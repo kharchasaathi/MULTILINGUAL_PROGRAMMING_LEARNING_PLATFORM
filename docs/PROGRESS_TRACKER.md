@@ -2,10 +2,10 @@
 Last updated: 2026-11-05
 
 ## Current execution position
-- Current stage: D — Software Architecture
-- Current task: D15 — Approve system architecture
-- Next action: Review D1–D14 as one coherent architecture; reconcile contracts, ownership, security, consistency, operational risks and deferred decisions; record the system architecture approval gate.
-- Completed immediately before current task: D13 — Module Communication architecture (logical specification scope).
+- Current stage: E — Security Constitution
+- Current task: E1 — Threat modelling
+- Next action: Build the E1 threat model from D1–D15 trust boundaries, D15 GATE-01–GATE-15, actors, assets, entry points, abuse cases, threats, mitigations and residual risks.
+- Completed immediately before current task: D15 — System Architecture conditional approval (logical architecture baseline scope).
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -523,3 +523,15 @@ D13 Module Communication architecture is complete at specification scope. Eviden
 - **Future tests:** 56 acceptance scenarios specified. They have not been executed.
 - **Limitations:** No application code, API endpoint, database migration, provider integration, worker, notification channel, entitlement implementation, deployment or production test is claimed. Deferred choices remain assigned to the relevant architecture/security/quality tasks.
 - **Next task:** D15 — Approve system architecture.
+
+
+## D15 closure (2026-11-05) — system architecture review and conditional approval
+
+- **Status:** Complete — conditionally approved as the logical architecture baseline.
+- **Evidence:** `docs/D15_SYSTEM_ARCHITECTURE_APPROVAL.md`; decision D-0013 in `docs/DECISION_LOG.md`.
+- **Reviewed:** D1–D14 and supporting D3 module matrix, D4 entity matrix, D5 API endpoint matrix, D6–D13 architecture documents, D14 data flow, AGENTS.md, Engineering Constitution and Security Constitution.
+- **Reconciliations committed:** Removed Assessment/Progress dependency cycle; explicitly represented Project, Payment and Entitlement boundaries; separated internal principal from external identity link; added logical consumer inbox receipt; reconciled D12 billing route candidates into D5; clarified progress write as append-only evidence ingestion.
+- **Approval:** Approved to proceed to Stage E security design and Stage F quality engineering. Not production-ready and not approval to begin implementation or enable payment, AI provider, publishing or code execution.
+- **Mandatory gates:** GATE-01–GATE-15 remain tracked in D15. Project/notification/billing/identity persistence consolidation, exact wire schemas, provider choices, privacy/retention, sandbox, worker operations, backup/restore and CI/release evidence remain pending.
+- **Tests:** 35 future architecture verification scenarios specified; none executed by this review.
+- **Next task:** E1 — Threat modelling.
