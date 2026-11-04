@@ -597,3 +597,51 @@ Source: https://www.w3schools.com/bootstrap5/
 ## 12. Batch 4 coverage note
 
 Six tutorial page/module trees were captured in this batch: Go, Kotlin, Rust, Vue, PostgreSQL, MongoDB, and Bootstrap 5 (seven tracks). The source pages expose differing depth: some use chapter navigation, while others expose module lists and syllabus outcomes. Our normalized register should preserve the original source granularity and not invent subtopics absent from the source.
+
+
+## 13. Cross-check against W3Schools global navigation — batch 5
+
+A fresh check of the public Tutorials index and global navigation on 2026-11-04 shows that W3Schools surfaces a broader set of learning entries than the four-section Tutorials index alone. The index currently lists 60 links in its category blocks, while the global navigation exposes additional entries and version-specific tracks. These are not all the same content type; the platform must keep a typed source catalogue rather than force every entry into a programming-language tutorial.
+
+### 13.1 Additional/versioned tutorial entries to track separately
+- Bootstrap 3
+- Bootstrap 4
+- Bootstrap 5 (already registered)
+- Cyber Security
+- Intro to Programming
+- Intro to HTML & CSS
+- Bash
+- Tools
+- UTF-8 / Emojis
+- Accessibility
+- Spaces
+- Typing Speed Test
+- Code Game
+- Code Editor
+- Web Templates
+- ChatGPT-3.5
+- ChatGPT-4
+- Google Bard (legacy entry; verify availability and current status before inclusion in active curriculum)
+
+### 13.2 Additional global-nav entries already represented or needing alias resolution
+- Gen AI — map to Generative AI only after confirming the current official destination.
+- Colors, Icons, SVG, Canvas, Graphics, AJAX, AppML, W3.JS, RWD, Raspberry Pi — map to existing topic tracks where the page is a subtopic/resource, but preserve their own source URL and relationship.
+- AWS — map to AWS Cloud only after URL and content equivalence is verified.
+- XML, JSON, Git, DSA, Data Science, NumPy, Pandas, SciPy, Matplotlib, Statistics, Google Sheets — already represented in the broader register; exact track/page URL and type still require verification.
+
+### 13.3 Scope correction
+Do not treat “60” as the total number of all W3Schools learning resources. It is only the number of links shown in the four main category blocks in the current Tutorials index result. The global navigation is broader and contains additional versions, learning paths, tools, games, and legacy AI entries. B3 must report both counts separately after every entry has been reconciled.
+
+### 13.4 Source links
+- Tutorials index: https://www.w3schools.com/tutorials/
+- Global navigation: https://nav.w3schools.com/
+- HTML tutorial navigation example: https://www.w3schools.com/html/
+- Integrated HTML & CSS track: https://www.w3schools.com/htmlcss/
+
+## 14. Batch 5 completion status
+- [x] Rechecked current Tutorials index.
+- [x] Compared it with global navigation entries.
+- [x] Added versioned and supplementary resource candidates to the register.
+- [ ] Verify each additional entry's exact destination, current availability, and content type.
+- [ ] Resolve aliases and legacy entries without double-counting.
+- [ ] Complete all remaining chapter/topic trees.
