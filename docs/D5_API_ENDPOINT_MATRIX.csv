@@ -1,0 +1,40 @@
+operation_id,method,path,module,access_class,request_contract,response_contract,errors,idempotency,concurrency,notes
+health_live,GET,/health/live,CORE,public,none,HealthStatus,503,No,No,Minimal liveness only
+health_ready,GET,/health/ready,CORE,restricted,none,ReadinessStatus,503,No,No,Do not expose dependency topology
+learner_me_get,GET,/learners/me,LEARNER,authenticated,none,LearnerProfile,401|403|404,No,No,Principal derived server-side
+learner_me_patch,PATCH,/learners/me,LEARNER,authenticated,UpdateLearnerProfile,LearnerProfile,400|401|403|412|422,No,If-Match,Allowlisted profile fields only
+learner_preferences_get,GET,/learners/me/preferences,LEARNER,authenticated,none,LearnerPreferences,401|403,No,No,Locale allowlist
+learner_preferences_patch,PATCH,/learners/me/preferences,LEARNER,authenticated,UpdateLearnerPreferences,LearnerPreferences,400|401|412|422,No,If-Match,te en ml kn ta hi only
+tracks_list,GET,/tracks,CURRICULUM,public,TrackListQuery,CursorPage<TrackSummary>,400,No,No,Published tracks only
+track_get,GET,/tracks/{trackId},CURRICULUM,public,none,TrackDetail,404,No,No,Published detail only
+track_modules_list,GET,/tracks/{trackId}/modules,CURRICULUM,public,CatalogueQuery,CursorPage<ModuleSummary>,400|404,No,No,Stable ordering and prerequisites
+module_get,GET,/modules/{moduleId},CURRICULUM,public,none,ModuleDetail,404,No,No,Published only
+topic_get,GET,/topics/{topicId},CURRICULUM,public,none,TopicDetail,404,No,No,W3Schools source mapping metadata
+lesson_get,GET,/lessons/{lessonId},CONTENT,public,LessonQuery(locale),LessonRepresentation,400|404,No,No,Published locale only; ETag eligible
+lesson_version_get,GET,/lessons/{lessonId}/versions/{versionId},CONTENT,restricted,none,LessonVersion,401|403|404,No,No,Author/reviewer access only
+learner_progress_list,GET,/learners/me/progress,PROGRESS,authenticated,ProgressListQuery,CursorPage<ProgressRecord>,400|401,No,No,Own learner only
+learner_progress_get,GET,/learners/me/progress/{progressId},PROGRESS,authenticated,none,ProgressRecord,401|403|404,No,No,Ownership enforced
+learner_progress_put,PUT,/learners/me/progress/{progressId},PROGRESS,authenticated,UpdateProgressEvidence,ProgressRecord,400|401|403|409|412|422,Required,If-Match,No arbitrary completion flag
+assessment_get,GET,/assessments/{assessmentId},ASSESS,authenticated,AssessmentDelivery,401|403|404,No,No,No answer keys
+assessment_attempt_create,POST,/assessments/{assessmentId}/attempts,ASSESS,authenticated,CreateAttempt,AssessmentAttempt,401|403|404|409,Required,No,Creates version-bound attempt
+assessment_attempt_get,GET,/assessment-attempts/{attemptId},ASSESS,authenticated,AssessmentAttempt,401|403|404,No,No,Owner only
+assessment_responses_post,POST,/assessment-attempts/{attemptId}/responses,ASSESS,authenticated,SubmitResponses,ResponseReceipt,400|401|403|404|409|422,Required,If-Match,Attempt ownership and state checked
+assessment_attempt_submit,POST,/assessment-attempts/{attemptId}/submit,ASSESS,authenticated,SubmitAttempt,AttemptResult,401|403|404|409,Required,If-Match,Server scoring only
+author_draft_create,POST,/authoring/lessons,REVIEW,author,CreateLessonDraft,DraftLesson,400|401|403|409|422,Required,No,Authoring only
+author_draft_version_create,POST,/authoring/lessons/{lessonId}/versions,REVIEW,author,CreateDraftVersion,DraftLessonVersion,400|401|403|404|409,Required,If-Match,Immutable version
+author_draft_update,PATCH,/authoring/lesson-versions/{versionId},REVIEW,author,UpdateDraftContent,DraftLessonVersion,400|401|403|404|409|412|422,No,If-Match,Only editable draft states
+author_submit,POST,/authoring/lesson-versions/{versionId}/submit,REVIEW,author,SubmitForReview,ReviewRequest,401|403|404|409|422,Required,If-Match,Freezes submitted hash
+review_queue_get,GET,/review/queue,REVIEW,reviewer,ReviewQueueQuery,CursorPage<ReviewQueueItem>,400|401|403,No,No,Only authorized assignments
+review_assignment_get,GET,/review/assignments/{assignmentId},REVIEW,reviewer,none,ReviewAssignment,401|403|404,No,No,Locale and reviewer scope
+review_comment_create,POST,/review/assignments/{assignmentId}/comments,REVIEW,reviewer,CreateReviewComment,ReviewComment,400|401|403|404|422,Required,No,Version-bound comment
+review_decision_create,POST,/review/assignments/{assignmentId}/decisions,REVIEW,reviewer,CreateReviewDecision,ReviewDecision,400|401|403|404|409|422,Required,If-Match,No self-approval; hash-bound
+release_preflight,POST,/releases/preflight,REVIEW,publisher,ReleasePreflightRequest,ReleasePreflightResult,401|403|409|422,No,No,Read-only eligibility check
+release_publish,POST,/releases,REVIEW,publisher,PublishReleaseRequest,ReleaseManifest,401|403|409|422,Required,No,Immutable approved manifest only
+release_get,GET,/releases/{releaseId},REVIEW,public,none,ReleaseManifest,404,No,No,Public release metadata
+ai_generation_create,POST,/ai/generation-tasks,AI,author,CreateGenerationTask,GenerationTask,400|401|403|409|422|429,Required,No,Allowlisted task; creates draft only
+ai_generation_get,GET,/ai/generation-tasks/{taskId},AI,owner,none,GenerationTask,401|403|404,No,No,Owner or authorized reviewer
+asset_upload_authorize,POST,/assets/upload-authorizations,ASSET,authenticated,CreateUploadAuthorization,UploadAuthorization,400|401|403|413|415|429,Required,No,Short-lived scoped upload permission
+asset_upload_confirm,POST,/assets/{assetId}/confirm,ASSET,owner,ConfirmAssetUpload,AssetMetadata,400|401|403|404|409|422,Required,If-Match,Scan status required before use
+asset_download_authorize,POST,/assets/{assetId}/download-authorizations,ASSET,owner_or_public_policy,CreateDownloadAuthorization,DownloadAuthorization,401|403|404|429,Required,No,No arbitrary object-key access
+playground_execution_create,POST,/playground/executions,PLAYGROUND,disabled_until_security_approval,CreateExecutionRequest,ExecutionRequestReceipt,403|404|409|422|429,Required,No,Must remain disabled until isolated sandbox gates approved
+playground_execution_get,GET,/playground/executions/{executionId},PLAYGROUND,disabled_until_security_approval,none,ExecutionStatus,403|404,No,No,No execution inside API process
