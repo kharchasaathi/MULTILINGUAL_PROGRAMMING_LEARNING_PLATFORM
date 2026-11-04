@@ -733,3 +733,79 @@ Source: https://www.w3schools.com/
 4. Do not count a tool or reference as a tutorial course.
 5. Record aliases and redirects instead of duplicating tracks.
 6. A page is “tree captured” only after its visible navigation/module list is fully inspected. First-pass topic outlines remain provisional.
+
+
+## 16. Official source re-check and integrated HTML/CSS syllabus — batch 7
+
+Checked the live official pages on 2026-11-04:
+- Tutorials index: https://www.w3schools.com/tutorials/
+- Global navigation: https://nav.w3schools.com/
+- Integrated HTML & CSS track: https://www.w3schools.com/htmlcss/
+
+### 16.1 Integrated HTML & CSS course — verified chapter/module map
+The official HTML & CSS track currently exposes these modules:
+1. Introduction
+2. Environment Setup
+3. First Web Page
+4. Workflow & Tools
+5. HTML & CSS Foundations
+   - Essentials
+   - Document Structure
+   - Text Content
+   - Lists & Tables
+   - Links & Navigation
+   - Images & Media
+   - Forms & Validation
+   - Reusable Components
+6. Styling Core
+   - Styling Essentials
+   - Selectors & Specificity
+   - Cascade & Inheritance
+   - Typography
+   - Colors & Backgrounds
+   - Box Model
+7. Layout Fundamentals
+   - Positioning & Z-Index
+   - Flexbox
+   - CSS Grid
+   - Layout Patterns
+   - Responsive Design
+   - Responsive Components
+8. Enhancements
+   - Custom Properties
+   - Calc & Functions
+   - Transitions
+   - Transforms
+   - Animations
+   - Effects & Filters
+9. Quality
+   - Accessibility
+   - Design Systems
+   - Performance
+   - Debugging & Testing
+   - Tooling & Automation
+10. Practice & Exams
+   - Landing Page Project
+   - Exercises
+   - Quiz
+
+This is a dedicated learning path with its own curated sequence. It overlaps HTML and CSS topic domains but should remain a separate path record linked to canonical HTML/CSS lesson nodes rather than duplicating the underlying lessons.
+
+### 16.2 Reference and practice catalogues — keep outside B3 tutorial count
+The official W3Schools navigation separately exposes:
+- References (language/API reference collections)
+- Exercises
+- Quizzes
+- Challenges
+- Practice Problems
+These are related learning assets and will be inventoried in B4/B5, not counted as tutorial tracks in B3.
+
+### 16.3 Corrected counting rule
+The “60” number previously recorded refers to the four category blocks from the Tutorials index snapshot, not a definitive all-time or global catalogue total. The global navigation includes additional tracks and resources, and the main page now advertises “40+” in its condensed all-languages presentation. Future progress reports must quote the exact source view and date, not present 60 as the total W3Schools catalogue.
+
+### 16.4 Remaining B3 audit work
+- Verify exact canonical URLs for every global-navigation entry.
+- Separate tutorial courses, version tracks, learning paths, references, exercises, and tools.
+- Capture complete chapter/module trees for all tutorial courses.
+- Resolve legacy entries (ChatGPT-3.5, ChatGPT-4, Google Bard) as active, renamed, or retired based on destination evidence.
+- Mark complete only after all in-scope entries have a verified URL and a fully captured source navigation tree, or an explicit documented exclusion.
