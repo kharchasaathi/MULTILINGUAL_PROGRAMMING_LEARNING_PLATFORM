@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: B — Complete Curriculum Planning
-- Current task: B6 — Create master topic checklist
-- Next action: Build the master topic checklist using B3 tutorial topics and B4 reference links.
+- Current task: B7 — Define Beginner level
+- Next action: Define the Beginner learning level using the completed B6 master checklist and W3Schools-only topic scope.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -26,7 +26,7 @@ Last updated: 2026-11-05
 | B3 Tutorials | Complete | Final catalogue audit: 58 official Tutorials-index entries (12 HTML/CSS, 10 JavaScript, 23 Backend, 13 Data Analytics); wider global navigation separately classified; version tracks, learning paths, specialist resources, tools and legacy labels reconciled. Per-track chapter-tree evidence and limitations are recorded in docs/B3_TUTORIAL_TRACK_REGISTER.csv; no claim that every sidebar was fully captured. References/practice assets routed to B4/B5. |
 | B4 References | Complete (catalogue/link capture scope) | W3Schools reference index and available family/source links recorded in B4 registers. Per user's instruction, no external verification or approval workflow. This does not mean full page-text or every reference member was copied. |
 | B5 Examples and exercises | Complete (catalogue/link capture scope) | W3Schools practice catalogue, HTML/SQL category labels, examples/exercises/quiz surfaces and 32 link records captured in docs/B5_W3SCHOOLS_EXAMPLES_EXERCISES_INDEX.md and docs/B5_PRACTICE_LINK_REGISTER.csv. |
-| B6 Master topic checklist | In progress | Created `docs/B6_MASTER_TOPIC_CHECKLIST.csv` with 181 rows mapped from the existing B3 tutorial, B4 reference, and B5 practice registers. Topic-level coverage marking remains pending. |
+| B6 Master topic checklist | Complete (master index scope) | `docs/B6_MASTER_TOPIC_CHECKLIST.csv` consolidates 3,232 uniquely identified rows: B3 tutorial tracks and 533 topic labels, B4 reference families and 2,519 W3Schools reference-member rows, plus B5 practice links. All source URLs are restricted to `www.w3schools.com`. This is an indexed master checklist; it does not claim that upstream B3/B4 source inventories are exhaustive. |
 | B7 Beginner | Not started | |
 | B8 Intermediate | Not started | |
 | B9 Advanced | Not started | |
@@ -106,3 +106,10 @@ Captured W3Schools practice surfaces include Tryit/interactive examples, Example
 ## B6 start (2026-11-05)
 
 Created `docs/B6_MASTER_TOPIC_CHECKLIST.csv` on `docs/project-foundation`. It consolidates 181 existing records from the B3 tutorial register, B4 reference register, and B5 practice link register into one checklist index. Each row retains its source ID, topic label, category/domain, W3Schools URL, and source-register path. All coverage statuses are initialized as `Not started`; B6 remains in progress until the checklist is populated and reconciled at the intended topic scope. W3Schools remains the exclusive source; no external verification or approval stage was added.
+
+
+## B6 closure (2026-11-05) — master checklist index scope
+
+Expanded `docs/B6_MASTER_TOPIC_CHECKLIST.csv` from the initial 181-row cross-register index to 3,232 uniquely identified records. The consolidated file includes B3 tutorial-track records and 533 topic labels from the existing B3 topic-tree document; B4 reference-family records and 2,519 member records from the active HTML, CSS, JavaScript/DOM, JavaScript RegExp, Python, Python keyword/type, SQL, and SQL advanced registers; and B5 practice-link records. The CSV retains source IDs, source-register paths, category/parent fields, W3Schools URLs, and indexed status. A structural check confirmed zero duplicate checklist IDs and zero URLs outside `https://www.w3schools.com/`.
+
+B6 is complete at **master checklist consolidation/index scope**. This does not upgrade the completeness of the underlying B3/B4 inventories or claim that every W3Schools topic has been exhaustively captured. No external source, external verification, or separate approval stage was used. Next task: B7 — Define Beginner level.
