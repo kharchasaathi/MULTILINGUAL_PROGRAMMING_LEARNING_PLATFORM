@@ -4,7 +4,7 @@ Last updated: 2026-11-04
 ## Current execution position
 - Current stage: B — Complete Curriculum Planning
 - Current task: B4 — Inventory references
-- Next action: Continue B4 — extract HTML element-specific attribute rows and relationships; then create normalized CSS property/selector, JS/DOM API, Python and SQL member registers; verify remaining catalogue URLs and run final coverage audit. B3 catalogue audit is complete.
+- Next action: Continue B4 — extract CSS individual property/selector/combinator/pseudo-class/function records and HTML element-specific attributes; then create JS/DOM API, Python and SQL member registers; verify remaining URLs and run final coverage audit. B3 catalogue audit is complete.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -24,7 +24,7 @@ Last updated: 2026-11-04
 | B1 Categories | Complete | 15 curriculum families; 72 catalogue entries; detailed scope and limitations documented in docs/B1_W3SCHOOLS_CURRICULUM_INVENTORY.md |
 | B2 Languages and technologies | Complete | 13 tutorial-scope programming languages, 7 editor-only extension candidates, plus separate markup/query/shell/data-format and technology registers; see docs/B2_PROGRAMMING_LANGUAGE_TECHNOLOGY_INVENTORY.md |
 | B3 Tutorials | Complete | Final catalogue audit: 58 official Tutorials-index entries (12 HTML/CSS, 10 JavaScript, 23 Backend, 13 Data Analytics); wider global navigation separately classified; version tracks, learning paths, specialist resources, tools and legacy labels reconciled. Per-track chapter-tree evidence and limitations are recorded in docs/B3_TUTORIAL_TRACK_REGISTER.csv; no claim that every sidebar was fully captured. References/practice assets routed to B4/B5. |
-| B4 References | In progress | Reference register has 37 entries; docs/B4_HTML_REFERENCE_MEMBER_REGISTER.csv now contains 225 records (122 HTML index entries, 18 individual global attributes, 71 individual event handlers, plus 14 initial family/group records). CSS, JavaScript/DOM, Python and SQL taxonomies remain at family level; element-specific attribute relationships and remaining URL verification are pending. |
+| B4 References | In progress | Reference register has 37 entries; docs/B4_HTML_REFERENCE_MEMBER_REGISTER.csv contains 225 records (122 HTML index entries, 18 global attributes, 71 event handlers, 14 initial family/group records). Added docs/B4_CSS_REFERENCE_MEMBER_REGISTER.csv with 36 records (15 reference families, 6 selector types, 15 at-rules). CSS property extraction and HTML element-specific attribute mapping remain pending; JS/DOM, Python and SQL member registers not yet created. |
 | B5 Examples and exercises | Not started | Map topics; create original teaching material |
 | B6 Master topic checklist | Not started | |
 | B7 Beginner | Not started | |
