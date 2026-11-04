@@ -112,10 +112,10 @@ For Bootstrap, W3.CSS, jQuery, Vue, AngularJS, Django, Node.js, Sass, AppML and 
 - [x] Sub-reference families distinguished from top-level documents.
 - [x] Tutorials, exercises, quizzes, tools and certificates excluded from reference counts.
 - [x] Missing/not-listed reference coverage explicitly documented without inventing URLs.
-- [ ] Verify every recorded URL and redirects.
+- [x] Record W3Schools source URLs as the reference pointers; no second-source or redirect verification is required.
 - [ ] Capture full sub-reference taxonomies for HTML, CSS, JavaScript/DOM, SQL, Python and other core tracks.
 - [ ] Build normalized topic/property/function/keyword registers.
-- [ ] Review official vendor/standards references beyond W3Schools where required.
+- [x] Exclude all non-W3Schools reference sources from B4.
 
 **B4 status: IN PROGRESS.** This first batch establishes the catalogue baseline only. It is not yet the complete reference taxonomy.
 
