@@ -4,7 +4,7 @@ PROJECT_NAME: MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 VERSION: 1.0
 STATUS: PLANNING
 CURRENT_STAGE: D
-NEXT_STAGE: D3
+NEXT_STAGE: D4
 
 ==================================================
 # PROJECT GOAL
@@ -85,7 +85,7 @@ https://www.w3schools.com/
 # D. SOFTWARE ARCHITECTURE
 - [x] D1. Select technology stack
 - [x] D2. Design frontend architecture
-- [ ] D3. Design backend architecture
+- [x] D3. Design backend architecture
 - [ ] D4. Design database architecture
 - [ ] D5. Design API contracts
 - [ ] D6. Design authentication
@@ -346,9 +346,9 @@ PLAN -> DESIGN -> REVIEW -> IMPLEMENT -> TEST -> SECURITY CHECK -> APPROVE -> DO
 ==================================================
 # PROGRESS TRACKER
 
-CURRENT_STAGE: C
-CURRENT_TASK: D3
-NEXT_ACTION: Design backend architecture around the NestJS modular monolith, defining module boundaries, service responsibilities, provider adapters, background work and operational contracts.
+CURRENT_STAGE: D
+CURRENT_TASK: D4
+NEXT_ACTION: Design PostgreSQL database architecture: entities, module ownership, relationships, constraints, indexes, migrations, retention, backups and recovery.
 
 COMPLETED:
 - A1 to A7 — Project foundation documented and approved
@@ -363,8 +363,7 @@ IN_PROGRESS:
 
 PENDING:
 - B4 to B12
-- D1 to D15
-- D1 to D15
+- D4 to D15
 - E1 to E15
 - F1 to F15
 - G10 to G12
@@ -398,3 +397,12 @@ When restarting this project:
 
 Never restart from the beginning unless requested.
 Never assume a task is complete without evidence.
+
+
+## D3 closure — 2026-11-05
+
+- D3 backend architecture is complete at logical specification scope.
+- Evidence: `docs/D3_BACKEND_ARCHITECTURE.md` and `docs/D3_BACKEND_MODULE_MATRIX.csv`.
+- The initial backend is a NestJS modular monolith with explicit module ownership, dependency direction, request lifecycle, authorization, persistence/provider boundaries, async-work constraints, operational controls and 24 future test scenarios.
+- No application implementation, database schema, migrations, provider integrations, worker infrastructure or deployment is claimed. Tests are specified, not executed.
+- **Next task: D4 — Design PostgreSQL database architecture and data ownership.**
