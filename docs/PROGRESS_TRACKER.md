@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: D — Software Architecture
-- Current task: D5 — Design API contracts
-- Next action: Define versioned REST/JSON endpoints, request/response schemas, error envelopes, pagination, idempotency, OpenAPI generation and compatibility rules.
+- Current task: D7 — Design the course engine
+- Next action: Define course, module, chapter, topic and lesson domain contracts, prerequisite traversal, publication and learner retrieval.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -409,3 +409,12 @@ Next task: C11 — Define code explanation format.
 - **Deferred:** Exact Prisma/SQL names and migrations; D5 API contracts; D6 identity/roles; billing and notification persistence; hosting/database region; key management; retention durations; legal deletion policy; RPO/RTO/SLO targets; partitioning and row-level security.
 - **Limitations:** No database instance, Prisma schema, SQL migration, seed data, backup job or restore drill was created. The 26 database tests are specified, not executed. No retention duration or recovery objective is invented.
 - **Next task:** D5 — Design versioned REST API contracts and OpenAPI schemas.
+
+
+## D6 closure (2026-11-05) — authentication and identity architecture
+
+Artifacts committed on `docs/project-foundation`:
+- `docs/D6_AUTHENTICATION_AND_IDENTITY_ARCHITECTURE.md`
+- `docs/D6_AUTHORIZATION_POLICY_MATRIX.csv`
+
+D6 defines provider-neutral identity-to-principal mapping, account lifecycle, web/native authentication and session decision gates, server-side deny-by-default authorization, scoped roles/permissions, C15 separation-of-duties, D4 persistence alignment, D5 API integration, security threats and 26 future test scenarios. Provider, protocol transport, session store, MFA/recovery methods, verification vendor, key management and retention remain open decisions. No production authentication code, provider integration, migration or tests are claimed; tests are specified, not executed. Next: D7 — Design the course engine.
