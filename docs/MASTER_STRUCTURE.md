@@ -4,7 +4,7 @@ PROJECT_NAME: MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 VERSION: 1.0
 STATUS: PLANNING
 CURRENT_STAGE: D
-NEXT_STAGE: D9
+NEXT_STAGE: D10
 
 ==================================================
 # PROJECT GOAL
@@ -91,7 +91,7 @@ https://www.w3schools.com/
 - [x] D6. Design authentication
 - [x] D7. Design course engine
 - [x] D8. Design language engine
-- [ ] D9. Design AI engine
+- [x] D9. Design AI engine
 - [ ] D10. Design progress engine
 - [ ] D11. Design admin panel
 - [ ] D12. Design payment architecture
@@ -432,3 +432,13 @@ Never assume a task is complete without evidence.
 - Six-locale resolution, native authoring, semantic parity, protected code tokens, C9 glossary, C15 approval, client behavior, accessibility and D4/D5 integration are specified.
 - No locale runtime, translated corpus, migrations or executed tests are claimed. C9 locale statuses remain unchanged.
 - **Next: D9 — Design the AI engine.**
+
+
+## D9 closure — 2026-11-05
+
+- D9 AI engine architecture is complete at provider-neutral logical architecture and contract specification scope.
+- Evidence: `docs/D9_AI_ENGINE_ARCHITECTURE.md`, `docs/D9_AI_TASK_AND_CAPABILITY_MATRIX.csv`, and `docs/D9_AI_DATA_CONTRACT_MATRIX.csv`; decision D-0007 in `docs/DECISION_LOG.md`.
+- Defines bounded AI task classes and authority limits, provider adapter/capability registry, typed request/response contracts, prompt/context governance, injection and output-safety controls, data classification/privacy gates, cost/quota/idempotency/resilience controls, validation pipeline, D4/D5/D6/D8 and C8/C14/C15 integration, proposed persistence, evaluation metrics and 35 future test scenarios.
+- AI is draft/response assistance only: it cannot alter approved curriculum, execute code, decide mastery/scoring, approve content or publish. Instructional drafts require C14 evidence and C15 hash-bound human approval.
+- No provider/model, region, budget, runtime, endpoint, migration or evaluation corpus is selected/implemented. Privacy/contract decisions remain open. Test scenarios are specified, not executed.
+- **Next task: D10 — Design the progress engine.**
