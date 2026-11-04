@@ -1,61 +1,67 @@
 # B4 Source and Verification Policy
 
-**Status:** Adopted working rule for B4 inventory execution  
-**Primary curriculum source:** https://www.w3schools.com/  
-**Branch:** `docs/project-foundation`
+**Status:** Binding scope decision for B4  
+**Authoritative and exclusive reference source:** https://www.w3schools.com/  
+**Working branch:** `docs/project-foundation`
 
-## 1. Purpose
+## 1. Purpose and source boundary
 
-B4 inventories the curriculum and reference surface that the product intends to teach, using W3Schools as its primary curriculum taxonomy and learning/reference source. B4 is not intended to recreate every external standards body's full conformance test suite.
+B4 inventories the reference and lookup material that this learning platform will use, following **W3Schools only**. For B4, W3Schools is the sole source of truth for deciding which reference families, topics, members, labels, groupings, and source URLs are in scope.
 
-## 2. W3Schools-first rule
+Do not use WHATWG, W3C, MDN, ECMA, Python.org, vendor documentation, database-vendor documentation, Wikipedia, GitHub projects, or any other external website to add, remove, rename, validate, or expand B4 curriculum inventory members. Do not perform cross-site comparison as a B4 completion requirement.
 
-For every W3Schools tutorial/reference family in scope:
+## 2. Required W3Schools-only workflow
 
-1. Capture the official W3Schools page URL and page title.
-2. Inventory its visible topic/member taxonomy at the level needed by the platform.
-3. Preserve W3Schools terminology and scope, while recording the date/source page.
-4. Check that each captured URL resolves and that the inventory row maps to the correct W3Schools page/member.
-5. Record source gaps or ambiguous groupings instead of silently inventing members.
+For each in-scope W3Schools reference page:
 
-The inventory is considered source-faithful when the listed W3Schools members, names, grouping, and links match the current source page. Do not re-audit every item against WHATWG/W3C/ECMA/Python/SQL standards merely to prove that it exists on W3Schools.
+1. Record the exact W3Schools page title and URL.
+2. Capture its visible categories, sub-reference families, topics, and individual members at the level exposed by that page.
+3. Preserve the W3Schools spelling, naming, grouping, and scope.
+4. Record the parent reference family and the exact W3Schools source URL for every row.
+5. Check that the W3Schools URL opens and that the row is visibly present on that W3Schools page.
+6. Record a source-page date/check date and a concise disposition for any ambiguous, grouped, duplicate, legacy, or unavailable entry.
+7. Keep tutorial chapters (B3) and exercises, quizzes, challenges, and practice problems (B5) out of B4 unless W3Schools explicitly presents them as part of a reference lookup.
 
-## 3. Limited accuracy safeguard (not a second full inventory)
+A W3Schools page is sufficient evidence for its own listed taxonomy. Do not require a second standards or vendor source to prove that a W3Schools-listed member exists.
 
-Use authoritative standards or vendor documentation only when one of these triggers occurs:
+## 3. Supplemental and external-source records
 
-- W3Schools explicitly marks an item unsupported, obsolete, deprecated, or historical;
-- the topic has a known security/safety consequence (for example HTML injection, iframe sandbox, URL handling, authentication, SQL injection, unsafe evaluation);
-- a source conflict or material ambiguity is found;
-- browser/runtime/version behavior is part of the lesson's promised outcome;
-- the platform is about to present the item as current, universal, or production-safe.
+Existing rows derived from non-W3Schools sites are **out of B4 scope**. Preserve them only as clearly marked historical/supplemental candidates if useful; do not count them in W3Schools coverage, denominators, completion status, or acceptance evidence. Do not silently blend them with W3Schools-derived rows.
 
-For these triggered cases, record a short discrepancy/accuracy note and a targeted source link. Do not expand a triggered check into a full standards audit of every sibling item.
+If a row's provenance is unknown or cannot be tied to a W3Schools page, classify it as `SOURCE_UNCONFIRMED` and exclude it from the W3Schools-verified count until its presence on W3Schools is confirmed. Do not infer that a member is W3Schools-listed merely because it is common in the language or appears on another website.
 
-## 4. Supplemental material
+## 4. Status labels
 
-Non-W3Schools additions must be clearly labeled `SUPPLEMENTAL`, include their source and reason for inclusion, and remain outside W3Schools-derived coverage counts. Do not silently mix supplemental standards members into the W3Schools inventory.
+Use these consistent dispositions:
+- `W3SCHOOLS_VERIFIED`: the member is visibly listed on the cited W3Schools page.
+- `W3SCHOOLS_LEGACY_LABEL`: W3Schools lists it but marks it obsolete, deprecated, unsupported, or historical; retain the source label and note the W3Schools warning.
+- `W3SCHOOLS_GROUPED`: W3Schools groups multiple members in one entry and the register preserves that grouping transparently.
+- `SOURCE_UNCONFIRMED`: not yet matched to a W3Schools page.
+- `SUPPLEMENTAL_OUT_OF_SCOPE`: derived from another source; excluded from B4 coverage.
+- `DUPLICATE_OR_ALIAS`: duplicate/alias disposition documented against the W3Schools source entry.
 
 ## 5. Copyright and content handling
 
-Inventory page titles, topic/member names, URLs, short factual metadata and our own explanations. Do not bulk-copy W3Schools lesson prose, examples, diagrams or exercises. Create original explanations and code examples, and link/cite the source where appropriate.
+Record titles, names, URLs, categories, relationships, and short factual metadata. Do not bulk-copy W3Schools explanations, lesson prose, code examples, diagrams, or exercises. The platform must create original explanations, examples, diagrams, and translations.
 
-## 6. Acceptance criteria for B4
+## 6. B4 acceptance criteria
 
-B4 source-inventory acceptance is based on:
-
-- every in-scope W3Schools tutorial/reference family has a source URL and inventory scope;
-- every in-scope page/member is represented once with stable ID and source provenance;
-- duplicate IDs, malformed rows, unresolved source links and unclassified supplemental rows are resolved;
-- known legacy/security/version-sensitive caveats are flagged using targeted authoritative references;
+B4 can be accepted only when:
+- the W3Schools References catalogue and all selected W3Schools reference families are inventoried;
+- every in-scope W3Schools topic/member is represented with a stable ID, exact W3Schools URL, parent family, and source check evidence;
+- all non-W3Schools rows are excluded from B4 counts and clearly classified as out of scope;
+- duplicates, aliases, grouped rows, malformed CSV rows, and unknown provenance are dispositioned;
+- the catalogue and member registers have consistent totals and family links;
+- all applicable W3Schools URLs are checked;
 - each family has a documented coverage decision and reviewer sign-off;
-- the acceptance matrix accurately distinguishes `COMPLETE`, `PARTIAL`, `NOT_STARTED`, and `NOT_APPLICABLE`.
+- the acceptance matrix reflects evidence actually present in the repository.
 
-B4 does **not** require 100% standards-level normative semantics, grammar, security and browser-version audits for all W3Schools members. Those belong to lesson-authoring QA and targeted high-risk review, unless the project explicitly adds them to scope.
+No external standards audit, cross-vendor dialect matrix, or full browser-compatibility audit is required for B4.
 
 ## 7. Execution guardrails
 
 - Work only on `docs/project-foundation` until B4 sign-off.
 - Do not merge `main` or start B5 before B4 acceptance.
-- Never report a test or source check as passed unless actually executed and evidenced.
-- Keep the denominator fixed and evidence-backed before publishing percentages.
+- Never report a source check or test as passed unless it was actually executed and evidenced.
+- Do not publish percentages without frozen W3Schools-only denominators.
+- When the W3Schools source does not expose a detail, record that limitation; do not fill it from another website.
