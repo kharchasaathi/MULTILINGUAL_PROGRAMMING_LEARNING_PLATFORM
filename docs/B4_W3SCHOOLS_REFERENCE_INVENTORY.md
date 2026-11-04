@@ -39,7 +39,7 @@ The current working catalogue is represented in `docs/B4_REFERENCE_REGISTER.csv`
 17. Django
 18. jQuery
 19. Vue
-20. AngularJS
+20. Angular
 21. Sass
 22. XML
 23. JSON
@@ -64,8 +64,10 @@ HTML DOM is linked with JavaScript and must remain a child/sub-reference rather 
 - `docs/B4_PYTHON_KEYWORD_EXCEPTION_TYPE_REGISTER.csv`
 - `docs/B4_SQL_REFERENCE_MEMBER_REGISTER.csv`
 - `docs/B4_SQL_ADVANCED_DIALECT_REFERENCE_REGISTER.csv`
+- `docs/B4_HTML_REFERENCE_FAMILY_CAPTURE.md` (HTML reference-family navigation capture)
+- `docs/B4_HTML_REFERENCE_MEMBERS_CAPTURE_02.md` (HTML element/global-attribute capture; event list still partial)
 
-Other W3Schools reference families still require their own member inventories. A catalogue URL alone does not mean that the family is fully inventoried.
+Other W3Schools reference families still require their own member inventories. The current W3Schools homepage reference index labels this entry “Angular” (not “AngularJS”); retain the current displayed label in the catalogue. A catalogue URL alone does not mean that the family is fully inventoried.
 
 ## 4. Out-of-scope material removed
 
