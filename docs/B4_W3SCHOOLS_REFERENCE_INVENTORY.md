@@ -621,3 +621,24 @@ Sources:
 - https://www.w3schools.com/js/js_typed_reference.asp
 
 Reconciliation note: W3Schools' central JavaScript index enumerates the Temporal object-specific member lists and the Typed Array types/member list. Some Temporal object names and labels in W3Schools pages are inconsistent (for example, the ZonedDate/ZonedDateTime label and case/wording variants); retain normalized ECMAScript naming in the register and preserve source wording in lesson-source notes. The current 120 Temporal member rows should be checked against each individual object page during source reconciliation; the register is an inventory, not a claim that every method is available in every browser. Temporal support is runtime-dependent and requires feature detection/polyfill guidance.
+
+
+## 37. JavaScript RegExp pattern syntax inventory (2026-11-04)
+
+Created `docs/B4_JS_REGEXP_PATTERN_SYNTAX_REGISTER.csv` with 83 syntax records (REGEX-001 through REGEX-083), separate from the RegExp object/member register. Categories:
+- 8 flags: d, g, i, m, s, u, v, y.
+- Character classes and Unicode property/string-set forms.
+- Metacharacters, shorthand classes and escape sequences.
+- 8 assertions: input/line boundaries, word boundaries, lookahead and lookbehind.
+- Capturing, named, non-capturing and scoped-modifier groups.
+- Greedy and lazy quantifiers.
+- Literal escapes and v-mode Unicode set operations.
+
+Sources:
+- https://www.w3schools.com/js/js_regexp_patterns.asp
+- https://www.w3schools.com/js/js_regexp_assertions.asp
+- https://www.w3schools.com/js/js_regexp_groups.asp
+- https://www.w3schools.com/jsref/jsref_obj_regexp.asp
+- https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Regular_expressions
+
+Accuracy notes: W3Schools' current pattern page lists flags d/g/i/m/s/u/v/y and basic pattern grammar. MDN is used to expand modern grammar details such as named backreferences, Unicode code-point escapes, and v-mode set operations. Do not teach legacy octal escapes as portable modern syntax; decimal escapes have Unicode-mode restrictions. Unicode property escapes require u or v mode; v-mode string properties and set operators require dedicated explanation. The `\b` token means a word-boundary assertion outside a character class but backspace inside one. Flag modifiers in groups have limited supported flag combinations; validate against the ECMAScript grammar and target runtime. This syntax register is distinct from JSREF-634..642 RegExp object members.
