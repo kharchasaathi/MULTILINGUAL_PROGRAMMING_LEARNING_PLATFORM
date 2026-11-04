@@ -3,9 +3,9 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: D — Software Architecture
-- Current task: D12 — Design the payment architecture
-- Next action: Define payment provider boundary, product/plan catalogue, checkout, payment state lifecycle, webhook verification, entitlements, refunds, reconciliation, security and compliance requirements.
-- Completed immediately before current task: D11 — Admin Panel architecture (logical specification scope).
+- Current task: D13 — Design module communication
+- Next action: Define internal module contracts, synchronous call boundaries, asynchronous event delivery, message envelope, outbox/inbox, retries, ordering, versioning, observability and failure handling.
+- Completed immediately before current task: D12 — Payment architecture (provider-neutral logical specification scope).
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -491,3 +491,20 @@ Final role-grant authority, MFA/dual-control, break-glass expiry, privacy/retent
 D11 is complete at logical architecture/specification scope only. No admin UI, backend endpoint, database migration, permission seed or executed tests are claimed. Test scenarios are specified, not executed.
 
 **Next task: D12 — Design the payment architecture.**
+
+
+## D12 closure (2026-11-05) — payment architecture
+
+Artifacts committed on `docs/project-foundation`:
+- `docs/D12_PAYMENT_ARCHITECTURE.md`
+- `docs/D12_PAYMENT_STATE_MACHINE.csv`
+- `docs/D12_PAYMENT_DATA_CONTRACT_MATRIX.csv`
+- Decision D-0010 in `docs/DECISION_LOG.md`
+
+D12 defines the free-first commercial boundary; versioned plans/prices and immutable order snapshots; provider-hosted checkout; payment, refund and optional subscription lifecycles; raw-body webhook verification; idempotency; reconciliation; entitlement separation; financial data integrity; D11 operational controls; security/compliance gates and 40 future test scenarios.
+
+Gateway, merchant entity/markets, prices, GST/tax, recurring mandates, refund rules, PCI scope, retention, exact D5 schemas and provider SLA remain open.
+
+D12 is complete at provider-neutral architecture/specification scope only. No gateway, merchant account, payment UI/API, database migration, live transaction or executed tests are claimed. Test scenarios are specified, not executed.
+
+**Next task: D13 — Design module communication.**
