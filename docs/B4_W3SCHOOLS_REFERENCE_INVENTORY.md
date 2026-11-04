@@ -437,3 +437,22 @@ Sources:
 - https://www.w3schools.com/jsref/api_fetch.asp
 
 This batch covers five API pages only. Canvas, MediaQueryList, Validation, and the full Fetch Request/Response surfaces remain pending.
+
+
+## 28. JavaScript Web API expansion — Canvas, MediaQueryList, Validation and Fetch Response (2026-11-04)
+
+Added 43 API/member records (JSREF-264 through JSREF-306):
+- MediaQueryList: 5 records — `matches`, `media`, legacy `addListener()`/`removeListener()`, and the `change` event. The modern event-listener pattern is preferred; legacy listener methods are retained for reference compatibility.
+- Constraint Validation: 14 records — `checkValidity()`, `setCustomValidity()`, `validity`, `validationMessage`, `willValidate`, and nine ValidityState flags.
+- Fetch Response: 9 records — `ok`, `status`, `statusText`, `url`, `text()`, `json()`, `blob()`, `bytes()`, and `arrayBuffer()`.
+- CanvasRenderingContext2D: 15 foundational drawing/path/text/image methods, including `fillRect()`, `beginPath()`, `lineTo()`, `arc()`, `fillText()`, and `drawImage()`.
+
+The JavaScript register now contains 306 data records: 7 reference-family records and 299 API/member records. This batch extends the Web API coverage; it does not claim that the complete Canvas 2D interface, Fetch Request/Response interfaces, or all modern browser APIs are exhaustively captured. Canvas work remains a selected foundational method pass and needs full table reconciliation.
+
+Source pages:
+- https://www.w3schools.com/jsref/api_canvas.asp
+- https://www.w3schools.com/jsref/api_mediaquerylist.asp
+- https://www.w3schools.com/js/js_validation_api.asp
+- https://www.w3schools.com/js/js_asynC_fetch.asp
+
+Source note: the Canvas reference's older graphics URL resolves to the current JavaScript Canvas API page. W3Schools' Fullscreen reference labels `fullscreenEnabled()` as a method; retain that source label for traceability but flag it for standards/API-shape review because current DOM usage exposes `document.fullscreenEnabled` as a property.
