@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: B — Complete Curriculum Planning
-- Current task: B8 — Define Intermediate Level
-- Next action: Define the Intermediate learning level using the B6 master checklist and W3Schools-only topic scope.
+- Current task: B9 — Define Advanced Level
+- Next action: Define the Advanced learning level using the W3Schools-only topic scope.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -28,7 +28,7 @@ Last updated: 2026-11-05
 | B5 Examples and exercises | Complete (catalogue/link capture scope) | W3Schools practice catalogue, HTML/SQL category labels, examples/exercises/quiz surfaces and 32 link records captured in docs/B5_W3SCHOOLS_EXAMPLES_EXERCISES_INDEX.md and docs/B5_PRACTICE_LINK_REGISTER.csv. |
 | B6 Master topic checklist | Complete (master index scope) | `docs/B6_MASTER_TOPIC_CHECKLIST.csv` consolidates 3,232 uniquely identified rows: B3 tutorial tracks and 533 topic labels, B4 reference families and 2,519 W3Schools reference-member rows, plus B5 practice links. All source URLs are restricted to `www.w3schools.com`. This is an indexed master checklist; it does not claim that upstream B3/B4 source inventories are exhaustive. |
 | B7 Beginner | Complete | Beginner scope, outcomes, web pathway, optional language tracks, practice rules, progression criteria and source map documented in `docs/B7_BEGINNER_LEVEL_CURRICULUM.md`; track/module mapping in `docs/B7_BEGINNER_LEVEL_MAP.csv`. |
-| B8 Intermediate | Not started | |
+| B8 Intermediate | Complete | Intermediate scope, outcomes, common web path, optional language tracks, SQL pathway and completion criteria in `docs/B8_INTERMEDIATE_LEVEL_CURRICULUM.md`; 27 module/extension rows in `docs/B8_INTERMEDIATE_LEVEL_MAP.csv`. |
 | B9 Advanced | Not started | |
 | B10 Professional | Not started | |
 | B11 Prerequisites | Not started | |
@@ -124,3 +124,14 @@ Artifacts committed on `docs/project-foundation`:
 B7 defines the beginner learner profile, learning outcomes, default HTML → CSS → JavaScript pathway following W3Schools' Where To Start sequence, optional first-language beginner tracks (Python, Java, C, C++, C#, PHP), SQL foundations, beginner boundaries, practice/teaching rules, track-specific completion criteria, and progression handoff to B8. The CSV maps 25 beginner modules across the common, web, programming-language, and SQL tracks. W3Schools is the only curriculum source. The level definition does not claim exhaustive completion of upstream B3/B4 source inventories.
 
 B7 is complete at **beginner-level scope and track-map definition**. Next task: B8 — Define Intermediate Level.
+
+
+## B8 closure (2026-11-05) — intermediate-level definition
+
+Artifacts committed on `docs/project-foundation`:
+- `docs/B8_INTERMEDIATE_LEVEL_CURRICULUM.md`
+- `docs/B8_INTERMEDIATE_LEVEL_MAP.csv`
+
+B8 defines entry conditions, outcomes, common HTML/CSS/JavaScript intermediate modules, Python intermediate modules, SQL intermediate modules, optional W3Schools language tracks and framework/database extensions, practice expectations, completion criteria, and the handoff to B9. The CSV contains 27 module/extension rows. W3Schools remains the exclusive curriculum source. Optional tracks are not claimed to have exhaustive chapter maps; upstream B3/B4 inventory limitations remain unchanged.
+
+B8 is complete at **intermediate-level scope and track-map definition**. Next task: B9 — Define Advanced Level.
