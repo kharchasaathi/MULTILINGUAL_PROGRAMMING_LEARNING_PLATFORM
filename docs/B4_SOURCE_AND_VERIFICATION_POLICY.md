@@ -17,9 +17,9 @@ For each selected W3Schools reference page:
 2. Capture its visible categories, sub-reference families, topics, and individual members.
 3. Preserve W3Schools naming, spelling, grouping, and scope.
 4. Link every member row to its parent family and exact W3Schools source URL.
-5. Check that the W3Schools URL opens and that the member is visibly present on that page.
-6. Record the source check date and disposition for ambiguous, grouped, duplicate, legacy, or unavailable entries.
-7. Keep tutorial chapters (B3) and exercises, quizzes, challenges, and practice problems (B5) out of B4 unless W3Schools explicitly presents them as reference lookup material.
+5. Record the W3Schools URL as the source pointer; do not run a second-source verification or compare the member against another website.
+6. Preserve W3Schools' own grouping and labels; do not create additional verification work beyond following its displayed taxonomy.
+7. Keep tutorial chapters (B3) and exercises, quizzes, challenges, and practice problems (B5) in their corresponding project stages unless W3Schools presents them as reference lookup material.
 
 A W3Schools page is sufficient evidence for its own listed taxonomy. No second standards/vendor source is required to prove a W3Schools-listed member exists.
 
@@ -50,11 +50,11 @@ B4 can be accepted only when:
 - all non-W3Schools rows are excluded from B4 counts and clearly classified;
 - duplicates, aliases, grouped rows, malformed CSV rows, and unknown provenance are dispositioned;
 - catalogue totals and member registers are consistent;
-- applicable W3Schools URLs are checked;
+- exact W3Schools source URLs are recorded as pointers; no external-source verification is performed;
 - each family has a documented coverage decision and reviewer sign-off;
 - the acceptance matrix reflects evidence actually present.
 
-No external standards audit, cross-vendor dialect matrix, or full browser-compatibility audit is required for B4.
+No second-source verification, external standards audit, cross-vendor dialect matrix, or browser-compatibility audit is required for B4.
 
 ## 7. Guardrails
 
