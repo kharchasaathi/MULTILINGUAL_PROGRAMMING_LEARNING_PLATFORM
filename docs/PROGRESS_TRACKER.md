@@ -192,3 +192,22 @@ Artifacts committed on `docs/project-foundation`:
 C1 defines a reusable lesson sequence, lesson types, B7–B10 teaching depth, six-language localization parity, lesson metadata, assessment/mastery states, remediation, authoring/review lifecycle, accessibility and responsive-content rules. The reusable template is ready for future lesson authoring. This is a specification/template milestone; no lesson has been authored, translated, executed or published by this task.
 
 W3Schools remains the exclusive curriculum scope/source reference. Original instructional content is required. Next task: C2 — Define Telugu-native teaching rules.
+
+## C — Teaching & Content Engine
+| Task | Status | Evidence |
+|---|---|---|
+| C1 Lesson structure | Complete | `docs/C1_STANDARD_LESSON_STRUCTURE.md`; reusable authoring template: `docs/templates/LESSON_TEMPLATE.md`. |
+| C2 Telugu-native teaching rules | Not started | |
+| C3 English teaching rules | Not started | |
+| C4 Malayalam teaching rules | Not started | |
+| C5 Kannada teaching rules | Not started | |
+| C6 Tamil teaching rules | Not started | |
+| C7 Hindi teaching rules | Not started | |
+| C8 AI Localization Engine | Not started | |
+| C9 Technical terminology glossary | Not started | |
+| C10 Diagrams and visual teaching | Not started | |
+| C11 Code explanation format | Not started | |
+| C12 Exercises and quizzes | Not started | |
+| C13 Mini-projects | Not started | |
+| C14 Lesson quality evaluation | Not started | |
+| C15 Content review and approval | Not started | |
