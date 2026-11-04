@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: B — Complete Curriculum Planning
-- Current task: B7 — Define Beginner level
-- Next action: Define the Beginner learning level using the completed B6 master checklist and W3Schools-only topic scope.
+- Current task: B8 — Define Intermediate Level
+- Next action: Define the Intermediate learning level using the B6 master checklist and W3Schools-only topic scope.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -27,7 +27,7 @@ Last updated: 2026-11-05
 | B4 References | Complete (catalogue/link capture scope) | W3Schools reference index and available family/source links recorded in B4 registers. Per user's instruction, no external verification or approval workflow. This does not mean full page-text or every reference member was copied. |
 | B5 Examples and exercises | Complete (catalogue/link capture scope) | W3Schools practice catalogue, HTML/SQL category labels, examples/exercises/quiz surfaces and 32 link records captured in docs/B5_W3SCHOOLS_EXAMPLES_EXERCISES_INDEX.md and docs/B5_PRACTICE_LINK_REGISTER.csv. |
 | B6 Master topic checklist | Complete (master index scope) | `docs/B6_MASTER_TOPIC_CHECKLIST.csv` consolidates 3,232 uniquely identified rows: B3 tutorial tracks and 533 topic labels, B4 reference families and 2,519 W3Schools reference-member rows, plus B5 practice links. All source URLs are restricted to `www.w3schools.com`. This is an indexed master checklist; it does not claim that upstream B3/B4 source inventories are exhaustive. |
-| B7 Beginner | Not started | |
+| B7 Beginner | Complete | Beginner scope, outcomes, web pathway, optional language tracks, practice rules, progression criteria and source map documented in `docs/B7_BEGINNER_LEVEL_CURRICULUM.md`; track/module mapping in `docs/B7_BEGINNER_LEVEL_MAP.csv`. |
 | B8 Intermediate | Not started | |
 | B9 Advanced | Not started | |
 | B10 Professional | Not started | |
@@ -113,3 +113,14 @@ Created `docs/B6_MASTER_TOPIC_CHECKLIST.csv` on `docs/project-foundation`. It co
 Expanded `docs/B6_MASTER_TOPIC_CHECKLIST.csv` from the initial 181-row cross-register index to 3,232 uniquely identified records. The consolidated file includes B3 tutorial-track records and 533 topic labels from the existing B3 topic-tree document; B4 reference-family records and 2,519 member records from the active HTML, CSS, JavaScript/DOM, JavaScript RegExp, Python, Python keyword/type, SQL, and SQL advanced registers; and B5 practice-link records. The CSV retains source IDs, source-register paths, category/parent fields, W3Schools URLs, and indexed status. A structural check confirmed zero duplicate checklist IDs and zero URLs outside `https://www.w3schools.com/`.
 
 B6 is complete at **master checklist consolidation/index scope**. This does not upgrade the completeness of the underlying B3/B4 inventories or claim that every W3Schools topic has been exhaustively captured. No external source, external verification, or separate approval stage was used. Next task: B7 — Define Beginner level.
+
+
+## B7 closure (2026-11-05) — beginner-level definition
+
+Artifacts committed on `docs/project-foundation`:
+- `docs/B7_BEGINNER_LEVEL_CURRICULUM.md`
+- `docs/B7_BEGINNER_LEVEL_MAP.csv`
+
+B7 defines the beginner learner profile, learning outcomes, default HTML → CSS → JavaScript pathway following W3Schools' Where To Start sequence, optional first-language beginner tracks (Python, Java, C, C++, C#, PHP), SQL foundations, beginner boundaries, practice/teaching rules, track-specific completion criteria, and progression handoff to B8. The CSV maps 25 beginner modules across the common, web, programming-language, and SQL tracks. W3Schools is the only curriculum source. The level definition does not claim exhaustive completion of upstream B3/B4 source inventories.
+
+B7 is complete at **beginner-level scope and track-map definition**. Next task: B8 — Define Intermediate Level.
