@@ -4,7 +4,7 @@ PROJECT_NAME: MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 VERSION: 1.0
 STATUS: PLANNING
 CURRENT_STAGE: D
-NEXT_STAGE: D5
+NEXT_STAGE: D6
 
 ==================================================
 # PROJECT GOAL
@@ -87,7 +87,7 @@ https://www.w3schools.com/
 - [x] D2. Design frontend architecture
 - [x] D3. Design backend architecture
 - [x] D4. Design database architecture
-- [ ] D5. Design API contracts
+- [x] D5. Design API contracts
 - [ ] D6. Design authentication
 - [ ] D7. Design course engine
 - [ ] D8. Design language engine
