@@ -439,3 +439,74 @@ Source: https://www.w3schools.com/django/index.php
 ## 9. Corrected catalogue scope note
 
 The live index's category groups total 60 links (HTML & CSS 12, JavaScript 10, Backend 24, Data Analytics 14). The index and secondary site navigation are not identical: secondary navigation also exposes learning paths and supporting subjects such as Cyber Security, Accessibility, Intro to Programming, Tools, UTF-8/Emojis, and related learning utilities. These should be registered separately as supplementary learning resources, not silently counted as tutorial tracks in the 60-link total.
+
+
+## 10. Additional tutorial page verification — batch 3
+
+The official index and page-level checks were repeated on 2026-11-04. The following official tutorial pages were reachable and confirmed as individual tutorial tracks. The navigation extraction is marked first-pass where the page reader did not expose the complete sidebar tree; no unsupported claim of a complete chapter list is made.
+
+### 10.1 R
+Source: https://www.w3schools.com/r/default.asp
+- Introduction and getting started
+- Syntax, comments, variables and data types
+- Numbers, strings and booleans
+- Operators and control flow
+- Vectors, lists, matrices and arrays
+- Factors and data frames
+- Functions and apply-family operations
+- Statistics and data visualization
+- Files, packages and data import/export
+- Navigation tree status: page verified; full subtopic-level sidebar capture pending
+
+### 10.2 Swift
+Source: https://www.w3schools.com/swift/default.asp
+- Introduction and setup
+- Syntax, output, comments and variables
+- Data types, constants and type inference
+- Operators and expressions
+- Strings, numbers and booleans
+- Conditions and switch
+- Loops and collections
+- Functions and parameters
+- Classes, structures, properties and methods
+- Optionals, error handling and protocols
+- Navigation tree status: page verified; full subtopic-level sidebar capture pending
+
+### 10.3 Angular
+Source: https://www.w3schools.com/angular/default.asp
+- Introduction and setup
+- Application structure and components
+- Templates and data binding
+- Directives and event handling
+- Forms and validation
+- Services and dependency injection
+- Routing and navigation
+- HTTP/data access
+- Navigation tree status: page verified; full subtopic-level sidebar capture pending
+
+### 10.4 jQuery
+Source: https://www.w3schools.com/jquery/default.asp
+- Introduction and setup
+- Syntax and selectors
+- Events and effects
+- HTML: get, set, add, remove
+- CSS classes and styling
+- Dimensions and traversal
+- AJAX
+- No-conflict mode and related utilities
+- Navigation tree status: page verified; full subtopic-level sidebar capture pending
+
+### 10.5 MySQL
+Source: https://www.w3schools.com/mysql/default.asp
+- Introduction and database basics
+- SELECT, DISTINCT and filtering
+- Sorting and limiting
+- INSERT, UPDATE and DELETE
+- Aggregate functions and grouping
+- Joins and relationships
+- Constraints, keys and indexes
+- Views and stored procedures
+- Navigation tree status: page verified; full subtopic-level sidebar capture pending
+
+### 10.6 Audit note
+Some pages opened successfully but the extraction interface exposed the page shell rather than its complete left navigation. Such pages are not counted as fully captured. The current B3 evidence therefore distinguishes: (1) catalogue-listed, (2) page URL verified, (3) topic tree first-pass, and (4) topic tree fully captured. Only category (4) can satisfy the final B3 completion criterion.
