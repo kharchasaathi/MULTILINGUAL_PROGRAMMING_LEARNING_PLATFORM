@@ -50,7 +50,7 @@ W3Schools
 # B. COMPLETE CURRICULUM PLANNING
 - [x] B1. Inventory W3Schools categories
 - [x] B2. Inventory all relevant languages
-- [ ] B3. Inventory tutorials
+- [x] B3. Inventory tutorials
 - [ ] B4. Inventory references
 - [ ] B5. Inventory examples and exercises as topic references
 - [ ] B6. Create master topic checklist
@@ -345,8 +345,8 @@ PLAN -> DESIGN -> REVIEW -> IMPLEMENT -> TEST -> SECURITY CHECK -> APPROVE -> DO
 # PROGRESS TRACKER
 
 CURRENT_STAGE: B
-CURRENT_TASK: B3
-NEXT_ACTION: Continue B3 tutorial inventory and complete URL verification, source navigation capture, duplicate/legacy reconciliation, and acceptance audit.
+CURRENT_TASK: B4
+NEXT_ACTION: Begin B4 reference inventory; B3 catalogue audit is complete with per-track evidence limitations documented.
 
 COMPLETED:
 - A1 to A7 — Project foundation documented and approved
