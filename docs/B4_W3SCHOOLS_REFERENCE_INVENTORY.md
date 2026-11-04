@@ -281,3 +281,15 @@ Created `docs/B4_CSS_REFERENCE_MEMBER_REGISTER.csv` with 36 initial records:
 The current W3Schools CSS index confirms the reference families and the CSS selector page confirms the selector categories. The dedicated at-rules page lists the 15 at-rules recorded here. The CSS properties index itself contains a much larger alphabetical list; individual property extraction is not yet complete.
 
 Important data-quality note: only the CSS Properties, CSS Selectors and CSS At-rules destinations have been confirmed in this batch. Other CSS family URLs are provisional candidates and explicitly marked pending verification in the CSV. Do not use pending URLs as authoritative navigation links until checked.
+
+
+## 13. CSS selector taxonomy expansion — batch 7 (2026-11-04)
+
+Expanded `docs/B4_CSS_REFERENCE_MEMBER_REGISTER.csv` by 44 records:
+- 4 combinators: descendant, child, adjacent sibling and general sibling.
+- 33 pseudo-class entries, including interaction, link, structural, language and form-validation states.
+- 7 pseudo-elements: `::after`, `::before`, `::first-letter`, `::first-line`, `::marker`, `::placeholder`, `::selection`.
+
+The selector names and basic groupings are based on the W3Schools CSS selector reference. This is a source snapshot, not a claim that the W3Schools list contains every current Selectors Level 4/5 selector. Modern selector additions and browser support require a separate standards compatibility pass. <https://www.w3schools.com/cssref/css_selectors.php>
+
+CSS property extraction is still outstanding. The main W3Schools CSS Reference index is the intended source; its alphabetical property list is much larger than the current register. Do not infer a complete property count from this batch.
