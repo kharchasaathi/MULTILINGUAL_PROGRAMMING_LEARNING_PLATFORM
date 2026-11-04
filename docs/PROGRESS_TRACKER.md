@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: D — Software Architecture
-- Current task: D14 — Design end-to-end system data flow
-- Next action: Map end-to-end learner, content, assessment, AI, payment, entitlement, progress, admin and notification flows, trust boundaries and failure paths.
+- Current task: D15 — Approve system architecture
+- Next action: Review D1–D14 as one coherent architecture; reconcile contracts, ownership, security, consistency, operational risks and deferred decisions; record the system architecture approval gate.
 - Completed immediately before current task: D13 — Module Communication architecture (logical specification scope).
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
@@ -512,3 +512,14 @@ D12 is complete at provider-neutral architecture/specification scope only. No ga
 
 ## D13 closure — 2026-11-05
 D13 Module Communication architecture is complete at specification scope. Evidence: docs/D13_MODULE_COMMUNICATION_ARCHITECTURE.md and decision D-0011. It defines module ownership, sync ports, event envelopes, outbox/inbox, at-least-once delivery, idempotency, ordering, retries, quarantine, replay, sagas, security and observability. No broker, worker, migration, endpoint or runtime is implemented; tests are specified, not executed. Next: D14 — end-to-end system data flow.
+
+
+## D14 closure (2026-11-05) — end-to-end system data flow
+
+- **Status:** Complete at logical end-to-end data-flow and contract specification scope.
+- **Evidence:** `docs/D14_END_TO_END_SYSTEM_DATA_FLOW.md`; decision D-0012 in `docs/DECISION_LOG.md`.
+- **Coverage:** Registration/authentication; course selection and published content delivery; lesson/exercise/assessment/progress; learner AI Tutor and AI-assisted authoring/localization; payment/refund/subscription and separate entitlement; admin review/approval/publishing; notifications; error handling, recovery, reconciliation and audit.
+- **Architecture controls:** Explicit module ownership and trust boundaries; D5/D13 contract alignment; source-of-truth and version rules; idempotency and at-least-once delivery; pending/unknown outcome handling; failure classification; privacy, security and observability requirements.
+- **Future tests:** 56 acceptance scenarios specified. They have not been executed.
+- **Limitations:** No application code, API endpoint, database migration, provider integration, worker, notification channel, entitlement implementation, deployment or production test is claimed. Deferred choices remain assigned to the relevant architecture/security/quality tasks.
+- **Next task:** D15 — Approve system architecture.
