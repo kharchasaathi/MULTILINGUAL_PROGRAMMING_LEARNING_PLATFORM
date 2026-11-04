@@ -3,8 +3,9 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: D — Software Architecture
-- Current task: D8 — Design the language engine
-- Next action: Define locale resolution, language switching, translation parity, glossary integration and localized content delivery.
+- Current task: D9 — Design the AI engine
+- Next action: Define provider-neutral AI orchestration, safety, validation, evaluation, cost controls and human approval boundaries.
+- Completed immediately before current task: D8 — Language Engine architecture (specification scope).
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -428,3 +429,18 @@ Artifacts committed on `docs/project-foundation`:
 - `docs/D7_COURSE_LIFECYCLE_STATE_MACHINE.csv`
 
 D7 defines the track/level/module/chapter/topic/lesson hierarchy, Curriculum vs Content ownership, W3Schools source provenance, optional chapter policy, B11 prerequisite graph evaluation and remediation, track-specific learner pathway selection, immutable catalogue releases, C15 publication gates, D4/D5 integration and security controls. 26 future test scenarios are specified but not executed. The B7–B12 framework and recorded B11 edges are preserved; source inventory limitations remain. No application code, migrations, API deployment, lesson import or learner progress implementation is claimed. Next: D8 — Design the language engine.
+
+
+## D8 closure (2026-11-05) — language engine architecture
+
+Artifacts committed on `docs/project-foundation`:
+- `docs/D8_LANGUAGE_ENGINE_ARCHITECTURE.md`
+- `docs/D8_SUPPORTED_LOCALE_REGISTRY.csv`
+- `docs/D8_LOCALIZATION_PARITY_MATRIX.csv`
+- Decision D-0006 in `docs/DECISION_LOG.md`
+
+D8 defines the six-locale allowlist (Telugu, English, Malayalam, Kannada, Tamil and Hindi), locale-resolution precedence, explicit language selection, separate UI and learning-content fallback policies, shared lesson identity with immutable localized versions, protected code/token fidelity, C2–C7 language-rule and C9 glossary integration, AI draft-only authority, semantic/parity validation, C15 human approval, web/PWA/native behavior, accessibility, caching, privacy/security and 30 future test scenarios.
+
+D8 is complete at architecture/specification scope only. No translation corpus, runtime language service, provider, database migration or production implementation was created. C9 locale translation statuses remain unchanged. Test scenarios are specified, not executed. Open decisions (including default UI locale, fallback policy, preference retention, fonts and release completeness) remain recorded in the architecture document.
+
+**Next task: D9 — Design the AI engine.**
