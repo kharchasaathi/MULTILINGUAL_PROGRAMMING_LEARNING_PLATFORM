@@ -133,3 +133,6 @@ B4 HTML attribute applicability audit — second targeted batch (2026-11-04): co
 
 
 B4 HTML attribute applicability audit — third targeted batch (2026-11-04): added WHATWG/W3Schools owner-scope comparisons for `disabled`, `open` and `for`, and refined the `value` record to include the `data` owner and per-element semantic distinctions. Audit now contains 21 checked attribute records plus one historical resolved-member record. B4-GATE-003 remains PARTIAL at 21/116 checked; 95 remain. Sources: https://html.spec.whatwg.org/dev/indices.html and https://www.w3schools.com/tags/ref_attributes.asp.
+
+
+B4 HTML attribute applicability audit — third targeted batch (2026-11-04): added WHATWG/W3Schools owner-scope comparisons for `disabled`, `open` and `for`, and refined the `value` record to include the `data` owner and per-element semantic distinctions. Audit now contains 21 checked attribute records plus one historical resolved-member record. B4-GATE-003 remains PARTIAL at 21/116 checked; 95 remain. Sources: https://html.spec.whatwg.org/dev/indices.html and https://www.w3schools.com/tags/ref_attributes.asp.
