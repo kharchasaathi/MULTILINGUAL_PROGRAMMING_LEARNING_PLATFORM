@@ -4,7 +4,7 @@ PROJECT_NAME: MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 VERSION: 1.0
 STATUS: PLANNING
 CURRENT_STAGE: B
-NEXT_STAGE: B2
+NEXT_STAGE: B3
 
 ==================================================
 # PROJECT GOAL
@@ -49,7 +49,7 @@ W3Schools
 ==================================================
 # B. COMPLETE CURRICULUM PLANNING
 - [x] B1. Inventory W3Schools categories
-- [ ] B2. Inventory all relevant languages
+- [x] B2. Inventory all relevant languages
 - [ ] B3. Inventory tutorials
 - [ ] B4. Inventory references
 - [ ] B5. Inventory examples and exercises as topic references
