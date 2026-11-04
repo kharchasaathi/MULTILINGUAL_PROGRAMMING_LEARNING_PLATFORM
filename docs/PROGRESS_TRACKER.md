@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: C — Teaching & Content Engine
-- Current task: C11 — Define code explanation format
-- Next action: Define a consistent code explanation format aligned with lesson structure, glossary, code fidelity and six-locale parity.
+- Current task: C12 — Define exercises and quizzes
+- Next action: Define exercise and quiz types, assessment rules, feedback, answer validation and six-locale parity.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
