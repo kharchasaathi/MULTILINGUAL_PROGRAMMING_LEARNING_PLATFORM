@@ -604,3 +604,20 @@ Sources:
 - https://www.w3schools.com/jsref/jsref_reference.asp
 
 Coverage note: the W3Schools Reflect & Proxy reference identifies the 13 listed traps/methods and internal-method correspondence. The complete ECMAScript internal operation list and invariants for Proxy traps require a separate specification-level review; this inventory does not claim that the 13-row W3Schools table exhausts every Proxy semantic constraint.
+
+
+## 36. JavaScript Temporal and Typed Array references (2026-11-04)
+
+Added 179 owner-qualified records (JSREF-716 through JSREF-894):
+- Temporal: 9 object/namespace records (Duration, Instant, Now, PlainDate, PlainDateTime, PlainMonthDay, PlainTime, PlainYearMonth, ZonedDateTime) and 120 object-scoped member records.
+- Typed Arrays: 12 typed-array constructors/types (including Float16Array and BigInt typed arrays), 32 shared methods/static methods, and 5 property/metadata entries.
+
+The Temporal inventory preserves owner context for methods with repeated names such as `add()`, `from()`, `toString()` and `with()`. Typed Array methods are scoped separately from Array and Iterator methods. Numeric typed arrays and BigInt typed arrays must not be mixed: BigInt typed arrays store BigInt values, while numeric typed arrays store Number values.
+
+Sources:
+- https://www.w3schools.com/jsref/jsref_obj_temporal.asp
+- https://www.w3schools.com/jsref/jsref_reference.asp (Temporal and Typed Arrays sections)
+- https://www.w3schools.com/jsref/jsref_typed_reference.asp
+- https://www.w3schools.com/js/js_typed_reference.asp
+
+Reconciliation note: W3Schools' central JavaScript index enumerates the Temporal object-specific member lists and the Typed Array types/member list. Some Temporal object names and labels in W3Schools pages are inconsistent (for example, the ZonedDate/ZonedDateTime label and case/wording variants); retain normalized ECMAScript naming in the register and preserve source wording in lesson-source notes. The current 120 Temporal member rows should be checked against each individual object page during source reconciliation; the register is an inventory, not a claim that every method is available in every browser. Temporal support is runtime-dependent and requires feature detection/polyfill guidance.
