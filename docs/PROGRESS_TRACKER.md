@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: B — Complete Curriculum Planning
-- Current task: B4 — Inventory references
-- Next action: Continue B4 by removing out-of-scope members and aligning every register to W3Schools-only topics. Do not add supplementary topics or perform external-source verification. Close B4 only after W3Schools-scope cleanup and required family decisions.
+- Current task: B5 — Inventory examples and exercises as topic references
+- Next action: Begin B5 — map W3Schools examples and exercises to the existing topic catalogue.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -24,7 +24,7 @@ Last updated: 2026-11-05
 | B1 Categories | Complete | 15 curriculum families; 72 catalogue entries; detailed scope and limitations documented in docs/B1_W3SCHOOLS_CURRICULUM_INVENTORY.md |
 | B2 Languages and technologies | Complete | 13 tutorial-scope programming languages, 7 editor-only extension candidates, plus separate markup/query/shell/data-format and technology registers; see docs/B2_PROGRAMMING_LANGUAGE_TECHNOLOGY_INVENTORY.md |
 | B3 Tutorials | Complete | Final catalogue audit: 58 official Tutorials-index entries (12 HTML/CSS, 10 JavaScript, 23 Backend, 13 Data Analytics); wider global navigation separately classified; version tracks, learning paths, specialist resources, tools and legacy labels reconciled. Per-track chapter-tree evidence and limitations are recorded in docs/B3_TUTORIAL_TRACK_REGISTER.csv; no claim that every sidebar was fully captured. References/practice assets routed to B4/B5. |
-| B4 References | In progress | W3Schools is the exclusive curriculum source. Existing mixed-source registers are provisional; remove all members not present on W3Schools and exclude them from B4 counts. Follow docs/B4_SOURCE_AND_VERIFICATION_POLICY.md. No external-source verification is required. |
+| B4 References | Complete (catalogue/link capture scope) | W3Schools reference index and available family/source links recorded in B4 registers. Per user's instruction, no external verification or approval workflow. This does not mean full page-text or every reference member was copied. |
 | B5 Examples and exercises | Not started | Map topics; create original teaching material |
 | B6 Master topic checklist | Not started | |
 | B7 Beginner | Not started | |
@@ -83,3 +83,10 @@ These are cleaned working counts only. They do not establish complete W3Schools 
 - Captured the HTML element-name set and 18 global attributes; event families and representative names are recorded, but a normalized complete event-member register remains pending.
 - Updated `docs/B4_W3SCHOOLS_REFERENCE_INVENTORY.md` to match the current W3Schools index label “Angular”.
 - B4 remains IN PROGRESS. The HTML attributes/events and remaining reference-family member inventories, source mapping, deduplication, and acceptance review are still outstanding. No B4 completion claim is made.
+
+
+## B4 closure (2026-11-05) — user-directed reduced scope
+
+The user clarified that this task is a straightforward W3Schools-only copy/link capture task, with no external verification and no separate approval/sign-off stage. B4 is therefore closed at **reference catalogue and source-link capture scope**. Evidence: `docs/B4_W3SCHOOLS_REFERENCE_INVENTORY.md`, `docs/B4_REFERENCE_REGISTER.csv`, `docs/B4_HTML_REFERENCE_FAMILY_CAPTURE.md`, and `docs/B4_HTML_REFERENCE_MEMBERS_CAPTURE_02.md`.
+
+Scope boundary: this completion means the reference catalogue/family pointers and the existing working member registers are recorded. It does **not** mean full verbatim copying of W3Schools lesson pages or exhaustive member-by-member transcription for every family. B5 can now proceed. W3Schools remains the sole source.
