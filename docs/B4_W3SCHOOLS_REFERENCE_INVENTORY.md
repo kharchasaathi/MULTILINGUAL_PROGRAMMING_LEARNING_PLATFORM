@@ -131,3 +131,68 @@ For Bootstrap, W3.CSS, jQuery, Vue, AngularJS, Django, Node.js, Sass, AppML and 
 - C Reference: https://www.w3schools.com/c/c_ref_reference.php
 - C++ Reference: https://www.w3schools.com/cpp/cpp_ref_reference.asp
 - Bootstrap 3 Classes Reference: https://www.w3schools.com/bootstrap/bootstrap_ref_all_classes.asp
+
+
+## 7. Verified taxonomy expansion — batch 1 (2026-11-04)
+
+This batch records the visible taxonomy exposed by the current W3Schools reference landing pages. It is a family-level inventory, not a full row-by-row extraction of every CSS property, DOM member or SQL keyword.
+
+### 7.1 CSS reference families — landing-page confirmation
+
+The CSS reference index advertises the following distinct reference families:
+1. CSS Properties
+2. CSS Browser Support
+3. CSS Selectors
+4. CSS Combinators
+5. CSS Pseudo-classes
+6. CSS Pseudo-elements
+7. CSS At-rules
+8. CSS Functions
+9. CSS Animatable
+10. CSS Web Safe Fonts
+11. CSS Units
+12. PX-to-EM Conversion
+13. CSS Colors
+14. CSS Default Values
+15. CSS Entities
+16. CSS Aural
+
+The current At-rules reference visibly includes: `@charset`, `@container`, `@counter-style`, `@font-face`, `@font-palette-values`, `@import`, `@keyframes`, `@layer`, `@media`, `@namespace`, `@page`, `@property`, `@scope`, `@starting-style` and `@supports`. Store these as at-rule records, not CSS properties.
+
+### 7.2 JavaScript and HTML DOM — current index taxonomy
+
+The combined JavaScript/HTML DOM reference currently exposes these JavaScript primitive types: String, Number, Boolean, BigInt, Symbol, undefined and null.
+
+Object/method/property reference groups include: Array, Boolean, Classes, Date, Error, Function, Global, Iterator, JSON, Map, Math, Number, Object, Operators, Precedence, Promise, Proxy, Reflect, RegExp, Set, Statements, String, Temporal and Typed Array.
+
+Window object groups: Window, History, Location, Navigator and Screen.
+
+HTML DOM groups: Document, Element, Attributes, Events, Event Objects, Collection and Style.
+
+Web API groups: Canvas, Console, Fetch, Fullscreen, Geolocation, History, MediaQuery, Storage and Validation.
+
+HTML element reference coverage is also linked from this combined index. Keep it cross-linked to the HTML Tags reference rather than counting each element twice.
+
+### 7.3 Python reference taxonomy
+
+The Python reference index exposes:
+- Core reference families: Built-in Functions, String Methods, List Methods, Dictionary Methods, Tuple Methods, Set Methods, File Methods, Keywords, Exceptions and Glossary.
+- Module reference families: Random, Requests, Math and CMath on the compact reference landing page.
+- The wider Python navigation additionally exposes the Standard Library Modules reference, including modules such as json, keyword, locale, logging, math and multiprocessing. Treat the standard-library module catalogue as a separate sub-reference collection.
+
+### 7.4 SQL keyword reference
+
+The SQL Keywords reference is a reserved-keyword lookup table. The currently visible catalogue includes command/statement families (SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, DROP, TRUNCATE), filtering and sorting (WHERE, DISTINCT, ORDER BY, GROUP BY, HAVING, LIMIT, TOP), joins (JOIN, INNER/LEFT/RIGHT/FULL OUTER JOIN), set operations (UNION, UNION ALL), constraints and keys (PRIMARY KEY, FOREIGN KEY, UNIQUE, CHECK, DEFAULT, NOT NULL), and predicates/operators (AND, OR, NOT, IN, EXISTS, BETWEEN, LIKE, IS NULL). Preserve the full keyword list as individual records in the later normalized SQL register; this summary is illustrative, not exhaustive.
+
+### 7.5 Source URLs and verification notes
+
+- CSS reference/tutorial index and its advertised families: https://www.w3schools.com/css/
+- CSS At-rules reference: https://www.w3schools.com/cssref/css_ref_atrules.php
+- JavaScript and HTML DOM reference: https://www.w3schools.com/jsref/default.asp
+- Python reference: https://www.w3schools.com/python/python_reference.asp
+- Python built-in functions: https://www.w3schools.com/python/python_ref_functions.asp
+- Python keywords: https://www.w3schools.com/python/python_ref_keywords.asp
+- Python standard-library modules: https://www.w3schools.com/python/python_ref_modules.asp
+- SQL Keywords reference: https://www.w3schools.com/sql/sql_ref_keywords.asp
+
+Verification note: the CSS family list was confirmed on the current CSS reference index; the at-rule list on the dedicated At-rules page; the JS/DOM groups on the combined reference page; Python groups on the Python reference/navigation; and SQL families on the keyword table. This does not yet verify every individual member page or every catalogue URL in the CSV.
