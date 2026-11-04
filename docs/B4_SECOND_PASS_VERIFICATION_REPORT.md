@@ -77,4 +77,14 @@ B4 cannot be marked complete while any required gate remains PARTIAL or NOT_STAR
 5. Run cross-file ID/reference/schema checks across every B4 CSV, then a second clean verification pass.
 6. Obtain family-level acceptance sign-off and update the gate matrix only from attached evidence.
 
-**No percentage is reported:** the current acceptance matrix does not yet have a defensible, frozen weighted denominator.  
+**No percentage is reported:** the current acceptance matrix does not yet have a defensible, frozen weighted denominator.
+
+## 6. Follow-up source-gap work after the initial second pass (2026-11-04)
+
+The initial second-pass snapshot above is retained as historical evidence. Subsequent source review produced these additional changes:
+
+- **CSS:** expanded the register from 515 to **554 rows**: seven MDN at-rule candidates (`@color-profile`, `@custom-media`, `@document`, `@font-feature-values`, `@function`, `@position-try`, `@view-transition`) and 32 owner-qualified at-rule descriptors. Added `docs/B4_CSS_AT_RULE_DESCRIPTOR_AUDIT.csv`. The at-rule source audit now has 22 rows (15 W3Schools name matches + 7 MDN candidates); the descriptor audit has 32 rows. The seven candidate at-rules and 32 descriptors are still pending standards maturity, deprecation, syntax and browser-support review. The MDN reference itself enumerates these at-rules and nested descriptors; CSS Syntax also notes that `@charset` is a legacy byte-sequence mechanism rather than a normal at-rule definition. See https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules and https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Syntax.
+- **Python:** expanded the Python 3.14 gap-candidate list from 83 to **91** after comparing with the current 3.14.10 Standard Library and Module Index. Added `string.templatelib`, `compression.zstd`, `os.path`, `annotationlib`, `concurrent.interpreters`, `dbm.sqlite3`, `ctypes.wintypes`, `curses.ascii`, `curses.panel` and `curses.textpad`. These are candidates for scope review, not automatically accepted curriculum requirements. See https://docs.python.org/3.14/library/index.html and https://docs.python.org/3.14/py-modindex.html.
+- **Second-pass re-fetch:** CSS member register: 554 rows, zero duplicate IDs; CSS at-rule source audit: 22 rows, zero duplicate IDs; CSS descriptor audit: 32 rows, zero duplicate IDs; Python gap candidates: 91 rows, zero duplicate IDs; acceptance matrix: 29 rows, zero duplicate IDs. Python standard-library module register: 258 rows, no placeholder row, zero duplicate IDs.
+
+These additions increase inventory coverage but do not satisfy the outstanding semantic, version, source-URL, browser/runtime, cross-file provenance, test and family sign-off gates. B4 remains NOT ACCEPTED; B5 remains blocked; no merge to `main`.
