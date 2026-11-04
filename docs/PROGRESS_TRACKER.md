@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: C — Teaching & Content Engine
-- Current task: C15 — Define content review and approval
-- Next action: Define end-to-end content review roles, approval authority, review queues, revision handling, publication controls, audit trail and withdrawal/rollback policy.
+- Current task: D1 — Select technology stack
+- Next action: Compare candidate technology stacks against documented platform, security, localization, accessibility, operational and cost requirements; record trade-offs before selection.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -339,3 +339,19 @@ Next task: C11 — Define code explanation format.
 - **Evidence:** `docs/C14_LESSON_QUALITY_EVALUATION_SPECIFICATION.md` defines nine weighted quality dimensions, 0–4 evidence scale, 80/100 approval threshold, independent mandatory gates, reviewer roles, evaluation workflow, evidence contract, defect severity, six-locale parity, AI limitations, regression policy and 26 future test cases.
 - **Rubric:** `docs/C14_LESSON_QUALITY_RUBRIC.csv` records the nine dimensions and weights (total 100%).
 - **Limitations:** No evaluation service, reviewer dashboard, automated validators, audit store or publication control implemented. No lesson corpus scored and no tests executed. The rubric threshold/weights are proposed policy pending validation against real lesson evidence.
+
+
+## C — Teaching and content engine
+
+| Task | Status | Evidence |
+|---|---|---|
+| C15 Content review and approval | Complete (workflow specification scope) | `docs/C15_CONTENT_REVIEW_AND_APPROVAL_WORKFLOW.md` defines reviewer roles, separation of duties, submission package, queues, state transitions, revision/dispute handling, six-locale approval, C14 gate integration, release controls, audit, withdrawal/rollback, data contracts, security/privacy/accessibility and 28 future implementation tests. `docs/C15_REVIEW_WORKFLOW_STATE_MACHINE.csv` records transition guards and audit events. No production workflow service, UI, role enforcement, publisher or rollback tooling is implemented; tests are specified, not executed. |
+
+## C15 closure and handoff (2026-11-05)
+
+- C15 is complete at governance and workflow specification scope.
+- C14 remains the quality rubric; C15 consumes its mandatory gates and version-bound evaluation evidence.
+- All six locales require independent native-language review for a six-locale release; partial locale release must be explicit and policy-authorized.
+- Queue targets are provisional and require staffing/capacity validation. C14's proposed score threshold requires calibration on representative lessons.
+- Production schemas, authorization, workflow automation, audit storage, notifications and publication controls remain Stage D/implementation work.
+- **Next task: D1 — Select technology stack.**
