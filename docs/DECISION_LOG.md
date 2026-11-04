@@ -45,3 +45,12 @@ Technology stack/hosting; database/authentication; AI provider and budget; sandb
 - Constraints: Preserve the bounded B7–B12 curriculum and B11 dependency register; W3Schools remains the exclusive curriculum scope source. Do not infer prerequisites from display order or invent chapter/topic coverage.
 - Deferred: curated vs learner-configured pathways, chapter parent/reuse model, mastery thresholds, locale fallback, D5 OpenAPI route reconciliation, D4 schema refinement, graph/cache limits and release rollback details.
 - Rationale, contracts and future tests: `docs/D7_COURSE_ENGINE_ARCHITECTURE.md`; logical entity additions: `docs/D7_COURSE_ENTITY_MATRIX.csv`; lifecycle transitions: `docs/D7_COURSE_LIFECYCLE_STATE_MACHINE.csv`.
+
+
+## D-0006 — Language engine architecture
+- Date: 2026-11-05
+- Status: Approved at logical locale and localization-contract scope
+- Decision: Support exactly `te`, `en`, `ml`, `kn`, `ta`, `hi`; explicit route/user choice outranks device negotiation; never silently substitute a lesson or assessment language. Separate UI fallback from learning-content availability. Preserve locale-neutral lesson identity, immutable locale versions, protected code/token payloads and semantic parity. Require C2–C9 rules and C15 human approval.
+- Deferred: default UI locale, UI-only fallback policy, anonymous preference retention, per-release locale completeness policy, English spelling convention, font stacks and D4/D5 refinements.
+- Evidence: `docs/D8_LANGUAGE_ENGINE_ARCHITECTURE.md`, `docs/D8_SUPPORTED_LOCALE_REGISTRY.csv`, `docs/D8_LOCALIZATION_PARITY_MATRIX.csv`.
+- No locale runtime, translation corpus, provider or migration is implemented; tests are specified, not executed.
