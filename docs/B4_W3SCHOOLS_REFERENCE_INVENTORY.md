@@ -373,3 +373,11 @@ Added 49 Element-object properties and methods (JSREF-073 through JSREF-121) to 
 The source is W3Schools' HTML DOM Element reference, revised January 2026. The current working register preserves the owner context as `HTML Element`; later passes must reconcile this shared Element list against the separate HTMLElement and specialized HTML element object pages. The source index includes both shared Element members and specialized APIs, so this is a first normalized batch, not an exhaustive full API claim.
 
 Source: https://www.w3schools.com/jsref/dom_obj_all.asp
+
+## 24. JavaScript/DOM member inventory — Event object properties batch 1 (2026-11-04)
+
+Added 31 Event and specialized event-object properties (JSREF-122 through JSREF-152). Owner context is retained for Event, MouseEvent, KeyboardEvent, InputEvent, ClipboardEvent and WheelEvent. The W3Schools Event Properties index contains repeated names with specialized owners (for example modifier keys and `relatedTarget`); this batch normalizes the selected common properties with combined owner context rather than duplicating identical names.
+
+The source also lists HTML event types, event object families and event methods separately. Those are distinct taxonomies and will be inventoried in separate batches; this batch must not be interpreted as full Event API coverage.
+
+Source: https://www.w3schools.com/jsref/dom_obj_event.asp (Event Properties index and Event Object sections).
