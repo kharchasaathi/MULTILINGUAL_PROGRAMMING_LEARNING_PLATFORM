@@ -4,7 +4,7 @@ PROJECT_NAME: MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 VERSION: 1.0
 STATUS: PLANNING
 CURRENT_STAGE: D
-NEXT_STAGE: D8
+NEXT_STAGE: D9
 
 ==================================================
 # PROJECT GOAL
@@ -90,7 +90,7 @@ https://www.w3schools.com/
 - [x] D5. Design API contracts
 - [x] D6. Design authentication
 - [x] D7. Design course engine
-- [ ] D8. Design language engine
+- [x] D8. Design language engine
 - [ ] D9. Design AI engine
 - [ ] D10. Design progress engine
 - [ ] D11. Design admin panel
@@ -347,7 +347,7 @@ PLAN -> DESIGN -> REVIEW -> IMPLEMENT -> TEST -> SECURITY CHECK -> APPROVE -> DO
 # PROGRESS TRACKER
 
 CURRENT_STAGE: D
-CURRENT_TASK: D8
+CURRENT_TASK: D9
 NEXT_ACTION: Design the course engine, course/module/chapter/topic/lesson relationships, publication boundaries and learner-facing retrieval contracts.
 
 COMPLETED:
