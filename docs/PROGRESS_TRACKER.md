@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: C — Teaching & Content Engine
-- Current task: C7 — Define Hindi teaching rules
-- Next action: Define Hindi teaching rules while preserving the shared C1 lesson structure.
+- Current task: C8 — Design AI Localization Engine
+- Next action: Design the AI Localization Engine while preserving native-language rules and the shared C1 lesson contract.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -202,7 +202,7 @@ W3Schools remains the exclusive curriculum scope/source reference. Original inst
 | C4 Malayalam teaching rules | Complete | Malayalam language standard, teaching voice, terminology, code fidelity, examples, learner instructions, typography, accessibility, parity and review checklist in `docs/C4_MALAYALAM_NATIVE_TEACHING_RULES.md`. |
 | C5 Kannada teaching rules | Complete | Kannada language standard, teaching voice, terminology, code fidelity, examples, learner instructions, typography, accessibility, parity and review checklist in `docs/C5_KANNADA_NATIVE_TEACHING_RULES.md`. |
 | C6 Tamil teaching rules | Complete | Tamil language standard, teaching voice, terminology, code fidelity, examples, learner instructions, typography, accessibility, parity and review checklist in `docs/C6_TAMIL_NATIVE_TEACHING_RULES.md`. |
-| C7 Hindi teaching rules | Not started | |
+| C7 Hindi teaching rules | Complete | Hindi language standard, teaching voice, terminology, code fidelity, examples, learner instructions, typography, accessibility, parity and review checklist in `docs/C7_HINDI_NATIVE_TEACHING_RULES.md`. |
 | C8 AI Localization Engine | Not started | |
 | C9 Technical terminology glossary | Not started | |
 | C10 Diagrams and visual teaching | Not started | |
@@ -271,3 +271,15 @@ C6 defines contemporary Tamil writing standards, consistent learner address, Eng
 C6 is complete at Tamil teaching-rule specification scope. No Tamil lesson has been authored, translated, executed, reviewed or published by this task. W3Schools remains the exclusive curriculum topic/source reference; original instructional content is required.
 
 Next task: C7 — Define Hindi teaching rules.
+
+
+## C7 closure (2026-11-05) — Hindi-native teaching rules
+
+Artifact committed on `docs/project-foundation`:
+- `docs/C7_HINDI_NATIVE_TEACHING_RULES.md`
+
+C7 defines contemporary Hindi writing standards, consistent respectful learner address, English technical terminology policy, exact code/output preservation, original examples, C1-aligned Hindi lesson labels, instructions/questions/hints/feedback, Hindi grammar and Devanagari typography checks, glyph/mobile accessibility, six-language parity and language/technical publication reviews.
+
+C7 is complete at Hindi teaching-rule specification scope. No Hindi lesson has been authored, translated, executed, reviewed or published by this task. W3Schools remains the exclusive curriculum topic/source reference; original instructional content is required.
+
+Next task: C8 — Design AI Localization Engine.
