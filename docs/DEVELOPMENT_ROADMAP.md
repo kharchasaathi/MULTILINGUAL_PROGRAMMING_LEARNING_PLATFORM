@@ -1,0 +1,44 @@
+# Development Roadmap
+
+## Phase 0 — Foundation
+- [x] Product direction agreed: audience, six languages, website-first, initially free.
+- [x] Private GitHub repository created and connected.
+- [ ] Commit governance documents and establish branch/CI conventions.
+
+## Phase 1 — Curriculum discovery
+- [ ] B1 Verify W3Schools categories and build detailed inventory.
+- [ ] B2 Normalize languages, technologies, frameworks, and runtimes.
+- [ ] B3 Inventory tutorial chapters and topic trees.
+- [ ] B4 Inventory reference sections and API coverage.
+- [ ] B5 Map example/exercise themes without copying source examples.
+- [ ] B6 Create canonical master topic checklist.
+- [ ] B7–B10 Define Beginner, Intermediate, Advanced, Professional levels.
+- [ ] B11 Map prerequisites and dependencies.
+- [ ] B12 Review gaps and baseline curriculum coverage.
+
+## Phase 2 — Teaching/content system
+Define lesson schema, six native-language standards, glossary, diagrams, code walkthroughs, exercises, quizzes, projects, and review workflow.
+
+## Phase 3 — Architecture/security
+Select stack and hosting based on requirements. Design frontend/backend/database/API, identity, course/language/progress/AI/admin modules, threat model, privacy, and isolated code execution. Review before implementation.
+
+## Phase 4 — UX and web foundation
+Brand and design system; accessible responsive layouts; navigation; catalogue; lesson experience; search; profile/dashboard; admin/content workflows.
+
+## Phase 5 — Learning engine
+Curriculum data model, prerequisites, lesson delivery, exercises, assessments, projects, progress, achievements, certificates.
+
+## Phase 6 — AI and code tools
+Constrained AI tutor, localization/quality evaluation, cost controls, playground, AST analyzer. Do not enable untrusted execution until sandbox gates pass.
+
+## Phase 7 — Multilingual quality and audit
+Native-language review, parity checks, functional/UI/browser/mobile/database/API/AI/sandbox/security/performance/accessibility/regression testing.
+
+## Phase 8 — PWA, Android, launch
+Offline/install support, Android packaging/tests, hosting/backend, domain/DNS/HTTPS, final release checks, public launch.
+
+## Phase 9 — Monetization and growth
+Evaluate premium/institutional offerings, payments, invoices, usage limits, analytics only after free product value and operating costs are understood. Maintain courses, security, and platform.
+
+## Release rule
+No production release without acceptance criteria, required quality gates, security review, monitoring, backup, and rollback readiness.
