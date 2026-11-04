@@ -26,7 +26,7 @@ Last updated: 2026-11-05
 | B3 Tutorials | Complete | Final catalogue audit: 58 official Tutorials-index entries (12 HTML/CSS, 10 JavaScript, 23 Backend, 13 Data Analytics); wider global navigation separately classified; version tracks, learning paths, specialist resources, tools and legacy labels reconciled. Per-track chapter-tree evidence and limitations are recorded in docs/B3_TUTORIAL_TRACK_REGISTER.csv; no claim that every sidebar was fully captured. References/practice assets routed to B4/B5. |
 | B4 References | Complete (catalogue/link capture scope) | W3Schools reference index and available family/source links recorded in B4 registers. Per user's instruction, no external verification or approval workflow. This does not mean full page-text or every reference member was copied. |
 | B5 Examples and exercises | Complete (catalogue/link capture scope) | W3Schools practice catalogue, HTML/SQL category labels, examples/exercises/quiz surfaces and 32 link records captured in docs/B5_W3SCHOOLS_EXAMPLES_EXERCISES_INDEX.md and docs/B5_PRACTICE_LINK_REGISTER.csv. |
-| B6 Master topic checklist | Not started | |
+| B6 Master topic checklist | In progress | Created `docs/B6_MASTER_TOPIC_CHECKLIST.csv` with 181 rows mapped from the existing B3 tutorial, B4 reference, and B5 practice registers. Topic-level coverage marking remains pending. |
 | B7 Beginner | Not started | |
 | B8 Intermediate | Not started | |
 | B9 Advanced | Not started | |
@@ -101,3 +101,8 @@ Artifacts:
 - `docs/B5_PRACTICE_LINK_REGISTER.csv`
 
 Captured W3Schools practice surfaces include Tryit/interactive examples, Examples, Exercises, Quizzes, Challenges, and Practice Problems. Topic exercise links and available HTML/SQL category labels are recorded. This does not claim that every W3Schools exercise prompt or code sample has been copied. B6 is next. W3Schools remains the exclusive source.
+
+
+## B6 start (2026-11-05)
+
+Created `docs/B6_MASTER_TOPIC_CHECKLIST.csv` on `docs/project-foundation`. It consolidates 181 existing records from the B3 tutorial register, B4 reference register, and B5 practice link register into one checklist index. Each row retains its source ID, topic label, category/domain, W3Schools URL, and source-register path. All coverage statuses are initialized as `Not started`; B6 remains in progress until the checklist is populated and reconciled at the intended topic scope. W3Schools remains the exclusive source; no external verification or approval stage was added.
