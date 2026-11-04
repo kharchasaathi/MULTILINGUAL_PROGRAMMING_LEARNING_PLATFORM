@@ -1,6 +1,6 @@
 # B4 — W3Schools Reference Inventory
 
-**Status:** In progress  
+**Status:** Complete — user-directed catalogue/link capture scope  
 **Sole source:** https://www.w3schools.com/  
 **Reference catalogue:** https://www.w3schools.com/references/  
 **Branch:** `docs/project-foundation`
@@ -82,20 +82,10 @@ Removed from active B4 because it came from websites other than W3Schools or exp
 
 Do not restore these items to B4. If W3Schools itself later adds a reference entry, include it from the W3Schools page.
 
-## 5. Completion criteria
+## 5. Completion criteria (revised by user instruction)
 
-B4 is complete when:
-- The W3Schools References catalogue is represented without double-counting linked child references.
-- Every selected W3Schools reference family has its displayed topics and members inventoried.
-- Every retained member has a stable ID and W3Schools source URL.
-- No non-W3Schools member or external-source audit is included in B4 coverage.
-- CSV structure, IDs, duplicates, and parent/member relationships are consistent.
-- Each family has a documented coverage decision and project sign-off.
-
-No external standards comparison, vendor dialect matrix, or second-source verification is required.
+B4 is complete at the scope requested by the user: capture the W3Schools reference catalogue, family names, and available source links in the working registers. No external verification, formal approval, or sign-off stage is required. This is a catalogue/link capture completion only; it is not a claim that every page's full prose or every member across every family has been transcribed. Do not expand B4 back into a verification or approval workflow.
 
 ## 6. Current status
 
-B4 remains **IN PROGRESS**. Cleaned row counts are working inventory counts only, not proof that all W3Schools members or all catalogue families have been captured. See `docs/PROGRESS_TRACKER.md` and `docs/B4_ACCEPTANCE_GATE_MATRIX.csv`.
-
-B5 remains blocked until B4 is accepted. Do not merge this branch into `main` before B4 approval.
+B4 is **COMPLETE at catalogue/link capture scope** per the user's clarification. B5 may proceed. The existing member registers remain working topic inventories and are not represented as exhaustive verbatim copies of W3Schools pages. W3Schools remains the only curriculum source.
