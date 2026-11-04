@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: C — Teaching & Content Engine
-- Current task: C3 — Define English teaching rules
-- Next action: Define English teaching rules while preserving the shared C1 lesson structure.
+- Current task: C4 — Define Malayalam teaching rules
+- Next action: Define Malayalam teaching rules while preserving the shared C1 lesson structure.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -198,7 +198,7 @@ W3Schools remains the exclusive curriculum scope/source reference. Original inst
 |---|---|---|
 | C1 Lesson structure | Complete | `docs/C1_STANDARD_LESSON_STRUCTURE.md`; reusable authoring template: `docs/templates/LESSON_TEMPLATE.md`. |
 | C2 Telugu-native teaching rules | Complete | Telugu language standard, teaching voice, technical terminology policy, code fidelity, examples, learner instructions, review and quality checklist in `docs/C2_TELUGU_NATIVE_TEACHING_RULES.md`. |
-| C3 English teaching rules | Not started | |
+| C3 English teaching rules | Complete | English writing and spelling policy, teaching voice, terminology, code fidelity, examples, learner instructions, accessibility, parity and review checklist in `docs/C3_ENGLISH_NATIVE_TEACHING_RULES.md`. |
 | C4 Malayalam teaching rules | Not started | |
 | C5 Kannada teaching rules | Not started | |
 | C6 Tamil teaching rules | Not started | |
@@ -223,3 +223,15 @@ C2 defines standard Telugu prose, learner address and teaching voice, first-use 
 The task is complete at teaching-rule specification scope. No Telugu lesson has been authored, translated, technically executed, reviewed or published by this task. A separate Telugu lesson-template file was not created; the C1 reusable template remains the authoring base and the Telugu headings/rules are specified in the C2 document.
 
 Next task: C3 — Define English teaching rules.
+
+
+## C3 closure (2026-11-05) — English-native teaching rules
+
+Artifact committed on `docs/project-foundation`:
+- `docs/C3_ENGLISH_NATIVE_TEACHING_RULES.md`
+
+C3 defines internationally understandable English writing standards, spelling consistency, learner address, instructional voice, technical terminology, exact code/output preservation, original examples, C1-aligned English lesson labels, actionable instructions, question and hint design, feedback, readability, accessibility, localization parity and editorial/technical publication reviews.
+
+C3 is complete at English teaching-rule specification scope. No English lesson has been authored, executed, reviewed or published by this task. W3Schools remains the exclusive curriculum topic/source reference; original instructional content is required.
+
+Next task: C4 — Define Malayalam teaching rules.
