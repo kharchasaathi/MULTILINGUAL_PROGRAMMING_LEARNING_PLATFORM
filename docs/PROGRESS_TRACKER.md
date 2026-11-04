@@ -2,9 +2,9 @@
 Last updated: 2026-11-05
 
 ## Current execution position
-- Current stage: B — Complete Curriculum Planning
-- Current task: B12 — Approve curriculum coverage
-- Next action: Review the B7–B10 curriculum coverage against the W3Schools-only master checklist and record coverage gaps/limits.
+- Current stage: C — Teaching & Content Engine
+- Current task: C1 — Define lesson structure
+- Next action: Define the reusable lesson structure for the approved W3Schools-only curriculum.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -32,7 +32,7 @@ Last updated: 2026-11-05
 | B9 Advanced | Complete | Advanced scope, DSA structures/algorithms/complexity, advanced JavaScript and Python pathways, SQL extensions, electives and capstone criteria in `docs/B9_ADVANCED_LEVEL_CURRICULUM.md`; 23 module/extension rows in `docs/B9_ADVANCED_LEVEL_MAP.csv`. |
 | B10 Professional | Complete | Professional outcomes, specialization pathways, project lifecycle, portfolio deliverables, assessment rubric and completion criteria in `docs/B10_PROFESSIONAL_LEVEL_CURRICULUM.md`; 17 module rows in `docs/B10_PROFESSIONAL_LEVEL_MAP.csv`. |
 | B11 Prerequisites | Complete | Prerequisite matrix and 70-edge dependency map across B7–B10; see `docs/B11_CURRICULUM_PREREQUISITE_MATRIX.md` and `docs/B11_PREREQUISITE_DEPENDENCY_MAP.csv`. |
-| B12 Coverage approval | Not started | |
+| B12 Coverage approval | Complete (bounded approval) | B7–B10 curriculum framework approved with explicit coverage limitations; see `docs/B12_CURRICULUM_COVERAGE_APPROVAL.md` and `docs/B12_COVERAGE_GAP_REGISTER.csv`. |
 
 ## G — Project management and GitHub
 | Task | Status | Evidence |
@@ -168,3 +168,16 @@ Artifacts committed on `docs/project-foundation`:
 B11 reconciles the B7–B10 learning paths into explicit global entry gates and track-specific prerequisites for the web, programming-language, SQL/database, DSA, data/AI and professional pathways. Dependencies are classified as Required, Conditional or Recommended. The matrix defines prerequisite remediation, track-specific unlocking, and the professional project sequence. The companion CSV records 70 dependency edges, using existing module IDs where available and named gates where upstream optional tracks are only catalogue-mapped.
 
 W3Schools remains the exclusive curriculum source. No new curriculum topics or external sources were introduced. Conditional tracks are not universal requirements; upstream B3/B4 inventory and optional-track mapping limitations remain unchanged. B11 is complete at prerequisite-identification and dependency-map scope. Next task: B12 — Approve curriculum coverage.
+
+
+## B12 closure (2026-11-05) — curriculum coverage approval with documented limits
+
+Artifacts committed on `docs/project-foundation`:
+- `docs/B12_CURRICULUM_COVERAGE_APPROVAL.md`
+- `docs/B12_COVERAGE_GAP_REGISTER.csv`
+
+Decision: **Approved with documented coverage limitations.** B7–B10 are approved as the initial W3Schools-derived curriculum framework and selected pathway definitions. The approval is not a claim of exhaustive W3Schools coverage, complete lesson mapping, six-language content completion or implementation.
+
+The reconciliation records the evidence counts: B3 tutorial register 112 rows; B4 reference catalogue 37 rows; B5 practice-link register 32 rows; B6 master checklist 3,232 indexed rows; B7/B8/B9/B10 maps 25/27/23/17 rows; B11 dependency map 70 edges. B6 contains 111 tutorial-track records, and the B3 track `SUP-SPACES — Spaces` is absent from that checklist slice. All B6 rows are marked `Indexed`, which is not a lesson coverage/mastery state. Eight follow-up gaps are recorded in the B12 gap register and remain open.
+
+W3Schools remains the sole curriculum source. No external source or exhaustive-coverage claim was added. B12 is complete at bounded curriculum-framework approval scope. Next stage: C — Teaching & Content Engine; next task: C1 — Define lesson structure.
