@@ -4,7 +4,7 @@ PROJECT_NAME: MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 VERSION: 1.0
 STATUS: PLANNING
 CURRENT_STAGE: B
-NEXT_STAGE: B4
+NEXT_STAGE: B6
 
 ==================================================
 # PROJECT GOAL
@@ -54,7 +54,7 @@ https://www.w3schools.com/
 - [x] B2. Inventory all relevant languages
 - [x] B3. Inventory tutorials
 - [x] B4. Inventory W3Schools reference catalogue and source links (copy/link capture scope)
-- [ ] B5. Inventory examples and exercises as topic references
+- [x] B5. Inventory W3Schools examples and exercises as topic references (catalogue/link capture scope)
 - [ ] B6. Create master topic checklist
 - [ ] B7. Define Beginner level
 - [ ] B8. Define Intermediate level
@@ -347,7 +347,7 @@ PLAN -> DESIGN -> REVIEW -> IMPLEMENT -> TEST -> SECURITY CHECK -> APPROVE -> DO
 # PROGRESS TRACKER
 
 CURRENT_STAGE: B
-CURRENT_TASK: B4
+CURRENT_TASK: B6
 NEXT_ACTION: Continue B4 by removing all non-W3Schools additions and aligning every curriculum register to W3Schools-only scope. Do not perform external-source verification or add supplementary topics.
 
 COMPLETED:
