@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: D — Software Architecture
-- Current task: D3 — Design backend architecture
-- Next action: Design backend architecture around the NestJS modular monolith, defining module boundaries, service responsibilities, provider adapters, background work and operational contracts.
+- Current task: D4 — Design database architecture
+- Next action: Define PostgreSQL entities, ownership boundaries, relations, constraints, indexes, migrations, retention and backup/restore requirements.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -389,3 +389,13 @@ Next task: C11 — Define code explanation format.
 - Offline support is initially read-only for explicitly cached public content. Assessment/progress/project/review writes remain disabled offline until conflict, secure storage and idempotency rules are designed.
 - Accessibility and security requirements are specified, not certified or penetration-tested. Twenty-four future tests are documented, not executed.
 - **Next task: D3 — Design backend architecture.**
+
+
+## D3 — Backend architecture closure (2026-11-05)
+
+- **Status:** Complete at logical architecture and module-boundary specification scope.
+- **Artifacts:** `docs/D3_BACKEND_ARCHITECTURE.md` defines the NestJS modular-monolith runtime, layering/dependency rules, request lifecycle, data/transaction policy, provider ports, async-work constraints, authorization, error/resilience model, configuration, observability, performance and 24 future implementation tests. `docs/D3_BACKEND_MODULE_MATRIX.csv` records 14 module ownership/dependency boundaries.
+- **Key controls:** PostgreSQL remains authoritative; API owns authorization and business invariants; module-private repositories are not accessed cross-module; AI output remains draft and cannot approve/publish; review decisions remain hash-bound; learner code is never executed in the API process.
+- **Deferred:** D4 schemas/migrations; D5 exact API contracts; D6 identity/session design; queue/broker/worker technology; hosting, AI, storage, notification, payment and sandbox providers; retention and SLOs.
+- **Limitations:** No NestJS application code, database schema, migrations, endpoint implementation, queue, provider integration or deployment was created. Test cases are specified, not executed.
+- **Next task:** D4 — Design PostgreSQL database architecture and data ownership.
