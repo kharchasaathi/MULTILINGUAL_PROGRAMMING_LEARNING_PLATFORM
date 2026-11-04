@@ -4,7 +4,7 @@ Last updated: 2026-11-04
 ## Current execution position
 - Current stage: B — Complete Curriculum Planning
 - Current task: B4 — Inventory references
-- Next action: Continue B4 — reconcile the CSS A–Z property index and CSS function list against source; reconcile HTML element-specific attributes; inventory remaining JavaScript built-in object families (Iterator, Temporal, Proxy, Reflect and Typed Arrays); create Python and SQL member registers; verify remaining URLs and run the final coverage audit. B3 catalogue audit is complete.
+- Next action: Continue B4 — reconcile the 353-row CSS A–Z property register against the current source index; reconcile HTML element-specific attributes against WHATWG; finish JavaScript built-in member/source reconciliation (Iterator, Temporal, Proxy, Reflect, Typed Arrays, RegExp grammar and Error legacy members); expand/reconcile Python (729 curated rows) and SQL (564 curated rows) coverage; verify remaining URLs and run the final coverage audit. B3 catalogue audit is complete.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -70,3 +70,5 @@ Python standard-library supplement: `docs/B4_PYTHON_STANDARD_LIBRARY_MODULE_REGI
 SQL reference register created: `docs/B4_SQL_REFERENCE_MEMBER_REGISTER.csv` contains 348 records (keywords/statements, data types by dialect, operators/predicates, constraints, clauses/set operators, aggregate functions, and MySQL string/numeric/date-time/advanced functions). Initial SQL batch only; transaction control, window functions, CTEs, stored-program dialects, JSON/spatial APIs and complete DBMS-specific catalogs remain open. SQL must be taught with explicit dialect labels.
 
 Advanced SQL inventory added: `docs/B4_SQL_ADVANCED_DIALECT_REFERENCE_REGISTER.csv` contains 216 curated records covering transactions/isolation, window functions and frame syntax, CTE/recursive CTE concepts, SQL Server/T-SQL functions and MS Access expression functions. Dialect/version reconciliation and exhaustive coverage remain open.
+
+B4 CSS function source audit (2026-11-04): all 82 normalized function member records in `docs/B4_CSS_REFERENCE_MEMBER_REGISTER.csv` were checked against the current W3Schools CSS Functions Reference. W3Schools presents 80 table rows because `hsl()/hsla()` and `rgb()/rgba()` are paired in two rows; the register correctly normalizes those pairs into four distinct function records. All 82 records now carry an explicit source-verification status. CSS property A–Z reconciliation remains pending.
