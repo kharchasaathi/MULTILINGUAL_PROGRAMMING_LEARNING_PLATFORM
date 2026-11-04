@@ -685,3 +685,25 @@ Sources:
 - https://docs.python.org/3/reference/lexical_analysis.html#soft-keywords
 
 Version notes: W3Schools keyword lists are a reference baseline, not a version pin. Soft keywords are context-sensitive and must not be taught as globally reserved identifiers. The `type` statement soft keyword requires Python 3.12+. Exception inheritance and availability can evolve; teach BaseException versus Exception correctly and do not catch KeyboardInterrupt/SystemExit via a broad Exception handler. The built-in type member entries are a starter selection, not exhaustive protocol coverage. Some methods in immutable bytes and mutable bytearray share names but differ in mutability/return behavior. Full Python-version matrix and source-by-source member reconciliation remain open.
+
+
+## 40. Python iterator, generator, decorator, context manager and data-model inventory (2026-11-04)
+
+Created `docs/B4_PYTHON_ITERATOR_GENERATOR_DECORATOR_CONTEXT_MANAGER_REGISTER.csv` with 115 owner-qualified records (PYADV-001 through PYADV-115):
+- Iterator and asynchronous iterator protocol: 8 entries.
+- Generator protocol and metadata: 11 entries.
+- Asynchronous generator protocol and metadata: 9 entries.
+- Decorator/function metadata and wrapper helpers: 12 entries.
+- Context manager/contextlib APIs: 14 entries.
+- Data-model special methods: 61 entries across object representation, comparisons, numeric operations, containers/iteration, attribute/descriptor behavior, class creation/callability and async protocols.
+
+Sources:
+- https://docs.python.org/3/library/stdtypes.html#iterator-types
+- https://docs.python.org/3/reference/expressions.html#yield-expressions
+- https://docs.python.org/3/reference/expressions.html#asynchronous-generator-functions
+- https://docs.python.org/3/reference/compound_stmts.html#function-definitions
+- https://docs.python.org/3/reference/datamodel.html
+- https://docs.python.org/3/library/contextlib.html
+- https://docs.python.org/3/library/functools.html
+
+Teaching notes: distinguish iterable from iterator, synchronous from asynchronous protocols, generator return/StopIteration behavior, and decorator definition-time application. Context managers must explain exception suppression semantics of `__exit__`. Special methods are usually invoked implicitly by syntax/operators; avoid presenting every dunder as an ordinary public method. This is a selected protocol inventory, not an exhaustive list of the Python Data Model. Version-specific additions and implementation-specific attributes require a pinned Python-version audit.
