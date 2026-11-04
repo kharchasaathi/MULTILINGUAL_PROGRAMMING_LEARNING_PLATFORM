@@ -645,3 +645,91 @@ Do not treat “60” as the total number of all W3Schools learning resources. I
 - [ ] Verify each additional entry's exact destination, current availability, and content type.
 - [ ] Resolve aliases and legacy entries without double-counting.
 - [ ] Complete all remaining chapter/topic trees.
+
+
+## 15. Global navigation reconciliation — batch 6
+
+A current crawl of the official Tutorials index, the W3Schools global navigation, and the tutorial directory shows an important distinction:
+
+- The four-category Tutorials index presents its own curated list.
+- The global navigation presents a wider catalogue including Bootstrap 3/4/5, Gen AI, Cyber Security, Bash, introductory learning paths, and tools.
+- The video/tutorial directory separately groups tutorial cards, references, exercises, quizzes, challenges, and practice problems.
+
+Therefore the earlier “60” count is valid only for the four-category index snapshot; it is not the total W3Schools learning catalogue. The global navigation catalogue should be counted separately after URL deduplication.
+
+### 15.1 Newly reconciled curriculum tracks
+
+#### Bootstrap 3
+Source: https://www.w3schools.com/bootstrap/
+- Getting started, containers, grid system, typography
+- Tables, images, jumbotron, wells, alerts
+- Buttons, button groups, glyphicons, badges, progress bars
+- Pagination, list groups, panels, dropdowns
+- Collapse, tabs/pills, navbar, forms, inputs, carousel, modal, tooltip, popover, scrollspy
+- Grid breakpoints and responsive layouts
+
+#### Bootstrap 4
+Source: https://www.w3schools.com/bootstrap4/
+- Getting started, containers, grid, typography, colors
+- Tables, images, jumbotron, alerts
+- Buttons, button groups, badges, progress bars, spinners
+- Pagination, list groups, cards, dropdowns, collapse
+- Navs, navbar, carousel, modal, tooltip, popover, toast, scrollspy
+- Utilities, flex, forms, input groups, custom controls, validation
+- Grid breakpoints and responsive layout patterns
+
+#### Bash
+Source: https://www.w3schools.com/bash/
+- Introduction and setup
+- Shell commands and script files
+- Variables and arguments
+- Input/output and comments
+- Conditions and loops
+- Functions
+- Arrays and strings
+- Exit status and command chaining
+- Navigation tree needs full verification; topics above are a first-pass scope outline, not a claim of complete source sidebar capture.
+
+#### Cyber Security
+Source: https://www.w3schools.com/cybersecurity/
+- Introduction and security fundamentals
+- Threats, vulnerabilities and attack concepts
+- Authentication and authorization concepts
+- Encryption and secure communication
+- Web security and common risks
+- Defensive practices and security awareness
+- First-pass track outline only; exact chapter tree and page availability require final verification.
+
+#### Generative AI
+Source: https://www.w3schools.com/gen_ai/
+- Introduction and generative AI concepts
+- Models and prompting
+- Text, image and other content generation concepts
+- Responsible use, limitations and verification
+- First-pass track outline only; exact chapter tree requires final verification.
+
+#### Intro to HTML & CSS
+Source: https://www.w3schools.com/htmlcss/
+- Web page foundations
+- HTML structure and content
+- CSS styling and layout
+- Combining HTML and CSS
+- Responsive design concepts
+- First-pass track outline; map topic IDs to HTML/CSS tracks to avoid duplicate lessons.
+
+#### Intro to Programming
+Source: https://www.w3schools.com/
+- Programming concepts and problem solving
+- Algorithms, sequence, selection and iteration
+- Variables, values, expressions and data types
+- Functions and decomposition
+- Debugging and testing
+- Entry destination is currently resolved through global navigation, but a dedicated canonical tutorial URL was not verified in this pass.
+
+### 15.2 Catalogue governance rules
+1. Preserve the source's exact track title and canonical URL.
+2. Assign one content type: language, markup, framework, database, domain course, learning path, reference, exercise, quiz, challenge, tool, or legacy.
+3. Keep versioned frameworks as separate tracks where the source maintains separate tutorials (e.g., Bootstrap 3/4/5).
+4. Do not count a tool or reference as a tutorial course.
+5. Record aliases and redirects instead of duplicating tracks.
+6. A page is “tree captured” only after its visible navigation/module list is fully inspected. First-pass topic outlines remain provisional.
