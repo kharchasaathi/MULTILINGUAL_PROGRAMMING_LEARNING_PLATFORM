@@ -345,26 +345,27 @@ PLAN -> DESIGN -> REVIEW -> IMPLEMENT -> TEST -> SECURITY CHECK -> APPROVE -> DO
 # PROGRESS TRACKER
 
 CURRENT_STAGE: B
-CURRENT_TASK: B1
+CURRENT_TASK: B3
+NEXT_ACTION: Continue B3 tutorial inventory and complete URL verification, source navigation capture, duplicate/legacy reconciliation, and acceptance audit.
 
 COMPLETED:
-- Initial project discussion
-- Multilingual concept approved
-- W3Schools curriculum reference approved
-- Prevention-first development requirement
-- Security-by-design requirement
-- Self-development approach approved
-- Domain purchase deferred
-- A1 to A7 project foundation completed in planning
-- G1 to G8 repository and governance documents created
+- A1 to A7 — Project foundation documented and approved
+- B1 — W3Schools category inventory baseline
+- B2 — Programming language and technology inventory baseline
+- G1 to G8 — Private repository and core governance documents created
+
+IN_PROGRESS:
+- B3 — Tutorial inventory; catalogue and partial topic trees recorded, full audit not complete
+- G9 — Working branch exists; pull request policy and branch protections pending
+- G13 — Git history/version control active; backup policy pending
 
 PENDING:
-- B1 to B12
+- B4 to B12
 - C1 to C15
 - D1 to D15
 - E1 to E15
 - F1 to F15
-- G9 to G13
+- G10 to G12
 - H1 to H12
 - I1 to I14
 - J1 to J12
@@ -378,8 +379,8 @@ PENDING:
 - R1 to R8
 - S1 to S9
 
-NEXT_ACTION:
-B1. Inventory W3Schools categories in detail.
+NOTE:
+This tracker reflects documented planning artifacts, not implemented application features. A checkbox is complete only when its defined acceptance evidence exists. Partial inventories remain in progress and must not be treated as approved curriculum coverage.
 
 ==================================================
 # RESUME COMMAND
