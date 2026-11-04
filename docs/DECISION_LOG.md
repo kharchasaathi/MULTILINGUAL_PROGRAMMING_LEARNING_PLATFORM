@@ -75,3 +75,14 @@ Technology stack/hosting; database/authentication; AI provider and budget; sandb
 - Deferred: completion criteria, mastery thresholds/recency, cross-version evidence reuse, section-level progress, retention, exact D5 routes, projection worker and SLOs.
 - Evidence: `docs/D10_PROGRESS_ENGINE_ARCHITECTURE.md`, `docs/D10_PROGRESS_EVENT_CATALOG.csv`, `docs/D10_PROGRESS_DATA_CONTRACT_MATRIX.csv`, `docs/D10_PROGRESS_WORKFLOW_STATE_MACHINE.csv`.
 - No runtime, schema migration, API endpoint or executed test is claimed.
+
+
+## D-0009 — Admin panel architecture
+- Date: 2026-11-05
+- Status: Approved at logical product, role and contract specification scope
+- Decision: Provide a protected admin workspace with permission-filtered operational workspaces and backend-enforced, deny-by-default scoped authorization. Keep admin UI separate from module authority: D7 curriculum, C15 review/release, D8 localization, D9 AI, D10 progress and D6 identity remain owners of their respective data and decisions.
+- Separation of duties: authors cannot approve/publish own work; reviewers act only within assigned qualifications/locale; publishers release only frozen versions with all current mandatory gates; auditors are read-only; support and progress access is purpose-limited.
+- Security: audit every privileged action; use scoped/time-bound grants, independent approval for sensitive changes, and reviewed break-glass access. No admin UI access to raw DB, arbitrary code, secrets or direct learner score/mastery mutation.
+- Deferred: final role grant authority, MFA/dual-control, break-glass duration, exact D5 routes, D4 audit persistence, privacy/retention, queue SLAs and analytics thresholds.
+- Evidence: `docs/D11_ADMIN_PANEL_ARCHITECTURE.md`, `docs/D11_ADMIN_PERMISSION_MATRIX.csv`, `docs/D11_ADMIN_DATA_CONTRACT_MATRIX.csv`, `docs/D11_ADMIN_WORKSPACE_MATRIX.csv`.
+- No admin UI, API, migration, permission seed or tests are implemented/executed.
