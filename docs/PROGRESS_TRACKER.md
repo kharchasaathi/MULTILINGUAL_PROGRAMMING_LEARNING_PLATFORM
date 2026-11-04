@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: D — Software Architecture
-- Current task: D4 — Design database architecture
-- Next action: Define PostgreSQL entities, ownership boundaries, relations, constraints, indexes, migrations, retention and backup/restore requirements.
+- Current task: D5 — Design API contracts
+- Next action: Define versioned REST/JSON endpoints, request/response schemas, error envelopes, pagination, idempotency, OpenAPI generation and compatibility rules.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -399,3 +399,13 @@ Next task: C11 — Define code explanation format.
 - **Deferred:** D4 schemas/migrations; D5 exact API contracts; D6 identity/session design; queue/broker/worker technology; hosting, AI, storage, notification, payment and sandbox providers; retention and SLOs.
 - **Limitations:** No NestJS application code, database schema, migrations, endpoint implementation, queue, provider integration or deployment was created. Test cases are specified, not executed.
 - **Next task:** D4 — Design PostgreSQL database architecture and data ownership.
+
+
+## D4 — Database architecture closure (2026-11-05)
+
+- **Status:** Complete at logical PostgreSQL data architecture and recovery-requirements scope.
+- **Artifacts:** `docs/D4_DATABASE_ARCHITECTURE.md` defines module-owned relational data groups, key/relationship conventions, integrity constraints, indexes, transaction/concurrency/idempotency rules, migration governance, privacy classification, retention decision gates, and backup/restore/disaster-recovery requirements. `docs/D4_DATABASE_ENTITY_MATRIX.csv` catalogs 40 logical entities with ownership, keys, important relationships, constraints and sensitivity.
+- **Key controls:** PostgreSQL remains the system of record; one initial database with module-prefixed table ownership; UUID identifiers; immutable lesson/locale/review/release versions; hash-bound approvals; server-side authorization; short transactions; no client database access.
+- **Deferred:** Exact Prisma/SQL names and migrations; D5 API contracts; D6 identity/roles; billing and notification persistence; hosting/database region; key management; retention durations; legal deletion policy; RPO/RTO/SLO targets; partitioning and row-level security.
+- **Limitations:** No database instance, Prisma schema, SQL migration, seed data, backup job or restore drill was created. The 26 database tests are specified, not executed. No retention duration or recovery objective is invented.
+- **Next task:** D5 — Design versioned REST API contracts and OpenAPI schemas.
