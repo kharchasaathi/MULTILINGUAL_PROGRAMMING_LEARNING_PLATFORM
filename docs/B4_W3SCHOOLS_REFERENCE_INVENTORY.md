@@ -456,3 +456,20 @@ Source pages:
 - https://www.w3schools.com/js/js_asynC_fetch.asp
 
 Source note: the Canvas reference's older graphics URL resolves to the current JavaScript Canvas API page. W3Schools' Fullscreen reference labels `fullscreenEnabled()` as a method; retain that source label for traceability but flag it for standards/API-shape review because current DOM usage exposes `document.fullscreenEnabled` as a property.
+
+
+## 29. JavaScript built-in Array and DOM CSSStyleDeclaration members (2026-11-04)
+
+Added 52 owner-qualified records (JSREF-307 through JSREF-358):
+- Array: 44 members from the W3Schools complete Array reference, including iteration, transformation, searching, copying, mutation and static factory operations. Modern copying methods (`toReversed()`, `toSorted()`, `toSpliced()`, and `with()`) are explicitly described as non-mutating; older mutating methods remain distinguished in their notes.
+- CSSStyleDeclaration: 8 members — properties `cssText`, `length`, `parentRule`; methods `getPropertyPriority()`, `getPropertyValue()`, `item()`, `removeProperty()`, and `setProperty()`.
+
+The JavaScript register now contains 358 data records: 7 reference-family records and 351 API/member records. The CSSStyleDeclaration entries are distinct from the large CSS property register: they describe the DOM interface used to read and manipulate an element's inline style declarations. The Array pass captures the members listed in the current W3Schools Array reference; it does not mean every built-in JavaScript object family is complete.
+
+Sources:
+- https://www.w3schools.com/jsref/jsref_obj_array.asp
+- https://www.w3schools.com/jsref/obj_cssstyledeclaration.asp
+- https://www.w3schools.com/jsref/prop_html_style.asp
+- https://www.w3schools.com/jsref/default.asp
+
+Coverage note: the combined JavaScript reference index (revised June 2026) enumerates additional object families including Boolean, Date, Error, Function, Global, Iterator, JSON, Map, Math, Number, Object, Promise, Proxy, Reflect, RegExp, Set, String, Temporal and Typed Array. These remain to be inventoried member-by-member, with owner-qualified duplicate names and source reconciliation.
