@@ -302,3 +302,11 @@ Added 121 individual CSS property records to `docs/B4_CSS_REFERENCE_MEMBER_REGIS
 Source: W3Schools CSS Properties Reference, which presents the property directory alphabetically and links individual property pages. This batch is only the A–C segment; remaining alphabetical sections still need extraction and duplicate/alias reconciliation. <https://www.w3schools.com/cssref/index.php>
 
 B4 planning estimate (not an acceptance result): approximately 25–30% complete and 70–75% remaining. This estimate reflects that the catalogue baseline and initial HTML/CSS taxonomy exist, while full member-level extraction for all core references, full URL verification, standards comparison and final coverage audit remain incomplete. Recalculate after the remaining core member registers are built.
+
+## 15. CSS property extraction — batch 9 (2026-11-04)
+
+Added 64 individual CSS property records covering the D–I alphabetical segment (from `direction` through `isolation`) to `docs/B4_CSS_REFERENCE_MEMBER_REGISTER.csv`. Each record carries the W3Schools CSS Properties Reference source URL and a concise catalogue description. At-rules beginning with `@` remain excluded from the property register because they are separately represented in the at-rule taxonomy.
+
+Source: W3Schools CSS Properties Reference, alphabetical directory: https://www.w3schools.com/cssref/index.php
+
+This batch does not complete D–Z. Remaining property groups include J–Z, followed by reconciliation of the index list against the normalized register, CSS Functions extraction, and URL/member-level audit.
