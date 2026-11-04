@@ -127,3 +127,12 @@ The current WHATWG obsolete-features section demonstrates why legacy classificat
 **Decision remains:** B4 NOT ACCEPTED; B5 blocked; no merge to `main`. No claim is made that application, browser, security, or cross-language tests have been executed.
 
 Sources reviewed: WHATWG HTML Living Standard (https://html.spec.whatwg.org/), WHATWG element definitions (https://html.spec.whatwg.org/multipage/semantics.html), WHATWG obsolete features (https://html.spec.whatwg.org/multipage/obsolete.html), and MDN iframe reference (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe).
+
+
+## 13. B4 scope correction — W3Schools-first (2026-11-04)
+
+The earlier statement that every one of the 116 HTML attributes needed five-dimension normative/security/browser verification to close B4 was an over-scoping error. Under the adopted `docs/B4_SOURCE_AND_VERIFICATION_POLICY.md`, B4 inventories the in-scope W3Schools learning/reference taxonomy faithfully and traceably. Standards/vendor checks are targeted safeguards for known legacy, security, version/compatibility, or source-conflict triggers; they are not a full second audit prerequisite for every member.
+
+Accordingly, B4-GATE-003 is now **COMPLETE**: all 116 element-specific attribute owner-scope rows have dispositions, with W3Schools-derived and supplemental members separated. The deep-verification ledger remains useful as an optional risk-review queue, but its 0/116 fully verified count is **not** a B4 acceptance blocker under the corrected scope.
+
+This correction does not mean B4 itself is complete. The remaining 28 gates and family sign-offs must still be completed according to the matrix. B4 remains open; B5 remains blocked; no merge to `main`.
