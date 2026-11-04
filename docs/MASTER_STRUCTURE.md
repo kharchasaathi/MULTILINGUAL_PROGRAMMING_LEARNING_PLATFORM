@@ -53,7 +53,7 @@ https://www.w3schools.com/
 - [x] B1. Inventory W3Schools categories
 - [x] B2. Inventory all relevant languages
 - [x] B3. Inventory tutorials
-- [ ] B4. Inventory references
+- [x] B4. Inventory W3Schools reference catalogue and source links (copy/link capture scope)
 - [ ] B5. Inventory examples and exercises as topic references
 - [ ] B6. Create master topic checklist
 - [ ] B7. Define Beginner level
