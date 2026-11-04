@@ -113,3 +113,14 @@ Technology stack/hosting; database/authentication; AI provider and budget; sandb
 - Rationale and evidence: `docs/D14_END_TO_END_SYSTEM_DATA_FLOW.md` defines registration, course/content delivery, assessment/progress, AI, payment/entitlement, admin review/publishing, notifications, failure recovery, reconciliation, audit, security, privacy, observability and 56 future test scenarios.
 - Limitations: This is a logical architecture decision only. No endpoint, migration, provider, worker, UI, deployment or production integration was implemented. Future tests are specified, not executed.
 - Next: D15 — Approve system architecture.
+
+
+## D-0013 — System architecture conditional approval
+- Date: 2026-11-05
+- Status: Approved as logical architecture baseline; implementation remains gated
+- Decision: Approve D1–D14 as the coherent system architecture baseline for progression to Stage E security design and Stage F quality engineering. Do not treat this as production readiness or permission to begin implementation/enable payment, AI provider, content publishing or code execution.
+- Reconciliations: D3 Assessment/Progress dependency cycle removed; Project, Payment and Entitlement boundaries clarified; D4 internal principal separated from external identity link and durable inbox receipt added; D5 billing candidate routes reconciled with D12; D5 progress write explicitly constrained to append-only evidence ingestion.
+- Mandatory conditions: D15 GATE-01–GATE-15 in `docs/D15_SYSTEM_ARCHITECTURE_APPROVAL.md` must be closed with evidence before relevant implementation or production enablement. These include unified persistence contracts, exact API schemas, identity/session decisions, AI/payment provider review, entitlement policy, worker operations, sandbox security, privacy/retention, backup/restore and CI/release controls.
+- Evidence: `docs/D15_SYSTEM_ARCHITECTURE_APPROVAL.md` and reconciled D3/D4/D5 supporting documents.
+- Verification boundary: Documentation and repository consistency review only. 35 future architecture checks are specified, not executed. No code, migration, integration, security test or deployment is claimed.
+- Next: E1 — Threat modelling.
