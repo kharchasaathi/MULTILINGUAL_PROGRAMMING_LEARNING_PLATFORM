@@ -32,7 +32,7 @@ PostgreSQL is the system of record. Browser/mobile clients never connect directl
 The initial database is a single database and schema; prefixes make ownership visible:
 
 - `core_*`: stable shared reference/configuration records.
-- `identity_*`: internal principal mapping only; external authentication credentials/provider data are not designed here.
+- `identity_*`: internal principal plus a separate provider-neutral external identity-link mapping; credentials/tokens remain outside ordinary application tables.
 - `learner_*`: profile and preferences.
 - `curriculum_*`: tracks, levels, modules, topics and prerequisites.
 - `content_*`: canonical lessons, immutable versions, locale versions and structured blocks.
@@ -100,9 +100,9 @@ Six locale values are constrained to `te`, `en`, `ml`, `kn`, `ta`, `hi`. Code sa
 
 - `ai_generation_task` stores task state, owner, purpose, schema/rule version, input/output hashes, provider/model identifiers when available, usage/cost metadata and provenance references. Do not store secrets; raw prompts and full learner data require separate approved retention rules.
 - `platform_idempotency` stores scoped idempotency key, request fingerprint, processing state and stable result reference. Unique (principal_scope, operation, key); write atomically with the business effect.
-- `platform_outbox_event` stores schema-versioned event payload and delivery state in the same transaction as the originating business change when reliable asynchronous handoff is needed. This is a logical pattern; no queue product is selected.
+- `platform_outbox_event` stores schema-versioned event payload and delivery state in the same transaction as the originating business change when reliable asynchronous handoff is needed. `platform_inbox_receipt` records consumer/event deduplication and processing state. These are logical patterns; no queue product is selected.
 - `audit_event` is append-only, with actor/service, action, timestamp, target IDs, before/after state references, reason, correlation ID and policy/version references. Never store credentials, full prompts or unrestricted payloads.
-- Notifications, billing ledger and provider webhook records are not fully modeled in D4; D12/D13 and the relevant domain tasks must define them before implementation.
+- Notification persistence, C13 project/submission persistence, and D12 billing entities remain in their domain-specific contract matrices and must be reconciled into one migration-ready schema inventory before implementation. D12's payment data contract matrix remains authoritative for proposed billing entities; D4 does not duplicate those definitions.
 
 ## 5. Key and relationship conventions
 
@@ -118,7 +118,7 @@ Six locale values are constrained to `te`, `en`, `ml`, `kn`, `ta`, `hi`. Code sa
 ## 6. Integrity, constraints and concurrency
 
 Mandatory constraint patterns:
-- Unique identity subject pair; one profile per principal; locale enum/check constraint.
+- Unique external identity `(issuer, subject)` pair in `identity_external_link`; one profile per principal; locale enum/check constraint. `identity_principal` is the internal actor and must not store provider subject keys.
 - Unique (parent_id, version_number) for immutable versions; unique lesson-version/locale tuple.
 - Foreign keys with deliberate delete behavior. Prefer RESTRICT for historical/version/review/audit references; CASCADE only for disposable dependent data with an approved lifecycle.
 - Check constraints for nonnegative counters/sizes, valid status values where stable, valid time ordering and bounded score ranges.
