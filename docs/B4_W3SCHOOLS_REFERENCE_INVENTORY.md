@@ -240,3 +240,12 @@ Use separate record types and stable IDs:
 ### 8.4 Scope limitation
 
 This batch confirms reference-page destinations and family structure. It does not yet claim a complete element list, attribute list, event list, browser compatibility matrix or full HTML Living Standard coverage.
+
+
+## 9. HTML member-register progress — batch 3 (2026-11-04)
+
+Created `docs/B4_HTML_REFERENCE_MEMBER_REGISTER.csv` as the first machine-readable supporting taxonomy register. It currently contains 14 records: seven HTML reference-family records and seven grouped event-family records. Event names are retained as source groupings rather than falsely represented as a fully normalized one-event-per-row inventory.
+
+The event groups cover window, form/focus, keyboard, mouse, drag/scroll, clipboard and media events. The source labels `onmousewheel` deprecated; preserve that warning for later standards review. The source list is a W3Schools teaching reference and should not be treated as the current normative browser-platform specification.
+
+The register also distinguishes verified family landing pages from pending destination checks for additional families. Individual HTML element rows, individual attribute rows, global-attribute rows, per-event rows, element-to-attribute relationships and browser-support values remain outstanding.
