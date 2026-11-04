@@ -1,0 +1,23 @@
+entity,from_state,to_state,guard,authoritative_evidence,side_effect
+order,DRAFT,PENDING_PAYMENT,valid price and order snapshot,server order creation,create payment attempt
+order,PENDING_PAYMENT,PAID,verified successful capture and exact amount currency order,provider status plus verified webhook,emit entitlement evaluation
+order,PENDING_PAYMENT,PAYMENT_FAILED,provider confirms terminal failure,verified provider status,allow policy-based retry
+order,PENDING_PAYMENT,CANCELLED,valid pre-capture cancellation,server cancellation command,close pending attempt
+order,PENDING_PAYMENT,EXPIRED,checkout expiry confirmed,server time and provider query,close checkout session
+payment_attempt,CREATED,CHECKOUT_CREATED,adapter returns opaque session,provider session response,store provider reference
+payment_attempt,CHECKOUT_CREATED,PENDING_PROVIDER,checkout opened or awaiting result,provider session state,await webhook/status
+payment_attempt,PENDING_PROVIDER,SUCCEEDED,verified capture,verified provider evidence,emit payment succeeded event
+payment_attempt,PENDING_PROVIDER,FAILED,provider confirms terminal failure,verified provider evidence,record terminal failure
+payment_attempt,PENDING_PROVIDER,UNKNOWN,timeout or ambiguous response,no authoritative final status,enqueue reconciliation
+refund,REQUESTED,UNDER_REVIEW,request validated,authenticated learner request,queue review
+refund,UNDER_REVIEW,APPROVED,policy and approver checks pass,independent approval evidence,submit allowed
+refund,UNDER_REVIEW,REJECTED,policy denies request,reasoned decision,notify requester
+refund,APPROVED,SUBMITTED_TO_PROVIDER,provider command accepted,server adapter result,store provider refund ref
+refund,SUBMITTED_TO_PROVIDER,PENDING_PROVIDER,provider reports processing,provider status,await result
+refund,PENDING_PROVIDER,SUCCEEDED,provider confirms refund,verified provider evidence,update refundable balance and entitlement policy
+refund,PENDING_PROVIDER,FAILED,provider confirms failure,verified provider evidence,retain captured balance
+subscription,INCOMPLETE,ACTIVE,first period payment and mandate verified,provider evidence,activate entitlement period
+subscription,ACTIVE,PAST_DUE,renewal payment fails,provider evidence,apply approved grace policy
+subscription,ACTIVE,CANCEL_AT_PERIOD_END,cancellation scheduled,verified cancellation response,retain access until approved end
+subscription,CANCEL_AT_PERIOD_END,CANCELLED,period ends,server policy and billing period,reevaluate entitlement
+subscription,PAST_DUE,ACTIVE,renewal payment verified,provider evidence,restore active period
