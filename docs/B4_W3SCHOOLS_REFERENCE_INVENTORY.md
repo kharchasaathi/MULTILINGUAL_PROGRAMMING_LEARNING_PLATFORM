@@ -318,3 +318,9 @@ Added 168 individual CSS property records from the J–Z portion of the W3School
 Source: W3Schools CSS Properties Reference and its alphabetical property listing: https://www.w3schools.com/cssref/index.php. The source also separately lists at-rules interspersed alphabetically; those are not counted as properties.
 
 The property-name register now requires a source-to-register reconciliation pass. This batch captures the remaining J–Z entries surfaced by the index, but does not itself certify the whole directory as complete. CSS Functions extraction and HTML/JS/Python/SQL reference member registers remain outstanding.
+
+## 17. CSS Functions member extraction — batch 11 (2026-11-04)
+
+Added 82 individual CSS function records to `docs/B4_CSS_REFERENCE_MEMBER_REGISTER.csv`, using the current W3Schools CSS Functions Reference list. Function records use the distinct `css_function` member type and `CSS-FN-###` identifiers; they are not mixed with CSS property or at-rule records. The extraction includes mathematical, color, gradient, filter, shape, transform, grid, URL and custom-property functions. Paired spellings such as `rgb()/rgba()` and `hsl()/hsla()` are retained as separate searchable members because the source lists both forms.
+
+Source: W3Schools CSS Functions Reference: https://www.w3schools.com/cssref/css_functions.php. The reference currently lists function names with concise descriptions. This is a source-index inventory, not a complete CSS Values and Units specification or a browser-support guarantee.
