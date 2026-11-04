@@ -25,16 +25,18 @@ Build a professional programming education platform.
 5. Tamil
 6. Hindi
 
-## MAIN REFERENCE
-W3Schools
+## MAIN REFERENCE — EXCLUSIVE SOURCE
+https://www.w3schools.com/
 
 ## REFERENCE RULES
-- Use W3Schools as curriculum coverage reference.
-- Record all relevant topics and subtopics.
-- Never mass-copy protected content.
-- Create original explanations, examples and diagrams.
-- Our teaching quality must never be below W3Schools.
-- Improve clarity, depth, visuals and practical learning.
+- W3Schools is the only source for curriculum scope, topics, subtopics, reference families, examples, exercises, and technologies.
+- Include only topics and items that are present on W3Schools.
+- Do not add topics from memory, industry convention, standards bodies, vendors, or any other website.
+- Do not add supplemental technologies or members that are absent from W3Schools.
+- If an item is not present on W3Schools, exclude it from the platform curriculum.
+- Follow W3Schools' own categories, naming, grouping, and labels.
+- Use W3Schools as the source map; create original explanations, examples, exercises, and diagrams rather than copying protected content.
+- Improve clarity, depth, visuals, and practical learning without expanding the curriculum beyond W3Schools scope.
 
 ==================================================
 # A. PROJECT FOUNDATION
@@ -346,7 +348,7 @@ PLAN -> DESIGN -> REVIEW -> IMPLEMENT -> TEST -> SECURITY CHECK -> APPROVE -> DO
 
 CURRENT_STAGE: B
 CURRENT_TASK: B4
-NEXT_ACTION: Continue B4 reference inventory; verify URLs and expand core language/API reference taxonomies.
+NEXT_ACTION: Continue B4 by removing all non-W3Schools additions and aligning every curriculum register to W3Schools-only scope. Do not perform external-source verification or add supplementary topics.
 
 COMPLETED:
 - A1 to A7 — Project foundation documented and approved
