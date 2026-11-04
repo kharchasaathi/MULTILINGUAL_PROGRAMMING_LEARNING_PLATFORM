@@ -494,3 +494,25 @@ Coverage and editorial notes:
 - The String reference includes older HTML wrapper methods; they are retained only as legacy reference entries, not as recommended techniques.
 - Date local-time methods and UTC methods are kept as separate member entries to avoid hiding timezone semantics.
 - W3Schools reference pages can contain legacy/deprecated members alongside current APIs; source capture does not imply recommendation for new code.
+
+
+## 31. JavaScript Number, Math and Object built-in reference members (2026-11-04)
+
+Added 87 owner-qualified records (JSREF-460 through JSREF-546):
+- Number: 22 properties and methods, including numeric limits/constants, safe-integer checks, parsing helpers, formatting and primitive conversion.
+- Math: 42 methods/constants, including trigonometric and hyperbolic functions, logarithms, rounding, powers, random generation and mathematical constants.
+- Object: 23 entries from the Object reference, including property definition/inspection, copying, freezing/sealing, key/value/entry enumeration and prototype-related members.
+
+Editorial distinctions retained:
+- Number static methods such as `isFinite()`, `isInteger()`, `isNaN()`, `isSafeInteger()`, `parseFloat()` and `parseInt()` are recorded under the Number owner; global conversion/parsing functions remain separate global entries.
+- `Object.delete` is listed in the W3Schools Object reference index but is an operator concept, not an Object static method; it is recorded with a clarifying note rather than misrepresented as a callable method.
+- `Object.toString()` and `Object.valueOf()` are inherited instance methods, distinguished from static Object methods in their notes.
+- Math functions operate on JavaScript Number values; `Math.random()` is pseudo-random and must not be used for security-sensitive token generation.
+
+The JavaScript register now contains 546 data records: 7 reference-family records and 539 API/member records. Number, Math and Object reference lists have been inventoried; the remaining object families include Boolean, BigInt, Symbol, Promise, Map, Set, WeakMap, WeakSet, RegExp, JSON, Error, Function, Global, Iterator, Temporal, Proxy, Reflect and Typed Arrays.
+
+Sources:
+- https://www.w3schools.com/jsref/jsref_obj_number.asp
+- https://www.w3schools.com/jsref/jsref_obj_Math.asp
+- https://www.w3schools.com/js/js_object_reference.asp
+- https://www.w3schools.com/Jsref/default.asp
