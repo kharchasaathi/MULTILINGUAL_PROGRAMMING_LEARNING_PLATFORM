@@ -516,3 +516,30 @@ Sources:
 - https://www.w3schools.com/jsref/jsref_obj_Math.asp
 - https://www.w3schools.com/js/js_object_reference.asp
 - https://www.w3schools.com/Jsref/default.asp
+
+
+## 32. JavaScript Promise, Map, Set, WeakMap and WeakSet members (2026-11-04)
+
+Added 50 owner-qualified records (JSREF-547 through JSREF-596):
+- Promise: 12 entries — constructor, three instance methods and eight static methods, including newer `try()` and `withResolvers()`.
+- Map: 12 entries — constructor, core collection methods, `size`, and `groupBy()`.
+- Set: 17 entries — constructor, `size`, core iteration/mutation methods, and modern set-composition/relationship methods (`difference()`, `intersection()`, `symmetricDifference()`, `union()`, `isDisjointFrom()`, `isSubsetOf()`, `isSupersetOf()`).
+- WeakMap: 5 entries — constructor, `delete()`, `get()`, `has()`, `set()`.
+- WeakSet: 4 entries — constructor, `add()`, `delete()`, `has()`.
+
+The JavaScript register now contains 596 data records: 7 reference-family records and 589 API/member records. Weak collections are explicitly documented as non-enumerable collections without a `size` property; their keys/values are object-only as appropriate, and weak references do not keep otherwise-unreachable objects alive.
+
+Source coverage and verification notes:
+- Promise methods were cross-checked against the W3Schools Promise Object reference (Revised December 2025), including `Promise.try()` and `Promise.withResolvers()`.
+- Map and Set member lists were cross-checked against their W3Schools reference tables. The newer Set composition methods are included because the current reference lists them.
+- WeakMap and WeakSet entries are a normalized member inventory based on the W3Schools constructor/reference navigation and weak-collection documentation; the exact dedicated member-reference URL coverage needs a follow-up URL/content verification pass. They are not claimed as a separately verified complete member table.
+- `Map.groupBy()` and Set composition methods are modern ECMAScript additions; browser/runtime support needs to be included in future lesson metadata rather than assumed universal.
+
+Sources:
+- https://www.w3schools.com/jsref/jsref_obj_promise.asp
+- https://www.w3schools.com/jsref/jsref_obj_map.asp
+- https://www.w3schools.com/jsref/jsref_obj_set.asp
+- https://www.w3schools.com/jsref/jsref_construct_map.asp
+- https://www.w3schools.com/jsref/jsref_construct_weakset.asp
+- https://www.w3schools.com/js/js_sets_weak.asp
+- https://www.w3schools.com/jsref/default.asp
