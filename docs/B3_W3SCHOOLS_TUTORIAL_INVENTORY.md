@@ -875,3 +875,46 @@ Earlier B3 batches included some first-pass topic outlines inferred from general
 Rechecked the live official Tutorials index on 2026-11-04 and recounted each category item individually. The correct four-block total is **58**, not 60 or 59: HTML & CSS 12, JavaScript 10, Backend 23, Data Analytics 13. Bash is visible in the wider global navigation but is not listed in those four category blocks, so it is retained as a separate supplementary track in the register rather than inserted into the four-block count.
 
 The register's first five legacy rows also overstated navigation capture. Current evidence states: HTML detailed tree recorded; CSS visible menu captured but additional topics remain pending; JavaScript page verified but full sidebar not extracted; Python early menu only; SQL detailed tree recorded. The CSV status values are corrected to reflect this distinction. Draft topic outlines are not treated as fully captured source trees.
+
+
+## 20. SQL and Bootstrap 5 source navigation — batch 10
+
+Checked official tutorial pages on 2026-11-04:
+
+### 20.1 SQL — chapter navigation captured
+Source: https://www.w3schools.com/sql/default.asp
+
+**SQL Tutorial navigation**
+- Foundations: Intro, Syntax
+- Querying: SELECT, SELECT DISTINCT, WHERE, ORDER BY, AND, OR, NOT, NULL values, TOP
+- Data changes: INSERT INTO, UPDATE, DELETE, INSERT INTO SELECT
+- Filtering and expressions: LIKE, wildcards, IN, BETWEEN, aliases, CASE, NULL functions, operators
+- Aggregation: aggregate functions, MIN, MAX, COUNT, SUM, AVG
+- Relationships and set operations: JOINs (INNER, LEFT, RIGHT, FULL, SELF), UNION, UNION ALL, GROUP BY, HAVING, EXISTS, ANY, ALL
+- Database objects and advanced topics: SELECT INTO, stored procedures, comments
+
+**SQL Database navigation**
+- Create DB, Drop DB, Backup DB
+- Create Table, Drop Table, Alter Table
+- Constraints: NOT NULL, UNIQUE, PRIMARY KEY, FOREIGN KEY, CHECK, DEFAULT
+- Create Index, Auto Increment, Dates, Views
+- SQL Injection, Parameters, Prepared Statements, Hosting
+
+**Boundary:** SQL Exercises, Examples, Quiz, Syllabus and SQL reference collections are related assets but are not tutorial chapters; route them to B4/B5 or the relevant curriculum planning task. The live navigation explicitly separates the SQL Tutorial, SQL Database, SQL Cert and SQL References groups.
+
+### 20.2 Bootstrap 5 — current visible menu captured
+Source: https://www.w3schools.com/bootstrap5/
+- Getting started, containers, grid basics, typography, colors (text and background)
+- Tables, images, jumbotron, alerts
+- Buttons, button groups, badges, progress bars, spinners
+- Pagination, list groups, cards, dropdowns, collapse
+- Navs, navbar, carousel, modal, tooltip, popover, toast, scrollspy, offcanvas
+- Utilities, dark mode, flex
+- Forms: forms, select menus, checks/radios, range, input groups, floating labels, validation
+- Grid system and responsive breakpoints: stacked/horizontal, XS, SM, MD, LG, XL, XXL, examples
+- Separate supporting assets: basic template, editor, exercises, quiz, syllabus, study plan, interview prep
+
+The supporting assets above are not merged into the tutorial chapter count. Bootstrap 5 also explicitly distinguishes itself from Bootstrap 3 and 4; keep version tracks separate.
+
+### 20.3 Evidence and completion status
+The official SQL tutorial extraction exposes both SQL Tutorial and SQL Database navigation groups. The Bootstrap 5 extraction exposes its main component, form and grid groups. These two track menus are now recorded as source-captured for this audit pass. This does not mean the whole B3 register is complete; the remaining tracks still require canonical URL verification and menu capture.
