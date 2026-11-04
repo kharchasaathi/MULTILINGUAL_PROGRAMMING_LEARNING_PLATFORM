@@ -324,3 +324,9 @@ The property-name register now requires a source-to-register reconciliation pass
 Added 82 individual CSS function records to `docs/B4_CSS_REFERENCE_MEMBER_REGISTER.csv`, using the current W3Schools CSS Functions Reference list. Function records use the distinct `css_function` member type and `CSS-FN-###` identifiers; they are not mixed with CSS property or at-rule records. The extraction includes mathematical, color, gradient, filter, shape, transform, grid, URL and custom-property functions. Paired spellings such as `rgb()/rgba()` and `hsl()/hsla()` are retained as separate searchable members because the source lists both forms.
 
 Source: W3Schools CSS Functions Reference: https://www.w3schools.com/cssref/css_functions.php. The reference currently lists function names with concise descriptions. This is a source-index inventory, not a complete CSS Values and Units specification or a browser-support guarantee.
+
+## 18. HTML element-specific attribute mapping — batch 12 (2026-11-04)
+
+Added 79 individual `html_attribute` records to `docs/B4_HTML_REFERENCE_MEMBER_REGISTER.csv`. Each row stores the attribute name and the source table's “Belongs to” element mapping in the scope field. The extraction covers common form, media, image, link, table, list, metadata, object and interactive attributes. Attributes that W3Schools labels as not supported in HTML5 (including `align`, `bgcolor` and `border`) are retained with an explicit legacy note rather than presented as modern authoring guidance.
+
+Source: W3Schools HTML Attribute Reference: https://www.w3schools.com/tags/ref_attributes.asp. The source table lists attribute-to-element applicability; this batch records a working subset of the table, not a claim that every row on the source page has been extracted. Global attributes and event-handler attributes remain separate record types to avoid double counting.
