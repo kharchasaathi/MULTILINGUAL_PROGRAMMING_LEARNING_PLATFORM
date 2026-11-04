@@ -4,7 +4,7 @@ PROJECT_NAME: MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 VERSION: 1.0
 STATUS: PLANNING
 CURRENT_STAGE: C
-NEXT_STAGE: D1
+NEXT_STAGE: D2
 
 ==================================================
 # PROJECT GOAL
@@ -83,7 +83,7 @@ https://www.w3schools.com/
 
 ==================================================
 # D. SOFTWARE ARCHITECTURE
-- [ ] D1. Select technology stack
+- [x] D1. Select technology stack
 - [ ] D2. Design frontend architecture
 - [ ] D3. Design backend architecture
 - [ ] D4. Design database architecture
@@ -347,8 +347,8 @@ PLAN -> DESIGN -> REVIEW -> IMPLEMENT -> TEST -> SECURITY CHECK -> APPROVE -> DO
 # PROGRESS TRACKER
 
 CURRENT_STAGE: C
-CURRENT_TASK: D1
-NEXT_ACTION: Select the technology stack using documented requirements, constraints, security, maintainability and deployment trade-offs.
+CURRENT_TASK: D2
+NEXT_ACTION: Design the frontend architecture around the approved Next.js website/PWA and Expo mobile client, with responsive UI, shared contracts, accessibility, localization and API boundaries.
 
 COMPLETED:
 - A1 to A7 — Project foundation documented and approved
