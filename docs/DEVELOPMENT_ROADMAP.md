@@ -7,7 +7,7 @@
 
 ## Phase 1 — Curriculum discovery
 - [x] B1 Verify W3Schools categories and build category-level inventory (15 families, 72 entries; see docs/B1_W3SCHOOLS_CURRICULUM_INVENTORY.md).
-- [ ] B2 Normalize languages, technologies, frameworks, and runtimes.
+- [x] B2 Normalize languages, technologies, frameworks, runtimes, databases, tools, and platforms (see docs/B2_PROGRAMMING_LANGUAGE_TECHNOLOGY_INVENTORY.md).
 - [ ] B3 Inventory tutorial chapters and topic trees.
 - [ ] B4 Inventory reference sections and API coverage.
 - [ ] B5 Map example/exercise themes without copying source examples.
