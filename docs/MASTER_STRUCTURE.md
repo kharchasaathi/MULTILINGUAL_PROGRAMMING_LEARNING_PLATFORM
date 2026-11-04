@@ -4,7 +4,7 @@ PROJECT_NAME: MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 VERSION: 1.0
 STATUS: PLANNING
 CURRENT_STAGE: C
-NEXT_STAGE: C3
+NEXT_STAGE: C4
 
 ==================================================
 # PROJECT GOAL
@@ -67,7 +67,7 @@ https://www.w3schools.com/
 # C. TEACHING & CONTENT ENGINE
 - [x] C1. Define lesson structure
 - [x] C2. Define Telugu-native teaching rules
-- [ ] C3. Define English teaching rules
+- [x] C3. Define English teaching rules
 - [ ] C4. Define Malayalam teaching rules
 - [ ] C5. Define Kannada teaching rules
 - [ ] C6. Define Tamil teaching rules
