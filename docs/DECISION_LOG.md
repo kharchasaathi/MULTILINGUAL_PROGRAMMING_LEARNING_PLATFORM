@@ -96,3 +96,11 @@ Technology stack/hosting; database/authentication; AI provider and budget; sandb
 - Deferred: gateway/merchant entity/markets, price catalogue, currency and settlement, GST/tax/invoices, refund/cancellation/trial rules, recurring mandate, fraud controls, PCI scope, retention, exact API schemas and provider SLA.
 - Evidence: `docs/D12_PAYMENT_ARCHITECTURE.md`, `docs/D12_PAYMENT_STATE_MACHINE.csv`, `docs/D12_PAYMENT_DATA_CONTRACT_MATRIX.csv`.
 - No gateway, merchant account, live transaction, endpoint, migration or executed test is selected/implemented/claimed.
+
+
+## D-0011 — Module communication
+- Date: 2026-11-05
+- Status: Approved at architecture specification scope
+- Decision: Retain modular monolith and direct application ports by default. Use transactional outbox/inbox and at-least-once idempotent event delivery for justified async workflows. No broker is selected.
+- Security: Module ownership and authorization remain authoritative; no direct cross-module repository writes or secrets/payment credentials in event payloads.
+- Evidence: docs/D13_MODULE_COMMUNICATION_ARCHITECTURE.md. No runtime, worker, migration or tests are implemented.
