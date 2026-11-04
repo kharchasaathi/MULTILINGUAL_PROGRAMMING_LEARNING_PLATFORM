@@ -3,9 +3,9 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: D — Software Architecture
-- Current task: D10 — Design the progress engine
-- Next action: Define learner progress events, state transitions, mastery evidence, idempotency, recalculation and reporting contracts.
-- Completed immediately before current task: D9 — AI Engine architecture (provider-neutral specification scope).
+- Current task: D11 — Design the admin panel
+- Next action: Define admin roles, navigation, operational workspaces, moderation/review controls, audit visibility and safe administrative actions.
+- Completed immediately before current task: D10 — Progress Engine architecture (logical specification scope).
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -455,3 +455,21 @@ D9 defines bounded AI task classes, provider-neutral adapters, versioned contrac
 Complete at architecture/specification scope only. No provider/model, region, budget, runtime, API endpoint, migration or evaluation corpus was selected or implemented. 35 future test scenarios are specified, not executed. Provider privacy/retention terms, consent, region, quotas and budget remain open.
 
 **Next task: D10 — Design the progress engine.**
+
+
+## D10 closure (2026-11-05) — learner progress engine
+
+Artifacts committed on `docs/project-foundation`:
+- `docs/D10_PROGRESS_ENGINE_ARCHITECTURE.md`
+- `docs/D10_PROGRESS_EVENT_CATALOG.csv`
+- `docs/D10_PROGRESS_DATA_CONTRACT_MATRIX.csv`
+- `docs/D10_PROGRESS_WORKFLOW_STATE_MACHINE.csv`
+- Decision D-0008 in `docs/DECISION_LOG.md`
+
+D10 defines append-only, server-authoritative and version-bound learner evidence; pathway selection/enrolment; distinct activity, completion and mastery states; versioned completion/mastery policies; D7 prerequisite evaluation; C12 assessment and C13 project evidence boundaries; idempotent ingestion; rebuildable projections; stale/recalculation behavior; D4/D5/D6 integration; privacy/security controls and 35 future test scenarios.
+
+No universal mastery threshold or completion percentage is invented. Offline authoritative writes remain disabled. Completion/mastery policy values, cross-version evidence reuse, retention, exact API routes and projection worker/SLO choices remain open.
+
+D10 is complete at logical architecture/specification scope only. No application code, database migration, API implementation or executed tests are claimed. Test scenarios are specified, not executed.
+
+**Next task: D11 — Design the admin panel.**
