@@ -4,7 +4,7 @@ PROJECT_NAME: MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 VERSION: 1.0
 STATUS: PLANNING
 CURRENT_STAGE: D
-NEXT_STAGE: D7
+NEXT_STAGE: D8
 
 ==================================================
 # PROJECT GOAL
@@ -89,7 +89,7 @@ https://www.w3schools.com/
 - [x] D4. Design database architecture
 - [x] D5. Design API contracts
 - [x] D6. Design authentication
-- [ ] D7. Design course engine
+- [x] D7. Design course engine
 - [ ] D8. Design language engine
 - [ ] D9. Design AI engine
 - [ ] D10. Design progress engine
@@ -347,7 +347,7 @@ PLAN -> DESIGN -> REVIEW -> IMPLEMENT -> TEST -> SECURITY CHECK -> APPROVE -> DO
 # PROGRESS TRACKER
 
 CURRENT_STAGE: D
-CURRENT_TASK: D7
+CURRENT_TASK: D8
 NEXT_ACTION: Design the course engine, course/module/chapter/topic/lesson relationships, publication boundaries and learner-facing retrieval contracts.
 
 COMPLETED:
@@ -415,3 +415,12 @@ Never assume a task is complete without evidence.
 - Defines principal mapping, account lifecycle, authentication/session decision gates, web/native client boundaries, authorization, C15 separation-of-duties, D4 persistence alignment, D5 API integration, threat controls and 26 future test scenarios.
 - Identity provider, protocol transport, session store, MFA methods, contact-verification vendor and retention remain undecided. No authentication code, provider integration, database migration or tests are implemented/executed.
 - **Next task: D7 — Design the course engine.**
+
+
+## D7 closure — 2026-11-05
+
+- D7 course engine architecture is complete at logical domain and contract scope.
+- Evidence: `docs/D7_COURSE_ENGINE_ARCHITECTURE.md`, `docs/D7_COURSE_ENTITY_MATRIX.csv`, and `docs/D7_COURSE_LIFECYCLE_STATE_MACHINE.csv`.
+- Defines course hierarchy, source mapping, optional chapters, prerequisite graph evaluation, learner pathway selection, immutable catalogue releases, C15 publication gates, D4/D5 alignment, security boundaries and 26 future test scenarios.
+- Existing B7–B12 scope and B11's 70 recorded dependencies are preserved; curriculum coverage limitations remain open. No course code, database migration, API implementation, lesson import or tests are claimed. Tests are specified, not executed.
+- **Next task: D8 — Design the language engine.**
