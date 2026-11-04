@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: D — Software Architecture
-- Current task: D7 — Design the course engine
-- Next action: Define course, module, chapter, topic and lesson domain contracts, prerequisite traversal, publication and learner retrieval.
+- Current task: D8 — Design the language engine
+- Next action: Define locale resolution, language switching, translation parity, glossary integration and localized content delivery.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -418,3 +418,13 @@ Artifacts committed on `docs/project-foundation`:
 - `docs/D6_AUTHORIZATION_POLICY_MATRIX.csv`
 
 D6 defines provider-neutral identity-to-principal mapping, account lifecycle, web/native authentication and session decision gates, server-side deny-by-default authorization, scoped roles/permissions, C15 separation-of-duties, D4 persistence alignment, D5 API integration, security threats and 26 future test scenarios. Provider, protocol transport, session store, MFA/recovery methods, verification vendor, key management and retention remain open decisions. No production authentication code, provider integration, migration or tests are claimed; tests are specified, not executed. Next: D7 — Design the course engine.
+
+
+## D7 closure (2026-11-05) — course engine architecture
+
+Artifacts committed on `docs/project-foundation`:
+- `docs/D7_COURSE_ENGINE_ARCHITECTURE.md`
+- `docs/D7_COURSE_ENTITY_MATRIX.csv`
+- `docs/D7_COURSE_LIFECYCLE_STATE_MACHINE.csv`
+
+D7 defines the track/level/module/chapter/topic/lesson hierarchy, Curriculum vs Content ownership, W3Schools source provenance, optional chapter policy, B11 prerequisite graph evaluation and remediation, track-specific learner pathway selection, immutable catalogue releases, C15 publication gates, D4/D5 integration and security controls. 26 future test scenarios are specified but not executed. The B7–B12 framework and recorded B11 edges are preserved; source inventory limitations remain. No application code, migrations, API deployment, lesson import or learner progress implementation is claimed. Next: D8 — Design the language engine.
