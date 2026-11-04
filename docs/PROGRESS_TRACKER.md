@@ -3,9 +3,9 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: D — Software Architecture
-- Current task: D13 — Design module communication
-- Next action: Define internal module contracts, synchronous call boundaries, asynchronous event delivery, message envelope, outbox/inbox, retries, ordering, versioning, observability and failure handling.
-- Completed immediately before current task: D12 — Payment architecture (provider-neutral logical specification scope).
+- Current task: D14 — Design end-to-end system data flow
+- Next action: Map end-to-end learner, content, assessment, AI, payment, entitlement, progress, admin and notification flows, trust boundaries and failure paths.
+- Completed immediately before current task: D13 — Module Communication architecture (logical specification scope).
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
