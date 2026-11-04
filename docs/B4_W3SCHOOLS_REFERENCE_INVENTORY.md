@@ -543,3 +543,27 @@ Sources:
 - https://www.w3schools.com/jsref/jsref_construct_weakset.asp
 - https://www.w3schools.com/js/js_sets_weak.asp
 - https://www.w3schools.com/jsref/default.asp
+
+
+## 33. JavaScript Boolean, BigInt, Symbol and RegExp reference members (2026-11-04)
+
+Added 46 owner-qualified records (JSREF-597 through JSREF-642):
+- Boolean: 6 entries — Boolean conversion/call, wrapper constructor, constructor/prototype and primitive conversion methods.
+- BigInt: 5 entries — BigInt conversion, `asIntN()`, `asUintN()`, `toString()`, and `valueOf()`.
+- Symbol: 17 entries — `Symbol()`, registry methods `for()`/`keyFor()`, the `description` getter, and well-known Symbol keys including `iterator`, `asyncIterator`, `toPrimitive`, `toStringTag`, and `species`.
+- RegExp: 18 entries — constructor, 12 properties, legacy `compile()`, `escape()`, `exec()`, `test()`, and `toString()`.
+
+The JavaScript register now contains 642 data records: 7 reference-family records and 635 API/member records. Editorial notes distinguish primitive factories from wrapper objects, and well-known Symbol keys from ordinary instance methods. `new Boolean()` is retained for reference completeness but discouraged in normal Boolean logic. `new RegExp()` is the constructor form; `RegExp.escape()` is a static method. RegExp `compile()` is marked deprecated.
+
+Source verification:
+- W3Schools' current complete JavaScript reference index lists Boolean's constructor/prototype/toString/valueOf, BigInt's toString/valueOf, Symbol as a primitive family, and the RegExp member index including `dotAll`, `escape()`, `flags`, `hasIndices`, `unicodeSets`, and other flags/properties.
+- W3Schools' reference index provides the family/member cross-reference; dedicated page paths for Boolean, BigInt and Symbol should still be checked individually before final URL acceptance.
+- The current RegExp member index is supported by the W3Schools JavaScript reference index; a separate final pass must confirm every direct member URL and reconcile any newer ECMAScript additions.
+
+Sources:
+- https://www.w3schools.com/Jsref/jsref_reference.asp
+- https://www.w3schools.com/Jsref/default.asp
+- https://www.w3schools.com/jsref/jsref_obj_regexp.asp
+- https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt
+
+Coverage limitation: this batch captures the member lists visible in the W3Schools reference index, not the full grammar of RegExp patterns/modifiers. Pattern tokens, character classes, assertions, quantifiers and flags need a separate syntax inventory (they are reference topics, not RegExp object members).
