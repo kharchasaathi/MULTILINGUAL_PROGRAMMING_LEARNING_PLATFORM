@@ -336,3 +336,14 @@ Source: W3Schools HTML Attribute Reference: https://www.w3schools.com/tags/ref_a
 Added the W3Schools-listed `color` attribute as an individual legacy HTML attribute record (HTML-ATTR-080). The source labels it as not supported in HTML5 and recommends CSS instead; it is retained for historical/reference completeness, not as current authoring guidance. Attributes categorized by W3Schools as Global Attributes are represented in the dedicated `html_global_attribute` register rather than duplicated as element-specific rows; reconciliation must still confirm the full source table and any overlaps.
 
 Source: W3Schools HTML Attribute Reference: https://www.w3schools.com/tags/ref_attributes.asp. The search-visible source table explicitly identifies `color` as unsupported in HTML5. This batch is one verified addition, not completion of the attribute table.
+
+## 20. HTML attribute-reference reconciliation — batch 14 (2026-11-04)
+
+Added three element-specific attribute rows from the W3Schools HTML Attribute Reference table:
+- `cite` — `blockquote`, `del`, `ins`, `q`
+- `data` — `object`
+- `form` — `button`, `fieldset`, `input`, `label`, `meter`, `object`, `output`, `select`, `textarea`
+
+These were absent from the prior element-specific subset. The source also lists global attributes in the same master table; those continue to be classified in the separate global-attribute register and must be reconciled as a distinct category. This batch is a targeted gap-fill, not final source-table sign-off.
+
+Source: W3Schools HTML Attribute Reference: https://www.w3schools.com/tags/ref_attributes.asp.
