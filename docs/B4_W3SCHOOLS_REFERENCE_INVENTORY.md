@@ -381,3 +381,19 @@ Added 31 Event and specialized event-object properties (JSREF-122 through JSREF-
 The source also lists HTML event types, event object families and event methods separately. Those are distinct taxonomies and will be inventoried in separate batches; this batch must not be interpreted as full Event API coverage.
 
 Source: https://www.w3schools.com/jsref/dom_obj_event.asp (Event Properties index and Event Object sections).
+
+## 25. JavaScript/DOM reference expansion — Event Methods, Attributes, HTMLCollection and NodeList (2026-11-04)
+
+Added 22 owner-qualified members (JSREF-153 through JSREF-174) from four dedicated W3Schools reference pages:
+- Event Methods: 5 methods, including `stopImmediatePropagation()` (source spelling corrected from the previous provisional `stopImmidiatePropagation` in search-index text).
+- HTML Attributes: 7 NamedNodeMap/Attr members.
+- HTMLCollection: 3 members.
+- NodeList: 6 members.
+
+Important semantic distinction recorded for teaching: HTMLCollection is live; NodeList is often static, but `childNodes` returns a live NodeList. `querySelectorAll()` returns a static NodeList. The member register records owner context because names such as `item()` and `length` recur across different interfaces.
+
+Sources:
+- https://www.w3schools.com/jsref/dom_obj_event_methods.asp
+- https://www.w3schools.com/jsref/dom_obj_attributes.asp
+- https://www.w3schools.com/jsref/dom_obj_htmlcollection.asp
+- https://www.w3schools.com/jsref/dom_obj_html_nodelist.asp
