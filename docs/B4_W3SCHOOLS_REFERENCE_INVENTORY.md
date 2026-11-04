@@ -196,3 +196,47 @@ The SQL Keywords reference is a reserved-keyword lookup table. The currently vis
 - SQL Keywords reference: https://www.w3schools.com/sql/sql_ref_keywords.asp
 
 Verification note: the CSS family list was confirmed on the current CSS reference index; the at-rule list on the dedicated At-rules page; the JS/DOM groups on the combined reference page; Python groups on the Python reference/navigation; and SQL families on the keyword table. This does not yet verify every individual member page or every catalogue URL in the CSV.
+
+
+## 8. HTML reference taxonomy expansion — batch 2 (2026-11-04)
+
+### 8.1 HTML reference families
+
+The HTML Tags Reference links a set of supporting lookup families. Keep these attached to the HTML reference parent:
+- Element/tag directory: alphabetical listing and category-based listing.
+- Browser support matrix for HTML elements.
+- Element-specific attributes and global attributes.
+- Event-handler attributes.
+- Color names and Canvas reference.
+- Audio and video reference families.
+- Character sets and encoding.
+- Doctypes and URL encoding.
+- Language codes and country codes.
+- HTTP messages and HTTP methods.
+- PX-to-EM conversion and keyboard shortcuts.
+
+### 8.2 Verified supporting HTML reference pages
+
+The following destinations were opened and resolved as W3Schools reference pages during this batch:
+- HTML Attributes: https://www.w3schools.com/tags/ref_attributes.asp
+- HTML Global Attributes: https://www.w3schools.com/tags/ref_standardattributes.asp
+- HTML Event Attributes: https://www.w3schools.com/tags/ref_eventattributes.asp
+- HTML Color Names: https://www.w3schools.com/tags/ref_colornames.asp
+- HTML Canvas Reference: https://www.w3schools.com/tags/ref_canvas.asp
+- HTML Reference by Function: https://www.w3schools.com/tags/ref_byfunc.asp
+
+These are supporting reference pages, not additional top-level items in the 31-row catalogue. The HTML reference landing and its supporting pages were verified to resolve; individual tag/attribute/event rows still need extraction into a normalized CSV register.
+
+### 8.3 Normalization rules for the forthcoming HTML member register
+
+Use separate record types and stable IDs:
+- `html_element`: one row per element; retain semantic category and browser-support source.
+- `html_attribute`: one row per attribute; retain applicable element(s), global/specific classification and value type where stated.
+- `html_event_attribute`: one row per event handler attribute; link its event category and applicable element scope.
+- `html_reference_family`: one row per lookup family (audio, video, charset, doctype, URL encoding, language/country codes, HTTP, keyboard shortcuts, conversion).
+- Avoid treating obsolete/deprecated elements as recommended current practice; preserve status notes when the source marks them.
+- Do not copy explanatory prose or examples; record names, classifications, relationships and source URLs only.
+
+### 8.4 Scope limitation
+
+This batch confirms reference-page destinations and family structure. It does not yet claim a complete element list, attribute list, event list, browser compatibility matrix or full HTML Living Standard coverage.
