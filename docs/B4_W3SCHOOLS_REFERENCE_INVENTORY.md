@@ -793,3 +793,12 @@ Consequences for the existing catalogue and registers:
 - B4 acceptance still requires complete W3Schools taxonomy capture, exact URLs, stable IDs, duplicate/schema checks, and family sign-offs.
 
 The previously recorded 31-entry catalogue, mixed-source member totals, and 29-gate denominators must therefore be treated as **provisional pending W3Schools-only reconciliation**. No B4 completion claim is made by this scope correction.
+
+
+## 14. Owner-confirmed W3Schools-only source boundary (2026-11-04)
+
+The project owner has confirmed that **www.w3schools.com is the only reference source for B4**. This rule supersedes earlier wording that suggested standards-body, vendor, MDN, or other external-source comparison.
+
+The existing 31-entry top-level catalogue and mixed-source member registers are provisional, not final denominators. Reconcile the catalogue against the current W3Schools References landing page and include only resources actually presented by W3Schools as references. Every member row must map to a W3Schools page. Rows that cannot be confirmed must be marked `SOURCE_UNCONFIRMED`; rows derived from another site must be marked `SUPPLEMENTAL_OUT_OF_SCOPE` and excluded from all B4 counts.
+
+Do not use WHATWG, W3C, MDN, ECMA, Python.org, database-vendor, or other external material to add or verify B4 members. Preserve W3Schools' own labels and warnings. No B4 completion claim is made by this scope correction.
