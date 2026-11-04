@@ -330,3 +330,9 @@ Source: W3Schools CSS Functions Reference: https://www.w3schools.com/cssref/css_
 Added 79 individual `html_attribute` records to `docs/B4_HTML_REFERENCE_MEMBER_REGISTER.csv`. Each row stores the attribute name and the source table's “Belongs to” element mapping in the scope field. The extraction covers common form, media, image, link, table, list, metadata, object and interactive attributes. Attributes that W3Schools labels as not supported in HTML5 (including `align`, `bgcolor` and `border`) are retained with an explicit legacy note rather than presented as modern authoring guidance.
 
 Source: W3Schools HTML Attribute Reference: https://www.w3schools.com/tags/ref_attributes.asp. The source table lists attribute-to-element applicability; this batch records a working subset of the table, not a claim that every row on the source page has been extracted. Global attributes and event-handler attributes remain separate record types to avoid double counting.
+
+## 19. HTML attribute-reference reconciliation — batch 13 (2026-11-04)
+
+Added the W3Schools-listed `color` attribute as an individual legacy HTML attribute record (HTML-ATTR-080). The source labels it as not supported in HTML5 and recommends CSS instead; it is retained for historical/reference completeness, not as current authoring guidance. Attributes categorized by W3Schools as Global Attributes are represented in the dedicated `html_global_attribute` register rather than duplicated as element-specific rows; reconciliation must still confirm the full source table and any overlaps.
+
+Source: W3Schools HTML Attribute Reference: https://www.w3schools.com/tags/ref_attributes.asp. The search-visible source table explicitly identifies `color` as unsupported in HTML5. This batch is one verified addition, not completion of the attribute table.
