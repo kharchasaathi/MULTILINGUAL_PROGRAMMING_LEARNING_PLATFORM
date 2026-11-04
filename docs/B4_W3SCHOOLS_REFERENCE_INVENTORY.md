@@ -587,3 +587,20 @@ Sources:
 - https://www.w3schools.com/Jsref/jsref_reference.asp
 
 Coverage note: the W3Schools Error reference also lists non-standard/deprecated browser-specific properties and methods (for example Firefox-only and Microsoft-only fields); these will be captured in a separate legacy/non-standard reconciliation rather than presented as portable ECMAScript API. The Global reference is revised July 2025; compatibility and security notes must accompany these members in teaching content.
+
+
+## 35. JavaScript Iterator, Reflect and Proxy references (2026-11-04)
+
+Added 37 owner-qualified records (JSREF-679 through JSREF-715):
+- Iterator: 11 entries covering the Iterator Helper methods and `Iterator.from()` — drop, every, filter, find, flatMap, forEach, from, map, reduce, some and take.
+- Reflect: 13 static methods — apply, construct, defineProperty, deleteProperty, get, getOwnPropertyDescriptor, getPrototypeOf, has, isExtensible, ownKeys, preventExtensions, set and setPrototypeOf.
+- Proxy handler: 13 handler traps corresponding to the listed internal operations — apply, construct, defineProperty, deleteProperty, get, getOwnPropertyDescriptor, getPrototypeOf, has, isExtensible, ownKeys, preventExtensions, set and setPrototypeOf.
+
+The Proxy trap entries are classified under the handler context rather than as standalone Proxy instance methods. Reflect methods are separately scoped to the Reflect object. Iterator helper methods are distinct from similarly named Array, Map, Set and Typed Array methods.
+
+Sources:
+- https://www.w3schools.com/jsref/jsref_obj_iterator.asp
+- https://www.w3schools.com/js/js_meta_reference.asp
+- https://www.w3schools.com/jsref/jsref_reference.asp
+
+Coverage note: the W3Schools Reflect & Proxy reference identifies the 13 listed traps/methods and internal-method correspondence. The complete ECMAScript internal operation list and invariants for Proxy traps require a separate specification-level review; this inventory does not claim that the 13-row W3Schools table exhausts every Proxy semantic constraint.
