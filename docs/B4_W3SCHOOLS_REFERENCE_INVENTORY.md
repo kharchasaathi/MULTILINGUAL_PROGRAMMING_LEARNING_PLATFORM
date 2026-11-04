@@ -355,3 +355,13 @@ The live W3Schools HTML Attribute Reference table was checked row-by-row against
 The reconciliation is limited to the current W3Schools reference table and its own categorization; it is not a claim of full WHATWG/MDN standard coverage or browser compatibility validation. Any discrepancy between W3Schools' event-handler table and modern standards is tracked for a later standards comparison.
 
 Source: https://www.w3schools.com/tags/ref_attributes.asp (current page opened and inspected; table lines 431–608).
+
+## 22. JavaScript/DOM member inventory — Document object batch 1 (2026-11-04)
+
+Expanded `docs/B4_JS_DOM_REFERENCE_MEMBER_REGISTER.csv` with 35 Document-object properties and methods (JSREF-038 through JSREF-072). The batch covers focus state, document metadata, node creation/import, collections, document lifecycle, title/URL, and document writing APIs. Legacy or security-sensitive APIs are explicitly noted (including `createEvent()`, `domain`, `open()`, `write()`, and `writeln()`).
+
+The W3Schools JavaScript Reference index groups HTML DOM Document as a reference object; the Document object page supplies the object-specific member list and descriptions. These entries are source-indexed and are not a browser-support compatibility matrix. Member counts are not yet exhaustive for all Document rows; a full source-to-register reconciliation is still required.
+
+Sources:
+- https://www.w3schools.com/jsref/default.asp
+- https://www.w3schools.com/jsref/dom_obj_document.asp
