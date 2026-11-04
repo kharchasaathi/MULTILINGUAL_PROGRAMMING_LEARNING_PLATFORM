@@ -63,13 +63,13 @@ The authoritative module inventory is in `D3_BACKEND_MODULE_MATRIX.csv`. Initial
 | Curriculum & Course | curriculum catalogue, levels, modules, prerequisites and published course structure | authoring approval workflow |
 | Content & Localization | lesson versions, locale variants, glossary/visual references and content retrieval | AI provider execution or reviewer authority |
 | Authoring & Review | draft submission, review assignments, C14/C15 gates, immutable release workflow | bypassing publisher approval |
-| Assessment | question/item definitions, attempts, answer evaluation and scoring policies | learner code execution |
-| Learning Progress | enrolment/progress events, completion and achievement calculations | client-side authoritative progress |
+| Assessment | question/item definitions, attempts, answer evaluation and scoring policies | learner code execution or progress projection ownership |
+| Projects | project briefs, learner submissions, milestone and rubric evidence | assessment scoring or progress projection ownership |\n| Learning Progress | enrolment/progress evidence and projections, completion and achievement calculations | client-side authoritative progress or source assessment/project evidence |
 | AI Orchestration | task policy, prompt assembly, provider-neutral generation/validation workflow, usage budgets | final content approval/publication |
 | Playground Gateway | editor-session and execution-request orchestration, policy checks, safe result mapping | running code inside API process |
 | Asset & Media | metadata, upload authorization, object-storage adapter seam | public access to private assets |
 | Notification | notification intent, templates and provider adapter seam | authentication or business-state authority |
-| Entitlement & Billing boundary | plan/entitlement checks and future payment adapter seam | payment-provider selection or client-trusted entitlements |
+| Payment & Billing | orders, payment/refund/subscription state, provider webhook verification and reconciliation | effective entitlement decisions or client-trusted payment state |\n| Entitlement | effective server-side access grants/revocations derived from verified payment facts and approved free/admin policy | raw payment credentials or payment-provider state authority |
 | Audit & Compliance | append-only security/business audit records and access policy | unrestricted logging of payloads/secrets |
 
 Modules may be split into smaller packages when implementation evidence requires it; do not create empty NestJS modules solely to mirror this planning table.
@@ -92,7 +92,7 @@ Dependency direction:
 - Controllers depend on application use cases, not repositories.
 - Cross-module calls use exported application interfaces/facades; never reach into another module's tables or private repositories.
 - Shared kernel stays deliberately small (IDs, clock abstraction, error primitives, locale IDs). Avoid a catch-all common module.
-- Circular module dependencies are prohibited. If two modules need mutual coordination, introduce a narrow orchestration owner or event contract.
+- Circular module dependencies are prohibited. Assessment and Project publish versioned evidence facts through D13 outbox/event contracts; Progress consumes those facts and must not be a compile-time dependency of Assessment or Project. Progress may depend on the validated event contract, not source repositories. Payment publishes verified financial facts; Entitlement consumes them and owns access grants. If two modules need mutual coordination, introduce a narrow orchestration owner or event contract.
 
 ## 6. Request lifecycle
 
