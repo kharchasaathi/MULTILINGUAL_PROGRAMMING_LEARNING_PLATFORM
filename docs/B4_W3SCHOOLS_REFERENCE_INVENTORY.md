@@ -258,3 +258,14 @@ Expanded `docs/B4_HTML_REFERENCE_MEMBER_REGISTER.csv` with 122 individual `html_
 The source explicitly labels legacy entries including `acronym`, `applet`, `basefont`, `big`, `center`, `dir`, `font`, `frame`, `frameset`, `noframes`, `strike` and `tt` as not supported in HTML5. These are retained for historical/reference completeness and must be clearly separated from recommended modern HTML in teaching content.
 
 This is the W3Schools index snapshot, not an assertion that it equals the complete current WHATWG HTML Living Standard element set. Next extraction: per-element attributes and global attributes, then one-row-per-event records and classification by semantic category.
+
+
+## 11. HTML global attributes and event handlers — batch 5 (2026-11-04)
+
+Expanded `docs/B4_HTML_REFERENCE_MEMBER_REGISTER.csv` with:
+- 18 individual global-attribute records from the W3Schools global attributes table.
+- 71 individual event-handler records across window, form/focus, keyboard, mouse, drag/scroll, clipboard and media groups.
+
+The W3Schools global-attribute table includes `accesskey`, `class`, `contenteditable`, `data-*`, `dir`, `draggable`, `enterkeyhint`, `hidden`, `id`, `inert`, `inputmode`, `lang`, `popover`, `spellcheck`, `style`, `tabindex`, `title` and `translate`. This is a source-specific snapshot. The WHATWG HTML Standard currently exposes additional global attributes (for example `autocapitalize`, `autofocus`, `nonce`, microdata attributes and `writingsuggestions`); the platform must keep W3Schools coverage and modern standards coverage distinguishable rather than silently mixing them.
+
+The event handler names were normalized one per row from the W3Schools event reference. Applicability and status are not inferred from the event name alone: deprecated/obsolete items and event scope require a later standards/browser audit. The current register has not yet completed element-specific attribute rows or attribute-to-element relationships.
