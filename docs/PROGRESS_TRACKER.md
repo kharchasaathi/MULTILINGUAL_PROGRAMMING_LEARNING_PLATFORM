@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: C — Teaching & Content Engine
-- Current task: C2 — Define Telugu-native teaching rules
-- Next action: Define Telugu-native teaching rules while preserving the shared C1 lesson structure.
+- Current task: C3 — Define English teaching rules
+- Next action: Define English teaching rules while preserving the shared C1 lesson structure.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -197,7 +197,7 @@ W3Schools remains the exclusive curriculum scope/source reference. Original inst
 | Task | Status | Evidence |
 |---|---|---|
 | C1 Lesson structure | Complete | `docs/C1_STANDARD_LESSON_STRUCTURE.md`; reusable authoring template: `docs/templates/LESSON_TEMPLATE.md`. |
-| C2 Telugu-native teaching rules | Not started | |
+| C2 Telugu-native teaching rules | Complete | Telugu language standard, teaching voice, technical terminology policy, code fidelity, examples, learner instructions, review and quality checklist in `docs/C2_TELUGU_NATIVE_TEACHING_RULES.md`. |
 | C3 English teaching rules | Not started | |
 | C4 Malayalam teaching rules | Not started | |
 | C5 Kannada teaching rules | Not started | |
@@ -211,3 +211,15 @@ W3Schools remains the exclusive curriculum scope/source reference. Original inst
 | C13 Mini-projects | Not started | |
 | C14 Lesson quality evaluation | Not started | |
 | C15 Content review and approval | Not started | |
+
+
+## C2 closure (2026-11-05) — Telugu-native teaching rules
+
+Artifact committed on `docs/project-foundation`:
+- `docs/C2_TELUGU_NATIVE_TEACHING_RULES.md`
+
+C2 defines standard Telugu prose, learner address and teaching voice, first-use technical term explanations, canonical English/code-token preservation, original code-example rules, familiar neutral example contexts, Telugu learner-facing lesson headings, task/question/hint/feedback wording, spelling/typography checks, six-language parity and Telugu-specific publication review. It specializes C1 without changing approved learning outcomes or W3Schools-only curriculum scope.
+
+The task is complete at teaching-rule specification scope. No Telugu lesson has been authored, translated, technically executed, reviewed or published by this task. A separate Telugu lesson-template file was not created; the C1 reusable template remains the authoring base and the Telugu headings/rules are specified in the C2 document.
+
+Next task: C3 — Define English teaching rules.
