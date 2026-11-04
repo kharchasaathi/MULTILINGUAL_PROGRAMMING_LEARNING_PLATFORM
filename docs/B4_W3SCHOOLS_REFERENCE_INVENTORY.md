@@ -567,3 +567,23 @@ Sources:
 - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt
 
 Coverage limitation: this batch captures the member lists visible in the W3Schools reference index, not the full grammar of RegExp patterns/modifiers. Pattern tokens, character classes, assertions, quantifiers and flags need a separate syntax inventory (they are reference topics, not RegExp object members).
+
+
+## 34. JavaScript JSON, Error, Function and Global references (2026-11-04)
+
+Added 36 owner-qualified records (JSREF-643 through JSREF-678):
+- JSON: 2 static methods — `parse()` and `stringify()`.
+- Error: 5 core members — constructor, `cause`, `name`, `message`, and `Error.isError()`; plus 7 built-in error subtype names (AggregateError, EvalError, RangeError, ReferenceError, SyntaxError, TypeError, URIError).
+- Function: 6 members — `apply()`, `bind()`, `call()`, `length`, `name`, `toString()`.
+- Global: 16 global functions/properties — URI encode/decode helpers, legacy escape/unescape, eval, Infinity, isFinite/isNaN, NaN, Number, parseFloat/parseInt, String and undefined.
+
+The JavaScript register now contains 678 data records: 7 reference-family records and 671 API/member records. The Global family is kept separate from Number static methods even where names overlap (for example parseFloat and isFinite). The global `eval()` entry is explicitly flagged as dangerous with untrusted input; `escape()` and `unescape()` are marked deprecated legacy APIs. Error subtype names are classified as subtype identifiers, not instance methods.
+
+Sources:
+- https://www.w3schools.com/jsref/jsref_obj_json.asp
+- https://www.w3schools.com/jsref/jsref_obj_error.asp
+- https://www.w3schools.com/JS/js_function_reference.asp
+- https://www.w3schools.com/jsref/jsref_obj_global.asp
+- https://www.w3schools.com/Jsref/jsref_reference.asp
+
+Coverage note: the W3Schools Error reference also lists non-standard/deprecated browser-specific properties and methods (for example Firefox-only and Microsoft-only fields); these will be captured in a separate legacy/non-standard reconciliation rather than presented as portable ECMAScript API. The Global reference is revised July 2025; compatibility and security notes must accompany these members in teaching content.
