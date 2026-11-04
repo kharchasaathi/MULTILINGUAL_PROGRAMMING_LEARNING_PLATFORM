@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: C — Teaching & Content Engine
-- Current task: C8 — Design AI Localization Engine
-- Next action: Design the AI Localization Engine while preserving native-language rules and the shared C1 lesson contract.
+- Current task: C9 — Define technical terminology glossary
+- Next action: Define the canonical technical terminology glossary and six-locale approval/versioning rules.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -203,7 +203,7 @@ W3Schools remains the exclusive curriculum scope/source reference. Original inst
 | C5 Kannada teaching rules | Complete | Kannada language standard, teaching voice, terminology, code fidelity, examples, learner instructions, typography, accessibility, parity and review checklist in `docs/C5_KANNADA_NATIVE_TEACHING_RULES.md`. |
 | C6 Tamil teaching rules | Complete | Tamil language standard, teaching voice, terminology, code fidelity, examples, learner instructions, typography, accessibility, parity and review checklist in `docs/C6_TAMIL_NATIVE_TEACHING_RULES.md`. |
 | C7 Hindi teaching rules | Complete | Hindi language standard, teaching voice, terminology, code fidelity, examples, learner instructions, typography, accessibility, parity and review checklist in `docs/C7_HINDI_NATIVE_TEACHING_RULES.md`. |
-| C8 AI Localization Engine | Not started | |
+| C8 AI Localization Engine | Complete | `docs/C8_AI_LOCALIZATION_ENGINE_DESIGN.md` — architecture, contracts, validation, security, review, versioning and test plan. |
 | C9 Technical terminology glossary | Not started | |
 | C10 Diagrams and visual teaching | Not started | |
 | C11 Code explanation format | Not started | |
@@ -283,3 +283,14 @@ C7 defines contemporary Hindi writing standards, consistent respectful learner a
 C7 is complete at Hindi teaching-rule specification scope. No Hindi lesson has been authored, translated, executed, reviewed or published by this task. W3Schools remains the exclusive curriculum topic/source reference; original instructional content is required.
 
 Next task: C8 — Design AI Localization Engine.
+
+
+## C8 closure (2026-11-05) — AI Localization Engine design
+
+Artifact: `docs/C8_AI_LOCALIZATION_ENGINE_DESIGN.md`.
+
+C8 defines logical components, request/output contracts, six-locale ruleset mapping, protected code segments, scope and parity validation, prompt-injection and privacy controls, human review, versioning, failure handling, metrics and an 18-case implementation test plan.
+
+Complete at design/specification scope only. No provider, framework or database selected; no production pipeline or model adapter implemented; no lessons generated or published. W3Schools remains the exclusive curriculum reference.
+
+Next task: C9 — Define technical terminology glossary.
