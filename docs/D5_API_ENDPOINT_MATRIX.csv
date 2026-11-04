@@ -14,7 +14,7 @@ lesson_get,GET,/lessons/{lessonId},CONTENT,public,LessonQuery(locale),LessonRepr
 lesson_version_get,GET,/lessons/{lessonId}/versions/{versionId},CONTENT,restricted,none,LessonVersion,401|403|404,No,No,Author/reviewer access only
 learner_progress_list,GET,/learners/me/progress,PROGRESS,authenticated,ProgressListQuery,CursorPage<ProgressRecord>,400|401,No,No,Own learner only
 learner_progress_get,GET,/learners/me/progress/{progressId},PROGRESS,authenticated,none,ProgressRecord,401|403|404,No,No,Ownership enforced
-learner_progress_put,PUT,/learners/me/progress/{progressId},PROGRESS,authenticated,UpdateProgressEvidence,ProgressRecord,400|401|403|409|412|422,Required,If-Match,No arbitrary completion flag
+learner_progress_put,PUT,/learners/me/progress/{progressId},PROGRESS,authenticated,AppendProgressEvidence,ProgressEvidenceReceipt,400|401|403|409|412|422,Required,If-Match,Append-only evidence command only; cannot patch projection/completion/mastery or accept client evaluator facts
 assessment_get,GET,/assessments/{assessmentId},ASSESS,authenticated,AssessmentDelivery,401|403|404,No,No,No answer keys
 assessment_attempt_create,POST,/assessments/{assessmentId}/attempts,ASSESS,authenticated,CreateAttempt,AssessmentAttempt,401|403|404|409,Required,No,Creates version-bound attempt
 assessment_attempt_get,GET,/assessment-attempts/{attemptId},ASSESS,authenticated,AssessmentAttempt,401|403|404,No,No,Owner only
@@ -38,3 +38,12 @@ asset_upload_confirm,POST,/assets/{assetId}/confirm,ASSET,owner,ConfirmAssetUplo
 asset_download_authorize,POST,/assets/{assetId}/download-authorizations,ASSET,owner_or_public_policy,CreateDownloadAuthorization,DownloadAuthorization,401|403|404|429,Required,No,No arbitrary object-key access
 playground_execution_create,POST,/playground/executions,PLAYGROUND,disabled_until_security_approval,CreateExecutionRequest,ExecutionRequestReceipt,403|404|409|422|429,Required,No,Must remain disabled until isolated sandbox gates approved
 playground_execution_get,GET,/playground/executions/{executionId},PLAYGROUND,disabled_until_security_approval,none,ExecutionStatus,403|404,No,No,No execution inside API process
+
+billing_plans_list,GET,/billing/plans,PAYMENT,public,BillingPlanQuery,BillingPlanList,400,No,No,Published plan metadata only; price is versioned
+billing_plan_prices_list,GET,/billing/plans/{planId}/prices,PAYMENT,public,BillingPriceListQuery,BillingPriceList,400|404,No,No,Active eligible price versions only
+billing_order_create,POST,/orders,PAYMENT,authenticated,CreateOrder,OrderReceipt,400|401|403|409|422,Required,No,Server-owned plan price currency and terms snapshot
+billing_order_get,GET,/orders/{orderId},PAYMENT,owner,none,OrderStatus,401|403|404,No,No,Owner-scoped; payment outcome is server-authoritative
+billing_checkout_create,POST,/orders/{orderId}/checkout,PAYMENT,owner,CreateHostedCheckout,CheckoutReceipt,401|403|404|409|422,Required,If-Match,Provider-hosted checkout; unknown outcome reconciled before retry
+entitlements_me_get,GET,/me/entitlements,ENTITLE,authenticated,none,EffectiveEntitlementList,401|403,No,No,Server-derived effective access; never client-set
+refund_request_create,POST,/refund-requests,PAYMENT,owner,CreateRefundRequest,RefundRequestReceipt,400|401|403|409|422,Required,If-Match,Policy and eligibility rechecked server-side; request is not provider refund success
+refund_request_get,GET,/refund-requests/{refundRequestId},PAYMENT,owner,none,RefundRequestStatus,401|403|404,No,No,Owner-scoped; verified provider outcome only
