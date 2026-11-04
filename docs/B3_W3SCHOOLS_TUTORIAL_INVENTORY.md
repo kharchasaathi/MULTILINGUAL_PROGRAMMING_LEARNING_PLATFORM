@@ -809,3 +809,62 @@ The “60” number previously recorded refers to the four category blocks from 
 - Capture complete chapter/module trees for all tutorial courses.
 - Resolve legacy entries (ChatGPT-3.5, ChatGPT-4, Google Bard) as active, renamed, or retired based on destination evidence.
 - Mark complete only after all in-scope entries have a verified URL and a fully captured source navigation tree, or an explicit documented exclusion.
+
+
+## 17. Source-grounded navigation audit — batch 8
+
+Checked official pages on 2026-11-04. This section supersedes any earlier provisional outline where the live page exposes a more specific menu.
+
+### 17.1 PHP — detailed navigation captured
+Source: https://www.w3schools.com/php/
+- Introduction: PHP Intro, Install, Syntax, Comments, multiline comments
+- Variables: variables, scope
+- Output and types: Echo/Print, Data Types
+- Strings: string functions, modify, concatenate, slice, escape characters
+- Numbers, casting, math, constants, magic constants, operators
+- Conditions: If, If operators, If/Else, shorthand if, nested if, Switch, Match
+- Loops: while, do-while, for, foreach, break, continue
+- Functions
+- Arrays: indexed, associative, create, access, update, add, remove, sorting, multidimensional, array functions
+- Superglobals: $GLOBALS, $_SERVER, $_REQUEST, $_POST, $_GET
+- RegEx and RegEx functions
+- Forms: form handling, validation, required fields, URL/e-mail, complete form
+- Advanced: date/time, include, file handling, open/read, create/write, upload, cookies, sessions, filters, advanced filters, callbacks, JSON, exceptions
+- OOP: classes/objects, constructor/destructor, access modifiers, inheritance, constants, abstract classes, interfaces, traits, static methods/properties, namespaces, iterables
+- MySQL database: connect, create DB/table, insert, last ID, multiple insert, prepared statements, select, where, order, delete, update, limit
+- PHP reference categories: Array, Calendar, Date, Directory, Error, Exception, Filesystem, Filter, FTP, JSON, Keywords, Libxml, Mail, Math, Misc, MySQLi, Network, Output Control, RegEx, SimpleXML, Stream, String, Variable Handling, XML Parser, Zip, Timezones
+
+### 17.2 CSS — verified visible navigation sections
+Source: https://www.w3schools.com/css/
+- Introduction, Syntax, Selectors, Grouping Selectors, Code Challenge
+- How To: external, internal, inline, multiple style sheets
+- Comments, Errors
+- Colors: RGB/RGBA, HEX/HEXA, HSL/HSLA
+- Backgrounds: color, image, repeat, attachment, shorthand
+- Borders: style, width, color, sides, shorthand, rounded borders
+- Margins and margin collapse
+- Flexbox: intro, container, justify-content, align-items, items, responsive
+- Grid: intro, container, tracks, gaps, alignment, items, named grid items, alignment, order, 12-column layout
+- @supports
+- Responsive Web Design: RWD intro
+- Note: this current extracted menu is not a complete CSS property/reference catalogue; CSS reference topics are tracked separately under B4.
+
+### 17.3 HTML & CSS integrated path — source confirms separate sequence
+Source: https://www.w3schools.com/htmlcss/
+- Introduction, Environment Setup, First Web Page, Workflow & Tools
+- Foundations: Essentials, Document Structure, Text Content, Lists & Tables, Links & Navigation, Images & Media, Forms & Validation, Reusable Components
+- Styling Core: Styling Essentials, Selectors & Specificity, Cascade & Inheritance, Typography, Colors & Backgrounds, Box Model
+- Layout: Positioning & Z-Index, Flexbox, CSS Grid, Layout Patterns, Responsive Design, Responsive Components
+- Enhancements: Custom Properties, Calc & Functions, Transitions, Transforms, Animations, Effects & Filters
+- Quality: Accessibility, Design Systems, Performance, Debugging & Testing, Tooling & Automation
+- Practice & Exams: Landing Page Project, Exercises, Quiz
+
+### 17.4 JavaScript and Python extraction limitation
+- JavaScript page checked: https://www.w3schools.com/js/ . The page confirms a tutorial and points to examples, exercises, quiz and reference, but the extracted page view did not expose the left-side chapter tree. Keep the detailed tree as pending until that navigation is fully captured.
+- Python page checked: https://www.w3schools.com/python/ . The extracted page view exposed the early chapters (Intro, Get Started, Syntax, Statements, Output, Comments, Variables and subtopics, Data Types, Numbers, Casting, Strings and string subtopics) and links to File Handling and Database Handling. The remaining menu tree requires a dedicated extraction pass.
+
+### 17.5 Reference boundary
+The CSS page explicitly separates CSS Reference from CSS Tutorial and lists reference collections (properties, browser support, selectors, combinators, pseudo-classes, pseudo-elements, at-rules, functions, animatable, web-safe fonts, units, colors, default values, entities, aural). These are B4 reference inventory items, not B3 tutorial chapters.
+
+## 18. Quality correction to earlier B3 drafts
+Earlier B3 batches included some first-pass topic outlines inferred from general curriculum knowledge where the live navigation extraction was incomplete. Those outlines are useful as coverage prompts only, not verified W3Schools source trees. The status field in the CSV must remain “first-pass”, “queued”, or “pending” until the exact source navigation has been inspected. No draft outline is to be treated as an authoritative source transcript.
