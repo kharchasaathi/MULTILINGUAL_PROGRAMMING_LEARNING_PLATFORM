@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: C — Teaching & Content Engine
-- Current task: C14 — Define lesson quality evaluation
-- Next action: Define measurable lesson quality dimensions, scoring/rubric, evaluation workflow, six-locale parity checks, reviewer roles and quality gates.
+- Current task: C15 — Define content review and approval
+- Next action: Define end-to-end content review roles, approval authority, review queues, revision handling, publication controls, audit trail and withdrawal/rollback policy.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -332,3 +332,10 @@ Next task: C11 — Define code explanation format.
 - **Evidence:** `docs/C13_MINI_PROJECTS_SPECIFICATION.md` defines B7–B10 project progression, project types, brief metadata, learner-facing brief structure, milestones, submission/version contract, analytic rubric, hints, six-locale parity, AI/human review, lifecycle, accessibility, privacy/security and 22 future test cases.
 - **Catalog:** `docs/C13_MINI_PROJECT_CATALOG.csv` contains 20 original seed briefs across Beginner, Intermediate, Advanced and Professional pathways. Catalog module IDs were checked against the B7–B10 maps and topic IDs were checked against the B6 master checklist.
 - **Limitations:** Catalog entries remain draft seeds, not fully authored/published project lessons. No starter assets, locale translations/reviews, workspace, submission service, grading service or isolated code runner implemented. Test cases specified but not executed.
+
+
+## C14 — Lesson quality evaluation closure (2026-11-05)
+- **Status:** Complete at evaluation-policy and rubric-contract scope.
+- **Evidence:** `docs/C14_LESSON_QUALITY_EVALUATION_SPECIFICATION.md` defines nine weighted quality dimensions, 0–4 evidence scale, 80/100 approval threshold, independent mandatory gates, reviewer roles, evaluation workflow, evidence contract, defect severity, six-locale parity, AI limitations, regression policy and 26 future test cases.
+- **Rubric:** `docs/C14_LESSON_QUALITY_RUBRIC.csv` records the nine dimensions and weights (total 100%).
+- **Limitations:** No evaluation service, reviewer dashboard, automated validators, audit store or publication control implemented. No lesson corpus scored and no tests executed. The rubric threshold/weights are proposed policy pending validation against real lesson evidence.
