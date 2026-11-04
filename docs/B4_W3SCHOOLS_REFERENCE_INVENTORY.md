@@ -167,3 +167,17 @@ These counts are the current contents of the cleaned working CSV files, not a cl
 - Removed SQL advanced/dialect rows sourced from MySQL/vendor/other non-W3Schools websites.
 
 B4 remains in progress because the remaining W3Schools reference families and their member taxonomies still need to be brought into the registers. No B4 completion claim is made here.
+
+
+## 14. Final source-boundary instruction from project owner (2026-11-04)
+
+**Only www.w3schools.com is allowed as a curriculum/reference source.** This instruction overrides all older sections in this document that mention external standards, MDN, Python.org, vendor manuals, or other websites.
+
+- Follow W3Schools' own reference catalogue, tutorial/reference navigation, categories, page names, member names, and groupings.
+- Include only items that W3Schools itself presents. Do not add items because they are standard, popular, common, or documented elsewhere.
+- Do not perform a second-site verification or external comparison. The W3Schools page itself is the source.
+- Any non-W3Schools material previously added is removed from the active B4 registers or excluded from B4. It must not affect totals or acceptance decisions.
+- The active W3Schools catalogue currently has 31 reference entries as a working baseline; preserve parent/sub-reference relationships and do not double-count a linked subsection as an independent top-level entry.
+- This file's older mixed-source audit notes are historical context only and are not permission to use external sources.
+
+The cleaned working register counts are recorded in `docs/PROGRESS_TRACKER.md`. These counts are not a declaration of full B4 coverage; remaining W3Schools reference families still need to be inventoried. B5 remains blocked until B4 is accepted.
