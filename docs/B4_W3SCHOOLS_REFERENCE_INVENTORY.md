@@ -397,3 +397,23 @@ Sources:
 - https://www.w3schools.com/jsref/dom_obj_attributes.asp
 - https://www.w3schools.com/jsref/dom_obj_htmlcollection.asp
 - https://www.w3schools.com/jsref/dom_obj_html_nodelist.asp
+
+## 26. JavaScript BOM member inventory — Window, History, Location, Navigator and Screen (2026-11-04)
+
+Added 56 BOM members (JSREF-175 through JSREF-230) across five owner contexts:
+- Window: 30 properties/methods
+- History: 4 members
+- Location: 12 members
+- Navigator: 4 members
+- Screen: 6 members
+
+The entries preserve owner context where common names recur (for example `length`, `name`, `width`, `assign()`/navigation operations). Notes flag deprecated Window status properties, privacy/permission constraints for geolocation, and the limitations of using user-agent strings for feature detection. History `pushState()` and `replaceState()` are recorded as same-origin session-history operations that do not themselves load a new document. Screen and outer-window dimensions are reference members, not reliable indicators of layout viewport dimensions.
+
+Sources:
+- https://www.w3schools.com/jsref/obj_window.asp
+- https://www.w3schools.com/js/js_window_history.asp
+- https://www.w3schools.com/jsref/prop_win_location.asp
+- https://www.w3schools.com/jsref/prop_win_navigator.asp
+- https://www.w3schools.com/jsref/obj_screen.asp
+
+This is a member inventory batch, not a browser compatibility test or exhaustive modern Web API inventory.
