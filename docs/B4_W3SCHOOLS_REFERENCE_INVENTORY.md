@@ -756,3 +756,24 @@ Sources:
 - https://www.w3schools.com/sql/default.asp
 
 Dialect notes: SQL is not a single fully uniform implementation. LIMIT, TOP, ROWNUM, FETCH, concatenation operators, date/time functions, data types and stored-program syntax differ among MySQL, SQL Server, MS Access, PostgreSQL, Oracle and other systems. MySQL-specific functions are explicitly labelled MySQL and must not be taught as universally portable SQL. FIRST()/LAST() are included only as legacy/reference entries and need dialect alternatives. Data type sizes/ranges and behavior require per-DBMS verification. This is an initial core inventory, not exhaustive SQL coverage; transaction control, window functions, CTE details, procedural dialects, JSON functions, spatial types/functions, full SQL Server and Access function catalogs, and PostgreSQL/Oracle-specific references remain to be inventoried.
+
+
+## 43. SQL advanced and dialect-specific reference inventory (2026-11-04)
+
+Created `docs/B4_SQL_ADVANCED_DIALECT_REFERENCE_REGISTER.csv` with 216 records (SQLADV-001 through SQLADV-216):
+- Transaction commands and characteristics: BEGIN/START TRANSACTION, COMMIT, ROLLBACK, SAVEPOINT, isolation levels and related controls.
+- Window functions: ROW_NUMBER, RANK, DENSE_RANK, PERCENT_RANK, CUME_DIST, NTILE, LAG, LEAD, FIRST_VALUE, LAST_VALUE and NTH_VALUE.
+- Window specification/frame syntax: OVER, PARTITION BY, window ORDER BY, ROWS/RANGE/GROUPS, frame bounds and exclusions, FILTER, WINDOW and QUALIFY.
+- CTE syntax and concepts: WITH, WITH RECURSIVE, multiple/chained CTEs, anchor/recursive members, termination, SEARCH/CYCLE and materialization hints.
+- SQL Server/T-SQL string, numeric, date/time and advanced functions.
+- MS Access string, numeric, date/time and other expression functions.
+
+References:
+- W3Schools SQL Server functions: https://www.w3schools.com/sql/sql_ref_sqlserver.asp
+- W3Schools MS Access functions: https://www.w3schools.com/sql/sql_ref_msaccess.asp
+- MySQL 8.4 window functions: https://dev.mysql.com/doc/refman/8.4/en/window-functions.html
+- MySQL 8.4 CTEs: https://dev.mysql.com/doc/refman/8.4/en/with.html
+- SQL Server CTE documentation: https://learn.microsoft.com/en-us/sql/t-sql/queries/with-common-table-expression-transact-sql
+- Transaction/savepoint overview: https://www.w3schools.in/sql/savepoints
+
+Important caveats: this is a curated reference inventory, not a complete grammar or exhaustive API catalog. Window frame features, QUALIFY, FILTER, SEARCH/CYCLE, CTE materialization hints, recursive syntax, transaction control and isolation semantics vary across database engines and versions. SQL Server and MS Access functions are explicitly dialect-scoped; Access functions may be VBA/expression functions rather than portable SQL functions. Validate behavior against the target engine/version before lessons or examples are approved.
