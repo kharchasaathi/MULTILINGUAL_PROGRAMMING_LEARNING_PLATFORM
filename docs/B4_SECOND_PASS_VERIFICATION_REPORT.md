@@ -88,3 +88,7 @@ The initial second-pass snapshot above is retained as historical evidence. Subse
 - **Second-pass re-fetch:** CSS member register: 554 rows, zero duplicate IDs; CSS at-rule source audit: 22 rows, zero duplicate IDs; CSS descriptor audit: 32 rows, zero duplicate IDs; Python gap candidates: 91 rows, zero duplicate IDs; acceptance matrix: 29 rows, zero duplicate IDs. Python standard-library module register: 258 rows, no placeholder row, zero duplicate IDs.
 
 These additions increase inventory coverage but do not satisfy the outstanding semantic, version, source-URL, browser/runtime, cross-file provenance, test and family sign-off gates. B4 remains NOT ACCEPTED; B5 remains blocked; no merge to `main`.
+
+## 7. Latest ID integrity pass (2026-11-04)
+
+Re-fetched and parsed nine member registers after the CSS/Python expansions: HTML 373, CSS 554, JavaScript/DOM 906, Python core 171, Python keywords/exceptions/types 184, Python advanced protocols 115, Python standard-library selected members 258, SQL core 348, SQL advanced/dialect 216. All nine had zero duplicate IDs. The numeric suffix scan found no missing suffixes within each register's observed numeric ID range. This check validates ID uniqueness/continuity only; it does not validate semantic completeness, source accuracy or every cross-file reference. B4 remains NOT ACCEPTED; all outstanding acceptance gates listed above remain binding.
