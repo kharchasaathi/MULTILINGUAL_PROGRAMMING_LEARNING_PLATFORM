@@ -24,7 +24,7 @@ Primary sources:
 
 | Register | Count | Meaning |
 |---|---:|---|
-| Programming languages — tutorial scope | 16 | General-purpose, application, scripting, and data-oriented programming languages in current tutorial catalogue |
+| Programming languages — tutorial scope | 13 | General-purpose, application, scripting, and data-oriented programming languages in current tutorial catalogue |
 | Markup/style languages | 4 | HTML, CSS, XML, Sass |
 | Query language | 1 | SQL |
 | Shell/command language | 1 | Bash |
@@ -61,7 +61,7 @@ Counts describe this planning register and its categories, not a claim that W3Sc
 | LANG-19 | Fortran | Scientific/high-performance computing | Extended | Editor/compiler listing; tutorial coverage to verify |
 | LANG-20 | VB.NET | .NET language | Extended | Editor/compiler listing; tutorial coverage to verify |
 
-**Counting note:** The summary count of 16 tutorial-scope languages is a conservative core set (JavaScript, Python, Java, C, C++, C#, PHP, R, Go, Kotlin, Rust, TypeScript, Swift plus the 3 language entries that appear in current tutorial/editor catalogues?); the detailed register contains 20 rows total, of which 13 are explicit core language tutorial subjects and 7 are extended editor candidates. The authoritative per-item classification is the table, not the summary shorthand. The total has been normalized below in the CSV.
+**Counting note:** The 20-row language register contains 13 languages explicitly listed as tutorial subjects in the current W3Schools tutorial/syllabus catalogue and 7 additional languages surfaced in the code-editor/compiler catalogue. Those 7 are extension candidates, not confirmed full tutorial tracks. The detailed table and CSV are the authoritative item-level register.
 
 ## 4. Markup and style languages
 
