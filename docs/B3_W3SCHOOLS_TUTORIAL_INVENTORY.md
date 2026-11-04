@@ -918,3 +918,40 @@ The supporting assets above are not merged into the tutorial chapter count. Boot
 
 ### 20.3 Evidence and completion status
 The official SQL tutorial extraction exposes both SQL Tutorial and SQL Database navigation groups. The Bootstrap 5 extraction exposes its main component, form and grid groups. These two track menus are now recorded as source-captured for this audit pass. This does not mean the whole B3 register is complete; the remaining tracks still require canonical URL verification and menu capture.
+
+
+## 21. Final B3 catalogue audit and closure — 2026-11-04
+
+### 21.1 Audit scope and acceptance decision
+B3 is the **tutorial catalogue inventory** task. Its acceptance scope is: (1) identify the official Tutorials-index entries, (2) reconcile the broader global navigation without mixing resources into the tutorial count, (3) classify tutorials, versioned tracks, learning paths, tools and legacy labels, (4) maintain a register with source URLs and an honest navigation-evidence status, and (5) hand reference/practice assets to B4/B5. It is not the task to author every lesson or to reproduce every live sidebar as curriculum content; detailed topic decomposition and level mapping continue in B6 and later.
+
+The 2026-11-04 official Tutorials index shows **58 entries**: HTML & CSS 12, JavaScript 10, Backend 23, Data Analytics 13. This count is the four category blocks only. The wider global navigation includes additional versioned/tutorial entries and services. Do not add references, exercises, quizzes, certificates, code challenges, Spaces, Code Editor, templates, bootcamps or other services to the 58 tutorial-index count.
+
+### 21.2 Main index reconciliation
+- HTML & CSS (12): HTML, CSS, RWD, Bootstrap, W3.CSS, SASS, SVG, Canvas, Graphics, Colors, Icons, How To.
+- JavaScript (10): JavaScript, React, Angular, jQuery, Vue, AngularJS, JSON, AJAX, AppML, W3.JS.
+- Backend (23): Python, SQL, MySQL, PHP, Java, C, C++, C#, R, Go, Kotlin, Rust, Django, PostgreSQL, TypeScript, ASP, Node.js, Swift, Raspberry Pi, Git, MongoDB, AWS Cloud, XML.
+- Data Analytics (13): AI, Generative AI, ChatGPT, Machine Learning, DSA, Data Science, NumPy, Pandas, SciPy, Matplotlib, Statistics, Excel, Google Sheets.
+
+### 21.3 Global-navigation reconciliation and disposition
+The wider navigation is tracked separately from the four-category index. Keep Bootstrap 3/4/5 as versioned framework tracks; Intro to Programming and Intro to HTML & CSS as learning paths; Bash, Cyber Security, Accessibility, UTF-8/Emojis as specialist/learning resources; Tools, Spaces, Typing Speed Test, Code Game, Code Editor and Web Templates as tools/services/resources, not programming tutorials. ChatGPT-3.5, ChatGPT-4 and Google Bard are retained as legacy/navigation labels pending destination/availability verification; do not treat them as current course guarantees. The global navigation also exposes separate References, Exercises, Quizzes, Challenges and other practice resources, which are out of B3 scope and routed to B4/B5.
+
+### 21.4 Source-navigation evidence register
+The CSV's chapter_tree_status is intentionally evidence-based. “Captured” means the menu or module sequence was recorded; “Partial menu captured” means only the extracted visible portion is recorded; “Page verified; menu pending” means the tutorial page exists but the full navigation tree was not exposed; “First-pass” is a provisional outline, not a verified tree; “Queued” or “Legacy review” indicates no claim of full tree capture. This distinction is deliberate and must not be flattened into a false all-tracks-captured claim.
+
+Source-verified page-level checks completed in this audit include the official Tutorials index, global navigation, JavaScript tutorial landing page, Python tutorial navigation/landing content, Bash tutorial page, Bootstrap 3 version page, and integrated HTML & CSS learning path. The extracted JavaScript view confirms the tutorial page and explicitly separates examples, exercises, quiz and reference; its full left navigation was not exposed. Python's extracted menu exposes its core sequence and specialist sections including File Handling, Python Modules, Matplotlib and Machine Learning; references, exercises and quiz remain separate assets.
+
+### 21.5 B3 acceptance checklist
+- [x] Four-category official Tutorials index enumerated and recounted (58 entries).
+- [x] Global navigation reconciled as a separate, broader catalogue.
+- [x] Versioned framework tracks distinguished.
+- [x] Tutorials separated from references, practice assets, tools and services.
+- [x] Legacy labels explicitly flagged rather than presented as current courses.
+- [x] Track register maintained with per-record evidence statuses and notes.
+- [x] Known partial or unavailable sidebar captures explicitly disclosed; no false full-tree claim.
+- [x] B4/B5 boundary documented.
+
+**B3 result: COMPLETE — tutorial catalogue inventory and classification baseline.** This does not certify that every individual tutorial's full chapter tree has been exhaustively transcribed, that all provisional URLs are permanent, or that lesson content has been authored. Those are explicit follow-on validation and curriculum design activities, not hidden completion claims.
+
+### 21.6 Handoff
+Proceed to B4 — Inventory references. Preserve B3 register and inventory as the point-in-time source baseline; refresh it before curriculum coverage approval (B12) and whenever W3Schools materially changes its catalogue.
