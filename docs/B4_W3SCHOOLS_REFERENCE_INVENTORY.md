@@ -347,3 +347,11 @@ Added three element-specific attribute rows from the W3Schools HTML Attribute Re
 These were absent from the prior element-specific subset. The source also lists global attributes in the same master table; those continue to be classified in the separate global-attribute register and must be reconciled as a distinct category. This batch is a targeted gap-fill, not final source-table sign-off.
 
 Source: W3Schools HTML Attribute Reference: https://www.w3schools.com/tags/ref_attributes.asp.
+
+## 21. HTML Attribute Reference source reconciliation (2026-11-04)
+
+The live W3Schools HTML Attribute Reference table was checked row-by-row against the member register. Its non-event, element-specific entries reconcile to 83 unique attribute names in `html_attribute`; the 18 Global Attributes are separately represented as `html_global_attribute`; event-handler rows are separately represented as `html_event_attribute` (71 records). This yields 172 attribute/event records across the three categories, with no intentional cross-category duplication. The HTML member register currently has 308 total records and 308 unique IDs. The legacy-only `align`, `bgcolor`, `border`, and `color` records remain explicitly marked as unsupported in HTML5 rather than recommended for modern use.
+
+The reconciliation is limited to the current W3Schools reference table and its own categorization; it is not a claim of full WHATWG/MDN standard coverage or browser compatibility validation. Any discrepancy between W3Schools' event-handler table and modern standards is tracked for a later standards comparison.
+
+Source: https://www.w3schools.com/tags/ref_attributes.asp (current page opened and inspected; table lines 431–608).
