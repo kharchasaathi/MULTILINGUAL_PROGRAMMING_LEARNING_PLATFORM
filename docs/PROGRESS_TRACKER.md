@@ -3,8 +3,8 @@ Last updated: 2026-11-04
 
 ## Current execution position
 - Current stage: B — Complete Curriculum Planning
-- Current task: B2 — Inventory all relevant languages
-- Next action: Normalize all relevant languages, technologies, frameworks, libraries, runtimes, databases, tools, and platforms.
+- Current task: B3 — Inventory tutorials
+- Next action: Enumerate the current official tutorial index and collect chapter/section trees and subtopics into a structured register.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -22,8 +22,8 @@ Last updated: 2026-11-04
 | Task | Status | Notes |
 |---|---|---|
 | B1 Categories | Complete | 15 curriculum families; 72 catalogue entries; detailed scope and limitations documented in docs/B1_W3SCHOOLS_CURRICULUM_INVENTORY.md |
-| B2 Languages and technologies | In progress | Next task; normalize types and relevance |
-| B3 Tutorials | Not started | |
+| B2 Languages and technologies | Complete | 13 tutorial-scope programming languages, 7 editor-only extension candidates, plus separate markup/query/shell/data-format and technology registers; see docs/B2_PROGRAMMING_LANGUAGE_TECHNOLOGY_INVENTORY.md |
+| B3 Tutorials | In progress | Next task; enumerate chapter and topic trees |
 | B4 References | Not started | |
 | B5 Examples and exercises | Not started | Map topics; create original teaching material |
 | B6 Master topic checklist | Not started | |
