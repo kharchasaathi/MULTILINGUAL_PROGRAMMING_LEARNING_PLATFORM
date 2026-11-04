@@ -269,3 +269,15 @@ Expanded `docs/B4_HTML_REFERENCE_MEMBER_REGISTER.csv` with:
 The W3Schools global-attribute table includes `accesskey`, `class`, `contenteditable`, `data-*`, `dir`, `draggable`, `enterkeyhint`, `hidden`, `id`, `inert`, `inputmode`, `lang`, `popover`, `spellcheck`, `style`, `tabindex`, `title` and `translate`. This is a source-specific snapshot. The WHATWG HTML Standard currently exposes additional global attributes (for example `autocapitalize`, `autofocus`, `nonce`, microdata attributes and `writingsuggestions`); the platform must keep W3Schools coverage and modern standards coverage distinguishable rather than silently mixing them.
 
 The event handler names were normalized one per row from the W3Schools event reference. Applicability and status are not inferred from the event name alone: deprecated/obsolete items and event scope require a later standards/browser audit. The current register has not yet completed element-specific attribute rows or attribute-to-element relationships.
+
+
+## 12. CSS member-register foundation — batch 6 (2026-11-04)
+
+Created `docs/B4_CSS_REFERENCE_MEMBER_REGISTER.csv` with 36 initial records:
+- 15 reference-family records (properties, browser support, selectors, combinators, pseudo-classes/elements, at-rules, functions, animatable, fonts, units, colors, default values, entities and aural).
+- 6 selector-type records (type, ID, universal, class, attribute and nesting selectors).
+- 15 individual at-rule records, including `@container`, `@layer`, `@media`, `@property`, `@scope` and `@supports`.
+
+The current W3Schools CSS index confirms the reference families and the CSS selector page confirms the selector categories. The dedicated at-rules page lists the 15 at-rules recorded here. The CSS properties index itself contains a much larger alphabetical list; individual property extraction is not yet complete.
+
+Important data-quality note: only the CSS Properties, CSS Selectors and CSS At-rules destinations have been confirmed in this batch. Other CSS family URLs are provisional candidates and explicitly marked pending verification in the CSV. Do not use pending URLs as authoritative navigation links until checked.
