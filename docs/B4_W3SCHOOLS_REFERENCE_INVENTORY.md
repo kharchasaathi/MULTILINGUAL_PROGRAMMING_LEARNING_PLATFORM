@@ -707,3 +707,30 @@ Sources:
 - https://docs.python.org/3/library/functools.html
 
 Teaching notes: distinguish iterable from iterator, synchronous from asynchronous protocols, generator return/StopIteration behavior, and decorator definition-time application. Context managers must explain exception suppression semantics of `__exit__`. Special methods are usually invoked implicitly by syntax/operators; avoid presenting every dunder as an ordinary public method. This is a selected protocol inventory, not an exhaustive list of the Python Data Model. Version-specific additions and implementation-specific attributes require a pinned Python-version audit.
+
+
+## 41. Python Standard Library module inventory — core batch (2026-11-04)
+
+Created `docs/B4_PYTHON_STANDARD_LIBRARY_MODULE_REGISTER.csv` with 259 records (PYMOD-001 through PYMOD-259):
+- 12 module records: math, cmath, random, datetime, json, re, os, sys, pathlib, collections, itertools and functools.
+- 247 selected public member/type/constant records across those modules.
+
+The member selection covers mathematical functions/constants; pseudo-random generation and state; date/time classes and conversion/formatting; JSON encoder/decoder APIs; regular-expression compilation/search/match/substitution; OS environment/filesystem/process interfaces; interpreter state; pathlib path objects and methods; collections containers; itertools iterator factories; and functools decorators/wrappers.
+
+Sources:
+- https://www.w3schools.com/python/python_ref_modules.asp
+- https://docs.python.org/3/library/index.html
+- https://docs.python.org/3/library/math.html
+- https://docs.python.org/3/library/cmath.html
+- https://docs.python.org/3/library/random.html
+- https://docs.python.org/3/library/datetime.html
+- https://docs.python.org/3/library/json.html
+- https://docs.python.org/3/library/re.html
+- https://docs.python.org/3/library/os.html
+- https://docs.python.org/3/library/sys.html
+- https://docs.python.org/3/library/pathlib.html
+- https://docs.python.org/3/library/collections.html
+- https://docs.python.org/3/library/itertools.html
+- https://docs.python.org/3/library/functools.html
+
+Compatibility/security notes: this is a curated member selection, not a complete module API dump. The W3Schools module index is based on Python 3.13, while the official Python docs currently surface later versioned documentation; lesson authoring must pin a supported target runtime and mark newer members (for example itertools.batched and functools.Placeholder) with minimum-version requirements. `random` is not suitable for cryptographic secrets; use `secrets` for security-sensitive tokens. `pickle` is not safe for untrusted data. Filesystem and environment APIs are platform-dependent. JSON and regex examples must cover error handling and escaping.
