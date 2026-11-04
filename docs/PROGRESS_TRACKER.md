@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: C — Teaching & Content Engine
-- Current task: D1 — Select technology stack
-- Next action: Compare candidate technology stacks against documented platform, security, localization, accessibility, operational and cost requirements; record trade-offs before selection.
+- Current task: D2 — Design frontend architecture
+- Next action: Design the frontend architecture around the approved Next.js website/PWA and Expo mobile client, including application boundaries, shared contracts, navigation, localization, accessibility and API interaction.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -355,3 +355,20 @@ Next task: C11 — Define code explanation format.
 - Queue targets are provisional and require staffing/capacity validation. C14's proposed score threshold requires calibration on representative lessons.
 - Production schemas, authorization, workflow automation, audit storage, notifications and publication controls remain Stage D/implementation work.
 - **Next task: D1 — Select technology stack.**
+
+
+## D — Software architecture
+
+| Task | Status | Evidence |
+|---|---|---|
+| D1 Technology stack | Complete (baseline selection scope) | `docs/D1_TECHNOLOGY_STACK_DECISION.md` and `docs/D1_TECHNOLOGY_STACK_MATRIX.csv` select a TypeScript-first modular monorepo: Next.js App Router web/PWA, NestJS API, PostgreSQL + Prisma ORM 7 stable, Expo React Native mobile, REST/OpenAPI, pnpm/Turborepo, test toolchain and vendor-neutral operational interfaces. D-0003 recorded in `docs/DECISION_LOG.md`. Hosting, identity, AI, sandbox, storage and payment providers remain deferred. No application code or infrastructure was created; no tests were run. |
+
+## D1 closure and handoff (2026-11-05)
+
+- D1 is complete at baseline technology-stack selection scope.
+- The initial backend shape is a modular monolith; microservices, Redis and message brokers are deferred until justified by measured requirements.
+- Prisma ORM 7 stable is the baseline; Prisma ORM 8 prerelease is not selected. Compatible stable versions will be pinned at implementation time.
+- Hosting/region, authentication, AI provider/budget, code sandbox provider/runtimes, object-storage vendor, payment, retention and SLO decisions remain open for their relevant architecture/security tasks.
+- Untrusted learner code must never execute in the web or API application process. Sandbox design and security gates remain mandatory.
+- The D1 decision is a documented baseline, not a production implementation or deployment claim.
+- **Next task: D2 — Design frontend architecture.**
