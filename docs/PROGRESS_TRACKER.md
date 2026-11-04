@@ -508,3 +508,7 @@ Gateway, merchant entity/markets, prices, GST/tax, recurring mandates, refund ru
 D12 is complete at provider-neutral architecture/specification scope only. No gateway, merchant account, payment UI/API, database migration, live transaction or executed tests are claimed. Test scenarios are specified, not executed.
 
 **Next task: D13 — Design module communication.**
+
+
+## D13 closure — 2026-11-05
+D13 Module Communication architecture is complete at specification scope. Evidence: docs/D13_MODULE_COMMUNICATION_ARCHITECTURE.md and decision D-0011. It defines module ownership, sync ports, event envelopes, outbox/inbox, at-least-once delivery, idempotency, ordering, retries, quarantine, replay, sagas, security and observability. No broker, worker, migration, endpoint or runtime is implemented; tests are specified, not executed. Next: D14 — end-to-end system data flow.
