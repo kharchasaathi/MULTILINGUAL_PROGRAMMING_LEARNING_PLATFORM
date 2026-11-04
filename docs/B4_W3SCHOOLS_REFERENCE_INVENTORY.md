@@ -310,3 +310,11 @@ Added 64 individual CSS property records covering the D–I alphabetical segment
 Source: W3Schools CSS Properties Reference, alphabetical directory: https://www.w3schools.com/cssref/index.php
 
 This batch does not complete D–Z. Remaining property groups include J–Z, followed by reconciliation of the index list against the normalized register, CSS Functions extraction, and URL/member-level audit.
+
+## 16. CSS property extraction — batch 10 (2026-11-04)
+
+Added 168 individual CSS property records from the J–Z portion of the W3Schools alphabetical CSS Properties Reference. The batch includes layout, margin/padding, masking, object fitting, overflow, scroll snapping, text, transform, transition, writing-mode and stacking-related entries. At-rules remain excluded from the property rows and are maintained in the separate at-rule register. Legacy/replacement relationships are noted where applicable (for example page-break-* and word-wrap).
+
+Source: W3Schools CSS Properties Reference and its alphabetical property listing: https://www.w3schools.com/cssref/index.php. The source also separately lists at-rules interspersed alphabetically; those are not counted as properties.
+
+The property-name register now requires a source-to-register reconciliation pass. This batch captures the remaining J–Z entries surfaced by the index, but does not itself certify the whole directory as complete. CSS Functions extraction and HTML/JS/Python/SQL reference member registers remain outstanding.
