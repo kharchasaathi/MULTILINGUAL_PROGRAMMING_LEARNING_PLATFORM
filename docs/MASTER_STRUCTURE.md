@@ -3,8 +3,8 @@
 PROJECT_NAME: MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 VERSION: 1.0
 STATUS: PLANNING
-CURRENT_STAGE: B
-NEXT_STAGE: B12
+CURRENT_STAGE: C
+NEXT_STAGE: C1
 
 ==================================================
 # PROJECT GOAL
@@ -61,7 +61,7 @@ https://www.w3schools.com/
 - [x] B9. Define Advanced level
 - [x] B10. Define Professional level
 - [x] B11. Identify prerequisites
-- [ ] B12. Approve curriculum coverage
+- [x] B12. Approve curriculum coverage (bounded approval; coverage limits recorded)
 
 ==================================================
 # C. TEACHING & CONTENT ENGINE
