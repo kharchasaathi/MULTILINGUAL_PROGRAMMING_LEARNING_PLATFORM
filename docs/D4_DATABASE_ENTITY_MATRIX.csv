@@ -1,5 +1,6 @@
 entity_name,module_owner,primary_key,important_foreign_keys,unique_or_check_constraints,immutability_and_sensitivity
-identity_principal,Identity,principal_id UUID,"None; issuer and subject are external identity references","UNIQUE(issuer,subject)","Mutable mapping; confidential identifier; no passwords/tokens"
+identity_principal,Identity,principal_id UUID,"None","UNIQUE(principal_id)","Internal actor identity; confidential; no provider credentials or external subject fields"
+identity_external_link,Identity,external_link_id UUID,"principal_id -> identity_principal","UNIQUE(issuer,subject)","Provider-neutral external identity mapping; confidential; no raw tokens"
 learner_profile,Learner,profile_id UUID,"principal_id -> identity_principal","UNIQUE(principal_id)","Mutable profile; confidential personal data"
 learner_preference,Learner,preference_id UUID,"principal_id -> identity_principal","UNIQUE(principal_id); locale IN te/en/ml/kn/ta/hi","Mutable preference; confidential"
 curriculum_track,Curriculum,track_id UUID,"None","UNIQUE(slug)","Versioned lifecycle; public when published"
@@ -35,4 +36,5 @@ progress_event,Progress,event_id UUID,"progress_id -> progress_record; actor_id 
 ai_generation_task,AI,task_id UUID,"requested_by -> identity_principal; lesson_version_id nullable","UNIQUE(task_key); usage nonnegative","Confidential task metadata; no secrets/raw prompt by default"
 platform_idempotency,Platform,idempotency_id UUID,"principal_scope nullable -> identity_principal","UNIQUE(scope,operation,key); fingerprint required","Short-lived operational record; retention policy required"
 platform_outbox_event,Platform,event_id UUID,"Aggregate reference logical, no cross-module cascade","UNIQUE(event_key); schema_version required","Append/delivery state; payload bounded and validated"
+platform_inbox_receipt,Platform,receipt_id UUID,"None; source event and consumer are logical references","UNIQUE(consumer_id,event_id); schema_version required","Durable consumer deduplication and processing state; bounded/redacted payload"
 audit_event,Audit,event_id UUID,"actor_id nullable -> identity_principal","Append-only; event schema version required","Restricted; immutable; no secrets or full content payload"
