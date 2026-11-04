@@ -4,7 +4,7 @@ Last updated: 2026-11-04
 ## Current execution position
 - Current stage: B — Complete Curriculum Planning
 - Current task: B4 — Inventory references
-- Next action: Continue B4 — verify every reference URL/redirect and expand HTML, CSS, JavaScript/DOM, SQL, Python and database sub-reference taxonomies. B3 catalogue audit is complete.
+- Next action: Continue B4 — extract normalized HTML/CSS/JS-DOM/Python/SQL member registers, then verify all 31 catalogue URLs/redirects and database/framework coverage. B3 catalogue audit is complete.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -24,7 +24,7 @@ Last updated: 2026-11-04
 | B1 Categories | Complete | 15 curriculum families; 72 catalogue entries; detailed scope and limitations documented in docs/B1_W3SCHOOLS_CURRICULUM_INVENTORY.md |
 | B2 Languages and technologies | Complete | 13 tutorial-scope programming languages, 7 editor-only extension candidates, plus separate markup/query/shell/data-format and technology registers; see docs/B2_PROGRAMMING_LANGUAGE_TECHNOLOGY_INVENTORY.md |
 | B3 Tutorials | Complete | Final catalogue audit: 58 official Tutorials-index entries (12 HTML/CSS, 10 JavaScript, 23 Backend, 13 Data Analytics); wider global navigation separately classified; version tracks, learning paths, specialist resources, tools and legacy labels reconciled. Per-track chapter-tree evidence and limitations are recorded in docs/B3_TUTORIAL_TRACK_REGISTER.csv; no claim that every sidebar was fully captured. References/practice assets routed to B4/B5. |
-| B4 References | In progress | Initial official reference catalogue captured in docs/B4_W3SCHOOLS_REFERENCE_INVENTORY.md and docs/B4_REFERENCE_REGISTER.csv; 31 normalized rows including one linked sub-reference; URL and taxonomy verification pending. |
+| B4 References | In progress | Initial official reference catalogue captured (31 rows); taxonomy batch 1 added for CSS families/at-rules, JavaScript/DOM groups, Python references/modules and SQL keyword families. URL-by-URL verification and normalized member registers remain pending. |
 | B5 Examples and exercises | Not started | Map topics; create original teaching material |
 | B6 Master topic checklist | Not started | |
 | B7 Beginner | Not started | |
