@@ -48,7 +48,7 @@ W3Schools
 
 ==================================================
 # B. COMPLETE CURRICULUM PLANNING
-- [ ] B1. Inventory W3Schools categories
+- [x] B1. Inventory W3Schools categories
 - [ ] B2. Inventory all relevant languages
 - [ ] B3. Inventory tutorials
 - [ ] B4. Inventory references
