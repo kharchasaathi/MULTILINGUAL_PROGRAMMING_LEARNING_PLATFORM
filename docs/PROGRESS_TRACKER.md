@@ -3,9 +3,9 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: D — Software Architecture
-- Current task: D9 — Design the AI engine
-- Next action: Define provider-neutral AI orchestration, safety, validation, evaluation, cost controls and human approval boundaries.
-- Completed immediately before current task: D8 — Language Engine architecture (specification scope).
+- Current task: D10 — Design the progress engine
+- Next action: Define learner progress events, state transitions, mastery evidence, idempotency, recalculation and reporting contracts.
+- Completed immediately before current task: D9 — AI Engine architecture (provider-neutral specification scope).
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -444,3 +444,14 @@ D8 defines the six-locale allowlist (Telugu, English, Malayalam, Kannada, Tamil 
 D8 is complete at architecture/specification scope only. No translation corpus, runtime language service, provider, database migration or production implementation was created. C9 locale translation statuses remain unchanged. Test scenarios are specified, not executed. Open decisions (including default UI locale, fallback policy, preference retention, fonts and release completeness) remain recorded in the architecture document.
 
 **Next task: D9 — Design the AI engine.**
+
+
+## D9 closure (2026-11-05) — AI engine architecture
+
+Artifacts: `docs/D9_AI_ENGINE_ARCHITECTURE.md`, `docs/D9_AI_TASK_AND_CAPABILITY_MATRIX.csv`, `docs/D9_AI_DATA_CONTRACT_MATRIX.csv`; decision D-0007 in `docs/DECISION_LOG.md`.
+
+D9 defines bounded AI task classes, provider-neutral adapters, versioned contracts, prompt/context governance, injection and output-safety controls, privacy/data classification, budgets/quotas/idempotency, validation, audit/usage, evaluation metrics and integration with D4/D5/D6/D8 and C8/C14/C15. AI cannot expand approved W3Schools curriculum, execute code, decide mastery/scoring, grant permissions, approve content or publish. Instructional drafts require C14 evidence and C15 hash-bound human approval.
+
+Complete at architecture/specification scope only. No provider/model, region, budget, runtime, API endpoint, migration or evaluation corpus was selected or implemented. 35 future test scenarios are specified, not executed. Provider privacy/retention terms, consent, region, quotas and budget remain open.
+
+**Next task: D10 — Design the progress engine.**
