@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: C — Teaching & Content Engine
-- Current task: C4 — Define Malayalam teaching rules
-- Next action: Define Malayalam teaching rules while preserving the shared C1 lesson structure.
+- Current task: C5 — Define Kannada teaching rules
+- Next action: Define Kannada teaching rules while preserving the shared C1 lesson structure.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -199,7 +199,7 @@ W3Schools remains the exclusive curriculum scope/source reference. Original inst
 | C1 Lesson structure | Complete | `docs/C1_STANDARD_LESSON_STRUCTURE.md`; reusable authoring template: `docs/templates/LESSON_TEMPLATE.md`. |
 | C2 Telugu-native teaching rules | Complete | Telugu language standard, teaching voice, technical terminology policy, code fidelity, examples, learner instructions, review and quality checklist in `docs/C2_TELUGU_NATIVE_TEACHING_RULES.md`. |
 | C3 English teaching rules | Complete | English writing and spelling policy, teaching voice, terminology, code fidelity, examples, learner instructions, accessibility, parity and review checklist in `docs/C3_ENGLISH_NATIVE_TEACHING_RULES.md`. |
-| C4 Malayalam teaching rules | Not started | |
+| C4 Malayalam teaching rules | Complete | Malayalam language standard, teaching voice, terminology, code fidelity, examples, learner instructions, typography, accessibility, parity and review checklist in `docs/C4_MALAYALAM_NATIVE_TEACHING_RULES.md`. |
 | C5 Kannada teaching rules | Not started | |
 | C6 Tamil teaching rules | Not started | |
 | C7 Hindi teaching rules | Not started | |
@@ -235,3 +235,15 @@ C3 defines internationally understandable English writing standards, spelling co
 C3 is complete at English teaching-rule specification scope. No English lesson has been authored, executed, reviewed or published by this task. W3Schools remains the exclusive curriculum topic/source reference; original instructional content is required.
 
 Next task: C4 — Define Malayalam teaching rules.
+
+
+## C4 closure (2026-11-05) — Malayalam-native teaching rules
+
+Artifact committed on `docs/project-foundation`:
+- `docs/C4_MALAYALAM_NATIVE_TEACHING_RULES.md`
+
+C4 defines contemporary Malayalam writing standards, consistent learner address, English technical terminology policy, exact code/output preservation, original examples, C1-aligned Malayalam lesson labels, instructions/questions/hints/feedback, Malayalam grammar and typography checks, glyph/mobile accessibility, six-language parity and language/technical publication reviews.
+
+C4 is complete at Malayalam teaching-rule specification scope. No Malayalam lesson has been authored, translated, executed, reviewed or published by this task. W3Schools remains the exclusive curriculum topic/source reference; original instructional content is required.
+
+Next task: C5 — Define Kannada teaching rules.
