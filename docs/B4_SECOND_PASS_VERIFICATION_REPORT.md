@@ -92,3 +92,8 @@ These additions increase inventory coverage but do not satisfy the outstanding s
 ## 7. Latest ID integrity pass (2026-11-04)
 
 Re-fetched and parsed nine member registers after the CSS/Python expansions: HTML 373, CSS 554, JavaScript/DOM 906, Python core 171, Python keywords/exceptions/types 184, Python advanced protocols 115, Python standard-library selected members 258, SQL core 348, SQL advanced/dialect 216. All nine had zero duplicate IDs. The numeric suffix scan found no missing suffixes within each register's observed numeric ID range. This check validates ID uniqueness/continuity only; it does not validate semantic completeness, source accuracy or every cross-file reference. B4 remains NOT ACCEPTED; all outstanding acceptance gates listed above remain binding.
+
+
+## 8. Current WHATWG event-handler index reconciliation (2026-11-04)
+
+The WHATWG HTML Standard index updated 4 November 2026 lists seven event-handler content attributes absent from the existing 86-member HTML event-handler inventory: `onformdata`, `onmouseenter`, `onmouseleave`, `onscrollend`, `onsecuritypolicyviolation`, `onslotchange` and `ontoggle`. Added these as `HTML-EVENT-087` through `HTML-EVENT-093` to `docs/B4_HTML_REFERENCE_MEMBER_REGISTER.csv` and linked them to seven new audit rows in `docs/B4_HTML_EVENT_HANDLER_APPLICABILITY_AUDIT.csv`. Updated B4-GATE-004 from 86 to 93 event-handler records and classified the gate as PARTIAL. WHATWG index-level applicability is confirmed; event-specific interface, target/dispatch, bubbling/cancelability, security and browser-compatibility review is deliberately still open. Source: https://html.spec.whatwg.org/dev/indices.html (updated 4 November 2026).
