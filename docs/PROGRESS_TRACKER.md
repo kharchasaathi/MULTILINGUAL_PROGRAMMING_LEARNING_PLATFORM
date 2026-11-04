@@ -3,9 +3,9 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: D — Software Architecture
-- Current task: D11 — Design the admin panel
-- Next action: Define admin roles, navigation, operational workspaces, moderation/review controls, audit visibility and safe administrative actions.
-- Completed immediately before current task: D10 — Progress Engine architecture (logical specification scope).
+- Current task: D12 — Design the payment architecture
+- Next action: Define payment provider boundary, product/plan catalogue, checkout, payment state lifecycle, webhook verification, entitlements, refunds, reconciliation, security and compliance requirements.
+- Completed immediately before current task: D11 — Admin Panel architecture (logical specification scope).
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -473,3 +473,21 @@ No universal mastery threshold or completion percentage is invented. Offline aut
 D10 is complete at logical architecture/specification scope only. No application code, database migration, API implementation or executed tests are claimed. Test scenarios are specified, not executed.
 
 **Next task: D11 — Design the admin panel.**
+
+
+## D11 closure (2026-11-05) — admin panel
+
+Artifacts committed on `docs/project-foundation`:
+- `docs/D11_ADMIN_PANEL_ARCHITECTURE.md`
+- `docs/D11_ADMIN_PERMISSION_MATRIX.csv`
+- `docs/D11_ADMIN_DATA_CONTRACT_MATRIX.csv`
+- `docs/D11_ADMIN_WORKSPACE_MATRIX.csv`
+- Decision D-0009 in `docs/DECISION_LOG.md`
+
+D11 defines the protected admin workspace and 13 operational workspaces; proposed role catalogue and permission families; backend-enforced deny-by-default authorization; C15 author/reviewer/publisher separation; C14 release gates; learner support privacy; read-only D10 progress diagnostics; D8 localization and D9 AI operations; access grants, audit, security, accessibility and 35 future test scenarios.
+
+Final role-grant authority, MFA/dual-control, break-glass expiry, privacy/retention, exact API routes, queue SLAs and analytics thresholds remain open.
+
+D11 is complete at logical architecture/specification scope only. No admin UI, backend endpoint, database migration, permission seed or executed tests are claimed. Test scenarios are specified, not executed.
+
+**Next task: D12 — Design the payment architecture.**
