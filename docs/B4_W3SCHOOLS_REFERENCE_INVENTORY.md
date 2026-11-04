@@ -473,3 +473,24 @@ Sources:
 - https://www.w3schools.com/jsref/default.asp
 
 Coverage note: the combined JavaScript reference index (revised June 2026) enumerates additional object families including Boolean, Date, Error, Function, Global, Iterator, JSON, Map, Math, Number, Object, Promise, Proxy, Reflect, RegExp, Set, String, Temporal and Typed Array. These remain to be inventoried member-by-member, with owner-qualified duplicate names and source reconciliation.
+
+
+## 30. JavaScript String and Date built-in reference members (2026-11-04)
+
+Added 101 records (JSREF-359 through JSREF-459):
+- String: 41 core properties/methods, including modern methods such as `at()`, `matchAll()`, `replaceAll()`, `isWellFormed()` and `toWellFormed()`; also 13 legacy HTML wrapper methods, explicitly tagged deprecated/non-standard and not recommended for modern teaching.
+- Date: 47 constructors/properties/methods, covering local-time and UTC getters/setters, timestamp operations, parsing, serialization and locale formatting.
+
+Date source URL normalized to the W3Schools Date Reference page. String methods return new strings rather than mutating the original string; legacy HTML wrappers are preserved for reference completeness but will be taught with a deprecation warning and modern CSS/DOM alternatives.
+
+The JavaScript register now contains 459 data records: 7 reference-family records and 452 API/member records. This is not yet a full built-in object inventory: Number, Math, Object, Promise, Map, Set, WeakMap/WeakSet, RegExp, JSON, Error, Function, Global, Iterator, Temporal, Typed Arrays and other reference families remain.
+
+Sources:
+- https://www.w3schools.com/jsref/jsref_obj_string.asp
+- https://www.w3schools.com/jS/js_date_reference.asp
+- https://www.w3schools.com/jsref/default.asp
+
+Coverage and editorial notes:
+- The String reference includes older HTML wrapper methods; they are retained only as legacy reference entries, not as recommended techniques.
+- Date local-time methods and UTC methods are kept as separate member entries to avoid hiding timezone semantics.
+- W3Schools reference pages can contain legacy/deprecated members alongside current APIs; source capture does not imply recommendation for new code.
