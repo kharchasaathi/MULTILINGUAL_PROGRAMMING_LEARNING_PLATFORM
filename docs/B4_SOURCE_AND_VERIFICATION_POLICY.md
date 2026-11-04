@@ -1,67 +1,65 @@
 # B4 Source and Verification Policy
 
 **Status:** Binding scope decision for B4  
-**Authoritative and exclusive reference source:** https://www.w3schools.com/  
+**Sole reference source:** https://www.w3schools.com/  
 **Working branch:** `docs/project-foundation`
 
-## 1. Purpose and source boundary
+## 1. Source boundary
 
-B4 inventories the reference and lookup material that this learning platform will use, following **W3Schools only**. For B4, W3Schools is the sole source of truth for deciding which reference families, topics, members, labels, groupings, and source URLs are in scope.
+B4 inventories the reference and lookup material for this learning platform using **W3Schools only**. W3Schools is the sole source for deciding which reference families, topics, members, labels, groupings, and URLs are in B4 scope.
 
-Do not use WHATWG, W3C, MDN, ECMA, Python.org, vendor documentation, database-vendor documentation, Wikipedia, GitHub projects, or any other external website to add, remove, rename, validate, or expand B4 curriculum inventory members. Do not perform cross-site comparison as a B4 completion requirement.
+Do not use WHATWG, W3C, MDN, ECMA, Python.org, database vendors, or any other external website to add, remove, rename, expand, or validate B4 inventory members. Cross-site comparison is not a B4 completion requirement.
 
-## 2. Required W3Schools-only workflow
+## 2. W3Schools-only workflow
 
-For each in-scope W3Schools reference page:
-
+For each selected W3Schools reference page:
 1. Record the exact W3Schools page title and URL.
-2. Capture its visible categories, sub-reference families, topics, and individual members at the level exposed by that page.
-3. Preserve the W3Schools spelling, naming, grouping, and scope.
-4. Record the parent reference family and the exact W3Schools source URL for every row.
-5. Check that the W3Schools URL opens and that the row is visibly present on that W3Schools page.
-6. Record a source-page date/check date and a concise disposition for any ambiguous, grouped, duplicate, legacy, or unavailable entry.
-7. Keep tutorial chapters (B3) and exercises, quizzes, challenges, and practice problems (B5) out of B4 unless W3Schools explicitly presents them as part of a reference lookup.
+2. Capture its visible categories, sub-reference families, topics, and individual members.
+3. Preserve W3Schools naming, spelling, grouping, and scope.
+4. Link every member row to its parent family and exact W3Schools source URL.
+5. Check that the W3Schools URL opens and that the member is visibly present on that page.
+6. Record the source check date and disposition for ambiguous, grouped, duplicate, legacy, or unavailable entries.
+7. Keep tutorial chapters (B3) and exercises, quizzes, challenges, and practice problems (B5) out of B4 unless W3Schools explicitly presents them as reference lookup material.
 
-A W3Schools page is sufficient evidence for its own listed taxonomy. Do not require a second standards or vendor source to prove that a W3Schools-listed member exists.
+A W3Schools page is sufficient evidence for its own listed taxonomy. No second standards/vendor source is required to prove a W3Schools-listed member exists.
 
-## 3. Supplemental and external-source records
+## 3. External and supplemental rows
 
-Existing rows derived from non-W3Schools sites are **out of B4 scope**. Preserve them only as clearly marked historical/supplemental candidates if useful; do not count them in W3Schools coverage, denominators, completion status, or acceptance evidence. Do not silently blend them with W3Schools-derived rows.
+Rows derived from non-W3Schools sites are out of B4 scope. Preserve them only as historical/supplemental candidates if useful; exclude them from W3Schools coverage, denominators, completion status, and acceptance evidence.
 
-If a row's provenance is unknown or cannot be tied to a W3Schools page, classify it as `SOURCE_UNCONFIRMED` and exclude it from the W3Schools-verified count until its presence on W3Schools is confirmed. Do not infer that a member is W3Schools-listed merely because it is common in the language or appears on another website.
+If provenance is unknown or a row cannot be tied to a W3Schools page, classify it as `SOURCE_UNCONFIRMED` and exclude it from verified counts until confirmed. Do not infer that a member is W3Schools-listed because it is common in a language or appears elsewhere.
 
-## 4. Status labels
+## 4. Required dispositions
 
-Use these consistent dispositions:
-- `W3SCHOOLS_VERIFIED`: the member is visibly listed on the cited W3Schools page.
-- `W3SCHOOLS_LEGACY_LABEL`: W3Schools lists it but marks it obsolete, deprecated, unsupported, or historical; retain the source label and note the W3Schools warning.
-- `W3SCHOOLS_GROUPED`: W3Schools groups multiple members in one entry and the register preserves that grouping transparently.
+- `W3SCHOOLS_VERIFIED`: visibly listed on the cited W3Schools page.
+- `W3SCHOOLS_LEGACY_LABEL`: listed by W3Schools with an obsolete/deprecated/unsupported/historical warning; preserve that warning.
+- `W3SCHOOLS_GROUPED`: multiple members are grouped by W3Schools and grouping is retained transparently.
 - `SOURCE_UNCONFIRMED`: not yet matched to a W3Schools page.
-- `SUPPLEMENTAL_OUT_OF_SCOPE`: derived from another source; excluded from B4 coverage.
-- `DUPLICATE_OR_ALIAS`: duplicate/alias disposition documented against the W3Schools source entry.
+- `SUPPLEMENTAL_OUT_OF_SCOPE`: derived from another source; excluded from B4.
+- `DUPLICATE_OR_ALIAS`: duplicate/alias disposition documented against the W3Schools entry.
 
-## 5. Copyright and content handling
+## 5. Copyright
 
-Record titles, names, URLs, categories, relationships, and short factual metadata. Do not bulk-copy W3Schools explanations, lesson prose, code examples, diagrams, or exercises. The platform must create original explanations, examples, diagrams, and translations.
+Record titles, names, URLs, categories, relationships, and short factual metadata. Do not bulk-copy W3Schools explanations, lesson prose, examples, diagrams, or exercises. Create original teaching material.
 
 ## 6. B4 acceptance criteria
 
 B4 can be accepted only when:
-- the W3Schools References catalogue and all selected W3Schools reference families are inventoried;
-- every in-scope W3Schools topic/member is represented with a stable ID, exact W3Schools URL, parent family, and source check evidence;
-- all non-W3Schools rows are excluded from B4 counts and clearly classified as out of scope;
+- the W3Schools References catalogue and all selected reference families are inventoried;
+- every in-scope topic/member has a stable ID, exact W3Schools URL, parent family, and source check evidence;
+- all non-W3Schools rows are excluded from B4 counts and clearly classified;
 - duplicates, aliases, grouped rows, malformed CSV rows, and unknown provenance are dispositioned;
-- the catalogue and member registers have consistent totals and family links;
-- all applicable W3Schools URLs are checked;
+- catalogue totals and member registers are consistent;
+- applicable W3Schools URLs are checked;
 - each family has a documented coverage decision and reviewer sign-off;
-- the acceptance matrix reflects evidence actually present in the repository.
+- the acceptance matrix reflects evidence actually present.
 
 No external standards audit, cross-vendor dialect matrix, or full browser-compatibility audit is required for B4.
 
-## 7. Execution guardrails
+## 7. Guardrails
 
 - Work only on `docs/project-foundation` until B4 sign-off.
 - Do not merge `main` or start B5 before B4 acceptance.
-- Never report a source check or test as passed unless it was actually executed and evidenced.
+- Never report a source check or test as passed unless executed and evidenced.
 - Do not publish percentages without frozen W3Schools-only denominators.
-- When the W3Schools source does not expose a detail, record that limitation; do not fill it from another website.
+- If W3Schools does not expose a detail, record the limitation; do not fill it from another website.
