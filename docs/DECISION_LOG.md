@@ -86,3 +86,13 @@ Technology stack/hosting; database/authentication; AI provider and budget; sandb
 - Deferred: final role grant authority, MFA/dual-control, break-glass duration, exact D5 routes, D4 audit persistence, privacy/retention, queue SLAs and analytics thresholds.
 - Evidence: `docs/D11_ADMIN_PANEL_ARCHITECTURE.md`, `docs/D11_ADMIN_PERMISSION_MATRIX.csv`, `docs/D11_ADMIN_DATA_CONTRACT_MATRIX.csv`, `docs/D11_ADMIN_WORKSPACE_MATRIX.csv`.
 - No admin UI, API, migration, permission seed or tests are implemented/executed.
+
+
+## D-0010 — Payment architecture
+- Date: 2026-11-05
+- Status: Approved at provider-neutral logical architecture and contract specification scope
+- Decision: Preserve the initial-free launch model. Define separate Product/Pricing, Order, Payment, Subscription, Refund, Entitlement, Provider Adapter, Reconciliation and Audit boundaries. Use hosted provider checkout, server-authoritative verified provider evidence, append-only financial history, idempotent commands/webhooks and a transactional outbox for entitlement evaluation.
+- Security: Platform must not receive/store/log PAN, CVV, PIN, OTP or raw payment credentials. Client redirects never prove payment. Paid entitlement requires verified payment and policy evaluation; AI and ordinary admins cannot set payment success or grant access.
+- Deferred: gateway/merchant entity/markets, price catalogue, currency and settlement, GST/tax/invoices, refund/cancellation/trial rules, recurring mandate, fraud controls, PCI scope, retention, exact API schemas and provider SLA.
+- Evidence: `docs/D12_PAYMENT_ARCHITECTURE.md`, `docs/D12_PAYMENT_STATE_MACHINE.csv`, `docs/D12_PAYMENT_DATA_CONTRACT_MATRIX.csv`.
+- No gateway, merchant account, live transaction, endpoint, migration or executed test is selected/implemented/claimed.
