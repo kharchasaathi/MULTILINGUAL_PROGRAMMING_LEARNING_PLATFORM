@@ -4,7 +4,7 @@ Last updated: 2026-11-04
 ## Current execution position
 - Current stage: B — Complete Curriculum Planning
 - Current task: B4 — Inventory references
-- Next action: B4 remains open. HTML element-specific attribute owner-scope pass is complete (116/116) but the separate deep ledger is still open (0/116 fully verified across all five dimensions). Continue normative semantics/value grammar/legacy/security/browser evidence; then complete remaining HTML, CSS, JavaScript/DOM, Python, SQL and cross-cutting gates in `docs/B4_ACCEPTANCE_GATE_MATRIX.csv`. Do not start B5 or merge `main` until all 29 gates are accepted and family sign-offs are recorded. B3 catalogue audit is complete.
+- Next action: Execute B4 under the W3Schools-first policy in `docs/B4_SOURCE_AND_VERIFICATION_POLICY.md`: complete source-page/member coverage, URL/provenance integrity, duplicates/schema checks, supplemental separation, and targeted caveats only for legacy/security/version-sensitive conflicts. Do not treat a full standards audit of every member as a B4 prerequisite. Close all applicable gates with evidence and family sign-offs; only then start B5 or merge `main`.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -148,3 +148,8 @@ B4 HTML element-specific attribute owner-scope reconciliation — full batch (20
 - HTML attribute deep-verification ledger: 116 unique rows; 0 rows fully verified across normative semantics, value grammar, legacy status, security implications and browser compatibility. Fourteen rows contain limited partial evidence; remaining evidence is open.
 - The WHATWG HTML index is non-normative. Normative checks must use the element/attribute requirements and algorithms; legacy classification must be owner-specific; compatibility requires dated engine/version evidence.
 - B4 remains NOT ACCEPTED. B5 is blocked. No merge to `main` is authorized.
+
+
+## B4 scope correction — W3Schools-first (2026-11-04)
+
+Adopted `docs/B4_SOURCE_AND_VERIFICATION_POLICY.md`. B4's primary objective is a faithful, complete, traceable inventory of the in-scope W3Schools tutorials and references. Standards/vendor sources are targeted safeguards for known legacy, security, version/compatibility, or source-conflict cases; they are not a mandatory second full audit of every inventory row. Supplemental members remain explicitly separated from W3Schools-derived coverage. This corrects the prior over-expansion of HTML attribute verification scope. B4 is still open pending actual inventory, URL, schema, provenance and family-gate closure.
