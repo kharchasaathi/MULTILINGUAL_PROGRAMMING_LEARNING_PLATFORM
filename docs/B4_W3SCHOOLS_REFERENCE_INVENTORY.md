@@ -249,3 +249,12 @@ Created `docs/B4_HTML_REFERENCE_MEMBER_REGISTER.csv` as the first machine-readab
 The event groups cover window, form/focus, keyboard, mouse, drag/scroll, clipboard and media events. The source labels `onmousewheel` deprecated; preserve that warning for later standards review. The source list is a W3Schools teaching reference and should not be treated as the current normative browser-platform specification.
 
 The register also distinguishes verified family landing pages from pending destination checks for additional families. Individual HTML element rows, individual attribute rows, global-attribute rows, per-event rows, element-to-attribute relationships and browser-support values remain outstanding.
+
+
+## 10. HTML element member extraction — batch 4 (2026-11-04)
+
+Expanded `docs/B4_HTML_REFERENCE_MEMBER_REGISTER.csv` with 122 individual `html_element` records based on the current W3Schools alphabetical HTML tag index. The index includes the comment and doctype entries, element names, and the grouped heading entry `h1-h6`; therefore 122 register rows should not be interpreted as 122 distinct HTML element names.
+
+The source explicitly labels legacy entries including `acronym`, `applet`, `basefont`, `big`, `center`, `dir`, `font`, `frame`, `frameset`, `noframes`, `strike` and `tt` as not supported in HTML5. These are retained for historical/reference completeness and must be clearly separated from recommended modern HTML in teaching content.
+
+This is the W3Schools index snapshot, not an assertion that it equals the complete current WHATWG HTML Living Standard element set. Next extraction: per-element attributes and global attributes, then one-row-per-event records and classification by semantic category.
