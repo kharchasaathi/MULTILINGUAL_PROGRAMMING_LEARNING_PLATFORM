@@ -424,3 +424,11 @@ Never assume a task is complete without evidence.
 - Defines course hierarchy, source mapping, optional chapters, prerequisite graph evaluation, learner pathway selection, immutable catalogue releases, C15 publication gates, D4/D5 alignment, security boundaries and 26 future test scenarios.
 - Existing B7–B12 scope and B11's 70 recorded dependencies are preserved; curriculum coverage limitations remain open. No course code, database migration, API implementation, lesson import or tests are claimed. Tests are specified, not executed.
 - **Next task: D8 — Design the language engine.**
+
+
+## D8 closure — 2026-11-05
+
+- Evidence: `docs/D8_LANGUAGE_ENGINE_ARCHITECTURE.md`, `docs/D8_SUPPORTED_LOCALE_REGISTRY.csv`, `docs/D8_LOCALIZATION_PARITY_MATRIX.csv`.
+- Six-locale resolution, native authoring, semantic parity, protected code tokens, C9 glossary, C15 approval, client behavior, accessibility and D4/D5 integration are specified.
+- No locale runtime, translated corpus, migrations or executed tests are claimed. C9 locale statuses remain unchanged.
+- **Next: D9 — Design the AI engine.**
