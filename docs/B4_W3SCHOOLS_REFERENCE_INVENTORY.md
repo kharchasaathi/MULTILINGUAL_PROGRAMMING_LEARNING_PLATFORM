@@ -777,3 +777,19 @@ References:
 - Transaction/savepoint overview: https://www.w3schools.in/sql/savepoints
 
 Important caveats: this is a curated reference inventory, not a complete grammar or exhaustive API catalog. Window frame features, QUALIFY, FILTER, SEARCH/CYCLE, CTE materialization hints, recursive syntax, transaction control and isolation semantics vary across database engines and versions. SQL Server and MS Access functions are explicitly dialect-scoped; Access functions may be VBA/expression functions rather than portable SQL functions. Validate behavior against the target engine/version before lessons or examples are approved.
+
+
+## 14. Binding W3Schools-only scope correction (2026-11-04)
+
+The project owner has confirmed that **www.w3schools.com is the only reference source for B4**. This rule supersedes any earlier wording in this document that suggested later comparison with standards bodies, vendors, MDN, or other external documentation.
+
+Consequences for the existing catalogue and registers:
+
+- The current 31-entry catalogue is an initial working list, not a final verified denominator. Reconcile it against the current W3Schools References landing page and record only entries actually linked or presented by W3Schools.
+- The W3Schools site homepage and Tutorials/References indexes are separate taxonomies. Do not treat every tutorial as a reference.
+- Every member row must map to a W3Schools page. If it cannot be confirmed there, mark it `SOURCE_UNCONFIRMED` or `SUPPLEMENTAL_OUT_OF_SCOPE`; do not count it as B4 coverage.
+- Prior WHATWG, MDN, Python.org, vendor, and other external additions remain historical candidates only and are excluded from all B4 denominators and completion claims.
+- Do not use external standards/version/security/browser checks as B4 exit requirements. Preserve W3Schools' own labels and warnings where present.
+- B4 acceptance still requires complete W3Schools taxonomy capture, exact URLs, stable IDs, duplicate/schema checks, and family sign-offs.
+
+The previously recorded 31-entry catalogue, mixed-source member totals, and 29-gate denominators must therefore be treated as **provisional pending W3Schools-only reconciliation**. No B4 completion claim is made by this scope correction.
