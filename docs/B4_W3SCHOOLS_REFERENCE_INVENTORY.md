@@ -734,3 +734,25 @@ Sources:
 - https://docs.python.org/3/library/functools.html
 
 Compatibility/security notes: this is a curated member selection, not a complete module API dump. The W3Schools module index is based on Python 3.13, while the official Python docs currently surface later versioned documentation; lesson authoring must pin a supported target runtime and mark newer members (for example itertools.batched and functools.Placeholder) with minimum-version requirements. `random` is not suitable for cryptographic secrets; use `secrets` for security-sensitive tokens. `pickle` is not safe for untrusted data. Filesystem and environment APIs are platform-dependent. JSON and regex examples must cover error handling and escaping.
+
+
+## 42. SQL reference member inventory — initial core batch (2026-11-04)
+
+Created `docs/B4_SQL_REFERENCE_MEMBER_REGISTER.csv` with 348 owner- and dialect-qualified records (SQLREF-001 through SQLREF-348):
+- SQL keywords and statement tokens.
+- SQL data types, separated into common/standard, MySQL, SQL Server and MS Access families.
+- Operators and predicates.
+- Integrity constraints.
+- Query clauses and set operators.
+- Aggregate functions.
+- MySQL string, numeric, date/time and advanced/session functions.
+
+Sources:
+- https://www.w3schools.com/sql/sql_ref_keywords.asp
+- https://www.w3schools.com/sql/sql_datatypes.asp
+- https://www.w3schools.com/sql/sql_operators.asp
+- https://www.w3schools.com/sql/sql_constraints.asp
+- https://www.w3schools.com/sql/sql_ref_mysql_functions.asp
+- https://www.w3schools.com/sql/default.asp
+
+Dialect notes: SQL is not a single fully uniform implementation. LIMIT, TOP, ROWNUM, FETCH, concatenation operators, date/time functions, data types and stored-program syntax differ among MySQL, SQL Server, MS Access, PostgreSQL, Oracle and other systems. MySQL-specific functions are explicitly labelled MySQL and must not be taught as universally portable SQL. FIRST()/LAST() are included only as legacy/reference entries and need dialect alternatives. Data type sizes/ranges and behavior require per-DBMS verification. This is an initial core inventory, not exhaustive SQL coverage; transaction control, window functions, CTE details, procedural dialects, JSON functions, spatial types/functions, full SQL Server and Access function catalogs, and PostgreSQL/Oracle-specific references remain to be inventoried.
