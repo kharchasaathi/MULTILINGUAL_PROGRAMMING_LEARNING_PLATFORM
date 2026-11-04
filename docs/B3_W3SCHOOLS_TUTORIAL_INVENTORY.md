@@ -83,7 +83,7 @@ The following is the tutorial track inventory as visible in the official catalog
 58. Excel
 59. Google Sheets
 
-**Catalogue count in the live official index (checked 2026-11-04):** 60 tutorial tracks across the four categories shown on the page. The earlier draft count of 59 was an undercount and is corrected here. This is a point-in-time count of the links visible in the inspected index, not a guarantee that every item is a programming language or a full-length programming course. Some are tools, frameworks, libraries, and specialist subjects.
+**Catalogue count in the live official index (checked 2026-11-04):** 58 entries across the four categories shown on the page: 12 HTML & CSS, 10 JavaScript, 23 Backend, and 13 Data Analytics. Bash is listed separately in the wider global navigation and is not part of these four index blocks. This is a point-in-time count of the entries visible in the inspected index, not a guarantee that every item is a programming language or a full-length programming course. Some are tools, frameworks, libraries, and specialist subjects.
 
 ## 3. Chapter/topic tree — detailed navigation capture
 
@@ -868,3 +868,10 @@ The CSS page explicitly separates CSS Reference from CSS Tutorial and lists refe
 
 ## 18. Quality correction to earlier B3 drafts
 Earlier B3 batches included some first-pass topic outlines inferred from general curriculum knowledge where the live navigation extraction was incomplete. Those outlines are useful as coverage prompts only, not verified W3Schools source trees. The status field in the CSV must remain “first-pass”, “queued”, or “pending” until the exact source navigation has been inspected. No draft outline is to be treated as an authoritative source transcript.
+
+
+## 19. Count and evidence reconciliation — batch 9
+
+Rechecked the live official Tutorials index on 2026-11-04 and recounted each category item individually. The correct four-block total is **58**, not 60 or 59: HTML & CSS 12, JavaScript 10, Backend 23, Data Analytics 13. Bash is visible in the wider global navigation but is not listed in those four category blocks, so it is retained as a separate supplementary track in the register rather than inserted into the four-block count.
+
+The register's first five legacy rows also overstated navigation capture. Current evidence states: HTML detailed tree recorded; CSS visible menu captured but additional topics remain pending; JavaScript page verified but full sidebar not extracted; Python early menu only; SQL detailed tree recorded. The CSV status values are corrected to reflect this distinction. Draft topic outlines are not treated as fully captured source trees.
