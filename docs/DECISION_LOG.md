@@ -64,3 +64,14 @@ Technology stack/hosting; database/authentication; AI provider and budget; sandb
 - Privacy: no sensitive learner data or secrets sent to providers by default. Provider retention/training terms, processing region, consent/legal basis, raw prompt retention, quotas and budget remain open pending security/privacy and commercial review. No provider/model is selected.
 - Evidence: `docs/D9_AI_ENGINE_ARCHITECTURE.md`, `docs/D9_AI_TASK_AND_CAPABILITY_MATRIX.csv`, `docs/D9_AI_DATA_CONTRACT_MATRIX.csv`.
 - No runtime, provider integration, database migration, API endpoint, evaluation corpus or executed tests are claimed.
+
+
+## D-0008 — Learner progress engine architecture
+- Date: 2026-11-05
+- Status: Approved at logical domain and contract specification scope
+- Decision: Use append-only, server-authoritative, version-bound learner evidence events as the durable source of progress; derive rebuildable node/pathway projections. Separate activity, completion and mastery. Evaluate progression using D7's published prerequisite graph and versioned evidence policies.
+- Authority boundaries: D10 owns progress state and projections; C12 owns assessment definitions/scoring; C13 owns project rubrics; D7 owns curriculum/prerequisites; D6 owns identity/authorization. Only authenticated owning services may submit evaluator results. AI and clients cannot set scores, completion, mastery or exemptions.
+- Constraints: Duplicate writes are idempotent; corrections are compensating audited events; historic evidence retains its original content/catalogue/policy versions. Initial offline mode remains read-only for authoritative progress.
+- Deferred: completion criteria, mastery thresholds/recency, cross-version evidence reuse, section-level progress, retention, exact D5 routes, projection worker and SLOs.
+- Evidence: `docs/D10_PROGRESS_ENGINE_ARCHITECTURE.md`, `docs/D10_PROGRESS_EVENT_CATALOG.csv`, `docs/D10_PROGRESS_DATA_CONTRACT_MATRIX.csv`, `docs/D10_PROGRESS_WORKFLOW_STATE_MACHINE.csv`.
+- No runtime, schema migration, API endpoint or executed test is claimed.
