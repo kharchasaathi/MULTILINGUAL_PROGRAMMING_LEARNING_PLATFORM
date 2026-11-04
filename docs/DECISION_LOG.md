@@ -104,3 +104,12 @@ Technology stack/hosting; database/authentication; AI provider and budget; sandb
 - Decision: Retain modular monolith and direct application ports by default. Use transactional outbox/inbox and at-least-once idempotent event delivery for justified async workflows. No broker is selected.
 - Security: Module ownership and authorization remain authoritative; no direct cross-module repository writes or secrets/payment credentials in event payloads.
 - Evidence: docs/D13_MODULE_COMMUNICATION_ARCHITECTURE.md. No runtime, worker, migration or tests are implemented.
+
+
+## D-0012 — End-to-end system data flow
+- Date: 2026-11-05
+- Status: Approved at logical data-flow specification scope
+- Decision: Connect D1–D13 through explicit end-to-end journeys with authoritative module ownership, validated trust boundaries, D5 external API contracts and D13 internal application-port/event communication. Preserve separate payment and entitlement authority; separate assessment/project source evidence from D10 progress projections; keep AI output draft/assistance-only and C15 human approval authoritative; make asynchronous pending/reconciliation states explicit.
+- Rationale and evidence: `docs/D14_END_TO_END_SYSTEM_DATA_FLOW.md` defines registration, course/content delivery, assessment/progress, AI, payment/entitlement, admin review/publishing, notifications, failure recovery, reconciliation, audit, security, privacy, observability and 56 future test scenarios.
+- Limitations: This is a logical architecture decision only. No endpoint, migration, provider, worker, UI, deployment or production integration was implemented. Future tests are specified, not executed.
+- Next: D15 — Approve system architecture.
