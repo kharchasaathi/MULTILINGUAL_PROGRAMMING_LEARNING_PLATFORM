@@ -4,7 +4,7 @@ PROJECT_NAME: MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 VERSION: 1.0
 STATUS: PLANNING
 CURRENT_STAGE: D
-NEXT_STAGE: D6
+NEXT_STAGE: D7
 
 ==================================================
 # PROJECT GOAL
@@ -88,7 +88,7 @@ https://www.w3schools.com/
 - [x] D3. Design backend architecture
 - [x] D4. Design database architecture
 - [x] D5. Design API contracts
-- [ ] D6. Design authentication
+- [x] D6. Design authentication
 - [ ] D7. Design course engine
 - [ ] D8. Design language engine
 - [ ] D9. Design AI engine
@@ -347,8 +347,8 @@ PLAN -> DESIGN -> REVIEW -> IMPLEMENT -> TEST -> SECURITY CHECK -> APPROVE -> DO
 # PROGRESS TRACKER
 
 CURRENT_STAGE: D
-CURRENT_TASK: D5
-NEXT_ACTION: Design versioned REST/JSON API contracts, request/response schemas, error envelopes, pagination, idempotency, OpenAPI generation and compatibility rules.
+CURRENT_TASK: D7
+NEXT_ACTION: Design the course engine, course/module/chapter/topic/lesson relationships, publication boundaries and learner-facing retrieval contracts.
 
 COMPLETED:
 - A1 to A7 — Project foundation documented and approved
@@ -406,3 +406,12 @@ Never assume a task is complete without evidence.
 - The initial backend is a NestJS modular monolith with explicit module ownership, dependency direction, request lifecycle, authorization, persistence/provider boundaries, async-work constraints, operational controls and 24 future test scenarios.
 - No application implementation, database schema, migrations, provider integrations, worker infrastructure or deployment is claimed. Tests are specified, not executed.
 - **Next task: D6 — Design authentication, identity, session and account lifecycle.**
+
+
+## D6 closure — 2026-11-05
+
+- D6 authentication and identity architecture is complete at provider-neutral logical specification scope.
+- Evidence: `docs/D6_AUTHENTICATION_AND_IDENTITY_ARCHITECTURE.md` and `docs/D6_AUTHORIZATION_POLICY_MATRIX.csv`.
+- Defines principal mapping, account lifecycle, authentication/session decision gates, web/native client boundaries, authorization, C15 separation-of-duties, D4 persistence alignment, D5 API integration, threat controls and 26 future test scenarios.
+- Identity provider, protocol transport, session store, MFA methods, contact-verification vendor and retention remain undecided. No authentication code, provider integration, database migration or tests are implemented/executed.
+- **Next task: D7 — Design the course engine.**
