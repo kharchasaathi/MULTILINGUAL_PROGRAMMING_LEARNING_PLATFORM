@@ -293,3 +293,12 @@ Expanded `docs/B4_CSS_REFERENCE_MEMBER_REGISTER.csv` by 44 records:
 The selector names and basic groupings are based on the W3Schools CSS selector reference. This is a source snapshot, not a claim that the W3Schools list contains every current Selectors Level 4/5 selector. Modern selector additions and browser support require a separate standards compatibility pass. <https://www.w3schools.com/cssref/css_selectors.php>
 
 CSS property extraction is still outstanding. The main W3Schools CSS Reference index is the intended source; its alphabetical property list is much larger than the current register. Do not infer a complete property count from this batch.
+
+
+## 14. CSS property extraction — batch 8 (2026-11-04)
+
+Added 121 individual CSS property records to `docs/B4_CSS_REFERENCE_MEMBER_REGISTER.csv`, covering the alphabetical A–C segment from `accent-color` through `cursor`. Descriptions are concise catalog summaries, not copied tutorial prose. The `@charset` and other at-rules are tracked separately as at-rule records, not misclassified as CSS properties. The legacy `clip` property is marked deprecated in the source.
+
+Source: W3Schools CSS Properties Reference, which presents the property directory alphabetically and links individual property pages. This batch is only the A–C segment; remaining alphabetical sections still need extraction and duplicate/alias reconciliation. <https://www.w3schools.com/cssref/index.php>
+
+B4 planning estimate (not an acceptance result): approximately 25–30% complete and 70–75% remaining. This estimate reflects that the catalogue baseline and initial HTML/CSS taxonomy exist, while full member-level extraction for all core references, full URL verification, standards comparison and final coverage audit remain incomplete. Recalculate after the remaining core member registers are built.
