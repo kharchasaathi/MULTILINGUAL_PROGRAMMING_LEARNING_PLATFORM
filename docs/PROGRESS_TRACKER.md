@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: C — Teaching & Content Engine
-- Current task: C9 — Define technical terminology glossary
-- Next action: Define the canonical technical terminology glossary and six-locale approval/versioning rules.
+- Current task: C10 — Define diagrams and visual teaching
+- Next action: Define diagram types, visual explanation patterns, accessibility requirements and six-locale visual parity rules.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -294,3 +294,16 @@ C8 defines logical components, request/output contracts, six-locale ruleset mapp
 Complete at design/specification scope only. No provider, framework or database selected; no production pipeline or model adapter implemented; no lessons generated or published. W3Schools remains the exclusive curriculum reference.
 
 Next task: C9 — Define technical terminology glossary.
+
+
+## C9 closure (2026-11-05) — Canonical multilingual technical terminology glossary
+
+Artifacts committed on `docs/project-foundation`:
+- `docs/C9_TECHNICAL_TERMINOLOGY_GLOSSARY.md`
+- `docs/C9_CANONICAL_TERM_REGISTER.csv`
+
+C9 defines stable term identity, canonical English labels, six-locale record requirements, first-use/repeat-use rules, ambiguity handling, protected code-token rules, human review and approval gates, versioning, audit/rollback, publication requirements and integration with the C8 AI localization design. The seed register contains 30 source-mapped foundational concepts. All six locale statuses are explicitly `not_started`; no translation or native review is claimed.
+
+Complete at glossary governance and seed-register scope. Native-language translation/review, runtime glossary storage/service, automated validation and implementation tests remain pending. No tests are claimed as executed. W3Schools remains the exclusive curriculum source.
+
+Next task: C10 — Define diagrams and visual teaching.
