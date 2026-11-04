@@ -642,3 +642,27 @@ Sources:
 - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Regular_expressions
 
 Accuracy notes: W3Schools' current pattern page lists flags d/g/i/m/s/u/v/y and basic pattern grammar. MDN is used to expand modern grammar details such as named backreferences, Unicode code-point escapes, and v-mode set operations. Do not teach legacy octal escapes as portable modern syntax; decimal escapes have Unicode-mode restrictions. Unicode property escapes require u or v mode; v-mode string properties and set operators require dedicated explanation. The `\b` token means a word-boundary assertion outside a character class but backspace inside one. Flag modifiers in groups have limited supported flag combinations; validate against the ECMAScript grammar and target runtime. This syntax register is distinct from JSREF-634..642 RegExp object members.
+
+
+## 38. Python reference member inventory — initial core batch (2026-11-04)
+
+Created `docs/B4_PYTHON_REFERENCE_MEMBER_REGISTER.csv` with 171 owner-qualified records (PYREF-001 through PYREF-171):
+- 67 built-in functions (builtins scope).
+- 46 string methods (str).
+- 11 list methods.
+- 11 dictionary methods.
+- 2 tuple methods.
+- 16 set methods.
+- 16 file/stream methods.
+
+Sources:
+- https://www.w3schools.com/python/python_reference.asp
+- https://www.w3schools.com/python/python_ref_functions.asp
+- https://www.w3schools.com/python/python_ref_string.asp
+- https://www.w3schools.com/python/python_ref_list.asp
+- https://www.w3schools.com/python/python_ref_dictionary.asp
+- https://www.w3schools.com/python/python_ref_tuple.asp
+- https://www.w3schools.com/python/python_ref_set.asp
+- https://www.w3schools.com/python/python_ref_file.asp
+
+Safety and accuracy notes: `eval()` and `exec()` are explicitly flagged as unsafe for untrusted input. String methods return new values rather than mutating strings. List/set/dictionary mutability and in-place versus value-returning behavior must be taught distinctly. File methods are scoped to stream abstractions; not every method exists on every concrete stream type. This is an initial core inventory, not full Python coverage. Python keywords, exception hierarchy, built-in types and their attributes, iterator/protocol methods, context managers, decorators, comprehensions, and W3Schools module references remain to be inventoried and reconciled against the selected Python version.
