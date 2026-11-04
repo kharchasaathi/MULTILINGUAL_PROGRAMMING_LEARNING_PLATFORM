@@ -4,7 +4,7 @@ Last updated: 2026-11-04
 ## Current execution position
 - Current stage: B — Complete Curriculum Planning
 - Current task: B4 — Inventory references
-- Next action: Continue B4 — reconcile the 353-row CSS A–Z property register against the current source index; reconcile HTML element-specific attributes against WHATWG; finish JavaScript built-in member/source reconciliation (Iterator, Temporal, Proxy, Reflect, Typed Arrays, RegExp grammar and Error legacy members); expand/reconcile Python (729 curated rows) and SQL (564 curated rows) coverage; verify remaining URLs and run the final coverage audit. B3 catalogue audit is complete.
+- Next action: B4 remains open. HTML element-specific attribute owner-scope pass is complete (116/116) but the separate deep ledger is still open (0/116 fully verified across all five dimensions). Continue normative semantics/value grammar/legacy/security/browser evidence; then complete remaining HTML, CSS, JavaScript/DOM, Python, SQL and cross-cutting gates in `docs/B4_ACCEPTANCE_GATE_MATRIX.csv`. Do not start B5 or merge `main` until all 29 gates are accepted and family sign-offs are recorded. B3 catalogue audit is complete.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -139,3 +139,12 @@ B4 HTML attribute applicability audit — third targeted batch (2026-11-04): add
 
 
 B4 HTML element-specific attribute owner-scope reconciliation — full batch (2026-11-04): completed the remaining 95 of 116 registered element-specific HTML attribute rows in one batch. `docs/B4_HTML_ATTRIBUTE_APPLICABILITY_AUDIT.csv` now contains 116 unique member-level owner-scope dispositions; the historic `label` gap entry was converted to a normal audit record to avoid double-counting. B4-GATE-003 records 116/116 owner-scope dispositions but remains PARTIAL because normative semantics, value grammar, deprecation/legacy policy, security notes and browser compatibility have not been fully reviewed. Sources: https://html.spec.whatwg.org/multipage/indices.html and https://www.w3schools.com/tags/ref_attributes.asp.
+
+
+## B4 execution checkpoint — 2026-11-04
+
+- The 29-gate acceptance matrix was re-read from `docs/B4_ACCEPTANCE_GATE_MATRIX.csv`. Current state: 0 gates marked ACCEPTED; 29 gates remain PARTIAL or NOT_STARTED; 0 family sign-offs.
+- HTML attribute owner-scope reconciliation: 116/116 index-level dispositions recorded. This is not normative verification.
+- HTML attribute deep-verification ledger: 116 unique rows; 0 rows fully verified across normative semantics, value grammar, legacy status, security implications and browser compatibility. Fourteen rows contain limited partial evidence; remaining evidence is open.
+- The WHATWG HTML index is non-normative. Normative checks must use the element/attribute requirements and algorithms; legacy classification must be owner-specific; compatibility requires dated engine/version evidence.
+- B4 remains NOT ACCEPTED. B5 is blocked. No merge to `main` is authorized.
