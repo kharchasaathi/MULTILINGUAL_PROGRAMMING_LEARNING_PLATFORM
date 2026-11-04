@@ -3,8 +3,8 @@
 PROJECT_NAME: MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 VERSION: 1.0
 STATUS: PLANNING
-CURRENT_STAGE: C
-NEXT_STAGE: D2
+CURRENT_STAGE: D
+NEXT_STAGE: D3
 
 ==================================================
 # PROJECT GOAL
@@ -84,7 +84,7 @@ https://www.w3schools.com/
 ==================================================
 # D. SOFTWARE ARCHITECTURE
 - [x] D1. Select technology stack
-- [ ] D2. Design frontend architecture
+- [x] D2. Design frontend architecture
 - [ ] D3. Design backend architecture
 - [ ] D4. Design database architecture
 - [ ] D5. Design API contracts
@@ -347,8 +347,8 @@ PLAN -> DESIGN -> REVIEW -> IMPLEMENT -> TEST -> SECURITY CHECK -> APPROVE -> DO
 # PROGRESS TRACKER
 
 CURRENT_STAGE: C
-CURRENT_TASK: D2
-NEXT_ACTION: Design the frontend architecture around the approved Next.js website/PWA and Expo mobile client, with responsive UI, shared contracts, accessibility, localization and API boundaries.
+CURRENT_TASK: D3
+NEXT_ACTION: Design backend architecture around the NestJS modular monolith, defining module boundaries, service responsibilities, provider adapters, background work and operational contracts.
 
 COMPLETED:
 - A1 to A7 — Project foundation documented and approved
