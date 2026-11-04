@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: C — Teaching & Content Engine
-- Current task: C10 — Define diagrams and visual teaching
-- Next action: Define diagram types, visual explanation patterns, accessibility requirements and six-locale visual parity rules.
+- Current task: C11 — Define code explanation format
+- Next action: Define a consistent code explanation format aligned with lesson structure, glossary, code fidelity and six-locale parity.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -307,3 +307,16 @@ C9 defines stable term identity, canonical English labels, six-locale record req
 Complete at glossary governance and seed-register scope. Native-language translation/review, runtime glossary storage/service, automated validation and implementation tests remain pending. No tests are claimed as executed. W3Schools remains the exclusive curriculum source.
 
 Next task: C10 — Define diagrams and visual teaching.
+
+
+## C10 closure (2026-11-05) — Diagrams and visual teaching
+
+Artifacts committed on `docs/project-foundation`:
+- `docs/C10_DIAGRAMS_AND_VISUAL_TEACHING.md`
+- `docs/C10_VISUAL_PATTERN_CATALOG.csv`
+
+C10 defines outcome-led visual selection, a controlled pattern catalogue, visual metadata and structured content contract, six-locale semantic parity, responsive behaviour, text equivalents, keyboard and screen-reader access, contrast and colour-independent meaning, reduced-motion rules, code/data integrity, stale dependency handling, asset provenance, human review and security controls. The catalog contains 12 patterns mapped to W3Schools tutorial topic tracks.
+
+Complete at specification and catalog scope. No renderer, visual authoring UI or production diagrams implemented; no lesson visuals localized or published. Eighteen future implementation test cases are specified but not executed. W3Schools remains the exclusive curriculum reference.
+
+Next task: C11 — Define code explanation format.
