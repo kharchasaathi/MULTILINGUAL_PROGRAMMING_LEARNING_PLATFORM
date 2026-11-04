@@ -4,7 +4,7 @@ PROJECT_NAME: MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 VERSION: 1.0
 STATUS: PLANNING
 CURRENT_STAGE: C
-NEXT_STAGE: C13
+NEXT_STAGE: C14
 
 ==================================================
 # PROJECT GOAL
@@ -77,7 +77,7 @@ https://www.w3schools.com/
 - [x] C10. Define diagrams and visual teaching
 - [x] C11. Define code explanation format
 - [x] C12. Define exercises and quizzes
-- [ ] C13. Define mini-projects
+- [x] C13. Define mini-projects
 - [ ] C14. Define lesson quality evaluation
 - [ ] C15. Define content review and approval
 
@@ -346,9 +346,9 @@ PLAN -> DESIGN -> REVIEW -> IMPLEMENT -> TEST -> SECURITY CHECK -> APPROVE -> DO
 ==================================================
 # PROGRESS TRACKER
 
-CURRENT_STAGE: B
-CURRENT_TASK: B6
-NEXT_ACTION: Continue B4 by removing all non-W3Schools additions and aligning every curriculum register to W3Schools-only scope. Do not perform external-source verification or add supplementary topics.
+CURRENT_STAGE: C
+CURRENT_TASK: C14
+NEXT_ACTION: Define lesson quality evaluation dimensions, rubric, review workflow, six-locale parity checks and publication quality gates.
 
 COMPLETED:
 - A1 to A7 — Project foundation documented and approved
@@ -363,7 +363,7 @@ IN_PROGRESS:
 
 PENDING:
 - B4 to B12
-- C1 to C15
+- C14 to C15
 - D1 to D15
 - E1 to E15
 - F1 to F15
