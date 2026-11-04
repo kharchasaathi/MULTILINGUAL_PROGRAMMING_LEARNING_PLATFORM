@@ -130,3 +130,6 @@ B4 HTML event-handler index refresh (2026-11-04): rechecked the WHATWG HTML Stan
 
 
 B4 HTML attribute applicability audit — second targeted batch (2026-11-04): compared current WHATWG element-index scope with the W3Schools-derived attribute register for `controls` and `type`. Added `HTML-APPL-AUD-017` and `HTML-APPL-AUD-018`. The audit now has 18 attribute checks plus one historical resolved-member record; B4-GATE-003 records 18/116 checked and 98 remaining. `controls` is explicitly conditional for the `img` case; `type` has an owner-set discrepancy (`ol` in WHATWG versus `menu`/`style` in the W3Schools mapping). This is not a complete attribute reconciliation or semantic conformance review. Source: https://html.spec.whatwg.org/dev/indices.html (updated 4 November 2026).
+
+
+B4 HTML attribute applicability audit — third targeted batch (2026-11-04): added WHATWG/W3Schools owner-scope comparisons for `disabled`, `open` and `for`, and refined the `value` record to include the `data` owner and per-element semantic distinctions. Audit now contains 21 checked attribute records plus one historical resolved-member record. B4-GATE-003 remains PARTIAL at 21/116 checked; 95 remain. Sources: https://html.spec.whatwg.org/dev/indices.html and https://www.w3schools.com/tags/ref_attributes.asp.
