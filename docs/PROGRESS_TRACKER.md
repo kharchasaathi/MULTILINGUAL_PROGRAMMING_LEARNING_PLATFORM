@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: C — Teaching & Content Engine
-- Current task: C6 — Define Tamil teaching rules
-- Next action: Define Tamil teaching rules while preserving the shared C1 lesson structure.
+- Current task: C7 — Define Hindi teaching rules
+- Next action: Define Hindi teaching rules while preserving the shared C1 lesson structure.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -201,7 +201,7 @@ W3Schools remains the exclusive curriculum scope/source reference. Original inst
 | C3 English teaching rules | Complete | English writing and spelling policy, teaching voice, terminology, code fidelity, examples, learner instructions, accessibility, parity and review checklist in `docs/C3_ENGLISH_NATIVE_TEACHING_RULES.md`. |
 | C4 Malayalam teaching rules | Complete | Malayalam language standard, teaching voice, terminology, code fidelity, examples, learner instructions, typography, accessibility, parity and review checklist in `docs/C4_MALAYALAM_NATIVE_TEACHING_RULES.md`. |
 | C5 Kannada teaching rules | Complete | Kannada language standard, teaching voice, terminology, code fidelity, examples, learner instructions, typography, accessibility, parity and review checklist in `docs/C5_KANNADA_NATIVE_TEACHING_RULES.md`. |
-| C6 Tamil teaching rules | Not started | |
+| C6 Tamil teaching rules | Complete | Tamil language standard, teaching voice, terminology, code fidelity, examples, learner instructions, typography, accessibility, parity and review checklist in `docs/C6_TAMIL_NATIVE_TEACHING_RULES.md`. |
 | C7 Hindi teaching rules | Not started | |
 | C8 AI Localization Engine | Not started | |
 | C9 Technical terminology glossary | Not started | |
@@ -259,3 +259,15 @@ C5 defines contemporary Kannada writing standards, consistent learner address, E
 C5 is complete at Kannada teaching-rule specification scope. No Kannada lesson has been authored, translated, executed, reviewed or published by this task. W3Schools remains the exclusive curriculum topic/source reference; original instructional content is required.
 
 Next task: C6 — Define Tamil teaching rules.
+
+
+## C6 closure (2026-11-05) — Tamil-native teaching rules
+
+Artifact committed on `docs/project-foundation`:
+- `docs/C6_TAMIL_NATIVE_TEACHING_RULES.md`
+
+C6 defines contemporary Tamil writing standards, consistent learner address, English technical terminology policy, exact code/output preservation, original examples, C1-aligned Tamil lesson labels, instructions/questions/hints/feedback, Tamil grammar and typography checks, glyph/mobile accessibility, six-language parity and language/technical publication reviews.
+
+C6 is complete at Tamil teaching-rule specification scope. No Tamil lesson has been authored, translated, executed, reviewed or published by this task. W3Schools remains the exclusive curriculum topic/source reference; original instructional content is required.
+
+Next task: C7 — Define Hindi teaching rules.
