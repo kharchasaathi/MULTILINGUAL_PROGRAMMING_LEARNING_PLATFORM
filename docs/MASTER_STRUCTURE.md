@@ -4,7 +4,7 @@ PROJECT_NAME: MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 VERSION: 1.0
 STATUS: PLANNING
 CURRENT_STAGE: D
-NEXT_STAGE: D13
+NEXT_STAGE: D14
 
 ==================================================
 # PROJECT GOAL
@@ -95,7 +95,7 @@ https://www.w3schools.com/
 - [x] D10. Design progress engine
 - [x] D11. Design admin panel
 - [x] D12. Design payment architecture
-- [ ] D13. Design module communication
+- [x] D13. Design module communication
 - [ ] D14. Design data flow
 - [ ] D15. Approve system architecture
 
