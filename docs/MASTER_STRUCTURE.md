@@ -4,7 +4,7 @@ PROJECT_NAME: MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 VERSION: 1.0
 STATUS: PLANNING
 CURRENT_STAGE: D
-NEXT_STAGE: D4
+NEXT_STAGE: D5
 
 ==================================================
 # PROJECT GOAL
@@ -86,7 +86,7 @@ https://www.w3schools.com/
 - [x] D1. Select technology stack
 - [x] D2. Design frontend architecture
 - [x] D3. Design backend architecture
-- [ ] D4. Design database architecture
+- [x] D4. Design database architecture
 - [ ] D5. Design API contracts
 - [ ] D6. Design authentication
 - [ ] D7. Design course engine
@@ -347,8 +347,8 @@ PLAN -> DESIGN -> REVIEW -> IMPLEMENT -> TEST -> SECURITY CHECK -> APPROVE -> DO
 # PROGRESS TRACKER
 
 CURRENT_STAGE: D
-CURRENT_TASK: D4
-NEXT_ACTION: Design PostgreSQL database architecture: entities, module ownership, relationships, constraints, indexes, migrations, retention, backups and recovery.
+CURRENT_TASK: D5
+NEXT_ACTION: Design versioned REST/JSON API contracts, request/response schemas, error envelopes, pagination, idempotency, OpenAPI generation and compatibility rules.
 
 COMPLETED:
 - A1 to A7 — Project foundation documented and approved
@@ -363,7 +363,7 @@ IN_PROGRESS:
 
 PENDING:
 - B4 to B12
-- D4 to D15
+- D5 to D15
 - E1 to E15
 - F1 to F15
 - G10 to G12
