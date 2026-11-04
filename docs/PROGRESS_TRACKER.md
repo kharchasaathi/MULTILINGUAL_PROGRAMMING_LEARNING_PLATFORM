@@ -2,9 +2,9 @@
 Last updated: 2026-11-05
 
 ## Current execution position
-- Current stage: C — Teaching & Content Engine
-- Current task: D2 — Design frontend architecture
-- Next action: Design the frontend architecture around the approved Next.js website/PWA and Expo mobile client, including application boundaries, shared contracts, navigation, localization, accessibility and API interaction.
+- Current stage: D — Software Architecture
+- Current task: D3 — Design backend architecture
+- Next action: Design backend architecture around the NestJS modular monolith, defining module boundaries, service responsibilities, provider adapters, background work and operational contracts.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -372,3 +372,20 @@ Next task: C11 — Define code explanation format.
 - Untrusted learner code must never execute in the web or API application process. Sandbox design and security gates remain mandatory.
 - The D1 decision is a documented baseline, not a production implementation or deployment claim.
 - **Next task: D2 — Design frontend architecture.**
+
+
+## D — Software architecture
+
+| Task | Status | Evidence |
+|---|---|---|
+| D1 Technology stack | Complete (baseline selection scope) | `docs/D1_TECHNOLOGY_STACK_DECISION.md` and `docs/D1_TECHNOLOGY_STACK_MATRIX.csv`; D-0003 recorded in `docs/DECISION_LOG.md`. Hosting, identity, AI and sandbox providers remain deferred. |
+| D2 Frontend architecture | Complete (architecture specification scope) | `docs/D2_FRONTEND_ARCHITECTURE.md` defines Next.js web/PWA and Expo native boundaries, monorepo packages, navigation/access classes, server/client rendering, feature ownership, API/state contracts, six-locale behavior, responsive/accessibility requirements, PWA/offline policy, frontend security and 24 future test cases. `docs/D2_FRONTEND_ROUTE_MATRIX.csv` records 20 web/mobile route entries. No app code or tests were executed. |
+
+## D2 closure and handoff (2026-11-05)
+
+- D2 is complete at frontend architecture specification scope; no application directories, components, routes, dependencies or PWA/mobile builds were implemented.
+- Web and PWA share the Next.js app; Expo React Native is the separate native client. Shared contracts/domain/validation/i18n/design tokens do not imply shared DOM/native UI components.
+- Backend authorization remains authoritative; frontend route guards are UX only. No direct client database access is allowed.
+- Offline support is initially read-only for explicitly cached public content. Assessment/progress/project/review writes remain disabled offline until conflict, secure storage and idempotency rules are designed.
+- Accessibility and security requirements are specified, not certified or penetration-tested. Twenty-four future tests are documented, not executed.
+- **Next task: D3 — Design backend architecture.**
