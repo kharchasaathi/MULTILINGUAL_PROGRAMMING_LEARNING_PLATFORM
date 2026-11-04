@@ -405,4 +405,4 @@ Never assume a task is complete without evidence.
 - Evidence: `docs/D3_BACKEND_ARCHITECTURE.md` and `docs/D3_BACKEND_MODULE_MATRIX.csv`.
 - The initial backend is a NestJS modular monolith with explicit module ownership, dependency direction, request lifecycle, authorization, persistence/provider boundaries, async-work constraints, operational controls and 24 future test scenarios.
 - No application implementation, database schema, migrations, provider integrations, worker infrastructure or deployment is claimed. Tests are specified, not executed.
-- **Next task: D4 — Design PostgreSQL database architecture and data ownership.**
+- **Next task: D6 — Design authentication, identity, session and account lifecycle.**
