@@ -83,7 +83,7 @@ The following is the tutorial track inventory as visible in the official catalog
 58. Excel
 59. Google Sheets
 
-**Catalogue count in this captured index:** 59 tutorial tracks. This is a point-in-time count of the links visible in the inspected index, not a guarantee that every item is a programming language or a full-length programming course. Some are tools, frameworks, libraries, and specialist subjects.
+**Catalogue count in the live official index (checked 2026-11-04):** 60 tutorial tracks across the four categories shown on the page. The earlier draft count of 59 was an undercount and is corrected here. This is a point-in-time count of the links visible in the inspected index, not a guarantee that every item is a programming language or a full-length programming course. Some are tools, frameworks, libraries, and specialist subjects.
 
 ## 3. Chapter/topic tree — detailed navigation capture
 
@@ -244,7 +244,7 @@ Source: https://www.w3schools.com/sql/default.asp
 
 ## 4. Other tutorial tracks — topic-tree extraction queue
 
-The catalogue below is inventoried, but each track's full chapter/subtopic tree must be captured from its own live navigation page before B3 can be considered fully audited. The queue is deliberately explicit so that no track is silently omitted.
+The catalogue below is inventoried, but each track's full chapter/subtopic tree must be captured from its own live navigation page before B3 can be considered fully audited. This second batch has now captured additional page-navigation trees for Java, C, C++, C#, PHP, TypeScript, Node.js, React, and Django. The individual trees below are a first-pass navigation capture; not every lower-level reference entry is included. The queue is deliberately explicit so that no track is silently omitted.
 
 | Track | Source path | Extraction state |
 |---|---|---|
@@ -322,3 +322,120 @@ Do not copy W3Schools lesson prose, code samples, diagrams, or exercise wording 
 ## 7. Status and next action
 
 **B3 is IN PROGRESS, not complete.** The catalogue index and five detailed core topic trees are captured, but the remaining track queue must be processed. B4 should not begin until B3's remaining in-scope chapter trees have been inventoried or explicitly classified as out-of-scope with a recorded reason.
+
+
+## 8. Additional chapter/topic trees — batch 2
+
+### 8.1 Java
+Source: https://www.w3schools.com/java/default.asp
+- Getting started: introduction, setup, syntax, statements, output, comments
+- Variables and types: variables, identifiers, constants, primitive and non-primitive types, numbers, booleans, characters, type casting
+- Operators: arithmetic, assignment, comparison, logical, precedence
+- Strings, Math, booleans
+- Control flow: if/else, switch, while/do-while, for, nested loops, for-each, break/continue
+- Arrays: traversal, multidimensional arrays
+- Methods: parameters, return values, overloading, scope, recursion
+- OOP: classes/objects, attributes, methods, constructors, this, access/non-access modifiers, encapsulation, packages/API, inheritance, polymorphism, super, inner classes, abstraction, interfaces, anonymous classes, enums
+- Input, dates, errors, debugging, exceptions, multiple exceptions, try-with-resources
+- File handling: create, write, read, delete
+- I/O streams: file input/output streams, buffered reader/writer
+- Data structures: collections, list, ArrayList, LinkedList, sorting, Set, HashSet, TreeSet, LinkedHashSet, Map, HashMap, TreeMap, LinkedHashMap, iterators, algorithms
+- Advanced: wrapper classes, generics, annotations, RegEx, threads, lambdas, advanced sorting
+- Projects and How-To problem set
+
+### 8.2 C
+Source: https://www.w3schools.com/c/index.php
+- Introduction, setup, syntax, statements, output, comments
+- Variables, format specifiers, identifiers, constants
+- Data types: characters, numbers, decimal precision, memory size, extended types
+- Type conversion, constants, operators and precedence
+- Booleans, if/else, switch
+- Loops: while, do/while, for, nested loops, break/continue
+- Arrays and subsequent structures/functions topics are present in the page navigation; continue deeper capture in the next audit pass.
+
+### 8.3 C++
+Source: https://www.w3schools.com/cpp/default.asp
+- Introduction, setup, syntax, statements, output, comments
+- Variables, identifiers, constants, user input
+- Data types: basic types, numbers, booleans, characters, strings, auto
+- Operators: arithmetic, assignment, comparison, logical, precedence
+- Strings: concatenation, length, access, special characters, input, C-style strings
+- Math, boolean values/expressions, if/else, switch, loops, arrays
+- Continue deeper capture for functions, references, pointers, memory, OOP, STL and file handling from the live navigation.
+
+### 8.4 C#
+Source: https://www.w3schools.com/cs/index.php
+- Introduction, setup, syntax, output, comments
+- Variables, constants, display, multiple variables, identifiers
+- Data types, casting, user input
+- Operators: arithmetic, assignment, comparison, logical
+- Math, strings, concatenation, interpolation, access, special characters
+- Booleans, if/else, switch
+- Loops: while, for, foreach, break/continue
+- Arrays: traversal, sorting, multidimensional arrays
+- Methods: parameters, default parameters, return values, named arguments, overloading
+- Continue deeper capture for classes, OOP, exceptions, files, LINQ and related advanced topics.
+
+### 8.5 PHP
+Source: https://www.w3schools.com/php/default.asp
+- Introduction, installation, syntax, comments
+- Variables and scope; echo/print; data types
+- Strings: functions, modification, concatenation, slicing, escaping
+- Numbers, casting, math, constants, magic constants, operators
+- Conditions: if, operators, if/else, shorthand, nested if, switch, match
+- Loops: while, do/while, for, foreach, break, continue
+- Functions and arrays: indexed, associative, create/access/update/add/remove, sorting, multidimensional, array functions
+- Superglobals: $GLOBALS, $_SERVER, $_REQUEST, $_POST, $_GET
+- Regular expressions and RegEx functions
+- Continue deeper capture for forms, validation, dates, include/files, sessions, cookies, filters, database, XML, OOP, exceptions, JSON and security.
+
+### 8.6 TypeScript
+Source: https://www.w3schools.com/typescript/index.php
+- Introduction, setup
+- Simple types, explicit typing and inference, special types
+- Arrays, tuples, object types, enums
+- Type aliases and interfaces, union types
+- Functions, casting, classes
+- Basic generics, utility types, keyof, null
+- DefinitelyTyped, TypeScript 5 updates, configuration
+- TypeScript with Node.js and React
+- Tooling, advanced types, type guards, conditional and mapped types, inference, literal types, namespaces, index signatures, declaration merging
+- Async programming, decorators, JS projects, migration, error handling, best practices
+
+### 8.7 Node.js
+Source: https://www.w3schools.com/nodejs/default.asp
+- Introduction, setup, requirements, Node vs browser, command line, V8 engine, architecture, event loop
+- Asynchronous programming: async, promises, async/await, error handling
+- Modules: CommonJS/modules, ES modules, npm, package.json, scripts, dependency management, publishing packages
+- Core modules: HTTP, HTTPS, fs, path, OS, URL, events, streams, buffers, crypto, timers, DNS, assert, util, readline
+- JavaScript/TypeScript: ES6+, process, TypeScript, advanced TypeScript, linting/formatting
+- Application building: frameworks, Express.js, middleware, REST API design, API authentication, frontend integration
+
+### 8.8 React
+Source: https://www.w3schools.com/react/default.asp
+- Introduction, setup, first app, render HTML, upgrade, ES6
+- ES6 refresh: classes, arrow functions, variables, array map, destructuring, spread, modules, ternary, template strings
+- JSX: introduction, expressions, attributes, conditions
+- Components: class/function component concepts, props, props destructuring/children, events
+- UI logic: conditionals, lists
+- Forms: forms, submit, textarea, select, multiple inputs, checkbox, radio
+- Advanced UI: portals, suspense
+- Styling: CSS, CSS modules, CSS-in-JS, Sass
+- Routing, transitions, refs, higher-order components
+
+### 8.9 Django
+Source: https://www.w3schools.com/django/index.php
+- Introduction, setup, virtual environment, installation
+- Project and app creation
+- Views, URLs, templates, models
+- Database CRUD: insert, update, delete, update model
+- Display data: prepare template/view, detail links, master template, index page, 404 template, test view
+- Admin: admin setup, users, include models, list display, update/add/delete members
+- Template syntax: variables, tags, if/else, for loop, comments, include
+- QuerySets: introduction, get, filter, order by
+- Static files: add static files, WhiteNoise, collect static, global static files, project styles
+- PostgreSQL integration and AWS RDS database setup
+
+## 9. Corrected catalogue scope note
+
+The live index's category groups total 60 links (HTML & CSS 12, JavaScript 10, Backend 24, Data Analytics 14). The index and secondary site navigation are not identical: secondary navigation also exposes learning paths and supporting subjects such as Cyber Security, Accessibility, Intro to Programming, Tools, UTF-8/Emojis, and related learning utilities. These should be registered separately as supplementary learning resources, not silently counted as tutorial tracks in the 60-link total.
