@@ -510,3 +510,90 @@ Source: https://www.w3schools.com/mysql/default.asp
 
 ### 10.6 Audit note
 Some pages opened successfully but the extraction interface exposed the page shell rather than its complete left navigation. Such pages are not counted as fully captured. The current B3 evidence therefore distinguishes: (1) catalogue-listed, (2) page URL verified, (3) topic tree first-pass, and (4) topic tree fully captured. Only category (4) can satisfy the final B3 completion criterion.
+
+
+## 11. Tutorial chapter/topic trees — batch 4
+
+This batch is grounded in the current official W3Schools tutorial pages and syllabus/module outlines checked on 2026-11-04.
+
+### 11.1 Go
+Source: https://www.w3schools.com/go/
+- Introduction, get started, syntax, comments
+- Variables: declare variables, multiple variables, naming rules
+- Constants and output: output functions, formatting verbs
+- Data types: basic types, boolean, integer, float, string
+- Arrays and slices
+- Operators: arithmetic, assignment, comparison, logical, bitwise
+- Conditions: if, if/else, else-if, nested if
+- Switch: single-case and multi-case
+- Loops
+- Functions: create/call, parameters/arguments, return values, recursion
+- Structs and maps
+- Exercises, compiler, syllabus, study plan
+
+### 11.2 Kotlin
+Source: https://www.w3schools.com/kotlin/index.php
+- Intro, get started, syntax, output, comments
+- Variables, data types, operators, strings, booleans
+- If/else and when
+- While loop, break/continue, arrays, for loop, ranges
+- Functions
+- OOP: classes/objects, constructors, class functions, inheritance
+- Exercises, quiz, practice problems, syllabus, study plan
+
+### 11.3 Rust
+Source: https://www.w3schools.com/rust/index.php
+- Intro, get started, syntax, output, comments
+- Variables, data types, constants, operators, booleans
+- If/else and match
+- Loops, while loops, for loops
+- Functions, scope, strings
+- Ownership and borrowing
+- Data structures: arrays, vectors, tuples, HashMap, structs, enums
+- Exercises and practice problems
+
+### 11.4 Vue
+Source: https://www.w3schools.com/vue/index.php
+- Intro and directives
+- Bindings: v-bind, v-if, v-show, v-for
+- Events: events, v-on, event modifiers
+- Methods, forms, v-model, CSS binding
+- Computed properties and watchers
+- Templates
+- Scaling up: setup, Single-File Components, components, props, component loops, $emit, fallthrough attributes, scoped styling, local components, slots, dynamic components, Teleport, HTTP requests, template refs, lifecycle hooks, provide/inject, routing, form inputs, animations, build, Composition API
+- Syllabus learning outcomes include reactive system, component communication/state patterns and SPA routing
+
+### 11.5 PostgreSQL
+Source: https://www.w3schools.com/postgresql/index.php
+- Intro, install, get started, pgAdmin 4
+- Database operations: CREATE TABLE, INSERT, fetch data, ADD COLUMN, UPDATE, ALTER COLUMN, DROP COLUMN, DELETE, DROP TABLE
+- Syntax and query operations: operators, SELECT, DISTINCT, WHERE, ORDER BY, LIMIT
+- Aggregates: MIN/MAX, COUNT, SUM, AVG
+- Filtering: LIKE, IN, BETWEEN, aliases
+- Joins: JOIN, INNER, LEFT, RIGHT, FULL, CROSS
+- UNION, GROUP BY, HAVING, EXISTS, ANY, ALL, CASE
+
+### 11.6 MongoDB
+Source: https://www.w3schools.com/mongodb/
+- Get started and Query API
+- Database and collections
+- CRUD: insert, find, update, delete
+- Query operators and update operators
+- Aggregation pipeline: $group, $limit, $project, $sort, $match, $addFields, $count, $lookup, $out
+- Indexing/search and validation
+- Data API, drivers, Node.js driver, Charts
+
+### 11.7 Bootstrap 5
+Source: https://www.w3schools.com/bootstrap5/
+- Get started, containers, grid, typography, colors
+- Tables, images, jumbotron, alerts
+- Buttons, button groups, badges, progress bars, spinners, pagination, list groups, cards
+- Dropdowns, collapse, navs, navbar, carousel, modal, tooltip, popover, toast, scrollspy, offcanvas
+- Utilities, dark mode, flex
+- Forms: select menus, checks/radios, range, input groups, floating labels, validation
+- Grid breakpoints: stacked/horizontal, xs, sm, md, lg, xl, xxl, examples
+- Basic template, editor, exercises, quiz, syllabus, study plan, interview preparation
+
+## 12. Batch 4 coverage note
+
+Six tutorial page/module trees were captured in this batch: Go, Kotlin, Rust, Vue, PostgreSQL, MongoDB, and Bootstrap 5 (seven tracks). The source pages expose differing depth: some use chapter navigation, while others expose module lists and syllabus outcomes. Our normalized register should preserve the original source granularity and not invent subtopics absent from the source.
