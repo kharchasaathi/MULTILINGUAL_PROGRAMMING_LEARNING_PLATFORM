@@ -4,7 +4,7 @@ PROJECT_NAME: MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 VERSION: 1.0
 STATUS: PLANNING
 CURRENT_STAGE: C
-NEXT_STAGE: C15
+NEXT_STAGE: D1
 
 ==================================================
 # PROJECT GOAL
@@ -79,7 +79,7 @@ https://www.w3schools.com/
 - [x] C12. Define exercises and quizzes
 - [x] C13. Define mini-projects
 - [x] C14. Define lesson quality evaluation
-- [ ] C15. Define content review and approval
+- [x] C15. Define content review and approval
 
 ==================================================
 # D. SOFTWARE ARCHITECTURE
@@ -347,8 +347,8 @@ PLAN -> DESIGN -> REVIEW -> IMPLEMENT -> TEST -> SECURITY CHECK -> APPROVE -> DO
 # PROGRESS TRACKER
 
 CURRENT_STAGE: C
-CURRENT_TASK: C15
-NEXT_ACTION: Define content review roles, approval authority, review queues, revision handling, publication controls, audit trail and withdrawal/rollback policy.
+CURRENT_TASK: D1
+NEXT_ACTION: Select the technology stack using documented requirements, constraints, security, maintainability and deployment trade-offs.
 
 COMPLETED:
 - A1 to A7 — Project foundation documented and approved
@@ -363,7 +363,7 @@ IN_PROGRESS:
 
 PENDING:
 - B4 to B12
-- C14 to C15
+- D1 to D15
 - D1 to D15
 - E1 to E15
 - F1 to F15
