@@ -249,7 +249,7 @@ W3Schools
 - [ ] N1. Telugu content
 - [ ] N2. English content
 - [ ] N3. Malayalam content
-- [ ] [ ] N4. Kannada content
+- [ ] N4. Kannada content
 - [ ] N5. Tamil content
 - [ ] N6. Hindi content
 - [ ] N7. Native language review
