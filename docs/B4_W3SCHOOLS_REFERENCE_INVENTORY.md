@@ -666,3 +666,22 @@ Sources:
 - https://www.w3schools.com/python/python_ref_file.asp
 
 Safety and accuracy notes: `eval()` and `exec()` are explicitly flagged as unsafe for untrusted input. String methods return new values rather than mutating strings. List/set/dictionary mutability and in-place versus value-returning behavior must be taught distinctly. File methods are scoped to stream abstractions; not every method exists on every concrete stream type. This is an initial core inventory, not full Python coverage. Python keywords, exception hierarchy, built-in types and their attributes, iterator/protocol methods, context managers, decorators, comprehensions, and W3Schools module references remain to be inventoried and reconciled against the selected Python version.
+
+
+## 39. Python keywords, built-in exceptions and built-in type members (2026-11-04)
+
+Created `docs/B4_PYTHON_KEYWORD_EXCEPTION_TYPE_REGISTER.csv` with 184 records (PYLANG-001 through PYLANG-184):
+- 35 hard/reserved Python keywords.
+- 4 context-sensitive soft keywords: match, case, _, and type (type is soft from Python 3.12).
+- 61 built-in exception and warning hierarchy entries.
+- 61 built-in type methods/attributes/protocol members across int, float, complex, bytes, bytearray, str, list, dict, set and tuple.
+
+Sources:
+- https://www.w3schools.com/python/python_ref_keywords.asp
+- https://www.w3schools.com/python/python_ref_exceptions.asp
+- https://www.w3schools.com/python/python_reference.asp
+- https://docs.python.org/3/library/stdtypes.html
+- https://docs.python.org/3/library/exceptions.html
+- https://docs.python.org/3/reference/lexical_analysis.html#soft-keywords
+
+Version notes: W3Schools keyword lists are a reference baseline, not a version pin. Soft keywords are context-sensitive and must not be taught as globally reserved identifiers. The `type` statement soft keyword requires Python 3.12+. Exception inheritance and availability can evolve; teach BaseException versus Exception correctly and do not catch KeyboardInterrupt/SystemExit via a broad Exception handler. The built-in type member entries are a starter selection, not exhaustive protocol coverage. Some methods in immutable bytes and mutable bytearray share names but differ in mutability/return behavior. Full Python-version matrix and source-by-source member reconciliation remain open.
