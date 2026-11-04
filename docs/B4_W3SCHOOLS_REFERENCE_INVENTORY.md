@@ -417,3 +417,23 @@ Sources:
 - https://www.w3schools.com/jsref/obj_screen.asp
 
 This is a member inventory batch, not a browser compatibility test or exhaustive modern Web API inventory.
+
+## 27. JavaScript Web API member inventory — Console, Storage, Geolocation, Fullscreen and Fetch (2026-11-04)
+
+Added 33 API members (JSREF-231 through JSREF-263) across five W3Schools Web API reference pages:
+- Console: 15 methods
+- Storage: 6 properties/methods
+- Geolocation: 7 properties/methods
+- Fullscreen: 4 properties/methods
+- Fetch: 1 global method
+
+Owner context is preserved for duplicate names such as `clear()` and `length`. Geolocation entries are flagged as permission-gated and HTTPS/secure-context dependent. Storage entries are noted as origin-scoped and subject to browser restrictions. Fetch is recorded as an asynchronous resource request returning a Promise resolving to a Response; the Fetch API's broader Request/Response members remain to be inventoried separately.
+
+Sources:
+- https://www.w3schools.com/jsref/api_console.asp
+- https://www.w3schools.com/jsref/api_storage.asp
+- https://www.w3schools.com/jsref/api_geolocation.asp
+- https://www.w3schools.com/jsref/api_fullscreen.asp
+- https://www.w3schools.com/jsref/api_fetch.asp
+
+This batch covers five API pages only. Canvas, MediaQueryList, Validation, and the full Fetch Request/Response surfaces remain pending.
