@@ -198,8 +198,8 @@ The complete route/method/ownership/auth/contract inventory is `D5_API_ENDPOINT_
 - Learner: `GET/PATCH /learners/me`; `GET/PATCH /learners/me/preferences`.
 - Curriculum: `GET /tracks`, `GET /tracks/{trackId}`, `GET /tracks/{trackId}/modules`, `GET /modules/{moduleId}`, `GET /topics/{topicId}`.
 - Content: `GET /lessons/{lessonId}`, `GET /lessons/{lessonId}/versions/{versionId}`; public delivery returns published locale content only.
-- Progress: `GET /learners/me/progress`, `GET /learners/me/progress/{progressId}`, `PUT /learners/me/progress/{progressId}` with version/idempotency policy.
-- Assessment: `GET /assessments/{assessmentId}`, `POST /assessments/{assessmentId}/attempts`, `GET /assessment-attempts/{attemptId}`, `POST /assessment-attempts/{attemptId}/responses`, `POST /assessment-attempts/{attemptId}/submit`. Learner schemas never expose answer keys.
+- Progress: `GET /learners/me/progress`, `GET /learners/me/progress/{progressId}`, `PUT /learners/me/progress/{progressId}` as an append-only evidence command with version/idempotency policy. It cannot patch a derived projection, completion/mastery state or accept client-authored evaluator facts.
+- Billing/entitlement: `GET /billing/plans`, `GET /billing/plans/{planId}/prices`, `POST /orders`, `GET /orders/{orderId}`, `POST /orders/{orderId}/checkout`, `GET /me/entitlements`, `POST /refund-requests`, `GET /refund-requests/{refundRequestId}`. Provider webhook ingress is isolated server-to-server and is not a learner-authenticated route. Payment facts remain D12-owned; effective access remains entitlement-owner-owned.\n- Assessment: `GET /assessments/{assessmentId}`, `POST /assessments/{assessmentId}/attempts`, `GET /assessment-attempts/{attemptId}`, `POST /assessment-attempts/{attemptId}/responses`, `POST /assessment-attempts/{attemptId}/submit`. Learner schemas never expose answer keys.
 - Authoring/review: author draft create/update/version/submit; reviewer queues, assignments, comments and decisions; release preflight and publication. Each transition is a command endpoint, not generic status update.
 - AI: `POST /ai/generation-tasks`, `GET /ai/generation-tasks/{taskId}`; generated content remains draft and human review is mandatory.
 - Assets: request upload authorization, confirm metadata/scan state, request authorized download URL; no arbitrary public object-key access.
@@ -207,7 +207,7 @@ The complete route/method/ownership/auth/contract inventory is `D5_API_ENDPOINT_
 
 Exact per-route methods, request/response schema names, auth class and idempotency/precondition requirements are listed in the endpoint matrix. Route inventory is a proposed v1 contract; D6 and domain tasks may refine it before implementation, with changes recorded.
 
-## 10. Domain-specific contract rules
+Payment routes are D12-derived candidate v1 contracts reconciled into the endpoint matrix at D15. Exact DTO schemas, webhook ingress contract, provider signature verification and admin operations still require implementation-stage contract review and E-stage security approval. The progress PUT route is an evidence-ingestion command only; its name does not authorize mutable projection writes.\n\n## 10. Domain-specific contract rules
 
 ### 10.1 Curriculum and content
 
