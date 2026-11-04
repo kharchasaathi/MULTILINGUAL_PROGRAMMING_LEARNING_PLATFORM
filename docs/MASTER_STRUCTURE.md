@@ -96,7 +96,7 @@ https://www.w3schools.com/
 - [x] D11. Design admin panel
 - [x] D12. Design payment architecture
 - [x] D13. Design module communication
-- [ ] D14. Design data flow
+- [x] D14. Design data flow
 - [ ] D15. Approve system architecture
 
 ==================================================
@@ -347,8 +347,8 @@ PLAN -> DESIGN -> REVIEW -> IMPLEMENT -> TEST -> SECURITY CHECK -> APPROVE -> DO
 # PROGRESS TRACKER
 
 CURRENT_STAGE: D
-CURRENT_TASK: D9
-NEXT_ACTION: Design the course engine, course/module/chapter/topic/lesson relationships, publication boundaries and learner-facing retrieval contracts.
+CURRENT_TASK: D15
+NEXT_ACTION: Approve system architecture by reviewing D1–D14 as one coherent design, reconciling contracts, ownership, trust boundaries, security, consistency, operational risks and deferred decisions.
 
 COMPLETED:
 - A1 to A7 — Project foundation documented and approved
@@ -472,3 +472,13 @@ Never assume a task is complete without evidence.
 - Gateway, merchant entity, prices, tax, recurring mandate, refund policy, PCI scope and retention remain open decisions.
 - No gateway, merchant account, payment UI/API, database migration, live transaction or executed test is claimed. Test scenarios are specified, not executed.
 - **Next task: D13 — Design module communication.**
+
+
+## D14 closure — 2026-11-05
+
+- D14 end-to-end system data flow is complete at logical flow and contract specification scope.
+- Evidence: `docs/D14_END_TO_END_SYSTEM_DATA_FLOW.md`; decision D-0012 in `docs/DECISION_LOG.md`.
+- Covers registration/authentication; course selection/content delivery; lesson, exercise, assessment and progress; AI Tutor and AI-assisted authoring/localization; payment/refund/subscription and entitlement; admin review/approval/publishing; notifications; error handling, recovery, reconciliation and audit.
+- Preserves module ownership and D5/D13 contracts, source-of-truth rules, versioning, idempotency, asynchronous pending states, security/privacy and observability.
+- 56 future acceptance tests are specified, not executed. No production implementation or deployment is claimed.
+- **Next task: D15 — Approve system architecture.**
