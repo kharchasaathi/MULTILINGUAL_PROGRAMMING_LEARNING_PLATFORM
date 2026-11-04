@@ -4,7 +4,7 @@ PROJECT_NAME: MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 VERSION: 1.0
 STATUS: PLANNING
 CURRENT_STAGE: D
-NEXT_STAGE: D12
+NEXT_STAGE: D13
 
 ==================================================
 # PROJECT GOAL
@@ -94,7 +94,7 @@ https://www.w3schools.com/
 - [x] D9. Design AI engine
 - [x] D10. Design progress engine
 - [x] D11. Design admin panel
-- [ ] D12. Design payment architecture
+- [x] D12. Design payment architecture
 - [ ] D13. Design module communication
 - [ ] D14. Design data flow
 - [ ] D15. Approve system architecture
@@ -462,3 +462,13 @@ Never assume a task is complete without evidence.
 - Final grant authority, MFA/dual-control, break-glass, privacy/retention, exact API routes and operational SLAs remain open for later approval.
 - No admin UI, backend endpoint, database migration, permission seed or executed test is claimed. Test scenarios are specified, not executed.
 - **Next task: D12 — Design the payment architecture.**
+
+
+## D12 closure — 2026-11-05
+
+- D12 Payment Architecture is complete at provider-neutral logical architecture and contract specification scope.
+- Evidence: `docs/D12_PAYMENT_ARCHITECTURE.md`, `docs/D12_PAYMENT_STATE_MACHINE.csv`, `docs/D12_PAYMENT_DATA_CONTRACT_MATRIX.csv`; decision D-0010 in `docs/DECISION_LOG.md`.
+- Defines free-first launch boundary, product/plan/price versioning, immutable order snapshots, hosted checkout, payment/refund/subscription states, verified webhook inbox, idempotency, reconciliation, entitlement separation, financial integrity, D11 operations, security/compliance gates and 40 future test scenarios.
+- Gateway, merchant entity, prices, tax, recurring mandate, refund policy, PCI scope and retention remain open decisions.
+- No gateway, merchant account, payment UI/API, database migration, live transaction or executed test is claimed. Test scenarios are specified, not executed.
+- **Next task: D13 — Design module communication.**
