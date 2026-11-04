@@ -1,5 +1,5 @@
 # Progress Tracker
-Last updated: 2026-11-04
+Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: B — Complete Curriculum Planning
@@ -75,3 +75,11 @@ The owner confirmed that W3Schools is the exclusive curriculum source. Clearly e
 Removed out-of-scope content includes non-W3Schools HTML event/attribute supplements, CSS additions not listed in W3Schools, MDN-only JavaScript owner candidates and RegExp syntax rows, Python.org-only type/protocol/standard-library rows, and non-W3Schools SQL dialect rows. Deleted the Python protocol and Python standard-library registers because their entries were sourced entirely outside W3Schools.
 
 These are cleaned working counts only. They do not establish complete W3Schools coverage. B4 remains in progress; remaining W3Schools reference families still need inventory. B5 remains blocked. No merge to `main`.
+
+
+## B4 source capture update (2026-11-05)
+
+- Added `docs/B4_HTML_REFERENCE_MEMBERS_CAPTURE_02.md` from W3Schools HTML Elements, Global Attributes, and Event Attributes reference pages.
+- Captured the HTML element-name set and 18 global attributes; event families and representative names are recorded, but a normalized complete event-member register remains pending.
+- Updated `docs/B4_W3SCHOOLS_REFERENCE_INVENTORY.md` to match the current W3Schools index label “Angular”.
+- B4 remains IN PROGRESS. The HTML attributes/events and remaining reference-family member inventories, source mapping, deduplication, and acceptance review are still outstanding. No B4 completion claim is made.
