@@ -63,14 +63,14 @@ The owner confirmed that W3Schools is the exclusive curriculum source. Clearly e
 
 | Register | Current rows |
 |---|---:|
-| HTML reference member register | 310 |
+| HTML reference member register | 309 |
 | CSS reference member register | 507 |
 | JavaScript/DOM reference member register | 894 |
 | Python reference member register | 171 |
 | Python keyword/exception/type register | 100 |
 | SQL core reference member register | 348 |
 | SQL advanced reference member register | 148 |
-| JavaScript RegExp syntax register | 41 |
+| JavaScript RegExp syntax register | 42 |
 
 Removed out-of-scope content includes non-W3Schools HTML event/attribute supplements, CSS additions not listed in W3Schools, MDN-only JavaScript owner candidates and RegExp syntax rows, Python.org-only type/protocol/standard-library rows, and non-W3Schools SQL dialect rows. Deleted the Python protocol and Python standard-library registers because their entries were sourced entirely outside W3Schools.
 
