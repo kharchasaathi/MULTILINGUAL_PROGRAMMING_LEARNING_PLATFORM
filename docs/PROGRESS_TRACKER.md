@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: C — Teaching & Content Engine
-- Current task: C1 — Define lesson structure
-- Next action: Define the reusable lesson structure for the approved W3Schools-only curriculum.
+- Current task: C2 — Define Telugu-native teaching rules
+- Next action: Define Telugu-native teaching rules while preserving the shared C1 lesson structure.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -181,3 +181,14 @@ Decision: **Approved with documented coverage limitations.** B7–B10 are approv
 The reconciliation records the evidence counts: B3 tutorial register 112 rows; B4 reference catalogue 37 rows; B5 practice-link register 32 rows; B6 master checklist 3,232 indexed rows; B7/B8/B9/B10 maps 25/27/23/17 rows; B11 dependency map 70 edges. B6 contains 111 tutorial-track records, and the B3 track `SUP-SPACES — Spaces` is absent from that checklist slice. All B6 rows are marked `Indexed`, which is not a lesson coverage/mastery state. Eight follow-up gaps are recorded in the B12 gap register and remain open.
 
 W3Schools remains the sole curriculum source. No external source or exhaustive-coverage claim was added. B12 is complete at bounded curriculum-framework approval scope. Next stage: C — Teaching & Content Engine; next task: C1 — Define lesson structure.
+
+
+## C1 closure (2026-11-05) — standard lesson structure
+
+Artifacts committed on `docs/project-foundation`:
+- `docs/C1_STANDARD_LESSON_STRUCTURE.md`
+- `docs/templates/LESSON_TEMPLATE.md`
+
+C1 defines a reusable lesson sequence, lesson types, B7–B10 teaching depth, six-language localization parity, lesson metadata, assessment/mastery states, remediation, authoring/review lifecycle, accessibility and responsive-content rules. The reusable template is ready for future lesson authoring. This is a specification/template milestone; no lesson has been authored, translated, executed or published by this task.
+
+W3Schools remains the exclusive curriculum scope/source reference. Original instructional content is required. Next task: C2 — Define Telugu-native teaching rules.
