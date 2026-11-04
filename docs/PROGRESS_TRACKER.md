@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: C — Teaching & Content Engine
-- Current task: C13 — Define mini-projects
-- Next action: Define mini-project briefs, scope, milestones, deliverables, evaluation rubrics and six-locale parity.
+- Current task: C14 — Define lesson quality evaluation
+- Next action: Define measurable lesson quality dimensions, scoring/rubric, evaluation workflow, six-locale parity checks, reviewer roles and quality gates.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -320,3 +320,15 @@ C10 defines outcome-led visual selection, a controlled pattern catalogue, visual
 Complete at specification and catalog scope. No renderer, visual authoring UI or production diagrams implemented; no lesson visuals localized or published. Eighteen future implementation test cases are specified but not executed. W3Schools remains the exclusive curriculum reference.
 
 Next task: C11 — Define code explanation format.
+
+
+## C12 — Exercises and quizzes closure (2026-11-05)
+- **Status:** Complete at specification scope.
+- **Evidence:** `docs/C12_EXERCISES_AND_QUIZZES_SPECIFICATION.md` defines activity and quiz taxonomies, difficulty, item contract, feedback/hints, scoring boundaries, locale parity, AI/human review, privacy/security and 20 future test cases.
+- **Limitations:** No production question bank, quiz engine, grader, sandbox or localized question set implemented; test cases specified but not executed.
+
+## C13 — Mini-projects closure (2026-11-05)
+- **Status:** Complete at specification and seed-catalog scope.
+- **Evidence:** `docs/C13_MINI_PROJECTS_SPECIFICATION.md` defines B7–B10 project progression, project types, brief metadata, learner-facing brief structure, milestones, submission/version contract, analytic rubric, hints, six-locale parity, AI/human review, lifecycle, accessibility, privacy/security and 22 future test cases.
+- **Catalog:** `docs/C13_MINI_PROJECT_CATALOG.csv` contains 20 original seed briefs across Beginner, Intermediate, Advanced and Professional pathways. Catalog module IDs were checked against the B7–B10 maps and topic IDs were checked against the B6 master checklist.
+- **Limitations:** Catalog entries remain draft seeds, not fully authored/published project lessons. No starter assets, locale translations/reviews, workspace, submission service, grading service or isolated code runner implemented. Test cases specified but not executed.
