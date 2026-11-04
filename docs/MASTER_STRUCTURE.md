@@ -4,7 +4,7 @@ PROJECT_NAME: MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 VERSION: 1.0
 STATUS: PLANNING
 CURRENT_STAGE: D
-NEXT_STAGE: D10
+NEXT_STAGE: D11
 
 ==================================================
 # PROJECT GOAL
@@ -92,7 +92,7 @@ https://www.w3schools.com/
 - [x] D7. Design course engine
 - [x] D8. Design language engine
 - [x] D9. Design AI engine
-- [ ] D10. Design progress engine
+- [x] D10. Design progress engine
 - [ ] D11. Design admin panel
 - [ ] D12. Design payment architecture
 - [ ] D13. Design module communication
@@ -442,3 +442,13 @@ Never assume a task is complete without evidence.
 - AI is draft/response assistance only: it cannot alter approved curriculum, execute code, decide mastery/scoring, approve content or publish. Instructional drafts require C14 evidence and C15 hash-bound human approval.
 - No provider/model, region, budget, runtime, endpoint, migration or evaluation corpus is selected/implemented. Privacy/contract decisions remain open. Test scenarios are specified, not executed.
 - **Next task: D10 — Design the progress engine.**
+
+
+## D10 closure — 2026-11-05
+
+- D10 learner progress engine is complete at logical domain, lifecycle and contract specification scope.
+- Evidence: `docs/D10_PROGRESS_ENGINE_ARCHITECTURE.md`, `docs/D10_PROGRESS_EVENT_CATALOG.csv`, `docs/D10_PROGRESS_DATA_CONTRACT_MATRIX.csv`, `docs/D10_PROGRESS_WORKFLOW_STATE_MACHINE.csv`; decision D-0008 in `docs/DECISION_LOG.md`.
+- Defines append-only server-authoritative evidence events, pathway selection/enrolment, distinct activity/completion/mastery states, versioned completion/mastery policies, D7 prerequisite evaluation, C12 assessment and C13 project evidence boundaries, idempotency, rebuildable projections, stale/recalculation handling, privacy/security, D4/D5/D6 integration and 35 future test scenarios.
+- No universal mastery threshold or completion percentage is invented. Offline authoritative writes remain disabled. Exact policy thresholds, cross-version reuse, retention and worker/SLO decisions remain open.
+- No application code, database migration, API implementation or tests are claimed. Test scenarios are specified, not executed.
+- **Next task: D11 — Design the admin panel.**
