@@ -23,7 +23,7 @@ Last updated: 2026-11-04
 |---|---|---|
 | B1 Categories | Complete | 15 curriculum families; 72 catalogue entries; detailed scope and limitations documented in docs/B1_W3SCHOOLS_CURRICULUM_INVENTORY.md |
 | B2 Languages and technologies | Complete | 13 tutorial-scope programming languages, 7 editor-only extension candidates, plus separate markup/query/shell/data-format and technology registers; see docs/B2_PROGRAMMING_LANGUAGE_TECHNOLOGY_INVENTORY.md |
-| B3 Tutorials | In progress | 60 official index links confirmed (12 HTML/CSS, 10 JavaScript, 24 Backend, 14 Data Analytics); detailed topic trees captured for HTML, CSS, JavaScript, Python, SQL, Java, TypeScript, Node.js, React, Django; first-pass trees captured for C, C++, C#, PHP, R, Swift, Angular, jQuery, MySQL; additional trees captured for Go, Kotlin, Rust, Vue, PostgreSQL, MongoDB, Bootstrap 5. Remaining tracks and deeper audits are pending in docs/B3_TUTORIAL_TRACK_REGISTER.csv. |
+| B3 Tutorials | In progress | 60 official index links confirmed (12 HTML/CSS, 10 JavaScript, 24 Backend, 14 Data Analytics); detailed topic trees captured for HTML, CSS, JavaScript, Python, SQL, Java, TypeScript, Node.js, React, Django; first-pass trees captured for C, C++, C#, PHP, R, Swift, Angular, jQuery, MySQL; additional trees captured for Go, Kotlin, Rust, Vue, PostgreSQL, MongoDB, Bootstrap 5. Global navigation cross-check added 17 supplementary/versioned entries; exact URLs, aliases, and full topic trees remain pending in docs/B3_TUTORIAL_TRACK_REGISTER.csv. |
 | B4 References | Not started | |
 | B5 Examples and exercises | Not started | Map topics; create original teaching material |
 | B6 Master topic checklist | Not started | |
