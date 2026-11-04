@@ -54,3 +54,13 @@ Technology stack/hosting; database/authentication; AI provider and budget; sandb
 - Deferred: default UI locale, UI-only fallback policy, anonymous preference retention, per-release locale completeness policy, English spelling convention, font stacks and D4/D5 refinements.
 - Evidence: `docs/D8_LANGUAGE_ENGINE_ARCHITECTURE.md`, `docs/D8_SUPPORTED_LOCALE_REGISTRY.csv`, `docs/D8_LOCALIZATION_PARITY_MATRIX.csv`.
 - No locale runtime, translation corpus, provider or migration is implemented; tests are specified, not executed.
+
+
+## D-0007 — Provider-neutral AI engine architecture
+- Date: 2026-11-05
+- Status: Approved at logical architecture and contract specification scope; provider/model selection deferred
+- Decision: Implement AI capabilities through a policy-gated orchestration module and replaceable provider adapters. Allow only explicit task IDs and versioned schemas. Treat prompts, context and model outputs as untrusted; enforce server-side authorization, data minimization, safety checks, deterministic validation, usage budgets, idempotency and audit evidence.
+- Authority boundary: AI may produce learner responses and versioned content drafts. It cannot expand W3Schools-derived curriculum scope, execute code, change answer keys/mastery, grant permissions, approve C14/C15 gates or publish. Content drafts require C14 evidence and C15 hash-bound human approval.
+- Privacy: no sensitive learner data or secrets sent to providers by default. Provider retention/training terms, processing region, consent/legal basis, raw prompt retention, quotas and budget remain open pending security/privacy and commercial review. No provider/model is selected.
+- Evidence: `docs/D9_AI_ENGINE_ARCHITECTURE.md`, `docs/D9_AI_TASK_AND_CAPABILITY_MATRIX.csv`, `docs/D9_AI_DATA_CONTRACT_MATRIX.csv`.
+- No runtime, provider integration, database migration, API endpoint, evaluation corpus or executed tests are claimed.
