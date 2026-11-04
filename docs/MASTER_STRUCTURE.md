@@ -3,8 +3,8 @@
 PROJECT_NAME: MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 VERSION: 1.0
 STATUS: PLANNING
-CURRENT_STAGE: D
-NEXT_STAGE: D14
+CURRENT_STAGE: E
+NEXT_STAGE: E1
 
 ==================================================
 # PROJECT GOAL
@@ -97,7 +97,7 @@ https://www.w3schools.com/
 - [x] D12. Design payment architecture
 - [x] D13. Design module communication
 - [x] D14. Design data flow
-- [ ] D15. Approve system architecture
+- [x] D15. Approve system architecture
 
 ==================================================
 # E. SECURITY CONSTITUTION
@@ -346,42 +346,28 @@ PLAN -> DESIGN -> REVIEW -> IMPLEMENT -> TEST -> SECURITY CHECK -> APPROVE -> DO
 ==================================================
 # PROGRESS TRACKER
 
-CURRENT_STAGE: D
-CURRENT_TASK: D15
-NEXT_ACTION: Approve system architecture by reviewing D1–D14 as one coherent design, reconciling contracts, ownership, trust boundaries, security, consistency, operational risks and deferred decisions.
+CURRENT_STAGE: E
+CURRENT_TASK: E1
+NEXT_ACTION: Threat modelling using D1–D15 architecture, trust boundaries and D15 GATE-01–GATE-15.
 
 COMPLETED:
-- A1 to A7 — Project foundation documented and approved
-- B1 — W3Schools category inventory baseline
-- B2 — Programming language and technology inventory baseline
-- G1 to G8 — Private repository and core governance documents created
+- A1–A7 — Project foundation
+- B1–B12 — Curriculum planning (bounded scope and documented coverage limitations)
+- C1–C15 — Teaching and content engine specifications
+- D1–D15 — Software architecture specifications; D15 conditionally approved as logical baseline
 
 IN_PROGRESS:
-- B3 — Tutorial inventory; catalogue and partial topic trees recorded, full audit not complete
-- G9 — Working branch exists; pull request policy and branch protections pending
-- G13 — Git history/version control active; backup policy pending
+- G9 — Branch/PR policy and branch protection
+- G13 — Backup policy; Git history/version control active
 
 PENDING:
-- B4 to B12
-- D5 to D15
-- E1 to E15
-- F1 to F15
-- G10 to G12
-- H1 to H12
-- I1 to I14
-- J1 to J12
-- K1 to K12
-- L1 to L15
-- M1 to M12
-- N1 to N10
-- O1 to O13
-- P1 to P9
-- Q1 to Q9
-- R1 to R8
-- S1 to S9
+- E1–E15 — Security Constitution
+- F1–F15 — Error Prevention & Quality Engineering
+- G10–G12 — GitHub Actions, automated tests and deployment workflow
+- H1–S9 — Design, implementation, launch, monetization and maintenance workstreams
 
-NOTE:
-This tracker reflects documented planning artifacts, not implemented application features. A checkbox is complete only when its defined acceptance evidence exists. Partial inventories remain in progress and must not be treated as approved curriculum coverage.
+APPROVAL LIMIT:
+D15 approval permits progression to security and quality design. It is not production readiness or permission to implement/enable gated capabilities. D15 GATE-01–GATE-15 must be closed with evidence before the relevant implementation or production integration. No tests are claimed as executed unless recorded with actual results.
 
 ==================================================
 # RESUME COMMAND
