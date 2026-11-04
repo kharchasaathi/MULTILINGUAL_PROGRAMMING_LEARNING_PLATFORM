@@ -4,7 +4,7 @@ PROJECT_NAME: MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 VERSION: 1.0
 STATUS: PLANNING
 CURRENT_STAGE: B
-NEXT_STAGE: B3
+NEXT_STAGE: B4
 
 ==================================================
 # PROJECT GOAL
@@ -346,7 +346,7 @@ PLAN -> DESIGN -> REVIEW -> IMPLEMENT -> TEST -> SECURITY CHECK -> APPROVE -> DO
 
 CURRENT_STAGE: B
 CURRENT_TASK: B4
-NEXT_ACTION: Begin B4 reference inventory; B3 catalogue audit is complete with per-track evidence limitations documented.
+NEXT_ACTION: Continue B4 reference inventory; verify URLs and expand core language/API reference taxonomies.
 
 COMPLETED:
 - A1 to A7 — Project foundation documented and approved
