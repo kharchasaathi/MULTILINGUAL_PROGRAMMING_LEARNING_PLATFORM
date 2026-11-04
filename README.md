@@ -17,3 +17,7 @@ Security by design, least privilege, documented contracts, automated quality gat
 
 ## Status
 Planning and curriculum discovery. See [roadmap](docs/DEVELOPMENT_ROADMAP.md) and [progress tracker](docs/PROGRESS_TRACKER.md).
+
+
+## Canonical project structure
+The complete line-by-line A–S project plan, development rules, workflow, progress state, and resume command are maintained in [MASTER_STRUCTURE.md](docs/MASTER_STRUCTURE.md).
