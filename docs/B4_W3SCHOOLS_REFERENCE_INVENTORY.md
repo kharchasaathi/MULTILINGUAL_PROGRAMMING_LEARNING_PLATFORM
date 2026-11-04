@@ -365,3 +365,11 @@ The W3Schools JavaScript Reference index groups HTML DOM Document as a reference
 Sources:
 - https://www.w3schools.com/jsref/default.asp
 - https://www.w3schools.com/jsref/dom_obj_document.asp
+
+## 23. JavaScript/DOM member inventory — Element object batch 1 (2026-11-04)
+
+Added 49 Element-object properties and methods (JSREF-073 through JSREF-121) to `docs/B4_JS_DOM_REFERENCE_MEMBER_REGISTER.csv`. Entries cover element attributes, child relationships, node identity/position, content editing, layout geometry, scrolling, insertion/removal, and metadata. `insertAdjacentHTML()` and `outerHTML` carry explicit security notes because assigning untrusted markup can create injection risks.
+
+The source is W3Schools' HTML DOM Element reference, revised January 2026. The current working register preserves the owner context as `HTML Element`; later passes must reconcile this shared Element list against the separate HTMLElement and specialized HTML element object pages. The source index includes both shared Element members and specialized APIs, so this is a first normalized batch, not an exhaustive full API claim.
+
+Source: https://www.w3schools.com/jsref/dom_obj_all.asp
