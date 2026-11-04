@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: B — Complete Curriculum Planning
-- Current task: B5 — Inventory examples and exercises as topic references
-- Next action: Begin B5 — map W3Schools examples and exercises to the existing topic catalogue.
+- Current task: B6 — Create master topic checklist
+- Next action: Build the master topic checklist using B3 tutorial topics and B4 reference links.
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -25,7 +25,7 @@ Last updated: 2026-11-05
 | B2 Languages and technologies | Complete | 13 tutorial-scope programming languages, 7 editor-only extension candidates, plus separate markup/query/shell/data-format and technology registers; see docs/B2_PROGRAMMING_LANGUAGE_TECHNOLOGY_INVENTORY.md |
 | B3 Tutorials | Complete | Final catalogue audit: 58 official Tutorials-index entries (12 HTML/CSS, 10 JavaScript, 23 Backend, 13 Data Analytics); wider global navigation separately classified; version tracks, learning paths, specialist resources, tools and legacy labels reconciled. Per-track chapter-tree evidence and limitations are recorded in docs/B3_TUTORIAL_TRACK_REGISTER.csv; no claim that every sidebar was fully captured. References/practice assets routed to B4/B5. |
 | B4 References | Complete (catalogue/link capture scope) | W3Schools reference index and available family/source links recorded in B4 registers. Per user's instruction, no external verification or approval workflow. This does not mean full page-text or every reference member was copied. |
-| B5 Examples and exercises | Not started | Map topics; create original teaching material |
+| B5 Examples and exercises | Complete (catalogue/link capture scope) | W3Schools practice catalogue, HTML/SQL category labels, examples/exercises/quiz surfaces and 32 link records captured in docs/B5_W3SCHOOLS_EXAMPLES_EXERCISES_INDEX.md and docs/B5_PRACTICE_LINK_REGISTER.csv. |
 | B6 Master topic checklist | Not started | |
 | B7 Beginner | Not started | |
 | B8 Intermediate | Not started | |
@@ -90,3 +90,14 @@ These are cleaned working counts only. They do not establish complete W3Schools 
 The user clarified that this task is a straightforward W3Schools-only copy/link capture task, with no external verification and no separate approval/sign-off stage. B4 is therefore closed at **reference catalogue and source-link capture scope**. Evidence: `docs/B4_W3SCHOOLS_REFERENCE_INVENTORY.md`, `docs/B4_REFERENCE_REGISTER.csv`, `docs/B4_HTML_REFERENCE_FAMILY_CAPTURE.md`, and `docs/B4_HTML_REFERENCE_MEMBERS_CAPTURE_02.md`.
 
 Scope boundary: this completion means the reference catalogue/family pointers and the existing working member registers are recorded. It does **not** mean full verbatim copying of W3Schools lesson pages or exhaustive member-by-member transcription for every family. B5 can now proceed. W3Schools remains the sole source.
+
+
+## B5 closure (2026-11-05) — user-directed copy/link capture scope
+
+The user specified W3Schools as the only source and requested no external verification or approval stage. B5 is closed at **practice catalogue, topic/category label, and link-mapping scope**.
+
+Artifacts:
+- `docs/B5_W3SCHOOLS_EXAMPLES_EXERCISES_INDEX.md`
+- `docs/B5_PRACTICE_LINK_REGISTER.csv`
+
+Captured W3Schools practice surfaces include Tryit/interactive examples, Examples, Exercises, Quizzes, Challenges, and Practice Problems. Topic exercise links and available HTML/SQL category labels are recorded. This does not claim that every W3Schools exercise prompt or code sample has been copied. B6 is next. W3Schools remains the exclusive source.
