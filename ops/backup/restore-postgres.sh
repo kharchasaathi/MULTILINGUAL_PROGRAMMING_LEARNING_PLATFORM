@@ -8,7 +8,7 @@ umask 077
 : "\${PGUSER:?Set PGUSER}"
 [[ "\${RESTORE_CONFIRM:-}" == YES ]] || { echo "Blocked: set RESTORE_CONFIRM=YES after approval" >&2; exit 1; }
 [[ "$PGDATABASE" != postgres && "$PGDATABASE" != template0 && "$PGDATABASE" != template1 ]] || { echo "Refusing system database" >&2; exit 1; }
-file="$1"; "$(dirname "$0")/verify-backup.sh" "$file"
+file="$1"; bash "$(dirname "$0")/verify-backup.sh" "$file"
 for cmd in age pg_restore; do command -v "$cmd" >/dev/null || { echo "Missing $cmd" >&2; exit 127; }; done
 tmp="$(mktemp -d "\${TMPDIR:-/tmp}/platform-restore.XXXXXX")"; trap 'rm -rf -- "$tmp"' EXIT
 age --decrypt --identity "$AGE_IDENTITY_FILE" --output "$tmp/restore.dump" "$file"
