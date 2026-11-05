@@ -3,9 +3,9 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: E — Security Constitution
-- Current task: E13 — Backup and recovery (PostgreSQL+age CI passed; guarded AWS S3 publisher committed; live cloud validation and PITR/DR controls pending).
-- AWS account constraint recorded: Free Plan project is assigned to Sydney (`ap-southeast-2`); the approved production target remains Mumbai (`ap-south-1`). AWS documents S3 and KMS as Free Tier service families but disallow Multi-Region/cross-Region features for this new Free Tier experience. Customer-managed KMS keys have a published USD 1/key/month storage charge plus applicable API usage. No AWS resources or paid-plan upgrade have been authorized. See `docs/E13_AWS_FREE_PLAN_CONSTRAINTS.md`.
-- Next action: Resolve an owner-approved account/region and cost strategy that supports the intended production + DR topology; then provision disposable AWS test resources and execute live S3, pgBackRest WAL/PITR, key-custody, alerting, replication and restore-drill gates. E14 remains blocked.
+- Current task: E13 — Backup and recovery (PostgreSQL+age CI passed; Backblaze B2 bucket and guarded S3-compatible publisher added; live cloud validation and PITR/DR controls pending).
+- AWS S3 paid-plan route was paused; Google Cloud Billing signup was blocked by account-security verification and no GCP Billing Account was created. Current off-site candidate is Backblaze B2 EU Central (`eu-central-003`); bucket `kharchasaathi-e13-backup-primary` exists as Private, SSE-B2 enabled, Keep all versions, Object Lock Disabled. See E13 runbook.
+- Next action: verify the new B2 publisher CI; create a bucket-restricted B2 Application Key (never share it in chat); then run a controlled encrypted test upload/download and remote checksum verification. After that validate pgBackRest B2 stanza/base backup/WAL/PITR, approve Object Lock retention, provision separate-region DR account/bucket and Cloud Replication, and complete key custody, alerting, E11/E12 integration and restore drills. E14 remains blocked.
 - Completed prior: E1–E10 security design baselines; E11 — Privacy and data protection (completed out of sequence at design scope).
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
@@ -680,3 +680,14 @@ E3 milestone recorded in E3 artifacts.
 - **Guardrails:** no unlimited AI/code execution; enforce quotas server-side and apply budgets, rate limits, sandbox resource ceilings, alerts and kill switches.
 - **Still pending:** exact Free/Premium entitlements, quotas, price validation, billing provider, Play billing policy review, tax/compliance review and implementation in stage R.
 - This product decision does not change E13 status or acceptance gates. E13 remains IN PROGRESS; E14 remains blocked.
+
+
+## E13 Backblaze B2 implementation update (2026-11-05)
+
+- Backblaze B2 EU Central bucket kharchasaathi-e13-backup-primary created by owner. Observed: Private, default SSE-B2 enabled, Keep all versions, Object Lock Disabled, zero files at creation.
+- Added guarded B2 S3-compatible logical backup publisher and mocked contract tests: ops/backup/publish-b2-backup.sh and ops/backup/test-b2-publish.sh.
+- Added dedicated GitHub Actions workflow .github/workflows/e13-b2-contract.yml; workflow execution result is pending verification.
+- Updated pgBackRest config example to B2 endpoint/region and B2 Application Key placeholders; updated E13 runbook, README, architecture and control matrix.
+- Important capability differences: no AWS IAM roles, S3 Block Public Access or SSE-KMS; use bucket-restricted B2 Application Keys, private ACL, SSE-B2 plus client-side encryption. B2 versioning is always on. Object Lock is one-way enablement and still disabled on the created bucket. Cloud Replication uses B2 console/Native API and requires a separate B2 account per region.
+- Not yet done: live upload/download/remote checksum verification, Object Lock retention test, second-region/account and replication, live pgBackRest stanza/base backup/WAL/PITR, key escrow/rotation, alert delivery, actual E11/E12 restore integrations, approved numeric RPO/RTO and isolated restore drills.
+- **E13 remains IN PROGRESS. E14 remains BLOCKED.**
