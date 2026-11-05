@@ -45,4 +45,18 @@ jobs:
           PGUSER: postgres
           PGPASSWORD: postgres
         run: bash ops/backup/test-backup-integration.sh
-\n  s3-publisher-contract:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - name: Check Bash syntax\n        run: bash -n ops/backup/*.sh\n      - name: Run mocked S3 publisher contract tests (no AWS credentials)\n        run: bash ops/backup/test-s3-publish.sh\n
+
+  s3-publisher-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Bash syntax
+        run: bash -n ops/backup/*.sh
+      - name: Validate replication and lifecycle JSON templates
+        run: |
+          python3 -m json.tool ops/backup/s3-replication-config.example.json >/dev/null
+          python3 -m json.tool ops/backup/s3-lifecycle-incomplete-multipart.example.json >/dev/null
+      - name: Run mocked S3 publisher contract tests (no AWS credentials)
+        run: bash ops/backup/test-s3-publish.sh
+      - name: Run PITR operations and recovery-gate tests
+        run: bash ops/backup/test-e13-controls.sh
