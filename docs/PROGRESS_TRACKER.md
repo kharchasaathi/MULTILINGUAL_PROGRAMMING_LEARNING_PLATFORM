@@ -657,4 +657,4 @@ E3 milestone recorded in E3 artifacts.
 - Evidence: `ops/backup/backup-postgres.sh`, `verify-backup.sh`, `restore-postgres.sh`, `test-backup-scripts.sh`, `test-backup-integration.sh`, `README.md`, `.github/workflows/e13-backup-utility.yml`.
 - Still not production-complete: WAL archiving/PITR, immutable off-host copies, provider/KMS or key escrow, scheduled backups and freshness alerts, object/event/audit consistency, E11 deletion/legal-hold replay, E12 audit integration, approved RPO/RTO and recurring isolated restore drills. These require infrastructure/provider decisions and owner approvals.
 - **Status:** IN PROGRESS. Do not mark E13 complete or proceed to E14 until all mandatory E13 acceptance gates are evidenced.
-- **Next action:** obtain passing real PostgreSQL+age integration run, then implement and verify remaining provider-neutral recovery controls and record external dependencies explicitly.
+- **Next action:** implement and validate PITR/WAL recovery, immutable off-host copies, key escrow, scheduling/alerts, E11/E12 integration, approved RPO/RTO and recurring isolated restore drills; then obtain owner approval for external provider dependencies.
