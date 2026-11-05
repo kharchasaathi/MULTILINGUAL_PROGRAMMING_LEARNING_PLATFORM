@@ -1,0 +1,56 @@
+scenario_id,scenario,expected_result,status
+PAY-T001,Client submits manipulated amount,Server uses catalogue price and rejects mismatch,Future; not executed
+PAY-T002,Client submits another user order ID,Owner authorization denies access,Future; not executed
+PAY-T003,Client sends fake payment success status,No financial state transition occurs,Future; not executed
+PAY-T004,Client changes currency,Server-selected currency remains authoritative,Future; not executed
+PAY-T005,Price changes after order creation,Existing order snapshot remains unchanged,Future; not executed
+PAY-T006,Discount coupon is raced across parallel checkouts,Usage limit is atomically enforced,Future; not executed
+PAY-T007,Money value exceeds safe range or uses fractional precision,Schema rejects invalid amount and uses minor units,Future; not executed
+PAY-T008,Checkout request is retried with same idempotency key,Single logical attempt is created,Future; not executed
+PAY-T009,Same idempotency key reused with different payload,Conflict is rejected and audited,Future; not executed
+PAY-T010,Provider API times out after accepting checkout,Attempt remains recoverable without duplicate charge,Future; not executed
+PAY-T011,Provider returns malicious checkout URL,Origin validation rejects URL,Future; not executed
+PAY-T012,Return URL contains external redirect,Redirect is blocked,Future; not executed
+PAY-T013,Client success redirect is opened without payment,Order remains unpaid/pending,Future; not executed
+PAY-T014,Webhook signature uses reserialized body,Verification fails unless exact raw bytes match,Future; not executed
+PAY-T015,Webhook signature is invalid,Request is rejected and alerted,Future; not executed
+PAY-T016,Webhook timestamp is outside tolerance,Replay/stale event is rejected,Future; not executed
+PAY-T017,Previously accepted event is replayed,Inbox uniqueness prevents duplicate effect,Future; not executed
+PAY-T018,Webhook uses wrong merchant account,Event is quarantined/rejected,Future; not executed
+PAY-T019,Test event reaches live endpoint,Environment mismatch is rejected,Future; not executed
+PAY-T020,Webhook amount differs from order snapshot,No paid transition; reconciliation case raised,Future; not executed
+PAY-T021,Webhook currency differs from order snapshot,No paid transition; reconciliation case raised,Future; not executed
+PAY-T022,Webhook references unknown order,No entitlement is granted; event quarantined,Future; not executed
+PAY-T023,Duplicate webhook arrives concurrently,Exactly one logical transition is committed,Future; not executed
+PAY-T024,Older pending event arrives after captured event,State does not regress,Future; not executed
+PAY-T025,Webhook worker crashes after durable receipt,Retry processes event idempotently,Future; not executed
+PAY-T026,Webhook endpoint acknowledges before durable receipt,Test fails acceptance gate,Future; not executed
+PAY-T027,Provider status lookup is unavailable,State remains pending/unknown,Future; not executed
+PAY-T028,Provider reports success but internal order is cancelled,Conflict is quarantined for reconciliation,Future; not executed
+PAY-T029,Provider event has unsupported schema version,Event is quarantined safely,Future; not executed
+PAY-T030,Webhook body exceeds configured limit,Request is rejected before expensive processing,Future; not executed
+PAY-T031,Webhook key rotates during overlap,Valid current/overlap keys accepted per policy,Future; not executed
+PAY-T032,Revoked webhook key is used,Signature verification rejects event,Future; not executed
+PAY-T033,Duplicate refund request is retried,Only one refund operation is created,Future; not executed
+PAY-T034,Refund exceeds captured remainder,Domain invariant rejects refund,Future; not executed
+PAY-T035,Partial refunds are submitted concurrently,Aggregate refund ceiling remains intact,Future; not executed
+PAY-T036,Admin clicks refund execute without approval,Authorization denies execution,Future; not executed
+PAY-T037,Same actor requests and approves restricted refund,Separation-of-duties policy denies approval,Future; not executed
+PAY-T038,Provider accepts refund request but later fails,Refund remains non-complete until verified,Future; not executed
+PAY-T039,Chargeback event arrives twice,Single dispute transition with audit,Future; not executed
+PAY-T040,Refund/chargeback affects one of multiple entitlement sources,Only affected source is reevaluated,Future; not executed
+PAY-T041,Payment event is delivered twice to entitlement consumer,No duplicate entitlement grant,Future; not executed
+PAY-T042,Outbox publishes then crashes before marking sent,Consumer safely deduplicates redelivery,Future; not executed
+PAY-T043,Entitlement service is unavailable,Payment evidence persists and delivery retries,Future; not executed
+PAY-T044,Support user attempts to set payment success,Permission denied and audit emitted,Future; not executed
+PAY-T045,AI tool proposes refund or entitlement mutation,Deterministic broker denies action,Future; not executed
+PAY-T046,User enumerates another learner order IDs,No cross-owner data is disclosed,Future; not executed
+PAY-T047,Financial export is requested without purpose/scope,Export is denied,Future; not executed
+PAY-T048,Provider key is present in frontend bundle,Build/security gate fails,Future; not executed
+PAY-T049,Provider secret appears in application logs,Redaction test fails and incident alert fires,Future; not executed
+PAY-T050,Provider request redirects to private metadata IP,SSRF controls block destination,Future; not executed
+PAY-T051,Live credential is used in staging,Environment isolation denies operation,Future; not executed
+PAY-T052,Provider outage causes repeated checkout retries,Bounded backoff prevents retry storm,Future; not executed
+PAY-T053,Provider settlement report has missing transaction,Reconciliation flags unmatched record,Future; not executed
+PAY-T054,Internal record differs in fee/amount/currency,Variance case is raised without silent repair,Future; not executed
+PAY-T055,Payment data deletion/retention request occurs,Approved E11 financial retention/legal hold policy is applied,Future; not executed
