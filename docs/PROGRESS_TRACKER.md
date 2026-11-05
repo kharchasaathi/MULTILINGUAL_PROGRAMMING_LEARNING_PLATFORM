@@ -3,7 +3,7 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: E — Security Constitution
-- Current task: E2 — Network protection
+- Current task: E3 — Application security (completed; E4 is next)
 - Next action: Define deployment-independent ingress/egress, TLS, DNS/SSRF, service connectivity, environment isolation and network monitoring requirements from E1 trust boundaries TB2, TB5 and TB7.
 - Completed immediately before current task: E1 — System Security Threat Model (architecture-level threat identification and risk register scope).
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
