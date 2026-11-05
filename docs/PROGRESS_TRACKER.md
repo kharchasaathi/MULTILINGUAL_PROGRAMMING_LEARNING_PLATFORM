@@ -649,11 +649,12 @@ E3 milestone recorded in E3 artifacts.
 - Production reliance requires E11 retention/legal review, E13 backup/recovery, E14 independent tests and E15 explicit approval. Next: E13 — Backup and recovery.
 
 
-## E13 closure — Backup and recovery (2026-11-05)
-- Evidence: `docs/E13_BACKUP_RECOVERY_SECURITY_ARCHITECTURE.md`; 40 controls in `docs/E13_BACKUP_RECOVERY_CONTROL_MATRIX.csv`; 40 future scenarios in `docs/E13_BACKUP_RECOVERY_VERIFICATION_CATALOG.csv`; decision E-0013.
-- Executable slice committed: `ops/backup/backup-postgres.sh`, `ops/backup/verify-backup.sh`, `ops/backup/restore-postgres.sh`, `ops/backup/test-backup-scripts.sh`, `ops/backup/README.md`; CI workflow `.github/workflows/e13-backup-utility.yml`.
-- Implementation supports encrypted PostgreSQL logical dumps, SHA-256 plus manifest, pre-restore checksum/archive-list checks, explicit destructive-restore confirmation and system-database target rejection.
-- Verification status: scripts and mock harness are committed, but have not been executed in this session; CI result is pending. The harness does not prove real age cryptography or PostgreSQL recovery.
-- Not implemented: WAL archiving/PITR, remote immutable storage, scheduling/alerting, object-store/event/audit coordinated backup, key escrow, restore drill, numeric RPO/RTO or provider integration.
-- Production reliance requires E11 retention/deletion/legal-hold integration, E12 audit integration, E14 independent tests and E15 explicit approval. Learner code execution and live payments remain disabled under their existing gates.
-- **Next task: E14 — Security testing.**
+## E13 — Backup and recovery (REOPENED; implementation hardening in progress, 2026-11-05)
+
+- Previous E13 closure was premature: the initial mock-only utility did not prove recoverability. E13 is explicitly reopened; E14 must not start yet.
+- Hardened implementation committed: atomic staging/publication, restrictive permissions, strict manifest/checksum validation, tamper detection test, age decryption preflight, isolated-target attestation and non-destructive restore into a newly provisioned empty database.
+- Added a real PostgreSQL + age end-to-end integration test and a dedicated GitHub Actions service-container job. Mocked tests and Bash syntax checks have passed in GitHub Actions run 23; real integration job is still running at the time of this update.
+- Evidence: `ops/backup/backup-postgres.sh`, `verify-backup.sh`, `restore-postgres.sh`, `test-backup-scripts.sh`, `test-backup-integration.sh`, `README.md`, `.github/workflows/e13-backup-utility.yml`.
+- Still not production-complete: WAL archiving/PITR, immutable off-host copies, provider/KMS or key escrow, scheduled backups and freshness alerts, object/event/audit consistency, E11 deletion/legal-hold replay, E12 audit integration, approved RPO/RTO and recurring isolated restore drills. These require infrastructure/provider decisions and owner approvals.
+- **Status:** IN PROGRESS. Do not mark E13 complete or proceed to E14 until all mandatory E13 acceptance gates are evidenced.
+- **Next action:** obtain passing real PostgreSQL+age integration run, then implement and verify remaining provider-neutral recovery controls and record external dependencies explicitly.
