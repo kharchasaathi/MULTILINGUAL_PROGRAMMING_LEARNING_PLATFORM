@@ -124,3 +124,14 @@ Technology stack/hosting; database/authentication; AI provider and budget; sandb
 - Evidence: `docs/D15_SYSTEM_ARCHITECTURE_APPROVAL.md` and reconciled D3/D4/D5 supporting documents.
 - Verification boundary: Documentation and repository consistency review only. 35 future architecture checks are specified, not executed. No code, migration, integration, security test or deployment is claimed.
 - Next: E1 — Threat modelling.
+
+
+## E-0001 — Platform-wide security threat model
+- Date: 2026-11-05
+- Status: Approved as the architecture-level threat-model baseline; detailed controls and security approval pending E2–E15.
+- Decision: Use the E1 threat model and machine-readable register as the security risk baseline for the platform. Map threats to trust boundaries, assets, owners, D15 gates and downstream security tasks. Update it when architecture/data flows/providers/privileged capabilities change.
+- Evidence: `docs/E1_SYSTEM_SECURITY_THREAT_MODEL.md`, `docs/E1_THREAT_REGISTER.csv`, updated `docs/SECURITY_CONSTITUTION.md`.
+- Coverage: Seven trust boundaries, 20 baseline assets, STRIDE analysis, 30 threats with inherent/provisional residual ratings, 15 D15 gate mappings, monitoring indicators and 24 future verification scenarios.
+- Non-acceptance: Sandbox execution remains disabled; Critical/High risks are not accepted by documentation alone. Residual High risks require named ownership, evidence, compensating controls and E15 approval.
+- Verification boundary: Documentation review only. No implementation, provider/network configuration, penetration test, automated security test, vulnerability scan, restore drill or production control validation is claimed.
+- Next: E2 — Network protection.
