@@ -231,6 +231,7 @@ Technology stack/hosting; database/authentication; AI provider and budget; sandb
 - Adopt PostgreSQL custom-format logical dumps encrypted with age, SHA-256 artifact checksums, a versioned manifest, pre-restore verification and explicit confirmation for destructive restore into an isolated target.
 - Keep encryption identity outside backup artifacts and under separate custody. Backup credentials and keys must be delivered through protected secret management, never repository files or logs.
 - Logical dumps do not provide PITR. WAL archiving, immutable cross-account/region copies, object-store consistency, key escrow, scheduling, monitoring, retention, privacy tombstone replay, audit integration and restore drills remain production gates.
-- Evidence: E13 architecture, 40 controls, 40 future verification scenarios, backup/verify/restore scripts, mock harness and CI workflow.
-- No real database backup/restore, encryption round-trip, remote backup, PITR, recovery drill or RPO/RTO achievement is claimed. Mock tests have not been executed in this session.
-- Next: E14 — security testing.
+- Evidence: E13 architecture, 40 controls, 40 verification scenarios, hardened backup/verify/restore scripts, mock harness, real PostgreSQL+age integration test and CI workflow.
+- E13 was reopened because the earlier mock-only completion claim was premature. Mocked tests and Bash syntax checks passed in GitHub Actions run 23; real PostgreSQL+age integration is pending.
+- Production gates remain: WAL/PITR, immutable off-host copies, key escrow, scheduling/alerts, cross-system consistency, E11 deletion/legal-hold replay, E12 audit integration, approved RPO/RTO and restore drills.
+- Next: continue E13. E14 must not start until E13 acceptance is evidenced.
