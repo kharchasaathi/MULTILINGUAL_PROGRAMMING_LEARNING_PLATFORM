@@ -74,3 +74,14 @@ The authoritative sequence is defined in docs/MASTER_STRUCTURE.md: E1 Threat mod
 - Do not expose host paths, devices, runtime sockets, metadata endpoints, credentials, hidden tests or control-plane interfaces to a job.
 - Verify immutable signed runtime images and provenance; provide independent kill switch, monitoring and recovery.
 - No execution enablement until L13-L15 readiness, E14 independent test evidence and E15 explicit approval. E9 is design-only; no runtime or tests are claimed.
+
+
+## Payment security baseline (E10)
+- Use provider-hosted checkout or provider-controlled secure components. The platform must not receive or store card authentication data; never place payment credentials in logs, traces or analytics.
+- Server-side price, currency, tax/discount eligibility and immutable order snapshot are authoritative. Client values and return redirects never prove payment.
+- Verify provider callbacks using exact raw request bytes, signature, timestamp/replay window, merchant account, environment, order, amount and currency. Persist durable receipt before acknowledgment; deduplicate retries and handle out-of-order events safely.
+- Keep order, payment, refund, dispute, subscription and entitlement ownership separate. Only verified payment facts may be consumed by the entitlement owner.
+- Keep financial evidence append-only. Refunds and manual adjustments require scoped authorization, independent approval where required, evidence and audit. Reconciliation must not silently repair state.
+- Isolate provider credentials by environment in managed secret storage; rotate/revoke keys; restrict provider egress. Apply E11 privacy and retention rules.
+- No PCI DSS compliance is claimed. Determine scope with the acquirer/provider and qualified assessor; complete legal/tax/finance review before live payment acceptance.
+- E10 is design-only. No gateway, merchant account, endpoint, migration, credential, live payment, PCI assessment or runtime control is deployed or verified. Live payments require E14 evidence and E15 explicit approval.
