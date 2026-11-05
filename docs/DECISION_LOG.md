@@ -186,3 +186,9 @@ Technology stack/hosting; database/authentication; AI provider and budget; sandb
 - Evidence: docs/E11_DATA_PROTECTION_PRIVACY_SECURITY.md; docs/E11_PRIVACY_CONTROL_MATRIX.csv (48 controls); docs/E11_PRIVACY_VERIFICATION_CATALOG.csv (38 future scenarios).
 - Deferred: controller/entity and launch jurisdictions, lawful basis per purpose, child-user model, processor/AI providers, cross-border transfer mechanism, retention durations, rights SLA, legal holds and breach notification process. No legal opinion, DPIA, UI, contracts, workflows or tests are claimed; scenarios are unexecuted.
 - Learner code execution remains disabled until E9, L13-L15 and E15 approval. Next: E7 — API security.
+
+
+## E-0008 — API security
+- Status: Design baseline complete; implementation and verification pending (2026-11-05).
+- Evidence: `docs/E7_API_SECURITY_ARCHITECTURE.md`, `docs/E7_API_SECURITY_CONTROL_MATRIX.csv` (60 controls), `docs/E7_API_SECURITY_VERIFICATION_CATALOG.csv` (56 future scenarios).
+- No API implementation or tests are claimed. Next: E8 — AI prompt injection protection.
