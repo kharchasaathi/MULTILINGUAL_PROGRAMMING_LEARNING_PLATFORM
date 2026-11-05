@@ -4,7 +4,7 @@ PROJECT_NAME: MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 VERSION: 1.0
 STATUS: PLANNING
 CURRENT_STAGE: E
-NEXT_STAGE: E4
+NEXT_STAGE: E5
 
 ==================================================
 # PROJECT GOAL
@@ -104,7 +104,7 @@ https://www.w3schools.com/
 - [x] E1. Threat modelling
 - [ ] E2. Network protection
 - [ ] E3. Application security
-- [ ] E4. Authentication security
+- [x] E4. Authentication security
 - [ ] E5. Authorization and roles
 - [ ] E6. Database security
 - [ ] E7. API security
@@ -483,3 +483,10 @@ Never assume a task is complete without evidence.
 - The work is a design baseline; implementation and test evidence remain pending.
 - Learner code execution remains disabled until the required later gates are approved.
 - Next task: E4.
+
+
+## E4 milestone — identity and authentication security
+- E4 provider-neutral identity/authentication security design is complete: docs/E4_IDENTITY_AUTHENTICATION_SECURITY.md, 42-control matrix and 48-scenario verification catalog.
+- Implementation, provider selection and runtime verification remain pending; scenarios are not executed.
+- Learner code execution remains disabled until E9, L13-L15 and E15 approval.
+- Next task: E5 — authorization and roles.
