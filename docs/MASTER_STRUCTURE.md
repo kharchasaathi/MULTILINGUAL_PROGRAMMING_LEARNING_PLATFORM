@@ -4,7 +4,7 @@ PROJECT_NAME: MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 VERSION: 1.0
 STATUS: PLANNING
 CURRENT_STAGE: E
-NEXT_STAGE: E13
+NEXT_STAGE: E14
 
 ==================================================
 # PROJECT GOAL
@@ -113,7 +113,7 @@ https://www.w3schools.com/
 - [x] E10. Payment security
 - [x] E11. Privacy and data protection
 - [x] E12. Audit logging
-- [ ] E13. Backup and recovery
+- [x] E13. Backup and recovery
 - [ ] E14. Security testing
 - [ ] E15. Security approval
 
@@ -534,3 +534,12 @@ Never assume a task is complete without evidence.
 - Design-only: no sandbox runtime, VM/container, scheduler, network policy, runtime image, quota, endpoint or tests are implemented or validated.
 - **Execution remains disabled.** Enablement requires L13–L15 readiness, E14 independent security evidence and E15 explicit approval.
 - **Next task: E10 — Payment security.**
+
+
+## E13 closure — 2026-11-05
+- E13 architecture, 40-control matrix and 40-scenario verification catalogue committed.
+- Initial executable slice: provider-neutral PostgreSQL logical backup, age encryption, SHA-256/manifest verification, explicit-confirmation restore utility, operator README and mock test harness.
+- CI workflow added for Bash syntax and mock utility tests.
+- No live database, real encryption round-trip, remote immutable copy, WAL/PITR, object-store backup, scheduled job, restore drill or production recovery is claimed.
+- Production readiness remains gated on provider/key/storage decisions, approved RPO/RTO and retention, E11/E12 integration, E14 independent tests and E15 approval.
+- **Next task: E14 — Security testing.**
