@@ -1,15 +1,28 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
-root="$(cd "$(dirname "$0")/../.." && pwd)"; tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
+root="$(cd "$(dirname "$0")/../.." && pwd)"
+tmp="$(mktemp -d)"
+trap 'rm -rf "$tmp"' EXIT
 mkdir -p "$tmp/bin" "$tmp/out"
 cat > "$tmp/bin/pg_dump" <<'MOCK'
 #!/usr/bin/env bash
-out="$(echo "$arg" | sed 's/^--file=//')"; printf 'mock dump\n' > "$out"
+while (($#)); do
+  case "$1" in
+    --file=*) out="$(echo "$1" | sed 's/^--file=//')"; printf 'mock dump\n' > "$out" ;;
+  esac
+  shift
+done
 MOCK
 cat > "$tmp/bin/age" <<'MOCK'
 #!/usr/bin/env bash
 out=''; source=''
-while (($#)); do case "$1" in --output) out="$2"; shift 2;; --encrypt|--decrypt|--recipient|--identity) shift 2;; *) source="$1"; shift;; esac; done
+while (($#)); do
+  case "$1" in
+    --output) out="$2"; shift 2 ;;
+    --encrypt|--decrypt|--recipient|--identity) shift 2 ;;
+    *) source="$1"; shift ;;
+  esac
+done
 cp "$source" "$out"
 MOCK
 cat > "$tmp/bin/pg_restore" <<'MOCK'
@@ -22,8 +35,12 @@ export PATH="$tmp/bin:$PATH" BACKUP_DIR="$tmp/out" AGE_RECIPIENT=age1test PGHOST
 bash "$root/ops/backup/backup-postgres.sh"
 artifact="$(find "$tmp/out" -name '*.dump.age' -print -quit)"
 bash "$root/ops/backup/verify-backup.sh" "$artifact"
-export AGE_IDENTITY_FILE="$tmp/identity"; touch "$AGE_IDENTITY_FILE"
-if RESTORE_CONFIRM=NO bash "$root/ops/backup/restore-postgres.sh" "$artifact"; then echo "Expected confirmation guard failure" >&2; exit 1; fi
+export AGE_IDENTITY_FILE="$tmp/identity"
+touch "$AGE_IDENTITY_FILE"
+if RESTORE_CONFIRM=NO bash "$root/ops/backup/restore-postgres.sh" "$artifact"; then
+  echo "Expected confirmation guard failure" >&2
+  exit 1
+fi
 export RESTORE_CONFIRM=YES
-"$root/ops/backup/restore-postgres.sh" "$artifact"
+bash "$root/ops/backup/restore-postgres.sh" "$artifact"
 echo "Mock backup utility tests passed."
