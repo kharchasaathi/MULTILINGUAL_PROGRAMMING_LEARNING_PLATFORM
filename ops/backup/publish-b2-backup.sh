@@ -28,6 +28,7 @@ fi
 [[ -n "$B2_APPLICATION_KEY_ID" && -n "$B2_APPLICATION_KEY" ]] || { echo "B2 application credentials are required" >&2; exit 64; }
 
 file="$1"
+: "${B2_VERSION_LOG:=${file}.b2-versions}"
 [[ -f "$file" && -s "$file" ]] || { echo "Backup artifact missing or empty" >&2; exit 1; }
 sum="${file}.sha256"
 manifest="${file%.dump.age}.manifest"
