@@ -3,9 +3,9 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: E — Security Constitution
-- Current task: E1 — Threat modelling
-- Next action: Build the E1 threat model from D1–D15 trust boundaries, D15 GATE-01–GATE-15, actors, assets, entry points, abuse cases, threats, mitigations and residual risks.
-- Completed immediately before current task: D15 — System Architecture conditional approval (logical architecture baseline scope).
+- Current task: E2 — Network protection
+- Next action: Define deployment-independent ingress/egress, TLS, DNS/SSRF, service connectivity, environment isolation and network monitoring requirements from E1 trust boundaries TB2, TB5 and TB7.
+- Completed immediately before current task: E1 — System Security Threat Model (architecture-level threat identification and risk register scope).
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -535,3 +535,15 @@ D13 Module Communication architecture is complete at specification scope. Eviden
 - **Mandatory gates:** GATE-01–GATE-15 remain tracked in D15. Project/notification/billing/identity persistence consolidation, exact wire schemas, provider choices, privacy/retention, sandbox, worker operations, backup/restore and CI/release evidence remain pending.
 - **Tests:** 35 future architecture verification scenarios specified; none executed by this review.
 - **Next task:** E1 — Threat modelling.
+
+
+## E1 closure (2026-11-05) — system security threat modelling
+
+- **Status:** Complete — architecture-level threat model documented.
+- **Evidence:** `docs/E1_SYSTEM_SECURITY_THREAT_MODEL.md`, `docs/E1_THREAT_REGISTER.csv`, updated `docs/SECURITY_CONSTITUTION.md`; decision E-0001 in `docs/DECISION_LOG.md`.
+- **Inputs:** D1–D15, D6 identity, D9 AI, D11 admin, D12 payment, D13 module communication, D14 end-to-end data flow and current Security/Engineering Constitutions.
+- **Coverage:** Scope/assumptions; 7 logical trust boundaries; 20 baseline assets and classifications; threat actors/abuse cases; STRIDE by boundary; 30 threat records with inherent scores, owners, treatments and provisional residual ratings; D15 GATE-01–GATE-15 mapping; monitoring indicators; non-acceptance rules; 24 future verification scenarios.
+- **Critical guardrail:** Sandbox escape is Critical inherent / High provisional residual. Code execution remains disabled until E9, L13–L15 and E15 approval.
+- **Other unresolved risks:** Account takeover, IDOR, payment/webhook integrity, CI/CD compromise, privacy/retention and backup recovery remain open until owner stages provide implementation evidence.
+- **Verification boundary:** Design-time documentation only. No code, provider, network control, security test, penetration test, scan, restore drill or production control was executed or validated.
+- **Next task:** E2 — Network protection.
