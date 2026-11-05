@@ -1,6 +1,6 @@
 # E13 Operational Backup, PITR and Recovery Runbook
 
-**Status:** Local backup/restore and PostgreSQL+age CI evidence passed; Backblaze B2 bucket created; B2 publisher contract tests added; live cloud upload, PITR and DR evidence pending.
+**Status:** Local backup/restore and PostgreSQL+age CI evidence passed; synthetic live Backblaze B2 upload/download with exact-VersionId and SHA-256 verification passed (GitHub Actions run #3, 2026-11-05); pgBackRest/WAL/PITR and remaining DR controls are still pending.
 **Selected off-site object storage:** Backblaze B2 S3-compatible API, EU Central (eu-central-003).
 **Bucket:** kharchasaathi-e13-backup-primary
 **Endpoint:** https://s3.eu-central-003.backblazeb2.com
@@ -156,3 +156,23 @@ Before running it:
 4. Immediately delete the two GitHub repository secrets and revoke the temporary B2 Application Key in Backblaze. The uploaded synthetic encrypted smoke objects may remain versioned as evidence; they contain no production data.
 
 This smoke test proves the B2 S3-compatible path for a synthetic encrypted artifact only. It does not prove PostgreSQL dump consistency, pgBackRest compatibility, WAL/PITR, Object Lock, replication, key escrow, alerts or production DR.
+
+
+## 12. Live B2 synthetic smoke-test result and credential cleanup (2026-11-05)
+
+**Result: PASS — synthetic live B2 connectivity and exact-version integrity test.**
+
+Evidence:
+- GitHub Actions run #3: https://github.com/kharchasaathi/MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM/actions/runs/42019191955
+- Job `b2-live-smoke`: all steps completed successfully, including checkout of the E13 implementation branch, age installation, synthetic encrypted fixture creation, upload, exact VersionId downloads and SHA-256 verification.
+- The workflow used the private bucket `kharchasaathi-e13-backup-primary`, endpoint `https://s3.eu-central-003.backblazeb2.com`, and the isolated prefix `postgres/e13-live-smoke/`.
+- Only a synthetic text fixture encrypted with an ephemeral age identity was uploaded. No production database, learner, customer or personal data was included.
+- The run proves that this synthetic artifact could be uploaded and its exact object versions downloaded and checksum-verified through the configured B2 S3-compatible path. It does not validate PostgreSQL dump consistency, pgBackRest, WAL archiving, PITR, Object Lock retention, replication, escrow, alert delivery or a production recovery.
+
+Temporary credential cleanup:
+- GitHub repository secrets `B2_TEST_APPLICATION_KEY_ID` and `B2_TEST_APPLICATION_KEY` were deleted after the successful run.
+- Temporary B2 Application Key `e13-live-smoke` was revoked.
+- The separate `e13-backup-writer` key was retained. Do not copy it into GitHub Actions or reuse it for pgBackRest; it is restricted to the logical `postgres/` path.
+- The GitHub Environment `e13-b2-live-smoke` remains but has no environment secrets. The manual workflow is defined on `main` for workflow-dispatch discovery and explicitly checks out `docs/project-foundation` for the E13 implementation.
+
+**Acceptance status:** The live logical B2 smoke-test gate is complete. E13 overall remains **IN PROGRESS** and E14 remains **BLOCKED** until all other mandatory acceptance evidence in Section 9 is completed, independently checked and approved.
