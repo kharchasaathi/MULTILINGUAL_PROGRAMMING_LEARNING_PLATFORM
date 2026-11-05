@@ -101,7 +101,7 @@ https://www.w3schools.com/
 
 ==================================================
 # E. SECURITY CONSTITUTION
-- [ ] E1. Threat modelling
+- [x] E1. Threat modelling
 - [ ] E2. Network protection
 - [ ] E3. Application security
 - [ ] E4. Authentication security
@@ -347,27 +347,28 @@ PLAN -> DESIGN -> REVIEW -> IMPLEMENT -> TEST -> SECURITY CHECK -> APPROVE -> DO
 # PROGRESS TRACKER
 
 CURRENT_STAGE: E
-CURRENT_TASK: E1
-NEXT_ACTION: Threat modelling using D1–D15 architecture, trust boundaries and D15 GATE-01–GATE-15.
+CURRENT_TASK: E2
+NEXT_ACTION: Define deployment-independent ingress/egress, TLS, DNS/SSRF, service connectivity, environment isolation and network monitoring requirements from E1 trust boundaries TB2, TB5 and TB7.
 
 COMPLETED:
 - A1–A7 — Project foundation
 - B1–B12 — Curriculum planning (bounded scope and documented coverage limitations)
 - C1–C15 — Teaching and content engine specifications
 - D1–D15 — Software architecture specifications; D15 conditionally approved as logical baseline
+- E1 — System security threat model; architecture-level analysis and 30-threat register
 
 IN_PROGRESS:
 - G9 — Branch/PR policy and branch protection
 - G13 — Backup policy; Git history/version control active
 
 PENDING:
-- E1–E15 — Security Constitution
+- E2–E15 — Security Constitution
 - F1–F15 — Error Prevention & Quality Engineering
 - G10–G12 — GitHub Actions, automated tests and deployment workflow
 - H1–S9 — Design, implementation, launch, monetization and maintenance workstreams
 
 APPROVAL LIMIT:
-D15 approval permits progression to security and quality design. It is not production readiness or permission to implement/enable gated capabilities. D15 GATE-01–GATE-15 must be closed with evidence before the relevant implementation or production integration. No tests are claimed as executed unless recorded with actual results.
+E1 is a design-time threat model, not security approval. D15 GATE-01–GATE-15 and E1 threats remain open until owner evidence is produced. D15 permits progression to security/quality design only; it is not production readiness. Playground execution remains disabled. No tests are claimed as executed unless actual results are recorded.
 
 ==================================================
 # RESUME COMMAND
