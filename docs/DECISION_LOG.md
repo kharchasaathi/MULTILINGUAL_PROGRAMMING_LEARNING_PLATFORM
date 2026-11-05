@@ -162,3 +162,11 @@ Technology stack/hosting; database/authentication; AI provider and budget; sandb
 - Evidence: docs/E4_IDENTITY_AUTHENTICATION_SECURITY.md; docs/E4_IDENTITY_AUTHENTICATION_CONTROL_MATRIX.csv (42 controls); docs/E4_IDENTITY_AUTHENTICATION_VERIFICATION_CATALOG.csv (48 future scenarios).
 - Provider, credential ownership, MFA policy, session technology/lifetime, key management and recovery policy remain deferred. No implementation or tests are claimed; scenarios are unexecuted.
 - Learner code execution remains disabled until E9, L13-L15 and E15 approval. Next: E5.
+
+
+## E-0005 — Authorization and role security
+- Date: 2026-11-05; approved as a logical policy and governance baseline; implementation and verification pending.
+- Adopt deny-by-default authorization, server-side mutation-boundary enforcement, hybrid RBAC/contextual scope checks, granular permission identifiers, bounded role bundles, separation of duties, independent expiring grants, privileged-action step-up/dual approval, time-limited break-glass, cache invalidation, service identity isolation and auditable policy decisions.
+- Evidence: docs/E5_AUTHORIZATION_ROLE_SECURITY_ARCHITECTURE.md; docs/E5_PERMISSION_CATALOG.csv (44 identifiers); docs/E5_ROLE_PERMISSION_MATRIX.csv (15 candidate roles); docs/E5_AUTHORIZATION_CONTROL_MATRIX.csv (50 controls); docs/E5_AUTHORIZATION_VERIFICATION_CATALOG.csv (55 future scenarios).
+- Deferred: policy engine, final role membership, tenant model, approval matrix, assurance thresholds, revocation SLA, cache TTL and audit retention. No implementation or tests are claimed; scenarios are unexecuted.
+- Learner code execution remains disabled until E9, L13-L15 and E15 approval. Next: E6 — database security.
