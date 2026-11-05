@@ -135,3 +135,14 @@ Technology stack/hosting; database/authentication; AI provider and budget; sandb
 - Non-acceptance: Sandbox execution remains disabled; Critical/High risks are not accepted by documentation alone. Residual High risks require named ownership, evidence, compensating controls and E15 approval.
 - Verification boundary: Documentation review only. No implementation, provider/network configuration, penetration test, automated security test, vulnerability scan, restore drill or production control validation is claimed.
 - Next: E2 — Network protection.
+
+
+## E-0002 — Network protection architecture
+- Date: 2026-11-05
+- Status: Approved as a provider-neutral network security design baseline; deployment and verification pending.
+- Decision: Adopt logical zones Z0-Z7 and default-deny ingress/egress with explicit, owned and observable flows. Require protected public ingress/origins, TLS 1.2 minimum (TLS 1.3 preferred), least-privilege private data/worker connectivity, SSRF-safe egress, DNS protection, environment/CI isolation, network telemetry and fail-closed security behavior.
+- Sandbox constraint: Learner code execution remains disabled until E9, L13-L15 and E15 evidence/approval. Future execution network has no path to application/data/worker/control-plane/metadata/other-tenant networks and default-deny egress.
+- Evidence: docs/E2_NETWORK_PROTECTION_ARCHITECTURE.md, docs/E2_NETWORK_CONTROL_MATRIX.csv (32 controls), docs/E2_NETWORK_VERIFICATION_CATALOG.csv (30 future scenarios).
+- Deferred: Hosting vendor/region/topology, edge/WAF/DDoS, DNS/certificate products, CIDR/firewall rules, workload identity technology, provider allowlists, SIEM/retention, sandbox technology and operational SLOs.
+- Verification boundary: Documentation review only. No network configuration, infrastructure scan, TLS/DNS test, penetration test or production control validation is claimed. Future scenarios are not executed.
+- Next: E3 — security design.
