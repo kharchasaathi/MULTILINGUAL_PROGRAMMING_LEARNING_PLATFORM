@@ -547,3 +547,13 @@ D13 Module Communication architecture is complete at specification scope. Eviden
 - **Other unresolved risks:** Account takeover, IDOR, payment/webhook integrity, CI/CD compromise, privacy/retention and backup recovery remain open until owner stages provide implementation evidence.
 - **Verification boundary:** Design-time documentation only. No code, provider, network control, security test, penetration test, scan, restore drill or production control was executed or validated.
 - **Next task:** E2 — Network protection.
+
+
+## E2 closure (2026-11-05) — network protection
+
+- **Status:** Complete at provider-neutral network security design/specification scope.
+- **Evidence:** `docs/E2_NETWORK_PROTECTION_ARCHITECTURE.md`, `docs/E2_NETWORK_CONTROL_MATRIX.csv` (32 controls), `docs/E2_NETWORK_VERIFICATION_CATALOG.csv` (30 future scenarios); decision E-0002 in `docs/DECISION_LOG.md`.
+- **Coverage:** Eight logical zones; public ingress and origin protection; TLS/certificate lifecycle; east-west/data/worker access; default-deny egress; SSRF, metadata and DNS protections; provider callback boundary; environment/CI/admin isolation; future sandbox network isolation; DoS controls; telemetry, incident containment and fail-closed behavior.
+- **Critical guardrail:** Learner code execution remains disabled until E9, L13–L15 and E15 evidence/approval.
+- **Verification boundary:** Documentation review only. No network configuration, firewall/DNS/TLS change, infrastructure scan, penetration test or production control validation is claimed. All 30 scenarios are specified, not executed.
+- **Next task:** E3 — security design.
