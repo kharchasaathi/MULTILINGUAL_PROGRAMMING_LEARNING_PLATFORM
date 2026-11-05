@@ -110,4 +110,4 @@ Audit store and isolation topology; append-only/WORM product; cryptographic inte
 8. E11 retention/legal review and E13 backup/recovery controls are reconciled.
 9. E14 independent tests and E15 explicit approval are completed before production reliance.
 
-**Verification status:** Design only. The accompanying 60 controls and 55 scenarios are specifications, not deployed controls or executed tests. No log collector, SIEM, WORM store, database schema, alert, retention job, dashboard, integration or runtime control is implemented or validated.
+**Verification status:** Design only. The accompanying 59 controls and 55 scenarios are specifications, not deployed controls or executed tests. No log collector, SIEM, WORM store, database schema, alert, retention job, dashboard, integration or runtime control is implemented or validated.
