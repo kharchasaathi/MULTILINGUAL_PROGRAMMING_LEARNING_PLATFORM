@@ -95,3 +95,13 @@ The authoritative sequence is defined in docs/MASTER_STRUCTURE.md: E1 Threat mod
 - Audit access/search/export/replay/retention/legal-hold changes. Apply E11 minimization: never log passwords, tokens, cookies, secrets, PAN/CVV/PIN/OTP, raw prompts or full learner submissions by default.
 - Define risk-based alert owners/playbooks, pipeline-health monitoring, bounded retries/backpressure and restricted forensic evidence custody. High-risk actions fail closed or remain pending if required durable audit evidence is unavailable.
 - E12 is design-only: no collector, SIEM, WORM store, schema, retention job, alert, dashboard, integration, runtime control or test is deployed or validated. Production reliance requires E13 recovery, E14 independent tests and E15 explicit approval.
+
+
+## Backup and recovery baseline (E13)
+- Treat backups, manifests, checksums, WAL archives, object versions and encryption identities as sensitive assets with source-equivalent classification and retention.
+- Encrypt backup artifacts before leaving the trusted host; separate backup storage administration, database administration and key custody. Never commit secrets or plaintext dumps.
+- Verify artifact integrity and archive readability before restore. Destructive restores require explicit approval and an isolated, explicitly identified recovery target.
+- Coordinate database, object, event and audit recovery; replay privacy deletion tombstones and preserve legal holds before restored data is served.
+- Logical pg_dump backups are not PITR. Production requires approved RPO/RTO, retention, off-host immutable copies, key recovery, WAL/PITR where required, monitoring and tested restore drills.
+- Audit backup/restore requests, approvals, artifact identity, target, outcome and validation evidence without recording keys or credentials.
+- E13 implementation is partial and provider-neutral. No production backup, PITR, remote immutable copy, restore drill or recovery SLA is claimed. E14 independent testing and E15 explicit approval remain mandatory.
