@@ -154,3 +154,11 @@ Technology stack/hosting; database/authentication; AI provider and budget; sandb
 - Evidence: docs/E3_APPLICATION_SECURITY_ARCHITECTURE.md; docs/E3_APPLICATION_SECURITY_CONTROL_MATRIX.csv (40 controls); docs/E3_APPLICATION_SECURITY_VERIFICATION_CATALOG.csv (40 future scenarios).
 - No application code or tests are claimed. Scenarios remain unexecuted. Learner code execution remains disabled pending E9, L13-L15 and E15 approval.
 - Next: E4.
+
+
+## E-0004 — Identity and authentication security
+- Date: 2026-11-05; design baseline approved; implementation and verification pending.
+- Adopt E4 identity lifecycle, federation validation, MFA/recovery, session revocation, principal handoff, service identity, abuse and audit requirements.
+- Evidence: docs/E4_IDENTITY_AUTHENTICATION_SECURITY.md; docs/E4_IDENTITY_AUTHENTICATION_CONTROL_MATRIX.csv (42 controls); docs/E4_IDENTITY_AUTHENTICATION_VERIFICATION_CATALOG.csv (48 future scenarios).
+- Provider, credential ownership, MFA policy, session technology/lifetime, key management and recovery policy remain deferred. No implementation or tests are claimed; scenarios are unexecuted.
+- Learner code execution remains disabled until E9, L13-L15 and E15 approval. Next: E5.
