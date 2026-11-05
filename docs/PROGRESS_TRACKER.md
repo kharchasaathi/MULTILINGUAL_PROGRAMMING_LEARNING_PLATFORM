@@ -3,9 +3,9 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: E — Security Constitution
-- Current task: E7 — Data protection and privacy security (completed at design scope; E8 is next)
-- Next action: E8 — security monitoring, logging and incident response.
-- Completed immediately before current task: E6 — Database security hardening (design scope).
+- Current task: E7 — API security (pending)
+- Next action: E7 — API security.
+- Completed prior: E6 — Database security hardening; E11 — Privacy and data protection (completed out of sequence at design scope).
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -593,11 +593,12 @@ E3 milestone recorded in E3 artifacts.
 - **Next task:** E7 — data protection and privacy security.
 
 
-## E7 closure (2026-11-05) — data protection and privacy security
+## E11 closure (2026-11-05) — privacy and data protection (completed out of sequence)
 
 - **Status:** Complete at privacy architecture and verification-design scope; implementation and legal review pending.
-- **Evidence:** docs/E7_DATA_PROTECTION_PRIVACY_SECURITY.md; docs/E7_PRIVACY_CONTROL_MATRIX.csv (48 controls); docs/E7_PRIVACY_VERIFICATION_CATALOG.csv (38 future scenarios); decision E-0007.
-- **Coverage:** Data inventory/classification, purpose and lawful basis, granular consent/withdrawal, notices and rights requests, minimization, processors/transfers, AI data governance, child-user safeguards, retention/deletion, legal holds and privacy incident response.
+- **Canonical mapping:** The earlier E7 label was incorrect. E7 is API security; privacy and data protection is E11. The E11 artifacts below are the authoritative canonical copies.
+- **Evidence:** docs/E11_DATA_PROTECTION_PRIVACY_SECURITY.md; docs/E11_PRIVACY_CONTROL_MATRIX.csv (48 controls); docs/E11_PRIVACY_VERIFICATION_CATALOG.csv (38 future scenarios); decision E-0007.
+- **Coverage:** Data inventory/classification, purpose and lawful basis, consent/withdrawal, notices and rights requests, minimization, processors/transfers, AI data governance, child-user safeguards, retention/deletion, legal holds and privacy incident response.
 - **Verification boundary:** Design only. No legal opinion, DPIA, consent UI, privacy notice, processor contract, retention/deletion workflow, rights request, incident exercise or privacy test is claimed. All 38 scenarios are future tests.
 - **Critical guardrail:** Learner code execution remains disabled until E9, L13–L15 and E15 approval.
-- **Next task:** E8 — security monitoring, logging and incident response.
+- **Next task:** E7 — API security (not yet complete).
