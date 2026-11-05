@@ -62,8 +62,8 @@ bash ops/backup/test-b2-verify.sh
 
 ## 4. pgBackRest configuration and bootstrap
 
-1. Verify bucket, endpoint, region, Private ACL, SSE-B2 and versioning. Create a bucket-restricted B2 Application Key with only required operations. Separate backup and recovery credentials; keep recovery credentials outside the production host.
-2. Render ops/backup/pgbackrest.conf.example to /etc/pgbackrest/pgbackrest.conf, owner postgres, mode 0600. Inject B2 key ID, secret and repository cipher passphrase from secret management. Never commit the rendered file.
+1. Verify bucket, endpoint, region, Private ACL, SSE-B2 and versioning. The existing e13-backup-writer key is restricted to postgres/ and is only for the logical publisher. Create a separate bucket-restricted pgBackRest key restricted to pgbackrest/; verify required list/read/write and repository-prune operations in a disposable bucket before granting any delete capability. Keep recovery credentials outside the production host.
+2. Render ops/backup/pgbackrest.conf.example to /etc/pgbackrest/pgbackrest.conf, owner postgres, mode 0600. Inject the separate pgBackRest B2 key ID, secret and repository cipher passphrase from secret management. Do not reuse the logical publisher key because its postgres/ prefix cannot access the pgbackrest/ repository. Never commit the rendered file.
 3. Pin a patched pgBackRest release and verify its S3-compatible endpoint, Signature V4, URI-style and multipart behavior against B2 in a disposable bucket before production.
 4. Merge ops/backup/postgresql-archive-settings.conf.example into managed PostgreSQL configuration. archive_mode=on requires a PostgreSQL restart. Confirm archive command runs as the database service account with access to pgBackRest config/spool paths.
 5. Run:
@@ -125,7 +125,7 @@ The hook executables must be implemented, reviewed and deployed by E11 privacy a
 ## 9. Acceptance evidence still required
 
 - Approved data inventory, data classification, retention/legal-hold policy and numeric RPO/RTO.
-- B2 restricted Application Keys, tested live logical upload/download using exact VersionIds and independent checksum/manifest verification.
+- B2 restricted logical-writer key (postgres/) and separate pgBackRest key (pgbackrest/), tested live logical upload/download using exact VersionIds and independent checksum/manifest verification.
 - Object Lock enablement and approved per-object/default retention on a disposable/test bucket, followed by approved immutable DR destination; source bucket Object Lock is currently Disabled.
 - Separate B2 destination account/region, Cloud Replication rule, replication status monitoring and successful restore from the replica.
 - Successful pgBackRest B2 S3-compatible stanza, base backup, continuous WAL archive and timestamp-based PITR restore.
