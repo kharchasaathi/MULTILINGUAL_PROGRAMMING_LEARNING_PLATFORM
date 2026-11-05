@@ -4,7 +4,7 @@ PROJECT_NAME: MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 VERSION: 1.0
 STATUS: PLANNING
 CURRENT_STAGE: E
-NEXT_STAGE: E8
+NEXT_STAGE: E7
 
 ==================================================
 # PROJECT GOAL
@@ -102,16 +102,16 @@ https://www.w3schools.com/
 ==================================================
 # E. SECURITY CONSTITUTION
 - [x] E1. Threat modelling
-- [ ] E2. Network protection
-- [ ] E3. Application security
+- [x] E2. Network protection
+- [x] E3. Application security
 - [x] E4. Authentication security
 - [x] E5. Authorization and roles
-- [ ] E6. Database security
+- [x] E6. Database security
 - [ ] E7. API security
 - [ ] E8. AI prompt injection protection
 - [ ] E9. Code execution sandbox security
 - [ ] E10. Payment security
-- [ ] E11. Privacy and data protection
+- [x] E11. Privacy and data protection
 - [ ] E12. Audit logging
 - [ ] E13. Backup and recovery
 - [ ] E14. Security testing
@@ -505,3 +505,10 @@ Never assume a task is complete without evidence.
 - Design-only: no database configuration, migration, RLS policy, encryption, backup/restore or tests are claimed.
 - Learner code execution remains disabled until E9, L13-L15 and E15 approval.
 - Next task: E7 — data protection and privacy security.
+
+
+## E-stage canonical mapping correction — 2026-11-05
+- Canonical task IDs and titles are authoritative: E1 Threat modelling; E2 Network protection; E3 Application security; E4 Authentication security; E5 Authorization and roles; E6 Database security; E7 API security; E8 AI prompt injection protection; E9 Code execution sandbox security; E10 Payment security; E11 Privacy and data protection; E12 Audit logging; E13 Backup and recovery; E14 Security testing; E15 Security approval.
+- The privacy work previously labelled E7 is cross-mapped to canonical E11. Its canonical artifacts are docs/E11_DATA_PROTECTION_PRIVACY_SECURITY.md, docs/E11_PRIVACY_CONTROL_MATRIX.csv and docs/E11_PRIVACY_VERIFICATION_CATALOG.csv.
+- E7 API security is NOT complete. E7 is the next task. E8–E10 and E12–E15 remain pending. E11 privacy design is complete out of sequence.
+- E1–E6 and E11 are complete at design/documentation scope only; implementation and verification are still pending as described in each artifact.
