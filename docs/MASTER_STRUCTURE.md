@@ -543,3 +543,9 @@ Never assume a task is complete without evidence.
 - Remaining acceptance gates: WAL/PITR, immutable off-host storage, provider/KMS/key escrow, scheduling and freshness alerts, cross-system object/event/audit consistency, E11 deletion/legal-hold replay, E12 audit integration, approved RPO/RTO and recurring restore drills.
 - **Next task: continue E13; do not start E14 until mandatory recovery controls and operational evidence are complete.**
 \n\n## E13 AWS S3 decision and implementation slice (2026-11-05)\n- AWS S3 selected as the off-site object-storage target; primary region Mumbai (`ap-south-1`).\n- Added guarded publisher `ops/backup/publish-s3-backup.sh` and mocked contract test `ops/backup/test-s3-publish.sh`. It requires bucket versioning, Object Lock, S3 Block Public Access, SSE-KMS key and explicit retention before uploading encrypted backup + checksum + manifest.\n- AWS resources are not provisioned. Cross-account/region replication, lifecycle, live cloud validation, WAL/PITR, key escrow, automation/alerts and restore drills remain open.\n- Proposed 30-day retention is pending approval; default Object Lock mode is GOVERNANCE. E13 remains open; E14 is blocked.\n
+
+## E13 implementation update — 2026-11-05
+- Added pgBackRest S3/PITR configuration templates, PostgreSQL WAL archive settings, scheduled backup wrapper, freshness monitor, cron proposal, S3 replication/lifecycle templates, operational runbook and fail-closed E11/E12 restore gate.
+- CI run 57 passed the mocked S3, JSON, freshness and restore-gate checks. Existing real PostgreSQL+age integration job status was pending at the time of recording.
+- AWS resources and live PostgreSQL WAL/PITR have not been provisioned or validated; key escrow, real E11/E12 hooks, RPO/RTO approval and recurring isolated restore drills remain mandatory.
+- E13 remains open. E14 must not start until production-facing acceptance evidence is complete.
