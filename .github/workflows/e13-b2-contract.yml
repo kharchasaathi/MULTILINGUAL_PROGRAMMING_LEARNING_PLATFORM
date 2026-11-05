@@ -1,0 +1,29 @@
+name: E13 Backblaze B2 contract tests
+
+on:
+  push:
+    branches: [docs/project-foundation]
+    paths:
+      - "ops/backup/**"
+      - ".github/workflows/e13-b2-contract.yml"
+  pull_request:
+    paths:
+      - "ops/backup/**"
+      - ".github/workflows/e13-b2-contract.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  b2-publisher-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate shell syntax
+        run: |
+          bash -n ops/backup/publish-b2-backup.sh
+          bash -n ops/backup/test-b2-publish.sh
+          bash -n ops/backup/verify-backup.sh
+      - name: Run mocked B2 publisher contract tests
+        run: bash ops/backup/test-b2-publish.sh
