@@ -243,3 +243,12 @@ Technology stack/hosting; database/authentication; AI provider and budget; sandb
 **Retention safety:** Do not enable a default Object Lock retention policy on the active pgBackRest repository until a disposable-bucket test validates backup, WAL archive, expire/prune and restore behavior. Object Lock can prevent repository cleanup while versions are retained. The DR replica should be separately administered and its Object Lock/replication behavior validated.
 
 **Status:** Configuration templates, operational scripts, runbook and mocked CI tests are committed. No live AWS or PostgreSQL PITR validation is claimed.
+
+
+## P-0001 — Freemium commercial direction (2026-11-05)
+- **Decision:** Adopt free website access and a free-to-download Android app, with an optional low-cost Premium subscription. Keep useful core learning available without payment; use Premium for higher usage quotas and selected advanced learning capabilities. Institutional plans may be evaluated later.
+- **Initial price hypotheses (not launch prices):** ₹49/month, ₹129/quarter and ₹399/year. Validate unit economics, learner willingness to pay, taxes, payment-provider costs and applicable Play billing rules before approving prices.
+- **Candidate Premium scope:** expanded learning/practice access, higher isolated code-execution quotas, advanced projects/assessment features, a capped AI Tutor allowance and Code Structure Analyzer access. Final entitlements and quotas remain pending.
+- **Cost controls:** server-side entitlements and quotas; per-user/global rate limits; sandbox CPU, memory, time and output limits; AI budgets; monitoring, alerts and kill switches. No unlimited execution or AI promise.
+- **Platform policy:** Android app download is free. Billing implementation and applicable Google Play Billing/alternative billing requirements must be checked for the target market at implementation time. No payment provider or launch date is approved.
+- **Implementation boundary:** detailed monetization remains in stage R. Payment security must satisfy E10, and implementation must pass E14 testing and E15 approval. This decision does not change the active E13 backup/recovery work.
