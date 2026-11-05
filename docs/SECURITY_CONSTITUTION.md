@@ -66,3 +66,11 @@ The authoritative sequence is defined in docs/MASTER_STRUCTURE.md: E1 Threat mod
 - AI cannot approve/publish, grant permissions, set authoritative grades/mastery, change payment entitlements or execute learner code.
 - Validate structured output, curriculum references and destination rendering; never execute raw generated code or HTML. Apply E11 minimization, retention and deletion rules.
 - Evaluate direct/indirect, multilingual and multimodal injection, data leakage and tool misuse with deterministic assertions. E8 is design-only; E14 evidence and E15 approval remain required.
+
+
+## Secure code execution baseline (E9)
+- Learner code is hostile. Never execute it in the application, API, AI process, database host or a worker holding application credentials.
+- Execution defaults to disabled. Future runtime requires dedicated isolation, disposable per-job instances, least-privilege identities, default-deny network, externally enforced resource limits and quarantined outputs.
+- Do not expose host paths, devices, runtime sockets, metadata endpoints, credentials, hidden tests or control-plane interfaces to a job.
+- Verify immutable signed runtime images and provenance; provide independent kill switch, monitoring and recovery.
+- No execution enablement until L13-L15 readiness, E14 independent test evidence and E15 explicit approval. E9 is design-only; no runtime or tests are claimed.
