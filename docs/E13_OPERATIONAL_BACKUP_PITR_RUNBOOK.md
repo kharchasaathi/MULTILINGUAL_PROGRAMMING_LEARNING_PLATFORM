@@ -143,3 +143,16 @@ Until every mandatory gate is evidenced, E13 remains open and E14 remains blocke
 - B2 Object Lock: https://www.backblaze.com/docs/cloud-storage-object-lock
 - B2 Cloud Replication: https://www.backblaze.com/docs/cloud-storage-cloud-replication
 - pgBackRest configuration: https://pgbackrest.org/configuration.html
+
+
+## 11. Controlled live B2 smoke test (synthetic data only)
+
+A manually triggered GitHub Actions workflow is available at `.github/workflows/e13-b2-live-smoke.yml`. It creates a synthetic age-encrypted test artifact (no production database content), uploads it under `postgres/e13-live-smoke/`, downloads the exact returned object versions, and verifies SHA-256.
+
+Before running it:
+1. Create a temporary bucket-restricted B2 Application Key for `kharchasaathi-e13-backup-primary`, prefix `postgres/e13-live-smoke/`, Read and Write, expiry 3,600 seconds. Do not use the long-lived logical writer key for CI.
+2. Add the temporary values as GitHub repository Actions secrets `B2_TEST_APPLICATION_KEY_ID` and `B2_TEST_APPLICATION_KEY`. Never put them in workflow YAML, repository files, issues or chat.
+3. Manually run the workflow from the GitHub Actions tab. It must pass both upload and exact-VersionId remote verification.
+4. Immediately delete the two GitHub repository secrets and revoke the temporary B2 Application Key in Backblaze. The uploaded synthetic encrypted smoke objects may remain versioned as evidence; they contain no production data.
+
+This smoke test proves the B2 S3-compatible path for a synthetic encrypted artifact only. It does not prove PostgreSQL dump consistency, pgBackRest compatibility, WAL/PITR, Object Lock, replication, key escrow, alerts or production DR.
