@@ -4,7 +4,7 @@ PROJECT_NAME: MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 VERSION: 1.0
 STATUS: PLANNING
 CURRENT_STAGE: E
-NEXT_STAGE: E14
+NEXT_STAGE: E13
 
 ==================================================
 # PROJECT GOAL
@@ -113,7 +113,7 @@ https://www.w3schools.com/
 - [x] E10. Payment security
 - [x] E11. Privacy and data protection
 - [x] E12. Audit logging
-- [x] E13. Backup and recovery
+- [ ] E13. Backup and recovery
 - [ ] E14. Security testing
 - [ ] E15. Security approval
 
@@ -347,8 +347,8 @@ PLAN -> DESIGN -> REVIEW -> IMPLEMENT -> TEST -> SECURITY CHECK -> APPROVE -> DO
 # PROGRESS TRACKER
 
 CURRENT_STAGE: E
-CURRENT_TASK: E2
-NEXT_ACTION: Define deployment-independent ingress/egress, TLS, DNS/SSRF, service connectivity, environment isolation and network monitoring requirements from E1 trust boundaries TB2, TB5 and TB7.
+CURRENT_TASK: E13 — Backup and recovery
+NEXT_ACTION: Complete E13 recovery implementation, real PostgreSQL+age integration validation, PITR/WAL strategy, off-host immutable storage, key escrow, restore drills, RPO/RTO and E11/E12 recovery integration before E14.
 
 COMPLETED:
 - A1–A7 — Project foundation
