@@ -19,11 +19,11 @@ exit 0
 MOCK
 chmod +x "$tmp/bin/"*
 export PATH="$tmp/bin:$PATH" BACKUP_DIR="$tmp/out" AGE_RECIPIENT=age1test PGHOST=localhost PGDATABASE=testdb PGUSER=test
-"$root/ops/backup/backup-postgres.sh"
+bash "$root/ops/backup/backup-postgres.sh"
 artifact="$(find "$tmp/out" -name '*.dump.age' -print -quit)"
-"$root/ops/backup/verify-backup.sh" "$artifact"
+bash "$root/ops/backup/verify-backup.sh" "$artifact"
 export AGE_IDENTITY_FILE="$tmp/identity"; touch "$AGE_IDENTITY_FILE"
-if RESTORE_CONFIRM=NO "$root/ops/backup/restore-postgres.sh" "$artifact"; then echo "Expected confirmation guard failure" >&2; exit 1; fi
+if RESTORE_CONFIRM=NO bash "$root/ops/backup/restore-postgres.sh" "$artifact"; then echo "Expected confirmation guard failure" >&2; exit 1; fi
 export RESTORE_CONFIRM=YES
 "$root/ops/backup/restore-postgres.sh" "$artifact"
 echo "Mock backup utility tests passed."
