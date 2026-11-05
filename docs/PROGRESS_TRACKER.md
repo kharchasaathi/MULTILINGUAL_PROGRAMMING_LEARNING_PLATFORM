@@ -665,7 +665,7 @@ E3 milestone recorded in E3 artifacts.
 - Added pgBackRest S3 configuration example, PostgreSQL WAL archive settings example, serialized backup wrapper, backup freshness monitor, proposed cron schedule, cross-account replication template and incomplete-multipart lifecycle template.
 - Added `docs/E13_OPERATIONAL_BACKUP_PITR_RUNBOOK.md` covering S3 topology, pgBackRest bootstrap, WAL/PITR drill, key custody, E11/E12 restore gates and acceptance evidence.
 - Added `ops/backup/post-restore-gates.sh`; it fails closed unless dual approval, cross-system reconciliation, application smoke test, code-execution-disabled attestation and executable E11/E12 hooks are present.
-- GitHub Actions run 57: S3 publisher contract, JSON template validation, Bash syntax, freshness/scheduling/recovery-gate tests and mocked backup tests passed. Real PostgreSQL+age integration was still running at time of this update; its result will be recorded separately.
+- GitHub Actions run 57: S3 publisher contract, JSON template validation, Bash syntax, freshness/scheduling/recovery-gate tests and mocked backup tests passed. Real PostgreSQL+age integration also passed in the same run.
 - No live AWS resources, IAM/KMS, replication, pgBackRest stanza, PostgreSQL WAL archiving, scheduled production job, alert service, key escrow or real E11/E12 hooks have been provisioned. No live PITR/restore drill or RPO/RTO measurement has occurred.
 - Object Lock retention on a live pgBackRest repository requires a disposable-bucket test because retention may block repository pruning. The immutable DR copy must be separately administered and replication/restore tested.
 - **E13 remains IN PROGRESS; E14 remains blocked.**
