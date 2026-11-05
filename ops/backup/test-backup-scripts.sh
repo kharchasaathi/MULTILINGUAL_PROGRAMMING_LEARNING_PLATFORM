@@ -19,7 +19,7 @@ out=''; source=''
 while (($#)); do
   case "$1" in
     --output) out="$2"; shift 2 ;;
-    --encrypt|--decrypt|--recipient|--identity) shift 2 ;;
+    --encrypt|--decrypt) shift ;;\n    --recipient|--identity) shift 2 ;;
     *) source="$1"; shift ;;
   esac
 done
