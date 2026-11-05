@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: E — Security Constitution
-- Current task: E13 — Backup and recovery (initial implementation slice committed; production recovery validation pending).
-- Next action: E14 — Security testing.
+- Current task: E13 — Backup and recovery (PostgreSQL+age CI passed; guarded AWS S3 publisher committed; live cloud validation and PITR/DR controls pending).
+- Next action: Continue E13 — validate S3 publisher against provisioned AWS test bucket; implement WAL/PITR, replication, key escrow, scheduling/alerts and recovery drills. E14 remains blocked.
 - Completed prior: E1–E10 security design baselines; E11 — Privacy and data protection (completed out of sequence at design scope).
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
@@ -658,3 +658,4 @@ E3 milestone recorded in E3 artifacts.
 - Still not production-complete: WAL archiving/PITR, immutable off-host copies, provider/KMS or key escrow, scheduled backups and freshness alerts, object/event/audit consistency, E11 deletion/legal-hold replay, E12 audit integration, approved RPO/RTO and recurring isolated restore drills. These require infrastructure/provider decisions and owner approvals.
 - **Status:** IN PROGRESS. Do not mark E13 complete or proceed to E14 until all mandatory E13 acceptance gates are evidenced.
 - **Next action:** implement and validate PITR/WAL recovery, immutable off-host copies, key escrow, scheduling/alerts, E11/E12 integration, approved RPO/RTO and recurring isolated restore drills; then obtain owner approval for external provider dependencies.
+\n\n## E13 AWS S3 selection and implementation slice (2026-11-05)\n\n- Decision: AWS S3 selected for off-site encrypted backup objects; primary region `ap-south-1` (Mumbai).\n- Added `ops/backup/publish-s3-backup.sh`: preflight checks bucket versioning, Object Lock enabled, all four S3 Block Public Access flags, required customer-managed KMS key and explicit per-object retention; uploads encrypted artifact, checksum and manifest. It does not provision AWS resources.\n- Added `ops/backup/test-s3-publish.sh`: mocked AWS CLI contract test only. Live AWS behavior is not yet tested.\n- Added S3 usage/security notes to `ops/backup/README.md` and E13 architecture.\n- Proposed 30-day Object Lock retention is not approved policy. Governance mode is the default; Compliance mode requires legal/security approval.\n- Outstanding: provision isolated AWS test account/bucket/KMS/IAM; validate remote upload and restore; cross-account/region replication; lifecycle; WAL/PITR; age-key escrow/rotation; scheduled backup and freshness/coverage alerts; E11/E12 consistency and replay; numeric RPO/RTO and retention approval; recurring isolated restore drills.\n- E13 remains IN PROGRESS; E14 remains blocked. No production backup or DR readiness claim.\n
