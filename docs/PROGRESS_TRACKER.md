@@ -3,9 +3,9 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: E — Security Constitution
-- Current task: E4 — Identity, authentication and authorization hardening (completed; E5 is next)
-- Next action: E5 — authorization model and role hardening.
-- Completed immediately before current task: E3 — Application Security Architecture (design scope).
+- Current task: E5 — Authorization, permissions and role security (completed; E6 is next)
+- Next action: E6 — database security hardening.
+- Completed immediately before current task: E4 — Identity and Authentication Security (design scope).
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -571,3 +571,13 @@ E3 milestone recorded in E3 artifacts.
 - **Verification boundary:** Design only. No identity provider, endpoint, credential store, MFA, session control, penetration test or runtime scenario was executed or verified. All 48 scenarios are future tests.
 - **Critical guardrail:** Learner code execution remains disabled until E9, L13–L15 and E15 approval.
 - **Next task:** E5 — authorization and role hardening.
+
+
+## E5 closure (2026-11-05) — authorization and role security
+
+- **Status:** Complete at policy, permission vocabulary, role matrix and verification-design scope; implementation pending.
+- **Evidence:** docs/E5_AUTHORIZATION_ROLE_SECURITY_ARCHITECTURE.md; docs/E5_PERMISSION_CATALOG.csv (44 permission identifiers); docs/E5_ROLE_PERMISSION_MATRIX.csv (15 candidate roles); docs/E5_AUTHORIZATION_CONTROL_MATRIX.csv (50 controls); docs/E5_AUTHORIZATION_VERIFICATION_CATALOG.csv (55 future scenarios); decision E-0005.
+- **Coverage:** Deny-by-default policy contract; hybrid RBAC and contextual attributes; object/tenant/field scope; separation of duties; grant lifecycle; privileged/break-glass access; cache invalidation/revocation; service identities; asynchronous authorization; audit and admin enforcement.
+- **Verification boundary:** Design only. No policy engine, role seed, endpoint guard, migration, access review or test was implemented or executed. All 55 scenarios are future tests.
+- **Critical guardrail:** Learner code execution remains disabled until E9, L13–L15 and E15 approval.
+- **Next task:** E6 — database security hardening.
