@@ -1,6 +1,6 @@
 # PostgreSQL backup and recovery utilities (E13)
 
-This repository contains an encrypted PostgreSQL logical-backup utility, a guarded AWS S3 publisher and repeatable tests. S3 is the selected off-site object-storage target. These scripts are not, by themselves, a production disaster-recovery service.
+This repository contains encrypted PostgreSQL logical-backup utilities, a guarded Backblaze B2 S3-compatible publisher and repeatable tests. The current off-site candidate is Backblaze B2 EU Central (`eu-central-003`). AWS S3 examples below are legacy/reference material and are not the selected E13 target. These scripts are not, by themselves, a production disaster-recovery service.
 
 ## Dependencies and identity
 
@@ -101,7 +101,7 @@ Mock contract test (does not contact Backblaze):
 bash ops/backup/test-b2-publish.sh
 ~~~
 
-The B2 publisher is not evidence of immutable storage. Object Lock is a one-way bucket setting and needs a separately approved retention policy. Cloud Replication must be configured through B2 console/Native API and needs a separate destination account/region. Live B2 upload/download, pgBackRest base backup/WAL/PITR and replication restore tests remain open.
+The B2 publisher is not evidence of immutable storage. Object Lock is a one-way bucket setting and needs a separately approved retention policy. Cloud Replication must be configured through B2 console/Native API and needs a separate destination account/region. **Synthetic live B2 upload/download with exact-VersionId and SHA-256 verification passed** (GitHub Actions run #3: https://github.com/kharchasaathi/MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM/actions/runs/42019191955). This does not validate pgBackRest base backup/WAL/PITR or replication restore; those gates remain open.
 
 
 ### Verify a published B2 backup remotely
