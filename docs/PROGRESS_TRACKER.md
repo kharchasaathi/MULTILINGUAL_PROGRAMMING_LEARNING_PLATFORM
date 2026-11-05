@@ -653,7 +653,7 @@ E3 milestone recorded in E3 artifacts.
 
 - Previous E13 closure was premature: the initial mock-only utility did not prove recoverability. E13 is explicitly reopened; E14 must not start yet.
 - Hardened implementation committed: atomic staging/publication, restrictive permissions, strict manifest/checksum validation, tamper detection test, age decryption preflight, isolated-target attestation and non-destructive restore into a newly provisioned empty database.
-- Added a real PostgreSQL + age end-to-end integration test and a dedicated GitHub Actions service-container job. Mocked tests and Bash syntax checks have passed in GitHub Actions run 23; real integration job is still running at the time of this update.
+- Added a real PostgreSQL + age end-to-end integration test and a dedicated GitHub Actions service-container job. Mocked tests, Bash syntax checks and the real PostgreSQL 16 + age encryption/decryption + restore/data round-trip all passed in GitHub Actions run 23 (both jobs successful; commit `f171716a51d8d78845bb381c143a874e7eb2e88c`).
 - Evidence: `ops/backup/backup-postgres.sh`, `verify-backup.sh`, `restore-postgres.sh`, `test-backup-scripts.sh`, `test-backup-integration.sh`, `README.md`, `.github/workflows/e13-backup-utility.yml`.
 - Still not production-complete: WAL archiving/PITR, immutable off-host copies, provider/KMS or key escrow, scheduled backups and freshness alerts, object/event/audit consistency, E11 deletion/legal-hold replay, E12 audit integration, approved RPO/RTO and recurring isolated restore drills. These require infrastructure/provider decisions and owner approvals.
 - **Status:** IN PROGRESS. Do not mark E13 complete or proceed to E14 until all mandatory E13 acceptance gates are evidenced.
