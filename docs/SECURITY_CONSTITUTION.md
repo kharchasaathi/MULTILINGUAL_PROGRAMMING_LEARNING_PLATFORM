@@ -32,3 +32,16 @@ Authentication provider, data classification, retention, key management, sandbox
 - High residual risks require a named owner, documented business rationale, compensating controls, expiry/review date and E15 approval; do not silently accept them.
 - Protected actions fail closed when identity, authorization, ownership, signature verification or policy evaluation is unavailable.
 - Threat register updates and control evidence are versioned. Security exceptions and emergency actions require attributable, audited approval.
+
+
+## Network protection baseline (E2)
+- Treat public clients, internet paths, DNS answers, external providers and uploaded destinations as untrusted.
+- Use logical zones and deny-by-default ingress/egress. Every allowed flow requires purpose, owner, environment, protocol/port, data class, enforcement point, review expiry and rollback evidence.
+- Expose only approved HTTPS routes; protect origins; keep data stores, queues, caches, worker controls and admin interfaces private.
+- Require TLS 1.2 minimum, prefer TLS 1.3, validate outbound certificates/hostnames and prohibit insecure downgrade.
+- Restrict data access to named least-privilege workload identities. Network location never replaces application authorization or module ownership.
+- Restrict outbound destinations. SSRF-safe fetches validate IPv4/IPv6 addresses at connection time and after redirects, block private/loopback/link-local/reserved/metadata ranges and prevent DNS rebinding.
+- Separate development, test, staging and production identities, data and network paths. CI runners have no ambient production access.
+- Learner code execution remains disabled until E9, L13-L15 and E15 approval. Future sandbox egress is denied by default and has no route to application, data, control-plane, metadata or other tenants.
+- Monitor denied flows, DNS/TLS anomalies, unexpected egress, policy drift and telemetry gaps. Network changes are reviewed, versioned, attributable and rollback-capable.
+- E2 is a design baseline only; no network infrastructure or control is claimed to be deployed or verified.
