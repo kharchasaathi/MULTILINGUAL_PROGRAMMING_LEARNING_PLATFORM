@@ -8,12 +8,12 @@ PostgreSQL client tools compatible with the server major version, age CLI, Bash 
 ## Backup
 Set PGHOST, PGDATABASE, PGUSER, PGPASSWORD through protected secret delivery, BACKUP_DIR and AGE_RECIPIENT (public age recipient), then run:
 \`\`\`bash
-./ops/backup/backup-postgres.sh
+bash ops/backup/backup-postgres.sh
 \`\`\`
 
 ## Verify
 \`\`\`bash
-./ops/backup/verify-backup.sh /secure-backups/name.dump.age
+bash ops/backup/verify-backup.sh /secure-backups/name.dump.age
 \`\`\`
 Checks checksum and manifest only, not decryption or recoverability.
 
@@ -22,7 +22,7 @@ Restore uses pg_restore --clean --if-exists. Use a newly provisioned isolated re
 \`\`\`bash
 export AGE_IDENTITY_FILE=/run/secrets/backup-age-identity
 export RESTORE_CONFIRM=YES
-./ops/backup/restore-postgres.sh /secure-backups/name.dump.age
+bash ops/backup/restore-postgres.sh /secure-backups/name.dump.age
 \`\`\`
 Also set PGHOST, PGDATABASE and PGUSER. Never point a routine drill at production.
 
