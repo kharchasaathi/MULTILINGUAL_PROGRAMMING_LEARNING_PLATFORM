@@ -1,0 +1,17 @@
+name: E13 backup utility checks
+on:
+  pull_request:
+  push:
+    branches: [docs/project-foundation]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  shell-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Bash syntax
+        run: bash -n ops/backup/backup-postgres.sh ops/backup/verify-backup.sh ops/backup/restore-postgres.sh ops/backup/test-backup-scripts.sh
+      - name: Run mocked backup utility tests
+        run: bash ops/backup/test-backup-scripts.sh
