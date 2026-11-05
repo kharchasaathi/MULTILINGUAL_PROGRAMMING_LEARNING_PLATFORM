@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: E — Security Constitution
-- Current task: E7 — API security (complete at design/specification scope)
-- Next action: E8 — AI prompt injection protection.
+- Current task: E8 — AI prompt injection protection (complete at design/specification scope)
+- Next action: E9 — Code execution sandbox security.
 - Completed prior: E6 — Database security hardening; E11 — Privacy and data protection (completed out of sequence at design scope).
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
@@ -612,3 +612,12 @@ E3 milestone recorded in E3 artifacts.
 - **Verification boundary:** Design only. No endpoint, API gateway/WAF, auth guard, policy engine, rate limiter, webhook handler, upload scanner, production setting, scan or test was implemented or executed. All 56 scenarios are future tests.
 - **Critical guardrail:** Learner code execution remains disabled until E9, L13–L15 and E15 approval.
 - **Next task:** E8 — AI prompt injection protection.
+
+
+## E8 closure — AI prompt injection protection (2026-11-05)
+- Complete at architecture, control catalogue and verification-design scope only.
+- Evidence: `docs/E8_AI_PROMPT_INJECTION_PROTECTION.md`; 65 controls in `docs/E8_AI_SECURITY_CONTROL_MATRIX.csv`; 60 future scenarios in `docs/E8_AI_SECURITY_VERIFICATION_CATALOG.csv`; decision E-0009.
+- Covers direct/indirect injection, RAG provenance and ACLs, tool allowlists, deterministic authorization, output validation, cross-user isolation, privacy, multilingual/multimodal evaluation and abuse controls.
+- No provider, runtime mitigation, tool broker, retrieval ACL, evaluator or test is implemented or executed. Scenarios are future tests.
+- AI remains no-tool by default pending implementation and E14/E15 gates. Learner code execution remains disabled pending E9, L13-L15 and E15.
+- Next: E9 — code execution sandbox security.
