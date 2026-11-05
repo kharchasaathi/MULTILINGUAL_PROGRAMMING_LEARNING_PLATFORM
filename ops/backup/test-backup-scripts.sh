@@ -4,7 +4,7 @@ root="$(cd "$(dirname "$0")/../.." && pwd)"; tmp="$(mktemp -d)"; trap 'rm -rf "$
 mkdir -p "$tmp/bin" "$tmp/out"
 cat > "$tmp/bin/pg_dump" <<'MOCK'
 #!/usr/bin/env bash
-for arg in "$@"; do case "$arg" in --file=*) printf 'mock dump\n' > "\${arg#--file=}";; esac; done
+out="$(echo "$arg" | sed 's/^--file=//')"; printf 'mock dump\n' > "$out"
 MOCK
 cat > "$tmp/bin/age" <<'MOCK'
 #!/usr/bin/env bash
