@@ -1,11 +1,11 @@
 # Progress Tracker
-Last updated: 2026-11-05
+Last updated: 2026-11-05 (E13 live B2 evidence update)
 
 ## Current execution position
 - Current stage: E — Security Constitution
-- Current task: E13 — Backup and recovery (PostgreSQL+age CI passed; Backblaze B2 bucket, least-privilege logical key, guarded publisher and exact-version remote verifier added; live cloud validation and PITR/DR controls pending).
+- Current task: E13 — Backup and recovery (PostgreSQL+age CI and synthetic live Backblaze B2 upload/download/exact-VersionId/SHA-256 smoke test passed; pgBackRest/WAL/PITR, replication, key custody, alerting and restore acceptance remain open).
 - AWS S3 paid-plan route was paused; Google Cloud Billing signup was blocked by account-security verification and no GCP Billing Account was created. Current off-site candidate is Backblaze B2 EU Central (`eu-central-003`); bucket `kharchasaathi-e13-backup-primary` exists as Private, SSE-B2 enabled, Keep all versions, Object Lock Disabled. See E13 runbook.
-- Next action: verify the new B2 publisher CI; create a bucket-restricted B2 Application Key (never share it in chat); then run a controlled encrypted test upload/download and remote checksum verification. After that validate pgBackRest B2 stanza/base backup/WAL/PITR, approve Object Lock retention, provision separate-region DR account/bucket and Cloud Replication, and complete key custody, alerting, E11/E12 integration and restore drills. E14 remains blocked.
+- Next action: implement and validate pgBackRest B2 stanza/base backup/WAL/PITR in an isolated environment; then complete approved Object Lock/retention, separate-region/account replication and restore, key escrow/rotation, real alert delivery, E11/E12 restore integrations, numeric RPO/RTO approval and repeated isolated restore drills. E14 remains blocked.
 - Completed prior: E1–E10 security design baselines; E11 — Privacy and data protection (completed out of sequence at design scope).
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
@@ -721,3 +721,13 @@ E3 milestone recorded in E3 artifacts.
 - The existing long-lived `e13-backup-writer` key must not be copied into GitHub Actions. It remains local/secret-manager only.
 - This workflow is prepared but not yet run; therefore live B2 service validation is still pending.
 - Next user action: create the temporary prefix-restricted key and add it to GitHub repository Actions secrets, then manually run the workflow. No production data is uploaded.
+
+
+## E13 live Backblaze B2 smoke-test evidence (2026-11-05)
+
+- **PASS:** GitHub Actions run #3, workflow "E13 Backblaze B2 live smoke test": https://github.com/kharchasaathi/MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM/actions/runs/42019191955
+- Job `b2-live-smoke` completed successfully. Checkout of `docs/project-foundation`, age installation, synthetic encrypted fixture creation, live B2 upload, exact returned VersionId downloads and remote SHA-256 verification all passed.
+- The test uploaded only a synthetic text fixture encrypted with a one-time age identity. No production database or customer data was used. This proves the tested B2 S3-compatible path for this synthetic artifact only; it does not prove pgBackRest, PostgreSQL consistency, WAL/PITR, Object Lock, replication, key escrow, alerting or production disaster recovery.
+- The temporary GitHub repository secrets `B2_TEST_APPLICATION_KEY_ID` and `B2_TEST_APPLICATION_KEY` were deleted after the test, and the temporary `e13-live-smoke` B2 Application Key was revoked. The separate long-lived `e13-backup-writer` key was intentionally retained and must remain out of GitHub Actions.
+- Environment `e13-b2-live-smoke` remains configured; it contains no environment secrets. The manual workflow definition is on `main` so GitHub can expose workflow_dispatch, and it checks out the implementation branch `docs/project-foundation`.
+- **E13 remains IN PROGRESS; E14 remains BLOCKED** until every mandatory acceptance gate in the E13 runbook is evidenced and approved.
