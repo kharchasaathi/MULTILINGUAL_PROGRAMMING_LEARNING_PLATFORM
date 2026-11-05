@@ -546,6 +546,6 @@ Never assume a task is complete without evidence.
 
 ## E13 implementation update — 2026-11-05
 - Added pgBackRest S3/PITR configuration templates, PostgreSQL WAL archive settings, scheduled backup wrapper, freshness monitor, cron proposal, S3 replication/lifecycle templates, operational runbook and fail-closed E11/E12 restore gate.
-- CI run 57 passed the mocked S3, JSON, freshness and restore-gate checks. Existing real PostgreSQL+age integration job status was pending at the time of recording.
+- CI run 57 (run ID `41975104725`) passed all three jobs: mocked backup tests; S3 publisher/JSON/freshness/recovery-gate tests; and real PostgreSQL 16 + age encrypted logical backup/restore integration.
 - AWS resources and live PostgreSQL WAL/PITR have not been provisioned or validated; key escrow, real E11/E12 hooks, RPO/RTO approval and recurring isolated restore drills remain mandatory.
 - E13 remains open. E14 must not start until production-facing acceptance evidence is complete.
