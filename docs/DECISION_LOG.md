@@ -192,3 +192,10 @@ Technology stack/hosting; database/authentication; AI provider and budget; sandb
 - Status: Design baseline complete; implementation and verification pending (2026-11-05).
 - Evidence: `docs/E7_API_SECURITY_ARCHITECTURE.md`, `docs/E7_API_SECURITY_CONTROL_MATRIX.csv` (60 controls), `docs/E7_API_SECURITY_VERIFICATION_CATALOG.csv` (56 future scenarios).
 - No API implementation or tests are claimed. Next: E8 — AI prompt injection protection.
+
+
+## E-0009 — AI prompt injection protection
+- Status: Design baseline complete; implementation and verification pending (2026-11-05).
+- Adopt untrusted-context handling, task-scoped context minimization, retrieval authorization/provenance, no-tool-by-default AI tasks, deterministic tool authorization, strict output validation, cross-user isolation, privacy controls, adversarial evaluation and kill-switch requirements.
+- Evidence: `docs/E8_AI_PROMPT_INJECTION_PROTECTION.md`; `docs/E8_AI_SECURITY_CONTROL_MATRIX.csv` (65 controls); `docs/E8_AI_SECURITY_VERIFICATION_CATALOG.csv` (60 future scenarios).
+- No provider, classifier, retrieval ACL, tool broker, runtime mitigation or tests are claimed. Next: E9 — code execution sandbox security.
