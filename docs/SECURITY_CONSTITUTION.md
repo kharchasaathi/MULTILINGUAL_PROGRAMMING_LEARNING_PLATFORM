@@ -85,3 +85,13 @@ The authoritative sequence is defined in docs/MASTER_STRUCTURE.md: E1 Threat mod
 - Isolate provider credentials by environment in managed secret storage; rotate/revoke keys; restrict provider egress. Apply E11 privacy and retention rules.
 - No PCI DSS compliance is claimed. Determine scope with the acquirer/provider and qualified assessor; complete legal/tax/finance review before live payment acceptance.
 - E10 is design-only. No gateway, merchant account, endpoint, migration, credential, live payment, PCI assessment or runtime control is deployed or verified. Live payments require E14 evidence and E15 explicit approval.
+
+
+## Audit logging baseline (E12)
+- Emit versioned security audit events at authoritative server/domain boundaries; client telemetry is never the sole source for privileged evidence.
+- Include event identity/schema, occurrence and record times, actor, action, opaque target, outcome, source, correlation, classification and purpose. Represent unknown actor/context honestly.
+- Persist critical audit evidence atomically with state changes or through an approved transactional outbox. Use append-only records, idempotent delivery, explicit ordering/gap detection and independent integrity/key controls.
+- Separate append-only writers, purpose-bound readers, storage administrators and key custody. Runtime actors cannot update/delete evidence or disable auditing.
+- Audit access/search/export/replay/retention/legal-hold changes. Apply E11 minimization: never log passwords, tokens, cookies, secrets, PAN/CVV/PIN/OTP, raw prompts or full learner submissions by default.
+- Define risk-based alert owners/playbooks, pipeline-health monitoring, bounded retries/backpressure and restricted forensic evidence custody. High-risk actions fail closed or remain pending if required durable audit evidence is unavailable.
+- E12 is design-only: no collector, SIEM, WORM store, schema, retention job, alert, dashboard, integration, runtime control or test is deployed or validated. Production reliance requires E13 recovery, E14 independent tests and E15 explicit approval.
