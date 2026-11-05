@@ -76,3 +76,29 @@ The operational procedure, including stanza bootstrap, archive checks, isolated 
 ## Restore cutover gates
 
 `ops/backup/post-restore-gates.sh` fails closed unless dual approval, cross-system reconciliation, application smoke tests, code-execution-disabled attestation and executable E11 tombstone-replay/E12 audit-verification hooks are supplied. The CI tests use mock hooks only; real E11/E12 integrations remain unimplemented and must be supplied by their owning workstreams.
+
+
+## Publish an encrypted backup to Backblaze B2
+
+The current selected off-site target is Backblaze B2 S3-compatible API. The bucket is Private, SSE-B2 encrypted and versioned (B2 versioning is always enabled). Object Lock is currently Disabled. The publisher does not turn on Object Lock, configure retention, or create replication.
+
+The B2 publisher validates the local age-encrypted artifact, SHA-256 sidecar and manifest; verifies bucket versioning, Private ACL and default SSE-B2/AES256 encryption; then uploads artifact, checksum and manifest and records VersionIds. B2 does not support AWS SSE-KMS or AWS Block Public Access. Do not pass KMS flags. Use a bucket-restricted B2 Application Key and inject it via a secret manager.
+
+Required environment:
+~~~bash
+export B2_BUCKET=kharchasaathi-e13-backup-primary
+export B2_ENDPOINT=https://s3.eu-central-003.backblazeb2.com
+export B2_REGION=eu-central-003
+export B2_APPLICATION_KEY_ID=__INJECT_SECRET__
+export B2_APPLICATION_KEY=__INJECT_SECRET__
+export B2_OBJECT_LOCK_ENABLED=false
+export B2_PREFIX=postgres
+bash ops/backup/publish-b2-backup.sh /secure-backups/postgres/appdb-<UTC>.dump.age
+~~~
+
+Mock contract test (does not contact Backblaze):
+~~~bash
+bash ops/backup/test-b2-publish.sh
+~~~
+
+The B2 publisher is not evidence of immutable storage. Object Lock is a one-way bucket setting and needs a separately approved retention policy. Cloud Replication must be configured through B2 console/Native API and needs a separate destination account/region. Live B2 upload/download, pgBackRest base backup/WAL/PITR and replication restore tests remain open.
