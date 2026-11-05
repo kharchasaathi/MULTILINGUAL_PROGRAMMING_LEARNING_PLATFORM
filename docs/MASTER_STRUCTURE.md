@@ -4,7 +4,7 @@ PROJECT_NAME: MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 VERSION: 1.0
 STATUS: PLANNING
 CURRENT_STAGE: E
-NEXT_STAGE: E5
+NEXT_STAGE: E6
 
 ==================================================
 # PROJECT GOAL
@@ -105,7 +105,7 @@ https://www.w3schools.com/
 - [ ] E2. Network protection
 - [ ] E3. Application security
 - [x] E4. Authentication security
-- [ ] E5. Authorization and roles
+- [x] E5. Authorization and roles
 - [ ] E6. Database security
 - [ ] E7. API security
 - [ ] E8. AI prompt injection protection
@@ -490,3 +490,10 @@ Never assume a task is complete without evidence.
 - Implementation, provider selection and runtime verification remain pending; scenarios are not executed.
 - Learner code execution remains disabled until E9, L13-L15 and E15 approval.
 - Next task: E5 — authorization and roles.
+
+
+## E5 milestone — authorization and role security
+- E5 authorization policy baseline and registers are complete: architecture; 44 permission identifiers; 15 candidate role bundles; 50 controls; 55 future verification scenarios.
+- No policy engine, role seed, endpoint authorization or runtime test is implemented. Scenarios remain unexecuted.
+- Learner code execution remains disabled until E9, L13-L15 and E15 approval.
+- Next task: E6 — database security.
