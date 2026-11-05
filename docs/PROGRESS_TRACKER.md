@@ -4,7 +4,8 @@ Last updated: 2026-11-05
 ## Current execution position
 - Current stage: E — Security Constitution
 - Current task: E13 — Backup and recovery (PostgreSQL+age CI passed; guarded AWS S3 publisher committed; live cloud validation and PITR/DR controls pending).
-- Next action: Continue E13 — validate S3 publisher against provisioned AWS test bucket; implement WAL/PITR, replication, key escrow, scheduling/alerts and recovery drills. E14 remains blocked.
+- AWS account constraint recorded: Free Plan project is assigned to Sydney (`ap-southeast-2`); the approved production target remains Mumbai (`ap-south-1`). AWS documents S3 and KMS as Free Tier service families but disallow Multi-Region/cross-Region features for this new Free Tier experience. Customer-managed KMS keys have a published USD 1/key/month storage charge plus applicable API usage. No AWS resources or paid-plan upgrade have been authorized. See `docs/E13_AWS_FREE_PLAN_CONSTRAINTS.md`.
+- Next action: Resolve an owner-approved account/region and cost strategy that supports the intended production + DR topology; then provision disposable AWS test resources and execute live S3, pgBackRest WAL/PITR, key-custody, alerting, replication and restore-drill gates. E14 remains blocked.
 - Completed prior: E1–E10 security design baselines; E11 — Privacy and data protection (completed out of sequence at design scope).
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
