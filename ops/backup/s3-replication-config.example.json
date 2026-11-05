@@ -1,0 +1,25 @@
+{
+  "Role": "arn:aws:iam::__SOURCE_ACCOUNT_ID__:role/__REPLICATION_ROLE__",
+  "Rules": [
+    {
+      "ID": "e13-cross-account-dr-replication",
+      "Status": "Enabled",
+      "Priority": 10,
+      "Filter": { "Prefix": "pgbackrest/" },
+      "DeleteMarkerReplication": { "Status": "Disabled" },
+      "Destination": {
+        "Bucket": "arn:aws:s3:::__DESTINATION_BUCKET__",
+        "Account": "__DESTINATION_ACCOUNT_ID__",
+        "EncryptionConfiguration": {
+          "ReplicaKmsKeyID": "arn:aws:kms:__DR_REGION__:__DESTINATION_ACCOUNT_ID__:key/__DR_KMS_KEY_ID__"
+        },
+        "AccessControlTranslation": { "Owner": "Destination" },
+        "Metrics": { "Status": "Enabled", "EventThreshold": { "Minutes": 15 } }
+      },
+      "SourceSelectionCriteria": {
+        "SseKmsEncryptedObjects": { "Status": "Enabled" },
+        "ReplicaModifications": { "Status": "Disabled" }
+      }
+    }
+  ]
+}
