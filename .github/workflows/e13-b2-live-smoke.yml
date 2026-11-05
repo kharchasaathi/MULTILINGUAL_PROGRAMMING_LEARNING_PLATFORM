@@ -1,0 +1,59 @@
+name: E13 Backblaze B2 live smoke test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  b2-live-smoke:
+    runs-on: ubuntu-latest
+    environment: e13-b2-live-smoke
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install age
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y age
+      - name: Create synthetic encrypted smoke artifact
+        id: fixture
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          umask 077
+          mkdir -p "$RUNNER_TEMP/e13-b2-smoke"
+          cd "$RUNNER_TEMP/e13-b2-smoke"
+          stamp="$(date -u +%Y%m%dT%H%M%SZ)"
+          base="e13-smoke-$stamp"
+          age-keygen -o age-identity.txt 2>age-keygen.log
+          recipient="$(age-keygen -y age-identity.txt)"
+          printf 'E13 B2 live connectivity and integrity smoke test; no production data.\n' > "$base.dump"
+          age --encrypt --recipient "$recipient" --output "$base.dump.age" "$base.dump"
+          rm -f "$base.dump" age-identity.txt age-keygen.log
+          artifact="$base.dump.age"
+          sha256sum "$artifact" > "$artifact.sha256"
+          cat > "$base.manifest" <<EOF
+          format=platform-postgres-backup-v1
+          database=e13_smoke
+          created_at_utc=$stamp
+          artifact=$artifact
+          encryption=age
+          dump_format=postgres-custom
+          EOF
+          echo "artifact=$RUNNER_TEMP/e13-b2-smoke/$artifact" >> "$GITHUB_OUTPUT"
+      - name: Upload synthetic encrypted artifact and verify exact remote versions
+        env:
+          B2_BUCKET: kharchasaathi-e13-backup-primary
+          B2_ENDPOINT: https://s3.eu-central-003.backblazeb2.com
+          B2_REGION: eu-central-003
+          B2_APPLICATION_KEY_ID: ${{ secrets.B2_TEST_APPLICATION_KEY_ID }}
+          B2_APPLICATION_KEY: ${{ secrets.B2_TEST_APPLICATION_KEY }}
+          B2_OBJECT_LOCK_ENABLED: "false"
+          B2_PREFIX: postgres/e13-live-smoke
+        run: |
+          set -Eeuo pipefail
+          test -n "$B2_APPLICATION_KEY_ID"
+          test -n "$B2_APPLICATION_KEY"
+          bash ops/backup/publish-b2-backup.sh "${{ steps.fixture.outputs.artifact }}"
+          bash ops/backup/verify-b2-backup.sh "${{ steps.fixture.outputs.artifact }}"
