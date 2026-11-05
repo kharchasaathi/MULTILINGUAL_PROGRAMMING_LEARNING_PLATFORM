@@ -45,3 +45,7 @@ Authentication provider, data classification, retention, key management, sandbox
 - Learner code execution remains disabled until E9, L13-L15 and E15 approval. Future sandbox egress is denied by default and has no route to application, data, control-plane, metadata or other tenants.
 - Monitor denied flows, DNS/TLS anomalies, unexpected egress, policy drift and telemetry gaps. Network changes are reviewed, versioned, attributable and rollback-capable.
 - E2 is a design baseline only; no network infrastructure or control is claimed to be deployed or verified.
+
+
+## Canonical E-stage task map (2026-11-05)
+The authoritative sequence is defined in docs/MASTER_STRUCTURE.md: E1 Threat modelling; E2 Network protection; E3 Application security; E4 Authentication security; E5 Authorization and roles; E6 Database security; E7 API security; E8 AI prompt injection protection; E9 Code execution sandbox security; E10 Payment security; E11 Privacy and data protection; E12 Audit logging; E13 Backup and recovery; E14 Security testing; E15 Security approval. The privacy milestone previously labelled E7 is canonically E11 and is documented under the E11 artifact filenames. E7 API security remains pending. Completion labels describe design documentation only unless implementation and independent verification evidence are explicitly recorded.
