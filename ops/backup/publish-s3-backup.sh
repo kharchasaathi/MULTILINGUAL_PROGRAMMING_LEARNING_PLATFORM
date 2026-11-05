@@ -53,13 +53,16 @@ key="${prefix:+$prefix/}$base"
 
 put_file() {
   local source="$1" object_key="$2" content_type="$3"
-  aws s3api put-object \
+  version_id="$(aws s3api put-object \
     --bucket "$AWS_S3_BUCKET" --key "$object_key" --body "$source" \
     --region "$AWS_S3_REGION" --server-side-encryption aws:kms \
     --ssekms-key-id "$AWS_S3_KMS_KEY_ID" --bucket-key-enabled \
+    --checksum-algorithm SHA256 \
     --object-lock-mode "$AWS_S3_OBJECT_LOCK_MODE" \
     --object-lock-retain-until-date "$retain_until" \
-    --content-type "$content_type" --no-cli-pager >/dev/null
+    --content-type "$content_type" --query VersionId --output text --no-cli-pager)"
+  [[ -n "$version_id" && "$version_id" != None ]] || { echo "S3 did not return a VersionId for $object_key" >&2; exit 1; }
+  printf 'Uploaded key=%s version_id=%s\n' "$object_key" "$version_id"
 }
 
 # Publish data first; publish integrity metadata last. S3 object versions are
