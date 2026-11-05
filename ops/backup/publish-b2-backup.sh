@@ -11,6 +11,7 @@ umask 077
 : "${B2_APPLICATION_KEY:?Set B2_APPLICATION_KEY}"
 : "${B2_OBJECT_LOCK_ENABLED:?Set B2_OBJECT_LOCK_ENABLED=true|false after checking bucket settings}"
 : "${B2_PREFIX:=postgres}"
+: "${B2_VERSION_LOG:=}"
 if [[ "$B2_OBJECT_LOCK_ENABLED" == true ]]; then
   : "${B2_OBJECT_LOCK_DAYS:?Set approved B2_OBJECT_LOCK_DAYS when Object Lock is enabled}"
   : "${B2_OBJECT_LOCK_MODE:?Set approved B2_OBJECT_LOCK_MODE=GOVERNANCE|COMPLIANCE}"
@@ -78,6 +79,11 @@ put_file() {
     "${lock_args[@]}" --query VersionId --output text --no-cli-pager)"
   [[ -n "$version_id" && "$version_id" != None ]] || { echo "B2 did not return a VersionId for $object_key" >&2; exit 1; }
   printf 'Uploaded key=%s version_id=%s\n' "$object_key" "$version_id"
+  if [[ -n "$B2_VERSION_LOG" ]]; then
+    touch "$B2_VERSION_LOG"
+    chmod 0600 "$B2_VERSION_LOG"
+    printf '%s\t%s\n' "$object_key" "$version_id" >> "$B2_VERSION_LOG"
+  fi
 }
 
 # Data first; checksum and manifest last. SHA-256 sidecar is the integrity
