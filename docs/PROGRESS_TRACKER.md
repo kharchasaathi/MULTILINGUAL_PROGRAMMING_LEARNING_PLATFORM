@@ -3,9 +3,9 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: E — Security Constitution
-- Current task: E9 — Code execution sandbox security (complete at design/specification scope)
-- Next action: E10 — Payment security.
-- Completed prior: E6 — Database security hardening; E11 — Privacy and data protection (completed out of sequence at design scope).
+- Current task: E10 — Payment security (complete at design/specification scope).
+- Next action: E12 — Audit logging.
+- Completed prior: E1–E9 security design baselines; E11 — Privacy and data protection (completed out of sequence at design scope).
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -630,3 +630,11 @@ E3 milestone recorded in E3 artifacts.
 - **Verification boundary:** Design only. No sandbox runtime, VM/container, scheduler, network policy, image pipeline, quotas, endpoint, scanner or test was implemented or executed. All 60 scenarios are future tests.
 - **Hard gate:** Code execution remains disabled until L13–L15 readiness, E14 independent test evidence and explicit E15 approval.
 - **Next task:** E10 — payment security.
+
+
+## E10 closure — Payment security (2026-11-05)
+
+- Complete at architecture, control-catalogue and verification-design scope only; implementation and independent verification pending.
+- Evidence: `docs/E10_PAYMENT_SECURITY_ARCHITECTURE.md`; 60 controls in `docs/E10_PAYMENT_SECURITY_CONTROL_MATRIX.csv`; 55 future scenarios in `docs/E10_PAYMENT_SECURITY_VERIFICATION_CATALOG.csv`; decision E-0011.
+- No gateway, endpoint, migration, credential, live payment, PCI assessment or runtime control is implemented. All 55 scenarios are future tests.
+- Live payment acceptance requires provider/legal/finance review, E14 independent evidence and E15 explicit approval. E11 was completed out of sequence. Next: E12 — Audit logging.
