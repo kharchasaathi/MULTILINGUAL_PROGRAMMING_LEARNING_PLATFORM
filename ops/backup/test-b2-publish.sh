@@ -10,7 +10,7 @@ set -Eeuo pipefail
 printf '%s\n' "$*" >> "$B2_MOCK_LOG"
 case "$1 $2" in
   "s3api get-bucket-versioning") echo Enabled ;;
-  "s3api get-bucket-acl") echo '[]' ;;
+  "s3api get-bucket-acl") if [[ "${B2_MOCK_PUBLIC:-0}" == 1 ]]; then echo '[{"Grantee":{"URI":"http://acs.amazonaws.com/groups/global/AllUsers"}}]'; else echo '[]'; fi ;;
   "s3api get-bucket-encryption") echo '{"ServerSideEncryptionConfiguration":{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"AES256"}}]}}' ;;
   "s3api get-object-lock-configuration") echo '{"ObjectLockConfiguration":{"ObjectLockEnabled":"Enabled"}}' ;;
   "s3api put-object") echo mock-version ;;
@@ -43,7 +43,7 @@ grep -q 's3api get-bucket-encryption' "$tmp/b2.log"
 echo "B2 publisher mocked contract tests passed."
 
 # Fail closed for a public bucket.
-sed -i 's/echo '\''\[\]'\''/echo '\''[{"Grantee":{"URI":"http:\/\/acs.amazonaws.com\/groups\/global\/AllUsers"}}]'\''/' "$tmp/bin/aws"
+export B2_MOCK_PUBLIC=1
 if bash "$ROOT/publish-b2-backup.sh" "$tmp/backups/demo-20261105T120000Z.dump.age" >/dev/null 2>&1; then
   echo "Expected public bucket rejection" >&2; exit 1
 fi
