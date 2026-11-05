@@ -31,7 +31,7 @@ ops/backup/publish-b2-backup.sh:
 - verifies the local age-encrypted artifact, checksum and manifest before network writes;
 - checks B2 bucket versioning, Private ACL and default SSE-B2/AES256 encryption;
 - when explicitly configured, verifies Object Lock is enabled and attaches the approved per-object retention mode/date to each uploaded object;
-- uploads artifact, checksum and manifest and captures returned VersionIds;
+- uploads artifact, checksum and manifest, captures returned VersionIds in a mode-0600 local evidence file (default: <backup>.b2-versions);
 - does not create buckets, keys, retention policies, replication rules or lifecycle rules;
 - refuses Object Lock uploads without explicit retention days (1–3,000) and mode; it does not claim immutable storage when Object Lock is disabled or retention is absent.
 
@@ -48,9 +48,16 @@ bash ops/backup/publish-b2-backup.sh /secure-backups/postgres/appdb-<UTC>.dump.a
 ~~~
 Do not place literal credentials in shell history, Git, screenshots or chat. Use a restricted bucket-scoped Application Key. A live upload is not authorized by the presence of this example; perform it only after the disposable artifact and remote download/verification procedure are approved.
 
-Mock contract test (does not contact B2):
+After publishing, use the separate read-capable key and the saved version evidence to download exact object versions and verify the remote SHA-256:
+~~~bash
+bash ops/backup/verify-b2-backup.sh /secure-backups/postgres/appdb-<UTC>.dump.age
+~~~
+The verifier downloads the exact artifact/checksum/manifest versions, compares metadata with the local manifest/checksum, and recomputes SHA-256 over the downloaded encrypted artifact. It does not decrypt or restore the database; a separate isolated restore/PITR drill is required.
+
+Mock contract tests (do not contact B2):
 ~~~bash
 bash ops/backup/test-b2-publish.sh
+bash ops/backup/test-b2-verify.sh
 ~~~
 
 ## 4. pgBackRest configuration and bootstrap
@@ -118,7 +125,7 @@ The hook executables must be implemented, reviewed and deployed by E11 privacy a
 ## 9. Acceptance evidence still required
 
 - Approved data inventory, data classification, retention/legal-hold policy and numeric RPO/RTO.
-- B2 restricted Application Keys, tested live logical upload/download and independent checksum/manifest verification.
+- B2 restricted Application Keys, tested live logical upload/download using exact VersionIds and independent checksum/manifest verification.
 - Object Lock enablement and approved per-object/default retention on a disposable/test bucket, followed by approved immutable DR destination; source bucket Object Lock is currently Disabled.
 - Separate B2 destination account/region, Cloud Replication rule, replication status monitoring and successful restore from the replica.
 - Successful pgBackRest B2 S3-compatible stanza, base backup, continuous WAL archive and timestamp-based PITR restore.
