@@ -1,4 +1,4 @@
-name: E13 backup utility checks
+name: E13 backup and recovery checks
 on:
   pull_request:
   push:
@@ -7,11 +7,41 @@ on:
 permissions:
   contents: read
 jobs:
-  shell-checks:
+  mocked-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Check Bash syntax
-        run: bash -n ops/backup/backup-postgres.sh ops/backup/verify-backup.sh ops/backup/restore-postgres.sh ops/backup/test-backup-scripts.sh
-      - name: Run mocked backup utility tests
+        run: bash -n ops/backup/*.sh
+      - name: Run mocked security and utility tests
         run: bash ops/backup/test-backup-scripts.sh
+
+  postgres-age-integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install age and PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes age postgresql-client
+      - name: Run real encrypted backup and restore round trip
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: 5432
+          PGUSER: postgres
+          PGPASSWORD: postgres
+        run: bash ops/backup/test-backup-integration.sh
