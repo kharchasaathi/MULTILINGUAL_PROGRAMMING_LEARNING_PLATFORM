@@ -232,6 +232,6 @@ Technology stack/hosting; database/authentication; AI provider and budget; sandb
 - Keep encryption identity outside backup artifacts and under separate custody. Backup credentials and keys must be delivered through protected secret management, never repository files or logs.
 - Logical dumps do not provide PITR. WAL archiving, immutable cross-account/region copies, object-store consistency, key escrow, scheduling, monitoring, retention, privacy tombstone replay, audit integration and restore drills remain production gates.
 - Evidence: E13 architecture, 40 controls, 40 verification scenarios, hardened backup/verify/restore scripts, mock harness, real PostgreSQL+age integration test and CI workflow.
-- E13 was reopened because the earlier mock-only completion claim was premature. Mocked tests and Bash syntax checks passed in GitHub Actions run 23; real PostgreSQL+age integration is pending.
+- E13 was reopened because the earlier mock-only completion claim was premature. Mocked tests, Bash syntax checks and real PostgreSQL 16 + age encrypted backup/restore data round-trip passed in GitHub Actions run 23 (commit `f171716a51d8d78845bb381c143a874e7eb2e88c`). See `docs/E13_CI_TEST_EVIDENCE.md`.
 - Production gates remain: WAL/PITR, immutable off-host copies, key escrow, scheduling/alerts, cross-system consistency, E11 deletion/legal-hold replay, E12 audit integration, approved RPO/RTO and restore drills.
 - Next: continue E13. E14 must not start until E13 acceptance is evidenced.
