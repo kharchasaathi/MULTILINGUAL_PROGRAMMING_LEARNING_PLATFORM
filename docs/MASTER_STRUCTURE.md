@@ -368,7 +368,7 @@ PENDING:
 - H1–S9 — Design, implementation, launch, monetization and maintenance workstreams
 
 APPROVAL LIMIT:
-E1 is a design-time threat model, not security approval. D15 GATE-01–GATE-15 and E1 threats remain open until owner evidence is produced. D15 permits progression to security/quality design only; it is not production readiness. Playground execution remains disabled. No tests are claimed as executed unless actual results are recorded.
+E1 and E2 are design-time security baselines, not security approval. D15 GATE-01–GATE-15 and E1/E2 controls remain open until owner evidence is produced. D15 permits progression to security/quality design only; it is not production readiness. Playground execution remains disabled. No tests are claimed as executed unless actual results are recorded.
 
 ==================================================
 # RESUME COMMAND
@@ -469,3 +469,10 @@ Never assume a task is complete without evidence.
 - Preserves module ownership and D5/D13 contracts, source-of-truth rules, versioning, idempotency, asynchronous pending states, security/privacy and observability.
 - 56 future acceptance tests are specified, not executed. No production implementation or deployment is claimed.
 - **Next task: D15 — Approve system architecture.**
+
+
+## E2 closure — 2026-11-05
+- E2 network protection architecture and 32-control matrix plus 30 future verification scenarios are complete at design/specification scope.
+- Evidence: docs/E2_NETWORK_PROTECTION_ARCHITECTURE.md, docs/E2_NETWORK_CONTROL_MATRIX.csv, docs/E2_NETWORK_VERIFICATION_CATALOG.csv; decision E-0002.
+- No network configuration or tests are claimed. E1/E2 are not production security approval. Learner code execution remains disabled pending E9, L13-L15 and E15.
+- Next: E3.
