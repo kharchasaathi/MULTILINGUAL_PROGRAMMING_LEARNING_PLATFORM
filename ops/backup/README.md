@@ -1,6 +1,6 @@
 # PostgreSQL backup and recovery utilities (E13)
 
-This repository contains a provider-neutral encrypted logical-backup utility and a repeatable integration test. It is not, by itself, a production disaster-recovery service.
+This repository contains an encrypted PostgreSQL logical-backup utility, a guarded AWS S3 publisher and repeatable tests. S3 is the selected off-site object-storage target. These scripts are not, by themselves, a production disaster-recovery service.
 
 ## Dependencies and identity
 
@@ -47,10 +47,10 @@ Real encryption + PostgreSQL logical backup/restore round trip (requires a dispo
 bash ops/backup/test-backup-integration.sh
 ```
 
-## Production gates not provided by this provider-neutral utility
+## Publish an encrypted backup to AWS S3\n\nThe S3 publisher uploads only an already encrypted `.dump.age` artifact and its checksum/manifest. It refuses to write unless the bucket is in `ap-south-1`, versioning is enabled, Object Lock is enabled, all four S3 Block Public Access settings are true, and a customer-managed KMS key plus an explicit retention period are supplied. It does not create or modify buckets, policies, KMS keys, replication or lifecycle rules.\n\nRequired environment (inject through a secret manager/approved deployment environment):\n\n```bash\nexport AWS_S3_BUCKET=approved-backup-bucket\nexport AWS_S3_REGION=ap-south-1\nexport AWS_S3_PREFIX=postgres\nexport AWS_S3_KMS_KEY_ID=arn:aws:kms:ap-south-1:ACCOUNT:key/KEY-ID\nexport AWS_S3_OBJECT_LOCK_DAYS=30 # proposed example only; owner approval required\nexport AWS_S3_OBJECT_LOCK_MODE=GOVERNANCE # do not use COMPLIANCE without legal/security approval\nbash ops/backup/publish-s3-backup.sh /secure-backups/postgres/appdb-<UTC>.dump.age\n```\n\nThe publisher checks local checksum/manifest before network writes and uploads the artifact first, then checksum and manifest. Object Lock retention is attached to each uploaded object. Capture S3 VersionIds and independently verify remote object checksums/retention in the operational audit record. The publisher does not implement cross-account replication, WAL/PITR, lifecycle policies, scheduled execution, alerting or key escrow. Never pass AWS credentials on the command line or commit them. Use an IAM role with narrowly scoped `GetBucketVersioning`, `GetObjectLockConfiguration`, `GetPublicAccessBlock`, and `PutObject` permissions plus only the required KMS data-key/encrypt permissions.\n\nMock contract test (does not contact AWS):\n```bash\nbash ops/backup/test-s3-publish.sh\n```\n\n## Production gates not provided by these utilities
 
 - Continuous WAL archiving, physical base backups and tested point-in-time recovery (PITR).
-- Cross-account/region immutable copies, retention locks, storage lifecycle and separate backup administration.
+- Cross-account/region replication, retention/lifecycle policy and separate backup administration. The S3 publisher only checks and applies per-object controls in an already provisioned bucket.
 - Scheduled execution, freshness/coverage alerts, on-call ownership and restore-drill cadence.
 - Object-store/event/outbox/inbox/audit snapshots coordinated with the database consistency point.
 - Age identity escrow, key rotation/revocation drills and independent custody.
