@@ -214,3 +214,13 @@ Technology stack/hosting; database/authentication; AI provider and budget; sandb
 - Client redirects and client-supplied status never prove payment. Unknown outcomes remain pending until provider verification. No live payments before E14 independent evidence and E15 approval.
 - Evidence: E10 architecture; 60 controls; 55 future verification scenarios. No gateway, endpoint, migration, credential, payment, PCI assessment or test is claimed implemented/executed.
 - Next: E12 — audit logging.
+
+
+## E-0012 — Audit logging and security event architecture
+- Date: 2026-11-05; design baseline complete; implementation and operational validation pending.
+- Adopt a versioned, privacy-aware audit event envelope for security-relevant and privileged actions across identity, authorization, admin, learner data, content, payments, AI, sandbox, APIs, workers and audit-data access.
+- Critical state transitions must persist audit evidence atomically or through a transactional outbox. Events are append-only, deduplicated, correlated and protected from runtime mutation. Audit access, search, export, replay and retention changes are themselves audited.
+- Apply E11 minimization and retention; exclude passwords, tokens, cookies, secrets, card authentication data, raw prompts and full learner content by default. Separate writers, readers, storage administrators and key custody. Define alert ownership, pipeline-health monitoring and forensic preservation.
+- Evidence: `docs/E12_AUDIT_LOGGING_SECURITY_ARCHITECTURE.md`; `docs/E12_AUDIT_LOGGING_CONTROL_MATRIX.csv` (60 controls); `docs/E12_AUDIT_LOGGING_VERIFICATION_CATALOG.csv` (55 future scenarios).
+- No collector, SIEM, WORM store, schema, retention job, alert, dashboard, runtime control or test is implemented/executed. E11 legal/retention, E13 recovery, E14 testing and E15 approval remain gates.
+- Next: E13 — backup and recovery.
