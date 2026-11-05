@@ -75,7 +75,7 @@ put_file() {
   local version_id
   version_id="$(aws s3api put-object --bucket "$B2_BUCKET" --key "$object_key" --body "$source" \
     --endpoint-url "$B2_ENDPOINT" --content-type "$content_type" \
-    --query VersionId --output text --no-cli-pager)"
+    "${lock_args[@]}" --query VersionId --output text --no-cli-pager)"
   [[ -n "$version_id" && "$version_id" != None ]] || { echo "B2 did not return a VersionId for $object_key" >&2; exit 1; }
   printf 'Uploaded key=%s version_id=%s\n' "$object_key" "$version_id"
 }
