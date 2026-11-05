@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: E — Security Constitution
-- Current task: E7 — API security (pending)
-- Next action: E7 — API security.
+- Current task: E7 — API security (complete at design/specification scope)
+- Next action: E8 — AI prompt injection protection.
 - Completed prior: E6 — Database security hardening; E11 — Privacy and data protection (completed out of sequence at design scope).
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
@@ -602,3 +602,13 @@ E3 milestone recorded in E3 artifacts.
 - **Verification boundary:** Design only. No legal opinion, DPIA, consent UI, privacy notice, processor contract, retention/deletion workflow, rights request, incident exercise or privacy test is claimed. All 38 scenarios are future tests.
 - **Critical guardrail:** Learner code execution remains disabled until E9, L13–L15 and E15 approval.
 - **Next task:** E7 — API security (not yet complete).
+
+
+## E7 closure (2026-11-05) — API security
+
+- **Status:** Complete at API security architecture, control catalogue and verification-design scope; implementation and verification pending.
+- **Evidence:** `docs/E7_API_SECURITY_ARCHITECTURE.md`; `docs/E7_API_SECURITY_CONTROL_MATRIX.csv` (60 controls); `docs/E7_API_SECURITY_VERIFICATION_CATALOG.csv` (56 future scenarios); decision E-0008.
+- **Coverage:** Route inventory and OpenAPI governance; E4 authentication and E5 object/function/property authorization; strict request schemas and safe response DTOs; BOLA/IDOR/BFLA and mass assignment; rate limits, quotas, idempotency and concurrency; CORS/CSRF; webhook signature/replay/durable inbox; upload/download/export safety; D12 payment, D11 admin, D13 async events; E11 privacy-aware telemetry and CI release gates.
+- **Verification boundary:** Design only. No endpoint, API gateway/WAF, auth guard, policy engine, rate limiter, webhook handler, upload scanner, production setting, scan or test was implemented or executed. All 56 scenarios are future tests.
+- **Critical guardrail:** Learner code execution remains disabled until E9, L13–L15 and E15 approval.
+- **Next task:** E8 — AI prompt injection protection.
