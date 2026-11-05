@@ -1,6 +1,6 @@
 # E13 — Backup and Recovery Security Architecture
 
-**Status:** Hardened logical-backup implementation committed; real integration CI pending; production recovery controls remain open  
+**Status:** Hardened logical-backup implementation committed; real PostgreSQL+age integration passed in CI; production recovery controls remain open  
 **Date:** 2026-11-05  
 **Decision:** E-0013  
 **Baseline:** Provider-neutral PostgreSQL logical backup utility using pg_dump/pg_restore and age encryption  
@@ -63,4 +63,4 @@ Production operations must monitor last successful backup, backup age, inventory
 - Restore drills, security tests, application smoke tests and measured RPO/RTO pass.
 - E14 independent security testing and E15 explicit security approval completed.
 
-**Current limitation:** Provider-neutral PostgreSQL logical backup/verify/restore scripts, mock tests and a real PostgreSQL+age integration workflow have been committed. The real integration workflow is pending its first passing result. No production database, scheduled backup, remote immutable storage, PITR, key escrow, cross-system restore drill or production recovery has been executed. E13 remains open until the acceptance gates above are evidenced.
+**Current limitation:** Provider-neutral PostgreSQL logical backup/verify/restore scripts, mock tests and a real PostgreSQL+age integration workflow have been committed. The real integration workflow passed in GitHub Actions run 23 (both mock and real integration jobs successful). No production database, scheduled backup, remote immutable storage, PITR, key escrow, cross-system restore drill or production recovery has been executed. E13 remains open until the acceptance gates above are evidenced.
