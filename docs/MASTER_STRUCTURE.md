@@ -4,7 +4,7 @@ PROJECT_NAME: MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 VERSION: 1.0
 STATUS: PLANNING
 CURRENT_STAGE: E
-NEXT_STAGE: E8
+NEXT_STAGE: E9
 
 ==================================================
 # PROJECT GOAL
@@ -108,7 +108,7 @@ https://www.w3schools.com/
 - [x] E5. Authorization and roles
 - [x] E6. Database security
 - [x] E7. API security
-- [ ] E8. AI prompt injection protection
+- [x] E8. AI prompt injection protection
 - [ ] E9. Code execution sandbox security
 - [ ] E10. Payment security
 - [x] E11. Privacy and data protection
@@ -520,3 +520,10 @@ Never assume a task is complete without evidence.
 - E11 privacy remains completed out of sequence under its canonical E11 identifiers.
 - Learner code execution remains disabled until E9, L13–L15 and E15 approval.
 - **Next task: E8 — AI prompt injection protection.**
+
+
+## E8 closure — 2026-11-05
+- E8 AI prompt injection protection design and registers are complete: `docs/E8_AI_PROMPT_INJECTION_PROTECTION.md`, `docs/E8_AI_SECURITY_CONTROL_MATRIX.csv` (65 controls), and `docs/E8_AI_SECURITY_VERIFICATION_CATALOG.csv` (60 future scenarios).
+- Design-only: no model/provider, prompt firewall, retrieval ACL, tool broker, classifier, evaluator, runtime mitigation or tests are claimed. All scenarios remain unexecuted.
+- General AI capabilities remain no-tool by default and require implementation plus E14/E15 gates before production enablement. Learner code execution remains disabled until E9, L13–L15 and E15 approval.
+- **Next task: E9 — Code execution sandbox security.**
