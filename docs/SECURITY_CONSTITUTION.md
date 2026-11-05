@@ -57,3 +57,12 @@ The authoritative sequence is defined in docs/MASTER_STRUCTURE.md: E1 Threat mod
 - Validate bounded request schemas; use explicit response DTOs, safe errors, quotas, idempotency and replay protection.
 - Verify provider callbacks before processing; re-authorize file access and asynchronous jobs; apply E11 privacy rules to telemetry.
 - E7 is design-only. Implementation and testing remain pending; E14 and E15 gates still apply.
+
+
+## AI prompt injection baseline (E8)
+- Treat user prompts, retrieved documents, code, OCR, transcripts, metadata, tool outputs and model outputs as untrusted data; none can override server policy or grant authority.
+- Minimize and isolate context by principal, tenant, task and purpose. Enforce retrieval authorization before search and before citation/snippet delivery; provenance is mandatory for trusted use.
+- AI tasks default to no tools. Every proposed tool call passes a deterministic server-side broker with E4 identity, E5 authorization, strict schemas, resource scope, quotas and audit.
+- AI cannot approve/publish, grant permissions, set authoritative grades/mastery, change payment entitlements or execute learner code.
+- Validate structured output, curriculum references and destination rendering; never execute raw generated code or HTML. Apply E11 minimization, retention and deletion rules.
+- Evaluate direct/indirect, multilingual and multimodal injection, data leakage and tool misuse with deterministic assertions. E8 is design-only; E14 evidence and E15 approval remain required.
