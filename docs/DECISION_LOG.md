@@ -146,3 +146,11 @@ Technology stack/hosting; database/authentication; AI provider and budget; sandb
 - Deferred: Hosting vendor/region/topology, edge/WAF/DDoS, DNS/certificate products, CIDR/firewall rules, workload identity technology, provider allowlists, SIEM/retention, sandbox technology and operational SLOs.
 - Verification boundary: Documentation review only. No network configuration, infrastructure scan, TLS/DNS test, penetration test or production control validation is claimed. Future scenarios are not executed.
 - Next: E3 — security design.
+
+
+## E-0003 — Application security architecture
+- Date: 2026-11-05. Status: Design baseline complete; implementation and verification pending.
+- Adopt the E3 application request, access-control, validation, safe-output, browser, file, privacy, audit, AI, payment, admin and asynchronous-processing requirements.
+- Evidence: docs/E3_APPLICATION_SECURITY_ARCHITECTURE.md; docs/E3_APPLICATION_SECURITY_CONTROL_MATRIX.csv (40 controls); docs/E3_APPLICATION_SECURITY_VERIFICATION_CATALOG.csv (40 future scenarios).
+- No application code or tests are claimed. Scenarios remain unexecuted. Learner code execution remains disabled pending E9, L13-L15 and E15 approval.
+- Next: E4.
