@@ -362,7 +362,7 @@ IN_PROGRESS:
 - G13 — Backup policy; Git history/version control active
 
 PENDING:
-- E2–E15 — Security Constitution
+- E3–E15 — Security Constitution
 - F1–F15 — Error Prevention & Quality Engineering
 - G10–G12 — GitHub Actions, automated tests and deployment workflow
 - H1–S9 — Design, implementation, launch, monetization and maintenance workstreams
