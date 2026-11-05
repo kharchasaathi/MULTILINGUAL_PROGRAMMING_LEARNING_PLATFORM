@@ -42,8 +42,14 @@ grep -q 's3api get-bucket-encryption' "$tmp/b2.log"
 ! grep -q -- '--server-side-encryption aws:kms' "$tmp/b2.log"
 echo "B2 publisher mocked contract tests passed."
 
+# Verify explicit governance retention is attached to each uploaded object.
+export B2_OBJECT_LOCK_ENABLED=true B2_OBJECT_LOCK_DAYS=7 B2_OBJECT_LOCK_MODE=GOVERNANCE
+bash "$ROOT/publish-b2-backup.sh" "$tmp/backups/demo-20261105T120000Z.dump.age"
+[[ "$(grep -c -- "--object-lock-mode GOVERNANCE" "$B2_MOCK_LOG")" -eq 3 ]]
+echo "B2 per-object retention contract test passed."
+
 # Fail closed for a public bucket.
-export B2_MOCK_PUBLIC=1
+export B2_MOCK_PUBLIC=1 B2_OBJECT_LOCK_ENABLED=false
 if bash "$ROOT/publish-b2-backup.sh" "$tmp/backups/demo-20261105T120000Z.dump.age" >/dev/null 2>&1; then
   echo "Expected public bucket rejection" >&2; exit 1
 fi
