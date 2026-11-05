@@ -607,7 +607,7 @@ E3 milestone recorded in E3 artifacts.
 ## E7 closure (2026-11-05) — API security
 
 - **Status:** Complete at API security architecture, control catalogue and verification-design scope; implementation and verification pending.
-- **Evidence:** `docs/E7_API_SECURITY_ARCHITECTURE.md`; `docs/E7_API_SECURITY_CONTROL_MATRIX.csv` (60 controls); `docs/E7_API_SECURITY_VERIFICATION_CATALOG.csv` (56 future scenarios); decision E-0008.
+- **Evidence:** `docs/E7_API_SECURITY_ARCHITECTURE.md`; `docs/E7_API_SECURITY_CONTROL_MATRIX.csv` (59 controls); `docs/E7_API_SECURITY_VERIFICATION_CATALOG.csv` (56 future scenarios); decision E-0008.
 - **Coverage:** Route inventory and OpenAPI governance; E4 authentication and E5 object/function/property authorization; strict request schemas and safe response DTOs; BOLA/IDOR/BFLA and mass assignment; rate limits, quotas, idempotency and concurrency; CORS/CSRF; webhook signature/replay/durable inbox; upload/download/export safety; D12 payment, D11 admin, D13 async events; E11 privacy-aware telemetry and CI release gates.
 - **Verification boundary:** Design only. No endpoint, API gateway/WAF, auth guard, policy engine, rate limiter, webhook handler, upload scanner, production setting, scan or test was implemented or executed. All 56 scenarios are future tests.
 - **Critical guardrail:** Learner code execution remains disabled until E9, L13–L15 and E15 approval.
@@ -635,7 +635,7 @@ E3 milestone recorded in E3 artifacts.
 ## E10 closure — Payment security (2026-11-05)
 
 - Complete at architecture, control-catalogue and verification-design scope only; implementation and independent verification pending.
-- Evidence: `docs/E10_PAYMENT_SECURITY_ARCHITECTURE.md`; 60 controls in `docs/E10_PAYMENT_SECURITY_CONTROL_MATRIX.csv`; 55 future scenarios in `docs/E10_PAYMENT_SECURITY_VERIFICATION_CATALOG.csv`; decision E-0011.
+- Evidence: `docs/E10_PAYMENT_SECURITY_ARCHITECTURE.md`; 59 controls in `docs/E10_PAYMENT_SECURITY_CONTROL_MATRIX.csv`; 55 future scenarios in `docs/E10_PAYMENT_SECURITY_VERIFICATION_CATALOG.csv`; decision E-0011.
 - No gateway, endpoint, migration, credential, live payment, PCI assessment or runtime control is implemented. All 55 scenarios are future tests.
 - Live payment acceptance requires provider/legal/finance review, E14 independent evidence and E15 explicit approval. E11 was completed out of sequence. Next: E12 — Audit logging.
 
@@ -643,7 +643,7 @@ E3 milestone recorded in E3 artifacts.
 ## E12 closure — Audit logging (2026-11-05)
 
 - Complete at architecture, control-catalogue and verification-design scope; implementation and operational validation pending.
-- Evidence: `docs/E12_AUDIT_LOGGING_SECURITY_ARCHITECTURE.md`; 60 controls in `docs/E12_AUDIT_LOGGING_CONTROL_MATRIX.csv`; 55 future scenarios in `docs/E12_AUDIT_LOGGING_VERIFICATION_CATALOG.csv`; decision E-0012.
+- Evidence: `docs/E12_AUDIT_LOGGING_SECURITY_ARCHITECTURE.md`; 59 controls in `docs/E12_AUDIT_LOGGING_CONTROL_MATRIX.csv`; 55 future scenarios in `docs/E12_AUDIT_LOGGING_VERIFICATION_CATALOG.csv`; decision E-0012.
 - Defines versioned audit event envelope, server-side event production, durable transactional audit/outbox, append-only integrity, least-privilege writers/readers, privacy-safe redaction, retention/legal hold, access/export auditing, alert ownership, pipeline health, forensic preservation and incident response.
 - No collector, SIEM, WORM store, schema, retention job, dashboard, alert or runtime control is implemented. All 55 scenarios are future tests; none executed.
 - Production reliance requires E11 retention/legal review, E13 backup/recovery, E14 independent tests and E15 explicit approval. Next: E13 — Backup and recovery.
