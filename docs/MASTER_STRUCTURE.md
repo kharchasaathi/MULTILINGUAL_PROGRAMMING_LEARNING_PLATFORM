@@ -4,7 +4,7 @@ PROJECT_NAME: MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 VERSION: 1.0
 STATUS: PLANNING
 CURRENT_STAGE: E
-NEXT_STAGE: E7
+NEXT_STAGE: E8
 
 ==================================================
 # PROJECT GOAL
@@ -107,7 +107,7 @@ https://www.w3schools.com/
 - [x] E4. Authentication security
 - [x] E5. Authorization and roles
 - [x] E6. Database security
-- [ ] E7. API security
+- [x] E7. API security
 - [ ] E8. AI prompt injection protection
 - [ ] E9. Code execution sandbox security
 - [ ] E10. Payment security
@@ -512,3 +512,11 @@ Never assume a task is complete without evidence.
 - The privacy work previously labelled E7 is cross-mapped to canonical E11. Its canonical artifacts are docs/E11_DATA_PROTECTION_PRIVACY_SECURITY.md, docs/E11_PRIVACY_CONTROL_MATRIX.csv and docs/E11_PRIVACY_VERIFICATION_CATALOG.csv.
 - E7 API security is NOT complete. E7 is the next task. E8–E10 and E12–E15 remain pending. E11 privacy design is complete out of sequence.
 - E1–E6 and E11 are complete at design/documentation scope only; implementation and verification are still pending as described in each artifact.
+
+
+## E7 closure — 2026-11-05
+- E7 API security design and registers are complete: `docs/E7_API_SECURITY_ARCHITECTURE.md`, `docs/E7_API_SECURITY_CONTROL_MATRIX.csv` (60 controls), and `docs/E7_API_SECURITY_VERIFICATION_CATALOG.csv` (56 future scenarios).
+- Design-only: no API routes, gateway, guards, rate limits, webhook verification, production configuration or tests are claimed. All scenarios remain unexecuted.
+- E11 privacy remains completed out of sequence under its canonical E11 identifiers.
+- Learner code execution remains disabled until E9, L13–L15 and E15 approval.
+- **Next task: E8 — AI prompt injection protection.**
