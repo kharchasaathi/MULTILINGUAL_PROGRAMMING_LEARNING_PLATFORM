@@ -178,3 +178,11 @@ Technology stack/hosting; database/authentication; AI provider and budget; sandb
 - Evidence: docs/E6_DATABASE_SECURITY_HARDENING.md; docs/E6_DATABASE_SECURITY_CONTROL_MATRIX.csv (58 controls); docs/E6_DATABASE_SECURITY_VERIFICATION_CATALOG.csv (52 future scenarios).
 - Deferred: database host/provider/region, tenant model and RLS decision, KMS, connection pooler, audit/backup products, RPO/RTO and retention. No database configuration, migration, role, RLS, encryption, backup/restore or test is claimed; scenarios are unexecuted.
 - Learner code execution remains disabled until E9, L13-L15 and E15 approval. Next: E7 — data protection and privacy security.
+
+
+## E-0007 — Data protection and privacy security
+- Date: 2026-11-05; design baseline complete; implementation and jurisdiction-specific legal review pending.
+- Adopt purpose-bound processing, data inventory/classification, minimization, granular consent where relied upon, transparent notices, authenticated rights workflows, processor review, restricted AI data sharing, child-user review gates, retention/deletion propagation, legal-hold governance and privacy incident response.
+- Evidence: docs/E7_DATA_PROTECTION_PRIVACY_SECURITY.md; docs/E7_PRIVACY_CONTROL_MATRIX.csv (48 controls); docs/E7_PRIVACY_VERIFICATION_CATALOG.csv (38 future scenarios).
+- Deferred: controller/entity and launch jurisdictions, lawful basis per purpose, child-user model, processor/AI providers, cross-border transfer mechanism, retention durations, rights SLA, legal holds and breach notification process. No legal opinion, DPIA, UI, contracts, workflows or tests are claimed; scenarios are unexecuted.
+- Learner code execution remains disabled until E9, L13-L15 and E15 approval. Next: E8 — security monitoring, logging and incident response.
