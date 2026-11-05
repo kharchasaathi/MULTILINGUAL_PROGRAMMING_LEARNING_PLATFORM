@@ -49,3 +49,11 @@ Authentication provider, data classification, retention, key management, sandbox
 
 ## Canonical E-stage task map (2026-11-05)
 The authoritative sequence is defined in docs/MASTER_STRUCTURE.md: E1 Threat modelling; E2 Network protection; E3 Application security; E4 Authentication security; E5 Authorization and roles; E6 Database security; E7 API security; E8 AI prompt injection protection; E9 Code execution sandbox security; E10 Payment security; E11 Privacy and data protection; E12 Audit logging; E13 Backup and recovery; E14 Security testing; E15 Security approval. The privacy milestone previously labelled E7 is canonically E11 and is documented under the E11 artifact filenames. E7 API security remains pending. Completion labels describe design documentation only unless implementation and independent verification evidence are explicitly recorded.
+
+
+## API security baseline (E7)
+- Maintain a versioned route inventory tied to D5 contracts and one owning module; unclassified routes fail closed.
+- E4 authenticates the principal; E5 authorizes every operation and resource. Client-supplied roles and opaque IDs never grant access.
+- Validate bounded request schemas; use explicit response DTOs, safe errors, quotas, idempotency and replay protection.
+- Verify provider callbacks before processing; re-authorize file access and asynchronous jobs; apply E11 privacy rules to telemetry.
+- E7 is design-only. Implementation and testing remain pending; E14 and E15 gates still apply.
