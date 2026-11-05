@@ -30,10 +30,10 @@
 ops/backup/publish-b2-backup.sh:
 - verifies the local age-encrypted artifact, checksum and manifest before network writes;
 - checks B2 bucket versioning, Private ACL and default SSE-B2/AES256 encryption;
-- optionally verifies Object Lock is enabled when explicitly configured;
+- when explicitly configured, verifies Object Lock is enabled and attaches the approved per-object retention mode/date to each uploaded object;
 - uploads artifact, checksum and manifest and captures returned VersionIds;
 - does not create buckets, keys, retention policies, replication rules or lifecycle rules;
-- does not claim immutable storage when Object Lock is disabled or uploaded files have no retention.
+- refuses Object Lock uploads without explicit retention days (1–3,000) and mode; it does not claim immutable storage when Object Lock is disabled or retention is absent.
 
 Required environment variables are injected from an approved secret manager:
 ~~~bash
