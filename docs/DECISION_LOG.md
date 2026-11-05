@@ -206,3 +206,11 @@ Technology stack/hosting; database/authentication; AI provider and budget; sandb
 - Evidence: `docs/E9_CODE_EXECUTION_SANDBOX_SECURITY.md`, `docs/E9_SANDBOX_SECURITY_CONTROL_MATRIX.csv` (70 controls), `docs/E9_SANDBOX_SECURITY_VERIFICATION_CATALOG.csv` (60 future scenarios).
 - Execution remains disabled until L13-L15 readiness, E14 independent test evidence and E15 explicit approval. No runtime or tests are claimed.
 - Next: E10 — payment security.
+
+
+## E-0011 — Payment security
+- Date: 2026-11-05; design baseline complete; implementation and independent verification pending.
+- Adopt E10 provider-neutral controls for D12: hosted checkout, server-authoritative pricing and immutable orders, provider/merchant/environment/order/amount/currency binding, raw-byte webhook verification, replay defense, durable inbox/outbox, idempotent event processing, append-only financial evidence, controlled refunds/disputes, reconciliation, entitlement ownership, secret isolation, E11 privacy and audit.
+- Client redirects and client-supplied status never prove payment. Unknown outcomes remain pending until provider verification. No live payments before E14 independent evidence and E15 approval.
+- Evidence: E10 architecture; 60 controls; 55 future verification scenarios. No gateway, endpoint, migration, credential, payment, PCI assessment or test is claimed implemented/executed.
+- Next: E12 — audit logging.
