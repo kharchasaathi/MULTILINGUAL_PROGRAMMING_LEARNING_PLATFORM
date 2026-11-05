@@ -4,7 +4,7 @@ PROJECT_NAME: MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 VERSION: 1.0
 STATUS: PLANNING
 CURRENT_STAGE: E
-NEXT_STAGE: E6
+NEXT_STAGE: E7
 
 ==================================================
 # PROJECT GOAL
@@ -497,3 +497,11 @@ Never assume a task is complete without evidence.
 - No policy engine, role seed, endpoint authorization or runtime test is implemented. Scenarios remain unexecuted.
 - Learner code execution remains disabled until E9, L13-L15 and E15 approval.
 - Next task: E6 — database security.
+
+
+## E6 milestone — database security hardening
+- E6 database security architecture and registers are complete: 58 controls and 52 future verification scenarios.
+- Evidence: docs/E6_DATABASE_SECURITY_HARDENING.md, docs/E6_DATABASE_SECURITY_CONTROL_MATRIX.csv, docs/E6_DATABASE_SECURITY_VERIFICATION_CATALOG.csv; decision E-0006.
+- Design-only: no database configuration, migration, RLS policy, encryption, backup/restore or tests are claimed.
+- Learner code execution remains disabled until E9, L13-L15 and E15 approval.
+- Next task: E7 — data protection and privacy security.
