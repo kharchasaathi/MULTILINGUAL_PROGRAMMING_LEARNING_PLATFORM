@@ -3,9 +3,9 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: E — Security Constitution
-- Current task: E3 — Application security (completed; E4 is next)
-- Next action: E4 — identity, authentication and authorization hardening.
-- Completed immediately before current task: E2 — Network Protection Architecture (provider-neutral design scope).
+- Current task: E4 — Identity, authentication and authorization hardening (completed; E5 is next)
+- Next action: E5 — authorization model and role hardening.
+- Completed immediately before current task: E3 — Application Security Architecture (design scope).
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -560,3 +560,14 @@ D13 Module Communication architecture is complete at specification scope. Eviden
 
 
 E3 milestone recorded in E3 artifacts.
+
+
+## E4 closure (2026-11-05) — identity and authentication security
+
+- **Status:** Complete at provider-neutral security requirements and verification-design scope; implementation pending.
+- **Evidence:** docs/E4_IDENTITY_AUTHENTICATION_SECURITY.md; docs/E4_IDENTITY_AUTHENTICATION_CONTROL_MATRIX.csv (42 controls); docs/E4_IDENTITY_AUTHENTICATION_VERIFICATION_CATALOG.csv (48 future scenarios); decision E-0004.
+- **Coverage:** Identity lifecycle and linking; OIDC/OAuth validation, state/nonce/PKCE; credential and password safeguards; MFA/recovery; session/token expiry, rotation and revocation; server-resolved principal handoff; service identities; abuse resistance; audit; web/PWA/native client boundaries.
+- **Deferred:** Provider, credential ownership, MFA baseline, token/session transport and lifetime, key management, recovery policy and revocation objective remain unselected pending review.
+- **Verification boundary:** Design only. No identity provider, endpoint, credential store, MFA, session control, penetration test or runtime scenario was executed or verified. All 48 scenarios are future tests.
+- **Critical guardrail:** Learner code execution remains disabled until E9, L13–L15 and E15 approval.
+- **Next task:** E5 — authorization and role hardening.
