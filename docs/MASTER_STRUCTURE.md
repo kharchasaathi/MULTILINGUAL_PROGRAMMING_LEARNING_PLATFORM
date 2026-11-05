@@ -476,3 +476,10 @@ Never assume a task is complete without evidence.
 - Evidence: docs/E2_NETWORK_PROTECTION_ARCHITECTURE.md, docs/E2_NETWORK_CONTROL_MATRIX.csv, docs/E2_NETWORK_VERIFICATION_CATALOG.csv; decision E-0002.
 - No network configuration or tests are claimed. E1/E2 are not production security approval. Learner code execution remains disabled pending E9, L13-L15 and E15.
 - Next: E3.
+
+
+## E3 milestone
+- E3 application security design artifacts are complete: docs/E3_APPLICATION_SECURITY_ARCHITECTURE.md and its control and verification CSV registers.
+- The work is a design baseline; implementation and test evidence remain pending.
+- Learner code execution remains disabled until the required later gates are approved.
+- Next task: E4.
