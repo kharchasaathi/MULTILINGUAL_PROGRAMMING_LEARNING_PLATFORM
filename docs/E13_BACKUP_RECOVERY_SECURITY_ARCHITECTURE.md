@@ -1,6 +1,6 @@
 # E13 — Backup and Recovery Security Architecture
 
-**Status:** Initial implementation slice committed; production recovery controls and independent validation pending  
+**Status:** Hardened logical-backup implementation committed; real integration CI pending; production recovery controls remain open  
 **Date:** 2026-11-05  
 **Decision:** E-0013  
 **Baseline:** Provider-neutral PostgreSQL logical backup utility using pg_dump/pg_restore and age encryption  
@@ -20,13 +20,13 @@ Inventory PostgreSQL, object/file bytes and metadata, audit evidence, outbox/inb
 Files:
 - `ops/backup/backup-postgres.sh`: pg_dump custom archive, age encryption, SHA-256 checksum and manifest.
 - `ops/backup/verify-backup.sh`: checksum and manifest verification.
-- `ops/backup/restore-postgres.sh`: decrypt, archive-list preflight and explicit-confirmation restore with --clean/--if-exists.
-- `ops/backup/test-backup-scripts.sh`: mock-based utility test harness.
+- `ops/backup/restore-postgres.sh`: decrypt, archive-list preflight and explicit-confirmation and isolated-target-attestation restore into a newly provisioned empty database; no implicit object deletion.
+- `ops/backup/test-backup-scripts.sh`: mock-based utility/security guard test harness.\n- `ops/backup/test-backup-integration.sh`: real PostgreSQL + age encryption/decryption and data round-trip test, executed by GitHub Actions with a disposable PostgreSQL service.
 - `ops/backup/README.md`: usage and operational limits.
 
 Use a dedicated backup DB identity, protected environment/secret injection, restricted off-host BACKUP_DIR and public AGE_RECIPIENT. Keep AGE identity outside the artifact and recover it through separately controlled escrow. Never commit credentials or plaintext dumps. Restore only to an isolated, explicitly named recovery database. The restore command is destructive to matching objects in its target.
 
-The implementation is logical backup only. It does not enable WAL archiving, physical base backups, PITR, remote replication, immutable storage, scheduling, alerting, object-store backup or cloud KMS integration.
+The implementation is logical backup only. It does not enable WAL archiving, physical base backups, PITR, remote replication, immutable storage, scheduling, alerting, object-store backup or cloud KMS integration. The integration workflow proves a real logical backup/restore round trip in CI, not production disaster recovery.
 
 ## 5. Storage and cryptographic controls
 Encrypt before leaving the trusted host. Separate encryption identity from backup storage and production database administration. Restrict write/delete/read permissions independently. Production requires immutable/offline or separately administered copies, cross-account/region failure separation, retention lock, versioning and tested key escrow. SHA-256 detects accidental/tampered artifact changes relative to the stored checksum; it is not a signature or independent authenticity proof. Protect manifests/checksums from the same destructive actor as artifacts.
@@ -63,4 +63,4 @@ Production operations must monitor last successful backup, backup age, inventory
 - Restore drills, security tests, application smoke tests and measured RPO/RTO pass.
 - E14 independent security testing and E15 explicit security approval completed.
 
-**Current limitation:** Only the provider-neutral PostgreSQL logical backup/verify/restore scripts and mock test harness have been added. No live database, real encryption round-trip, scheduled backup, remote storage, PITR, restore drill or production recovery has been executed.
+**Current limitation:** Provider-neutral PostgreSQL logical backup/verify/restore scripts, mock tests and a real PostgreSQL+age integration workflow have been committed. The real integration workflow is pending its first passing result. No production database, scheduled backup, remote immutable storage, PITR, key escrow, cross-system restore drill or production recovery has been executed. E13 remains open until the acceptance gates above are evidenced.
