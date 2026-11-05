@@ -3,7 +3,7 @@ set -Eeuo pipefail
 umask 077
 
 # Publishes an already age-encrypted E13 logical backup to a private
-# Backblaze B2 bucket through its S3-compatible API. No bucket/IAM changes.
+# Backblaze B2 bucket through its S3-compatible API. No bucket or key changes.
 : "${B2_BUCKET:?Set B2_BUCKET}"
 : "${B2_ENDPOINT:?Set B2_ENDPOINT (the exact bucket/account S3 endpoint)}"
 : "${B2_REGION:?Set B2_REGION (for example eu-central-003)}"
