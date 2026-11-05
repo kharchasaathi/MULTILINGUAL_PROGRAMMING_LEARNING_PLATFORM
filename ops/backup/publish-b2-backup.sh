@@ -11,10 +11,19 @@ umask 077
 : "${B2_APPLICATION_KEY:?Set B2_APPLICATION_KEY}"
 : "${B2_OBJECT_LOCK_ENABLED:?Set B2_OBJECT_LOCK_ENABLED=true|false after checking bucket settings}"
 : "${B2_PREFIX:=postgres}"
+if [[ "$B2_OBJECT_LOCK_ENABLED" == true ]]; then
+  : "${B2_OBJECT_LOCK_DAYS:?Set approved B2_OBJECT_LOCK_DAYS when Object Lock is enabled}"
+  : "${B2_OBJECT_LOCK_MODE:?Set approved B2_OBJECT_LOCK_MODE=GOVERNANCE|COMPLIANCE}"
+fi
 
 [[ $# -eq 1 ]] || { echo "Usage: $0 BACKUP_FILE.dump.age" >&2; exit 64; }
 [[ "$B2_ENDPOINT" == https://*.backblazeb2.com ]] || { echo "Refusing non-Backblaze HTTPS endpoint" >&2; exit 1; }
 [[ "$B2_OBJECT_LOCK_ENABLED" == true || "$B2_OBJECT_LOCK_ENABLED" == false ]] || { echo "B2_OBJECT_LOCK_ENABLED must be true or false" >&2; exit 64; }
+if [[ "$B2_OBJECT_LOCK_ENABLED" == true ]]; then
+  [[ "$B2_OBJECT_LOCK_DAYS" =~ ^[1-9][0-9]*$ ]] || { echo "B2_OBJECT_LOCK_DAYS must be a positive integer" >&2; exit 64; }
+  [[ "$B2_OBJECT_LOCK_DAYS" -le 3000 ]] || { echo "B2 retention cannot exceed 3000 days" >&2; exit 64; }
+  [[ "$B2_OBJECT_LOCK_MODE" == GOVERNANCE || "$B2_OBJECT_LOCK_MODE" == COMPLIANCE ]] || { echo "B2_OBJECT_LOCK_MODE must be GOVERNANCE or COMPLIANCE" >&2; exit 64; }
+fi
 [[ -n "$B2_APPLICATION_KEY_ID" && -n "$B2_APPLICATION_KEY" ]] || { echo "B2 application credentials are required" >&2; exit 64; }
 
 file="$1"
@@ -46,7 +55,10 @@ grep -Eq '"SSEAlgorithm"[[:space:]]*:[[:space:]]*"AES256"' <<<"$encryption" || {
   echo "Expected Backblaze-managed SSE-B2/AES256 default encryption" >&2; exit 1;
 }
 
+lock_args=()
 if [[ "$B2_OBJECT_LOCK_ENABLED" == true ]]; then
+  retain_until="$(date -u -d "+${B2_OBJECT_LOCK_DAYS} days" +%Y-%m-%dT%H:%M:%SZ)"
+  lock_args=(--object-lock-mode "$B2_OBJECT_LOCK_MODE" --object-lock-retain-until-date "$retain_until")
   lock="$(aws s3api get-object-lock-configuration --bucket "$B2_BUCKET" --endpoint-url "$B2_ENDPOINT" --output json --no-cli-pager)"
   grep -q '"ObjectLockEnabled"[[:space:]]*:[[:space:]]*"Enabled"' <<<"$lock" || {
     echo "B2_OBJECT_LOCK_ENABLED=true but Object Lock is not enabled" >&2; exit 1;
