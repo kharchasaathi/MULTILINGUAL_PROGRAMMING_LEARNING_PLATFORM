@@ -12,7 +12,7 @@ case "$1 $2" in
   "s3api get-bucket-versioning") echo Enabled ;;
   "s3api get-object-lock-configuration") echo '{"ObjectLockEnabled":"Enabled"}' ;;
   "s3api get-public-access-block") echo '{"PublicAccessBlockConfiguration":{"BlockPublicAcls":true,"IgnorePublicAcls":true,"BlockPublicPolicy":true,"RestrictPublicBuckets":true}}' ;;
-  "s3api put-object") echo '{"VersionId":"mock-version"}' ;;
+  "s3api put-object") echo mock-version ;;
   *) echo "Unexpected AWS CLI command: $*" >&2; exit 90 ;;
 esac
 MOCK
@@ -34,5 +34,6 @@ export AWS_S3_OBJECT_LOCK_DAYS=30 AWS_S3_OBJECT_LOCK_MODE=GOVERNANCE
 bash "$ROOT/publish-s3-backup.sh" "$tmp/backups/demo-20261105T120000Z.dump.age"
 [[ "$(grep -c 's3api put-object' "$tmp/aws.log")" -eq 3 ]]
 grep -q -- '--server-side-encryption aws:kms' "$tmp/aws.log"
+grep -q -- '--checksum-algorithm SHA256' "$tmp/aws.log"
 grep -q -- '--object-lock-mode GOVERNANCE' "$tmp/aws.log"
 echo "S3 publisher mocked contract tests passed."
