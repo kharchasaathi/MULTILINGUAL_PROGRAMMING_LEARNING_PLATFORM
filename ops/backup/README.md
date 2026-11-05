@@ -118,3 +118,6 @@ Mocked verification and tamper tests:
 ~~~bash
 bash ops/backup/test-b2-verify.sh
 ~~~
+
+
+**Credential separation:** The currently created `e13-backup-writer` key is restricted to `postgres/` and is intended only for the logical backup publisher. pgBackRest uses a separate `pgbackrest/` prefix and separate Application Key. Do not reuse the logical publisher key; its prefix restriction intentionally blocks access to the pgBackRest repository. Validate pgBackRest prune behavior in a disposable bucket before granting delete capabilities.
