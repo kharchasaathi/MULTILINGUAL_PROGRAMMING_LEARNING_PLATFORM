@@ -3,9 +3,9 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: E — Security Constitution
-- Current task: E5 — Authorization, permissions and role security (completed; E6 is next)
-- Next action: E6 — database security hardening.
-- Completed immediately before current task: E4 — Identity and Authentication Security (design scope).
+- Current task: E6 — Database security hardening (completed at design scope; E7 is next)
+- Next action: E7 — data protection and privacy security.
+- Completed immediately before current task: E5 — Authorization, permissions and role security (design scope).
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -581,3 +581,13 @@ E3 milestone recorded in E3 artifacts.
 - **Verification boundary:** Design only. No policy engine, role seed, endpoint guard, migration, access review or test was implemented or executed. All 55 scenarios are future tests.
 - **Critical guardrail:** Learner code execution remains disabled until E9, L13–L15 and E15 approval.
 - **Next task:** E6 — database security hardening.
+
+
+## E6 closure (2026-11-05) — database security hardening
+
+- **Status:** Complete at database security architecture and verification-design scope; implementation pending.
+- **Evidence:** docs/E6_DATABASE_SECURITY_HARDENING.md; docs/E6_DATABASE_SECURITY_CONTROL_MATRIX.csv (58 controls); docs/E6_DATABASE_SECURITY_VERIFICATION_CATALOG.csv (52 future scenarios); decision E-0006.
+- **Coverage:** Least-privilege database identities; PostgreSQL grants/default privileges; privileged functions/search_path; tenant/RLS design; query safety; integrity; TLS/encryption/key management; migration separation; encrypted backup/PITR and restore; audit, monitoring, derived stores and data lifecycle.
+- **Verification boundary:** Design only. No database instance/configuration, SQL/Prisma migration, roles, RLS, encryption, credentials, backup/restore, scan or test was implemented or executed. All 52 scenarios are future tests.
+- **Critical guardrail:** Learner code execution remains disabled until E9, L13–L15 and E15 approval.
+- **Next task:** E7 — data protection and privacy security.
