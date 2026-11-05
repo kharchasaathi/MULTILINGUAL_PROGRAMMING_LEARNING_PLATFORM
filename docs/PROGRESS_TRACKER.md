@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: E — Security Constitution
-- Current task: E12 — Audit logging (complete at design/specification scope).
-- Next action: E13 — Backup and recovery.
+- Current task: E13 — Backup and recovery (initial implementation slice committed; production recovery validation pending).
+- Next action: E14 — Security testing.
 - Completed prior: E1–E10 security design baselines; E11 — Privacy and data protection (completed out of sequence at design scope).
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
@@ -647,3 +647,13 @@ E3 milestone recorded in E3 artifacts.
 - Defines versioned audit event envelope, server-side event production, durable transactional audit/outbox, append-only integrity, least-privilege writers/readers, privacy-safe redaction, retention/legal hold, access/export auditing, alert ownership, pipeline health, forensic preservation and incident response.
 - No collector, SIEM, WORM store, schema, retention job, dashboard, alert or runtime control is implemented. All 55 scenarios are future tests; none executed.
 - Production reliance requires E11 retention/legal review, E13 backup/recovery, E14 independent tests and E15 explicit approval. Next: E13 — Backup and recovery.
+
+
+## E13 closure — Backup and recovery (2026-11-05)
+- Evidence: `docs/E13_BACKUP_RECOVERY_SECURITY_ARCHITECTURE.md`; 40 controls in `docs/E13_BACKUP_RECOVERY_CONTROL_MATRIX.csv`; 40 future scenarios in `docs/E13_BACKUP_RECOVERY_VERIFICATION_CATALOG.csv`; decision E-0013.
+- Executable slice committed: `ops/backup/backup-postgres.sh`, `ops/backup/verify-backup.sh`, `ops/backup/restore-postgres.sh`, `ops/backup/test-backup-scripts.sh`, `ops/backup/README.md`; CI workflow `.github/workflows/e13-backup-utility.yml`.
+- Implementation supports encrypted PostgreSQL logical dumps, SHA-256 plus manifest, pre-restore checksum/archive-list checks, explicit destructive-restore confirmation and system-database target rejection.
+- Verification status: scripts and mock harness are committed, but have not been executed in this session; CI result is pending. The harness does not prove real age cryptography or PostgreSQL recovery.
+- Not implemented: WAL archiving/PITR, remote immutable storage, scheduling/alerting, object-store/event/audit coordinated backup, key escrow, restore drill, numeric RPO/RTO or provider integration.
+- Production reliance requires E11 retention/deletion/legal-hold integration, E12 audit integration, E14 independent tests and E15 explicit approval. Learner code execution and live payments remain disabled under their existing gates.
+- **Next task: E14 — Security testing.**
