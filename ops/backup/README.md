@@ -58,3 +58,21 @@ bash ops/backup/test-backup-integration.sh
 - Approved numeric RPO/RTO, capacity planning, measured restore objectives, application smoke tests and cutover approval.
 
 Do not claim production recovery readiness until these dependencies are selected, implemented, exercised and approved. Logical pg_dump is not PITR.
+
+
+## PostgreSQL point-in-time recovery (PITR) with pgBackRest
+
+For physical base backups and continuous WAL archiving to the selected S3 repository, use the pgBackRest configuration templates:
+- `ops/backup/pgbackrest.conf.example`
+- `ops/backup/postgresql-archive-settings.conf.example`
+- `ops/backup/run-pgbackrest-backup.sh`
+- `ops/backup/check-backup-freshness.sh`
+- `ops/backup/cron.example`
+
+The operational procedure, including stanza bootstrap, archive checks, isolated timestamp restore and key custody, is in `docs/E13_OPERATIONAL_BACKUP_PITR_RUNBOOK.md`. These are implementation templates and scripts; they do not mean PostgreSQL archive_mode, S3, IAM, KMS, cron or pgBackRest have been configured on a real service.
+
+**Important S3 retention interaction:** do not apply a default Object Lock retention period to the active pgBackRest repository until a disposable-bucket test confirms backup, WAL archive, expire/prune and restore behavior. Object Lock may prevent repository pruning while versions are retained. Prefer a separately administered DR replica/account as the immutable ransomware boundary, and validate replication and restore before relying on it.
+
+## Restore cutover gates
+
+`ops/backup/post-restore-gates.sh` fails closed unless dual approval, cross-system reconciliation, application smoke tests, code-execution-disabled attestation and executable E11 tombstone-replay/E12 audit-verification hooks are supplied. The CI tests use mock hooks only; real E11/E12 integrations remain unimplemented and must be supplied by their owning workstreams.
