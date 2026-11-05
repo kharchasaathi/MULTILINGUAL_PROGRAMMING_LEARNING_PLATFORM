@@ -30,6 +30,8 @@ fi
 file="$1"
 : "${B2_VERSION_LOG:=${file}.b2-versions}"
 [[ -f "$file" && -s "$file" ]] || { echo "Backup artifact missing or empty" >&2; exit 1; }
+: > "$B2_VERSION_LOG"
+chmod 0600 "$B2_VERSION_LOG"
 sum="${file}.sha256"
 manifest="${file%.dump.age}.manifest"
 [[ -s "$sum" && -s "$manifest" ]] || { echo "Checksum or manifest missing" >&2; exit 1; }
