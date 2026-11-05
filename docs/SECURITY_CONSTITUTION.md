@@ -1,7 +1,10 @@
 # Security Constitution
 Status: Baseline policy; E1 architecture-level threat model completed. Detailed control design and security approval remain pending E2–E15.
 
-## Threat model baseline\nThe platform-wide threat model is documented in `docs/E1_SYSTEM_SECURITY_THREAT_MODEL.md`; the machine-readable register is `docs/E1_THREAT_REGISTER.csv`. The model covers seven trust boundaries (client, public edge/API, application modules, data/events, external providers, future sandbox and privileged operations), asset classification, threat actors, STRIDE analysis, 30 tracked threats, D15 gate mapping, monitoring indicators and residual-risk conditions. E1 is design-time analysis only; it does not prove that controls are implemented or effective. Update the model whenever a trust boundary, data flow, provider, privileged capability or execution runtime changes.\n\n## Principles
+## Threat model baseline
+The platform-wide threat model is documented in `docs/E1_SYSTEM_SECURITY_THREAT_MODEL.md`; the machine-readable register is `docs/E1_THREAT_REGISTER.csv`. The model covers seven trust boundaries (client, public edge/API, application modules, data/events, external providers, future sandbox and privileged operations), asset classification, threat actors, STRIDE analysis, 30 tracked threats, D15 gate mapping, monitoring indicators and residual-risk conditions. E1 is design-time analysis only; it does not prove that controls are implemented or effective. Update the model whenever a trust boundary, data flow, provider, privileged capability or execution runtime changes.
+
+## Principles
 Secure by default, least privilege, defense in depth, privacy by design, and fail closed. Treat browser input, uploads, learner code, AI output, retrieved content, and third-party responses as untrusted.
 
 ## Identity and access
