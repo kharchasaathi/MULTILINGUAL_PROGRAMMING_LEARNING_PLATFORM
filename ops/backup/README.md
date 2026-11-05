@@ -102,3 +102,19 @@ bash ops/backup/test-b2-publish.sh
 ~~~
 
 The B2 publisher is not evidence of immutable storage. Object Lock is a one-way bucket setting and needs a separately approved retention policy. Cloud Replication must be configured through B2 console/Native API and needs a separate destination account/region. Live B2 upload/download, pgBackRest base backup/WAL/PITR and replication restore tests remain open.
+
+
+### Verify a published B2 backup remotely
+
+The publisher records each returned object VersionId in a mode-0600 local file named <backup>.b2-versions by default. Preserve this evidence with the backup's recovery record. Use a bucket/prefix-restricted Application Key with read access to download the exact versions and verify remote bytes:
+
+~~~bash
+bash ops/backup/verify-b2-backup.sh /secure-backups/postgres/appdb-<UTC>.dump.age
+~~~
+
+The verifier downloads the exact encrypted artifact, SHA-256 sidecar and manifest versions, compares the metadata with the local copies and recomputes SHA-256 over the downloaded artifact. It does not decrypt or restore PostgreSQL; isolated restore and PITR drills remain separate mandatory gates.
+
+Mocked verification and tamper tests:
+~~~bash
+bash ops/backup/test-b2-verify.sh
+~~~
