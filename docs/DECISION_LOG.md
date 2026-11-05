@@ -199,3 +199,10 @@ Technology stack/hosting; database/authentication; AI provider and budget; sandb
 - Adopt untrusted-context handling, task-scoped context minimization, retrieval authorization/provenance, no-tool-by-default AI tasks, deterministic tool authorization, strict output validation, cross-user isolation, privacy controls, adversarial evaluation and kill-switch requirements.
 - Evidence: `docs/E8_AI_PROMPT_INJECTION_PROTECTION.md`; `docs/E8_AI_SECURITY_CONTROL_MATRIX.csv` (65 controls); `docs/E8_AI_SECURITY_VERIFICATION_CATALOG.csv` (60 future scenarios).
 - No provider, classifier, retrieval ACL, tool broker, runtime mitigation or tests are claimed. Next: E9 — code execution sandbox security.
+
+
+## E-0010 — Secure code execution sandbox
+- Date: 2026-11-05; architecture complete; implementation and enablement pending.
+- Evidence: `docs/E9_CODE_EXECUTION_SANDBOX_SECURITY.md`, `docs/E9_SANDBOX_SECURITY_CONTROL_MATRIX.csv` (70 controls), `docs/E9_SANDBOX_SECURITY_VERIFICATION_CATALOG.csv` (60 future scenarios).
+- Execution remains disabled until L13-L15 readiness, E14 independent test evidence and E15 explicit approval. No runtime or tests are claimed.
+- Next: E10 — payment security.
