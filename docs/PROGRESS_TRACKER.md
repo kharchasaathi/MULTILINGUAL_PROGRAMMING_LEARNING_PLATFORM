@@ -557,3 +557,6 @@ D13 Module Communication architecture is complete at specification scope. Eviden
 - **Critical guardrail:** Learner code execution remains disabled until E9, L13–L15 and E15 evidence/approval.
 - **Verification boundary:** Documentation review only. No network configuration, firewall/DNS/TLS change, infrastructure scan, penetration test or production control validation is claimed. All 30 scenarios are specified, not executed.
 - **Next task:** E3 — security design.
+
+
+E3 milestone recorded in E3 artifacts.
