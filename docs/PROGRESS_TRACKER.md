@@ -3,9 +3,9 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: E — Security Constitution
-- Current task: E10 — Payment security (complete at design/specification scope).
-- Next action: E12 — Audit logging.
-- Completed prior: E1–E9 security design baselines; E11 — Privacy and data protection (completed out of sequence at design scope).
+- Current task: E12 — Audit logging (complete at design/specification scope).
+- Next action: E13 — Backup and recovery.
+- Completed prior: E1–E10 security design baselines; E11 — Privacy and data protection (completed out of sequence at design scope).
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
 ## A — Project foundation
@@ -638,3 +638,12 @@ E3 milestone recorded in E3 artifacts.
 - Evidence: `docs/E10_PAYMENT_SECURITY_ARCHITECTURE.md`; 60 controls in `docs/E10_PAYMENT_SECURITY_CONTROL_MATRIX.csv`; 55 future scenarios in `docs/E10_PAYMENT_SECURITY_VERIFICATION_CATALOG.csv`; decision E-0011.
 - No gateway, endpoint, migration, credential, live payment, PCI assessment or runtime control is implemented. All 55 scenarios are future tests.
 - Live payment acceptance requires provider/legal/finance review, E14 independent evidence and E15 explicit approval. E11 was completed out of sequence. Next: E12 — Audit logging.
+
+
+## E12 closure — Audit logging (2026-11-05)
+
+- Complete at architecture, control-catalogue and verification-design scope; implementation and operational validation pending.
+- Evidence: `docs/E12_AUDIT_LOGGING_SECURITY_ARCHITECTURE.md`; 60 controls in `docs/E12_AUDIT_LOGGING_CONTROL_MATRIX.csv`; 55 future scenarios in `docs/E12_AUDIT_LOGGING_VERIFICATION_CATALOG.csv`; decision E-0012.
+- Defines versioned audit event envelope, server-side event production, durable transactional audit/outbox, append-only integrity, least-privilege writers/readers, privacy-safe redaction, retention/legal hold, access/export auditing, alert ownership, pipeline health, forensic preservation and incident response.
+- No collector, SIEM, WORM store, schema, retention job, dashboard, alert or runtime control is implemented. All 55 scenarios are future tests; none executed.
+- Production reliance requires E11 retention/legal review, E13 backup/recovery, E14 independent tests and E15 explicit approval. Next: E13 — Backup and recovery.
