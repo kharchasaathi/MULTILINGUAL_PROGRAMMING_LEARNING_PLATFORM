@@ -348,7 +348,7 @@ PLAN -> DESIGN -> REVIEW -> IMPLEMENT -> TEST -> SECURITY CHECK -> APPROVE -> DO
 
 CURRENT_STAGE: E
 CURRENT_TASK: E13 — Backup and recovery
-NEXT_ACTION: Implement and validate PITR/WAL recovery, immutable off-host copies, key escrow, scheduled backup/alerts, E11/E12 recovery integration, approved RPO/RTO and recurring isolated restore drills before E14.
+NEXT_ACTION: Validate the guarded AWS S3 publisher against a provisioned test bucket; implement cross-account/region replication, PITR/WAL, key escrow, scheduled backup/alerts, E11/E12 recovery integration, approved RPO/RTO and recurring isolated restore drills before E14.
 
 COMPLETED:
 - A1–A7 — Project foundation
@@ -542,3 +542,4 @@ Never assume a task is complete without evidence.
 - GitHub Actions run 23 passed both jobs: Bash syntax/mock security tests and real PostgreSQL 16 + age encrypted backup/restore data round-trip. Evidence: docs/E13_CI_TEST_EVIDENCE.md.
 - Remaining acceptance gates: WAL/PITR, immutable off-host storage, provider/KMS/key escrow, scheduling and freshness alerts, cross-system object/event/audit consistency, E11 deletion/legal-hold replay, E12 audit integration, approved RPO/RTO and recurring restore drills.
 - **Next task: continue E13; do not start E14 until mandatory recovery controls and operational evidence are complete.**
+\n\n## E13 AWS S3 decision and implementation slice (2026-11-05)\n- AWS S3 selected as the off-site object-storage target; primary region Mumbai (`ap-south-1`).\n- Added guarded publisher `ops/backup/publish-s3-backup.sh` and mocked contract test `ops/backup/test-s3-publish.sh`. It requires bucket versioning, Object Lock, S3 Block Public Access, SSE-KMS key and explicit retention before uploading encrypted backup + checksum + manifest.\n- AWS resources are not provisioned. Cross-account/region replication, lifecycle, live cloud validation, WAL/PITR, key escrow, automation/alerts and restore drills remain open.\n- Proposed 30-day retention is pending approval; default Object Lock mode is GOVERNANCE. E13 remains open; E14 is blocked.\n
