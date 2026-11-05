@@ -699,3 +699,16 @@ E3 milestone recorded in E3 artifacts.
 - Existing E13 regression workflow for commit ebc836921e50c031a2b103a7334b2bca9b8c6d66 completed all three jobs successfully: mocked tests, mocked S3 contract/operations gates, and real PostgreSQL 16 + age encrypted logical backup/restore round-trip. Workflow: https://github.com/kharchasaathi/MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM/actions/runs/42003198872.
 - These CI results do not validate B2 service behavior, pgBackRest S3 compatibility, remote restore, Object Lock service retention, Cloud Replication, key custody, live WAL/PITR, alert delivery or E11/E12 production integration.
 - E13 remains IN PROGRESS; E14 remains BLOCKED.
+
+
+## E13 B2 remote-verification implementation update (2026-11-05)
+
+- Added optional mode-0600 local VersionId evidence log to `publish-b2-backup.sh`. The log is reset before each upload attempt so partial failures cannot silently reuse a previous successful set of VersionIds.
+- Added `verify-b2-backup.sh`: downloads the exact B2 object versions for encrypted artifact, SHA-256 sidecar and manifest; compares remote metadata with local copies; recomputes SHA-256 over downloaded bytes.
+- Added `test-b2-verify.sh`: mocked exact-version download and remote-tamper rejection.
+- Updated the B2 CI workflow to validate both scripts and run publisher + remote-verifier mocked tests.
+- B2 workflow run #9 passed: https://github.com/kharchasaathi/MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM/actions/runs/42008265312. The workflow uses mocked AWS CLI responses; it does not authenticate to Backblaze or transfer real data.
+- E13 regression workflow on commit `ff0c3f7ea6ac72f13b45d7f192c16c5e08450b2f` passed all three jobs (mocked tests, mocked S3/operations contracts, PostgreSQL 16 + age integration): https://github.com/kharchasaathi/MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM/actions/runs/42008163263.
+- Split B2 credentials by trust boundary: current `e13-backup-writer` key is for `postgres/` logical exports only. A separate `pgbackrest/` key is required for physical repository/WAL storage. Do not reuse the current prefix-restricted key for pgBackRest.
+- **Still open:** live B2 upload/download verification with owner-held credentials; separate pgBackRest key; live pgBackRest compatibility, base backup/WAL/PITR; approved Object Lock/retention; separate-region/account replica; key escrow/rotation; real alert delivery; E11/E12 restore integrations; approved RPO/RTO and isolated restore drill.
+- **E13 remains IN PROGRESS; E14 remains BLOCKED.**
