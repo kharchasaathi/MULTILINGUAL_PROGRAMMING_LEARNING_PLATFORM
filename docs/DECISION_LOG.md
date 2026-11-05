@@ -224,3 +224,13 @@ Technology stack/hosting; database/authentication; AI provider and budget; sandb
 - Evidence: `docs/E12_AUDIT_LOGGING_SECURITY_ARCHITECTURE.md`; `docs/E12_AUDIT_LOGGING_CONTROL_MATRIX.csv` (59 controls); `docs/E12_AUDIT_LOGGING_VERIFICATION_CATALOG.csv` (55 future scenarios).
 - No collector, SIEM, WORM store, schema, retention job, alert, dashboard, runtime control or test is implemented/executed. E11 legal/retention, E13 recovery, E14 testing and E15 approval remain gates.
 - Next: E13 — backup and recovery.
+
+
+## E-0013 — Backup and recovery
+- Date: 2026-11-05; provider-neutral baseline approved for initial implementation; production recovery approval pending.
+- Adopt PostgreSQL custom-format logical dumps encrypted with age, SHA-256 artifact checksums, a versioned manifest, pre-restore verification and explicit confirmation for destructive restore into an isolated target.
+- Keep encryption identity outside backup artifacts and under separate custody. Backup credentials and keys must be delivered through protected secret management, never repository files or logs.
+- Logical dumps do not provide PITR. WAL archiving, immutable cross-account/region copies, object-store consistency, key escrow, scheduling, monitoring, retention, privacy tombstone replay, audit integration and restore drills remain production gates.
+- Evidence: E13 architecture, 40 controls, 40 future verification scenarios, backup/verify/restore scripts, mock harness and CI workflow.
+- No real database backup/restore, encryption round-trip, remote backup, PITR, recovery drill or RPO/RTO achievement is claimed. Mock tests have not been executed in this session.
+- Next: E14 — security testing.
