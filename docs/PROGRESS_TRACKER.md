@@ -3,8 +3,8 @@ Last updated: 2026-11-05
 
 ## Current execution position
 - Current stage: E — Security Constitution
-- Current task: E8 — AI prompt injection protection (complete at design/specification scope)
-- Next action: E9 — Code execution sandbox security.
+- Current task: E9 — Code execution sandbox security (complete at design/specification scope)
+- Next action: E10 — Payment security.
 - Completed prior: E6 — Database security hardening; E11 — Privacy and data protection (completed out of sequence at design scope).
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
@@ -621,3 +621,12 @@ E3 milestone recorded in E3 artifacts.
 - No provider, runtime mitigation, tool broker, retrieval ACL, evaluator or test is implemented or executed. Scenarios are future tests.
 - AI remains no-tool by default pending implementation and E14/E15 gates. Learner code execution remains disabled pending E9, L13-L15 and E15.
 - Next: E9 — code execution sandbox security.
+
+
+## E9 closure — Code execution sandbox security (2026-11-05)
+- **Status:** Complete at architecture, control catalogue and verification-design scope; implementation and enablement prohibited pending gates.
+- **Evidence:** `docs/E9_CODE_EXECUTION_SANDBOX_SECURITY.md`; 70 controls in `docs/E9_SANDBOX_SECURITY_CONTROL_MATRIX.csv`; 60 future scenarios in `docs/E9_SANDBOX_SECURITY_VERIFICATION_CATALOG.csv`; decision E-0010.
+- **Coverage:** Dedicated execution trust zone; strong isolation candidate; disposable per-job runtime; server-owned job envelope/state machine; least-privilege identity; default-deny IPv4/IPv6 networking; hard CPU/memory/PID/disk/output limits; artifact quarantine; signed image supply chain; assessment/privacy safeguards; monitoring, kill switch and recovery.
+- **Verification boundary:** Design only. No sandbox runtime, VM/container, scheduler, network policy, image pipeline, quotas, endpoint, scanner or test was implemented or executed. All 60 scenarios are future tests.
+- **Hard gate:** Code execution remains disabled until L13–L15 readiness, E14 independent test evidence and explicit E15 approval.
+- **Next task:** E10 — payment security.
