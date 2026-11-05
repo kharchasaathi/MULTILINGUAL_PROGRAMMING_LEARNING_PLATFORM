@@ -170,3 +170,11 @@ Technology stack/hosting; database/authentication; AI provider and budget; sandb
 - Evidence: docs/E5_AUTHORIZATION_ROLE_SECURITY_ARCHITECTURE.md; docs/E5_PERMISSION_CATALOG.csv (44 identifiers); docs/E5_ROLE_PERMISSION_MATRIX.csv (15 candidate roles); docs/E5_AUTHORIZATION_CONTROL_MATRIX.csv (50 controls); docs/E5_AUTHORIZATION_VERIFICATION_CATALOG.csv (55 future scenarios).
 - Deferred: policy engine, final role membership, tenant model, approval matrix, assurance thresholds, revocation SLA, cache TTL and audit retention. No implementation or tests are claimed; scenarios are unexecuted.
 - Learner code execution remains disabled until E9, L13-L15 and E15 approval. Next: E6 — database security.
+
+
+## E-0006 — Database security hardening
+- Date: 2026-11-05; design baseline complete; implementation and verification pending.
+- Adopt least-privilege database identities, explicit PostgreSQL grants, privileged-function hardening, server-derived tenant context, conditional RLS, parameterized query requirements, integrity constraints, validated TLS, encryption/key governance, separate migration authority, protected backups/restores, audit integrity and derived-data lifecycle controls.
+- Evidence: docs/E6_DATABASE_SECURITY_HARDENING.md; docs/E6_DATABASE_SECURITY_CONTROL_MATRIX.csv (58 controls); docs/E6_DATABASE_SECURITY_VERIFICATION_CATALOG.csv (52 future scenarios).
+- Deferred: database host/provider/region, tenant model and RLS decision, KMS, connection pooler, audit/backup products, RPO/RTO and retention. No database configuration, migration, role, RLS, encryption, backup/restore or test is claimed; scenarios are unexecuted.
+- Learner code execution remains disabled until E9, L13-L15 and E15 approval. Next: E7 — data protection and privacy security.
