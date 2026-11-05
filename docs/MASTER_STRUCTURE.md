@@ -348,7 +348,7 @@ PLAN -> DESIGN -> REVIEW -> IMPLEMENT -> TEST -> SECURITY CHECK -> APPROVE -> DO
 
 CURRENT_STAGE: E
 CURRENT_TASK: E13 — Backup and recovery
-NEXT_ACTION: Complete E13 recovery implementation, real PostgreSQL+age integration validation, PITR/WAL strategy, off-host immutable storage, key escrow, restore drills, RPO/RTO and E11/E12 recovery integration before E14.
+NEXT_ACTION: Implement and validate PITR/WAL recovery, immutable off-host copies, key escrow, scheduled backup/alerts, E11/E12 recovery integration, approved RPO/RTO and recurring isolated restore drills before E14.
 
 COMPLETED:
 - A1–A7 — Project foundation
@@ -536,10 +536,9 @@ Never assume a task is complete without evidence.
 - **Next task: E10 — Payment security.**
 
 
-## E13 closure — 2026-11-05
-- E13 architecture, 40-control matrix and 40-scenario verification catalogue committed.
-- Initial executable slice: provider-neutral PostgreSQL logical backup, age encryption, SHA-256/manifest verification, explicit-confirmation restore utility, operator README and mock test harness.
-- CI workflow added for Bash syntax and mock utility tests.
-- No live database, real encryption round-trip, remote immutable copy, WAL/PITR, object-store backup, scheduled job, restore drill or production recovery is claimed.
-- Production readiness remains gated on provider/key/storage decisions, approved RPO/RTO and retention, E11/E12 integration, E14 independent tests and E15 approval.
-- **Next task: E14 — Security testing.**
+## E13 status — reopened, not complete (2026-11-05)
+- Initial mock-only completion was premature; E13 remains in progress and E14 is blocked.
+- Hardened logical backup/verification/restore utilities, tamper/guard tests, real PostgreSQL+age integration test and CI workflow are committed.
+- GitHub Actions run 23 passed both jobs: Bash syntax/mock security tests and real PostgreSQL 16 + age encrypted backup/restore data round-trip. Evidence: docs/E13_CI_TEST_EVIDENCE.md.
+- Remaining acceptance gates: WAL/PITR, immutable off-host storage, provider/KMS/key escrow, scheduling and freshness alerts, cross-system object/event/audit consistency, E11 deletion/legal-hold replay, E12 audit integration, approved RPO/RTO and recurring restore drills.
+- **Next task: continue E13; do not start E14 until mandatory recovery controls and operational evidence are complete.**
