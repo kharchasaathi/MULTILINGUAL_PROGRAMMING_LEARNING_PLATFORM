@@ -669,3 +669,13 @@ E3 milestone recorded in E3 artifacts.
 - No live AWS resources, IAM/KMS, replication, pgBackRest stanza, PostgreSQL WAL archiving, scheduled production job, alert service, key escrow or real E11/E12 hooks have been provisioned. No live PITR/restore drill or RPO/RTO measurement has occurred.
 - Object Lock retention on a live pgBackRest repository requires a disposable-bucket test because retention may block repository pruning. The immutable DR copy must be separately administered and replication/restore tested.
 - **E13 remains IN PROGRESS; E14 remains blocked.**
+
+
+## Product decision — freemium subscription direction (2026-11-05)
+
+- **Approved direction:** Free website + free-to-download Android app + optional low-cost Premium subscription; institutional plans may be evaluated later.
+- **Price hypotheses only:** ₹49/month, ₹129/quarter and ₹399/year. Not approved launch prices; unit economics and willingness-to-pay validation are required.
+- **Premium candidates:** expanded learning/practice access, higher isolated code-run quotas, advanced projects/assessments, capped AI Tutor usage and Code Structure Analyzer.
+- **Guardrails:** no unlimited AI/code execution; enforce quotas server-side and apply budgets, rate limits, sandbox resource ceilings, alerts and kill switches.
+- **Still pending:** exact Free/Premium entitlements, quotas, price validation, billing provider, Play billing policy review, tax/compliance review and implementation in stage R.
+- This product decision does not change E13 status or acceptance gates. E13 remains IN PROGRESS; E14 remains blocked.
