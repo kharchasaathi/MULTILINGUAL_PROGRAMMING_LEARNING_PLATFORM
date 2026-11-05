@@ -691,3 +691,11 @@ E3 milestone recorded in E3 artifacts.
 - Important capability differences: no AWS IAM roles, S3 Block Public Access or SSE-KMS; use bucket-restricted B2 Application Keys, private ACL, SSE-B2 plus client-side encryption. B2 versioning is always on. Object Lock is one-way enablement and still disabled on the created bucket. Cloud Replication uses B2 console/Native API and requires a separate B2 account per region.
 - Not yet done: live upload/download/remote checksum verification, Object Lock retention test, second-region/account and replication, live pgBackRest stanza/base backup/WAL/PITR, key escrow/rotation, alert delivery, actual E11/E12 restore integrations, approved numeric RPO/RTO and isolated restore drills.
 - **E13 remains IN PROGRESS. E14 remains BLOCKED.**
+
+
+### E13 CI verification — Backblaze B2 and regression suite (2026-11-05)
+
+- Backblaze B2 contract workflow run #7 passed: https://github.com/kharchasaathi/MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM/actions/runs/42003199163. It validates Bash syntax and mocked upload, versioning, private ACL, SSE-B2, Object Lock retention arguments and public-bucket rejection. No real B2 credentials or network upload are used.
+- Existing E13 regression workflow for commit ebc836921e50c031a2b103a7334b2bca9b8c6d66 completed all three jobs successfully: mocked tests, mocked S3 contract/operations gates, and real PostgreSQL 16 + age encrypted logical backup/restore round-trip. Workflow: https://github.com/kharchasaathi/MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM/actions/runs/42003198872.
+- These CI results do not validate B2 service behavior, pgBackRest S3 compatibility, remote restore, Object Lock service retention, Cloud Replication, key custody, live WAL/PITR, alert delivery or E11/E12 production integration.
+- E13 remains IN PROGRESS; E14 remains BLOCKED.
