@@ -719,8 +719,7 @@ E3 milestone recorded in E3 artifacts.
 - Added manually triggered `.github/workflows/e13-b2-live-smoke.yml`. It creates a synthetic age-encrypted artifact with no production data, uploads it to `postgres/e13-live-smoke/`, downloads the exact returned object versions and verifies SHA-256.
 - The workflow intentionally requires temporary GitHub Actions secrets. Before running, owner must create a temporary B2 key restricted to bucket + prefix `postgres/e13-live-smoke/`, Read and Write, 3,600-second expiry; add its ID/secret as `B2_TEST_APPLICATION_KEY_ID` and `B2_TEST_APPLICATION_KEY`; run the workflow manually; then delete both GitHub secrets and revoke the temporary B2 key.
 - The existing long-lived `e13-backup-writer` key must not be copied into GitHub Actions. It remains local/secret-manager only.
-- This workflow is prepared but not yet run; therefore live B2 service validation is still pending.
-- Next user action: create the temporary prefix-restricted key and add it to GitHub repository Actions secrets, then manually run the workflow. No production data is uploaded.
+- **Superseded by the successful run recorded below:** workflow run #3 completed successfully. Temporary GitHub repository secrets were deleted and the temporary B2 key was revoked after the run. No production data was uploaded.
 
 
 ## E13 live Backblaze B2 smoke-test evidence (2026-11-05)
