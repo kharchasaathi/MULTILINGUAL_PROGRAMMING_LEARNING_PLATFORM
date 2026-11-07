@@ -29,15 +29,15 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          sudo install -d -o postgres -g postgres -m 0700 "$RUNNER_TEMP/e13-pgbackrest-repo"
-          sudo install -d -o postgres -g postgres -m 0700 "$RUNNER_TEMP/e13-pgbackrest-spool"
+          sudo install -d -o postgres -g postgres -m 0700 "/var/lib/postgresql/e13-pgbackrest-repo"
+          sudo install -d -o postgres -g postgres -m 0700 "/var/lib/postgresql/e13-pgbackrest-spool"
           sudo install -d -o postgres -g postgres -m 0750 /etc/pgbackrest
           sudo tee /etc/pgbackrest/pgbackrest.conf >/dev/null <<EOF
           [global]
           repo1-type=posix
-          repo1-path=$RUNNER_TEMP/e13-pgbackrest-repo
+          repo1-path=/var/lib/postgresql/e13-pgbackrest-repo
           repo1-retention-full=2
-          spool-path=$RUNNER_TEMP/e13-pgbackrest-spool
+          spool-path=/var/lib/postgresql/e13-pgbackrest-spool
           start-fast=y
           process-max=2
           log-level-console=info
@@ -99,8 +99,8 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          restore_dir="$RUNNER_TEMP/e13-pitr-restore"
-          socket_dir="$RUNNER_TEMP/e13-pitr-socket"
+          restore_dir="/var/lib/postgresql/e13-pitr-restore"
+          socket_dir="/var/lib/postgresql/e13-pitr-socket"
           sudo install -d -o postgres -g postgres -m 0700 "$restore_dir" "$socket_dir"
           sudo -u postgres pgbackrest --stanza=platform --pg1-path="$restore_dir" --type=time --target="$PITR_TARGET" --target-action=promote restore
           sudo -u postgres /usr/lib/postgresql/16/bin/pg_ctl -D "$restore_dir" -o "-p 5544 -k $socket_dir -c listen_addresses=''" -w start
