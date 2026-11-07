@@ -1,0 +1,118 @@
+name: E13 PostgreSQL 16 pgBackRest local PITR integration
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  postgres-pgbackrest-pitr:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Checkout E13 implementation branch
+        uses: actions/checkout@v4
+        with:
+          ref: docs/project-foundation
+
+      - name: Install PostgreSQL 16 and pgBackRest
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo apt-get update
+          sudo apt-get install -y postgresql-16 pgbackrest
+          psql --version
+          pgbackrest version
+
+      - name: Configure isolated PostgreSQL and local pgBackRest repository
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo install -d -o postgres -g postgres -m 0700 "$RUNNER_TEMP/e13-pgbackrest-repo"
+          sudo install -d -o postgres -g postgres -m 0700 "$RUNNER_TEMP/e13-pgbackrest-spool"
+          sudo tee /etc/pgbackrest/pgbackrest.conf >/dev/null <<EOF
+          [global]
+          repo1-type=posix
+          repo1-path=$RUNNER_TEMP/e13-pgbackrest-repo
+          repo1-retention-full=2
+          spool-path=$RUNNER_TEMP/e13-pgbackrest-spool
+          start-fast=y
+          process-max=2
+          log-level-console=info
+
+          [platform]
+          pg1-path=/var/lib/postgresql/16/main
+          pg1-port=5432
+          pg1-user=postgres
+          EOF
+          sudo chown postgres:postgres /etc/pgbackrest/pgbackrest.conf
+          sudo chmod 0600 /etc/pgbackrest/pgbackrest.conf
+          sudo -u postgres psql -p 5432 -d postgres -v ON_ERROR_STOP=1 <<'SQL'
+          ALTER SYSTEM SET archive_mode = 'on';
+          ALTER SYSTEM SET archive_command = 'pgbackrest --stanza=platform archive-push %p';
+          ALTER SYSTEM SET archive_timeout = '10s';
+          ALTER SYSTEM SET wal_level = 'replica';
+          SQL
+          sudo pg_ctlcluster 16 main restart
+          sudo -u postgres pgbackrest --stanza=platform stanza-create
+          sudo -u postgres pgbackrest --stanza=platform check
+
+      - name: Create full backup and generate known WAL history
+        id: workload
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo -u postgres psql -p 5432 -d postgres -v ON_ERROR_STOP=1 <<'SQL'
+          CREATE DATABASE e13_pitr_test;
+          SQL
+          sudo -u postgres psql -p 5432 -d e13_pitr_test -v ON_ERROR_STOP=1 <<'SQL'
+          CREATE TABLE recovery_probe (
+            id integer PRIMARY KEY,
+            marker text NOT NULL,
+            created_at timestamptz NOT NULL DEFAULT clock_timestamp()
+          );
+          INSERT INTO recovery_probe (id, marker) VALUES (1, 'must-exist-at-target');
+          SQL
+          target="$(sudo -u postgres psql -p 5432 -d e13_pitr_test -Atqc "SELECT to_char(clock_timestamp() AT TIME ZONE 'UTC', 'YYYY-MM-DD HH24:MI:SS.US+00')")"
+          echo "target=$target" >> "$GITHUB_OUTPUT"
+          sudo -u postgres pgbackrest --stanza=platform --type=full backup
+          sleep 2
+          sudo -u postgres psql -p 5432 -d e13_pitr_test -v ON_ERROR_STOP=1 <<'SQL'
+          INSERT INTO recovery_probe (id, marker) VALUES (2, 'must-not-exist-after-pitr');
+          SELECT pg_switch_wal();
+          SQL
+          for attempt in $(seq 1 30); do
+            if sudo -u postgres pgbackrest --stanza=platform check; then
+              break
+            fi
+            sleep 2
+          done
+          sudo -u postgres pgbackrest --stanza=platform info
+
+      - name: Restore to the recorded timestamp in a separate empty data directory
+        env:
+          PITR_TARGET: ${{ steps.workload.outputs.target }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          restore_dir="$RUNNER_TEMP/e13-pitr-restore"
+          socket_dir="$RUNNER_TEMP/e13-pitr-socket"
+          sudo install -d -o postgres -g postgres -m 0700 "$restore_dir" "$socket_dir"
+          sudo -u postgres pgbackrest --stanza=platform --pg1-path="$restore_dir" --type=time --target="$PITR_TARGET" --target-action=promote restore
+          sudo -u postgres /usr/lib/postgresql/16/bin/pg_ctl -D "$restore_dir" -o "-p 5544 -k $socket_dir -c listen_addresses=''" -w start
+          trap 'sudo -u postgres /usr/lib/postgresql/16/bin/pg_ctl -D "$restore_dir" -m immediate -w stop || true' EXIT
+          count="$(sudo -u postgres psql -h "$socket_dir" -p 5544 -d e13_pitr_test -Atqc 'SELECT count(*) FROM recovery_probe')"
+          second="$(sudo -u postgres psql -h "$socket_dir" -p 5544 -d e13_pitr_test -Atqc "SELECT count(*) FROM recovery_probe WHERE id = 2")"
+          test "$count" = "1"
+          test "$second" = "0"
+          echo "PASS: timestamp PITR restored the pre-target row and excluded the post-target row."
+          sudo -u postgres psql -h "$socket_dir" -p 5544 -d e13_pitr_test -c 'TABLE recovery_probe'
+
+      - name: Record test boundary
+        if: always()
+        shell: bash
+        run: |
+          echo "This workflow uses a disposable GitHub-hosted runner and local POSIX repository only."
+          echo "It does not contact Backblaze B2 and does not use production or customer data."
+          echo "A passing run validates pgBackRest/WAL/timestamp-restore behavior only; B2 integration, E11/E12 replay, key custody, retention, replication, alerting and RPO/RTO approval remain separate gates."
