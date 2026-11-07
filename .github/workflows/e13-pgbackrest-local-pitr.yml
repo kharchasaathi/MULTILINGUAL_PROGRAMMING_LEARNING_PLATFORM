@@ -74,9 +74,9 @@ jobs:
           );
           INSERT INTO recovery_probe (id, marker) VALUES (1, 'must-exist-at-target');
           SQL
+          sudo -u postgres pgbackrest --stanza=platform --type=full backup
           target="$(sudo -u postgres psql -p 5432 -d e13_pitr_test -Atqc "SELECT to_char(clock_timestamp() AT TIME ZONE 'UTC', 'YYYY-MM-DD HH24:MI:SS.US+00')")"
           echo "target=$target" >> "$GITHUB_OUTPUT"
-          sudo -u postgres pgbackrest --stanza=platform --type=full backup
           sleep 2
           sudo -u postgres psql -p 5432 -d e13_pitr_test -v ON_ERROR_STOP=1 <<'SQL'
           INSERT INTO recovery_probe (id, marker) VALUES (2, 'must-not-exist-after-pitr');
