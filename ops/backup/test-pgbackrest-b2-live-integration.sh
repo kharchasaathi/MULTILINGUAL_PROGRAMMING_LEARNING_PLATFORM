@@ -112,7 +112,7 @@ psql_as_postgres -c "INSERT INTO e13_b2_pitr_probe(event) VALUES ('present-at-ba
 
 # Validate WAL archiving to B2, then create a physical full backup.
 runuser -u postgres -- pgbackrest --config="$PGBR_CONF" --stanza=platform check
-runuser -u postgres -- pgbackrest --config="$PGBR_CONF" --stanza=platform --type=full backup
+runuser -u postgres -- pgbackrest --config="$PGBR_CONF" --stanza=platform --no-expire-auto --type=full backup
 runuser -u postgres -- pgbackrest --config="$PGBR_CONF" --stanza=platform info
 
 # Choose a recovery boundary after the backup, then commit a later transaction.
