@@ -373,3 +373,22 @@ Owner provider-scope confirmation is complete, and the provider list is now boun
 Additionally, Firebase products not evidenced as active (App Hosting, FCM, Analytics, Crashlytics and Performance Monitoring) remain recorded as not evidenced, not as confirmed disabled.
 
 No service, billing plan, IAM role, key, database, domain or runtime configuration was changed as part of this owner confirmation.
+## 10. Official IAM role-definition review — 2026-11-12
+
+Google Cloud official role documentation was reviewed for the three role names visible in the project IAM screenshots:
+- Firebase Admin SDK Administrator Service Agent (`roles/firebase.sdkAdminServiceAgent`): Google describes this as read/write access to Firebase products available in the Admin SDK and warns not to grant service-agent roles to principals other than service agents.
+- Firebase Authentication Admin (`roles/firebaseauth.admin`): full read/write access to Firebase Authentication resources, including authentication configuration and user operations.
+- Service Account Token Creator (`roles/iam.serviceAccountTokenCreator`): allows creation of short-lived OAuth access tokens, OIDC ID tokens, signed JWTs and signed blobs for the target service account.
+
+Official references:
+- https://docs.cloud.google.com/iam/docs/roles-permissions/firebase
+- https://docs.cloud.google.com/iam/docs/roles-permissions/firebaseauth
+- https://docs.cloud.google.com/iam/docs/service-account-permissions
+
+Security interpretation:
+- The Firebase Admin SDK Administrator Service Agent role is consistent by name with the Firebase Admin SDK service identity shown in the screenshots. Do not remove it without dependency validation.
+- Firebase Authentication Admin is broad for Authentication. Because the principal is the Firebase Admin SDK service account, its presence may be part of the managed SDK setup; actual necessity must be checked against deployed runtime use and Google-managed service-agent behavior.
+- Service Account Token Creator is a sensitive impersonation/token-minting permission. The screenshots show it on the Firebase Admin SDK service account itself in the project-level role list and in the Service Account → Principals with access view. The exact binding scope and whether it is a self-binding or a resource-specific grant must be confirmed from the full IAM policy. Do not remove it based only on the role name.
+- This review checked official role definitions, not the project's effective permission evaluation. It does not replace IAM Policy Analyzer, inherited-policy review, IAM Conditions/Deny analysis, or audit-log review.
+
+Disposition: ROLE DEFINITIONS REVIEWED; EFFECTIVE IAM AUDIT REMAINS PENDING.
