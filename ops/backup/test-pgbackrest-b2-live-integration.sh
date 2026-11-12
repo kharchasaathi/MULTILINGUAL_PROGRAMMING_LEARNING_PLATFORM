@@ -71,7 +71,6 @@ repo1-s3-key=$B2_PGBR_KEY_ID
 repo1-s3-key-secret=$B2_PGBR_KEY
 repo1-cipher-type=aes-256-cbc
 repo1-cipher-pass=$PGBR_CIPHER_PASS
-repo1-retention-full=1
 start-fast=y
 archive-async=y
 spool-path=$SPOOL_DIR
@@ -90,6 +89,8 @@ chmod 0640 "$PGBR_CONF"
 unset B2_PGBR_KEY_ID B2_PGBR_KEY PGBR_CIPHER_PASS
 
 # Stanza bootstrap uses only the run-scoped B2 prefix above.
+# No repository retention is configured: pgBackRest backup must not auto-expire
+# prior objects, even within this disposable run prefix.
 runuser -u postgres -- pgbackrest --config="$PGBR_CONF" --stanza=platform stanza-create
 
 cat >> "$PG_CONF" <<EOF
