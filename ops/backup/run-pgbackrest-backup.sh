@@ -10,9 +10,10 @@ mkdir -p "$PGBACKREST_HEALTH_DIR"
 chmod 700 "$PGBACKREST_HEALTH_DIR"
 exec 9>"$PGBACKREST_HEALTH_DIR/backup.lock"
 flock -n 9 || { echo "Another backup is already running" >&2; exit 75; }
-started="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 pgbackrest --stanza="$PGBACKREST_STANZA" --type="$PGBACKREST_BACKUP_TYPE" backup
 pgbackrest --stanza="$PGBACKREST_STANZA" check
-printf '%s\n' "$started" > "$PGBACKREST_HEALTH_DIR/last-successful-backup.tmp"
-mv "$PGBACKREST_HEALTH_DIR/last-successful-backup.tmp" "$PGBACKREST_HEALTH_DIR/last-successful-backup"
-printf 'Backup and archive check completed at %s\n' "$started"
+# Record completion, not start time: long backups must not look older than they are.
+completed="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+printf '%s\n' "$completed" > "$PGBACKREST_HEALTH_DIR/last-successful-backup.tmp"
+mv -f "$PGBACKREST_HEALTH_DIR/last-successful-backup.tmp" "$PGBACKREST_HEALTH_DIR/last-successful-backup"
+printf 'Backup and archive check completed at %s\n' "$completed"
