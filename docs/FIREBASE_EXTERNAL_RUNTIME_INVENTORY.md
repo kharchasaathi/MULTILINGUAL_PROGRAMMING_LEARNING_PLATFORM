@@ -6,6 +6,16 @@
 
 ## 1. Executive status
 
+### Firebase Realtime Database — owner screenshot reviewed
+
+- Realtime Database product page shows the initial “Create Database” action.
+- No Realtime Database instance is evidenced as created for this Firebase project in the supplied console view.
+- Project billing tier visible on the page: Spark (no-cost).
+- No database instance was created and no billing plan was upgraded during this review.
+- Screenshot evidence received in chat on 2026-11-12.
+
+
+
 ### Cloud Firestore — owner screenshot reviewed
 
 - Firestore product page shows the introductory screen with a “Create database” action.
@@ -59,7 +69,7 @@ The currently inspected `main` branch contains the E13 backup workflows and evid
 |---|---|---|---|
 | Firebase Authentication | CONSOLE CONFIGURATION PARTIALLY VERIFIED; ZERO USERS OBSERVED | Email/Password and Google enabled; zero users observed; authorized domains are localhost, multilingual-learning-52e24.firebaseapp.com and multilingual-learning-52e24.web.app; SMS MFA shows upgrade-to-enable | Verify SDK/runtime integration, user account linking/actions, password policy, SMS region policy and deployed app sign-in flow |
 | Cloud Firestore | NOT CREATED / NOT EVIDENCED AS ACTIVE | Console shows the initial “Create database” screen; Spark plan visible | No current database, region, collections, rules or indexes to inventory; creation requires a separate approved design decision |
-| Realtime Database | NOT EVIDENCED | No deployed database evidence in inspected branch | Whether enabled; instance/region; rules; data flows |
+| Realtime Database | NOT CREATED / NOT EVIDENCED AS ACTIVE | Console shows the initial “Create Database” screen; Spark plan visible | No instance, region, rules or data flows to inventory; creation requires a separate approved architecture decision |
 | Cloud Storage for Firebase | NOT EVIDENCED | No deployed bucket/runtime evidence in inspected branch | Whether enabled; bucket/region; rules; lifecycle; object inventory; billing plan |
 | Firebase Hosting | LINKAGE NOT SHOWN FOR THE REGISTERED WEB APP; PRODUCT STATUS UNKNOWN | General settings shows a “Link to a Firebase Hosting site” action for the web app | Inspect Hosting product directly for sites, domains and deployments; do not infer Hosting is disabled |
 | Firebase App Hosting | NOT EVIDENCED | No deployment evidence | Whether enabled; backend/region; connected repository and build identity |
