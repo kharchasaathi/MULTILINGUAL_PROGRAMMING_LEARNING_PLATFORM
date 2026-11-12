@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 concurrency:
   group: firebase-hosting-live
@@ -29,10 +30,18 @@ jobs:
           test -f public/app.js
           node --check public/app.js
 
-      - name: Deploy to Firebase Hosting
-        uses: FirebaseExtended/action-hosting-deploy@v0.10.0
+      - name: Authenticate to Google Cloud using GitHub OIDC
+        uses: google-github-actions/auth@v2
         with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          projectId: multilingual-learning-52e24
-          channelId: live
+          project_id: multilingual-learning-52e24
+          workload_identity_provider: projects/1061074380401/locations/global/workloadIdentityPools/github-actions-pool/providers/github
+          service_account: github-firebase-deployer@multilingual-learning-52e24.iam.gserviceaccount.com
+
+      - name: Set up Google Cloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Install Firebase CLI
+        run: npm install --global firebase-tools
+
+      - name: Deploy to Firebase Hosting
+        run: firebase deploy --only hosting --project multilingual-learning-52e24 --non-interactive
