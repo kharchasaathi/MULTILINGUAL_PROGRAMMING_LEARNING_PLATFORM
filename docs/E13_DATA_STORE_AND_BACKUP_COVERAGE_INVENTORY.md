@@ -63,3 +63,74 @@ Blaze may become necessary if the product later chooses Firebase Storage or anot
 ## 7. Acceptance boundary
 
 This inventory is an initial documented baseline, not a complete cloud-account audit. It does not claim that all cloud projects, local environments, connected providers, buckets, secrets or production data have been discovered. E13 remains **IN PROGRESS** and E14 remains **BLOCKED**. No paid Firebase upgrade, database creation, bucket mutation, retention lock, key creation or production data transfer is authorized by this document.
+
+
+## 8. Authoritative data-store register and ownership
+
+The normalized, machine-readable inventory is maintained in `docs/E13_AUTHORITATIVE_DATA_STORE_REGISTER.csv` (25 records). It assigns an accountable owner role and operational custodian role to each domain, distinguishes authoritative stores from derived stores and provider boundaries, and records current evidence, classification, recovery requirement, reconciliation dependency and open confirmation.
+
+The register deliberately separates:
+- PostgreSQL application records (planned system of record; not deployed);
+- identity-provider credentials/session state (provider not selected; Firebase Authentication console configuration is not proof of runtime adoption);
+- product asset bytes (object-storage provider undecided) from the E13 B2 backup-artifact bucket;
+- source code and architecture evidence in GitHub from live business data;
+- authoritative audit/outbox/inbox/financial/progress records from logs, caches, indexes and other derived systems;
+- provider-side records and secrets from the application's internal identifiers and metadata.
+
+### 8.1 Domain ownership map
+
+| Data domain | Accountable owner role | Operational custodian |
+|---|---|---|
+| Platform/core and database | Platform Architecture Owner | Platform Operations |
+| Identity and credentials | Identity Product Owner | Identity/Security Operations |
+| Learner profile and preferences | Learning Product Owner | Learner Platform Operations |
+| Curriculum, lessons, localization and approvals | Learning Content / Content Governance Owner | Content Platform Operations |
+| Assessment and progress | Assessment / Learning Progress Product Owner | Learning Platform Operations |
+| AI task metadata and provenance | AI Product Owner | AI Platform Operations |
+| Asset metadata and object bytes | Asset and Media Product Owner | Storage Operations |
+| Audit and security events | Security and Audit Owner | Security Operations |
+| Outbox/inbox and integration events | Platform Architecture Owner | Platform Operations |
+| Notifications | Notification Product Owner | Platform Operations |
+| Payments and entitlements | Payments / Entitlement Product Owner | Finance and Platform Operations |
+| Search, caches and telemetry | Search / Platform Operations Owner | Platform Operations |
+| Backup artifacts and recovery keys | Database and Backup Owner / Security Owner | Backup / Security Operations |
+| Privacy tombstones and legal holds | Privacy and Legal Owner | Privacy Operations |
+| Code execution artifacts | Code Execution Security Owner | Security Operations |
+| Source code and CI | Engineering Owner | Repository Administrators |
+
+These are accountable role assignments, not named-person assignments. Named owners and approval authority must be confirmed before production operations.
+
+### 8.2 Inventory scope and limitations
+
+- The 25-row register covers all data domains and provider seams currently specified by D3, D4, D6, D7-D14, E11-E13 and the inspected repository tree.
+- D4's relational entity matrix remains the authoritative logical entity list. The register does not replace or rename D4 entities.
+- D12 payment records are represented as a domain and remain governed by `D12_PAYMENT_DATA_CONTRACT_MATRIX.csv`; notification persistence/provider choices are not yet finalized.
+- E12's canonical artifact is `E12_AUDIT_LOGGING_SECURITY_ARCHITECTURE.md`, not a file named `E12_AUDIT_LOGGING_ARCHITECTURE.md`.
+- GitHub tree inspection found no app source/runtime deployment, Prisma schema/migrations, Firebase project config/rules, deployed Firestore/Realtime Database, product asset bucket, queue, search index, telemetry vendor or payment gateway in this branch. This is bounded repository evidence only.
+- Backblaze B2 is currently evidenced as an E13 backup destination, not the product's user-uploaded asset store. Its synthetic live smoke test is not proof of database or product-media backup.
+- No direct cloud-account API audit was performed. Console evidence is limited to screenshots supplied by the owner; external services and local environments may exist outside the inspected branch.
+
+### 8.3 Task 01 acceptance checklist
+
+| Acceptance item | Evidence / status |
+|---|---|
+| Approved source-of-truth architecture identified | D3/D4 PostgreSQL decision recorded |
+| Logical data domains and supporting provider boundaries inventoried | 25-row authoritative register committed |
+| Data classification mapped to E11/D4 categories | Classification recorded per register row |
+| Accountable owner and operational custodian roles assigned | Role-level mapping recorded; named owner confirmation pending |
+| Backup/recovery requirement and cross-store reconciliation captured | Recorded per register row |
+| Current deployed versus planned state distinguished | Evidence and status columns recorded |
+| External/runtime discovery confirmed by owner | Pending owner confirmation |
+| Production owner sign-off | Pending |
+
+**Task 01 status: IN PROGRESS — repository and architecture inventory is documented; owner confirmations and external runtime discovery are still required.**
+
+### 8.4 Required owner confirmations to close Task 01
+
+1. Is Firebase Authentication intended to be the production identity provider, or was it only a console experiment? If production, confirm whether any real user accounts already exist.
+2. Is PostgreSQL still the approved authoritative application database, with no existing live production database or alternate authoritative data store?
+3. Is Backblaze B2 used only for E13 backup artifacts today, with no learner uploads/media stored there or in another provider?
+4. Are there any connected providers, local servers, cloud projects, databases, buckets, queues, analytics, monitoring, payment, email/SMS or AI services not visible in this repository inventory?
+5. Confirm the role-level ownership map or provide the correct accountable owner roles where different.
+
+Do not provide credentials, API keys, OAuth secrets, passwords or recovery codes in chat. Provider names, whether a service is used, and non-secret configuration facts are sufficient.
