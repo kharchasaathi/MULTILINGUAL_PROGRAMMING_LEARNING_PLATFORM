@@ -6,6 +6,14 @@
 
 ## 1. Executive status
 
+### Firebase Authentication — authorized domains reviewed
+
+- Authorized domains visible in Firebase console: `localhost`, `multilingual-learning-52e24.firebaseapp.com`, and `multilingual-learning-52e24.web.app`.
+- The two Firebase Hosting default domains are present in the Authentication authorized-domain list. This proves authorization for authentication redirects, not that a Hosting deployment/site is active or serving the app.
+- No custom domain is visible in the supplied screenshot.
+- No domain was added or removed during review.
+- Screenshot evidence received in chat on 2026-11-12.
+
 ### Firebase Authentication — sign-in methods reviewed
 
 - Sign-in providers shown as **Enabled**: Email/Password and Google.
@@ -39,7 +47,7 @@ The currently inspected `main` branch contains the E13 backup workflows and evid
 
 | Component | Current evidence-based status | What is known | What remains to verify |
 |---|---|---|---|
-| Firebase Authentication | CONSOLE CONFIGURATION VERIFIED; ZERO USERS OBSERVED | Email/Password and Google are Enabled; Users tab reported zero users; SMS MFA shows upgrade-to-enable; project tier Spark | Inspect authorized domains and Authentication settings; verify SDK/runtime integration in repository and deployed app |
+| Firebase Authentication | CONSOLE CONFIGURATION PARTIALLY VERIFIED; ZERO USERS OBSERVED | Email/Password and Google enabled; zero users observed; authorized domains are localhost, multilingual-learning-52e24.firebaseapp.com and multilingual-learning-52e24.web.app; SMS MFA shows upgrade-to-enable | Verify SDK/runtime integration, user account linking/actions, password policy, SMS region policy and deployed app sign-in flow |
 | Cloud Firestore | NOT EVIDENCED | No deployed database evidence in inspected branch | Whether enabled; project/region; collections; rules; indexes; backups; data classification |
 | Realtime Database | NOT EVIDENCED | No deployed database evidence in inspected branch | Whether enabled; instance/region; rules; data flows |
 | Cloud Storage for Firebase | NOT EVIDENCED | No deployed bucket/runtime evidence in inspected branch | Whether enabled; bucket/region; rules; lifecycle; object inventory; billing plan |
