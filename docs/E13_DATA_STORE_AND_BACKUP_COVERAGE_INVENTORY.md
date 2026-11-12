@@ -144,3 +144,9 @@ This decision does not select Firestore, Realtime Database, Firebase Storage, Fi
 Before implementation, inspect the existing Firebase project/account inventory without deleting or overwriting data; validate project ID, authorized domains and redirect origins; complete E4/E7 web and native session/security review; protect Admin SDK credentials in a managed secret facility; and test issuer/audience/signature/expiry validation, UID mapping, account linking, revocation and recovery. Never share secrets in chat or commit them to Git.
 
 Task 01 remains IN PROGRESS because external runtime discovery, existing Firebase account inventory and role-owner confirmation are outstanding. The identity provider choice itself is no longer an open question.
+
+## 10. D4 entity-level backup crosswalk
+
+The D4 relational entity matrix contains 39 logical entities. All 39 are explicitly mapped to the 25-domain E13 register in `docs/E13_D4_ENTITY_TO_BACKUP_DOMAIN_CROSSWALK.csv`. This crosswalk preserves D4 entity names and module ownership; it does not introduce new authoritative stores or replace the D4 schema. It also makes entity-level restore checks actionable: identity mappings, immutable content/release evidence, assessment confidentiality, progress events, idempotency/outbox/inbox replay and audit integrity each have a stated recovery treatment.
+
+**Reconciliation result:** 39/39 D4 entities mapped; no D4 entity is left without a backup-domain assignment. Object bytes remain a separate provider boundary (DS-011) because D4 `asset_object` stores metadata only. D3's Projects and Playground modules are represented by the separate code-execution/submission artifact domain (DS-024), not by a missing D4 relational entity. This is a repository-document reconciliation only; it does not prove deployed data or runtime coverage.
