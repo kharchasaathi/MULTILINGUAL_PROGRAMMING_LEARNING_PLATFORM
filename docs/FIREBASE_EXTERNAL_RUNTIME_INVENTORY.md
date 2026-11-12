@@ -488,3 +488,22 @@ Updated status:
 ### 13.1 Next binding review
 
 Inspect **Firebase Authentication Admin** using its **View Binding** action in the Policy Analyzer results. Capture the binding details showing the resource/header, role, members and any condition. Do not edit the binding. The Firebase Admin SDK Administrator Service Agent binding can be reviewed afterward if needed.
+
+
+## 14. Firebase Admin SDK Administrator Service Agent binding details — owner screenshot reviewed (2026-11-12)
+
+The owner supplied a Policy Analyzer **Policy binding details** screenshot for the Firebase Admin SDK Administrator Service Agent role.
+
+Visible binding JSON:
+- Resource/header: **Binding for** `firebase-adminsdk-fbsvc@multilingual-learning-52e24.iam.gserviceaccount.com`.
+- Role: `roles/firebase.sdkAdminServiceAgent`.
+- Member: `serviceAccount:firebase-adminsdk-fbsvc@multilingual-learning-52e24.iam.gserviceaccount.com`.
+- No `condition` field is visible in the displayed JSON.
+
+Evidence-bounded interpretation:
+- The displayed binding is on the Firebase Admin SDK service-account resource and its only visible member is that same service account. This is a self-binding in the displayed resource-level policy.
+- No additional member or condition is visible in the supplied JSON.
+- This screenshot is for `roles/firebase.sdkAdminServiceAgent`, **not** `roles/firebaseauth.admin`. The Firebase Authentication Admin binding remains uninspected and must not be marked verified from this screenshot.
+- No role, binding, service account or key was modified.
+
+Updated status: Firebase Admin SDK Administrator Service Agent binding resource/member verified as a self-binding in the displayed policy; Authentication Admin binding review still pending.
