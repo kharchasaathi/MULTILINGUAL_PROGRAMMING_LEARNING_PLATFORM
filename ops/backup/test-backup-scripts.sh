@@ -45,7 +45,7 @@ MOCK
 cat > "$tmp/bin/psql" <<'MOCK'
 #!/usr/bin/env bash
 set -Eeuo pipefail
-printf '0\\n'
+printf '%s\n' "${MOCK_PSQL_OBJECT_COUNT:-0}"
 MOCK
 
 chmod +x "$tmp/bin/"*
