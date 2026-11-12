@@ -172,3 +172,19 @@ Temporary credential cleanup:
 - The GitHub Environment `e13-b2-live-smoke` remains but has no environment secrets. The manual workflow is defined on `main` for workflow-dispatch discovery and explicitly checks out `docs/project-foundation` for the E13 implementation.
 
 **Acceptance status:** The live logical B2 smoke-test gate is complete. E13 overall remains **IN PROGRESS** and E14 remains **BLOCKED** until all other mandatory acceptance evidence in Section 9 is completed, independently checked and approved.
+
+
+## 13. Disposable local pgBackRest CI integration
+
+The workflow `.github/workflows/e13-backup-utility.yml` includes a cost-free GitHub-hosted runner job that installs PostgreSQL 16 and pgBackRest, creates a disposable local PostgreSQL cluster and POSIX repository, enables WAL archiving, creates a full backup, generates a post-target transaction, and performs a timestamp-based restore into a separate empty data directory.
+
+Test entry point: `ops/backup/test-pgbackrest-pitr-integration.sh`.
+
+Acceptance assertions:
+- pgBackRest stanza creation and archive check succeed.
+- A full physical backup completes in the local repository.
+- WAL generated after the backup is archived.
+- Timestamp-based restore starts as a separate recovery cluster.
+- A row present at the recovery target is retained and a transaction committed after the target is absent.
+
+This CI scenario is deliberately isolated and uses no cloud credentials, B2 network access, production data or paid cloud resources. It validates the local pgBackRest/PostgreSQL mechanics only. It does not validate B2 S3-compatible endpoint compatibility, production key permissions, object retention, replication, key escrow, notification delivery, application consistency, or approved RPO/RTO. A passing CI job is not a production PITR drill.
