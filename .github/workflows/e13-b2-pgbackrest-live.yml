@@ -1,0 +1,52 @@
+name: E13 live Backblaze B2 pgBackRest integration
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_disposable_test:
+        description: "Type RUN-DISPOSABLE-B2-PITR to authorize the synthetic live B2 test"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e13-b2-pgbackrest-live
+  cancel-in-progress: false
+
+jobs:
+  b2-pgbackrest-live:
+    if: ${{ inputs.confirm_disposable_test == 'RUN-DISPOSABLE-B2-PITR' }}
+    runs-on: ubuntu-24.04
+    environment: e13-b2-pgbackrest-live
+    timeout-minutes: 45
+    steps:
+      - name: Checkout approved project branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Install PostgreSQL 16 and pgBackRest
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-16 pgbackrest
+
+      - name: Validate script syntax
+        run: bash -n ops/backup/test-pgbackrest-b2-live-integration.sh
+
+      - name: Run live B2 backup, WAL archive and isolated timestamp PITR
+        env:
+          B2_PGBR_KEY_ID: ${{ secrets.B2_PGBR_KEY_ID }}
+          B2_PGBR_KEY: ${{ secrets.B2_PGBR_KEY }}
+          PGBR_CIPHER_PASS: ${{ secrets.PGBR_CIPHER_PASS }}
+        run: sudo --preserve-env=B2_PGBR_KEY_ID,B2_PGBR_KEY,PGBR_CIPHER_PASS,GITHUB_RUN_ID,GITHUB_RUN_ATTEMPT bash ops/backup/test-pgbackrest-b2-live-integration.sh
+
+      - name: Upload non-secret diagnostic logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e13-b2-pgbackrest-live-diagnostics-${{ github.run_id }}
+          path: /var/log/pgbackrest/
+          if-no-files-found: ignore
+          retention-days: 7
