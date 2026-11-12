@@ -150,3 +150,8 @@ Task 01 remains IN PROGRESS because external runtime discovery, existing Firebas
 The D4 relational entity matrix contains 39 logical entities. All 39 are explicitly mapped to the 25-domain E13 register in `docs/E13_D4_ENTITY_TO_BACKUP_DOMAIN_CROSSWALK.csv`. This crosswalk preserves D4 entity names and module ownership; it does not introduce new authoritative stores or replace the D4 schema. It also makes entity-level restore checks actionable: identity mappings, immutable content/release evidence, assessment confidentiality, progress events, idempotency/outbox/inbox replay and audit integrity each have a stated recovery treatment.
 
 **Reconciliation result:** 39/39 D4 entities mapped; no D4 entity is left without a backup-domain assignment. Object bytes remain a separate provider boundary (DS-011) because D4 `asset_object` stores metadata only. D3's Projects and Playground modules are represented by the separate code-execution/submission artifact domain (DS-024), not by a missing D4 relational entity. This is a repository-document reconciliation only; it does not prove deployed data or runtime coverage.
+
+
+## 11. Task 01 runtime discovery evidence pack
+
+A read-only evidence collection and owner-confirmation checklist is maintained in `docs/E13_TASK01_RUNTIME_DISCOVERY_EVIDENCE_PACK.md`. It covers Firebase project/Auth/Firestore/Realtime Database/Storage/Hosting, other Google Cloud services, Backblaze B2, external PostgreSQL, local/on-prem runtimes and third-party providers. It explicitly prohibits sharing credentials or changing cloud resources during discovery. The pack defines PRESENT / NONE_OBSERVED / UNKNOWN_NO_ACCESS / NOT_APPLICABLE outcomes and objective Task 01 close criteria.
