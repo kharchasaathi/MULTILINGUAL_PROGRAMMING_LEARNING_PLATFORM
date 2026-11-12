@@ -6,6 +6,16 @@
 
 ## 1. Executive status
 
+### Firebase App Check — owner screenshot reviewed
+
+- App Check console shows the initial “Get started” screen.
+- No Firebase apps are evidenced as registered with App Check, and no enforcement status/configuration is shown in this view.
+- App Check is therefore not configured/enforced based on the supplied screenshot; do not infer backend protection is active.
+- No App Check provider was selected and no enforcement setting was changed during this review.
+- Screenshot evidence received in chat on 2026-11-12.
+
+
+
 ### Cloud Functions for Firebase — owner screenshot reviewed
 
 - Functions console shows an “Upgrade project” prompt and explicitly states that Functions requires a billing account (Blaze).
