@@ -42,6 +42,12 @@ if [[ " $* " == *" --list "* ]]; then exit 0; fi
 exit 0
 MOCK
 
+cat > "$tmp/bin/psql" <<'MOCK'
+#!/usr/bin/env bash
+set -Eeuo pipefail
+printf '0\\n'
+MOCK
+
 chmod +x "$tmp/bin/"*
 export PATH="$tmp/bin:$PATH"
 export BACKUP_DIR="$tmp/out" AGE_RECIPIENT=age1test
