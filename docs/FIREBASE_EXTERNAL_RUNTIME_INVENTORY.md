@@ -507,3 +507,42 @@ Evidence-bounded interpretation:
 - No role, binding, service account or key was modified.
 
 Updated status: Firebase Admin SDK Administrator Service Agent binding resource/member verified as a self-binding in the displayed policy; Authentication Admin binding review still pending.
+
+
+## 15. Firebase Authentication Admin binding details — owner screenshot reviewed (2026-11-12)
+
+The owner supplied a Policy Analyzer **Policy binding details** screenshot for Firebase Authentication Admin.
+
+Visible binding JSON:
+- Resource/header: **Binding for** `firebase-adminsdk-fbsvc@multilingual-learning-52e24.iam.gserviceaccount.com`.
+- Role: `roles/firebaseauth.admin`.
+- Member: `serviceAccount:firebase-adminsdk-fbsvc@multilingual-learning-52e24.iam.gserviceaccount.com`.
+- No `condition` field is visible in the displayed JSON.
+
+Evidence-bounded interpretation:
+- The displayed binding is on the Firebase Admin SDK service-account resource and the only visible member is that same service account. This is a self-binding in the displayed resource-level policy.
+- No additional member or condition is visible in the supplied JSON.
+- The binding is consistent with the Firebase Admin SDK service account being granted Firebase Authentication Admin permissions on itself. The role is broad for Firebase Authentication; this screenshot does not prove which operations the application actually performs.
+- No role, binding, service account or key was modified.
+
+### 15.1 IAM binding review summary
+
+For all three roles shown in the earlier Policy Analyzer result set, supplied binding screenshots now show:
+| Role | Resource/header | Visible member | Condition shown |
+|---|---|---|---|
+| `roles/iam.serviceAccountTokenCreator` | Firebase Admin SDK service account | Same service account | No |
+| `roles/firebase.sdkAdminServiceAgent` | Firebase Admin SDK service account | Same service account | No |
+| `roles/firebaseauth.admin` | Firebase Admin SDK service account | Same service account | No |
+
+These screenshots establish three self-bindings in the displayed service-account resource policy. They do not by themselves prove that these bindings are unnecessary, nor do they prove the absence of other project/folder/organization-level grants, conditional bindings, deny policies, or principal access boundary effects. No IAM changes are recommended from this evidence alone.
+
+### 15.2 Remaining IAM audit work
+
+- Review the **Policy history** tab for each binding only if needed to establish when/how the bindings changed; current screenshots show the Binding tab, not history.
+- Check project/folder/organization inherited allow policies, IAM Conditions, deny policies and principal access boundary policies using the appropriate effective-access tools.
+- Validate whether the Firebase-managed service-agent roles are expected for this Firebase project and whether the service account is automatically managed by Google.
+- Review Cloud Audit Logs for actual service-account activity, impersonation/token creation and Firebase Admin API use, with a clearly defined time window and available log retention.
+- Inspect application code/runtime configuration for Firebase Admin SDK initialization and the exact APIs used. Never share service-account private keys or secrets.
+- Resolve the Firebase Settings “2 service accounts” label discrepancy separately; current Cloud Service Accounts page screenshot showed one visible row.
+
+Audit status: three resource-level self-bindings are evidenced; overall effective IAM / least-privilege audit remains **incomplete**. No permissions or services have been changed.
