@@ -6,6 +6,15 @@
 
 ## 1. Executive status
 
+### Firebase Authentication — sign-in methods reviewed
+
+- Sign-in providers shown as **Enabled**: Email/Password and Google.
+- Provider selection dialog shows check marks for Email/Password and Google; other listed providers (Phone, Anonymous, Facebook, Play Games, Game Center, Apple, GitHub, Microsoft, Twitter and Yahoo) were not shown as enabled. OpenID Connect and SAML are shown as locked/upgrade-gated options.
+- SMS Multi-factor Authentication panel shows an “Upgrade to enable” prompt. MFA is therefore not evidenced as enabled; do not infer that MFA is configured.
+- Project billing tier visible in console: Spark (no-cost). No upgrade was performed or recommended as part of this inventory.
+- This establishes console provider configuration only. The project currently has zero Authentication users in the previously reviewed Users tab; actual web-app SDK integration and sign-in flow still need code/runtime verification.
+- Screenshot evidence received in chat on 2026-11-12. No provider was enabled or modified during review.
+
 ### Firebase Authentication — owner screenshot reviewed
 
 - Firebase Authentication console page is accessible for project `multilingual-learning-52e24`.
@@ -30,7 +39,7 @@ The currently inspected `main` branch contains the E13 backup workflows and evid
 
 | Component | Current evidence-based status | What is known | What remains to verify |
 |---|---|---|---|
-| Firebase Authentication | CONSOLE ACCESS CONFIRMED; ZERO USERS OBSERVED; PROVIDERS UNVERIFIED | Authentication Users tab is accessible and reports no users for this project at screenshot time | Inspect Sign-in method, authorized domains, MFA and application SDK/runtime integration |
+| Firebase Authentication | CONSOLE CONFIGURATION VERIFIED; ZERO USERS OBSERVED | Email/Password and Google are Enabled; Users tab reported zero users; SMS MFA shows upgrade-to-enable; project tier Spark | Inspect authorized domains and Authentication settings; verify SDK/runtime integration in repository and deployed app |
 | Cloud Firestore | NOT EVIDENCED | No deployed database evidence in inspected branch | Whether enabled; project/region; collections; rules; indexes; backups; data classification |
 | Realtime Database | NOT EVIDENCED | No deployed database evidence in inspected branch | Whether enabled; instance/region; rules; data flows |
 | Cloud Storage for Firebase | NOT EVIDENCED | No deployed bucket/runtime evidence in inspected branch | Whether enabled; bucket/region; rules; lifecycle; object inventory; billing plan |
