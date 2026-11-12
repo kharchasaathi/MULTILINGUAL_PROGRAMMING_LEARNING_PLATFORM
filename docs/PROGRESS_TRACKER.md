@@ -773,3 +773,6 @@ E3 milestone recorded in E3 artifacts.
 - Corrected DS-002 so PostgreSQL identity principals/external links are marked `PLANNED_NOT_DEPLOYED`, and Firebase Authentication is recorded separately as the selected initial identity provider (DS-003). The stale question asking whether Firebase Auth is production or experiment has been removed; runtime account discovery remains open.
 - Updated BKP-001 with entity-level reconciliation evidence.
 - **Task 01 remains IN PROGRESS**: 39/39 entity mapping and repository-level inventory are complete; external cloud/local runtime discovery, existing Firebase account inventory, named accountable owners and owner sign-off remain unverified. No production infrastructure was changed.
+
+
+- 2026-11-12: Added `docs/E13_TASK01_RUNTIME_DISCOVERY_EVIDENCE_PACK.md` with read-only cloud/local runtime discovery scope, safe evidence handling, owner confirmation outcomes and objective Task 01 closure criteria. No credentials requested; no cloud resource changed. Task 01 remains IN PROGRESS pending external evidence.
