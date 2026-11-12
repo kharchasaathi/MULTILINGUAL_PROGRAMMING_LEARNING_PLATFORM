@@ -4,52 +4,47 @@
 
 **Live synthetic integration: PASS. E13 overall: IN PROGRESS.**
 
-## Run evidence
+## Definitive passing run
 
-- GitHub Actions run: [43202129682](https://github.com/kharchasaathi/MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM/actions/runs/43202129682)
-- Branch: `main`
-- Commit tested: `1c643a12b00b8579a26524a071f23d8bd3ed475d`
-- Run duration: 7m 24s
+- GitHub Actions run: [43207714271](https://github.com/kharchasaathi/MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM/actions/runs/43207714271)
+- Tested commit: `38e7e2ce6b15e466222dc47c757baba6e001735f`
+- Duration: 7m 50s
 - Jobs: `validate=success`, `b2-pgbackrest-live=success`
-- Test repository path: `/pgbackrest/e13-live-test/43202129682-1/`
-- PostgreSQL: 16
-- pgBackRest: 2.50
-- Repository: Backblaze B2 bucket `kharchasaathi-e13-backup-primary`, region `eu-central-003`
-- Encryption: pgBackRest AES-256-CBC repository cipher; B2 server-side encryption enabled on bucket.
+- Test repository prefix: `/pgbackrest/e13-live-test/43207714271-1/`
+- PostgreSQL: 16; pgBackRest: 2.50
+- B2 bucket: `kharchasaathi-e13-backup-primary`, region `eu-central-003`
+- Encryption: pgBackRest AES-256-CBC repository encryption; bucket-side encryption enabled.
 
-## Assertions evidenced in job log
+## Assertions evidenced in the passing run
 
-1. pgBackRest stanza creation completed successfully against B2.
-2. `pgbackrest check` validated repository configuration and WAL archive.
-3. WAL segment was successfully archived to the B2 repository.
-4. Full physical backup completed successfully (22.1 MB database; 967 files).
-5. A subsequent WAL segment was successfully archived.
-6. Restore from B2 to a separate recovery directory completed successfully.
+1. pgBackRest stanza creation against B2 succeeded.
+2. Repository/WAL check succeeded.
+3. WAL archive to B2 succeeded.
+4. Full physical backup completed successfully.
+5. A later WAL segment was archived.
+6. Restore from B2 to a separate recovery directory completed.
 7. Recovered PostgreSQL started on an isolated port/socket.
 8. Base-backup marker row was present after recovery.
-9. Transaction committed after the selected PITR target was absent after recovery.
-10. Job log emitted: `PASS: live B2 pgBackRest stanza, full physical backup, WAL archive, B2 restore and timestamp PITR.`
+9. A transaction committed after the PITR target was absent after recovery.
+10. The job emitted: `PASS: live B2 pgBackRest stanza, full physical backup, WAL archive, B2 restore and timestamp PITR.`
 
-## Retention/expiration finding and corrective action
+## Automatic expiration safeguard
 
-The tested script at commit `1c643a12b00b8579a26524a071f23d8bd3ed475d` set `repo1-retention-full=1`. The pgBackRest backup command consequently invoked `expire` after the full backup. The log records removal of one old WAL archive object under this run's isolated prefix:
+The first live run invoked automatic expiration and removed one old WAL object inside its run-scoped disposable test prefix. Run #3 still invoked the default `expire` command, although no object removal was shown in that run.
 
-`/pgbackrest/e13-live-test/43202129682-1/`
+The live test was corrected to explicitly pass `--no-expire-auto` to the backup command. Run #4 (above) proves:
+- backup log includes `--no-expire-auto`;
+- the complete live job log contains no `expire command begin` or `expire command end`;
+- backup, WAL, B2 restore and PITR assertions still pass.
 
-This did **not** use the `postgres/` prefix and did not target the logical-dump writer's namespace. However, the earlier statement that no remote deletion occurred was inaccurate: one test-prefix WAL object was expired.
-
-Run #3 [43205848796](https://github.com/kharchasaathi/MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM/actions/runs/43205848796) tested the script after removing `repo1-retention-full=1`. The run passed backup and PITR, and the expire log explicitly stated that archive logs would not be expired. However, pgBackRest still invoked its default automatic `expire` command after backup. No object deletion was shown in this run, but the requirement that automatic expiration not run was therefore **not** met.
-
-Corrective change committed as `c04efabb2cc46b1f95e3ce2f3c8a90f44dfde607`: the backup invocation now explicitly includes `--no-expire-auto`. The official pgBackRest command reference documents that automatic expiration is enabled by default and that `--no-expire-auto` disables it. This new change is **not yet live-tested**. A fresh B2 run must confirm the backup and PITR still pass and that no `expire command begin` appears after backup.
-
-No cleanup command in the script removes remote objects. The ephemeral runner removes only its local recovery directory and socket.
+The safeguard is PASS for this disposable integration test. It does not define or approve a production retention policy.
 
 ## Scope limitations
 
-This was a disposable synthetic database on a GitHub-hosted runner, not production data or a production recovery exercise. It does not establish:
+This was a disposable synthetic database on a GitHub-hosted runner, not a production recovery exercise. It does not establish:
 - production PostgreSQL deployment, runtime archive configuration, or complete database inventory;
 - approved business RPO/RTO or measured production recovery objectives;
-- retention policy suitability, lifecycle policy, legal hold, or Object Lock design;
+- production retention policy, lifecycle policy, legal hold, or Object Lock design;
 - monitoring, alert delivery, on-call ownership, or periodic restore scheduling;
 - key escrow, recovery access, rotation, or compromise procedures;
 - cross-region replication or independent account recovery;
@@ -59,6 +54,6 @@ This was a disposable synthetic database on a GitHub-hosted runner, not producti
 
 - Local PostgreSQL 16 PITR CI validation: PASS (separate local POSIX repository test).
 - Live Backblaze B2 pgBackRest synthetic integration: PASS.
-- Live-test no-expiration safeguard: PASS in run `43207714271`.
+- Live-test no-auto-expire safeguard: PASS in run `43207714271`.
 - E13 overall: IN PROGRESS.
 - E14: remains BLOCKED pending all E13 evidence and required owner approvals.
