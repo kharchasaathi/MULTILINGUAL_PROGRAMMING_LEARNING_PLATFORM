@@ -1,10 +1,10 @@
 # E4 — Identity, Authentication and Authorization Hardening
 
-**Status:** Complete — security requirements and verification design documented; implementation pending  
+**Status:** Complete — provider-neutral security requirements and verification design documented; Firebase Authentication selected as initial adapter; implementation and verification pending  
 **Date:** 2026-11-05  
 **Decision:** E-0004  
 **Authority:** D6 identity architecture; E1 threat model; E2 network controls; E3 application security; D11 admin architecture  
-**Scope:** Provider-neutral hardening baseline. No identity provider, credential store, MFA product, token format, session store, key manager or production control is selected, deployed or tested.
+**Scope:** Provider-neutral hardening baseline. Firebase Authentication is selected as the initial identity adapter by D6; no production integration, credential/session implementation, key manager or production control is deployed or tested. Exact token transport and session controls remain gated.
 
 ## 1. Purpose
 E4 converts D6's logical identity model into security requirements for registration, authentication, account recovery, sessions, federation, service identities and authorization handoff. It does not supersede D6's unresolved technology choices or E5's detailed authorization/role design.
@@ -112,3 +112,13 @@ Identity provider and tenant model; credential ownership; exact password policy;
 
 **Verification status:** The accompanying catalog contains future scenarios only. No authentication provider, endpoint, credential store, MFA, session revocation, penetration test or runtime control was executed or verified by this milestone.  
 **Execution gate:** Learner code execution remains disabled until E9, L13–L15 and E15 approval.
+
+## 12. Provider decision alignment — Firebase Authentication (2026-11-12)
+
+D6 has selected Firebase Authentication as the initial managed identity provider while retaining the provider-neutral adapter boundary. E4's security controls apply to this provider integration; this does not waive any security gate.
+
+Implementation must verify Firebase ID tokens server-side with trusted project configuration and official server-side verification, validate issuer/audience/signature/expiry and account state, map Firebase UID as the external subject to the internal PostgreSQL principal, and fail closed on uncertainty. Email is not the identity key and matching email addresses must not trigger automatic account linking.
+
+Admin SDK credentials remain server-side in a managed secret facility. No service-account private key or privileged credential may be placed in client bundles, repository files, logs or chat. Web session/BFF/cookie behavior and native token storage/redirect behavior require separate E4/E7 threat review and tests before production.
+
+Firebase Authentication selection does not authorize Firestore, Realtime Database, Firebase Storage, Firebase Hosting or a Blaze upgrade. Production integration and verification remain pending.
