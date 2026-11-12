@@ -1,10 +1,10 @@
 # D6 — Authentication and Identity Architecture
 
-**Status:** Complete — provider-neutral identity, authentication, session and authorization architecture documented
+**Status:** Complete — provider-neutral identity boundary documented; Firebase Authentication selected as the initial managed identity adapter (implementation and security validation pending)
 **Date:** 2026-11-05
 **Depends on:** D1–D5; C15 content review and approval workflow
 **Baseline:** NestJS modular monolith, PostgreSQL/Prisma ORM 7 stable, REST/JSON under `/api/v1`
-**Scope:** Logical architecture and policy contract only. No identity provider, credentials service, session store, key manager or production authentication code is selected or implemented.
+**Scope:** Logical architecture and policy contract only. Firebase Authentication is selected as the initial managed identity adapter; no production integration, credentials service implementation, session store, key manager or production authentication code is deployed.
 
 ## 1. Purpose and boundaries
 
@@ -15,13 +15,13 @@ D6 does not select an identity vendor, hosting region, email/SMS provider, OAuth
 ## 2. Architecture decisions
 
 1. **Separate authentication from application identity.** An external identity system proves control of an authentication method; the platform maps its stable issuer/subject pair to an internal UUID principal.
-2. **Provider-neutral boundary.** NestJS depends on an application-owned identity adapter and normalized claims contract. Vendor SDKs, tokens and provider-specific models remain in adapters.
+2. **Provider-neutral boundary with an initial adapter decision.** NestJS depends on an application-owned identity adapter and normalized claims contract. Firebase Authentication is the selected first managed identity provider; its Admin SDK, tokens and provider-specific models remain inside the adapter. The domain and application layers must not depend on Firebase types.
 3. **Server-resolved principal only.** Protected requests receive a principal only after cryptographic/protocol validation, issuer/audience/expiry checks, account-state checks and identity mapping. Never trust user IDs, role names, locale, subscription or reviewer claims supplied in request bodies or client storage.
 4. **Deny by default and least privilege.** Every non-public operation declares required permission and resource scope. Authorization is enforced in backend use cases/services, not merely in UI routes or guards.
 5. **Distinct roles and permissions.** Roles group permissions; permissions describe actions. Resource ownership and contextual constraints are evaluated separately. A role is not a blanket bypass.
 6. **No self-approval or AI approval.** Enforce C15 author/reviewer separation, locale-specific review authority, publisher authority and independent high-risk release approval. AI/system automation cannot impersonate a human approver.
-7. **No credential/token storage in application profile tables.** External credentials remain with the chosen identity provider. If first-party credentials are ever approved, their design requires a separate security decision and specialist review.
-8. **Protocol and client transport remain gated.** Prefer standards-based OIDC/OAuth integration where compatible, but the concrete flow, browser cookie vs bearer-token transport, PKCE requirements, native redirect strategy and session persistence are not locked until provider and threat-model review.
+7. **No credential/token storage in application profile tables.** External credentials remain with Firebase Authentication for the initial deployment. PostgreSQL stores only internal principals, exact issuer/subject links, account state, roles and application-owned identity metadata. Never mirror passwords or provider refresh/access tokens into PostgreSQL. A future provider replacement must be possible through the adapter.
+8. **Protocol and client transport remain gated.** Integrate Firebase Authentication using its supported standards-based flows and validate Firebase ID tokens only at the NestJS trust boundary using the official server-side verification approach. Exact web BFF/cookie transport, native PKCE/redirect strategy, session persistence, CSRF and revocation behavior remain gated by E4/E7 security review. Never accept a Firebase client claim as application authorization.
 9. **No long-lived secrets in browser storage.** Do not persist refresh tokens, access tokens or session secrets in localStorage, IndexedDB, application logs, analytics or URLs. Exact secure storage design must be validated per web/native platform before implementation.
 10. **Identity failures fail closed.** Unknown issuer, invalid signature, expired/revoked session, disabled account, malformed claims or unavailable required authorization data must not grant access.
 
@@ -271,3 +271,26 @@ Must be resolved before implementation/release:
 - Audit storage/retention, security monitoring and SLOs.
 
 **Handoff:** D7 — Design the course engine. E1–E5 must later turn these architecture controls into a threat model and implementation-grade security requirements. No production authentication or authorization implementation is claimed.
+
+## 13. Architecture decision addendum — initial identity provider (2026-11-12)
+
+**Decision:** Select Firebase Authentication as the initial managed identity provider for the platform, while retaining D6's provider-neutral identity adapter boundary.
+
+**Why this is the recommended baseline**
+- Provides managed Email/Password and Google sign-in options without building password storage, reset-token handling and credential security from scratch.
+- Fits the web/PWA and Expo mobile client direction, subject to validating the exact supported SDK/protocol flow for each client.
+- Keeps authentication separate from application identity and authorization: NestJS verifies the provider assertion, maps the exact issuer/subject pair to an internal UUID principal, and loads roles/account state from PostgreSQL.
+- Avoids making Firestore, Realtime Database or Firebase Storage dependencies. PostgreSQL remains the sole application system of record; object storage remains a separate provider decision.
+- Limits vendor coupling to one adapter. A future identity-provider migration must not require rewriting domain modules or changing PostgreSQL's internal principal IDs.
+
+**Required implementation constraints**
+1. Firebase Authentication is for proving identity only. It is not the source of truth for learner profile, curriculum, progress, permissions, subscriptions, reviewer roles or audit history.
+2. The backend verifies ID tokens server-side using trusted Firebase project configuration and the official Admin SDK/server verification path; check signature, issuer, audience/project, expiry, token type and account state. Fail closed on verification uncertainty.
+3. Map the exact issuer/subject pair (Firebase UID as subject) to the D4 external identity link; never use email as the primary key and never auto-link accounts merely because email strings match.
+4. Never place Admin SDK service-account private keys or privileged credentials in browser/mobile bundles, Git, logs or chat. Use a managed secret facility at deployment.
+5. Keep provider SDKs and provider-specific claim structures inside the adapter. Export a normalized principal contract to the NestJS application.
+6. Select web session/BFF/cookie and native secure token transport separately through E4/E7 threat review before production implementation. No long-lived browser-readable tokens.
+7. Enable only the required Firebase Authentication features/providers after domain, redirect, abuse, verification, recovery, privacy and budget checks. Do not enable Firebase Storage, Firestore or Blaze solely because Authentication is selected.
+8. Verify whether the existing Firebase project has real accounts before linking it to the production application. Do not migrate, delete, disable or overwrite any existing identity data as part of this architecture decision.
+
+**Decision status:** Provider choice approved as the default architecture direction. Production integration remains NOT IMPLEMENTED; E4/E7 controls and client-specific flow decisions remain mandatory release gates.
