@@ -1,9 +1,9 @@
 # Progress Tracker
-Last updated: 2026-11-05 (E13 live B2 evidence update)
+Last updated: 2026-11-12 (E13 Task 01 inventory and ownership work)
 
 ## Current execution position
 - Current stage: E — Security Constitution
-- Current task: E13 — Backup and recovery (PostgreSQL+age CI and synthetic live Backblaze B2 upload/download/exact-VersionId/SHA-256 smoke test passed; pgBackRest/WAL/PITR, replication, key custody, alerting and restore acceptance remain open).
+- Current task: E13 — Backup and recovery; Task 01 (authoritative data-store inventory and ownership) is IN PROGRESS. A 25-domain register and role-level ownership map are committed; owner confirmations and external runtime discovery remain open.
 - AWS S3 paid-plan route was paused; Google Cloud Billing signup was blocked by account-security verification and no GCP Billing Account was created. Current off-site candidate is Backblaze B2 EU Central (`eu-central-003`); bucket `kharchasaathi-e13-backup-primary` exists as Private, SSE-B2 enabled, Keep all versions, Object Lock Disabled. See E13 runbook.
 - Next action: implement and validate pgBackRest B2 stanza/base backup/WAL/PITR in an isolated environment; then complete approved Object Lock/retention, separate-region/account replication and restore, key escrow/rotation, real alert delivery, E11/E12 restore integrations, numeric RPO/RTO approval and repeated isolated restore drills. E14 remains blocked.
 - Completed prior: E1–E10 security design baselines; E11 — Privacy and data protection (completed out of sequence at design scope).
@@ -739,3 +739,17 @@ E3 milestone recorded in E3 artifacts.
 - Firebase Console evidence: Email/Password and Google Authentication providers are enabled; Firestore and Realtime Database show database-creation onboarding; Storage shows a billing/Blaze upgrade gate; Hosting shows Get started. These screens do not prove runtime integration or a deployed data store.
 - **Billing decision:** Firebase Blaze is not required for E13 as currently designed. E13 uses PostgreSQL plus Backblaze B2; Firebase Storage is not an approved E13 dependency. Do not upgrade or create Firebase resources until a separate architecture decision, usage estimate, budget alerts and billing-owner approval exist.
 - Inventory remains initial/evidence-bounded, not a complete cloud-account audit. Owner confirmations and runtime discovery remain open. E13 IN PROGRESS; E14 BLOCKED.
+
+
+## E13 Task 01 — Authoritative data-store inventory and ownership (2026-11-12)
+
+- **Status: IN PROGRESS — documentation baseline committed; owner sign-off and runtime discovery pending.**
+- Added `docs/E13_AUTHORITATIVE_DATA_STORE_REGISTER.csv` with 25 records covering PostgreSQL logical domains, identity, learner/profile, curriculum/content/review, assessment, progress, AI metadata, asset metadata and bytes, audit, outbox/inbox, notifications, payments, entitlements, search, caches, source/CI, B2 backup artifacts, telemetry, secrets, privacy tombstones/legal holds, sandbox artifacts and third-party provider records.
+- Each register row records authoritative system/provider boundary, observed evidence, deployed/planned status, E11-aligned classification, accountable owner role, operational custodian, backup/recovery requirement, reconciliation dependencies and outstanding confirmation.
+- Reconciled the register against D3 backend module ownership, D4 PostgreSQL entity and recovery design, D12 payment data contracts, E11 privacy controls, E12 audit architecture, E13 runbook/control matrix and the inspected working-branch tree.
+- Confirmed planning architecture: PostgreSQL remains the system of record; Prisma 7 is planned; object bytes require a provider-neutral object-storage adapter. Backblaze B2 is currently the E13 backup artifact destination only, not an approved product-media store.
+- Repository scan did not find a live app runtime, Prisma schema/migrations, Firebase project config/rules, deployed Firestore/Realtime Database, product asset bucket, payment gateway, queue, search index or telemetry deployment. This is repository-bounded evidence, not a cloud-account audit.
+- Firebase Authentication console screenshots show Email/Password and Google provider configuration, but runtime adoption and existing user accounts are unconfirmed. Firestore/Realtime Database/Storage/Hosting onboarding screens do not establish deployed services.
+- Updated BKP-001 and BKP-027 in `docs/E13_BACKUP_RECOVERY_CONTROL_MATRIX.csv` to point to the new inventory and explicitly retain pending owner/runtime confirmation.
+- **Owner confirmations required to close Task 01:** (1) Firebase Auth production or experiment and whether real accounts exist; (2) PostgreSQL remains sole authoritative application DB and whether any live DB exists; (3) B2 is only for backup artifacts and whether product media exists elsewhere; (4) disclose any other connected providers/cloud/local stores not represented; (5) confirm role-level owners.
+- No credentials or secrets are requested. E13 remains IN PROGRESS; E14 remains BLOCKED.
