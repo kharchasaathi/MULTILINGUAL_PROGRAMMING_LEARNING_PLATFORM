@@ -269,3 +269,80 @@ Firebase Project ID: `multilingual-learning-52e24`
 6. Obtain explicit owner confirmation that the inventory of external services is complete.
 
 Until these gates are satisfied, keep Inventory status **INCOMPLETE**. No Firebase Blaze upgrade, paid service activation, database creation, key creation, role modification or production configuration change is authorized by this inventory update.
+
+## 8. Follow-up audit disposition — 2026-11-12
+
+### 8.1 Effective permissions audit: evidence-bounded result
+
+**Result: PARTIALLY REVIEWED — NOT A COMPLETE EFFECTIVE-PERMISSIONS AUDIT.**
+
+Evidence now available:
+- Project-level IAM screenshot shows two visible principals: the owner account and the Firebase Admin SDK service account.
+- The owner has Owner (Legacy).
+- The Firebase Admin SDK service account has the three role bindings listed in Section 7.
+- Service Account → Principals with access shows the owner and the same service account in the supplied view.
+- The Service Account Keys page and list show no user-managed keys for the listed account.
+
+What cannot be established from these screenshots:
+- Effective permissions after inherited organization/folder/project/resource-level grants.
+- IAM Conditions, Deny policies, principal access boundaries, organization policies or cross-project grants.
+- The exact permissions included in each role and whether each permission is exercised by current runtime code.
+- Whether additional principals are hidden by filters, organization-level policy, or a different project/resource scope.
+
+No direct Google Cloud IAM Policy Analyzer/API result was available in this review. Therefore this is a screenshot-based role-binding review, not a certified least-privilege or effective-access audit. No IAM role changes are recommended from the available evidence.
+
+### 8.2 Second service-account discrepancy: unresolved, bounded finding
+
+Evidence:
+- Firebase Project Settings → Service Accounts showed a link labeled “2 service accounts”.
+- Google Cloud IAM & Admin → Service Accounts showed one visible row, the enabled Firebase Admin SDK service agent, with “No keys”.
+- Project IAM → View by principals showed two principals total: one human owner and one service account. This is not a service-account count.
+
+Finding:
+- The screenshots do not establish what Firebase's “2 service accounts” count refers to. It may refer to a different grouping or managed identity listing, but that would be speculation.
+- The only service account positively identified in the supplied Google Cloud Service Accounts list is the Firebase Admin SDK service agent.
+- Do not mark a second account as absent, and do not create/delete/disable any account to reconcile the count.
+
+Closure evidence required:
+- Open the Firebase “2 service accounts” link and capture the resulting full list/page title and all visible entries; or provide a non-secret service-account inventory export from the exact project. Include active filters and pagination state. Never provide key material.
+
+### 8.3 External providers inventory: evidence collected
+
+| Provider / service | Evidence-based classification | Known details | Remaining owner/runtime verification |
+|---|---|---|---|
+| GitHub | CONFIRMED — source control | Repository MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM; working branch docs/project-foundation | Confirm repository owner/recovery owner, branch protection, app/token scopes and production deployment use |
+| GitHub Actions | CONFIRMED — CI/test execution | Disposable GitHub-hosted runner used for PostgreSQL 16 + pgBackRest + B2 synthetic integration/PITR test; run 43207714271 recorded earlier in this inventory | Confirm whether any production workload or scheduled jobs run here; review permissions, environments, secret custody, artifact retention and alerting |
+| Backblaze B2 | CONFIRMED — E13 backup test target | Private bucket kharchasaathi-e13-backup-primary; region eu-central-003; endpoint s3.eu-central-003.backblazeb2.com; isolated test prefix /pgbackrest/e13-live-test/43207714271-1/ in the documented successful synthetic run | Confirm account owner/recovery contact, production source/backup scope, key custody and rotation, retention/lifecycle policy, monitoring and independent recovery |
+| PostgreSQL | TEST RUNTIME CONFIRMED; PRODUCTION HOST UNKNOWN | PostgreSQL 16 disposable CI database used in integration/PITR validation | Production provider, region, version, owner, HA, network controls, data classification, backup schedule and restore evidence |
+| Firebase Authentication | CONSOLE CONFIG PARTIALLY VERIFIED | Project multilingual-learning-52e24; Email/Password and Google providers enabled in prior screenshots; zero users observed at screenshot time | Verify actual app SDK integration, sign-in flow, account lifecycle, abuse controls and production use |
+| Firebase Hosting | NOT PROVISIONED IN EVIDENCE REVIEW | Hosting console showed Get Started; registered Web App panel showed Link to a Firebase Hosting site | Recheck current Hosting sites/domains/deployments only if the project intends to use Firebase Hosting |
+| Firebase Storage / Functions | NOT PROVISIONED IN EVIDENCE REVIEW; BLAZE PROMPT SHOWN | Console showed upgrade-to-Blaze prompt for Storage and Functions; no deployment/bucket shown | No upgrade approved. Reassess only after a documented feature/runtime requirement and cost review |
+| DNS / domain registrar | UNKNOWN | No provider/domain ownership evidence in inspected repository | Owner must identify registrar, DNS host, zones, records, DNSSEC and account recovery |
+| CDN / WAF | UNKNOWN | No provider or deployment evidence | Owner must confirm whether used; if yes, provider, protected domains, rules, TLS and origin controls |
+| Email / SMS delivery | UNKNOWN | No external delivery provider evidenced; Firebase Email/Password and Google sign-in are console providers, not proof of transactional email/SMS delivery | Owner must identify provider(s), sender identity, credentials custody and delivery/abuse controls |
+| Monitoring / logging / alerting | NOT EVIDENCED | No production alert-delivery evidence found in reviewed inventory/repository evidence | Owner must identify provider, data retention/redaction, alert destination and response owner |
+| Payments / finance APIs | UNKNOWN | No current Learning Platform payment provider evidenced | Confirm none, or list providers, webhook endpoints/signature validation and secrets custody |
+| Other external APIs / object storage | UNKNOWN | No additional active runtime evidence in inspected files; B2 is the only evidenced object-storage target in E13 | Owner to confirm complete provider list and data flows |
+
+**Important separation:** Backblaze B2 is confirmed as an E13 synthetic backup test target; this does not establish that a production PostgreSQL database exists or that production backups are running. The successful disposable CI test is not production deployment evidence.
+
+### 8.4 Final owner confirmation: not yet attestable
+
+The repository and screenshots do not allow the assistant to make an owner attestation on the user's behalf. The owner must explicitly confirm the completeness of the external-provider list and any services used outside this repository.
+
+Required owner response:
+- Confirm whether GitHub, GitHub Actions, Backblaze B2 and Firebase Authentication are the only services currently used for this platform/project.
+- Confirm whether a production PostgreSQL host, domain/DNS provider, email/SMS provider, CDN/WAF, monitoring/alerting provider, payment provider, or any other API/object storage exists.
+- If any exist, identify provider and environment only; do not provide secrets.
+- Confirm whether the Firebase “2 service accounts” link has been opened and the second identity identified, or authorize leaving the discrepancy explicitly unresolved.
+
+Until the owner supplies this attestation and the unresolved technical evidence is collected, **Inventory status remains INCOMPLETE**. This is a deliberate evidence gate, not a failed implementation.
+
+### 8.5 No-change statement
+
+During this follow-up:
+- No Firebase billing upgrade was made.
+- No Firebase product was activated.
+- No service account or key was created, deleted, disabled or rotated.
+- No IAM role or policy was modified.
+- No production database, DNS, deployment or external provider configuration was changed.
