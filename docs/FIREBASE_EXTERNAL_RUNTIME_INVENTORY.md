@@ -456,3 +456,35 @@ The result table provides a **View Binding** action on each row. Next inspect a 
 Do not remove or edit the binding. The purpose is to establish exact scope and membership before any security recommendation. After this, inspect the Firebase Authentication Admin binding similarly if needed.
 
 Updated disposition: **Policy Analyzer query completed; all three role names observed among 219 permission rows; binding-scope and condition review still pending.** This is not a completed effective-access or least-privilege audit.
+
+
+## 13. Service Account Token Creator binding details — owner screenshot reviewed (2026-11-12)
+
+The owner opened **View binding** for the Policy Analyzer result row whose role was **Service Account Token Creator**.
+
+The visible Policy binding details panel shows:
+- Resource/header: **Binding for** `firebase-adminsdk-fbsvc@multilingual-learning-52e24.iam.gserviceaccount.com`.
+- Role: `roles/iam.serviceAccountTokenCreator`.
+- Member: `serviceAccount:firebase-adminsdk-fbsvc@multilingual-learning-52e24.iam.gserviceaccount.com`.
+- No `condition` field is visible in the displayed binding JSON.
+
+Evidence-bounded interpretation:
+- This is a binding on the Firebase Admin SDK service-account resource, and the only member shown is the same service account. It is therefore a **self-binding** in the displayed resource-level policy, not evidence that another principal has Token Creator on this service account.
+- The screenshot does not show any additional members in this binding.
+- No condition is shown in the visible JSON. This is not a complete review of conditions or inherited grants elsewhere in the project/organization.
+- The role's presence means the service account is granted the Token Creator role on itself in this resource policy. Do not overstate this as proof that an external principal can impersonate it, or as proof of exploitable privilege escalation. The exact operational necessity and Google-managed setup behavior still need validation against the Firebase Admin SDK service-agent lifecycle and audit logs.
+- No policy, binding, role, service account or key was modified.
+
+Updated status:
+| Check | Result |
+|---|---|
+| Token Creator binding resource | Firebase Admin SDK service-account resource |
+| Binding member | Same Firebase Admin SDK service account (self-binding) |
+| Additional members shown | None in supplied JSON |
+| IAM condition | No condition field visible in supplied JSON |
+| External impersonation by another principal | Not established by this binding screenshot |
+| Security disposition | Record as self-binding; retain pending Google-managed dependency validation; no change |
+
+### 13.1 Next binding review
+
+Inspect **Firebase Authentication Admin** using its **View Binding** action in the Policy Analyzer results. Capture the binding details showing the resource/header, role, members and any condition. Do not edit the binding. The Firebase Admin SDK Administrator Service Agent binding can be reviewed afterward if needed.
