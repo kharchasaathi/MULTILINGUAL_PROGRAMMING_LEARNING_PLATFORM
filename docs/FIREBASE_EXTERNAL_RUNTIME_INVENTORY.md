@@ -423,3 +423,36 @@ Updated status:
 | Firebase “2 service accounts” label | Still unresolved; requires explanation from exact Firebase-linked account listing or Google Cloud inventory/API evidence |
 
 Next technical check: obtain the Firebase-linked service-account listing in a way that exposes its actual entries (for example, desktop browser/full-page view or a project-scoped service-account inventory export). Do not ask the owner to share private keys, JSON credentials, access tokens or secrets. If the Firebase label continues to resolve to the same IAM page, record the discrepancy as unresolved rather than repeatedly navigating to that page.
+
+
+## 12. Policy Analyzer custom query — three role permission rows observed (2026-11-12)
+
+Owner supplied screenshots of a Google Cloud IAM Policy Analyzer custom query with:
+- Scope: project **Multilingual Learning**.
+- Principal: `firebase-adminsdk-fbsvc@multilingual-learning-52e24.iam.gserviceaccount.com`.
+- Advanced option: **List permissions inside roles** enabled.
+- Query completed and displayed **219 result rows**, paginated as 1–50, 51–100, 101–150, 151–200 and 201–219.
+
+Across the supplied page screenshots, the Role column visibly contains all three role names already identified in Project IAM:
+1. Firebase Admin SDK Administrator Service Agent
+2. Firebase Authentication Admin
+3. Service Account Token Creator
+
+Interpretation and limits:
+- The 219 figure is the number of permission/result rows returned by this query, not 219 separate roles or 219 independent principals.
+- The screenshots establish that Policy Analyzer expanded permission entries for all three role names for the selected principal within the selected project scope.
+- The screenshots are not sufficiently legible to transcribe every permission identifier reliably. Do not infer or publish a complete permission list from these images.
+- This query alone does not establish whether every listed permission is exercised by application code, nor does it prove absence of inherited/conditional/deny effects beyond the query's displayed scope and analysis semantics.
+- No IAM role, binding, service account or key was modified during this query.
+
+### 12.1 Required follow-up: inspect binding details
+
+The result table provides a **View Binding** action on each row. Next inspect a row whose Role is **Service Account Token Creator**, and capture the binding detail panel/page showing:
+- the resource/project on which the binding exists;
+- all principals/members in the binding;
+- any IAM condition;
+- whether the selected service account is a member of its own service-account-level binding or whether this is only a project-level grant.
+
+Do not remove or edit the binding. The purpose is to establish exact scope and membership before any security recommendation. After this, inspect the Firebase Authentication Admin binding similarly if needed.
+
+Updated disposition: **Policy Analyzer query completed; all three role names observed among 219 permission rows; binding-scope and condition review still pending.** This is not a completed effective-access or least-privilege audit.
