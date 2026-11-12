@@ -44,6 +44,7 @@ if pg_lsclusters --no-header | awk -v v="$PG_VERSION" -v c="$PG_CLUSTER" '$1==v 
 fi
 pg_createcluster "$PG_VERSION" "$PG_CLUSTER" --start
 
+install -d -o root -g postgres -m 0750 "$(dirname "$PGBR_CONF")"
 install -d -o postgres -g postgres -m 0750 "$REPO" "$LOG_DIR" "$SPOOL_DIR"
 install -d -o postgres -g postgres -m 0750 "$SOCKET_DIR"
 cat > "$PGBR_CONF" <<EOF
