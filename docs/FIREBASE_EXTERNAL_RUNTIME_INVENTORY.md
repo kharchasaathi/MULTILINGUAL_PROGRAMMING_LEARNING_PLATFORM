@@ -346,3 +346,30 @@ During this follow-up:
 - No service account or key was created, deleted, disabled or rotated.
 - No IAM role or policy was modified.
 - No production database, DNS, deployment or external provider configuration was changed.
+
+## 9. Owner confirmation — external provider scope (2026-11-12)
+
+**Owner confirmation received:** The owner confirms that the services currently used for this project are limited to:
+- GitHub — source control
+- GitHub Actions — CI/test execution
+- Backblaze B2 — E13 backup test target
+- Firebase Authentication — identity provider
+
+The owner confirms that no other external providers are currently used for this project, including a production PostgreSQL host, DNS/domain provider, CDN/WAF, transactional email/SMS provider, monitoring/alerting provider, payment/finance API, or additional object-storage/API provider.
+
+Scope qualification:
+- PostgreSQL 16 exists only as a disposable CI test runtime in the evidence reviewed; no production PostgreSQL host is currently used/identified.
+- Backblaze B2 is used as an E13 backup test target; this confirmation does not assert that production database backups are active.
+- Firebase Authentication is currently used; other Firebase products are not assumed active merely because they appear in the console.
+
+**Owner confirmation status: COMPLETE for the currently used external-provider list.**
+
+### 9.1 Overall inventory disposition
+
+Owner provider-scope confirmation is complete, and the provider list is now bounded to the four services above. The overall Firebase / External Runtime Inventory remains **INCOMPLETE** because two technical evidence gates remain:
+1. The Firebase “2 service accounts” label versus one visible Google Cloud Service Accounts row remains unresolved.
+2. Full effective IAM permissions (including inherited grants, conditions, deny policies and policy analyzer results) have not been verified.
+
+Additionally, Firebase products not evidenced as active (App Hosting, FCM, Analytics, Crashlytics and Performance Monitoring) remain recorded as not evidenced, not as confirmed disabled.
+
+No service, billing plan, IAM role, key, database, domain or runtime configuration was changed as part of this owner confirmation.
