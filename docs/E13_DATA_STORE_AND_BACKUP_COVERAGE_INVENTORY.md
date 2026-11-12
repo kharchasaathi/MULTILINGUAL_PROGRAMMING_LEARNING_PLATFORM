@@ -71,7 +71,7 @@ The normalized, machine-readable inventory is maintained in `docs/E13_AUTHORITAT
 
 The register deliberately separates:
 - PostgreSQL application records (planned system of record; not deployed);
-- identity-provider credentials/session state (provider not selected; Firebase Authentication console configuration is not proof of runtime adoption);
+- identity-provider credentials/session state (Firebase Authentication selected as the initial provider in D6; console configuration is not proof of runtime adoption);
 - product asset bytes (object-storage provider undecided) from the E13 B2 backup-artifact bucket;
 - source code and architecture evidence in GitHub from live business data;
 - authoritative audit/outbox/inbox/financial/progress records from logs, caches, indexes and other derived systems;
@@ -127,10 +127,20 @@ These are accountable role assignments, not named-person assignments. Named owne
 
 ### 8.4 Required owner confirmations to close Task 01
 
-1. Is Firebase Authentication intended to be the production identity provider, or was it only a console experiment? If production, confirm whether any real user accounts already exist.
+1. Firebase Authentication is now the selected initial identity adapter under D6. Before connecting it to a production app, inspect whether the Firebase project contains real accounts and preserve any existing identity data.
 2. Is PostgreSQL still the approved authoritative application database, with no existing live production database or alternate authoritative data store?
 3. Is Backblaze B2 used only for E13 backup artifacts today, with no learner uploads/media stored there or in another provider?
 4. Are there any connected providers, local servers, cloud projects, databases, buckets, queues, analytics, monitoring, payment, email/SMS or AI services not visible in this repository inventory?
 5. Confirm the role-level ownership map or provide the correct accountable owner roles where different.
 
 Do not provide credentials, API keys, OAuth secrets, passwords or recovery codes in chat. Provider names, whether a service is used, and non-secret configuration facts are sufficient.
+
+## 9. Identity-provider architecture decision — Firebase Authentication
+
+D6 now selects Firebase Authentication as the initial managed identity provider while retaining the provider-neutral NestJS adapter boundary. PostgreSQL remains the authoritative application database and stores internal principal IDs, exact issuer/subject links, learner/application records, roles and permissions. Firebase Authentication manages authentication credentials and supported sign-in/recovery mechanisms only.
+
+This decision does not select Firestore, Realtime Database, Firebase Storage, Firebase Hosting or Firebase App Hosting, and does not authorize a Firebase Blaze upgrade. It does not prove that the current Firebase project is already integrated or contains no users.
+
+Before implementation, inspect the existing Firebase project/account inventory without deleting or overwriting data; validate project ID, authorized domains and redirect origins; complete E4/E7 web and native session/security review; protect Admin SDK credentials in a managed secret facility; and test issuer/audience/signature/expiry validation, UID mapping, account linking, revocation and recovery. Never share secrets in chat or commit them to Git.
+
+Task 01 remains IN PROGRESS because external runtime discovery, existing Firebase account inventory and role-owner confirmation are outstanding. The identity provider choice itself is no longer an open question.
