@@ -794,3 +794,13 @@ E3 milestone recorded in E3 artifacts.
 - Verification catalogue BKP-T023 is now marked passed for this tested relational fixture. This does not establish full production schema integrity, all application constraints, schema migration compatibility, physical pgBackRest/WAL/PITR, or a production DR drill.
 - The separate B2 contract run 43173829200 also passed; it exercises mocked AWS CLI contracts and does not contact B2.
 - **E13 remains IN PROGRESS; E14 remains BLOCKED.**
+
+
+## E13 restore safety negative-test regression — 2026-11-12
+
+- **PASS:** GitHub Actions run 43174271808 completed all three jobs successfully: `mocked-tests`, `s3-publisher-contract`, and `postgres-age-integration`.
+- The mocked restore utility suite now verifies rejection of the PostgreSQL system databases `postgres`, `template0` and `template1`, missing age identity, and a simulated age decryption failure. The earlier test-double defect that did not correctly simulate decryption failure was fixed before this passing run.
+- The PostgreSQL 16 + age integration job also passed its encrypted logical backup/restore round trip. The S3-named publisher/operations job passed mocked contracts only; it does not contact AWS or B2.
+- Verification catalogue BKP-T014–T016 are recorded as passed for their utility-level negative tests. BKP-T017 records the simulated decryption-failure test as passed while explicitly retaining real cryptographic failure-path integration as pending.
+- Evidence boundary: this run does not validate production data, physical pgBackRest, WAL archiving/PITR, live B2 transfer, production alert delivery, key escrow/rotation, E11/E12 runtime restore hooks, RPO/RTO, or a DR drill.
+- **E13 remains IN PROGRESS; E14 remains BLOCKED.** No cloud resource, paid plan, key, or production configuration was changed.
