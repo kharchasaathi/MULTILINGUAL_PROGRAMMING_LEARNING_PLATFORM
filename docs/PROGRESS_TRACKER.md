@@ -776,3 +776,12 @@ E3 milestone recorded in E3 artifacts.
 
 
 - 2026-11-12: Added `docs/E13_TASK01_RUNTIME_DISCOVERY_EVIDENCE_PACK.md` with read-only cloud/local runtime discovery scope, safe evidence handling, owner confirmation outcomes and objective Task 01 closure criteria. No credentials requested; no cloud resource changed. Task 01 remains IN PROGRESS pending external evidence.
+
+
+## E13 CI regression evidence — PostgreSQL 16 encrypted backup/restore (2026-11-12)
+
+- **PASS:** GitHub Actions run 43173458385 completed all three jobs successfully: `mocked-tests`, `s3-publisher-contract`, and `postgres-age-integration`.
+- PostgreSQL integration ran against a disposable PostgreSQL 16 service with matching PostgreSQL 16 client tools; age-encrypted logical backup, checksum verification, isolated restore to a separate database, and restored probe-row equality all passed.
+- This is repeatable CI evidence for the logical backup/restore utility only. It is not a production database backup, physical pgBackRest base backup, WAL archive, PITR, live B2 database artifact, or disaster-recovery drill. Foreign-key-specific assertions, failure-path cases and broader restore compatibility remain open.
+- The S3-named job uses mocked AWS CLI contracts and no AWS credentials; it is not an active AWS storage path. Backblaze B2 remains the selected off-site destination. B2 publisher/verifier mock scenarios BKP-T043–T045 are recorded as passed in B2 contract CI run 43172892301; those tests do not contact B2.
+- **E13 remains IN PROGRESS; E14 remains BLOCKED.** Production pgBackRest/WAL/PITR, key custody/escrow, live monitoring/alerts, E11/E12 integrations, approved RPO/RTO, isolated restore drills, runtime discovery and owner approvals are still mandatory outstanding gates.
