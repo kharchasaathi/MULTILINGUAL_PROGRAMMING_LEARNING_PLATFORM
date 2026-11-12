@@ -6,6 +6,16 @@
 
 ## 1. Executive status
 
+### Cloud Functions for Firebase — owner screenshot reviewed
+
+- Functions console shows an “Upgrade project” prompt and explicitly states that Functions requires a billing account (Blaze).
+- Current project tier shown: Spark (no-cost). No deployed Functions are evidenced in this console view.
+- No Blaze upgrade or function deployment was performed during this review.
+- Any future Blaze upgrade or deployment requires separate explicit approval after cost, region, runtime, IAM and security review. Do not upgrade solely to complete this inventory.
+- Screenshot evidence received in chat on 2026-11-12.
+
+
+
 ### Firebase Hosting — owner screenshot reviewed
 
 - Hosting console shows the initial “Get started” screen; no Hosting site is evidenced as provisioned in this project view.
