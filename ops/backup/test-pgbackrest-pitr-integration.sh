@@ -104,7 +104,7 @@ runuser -u postgres -- pgbackrest --config="$PGBR_CONF" --stanza=platform \
   --target-action=promote restore
 
 # Start the recovered cluster on a separate port/socket; do not reconnect to production.
-runuser -u postgres -- pg_ctl -D "$RECOVERY_DATA" \
+runuser -u postgres -- "$PG_CTL" -D "$RECOVERY_DATA" \
   -o "-p $RECOVERY_PORT -k $SOCKET_DIR -c archive_mode=off -c listen_addresses=''" \
   -l "$RECOVERY_DATA/e13-recovery.log" start
 
