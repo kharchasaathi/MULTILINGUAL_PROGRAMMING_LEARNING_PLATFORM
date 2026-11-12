@@ -764,3 +764,12 @@ E3 milestone recorded in E3 artifacts.
 - **Implementation status:** Architecture decision only. No Firebase app integration, user migration, production auth code, Firestore/Storage provisioning or billing upgrade performed.
 - **Next identity action:** Safely inspect the current Firebase project for existing accounts and non-secret project configuration before linking it to application runtime. Do not delete or overwrite existing identities.
 - E13 Task 01 remains IN PROGRESS until external runtime discovery and named/role owner confirmations are complete; E13 overall remains IN PROGRESS and E14 remains BLOCKED.
+
+## E13 Task 01 reconciliation update (2026-11-12)
+
+- Reconciled the full D4 relational entity matrix against the authoritative E13 data-store register.
+- Added `docs/E13_D4_ENTITY_TO_BACKUP_DOMAIN_CROSSWALK.csv`: all 39 D4 entities map to an existing E13 backup domain (39/39; no unmapped or extra entities in the crosswalk).
+- Confirmed D4 `asset_object` represents metadata only; object bytes remain a distinct external storage domain (DS-011). D3 Projects/Playground artifacts remain represented in DS-024.
+- Corrected DS-002 so PostgreSQL identity principals/external links are marked `PLANNED_NOT_DEPLOYED`, and Firebase Authentication is recorded separately as the selected initial identity provider (DS-003). The stale question asking whether Firebase Auth is production or experiment has been removed; runtime account discovery remains open.
+- Updated BKP-001 with entity-level reconciliation evidence.
+- **Task 01 remains IN PROGRESS**: 39/39 entity mapping and repository-level inventory are complete; external cloud/local runtime discovery, existing Firebase account inventory, named accountable owners and owner sign-off remain unverified. No production infrastructure was changed.
