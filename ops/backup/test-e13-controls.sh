@@ -8,6 +8,9 @@ cat > "$tmp/bin/pgbackrest" <<'MOCK'
 #!/usr/bin/env bash
 set -Eeuo pipefail
 printf '%s\n' "$*" >> "$PGBR_LOG"
+if [[ "${MOCK_FAIL_BACKUP:-0}" == 1 && " $* " == *" backup "* ]]; then
+  exit 42
+fi
 MOCK
 chmod +x "$tmp/bin/pgbackrest"
 export PATH="$tmp/bin:$PATH" PGBR_LOG="$tmp/pgbackrest.log"
@@ -15,7 +18,15 @@ export PGBACKREST_HEALTH_DIR="$tmp/health"
 PGBACKREST_BACKUP_TYPE=full bash "$ROOT/run-pgbackrest-backup.sh"
 grep -q -- '--type=full backup' "$PGBR_LOG"
 [[ -s "$PGBACKREST_HEALTH_DIR/last-successful-backup" ]]
-BACKUP_MAX_AGE_HOURS=30 bash "$ROOT/check-backup-freshness.sh"
+# A failed backup must not advance the last-successful marker.
+printf '2026-01-01T00:00:00Z\n' > "$PGBACKREST_HEALTH_DIR/last-successful-backup"
+if MOCK_FAIL_BACKUP=1 PGBACKREST_BACKUP_TYPE=diff bash "$ROOT/run-pgbackrest-backup.sh"; then
+  echo "Failed backup unexpectedly passed" >&2; exit 1
+fi
+[[ "$(cat "$PGBACKREST_HEALTH_DIR/last-successful-backup")" == "2026-01-01T00:00:00Z" ]]
+BACKUP_MAX_AGE_HOURS=30 bash "$ROOT/check-backup-freshness.sh" && {
+  echo "Stale marker unexpectedly passed" >&2; exit 1;
+} || [[ $? -eq 1 ]]
 # A missing marker must fail closed.
 rm "$PGBACKREST_HEALTH_DIR/last-successful-backup"
 if BACKUP_MAX_AGE_HOURS=30 bash "$ROOT/check-backup-freshness.sh"; then
