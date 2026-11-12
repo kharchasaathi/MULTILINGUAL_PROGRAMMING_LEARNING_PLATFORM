@@ -804,3 +804,11 @@ E3 milestone recorded in E3 artifacts.
 - Verification catalogue BKP-T014–T016 are recorded as passed for their utility-level negative tests. BKP-T017 records the simulated decryption-failure test as passed while explicitly retaining real cryptographic failure-path integration as pending.
 - Evidence boundary: this run does not validate production data, physical pgBackRest, WAL archiving/PITR, live B2 transfer, production alert delivery, key escrow/rotation, E11/E12 runtime restore hooks, RPO/RTO, or a DR drill.
 - **E13 remains IN PROGRESS; E14 remains BLOCKED.** No cloud resource, paid plan, key, or production configuration was changed.
+
+## E13 restore-target safety hardening and CI evidence (2026-11-12)
+
+- Hardened `ops/backup/restore-postgres.sh`: before invoking `pg_restore`, the utility independently queries the selected target and refuses restore if user objects/large objects are present or if emptiness cannot be verified. The existing explicit confirmation and isolated-target attestation remain required; no `--clean`/drop behavior was introduced.
+- Added utility-level negative coverage for non-empty target and target-inspection failure.
+- Extended the disposable PostgreSQL 16 integration test to create a pre-existing table in an isolated recovery database and prove the restore utility rejects it, then restore successfully into a separate empty recovery database and verify restored rows and foreign-key integrity.
+- CI run [43176300373](https://github.com/kharchasaathi/MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM/actions/runs/43176300373): all 3 jobs passed — mocked security/utility tests, real PostgreSQL 16 + age encrypted backup/restore integration, and mocked publisher/recovery-gate contract tests.
+- Evidence boundary: PostgreSQL service was disposable CI infrastructure; publisher tests are mocked. This does not validate the production database, live pgBackRest/B2 WAL archiving, PITR, immutable retention, replication, alert delivery, key escrow, E11/E12 runtime hooks or a production DR drill.
