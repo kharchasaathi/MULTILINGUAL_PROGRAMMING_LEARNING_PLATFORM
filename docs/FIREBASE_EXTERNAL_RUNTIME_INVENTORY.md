@@ -392,3 +392,34 @@ Security interpretation:
 - This review checked official role definitions, not the project's effective permission evaluation. It does not replace IAM Policy Analyzer, inherited-policy review, IAM Conditions/Deny analysis, or audit-log review.
 
 Disposition: ROLE DEFINITIONS REVIEWED; EFFECTIVE IAM AUDIT REMAINS PENDING.
+
+## 11. Google Cloud Service Accounts list — follow-up screenshot reviewed (2026-11-12)
+
+A direct screenshot of **Google Cloud → IAM & Admin → Service Accounts** was supplied after navigating from the Firebase Project Settings “2 service accounts” link.
+
+Observed in the Service Accounts table:
+- Exactly one visible row is shown, with no visible additional rows on the captured page.
+- Email: `firebase-adminsdk-fbsvc@multilingual-learning-52e24.iam.gserviceaccount.com`.
+- Name: `firebase-adminsdk`.
+- Description: `Firebase Admin SDK Service Agent`.
+- Status: **Enabled**.
+- Key ID column: **No keys**.
+- The screenshot does not show an active filter or pagination controls indicating additional rows, but a single screenshot cannot prove there are no identities in another project, organization scope, or a different filtered view.
+
+Reconciliation:
+- This confirms that the Google Cloud Service Accounts list displayed **one visible service-account row** in the supplied project view.
+- The Firebase Project Settings label “2 service accounts” remains unexplained. It must not be reinterpreted as two rows in the Google Cloud list.
+- Project IAM’s two principals remain one human owner plus one service account; that principal count is not a service-account count.
+- No second service account has been identified from the available screenshots. Do not state categorically that no second account exists.
+- No service account was created, deleted, disabled or modified. No key was created or rotated.
+
+Updated status:
+| Check | Evidence-based result |
+|---|---|
+| Google Cloud Service Accounts list | 1 visible row in supplied screenshot |
+| Listed identity | Firebase Admin SDK service account |
+| Status | Enabled |
+| User-managed keys | No keys shown |
+| Firebase “2 service accounts” label | Still unresolved; requires explanation from exact Firebase-linked account listing or Google Cloud inventory/API evidence |
+
+Next technical check: obtain the Firebase-linked service-account listing in a way that exposes its actual entries (for example, desktop browser/full-page view or a project-scoped service-account inventory export). Do not ask the owner to share private keys, JSON credentials, access tokens or secrets. If the Firebase label continues to resolve to the same IAM page, record the discrepancy as unresolved rather than repeatedly navigating to that page.
