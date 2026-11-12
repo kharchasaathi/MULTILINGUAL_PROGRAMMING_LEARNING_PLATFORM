@@ -27,6 +27,9 @@ while (($#)); do
   esac
 done
 [[ -n "$out" && -n "$source" ]]
+if [[ "${MOCK_AGE_FAIL:-0}" == 1 && " $* " == *" --decrypt "* ]]; then
+  exit 9
+fi
 cp -- "$source" "$out"
 MOCK
 
@@ -68,5 +71,24 @@ if RESTORE_CONFIRM=YES RESTORE_TARGET_ISOLATED=NO bash "$root/ops/backup/restore
   exit 1
 fi
 export RESTORE_CONFIRM=YES RESTORE_TARGET_ISOLATED=YES
+
+# System databases must never be accepted as restore targets.
+for target in postgres template0 template1; do
+  if PGDATABASE="$target" bash "$root/ops/backup/restore-postgres.sh" "$artifact"; then
+    echo "System database target was incorrectly accepted: $target" >&2
+    exit 1
+  fi
+done
+
+# Missing identity and failed decryption must stop before pg_restore.
+if AGE_IDENTITY_FILE="$tmp/missing-identity" bash "$root/ops/backup/restore-postgres.sh" "$artifact"; then
+  echo "Missing age identity was incorrectly accepted" >&2
+  exit 1
+fi
+if MOCK_AGE_FAIL=1 bash "$root/ops/backup/restore-postgres.sh" "$artifact"; then
+  echo "Failed age decryption was incorrectly accepted" >&2
+  exit 1
+fi
+
 bash "$root/ops/backup/restore-postgres.sh" "$artifact"
-echo "Mock backup utility tests passed."
+echo "Mock backup utility tests passed, including system-database, missing-identity and decryption-failure guards."
