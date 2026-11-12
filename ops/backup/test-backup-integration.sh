@@ -13,7 +13,7 @@ for cmd in psql createdb dropdb age age-keygen; do
 done
 
 tmp="$(mktemp -d)"
-trap 'rm -rf "$tmp"; dropdb --maintenance-db=postgres --if-exists e13_source >/dev/null 2>&1 || true; dropdb --maintenance-db=postgres --if-exists e13_recovery >/dev/null 2>&1 || true' EXIT
+trap 'rm -rf "$tmp"; dropdb --maintenance-db=postgres --if-exists e13_source >/dev/null 2>&1 || true; dropdb --maintenance-db=postgres --if-exists e13_recovery >/dev/null 2>&1 || true; dropdb --maintenance-db=postgres --if-exists e13_nonempty >/dev/null 2>&1 || true' EXIT
 chmod 700 "$tmp"
 createdb --maintenance-db=postgres e13_source
 export PGDATABASE=e13_source
@@ -43,9 +43,18 @@ artifact="$(find "$BACKUP_DIR" -maxdepth 1 -type f -name '*.dump.age' -print -qu
 [[ -n "$artifact" ]]
 bash "$root/ops/backup/verify-backup.sh" "$artifact"
 
+# Prove the restore utility refuses an isolated-but-nonempty target.
+createdb --maintenance-db=postgres e13_nonempty
+psql -v ON_ERROR_STOP=1 -d e13_nonempty -c "CREATE TABLE preexisting_guard (id integer PRIMARY KEY)" >/dev/null
+export RESTORE_CONFIRM=YES RESTORE_TARGET_ISOLATED=YES PGDATABASE=e13_nonempty
+if bash "$root/ops/backup/restore-postgres.sh" "$artifact"; then
+  echo "Restore incorrectly accepted a nonempty recovery database" >&2
+  exit 1
+fi
+
 # Restore into a separately created empty database, never over the source.
 createdb --maintenance-db=postgres e13_recovery
-export PGDATABASE=e13_recovery RESTORE_CONFIRM=YES RESTORE_TARGET_ISOLATED=YES
+export PGDATABASE=e13_recovery
 bash "$root/ops/backup/restore-postgres.sh" "$artifact"
 actual="$(psql -v ON_ERROR_STOP=1 -At -d e13_recovery -c "SELECT string_agg(id::text || ':' || parent_id::text || ':' || payload, ',' ORDER BY id) FROM e13_recovery_probe")"
 expected='1:10:recovery-proof-alpha,2:20:recovery-proof-beta'
