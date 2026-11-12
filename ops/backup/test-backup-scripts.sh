@@ -97,6 +97,10 @@ if MOCK_AGE_FAIL=1 bash "$root/ops/backup/restore-postgres.sh" "$artifact"; then
   echo "Failed age decryption was incorrectly accepted" >&2
   exit 1
 fi
+if MOCK_PSQL_OBJECT_COUNT=1 bash "$root/ops/backup/restore-postgres.sh" "$artifact"; then
+  echo "Nonempty recovery target was incorrectly accepted" >&2
+  exit 1
+fi
 
 bash "$root/ops/backup/restore-postgres.sh" "$artifact"
 echo "Mock backup utility tests passed, including system-database, missing-identity and decryption-failure guards."
