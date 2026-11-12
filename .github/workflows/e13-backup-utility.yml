@@ -37,7 +37,14 @@ jobs:
       - name: Install age and PostgreSQL client
         run: |
           sudo apt-get update
-          sudo apt-get install --yes age postgresql-client
+          sudo apt-get install --yes age postgresql-client-16
+          echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"
+      - name: Verify PostgreSQL client major version matches service
+        run: |
+          pg_dump --version
+          pg_restore --version
+          pg_dump --version | grep -q ' 16\\.'
+          pg_restore --version | grep -q ' 16\\.'
       - name: Run real encrypted backup and restore round trip
         env:
           PGHOST: 127.0.0.1
