@@ -1,0 +1,34 @@
+name: Google Cloud OIDC Authentication Check
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - release/v1-frontend
+    paths:
+      - .github/workflows/oidc-auth-check.yml
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  authenticate:
+    name: Authenticate without service-account keys
+    runs-on: ubuntu-latest
+    steps:
+      - name: Authenticate to Google Cloud using GitHub OIDC
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: multilingual-learning-52e24
+          workload_identity_provider: projects/1061074380401/locations/global/workloadIdentityPools/github-actions-pool/providers/github
+          service_account: github-firebase-deployer@multilingual-learning-52e24.iam.gserviceaccount.com
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Verify short-lived access token
+        run: |
+          gcloud auth print-access-token >/dev/null
+          echo "OIDC authentication and service-account impersonation succeeded."
