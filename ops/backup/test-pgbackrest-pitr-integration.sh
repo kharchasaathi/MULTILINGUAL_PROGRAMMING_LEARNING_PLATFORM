@@ -24,13 +24,14 @@ RECOVERY_DATA="/var/lib/postgresql/${PG_VERSION}/e13-pitr-recovery"
 SOCKET_DIR="/var/run/postgresql-e13-recovery"
 RECOVERY_PORT=55432
 LOG_DIR="/var/log/pgbackrest"
+PG_CTL="/usr/lib/postgresql/16/bin/pg_ctl"
 SPOOL_DIR="/var/spool/pgbackrest"
 TARGET_TIME=""
 
 cleanup() {
   set +e
   if [[ -d "$RECOVERY_DATA" ]]; then
-    runuser -u postgres -- pg_ctl -D "$RECOVERY_DATA" -m immediate stop >/dev/null 2>&1
+    runuser -u postgres -- "$PG_CTL" -D "$RECOVERY_DATA" -m immediate stop >/dev/null 2>&1
   fi
   pg_ctlcluster "$PG_VERSION" "$PG_CLUSTER" stop >/dev/null 2>&1
   rm -rf "$RECOVERY_DATA" "$SOCKET_DIR" "$REPO"
@@ -126,6 +127,6 @@ after_count="$(runuser -u postgres -- psql -X -At -v ON_ERROR_STOP=1 -h "$SOCKET
 [[ "$before_count" == "1" ]] || { echo "Base-backup row missing after PITR" >&2; exit 1; }
 [[ "$after_count" == "0" ]] || { echo "Post-target transaction unexpectedly present after PITR" >&2; exit 1; }
 
-runuser -u postgres -- pg_ctl -D "$RECOVERY_DATA" -m fast stop
+runuser -u postgres -- "$PG_CTL" -D "$RECOVERY_DATA" -m fast stop
 echo "PASS: PostgreSQL 16 local pgBackRest full backup, WAL archiving and timestamp PITR restored to the requested boundary."
 echo "LIMITATION: local POSIX repository only; no B2 connectivity, production data, key custody, alert delivery or owner-approved RPO/RTO was tested."
