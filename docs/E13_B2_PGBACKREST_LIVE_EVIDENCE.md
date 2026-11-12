@@ -38,7 +38,9 @@ The tested script at commit `1c643a12b00b8579a26524a071f23d8bd3ed475d` set `repo
 
 This did **not** use the `postgres/` prefix and did not target the logical-dump writer's namespace. However, the earlier statement that no remote deletion occurred was inaccurate: one test-prefix WAL object was expired.
 
-Corrective change committed as `b15b27c3e9b25bca9c852bc3ed246412f8b44dff`: removed `repo1-retention-full=1` from the live-test script and documented that no repository retention is configured in this test. This prevents the backup command from automatically invoking retention-based expiration. **The correction has not yet been validated by a new live B2 run.** Do not claim the no-expiration safeguard is proven until that run completes and its logs are checked.
+Run #3 [43205848796](https://github.com/kharchasaathi/MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM/actions/runs/43205848796) tested the script after removing `repo1-retention-full=1`. The run passed backup and PITR, and the expire log explicitly stated that archive logs would not be expired. However, pgBackRest still invoked its default automatic `expire` command after backup. No object deletion was shown in this run, but the requirement that automatic expiration not run was therefore **not** met.
+
+Corrective change committed as `c04efabb2cc46b1f95e3ce2f3c8a90f44dfde607`: the backup invocation now explicitly includes `--no-expire-auto`. The official pgBackRest command reference documents that automatic expiration is enabled by default and that `--no-expire-auto` disables it. This new change is **not yet live-tested**. A fresh B2 run must confirm the backup and PITR still pass and that no `expire command begin` appears after backup.
 
 No cleanup command in the script removes remote objects. The ephemeral runner removes only its local recovery directory and socket.
 
