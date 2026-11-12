@@ -18,16 +18,18 @@ cat > "$tmp/bin/age" <<'MOCK'
 set -Eeuo pipefail
 out=''
 source=''
+decrypt=0
 while (($#)); do
   case "$1" in
     --output) out="$2"; shift 2 ;;
-    --encrypt|--decrypt) shift ;;
+    --encrypt) shift ;;
+    --decrypt) decrypt=1; shift ;;
     --recipient|--identity) shift 2 ;;
     *) source="$1"; shift ;;
   esac
 done
 [[ -n "$out" && -n "$source" ]]
-if [[ "${MOCK_AGE_FAIL:-0}" == 1 && " $* " == *" --decrypt "* ]]; then
+if [[ "${MOCK_AGE_FAIL:-0}" == 1 && "$decrypt" == 1 ]]; then
   exit 9
 fi
 cp -- "$source" "$out"
