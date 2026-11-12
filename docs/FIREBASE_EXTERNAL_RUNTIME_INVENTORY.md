@@ -6,15 +6,27 @@
 
 ## 1. Executive status
 
+### Firebase project identity — owner screenshot reviewed
+
+- Project display name: `Multilingual Learning`.
+- Firebase Project ID: `multilingual-learning-52e24`.
+- Environment type in console: `Unspecified` (owner has not classified it as development, staging, or production).
+- One registered Web App is visible: nickname `multilingual-learning-web`.
+- The Web App panel displays a `Link to a Firebase Hosting site` action. This indicates this Web App is not currently shown as linked to a Hosting site in this panel; it does **not** prove that Firebase Hosting is disabled or that no Hosting site exists.
+- The screenshot does not establish Authentication providers, database instances, Storage buckets, deployed Functions, or actual production traffic.
+- Screenshot evidence received in chat on 2026-11-12. Support-account email and other unnecessary personal details are intentionally not copied into this inventory.
+
+
+
 The currently inspected `main` branch contains the E13 backup workflows and evidence, but no Firebase application configuration, deployment manifest, Firebase project inventory, or production runtime deployment evidence. Therefore this inventory cannot truthfully declare Firebase or the production external runtime fully verified yet.
 
 | Component | Current evidence-based status | What is known | What remains to verify |
 |---|---|---|---|
-| Firebase Authentication | SELECTED / DEPLOYMENT UNVERIFIED | Previously selected as the initial managed identity provider | Firebase project ID, enabled providers, tenant/account inventory, MFA, authorized domains, runtime integration |
+| Firebase Authentication | CONSOLE PRODUCT SHORTCUT VISIBLE; CONFIGURATION UNVERIFIED | Authentication appears in project shortcuts | Open Authentication and verify whether it is initialized, providers, authorized domains, MFA and aggregate user count |
 | Cloud Firestore | NOT EVIDENCED | No deployed database evidence in inspected branch | Whether enabled; project/region; collections; rules; indexes; backups; data classification |
 | Realtime Database | NOT EVIDENCED | No deployed database evidence in inspected branch | Whether enabled; instance/region; rules; data flows |
 | Cloud Storage for Firebase | NOT EVIDENCED | No deployed bucket/runtime evidence in inspected branch | Whether enabled; bucket/region; rules; lifecycle; object inventory; billing plan |
-| Firebase Hosting | NOT EVIDENCED | No deployed Hosting target evidence in inspected branch | Whether enabled; sites/domains; deploy workflow; headers/rewrites; rollback |
+| Firebase Hosting | LINKAGE NOT SHOWN FOR THE REGISTERED WEB APP; PRODUCT STATUS UNKNOWN | General settings shows a “Link to a Firebase Hosting site” action for the web app | Inspect Hosting product directly for sites, domains and deployments; do not infer Hosting is disabled |
 | Firebase App Hosting | NOT EVIDENCED | No deployment evidence | Whether enabled; backend/region; connected repository and build identity |
 | Firebase Cloud Functions | NOT EVIDENCED | No function deployment evidence | Whether enabled; functions/regions/runtime/service accounts/secrets |
 | Firebase Cloud Messaging | NOT EVIDENCED | No push integration evidence | Whether enabled; sender/project configuration; token handling |
