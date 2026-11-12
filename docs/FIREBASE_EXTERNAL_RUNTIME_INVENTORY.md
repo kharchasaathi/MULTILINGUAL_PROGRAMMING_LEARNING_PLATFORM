@@ -6,6 +6,18 @@
 
 ## 1. Executive status
 
+### Firebase Web App registration and repository comparison — reviewed
+
+- Firebase Console shows one registered Web App with nickname `multilingual-learning-web` under project `multilingual-learning-52e24`.
+- The Web App ID is visible in the owner screenshot; no API key or SDK config values were copied into this inventory.
+- The SDK setup panel offers npm, CDN and Config setup choices; npm is selected in the screenshot. This is setup guidance, not proof that the SDK is installed or initialized in the application.
+- The console shows a “Link to a Firebase Hosting site” action. Hosting linkage/deployment is not evidenced by this view.
+- Repository inspection of the `main` branch found only 13 tracked tree entries, with no application source tree, package manifest, Firebase SDK initialization/configuration, or deployed app code to compare. GitHub code searches for `firebase initializeApp`, `firebaseConfig`, and `getAuth initializeApp` returned no matches.
+- Therefore Web App registration is verified, but SDK/runtime integration remains **UNVERIFIED / NOT PRESENT IN INSPECTED REPOSITORY**. This does not prove the app is not hosted elsewhere; it means no evidence is present in this repository snapshot.
+- Screenshot and repository evidence reviewed on 2026-11-12.
+
+
+
 ### Firebase App Check — owner screenshot reviewed
 
 - App Check console shows the initial “Get started” screen.
