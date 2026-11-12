@@ -91,6 +91,7 @@ runuser -u postgres -- pgbackrest --config="$PGBR_CONF" --stanza=platform check
 runuser -u postgres -- pgbackrest --config="$PGBR_CONF" --stanza=platform --type=full backup
 
 # Select a recovery target after the base backup, then create a later transaction.
+sleep 2 # Ensure the second-resolution target is strictly later than the backup stop time.
 TARGET_TIME="$(date -u '+%Y-%m-%d %H:%M:%S+00')"
 sleep 3
 psql_as_postgres -c "INSERT INTO e13_pitr_probe(event) VALUES ('after-pitr-target');"
