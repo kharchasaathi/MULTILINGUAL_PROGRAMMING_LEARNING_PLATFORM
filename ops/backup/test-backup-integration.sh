@@ -18,11 +18,18 @@ chmod 700 "$tmp"
 createdb --maintenance-db=postgres e13_source
 export PGDATABASE=e13_source
 psql -v ON_ERROR_STOP=1 -d e13_source <<'SQL'
+CREATE TABLE e13_recovery_parent (
+  id bigint PRIMARY KEY
+);
 CREATE TABLE e13_recovery_probe (
   id bigint PRIMARY KEY,
+  parent_id bigint NOT NULL REFERENCES e13_recovery_parent(id),
   payload text NOT NULL
 );
-INSERT INTO e13_recovery_probe VALUES (1, 'recovery-proof-alpha'), (2, 'recovery-proof-beta');
+INSERT INTO e13_recovery_parent VALUES (10), (20);
+INSERT INTO e13_recovery_probe VALUES
+  (1, 10, 'recovery-proof-alpha'),
+  (2, 20, 'recovery-proof-beta');
 SQL
 
 age-keygen -o "$tmp/age-identity.txt" 2>"$tmp/age-keygen.log"
@@ -40,10 +47,19 @@ bash "$root/ops/backup/verify-backup.sh" "$artifact"
 createdb --maintenance-db=postgres e13_recovery
 export PGDATABASE=e13_recovery RESTORE_CONFIRM=YES RESTORE_TARGET_ISOLATED=YES
 bash "$root/ops/backup/restore-postgres.sh" "$artifact"
-actual="$(psql -v ON_ERROR_STOP=1 -At -d e13_recovery -c "SELECT string_agg(id::text || ':' || payload, ',' ORDER BY id) FROM e13_recovery_probe")"
-expected='1:recovery-proof-alpha,2:recovery-proof-beta'
+actual="$(psql -v ON_ERROR_STOP=1 -At -d e13_recovery -c "SELECT string_agg(id::text || ':' || parent_id::text || ':' || payload, ',' ORDER BY id) FROM e13_recovery_probe")"
+expected='1:10:recovery-proof-alpha,2:20:recovery-proof-beta'
 [[ "$actual" == "$expected" ]] || {
   echo "Restored row verification failed: $actual" >&2
   exit 1
 }
-echo "Real PostgreSQL + age backup/restore integration test passed."
+fk_valid="$(psql -v ON_ERROR_STOP=1 -At -d e13_recovery -c "SELECT convalidated FROM pg_constraint WHERE conname = 'e13_recovery_probe_parent_id_fkey' AND contype = 'f'")"
+[[ "$fk_valid" == "t" ]] || {
+  echo "Restored foreign-key constraint is missing or not validated" >&2
+  exit 1
+}
+if psql -v ON_ERROR_STOP=1 -d e13_recovery -c "INSERT INTO e13_recovery_probe VALUES (3, 999, 'must-fail')" >/dev/null 2>&1; then
+  echo "Restored foreign-key constraint accepted an invalid parent reference" >&2
+  exit 1
+fi
+echo "Real PostgreSQL + age backup/restore integration test passed, including foreign-key integrity."
