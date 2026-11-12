@@ -1,6 +1,7 @@
 name: E13 live Backblaze B2 pgBackRest integration
 
 on:
+  pull_request:
   workflow_dispatch:
     inputs:
       confirm_disposable_test:
@@ -16,6 +17,14 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout proposed changes
+        uses: actions/checkout@v4
+      - name: Validate live integration script syntax
+        run: bash -n ops/backup/test-pgbackrest-b2-live-integration.sh
+
   b2-pgbackrest-live:
     if: ${{ inputs.confirm_disposable_test == 'RUN-DISPOSABLE-B2-PITR' }}
     runs-on: ubuntu-24.04
