@@ -13,10 +13,10 @@ for cmd in psql createdb dropdb age age-keygen; do
 done
 
 tmp="$(mktemp -d)"
-trap 'rm -rf "$tmp"; dropdb --if-exists e13_source >/dev/null 2>&1 || true; dropdb --if-exists e13_recovery >/dev/null 2>&1 || true' EXIT
+trap 'rm -rf "$tmp"; dropdb --maintenance-db=postgres --if-exists e13_source >/dev/null 2>&1 || true; dropdb --maintenance-db=postgres --if-exists e13_recovery >/dev/null 2>&1 || true' EXIT
 chmod 700 "$tmp"
+createdb --maintenance-db=postgres e13_source
 export PGDATABASE=e13_source
-createdb e13_source
 psql -v ON_ERROR_STOP=1 -d e13_source <<'SQL'
 CREATE TABLE e13_recovery_probe (
   id bigint PRIMARY KEY,
@@ -37,7 +37,7 @@ artifact="$(find "$BACKUP_DIR" -maxdepth 1 -type f -name '*.dump.age' -print -qu
 bash "$root/ops/backup/verify-backup.sh" "$artifact"
 
 # Restore into a separately created empty database, never over the source.
-createdb e13_recovery
+createdb --maintenance-db=postgres e13_recovery
 export PGDATABASE=e13_recovery RESTORE_CONFIRM=YES RESTORE_TARGET_ISOLATED=YES
 bash "$root/ops/backup/restore-postgres.sh" "$artifact"
 actual="$(psql -v ON_ERROR_STOP=1 -At -d e13_recovery -c "SELECT string_agg(id::text || ':' || payload, ',' ORDER BY id) FROM e13_recovery_probe")"
