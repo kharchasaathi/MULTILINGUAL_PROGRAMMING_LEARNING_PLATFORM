@@ -6,6 +6,16 @@
 
 ## 1. Executive status
 
+### Firebase Hosting — owner screenshot reviewed
+
+- Hosting console shows the initial “Get started” screen; no Hosting site is evidenced as provisioned in this project view.
+- The console notice states that from October 2026, default Hosting site provisioning is on-demand and an action may be required for programmatic deploys to new projects.
+- Project billing tier visible: Spark (no-cost). No Hosting site was created and no deployment was run during this review.
+- This is distinct from the two default Firebase domains listed under Authentication authorized domains; their presence does not prove a Hosting site is provisioned or deployed.
+- Screenshot evidence received in chat on 2026-11-12.
+
+
+
 ### Cloud Storage for Firebase — owner screenshot reviewed
 
 - Storage console shows an “Upgrade project” prompt and explicitly states that Storage requires a billing account (Blaze).
