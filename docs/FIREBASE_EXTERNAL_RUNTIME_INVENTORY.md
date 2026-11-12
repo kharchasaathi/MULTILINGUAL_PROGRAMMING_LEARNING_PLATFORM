@@ -6,6 +6,14 @@
 
 ## 1. Executive status
 
+### Firebase Authentication — owner screenshot reviewed
+
+- Firebase Authentication console page is accessible for project `multilingual-learning-52e24`.
+- The Users tab displays: “No users for this project yet”. Observed user count: zero at screenshot time.
+- This confirms the Authentication product console is available, but does not establish that a sign-in provider is enabled or that application runtime sign-in is integrated.
+- Sign-in methods, authorized domains, MFA and SDK/runtime integration remain unverified. No user account was created and no provider setting was changed.
+- Screenshot evidence received in chat on 2026-11-12. No user-level identifiers are copied into this inventory.
+
 ### Firebase project identity — owner screenshot reviewed
 
 - Project display name: `Multilingual Learning`.
@@ -22,7 +30,7 @@ The currently inspected `main` branch contains the E13 backup workflows and evid
 
 | Component | Current evidence-based status | What is known | What remains to verify |
 |---|---|---|---|
-| Firebase Authentication | CONSOLE PRODUCT SHORTCUT VISIBLE; CONFIGURATION UNVERIFIED | Authentication appears in project shortcuts | Open Authentication and verify whether it is initialized, providers, authorized domains, MFA and aggregate user count |
+| Firebase Authentication | CONSOLE ACCESS CONFIRMED; ZERO USERS OBSERVED; PROVIDERS UNVERIFIED | Authentication Users tab is accessible and reports no users for this project at screenshot time | Inspect Sign-in method, authorized domains, MFA and application SDK/runtime integration |
 | Cloud Firestore | NOT EVIDENCED | No deployed database evidence in inspected branch | Whether enabled; project/region; collections; rules; indexes; backups; data classification |
 | Realtime Database | NOT EVIDENCED | No deployed database evidence in inspected branch | Whether enabled; instance/region; rules; data flows |
 | Cloud Storage for Firebase | NOT EVIDENCED | No deployed bucket/runtime evidence in inspected branch | Whether enabled; bucket/region; rules; lifecycle; object inventory; billing plan |
