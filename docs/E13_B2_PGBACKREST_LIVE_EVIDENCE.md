@@ -59,6 +59,6 @@ This was a disposable synthetic database on a GitHub-hosted runner, not producti
 
 - Local PostgreSQL 16 PITR CI validation: PASS (separate local POSIX repository test).
 - Live Backblaze B2 pgBackRest synthetic integration: PASS.
-- Live-test no-expiration safeguard: IMPLEMENTED, RE-TEST REQUIRED.
+- Live-test no-expiration safeguard: PASS in run `43207714271`.
 - E13 overall: IN PROGRESS.
 - E14: remains BLOCKED pending all E13 evidence and required owner approvals.
