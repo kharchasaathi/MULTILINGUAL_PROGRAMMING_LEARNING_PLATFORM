@@ -6,6 +6,16 @@
 
 ## 1. Executive status
 
+### Cloud Storage for Firebase — owner screenshot reviewed
+
+- Storage console shows an “Upgrade project” prompt and explicitly states that Storage requires a billing account (Blaze).
+- Current project tier shown: Spark (no-cost). No Firebase Storage bucket is evidenced as provisioned in this view.
+- Firebase Storage is therefore **not currently provisioned/available on the shown plan**. This does not affect the separate Backblaze B2 backup bucket already used for E13.
+- No Blaze upgrade was performed or requested. Do not upgrade solely to complete this inventory; any future billing change requires a separate explicit cost/architecture approval.
+- Screenshot evidence received in chat on 2026-11-12.
+
+
+
 ### Firebase Realtime Database — owner screenshot reviewed
 
 - Realtime Database product page shows the initial “Create Database” action.
@@ -70,7 +80,7 @@ The currently inspected `main` branch contains the E13 backup workflows and evid
 | Firebase Authentication | CONSOLE CONFIGURATION PARTIALLY VERIFIED; ZERO USERS OBSERVED | Email/Password and Google enabled; zero users observed; authorized domains are localhost, multilingual-learning-52e24.firebaseapp.com and multilingual-learning-52e24.web.app; SMS MFA shows upgrade-to-enable | Verify SDK/runtime integration, user account linking/actions, password policy, SMS region policy and deployed app sign-in flow |
 | Cloud Firestore | NOT CREATED / NOT EVIDENCED AS ACTIVE | Console shows the initial “Create database” screen; Spark plan visible | No current database, region, collections, rules or indexes to inventory; creation requires a separate approved design decision |
 | Realtime Database | NOT CREATED / NOT EVIDENCED AS ACTIVE | Console shows the initial “Create Database” screen; Spark plan visible | No instance, region, rules or data flows to inventory; creation requires a separate approved architecture decision |
-| Cloud Storage for Firebase | NOT EVIDENCED | No deployed bucket/runtime evidence in inspected branch | Whether enabled; bucket/region; rules; lifecycle; object inventory; billing plan |
+| Cloud Storage for Firebase | NOT PROVISIONED; BLAZE UPGRADE REQUIRED BY CONSOLE | Storage page shows “Upgrade project” and states a billing account (Blaze) is required; project is Spark | No Firebase Storage bucket to inventory; no upgrade authorized. Backblaze B2 is a separate service and remains the E13 backup target |
 | Firebase Hosting | LINKAGE NOT SHOWN FOR THE REGISTERED WEB APP; PRODUCT STATUS UNKNOWN | General settings shows a “Link to a Firebase Hosting site” action for the web app | Inspect Hosting product directly for sites, domains and deployments; do not infer Hosting is disabled |
 | Firebase App Hosting | NOT EVIDENCED | No deployment evidence | Whether enabled; backend/region; connected repository and build identity |
 | Firebase Cloud Functions | NOT EVIDENCED | No function deployment evidence | Whether enabled; functions/regions/runtime/service accounts/secrets |
