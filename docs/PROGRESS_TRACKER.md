@@ -730,3 +730,12 @@ E3 milestone recorded in E3 artifacts.
 - The temporary GitHub repository secrets `B2_TEST_APPLICATION_KEY_ID` and `B2_TEST_APPLICATION_KEY` were deleted after the test, and the temporary `e13-live-smoke` B2 Application Key was revoked. The separate long-lived `e13-backup-writer` key was intentionally retained and must remain out of GitHub Actions.
 - Environment `e13-b2-live-smoke` remains configured; it contains no environment secrets. The manual workflow definition is on `main` so GitHub can expose workflow_dispatch, and it checks out the implementation branch `docs/project-foundation`.
 - **E13 remains IN PROGRESS; E14 remains BLOCKED** until every mandatory acceptance gate in the E13 runbook is evidenced and approved.
+
+
+## E13 initial data-store inventory (2026-11-12)
+
+- Added `docs/E13_DATA_STORE_AND_BACKUP_COVERAGE_INVENTORY.md` after inspecting the recursive working-branch tree, D3/D4 architecture, E13 control matrix/runbook, and owner-provided Firebase Console screenshots.
+- Confirmed the approved planning baseline remains NestJS + PostgreSQL/Prisma; no live PostgreSQL instance was identified, and no Prisma schema/migrations or Firebase application configuration (firebase.json, .firebaserc, Firestore/Storage rules) was found in the inspected branch.
+- Firebase Console evidence: Email/Password and Google Authentication providers are enabled; Firestore and Realtime Database show database-creation onboarding; Storage shows a billing/Blaze upgrade gate; Hosting shows Get started. These screens do not prove runtime integration or a deployed data store.
+- **Billing decision:** Firebase Blaze is not required for E13 as currently designed. E13 uses PostgreSQL plus Backblaze B2; Firebase Storage is not an approved E13 dependency. Do not upgrade or create Firebase resources until a separate architecture decision, usage estimate, budget alerts and billing-owner approval exist.
+- Inventory remains initial/evidence-bounded, not a complete cloud-account audit. Owner confirmations and runtime discovery remain open. E13 IN PROGRESS; E14 BLOCKED.
