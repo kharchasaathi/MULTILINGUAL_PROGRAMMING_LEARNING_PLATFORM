@@ -1,9 +1,9 @@
 # Progress Tracker
-Last updated: 2026-11-12 (E13 Task 01 inventory and ownership work)
+Last updated: 2026-11-12 (E13 Task 01 inventory and Firebase identity-provider decision)
 
 ## Current execution position
 - Current stage: E — Security Constitution
-- Current task: E13 — Backup and recovery; Task 01 (authoritative data-store inventory and ownership) is IN PROGRESS. A 25-domain register and role-level ownership map are committed; owner confirmations and external runtime discovery remain open.
+- Current task: E13 — Backup and recovery; Task 01 (authoritative data-store inventory and ownership) is IN PROGRESS. A 25-domain register and role-level ownership map are committed. Firebase Authentication is selected as the initial identity adapter with PostgreSQL as application system of record; external runtime discovery and owner confirmations remain open.
 - AWS S3 paid-plan route was paused; Google Cloud Billing signup was blocked by account-security verification and no GCP Billing Account was created. Current off-site candidate is Backblaze B2 EU Central (`eu-central-003`); bucket `kharchasaathi-e13-backup-primary` exists as Private, SSE-B2 enabled, Keep all versions, Object Lock Disabled. See E13 runbook.
 - Next action: implement and validate pgBackRest B2 stanza/base backup/WAL/PITR in an isolated environment; then complete approved Object Lock/retention, separate-region/account replication and restore, key escrow/rotation, real alert delivery, E11/E12 restore integrations, numeric RPO/RTO approval and repeated isolated restore drills. E14 remains blocked.
 - Completed prior: E1–E10 security design baselines; E11 — Privacy and data protection (completed out of sequence at design scope).
@@ -753,3 +753,14 @@ E3 milestone recorded in E3 artifacts.
 - Updated BKP-001 and BKP-027 in `docs/E13_BACKUP_RECOVERY_CONTROL_MATRIX.csv` to point to the new inventory and explicitly retain pending owner/runtime confirmation.
 - **Owner confirmations required to close Task 01:** (1) Firebase Auth production or experiment and whether real accounts exist; (2) PostgreSQL remains sole authoritative application DB and whether any live DB exists; (3) B2 is only for backup artifacts and whether product media exists elsewhere; (4) disclose any other connected providers/cloud/local stores not represented; (5) confirm role-level owners.
 - No credentials or secrets are requested. E13 remains IN PROGRESS; E14 remains BLOCKED.
+
+## D6 / E4 identity-provider decision — 2026-11-12
+
+- **Decision:** Firebase Authentication selected as the initial managed identity provider; D6's provider-neutral adapter boundary is retained.
+- **Application source of truth:** PostgreSQL remains authoritative for internal principals, learner/profile data, curriculum, progress, roles/permissions, subscriptions, audit and business records. Firebase Auth manages authentication credentials and supported sign-in/recovery only.
+- **Scope exclusion:** This decision does not select or require Firestore, Realtime Database, Firebase Storage, Firebase Hosting/App Hosting, or Firebase Blaze.
+- **Security requirements:** NestJS server-side verification of Firebase ID tokens; exact issuer/UID mapping to internal principal; no email-based auto-linking; Admin SDK secrets only in managed server-side secret storage; E4/E7 review of web session and native token transport before production.
+- **Artifacts updated:** D6_AUTHENTICATION_AND_IDENTITY_ARCHITECTURE.md; E4_IDENTITY_AUTHENTICATION_SECURITY.md; E13_AUTHORITATIVE_DATA_STORE_REGISTER.csv; E13_DATA_STORE_AND_BACKUP_COVERAGE_INVENTORY.md.
+- **Implementation status:** Architecture decision only. No Firebase app integration, user migration, production auth code, Firestore/Storage provisioning or billing upgrade performed.
+- **Next identity action:** Safely inspect the current Firebase project for existing accounts and non-secret project configuration before linking it to application runtime. Do not delete or overwrite existing identities.
+- E13 Task 01 remains IN PROGRESS until external runtime discovery and named/role owner confirmations are complete; E13 overall remains IN PROGRESS and E14 remains BLOCKED.
