@@ -785,3 +785,12 @@ E3 milestone recorded in E3 artifacts.
 - This is repeatable CI evidence for the logical backup/restore utility only. It is not a production database backup, physical pgBackRest base backup, WAL archive, PITR, live B2 database artifact, or disaster-recovery drill. Foreign-key-specific assertions, failure-path cases and broader restore compatibility remain open.
 - The S3-named job uses mocked AWS CLI contracts and no AWS credentials; it is not an active AWS storage path. Backblaze B2 remains the selected off-site destination. B2 publisher/verifier mock scenarios BKP-T043–T045 are recorded as passed in B2 contract CI run 43172892301; those tests do not contact B2.
 - **E13 remains IN PROGRESS; E14 remains BLOCKED.** Production pgBackRest/WAL/PITR, key custody/escrow, live monitoring/alerts, E11/E12 integrations, approved RPO/RTO, isolated restore drills, runtime discovery and owner approvals are still mandatory outstanding gates.
+
+
+## E13 restore-integrity regression — foreign-key assertion (2026-11-12)
+
+- **PASS:** GitHub Actions run 43173829197 completed all three jobs successfully: mocked utility/security tests, mocked publisher/PITR control contracts, and PostgreSQL 16 + age encrypted logical backup/restore integration.
+- Strengthened `ops/backup/test-backup-integration.sh` with a parent/child relational fixture. After restoring the encrypted dump into a separate recovery database, CI verifies restored rows, confirms the foreign-key constraint exists and is validated, and confirms an insert with a nonexistent parent is rejected.
+- Verification catalogue BKP-T023 is now marked passed for this tested relational fixture. This does not establish full production schema integrity, all application constraints, schema migration compatibility, physical pgBackRest/WAL/PITR, or a production DR drill.
+- The separate B2 contract run 43173829200 also passed; it exercises mocked AWS CLI contracts and does not contact B2.
+- **E13 remains IN PROGRESS; E14 remains BLOCKED.**
