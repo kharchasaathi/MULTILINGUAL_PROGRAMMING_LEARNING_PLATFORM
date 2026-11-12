@@ -65,6 +65,21 @@ jobs:
       - name: Parse and validate offline B2 configuration template
         run: bash ops/backup/test-pgbackrest-config.sh
 
+
+  pgbackrest-local-pitr-integration:
+    # Disposable PostgreSQL 16 cluster and local POSIX repository; no cloud credentials.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL 16 server and pgBackRest
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-16 pgbackrest
+      - name: Validate Bash syntax for E13 backup scripts
+        run: bash -n ops/backup/*.sh
+      - name: Run isolated full-backup, WAL-archive and timestamp-PITR integration
+        run: sudo bash ops/backup/test-pgbackrest-pitr-integration.sh
+
   s3-publisher-contract:
     runs-on: ubuntu-latest
     steps:
