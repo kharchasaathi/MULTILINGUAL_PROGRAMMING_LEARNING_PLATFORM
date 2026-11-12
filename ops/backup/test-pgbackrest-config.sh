@@ -31,7 +31,7 @@ else
   exit 1
 fi
 
-# --help forces pgBackRest to load and parse the supplied configuration while
+# The version command forces pgBackRest to load and parse the supplied configuration while
 # avoiding stanza creation, database access, bucket access or data transfer.
-pgbackrest --config="$config" --stanza=platform --help >/dev/null
+pgbackrest --config="$config" --stanza=platform version >/dev/null
 echo "pgBackRest example configuration parsed successfully (offline; no cloud/database access)."
