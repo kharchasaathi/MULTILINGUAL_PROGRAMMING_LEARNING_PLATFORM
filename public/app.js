@@ -56,4 +56,7 @@
   $("#startHeader").addEventListener("click",()=>$("#courses").scrollIntoView({behavior:"smooth"}));
   $("#year").textContent=new Date().getFullYear();
   renderCourses();runCode();
+  if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+    window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(err => console.warn("Offline mode unavailable:", err)));
+  }
 })();
