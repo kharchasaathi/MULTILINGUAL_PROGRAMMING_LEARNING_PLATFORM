@@ -1,11 +1,11 @@
 # Progress Tracker
-Last updated: 2026-11-12 (E13 Task 01 inventory and Firebase identity-provider decision)
+Last updated: 2026-11-12 (E13 local pgBackRest WAL/PITR CI integration added; validation pending)
 
 ## Current execution position
 - Current stage: E — Security Constitution
 - Current task: E13 — Backup and recovery; Task 01 (authoritative data-store inventory and ownership) is IN PROGRESS. A 25-domain register and role-level ownership map are committed. Firebase Authentication is selected as the initial identity adapter with PostgreSQL as application system of record; external runtime discovery and owner confirmations remain open.
 - AWS S3 paid-plan route was paused; Google Cloud Billing signup was blocked by account-security verification and no GCP Billing Account was created. Current off-site candidate is Backblaze B2 EU Central (`eu-central-003`); bucket `kharchasaathi-e13-backup-primary` exists as Private, SSE-B2 enabled, Keep all versions, Object Lock Disabled. See E13 runbook.
-- Next action: implement and validate pgBackRest B2 stanza/base backup/WAL/PITR in an isolated environment; then complete approved Object Lock/retention, separate-region/account replication and restore, key escrow/rotation, real alert delivery, E11/E12 restore integrations, numeric RPO/RTO approval and repeated isolated restore drills. E14 remains blocked.
+- Next action: execute the newly added disposable PostgreSQL 16 + local pgBackRest full-backup/WAL/timestamp-PITR CI integration (BKP-T048); fix any failures from actual logs before recording evidence. Then complete approved B2 pgBackRest compatibility testing, runtime/owner discovery, key escrow/rotation, real alert delivery, E11/E12 restore integrations, numeric RPO/RTO approval and isolated recovery drills. E14 remains blocked.
 - Completed prior: E1–E10 security design baselines; E11 — Privacy and data protection (completed out of sequence at design scope).
 - Canonical checklist: [MASTER_STRUCTURE.md](MASTER_STRUCTURE.md)
 
@@ -812,3 +812,13 @@ E3 milestone recorded in E3 artifacts.
 - Extended the disposable PostgreSQL 16 integration test to create a pre-existing table in an isolated recovery database and prove the restore utility rejects it, then restore successfully into a separate empty recovery database and verify restored rows and foreign-key integrity.
 - CI run [43176300373](https://github.com/kharchasaathi/MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM/actions/runs/43176300373): all 3 jobs passed — mocked security/utility tests, real PostgreSQL 16 + age encrypted backup/restore integration, and mocked publisher/recovery-gate contract tests.
 - Evidence boundary: PostgreSQL service was disposable CI infrastructure; publisher tests are mocked. This does not validate the production database, live pgBackRest/B2 WAL archiving, PITR, immutable retention, replication, alert delivery, key escrow, E11/E12 runtime hooks or a production DR drill.
+
+
+### E13 execution update — 2026-11-12
+
+- Latest prior CI run `43176930462`: all four jobs passed (mocked utility/security tests, PostgreSQL 16 + age logical backup/restore integration, offline pgBackRest configuration validation, and mocked S3/B2 publisher/recovery contracts).
+- Additional B2 contract run `43176930266`: passed; contract tests are mocked and are not live B2 read/write evidence.
+- Added `ops/backup/test-pgbackrest-pitr-integration.sh` and a `pgbackrest-local-pitr-integration` GitHub Actions job. The new scenario uses a disposable PostgreSQL 16 cluster and local POSIX repository to exercise full physical backup, WAL archiving and timestamp PITR into a separate recovery data directory.
+- Added catalogue scenario BKP-T048 and documented the CI test boundary in the E13 runbook.
+- New workflow run `43181744479` was triggered by the implementation commit; final job results must be checked before marking BKP-T048 passed.
+- This local CI test does not contact B2 and does not establish production readiness. Live B2 pgBackRest compatibility, key custody, real alert delivery, E11/E12 integrations, approved RPO/RTO and owner-approved recovery drills remain outstanding.
