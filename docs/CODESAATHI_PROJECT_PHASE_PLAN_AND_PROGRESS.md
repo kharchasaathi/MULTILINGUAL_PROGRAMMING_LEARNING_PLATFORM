@@ -652,3 +652,10 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Registered lesson paths in curriculum index and updated matching tracker rows where present.
 - Preserved executable syntax and technical identifiers; translated learner-facing content, tasks, hints and assessments.
 - Browser execution and mutation/copy edge-case verification remain pending.
+
+
+### Telugu translation batch — JavaScript J7.7–J7.10 (2026-11-13)
+- Added four Telugu draft lessons for nested objects/arrays, destructuring and spread/rest, optional chaining, and JSON parsing/stringifying limitations.
+- Registered lesson paths in curriculum index and updated matching tracker rows where present.
+- Preserved executable syntax and technical identifiers; translated learner-facing content, tasks, hints and assessments.
+- Browser execution, schema validation, and serialization edge-case verification remain pending.
