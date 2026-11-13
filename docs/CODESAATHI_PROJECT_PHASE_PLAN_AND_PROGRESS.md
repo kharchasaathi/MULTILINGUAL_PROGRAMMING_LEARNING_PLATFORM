@@ -123,3 +123,38 @@ Use honest status values: `NOT STARTED`, `IN PROGRESS`, `BLOCKED`, `COMPLETE`, `
 **IN PROGRESS — implementation foundation is committed; final browser smoke verification is pending.**
 
 Phase 2 curriculum content, Phase 4 universal playground, and Phase 5 CSS labs remain separate work and must not be marked complete by this foundation work.
+
+## Phase 1 implementation update — 2026-11-13 (six-language and lesson foundation)
+
+### Completed
+- Added all six language choices to the visible selector: English, Telugu, Malayalam, Kannada, Tamil, Hindi.
+- Added honest fallback messaging: Malayalam, Kannada, Tamil and Hindi can be selected and saved, but their actual translations are not yet authored; content is explicitly shown in English until translated.
+- Added the reusable three-stage lesson renderer and connected it to the existing course lesson dialog.
+- Added the shared lesson JSON Schema contract.
+- Added lesson template styling and included the new renderer in the service-worker app shell; cache version advanced to `codesaathi-v2`.
+- Updated the app description to reflect the six-language roadmap.
+
+### Focused structural checks
+12/12 repository-content checks passed:
+- six selector options present;
+- shared preference key present;
+- fallback notice and honest fallback message present;
+- all three lesson stages present in the renderer;
+- renderer connected to the existing course dialog;
+- lesson completion handlers retained;
+- service worker caches the new module;
+- template script loads before the application script;
+- lesson schema parses as valid JSON;
+- architecture and phase documents describe the six-language state.
+
+These are source-structure checks, not a substitute for a real browser interaction test.
+
+### Still required before Phase 1 can be marked COMPLETE
+- Confirm the latest Firebase Hosting deployment succeeded.
+- In a real browser, select each of the six languages, refresh, and confirm the choice remains selected and fallback notice appears only for languages without translations.
+- Open a course lesson and confirm the three-stage template renders and the existing lesson completion action still works.
+
+**Status: IN PROGRESS — implementation and structural checks are committed; live browser/deployment verification is the final Phase 1 gate.**
+
+### Scope clarification
+Only English and Telugu currently have translated landing-page strings. The other four language options are preference/fallback support, not completed translations. Full translation work belongs to curriculum/content production and must be tracked separately.
