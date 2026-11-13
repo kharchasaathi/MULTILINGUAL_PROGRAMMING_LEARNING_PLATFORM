@@ -367,3 +367,15 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 
 ### Next translation topic
 - Continue in curriculum order with CSS C10.1 — Flex container and items.
+
+
+## Telugu Translation Continuation — CSS C10.1 — 2026-11-13
+
+- Added a Telugu draft for CSS C10.1, translating the English master section by section while preserving the topic ID, learning objectives, three-stage lesson contract, CSS identifiers, and runnable behaviour.
+- Learner-facing explanations, practice tasks, interface labels, and quiz content use natural Telugu; standard CSS property names and code syntax remain unchanged.
+- Registered `/content/te/css/C10.1.json` in the curriculum index and updated the existing C10.1 tracker row without adding a duplicate.
+- Commit: `2ead748b66f46be973a3b7e003c4098cf3714de5`
+- Index commit: `395b727bab6b0efdc4cd0bb8448b2459728adce2`
+- Tracker commit: `eb43f848a75bfbededd5bf3caf704bce47bcb6bc`
+- Telugu indexed topic count after this batch: 141 / 554. First-time Telugu translations still missing: 413.
+- Lesson remains DRAFT pending editorial review and real browser/playground verification.
