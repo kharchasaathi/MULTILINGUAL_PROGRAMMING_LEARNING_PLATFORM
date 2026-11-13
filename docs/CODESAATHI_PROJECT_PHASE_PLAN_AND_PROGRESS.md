@@ -533,3 +533,10 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Registered all lesson paths in the curriculum index and updated corresponding tracker rows.
 - Preserved code syntax and technical identifiers; translated learner-facing material, tasks, hints and assessments.
 - Editorial and browser/playground verification remain pending.
+
+
+### Telugu translation batch — HTML H15.7–H15.10 (2026-11-13)
+- Added four Telugu draft lessons for media captions/transcripts, language changes and pronunciation, introductory ARIA rules, and common accessibility anti-patterns.
+- Registered all four lessons in the curriculum index and updated matching tracker rows.
+- Preserved code syntax and technical identifiers; translated learner-facing explanations, tasks, hints and assessments.
+- Editorial and browser/assistive-technology verification remain pending.
