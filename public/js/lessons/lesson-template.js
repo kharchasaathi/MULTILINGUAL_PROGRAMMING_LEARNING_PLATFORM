@@ -13,6 +13,7 @@
   const render = (container, lesson) => {
     if (!container || !lesson) return;
     container.replaceChildren();
+    if (lesson.title) container.append(make("h3", "lesson-template-title", lesson.title));
 
     const stage1 = make("section", "lesson-stage");
     stage1.append(make("span", "lesson-stage-label", "STAGE 1 · UNDERSTAND"));
