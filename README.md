@@ -1,5 +1,32 @@
 # MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
-A multilingual programming education platform supporting Telugu, English, Malayalam, Kannada, Tamil, and Hindi.
+A multilingual programming education platform. The initial content locales currently implemented in the curriculum index are English (`en`) and Telugu (`te`).
+
+## Language expansion roadmap
+
+### Phase 1 — Priority Indian languages
+Planned language coverage (10 languages):
+- English (`en`)
+- Telugu (`te`)
+- Hindi (`hi`)
+- Bengali (`bn`)
+- Marathi (`mr`)
+- Tamil (`ta`)
+- Kannada (`kn`)
+- Malayalam (`ml`)
+- Gujarati (`gu`)
+- Urdu (`ur`)
+
+### Phase 2
+- Punjabi (`pa`)
+- Odia (`or`)
+- Assamese (`as`)
+- Nepali (`ne`)
+- Additional languages to be prioritized after Phase 1.
+
+### Phase 3
+- Remaining languages from the Eighth Schedule of the Constitution of India, followed by other Indian languages based on learner demand.
+
+**Implementation note:** The roadmap records planned coverage; a language must not be presented as available in the product until its locale content, language selector, rendering/font support, and validation are implemented and tested. The curriculum index remains the source of truth for currently available lesson locales.
 
 ## E13 backup and recovery evidence
 
