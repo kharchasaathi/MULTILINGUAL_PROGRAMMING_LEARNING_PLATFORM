@@ -715,3 +715,10 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Registered lesson paths in curriculum index and updated matching tracker rows where present.
 - Preserved executable syntax and technical identifiers; translated learner-facing content, tasks, hints and assessments.
 - Network endpoint, HTTP status, and rejection-path verification remain pending.
+
+
+### Telugu translation batch — JavaScript J11.8–J11.10 and J12.1 (2026-11-13)
+- Added four Telugu draft lessons for asynchronous UI states, AbortController/request cancellation, CORS/browser security boundaries, and Web Storage.
+- Registered lesson paths in curriculum index and updated matching tracker rows where present.
+- Preserved executable syntax and technical identifiers; translated learner-facing content, tasks, hints and assessments.
+- Browser storage availability, CORS, cancellation, and security verification remain pending.
