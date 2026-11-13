@@ -22,7 +22,7 @@
     if (lesson.context) stage1.append(make("p", "", lesson.context));
 
     const stage2 = make("section", "lesson-stage");
-    stage2.append(make("span", "lesson-stage-label", "STAGE 2 · HUMAN EXPLANATION"));
+    stage2.append(make("span", "lesson-stage-label", "STAGE 2 · EXPLANATION"));
     stage2.append(make("h4", "", "See how it works"));
     stage2.append(make("p", "", lesson.explanation || "Read the example and connect each important part to the result it produces."));
     if (lesson.analogy) stage2.append(make("p", "", "A useful comparison: " + lesson.analogy));
