@@ -461,3 +461,12 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Added Telugu-language starter/reset code, registered all eight lessons in the curriculum index, and updated tracker rows.
 - Index commit: `6d7abf2fc324efd951e68a1fdbf3252fa4e0b952`; tracker commit: `0863136cb42bd8fc86ce730404b7837ff894a27e`.
 - All lessons remain DRAFT pending editorial review and actual browser/playground verification.
+
+
+## Telugu curriculum translation continuation — 2026-11-13
+
+- Added the Telugu draft for CSS topic C18.9, “Scroll-driven effects (advanced, support-aware)”, at `public/content/te/css/C18.9.json`.
+- Registered the Telugu lesson path in `public/content/curriculum-index.json` and updated the matching detailed tracker row.
+- Preserved CSS syntax and executable code; translated learner-facing explanations, practice tasks, hints, quiz prompts/options/answers/feedback, and set the HTML language to `te`.
+- Lesson status remains DRAFT; editorial review and browser/playground execution are still pending.
+- Latest index count before this addition: 212/554 Telugu topics; after this addition: 213/554, with 341 topics still missing Telugu.
