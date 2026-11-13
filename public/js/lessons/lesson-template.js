@@ -10,6 +10,13 @@
     return node;
   };
 
+  const OBJECTIVES_HEADINGS = Object.freeze({
+    en: "What you will learn by the end of this lesson",
+    te: "ఈ పాఠం పూర్తయ్యే సరికి మీరు ఏమి నేర్చుకుంటారు?",
+    hi: "इस पाठ के अंत तक आप क्या सीखेंगे?"
+  });
+  const objectivesHeading = () => OBJECTIVES_HEADINGS[document.documentElement.lang] || OBJECTIVES_HEADINGS.en;
+
   const render = (container, lesson) => {
     if (!container || !lesson) return;
     container.replaceChildren();
@@ -19,7 +26,7 @@
     if (objectives.length) {
       const section = make("section", "lesson-objectives");
       section.append(make("span", "lesson-stage-label", "LEARNING OBJECTIVES"));
-      section.append(make("h4", "", "ఈ పాఠం పూర్తయ్యే సరికి మీరు ఏమి నేర్చుకుంటారు?"));
+      section.append(make("h4", "", objectivesHeading()));
       const list = make("ol", "lesson-objectives-list");
       objectives.forEach(objective => list.append(make("li", "", objective)));
       section.append(list);
