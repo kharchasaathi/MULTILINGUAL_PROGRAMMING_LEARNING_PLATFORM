@@ -1,0 +1,78 @@
+{
+  "id": "javascript.j20.4.te",
+  "courseId": "javascript",
+  "moduleId": "J20",
+  "topicId": "J20.4",
+  "title": "Async Codeలో Error Propagation",
+  "language": "te",
+  "learningObjectives": [
+    "async functionలో await rejection ఎలా throw అవుతుందో, try/catchతో errorను handle చేసి అవసరమైతే rethrow చేయగలగాలి."
+  ],
+  "prerequisites": [
+    "J11.1",
+    "J11.4",
+    "J19.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "async function ఎల్లప్పుడూ Promiseను return చేస్తుంది. Await చేసిన Promise reject అయితే await expression వద్ద error throw అవుతుంది; దాన్ని try/catchతో handle చేయవచ్చు. Recovery చేయగల, context జోడించగల లేదా userకు సరైన message చూపగల boundaryలో errorsను handle చేయాలి.",
+      "whyItMatters": "Error propagation స్పష్టంగా ఉంటే false success states నివారించవచ్చు. Recovery కోసం అవసరమైన అసలు error సమాచారం కూడా నిల్వ ఉంటుంది.",
+      "analogy": "ఒక పనిని నిర్వహించే క్రమం, దాని ఫలితాన్ని అందించే విధానం, తప్పు వచ్చినప్పుడు స్పందించే విధానం ముందుగానే నిర్ణయించిన workflowలాగా ఈ అంశాన్ని భావించవచ్చు.",
+      "analogyLimit": "ఈ పోలిక సరళీకరణ మాత్రమే. JavaScript scheduling, HTTP semantics, browser security web platform ప్రమాణాల ప్రకారం నిర్ణయించబడతాయి."
+    },
+    "explain": {
+      "narrative": "లోపలి catch errorకు context జోడించి మళ్లీ throw చేస్తుంది. బయట boundary retry వంటి recovery చర్యను నిర్ణయిస్తుంది.",
+      "examples": [
+        {
+          "id": "j20-4-example",
+          "language": "javascript",
+          "code": "async function load(){try{return await Promise.reject(Error('Offline'))}catch(error){console.error('Load failed',error.message);throw error}}load().catch(()=>console.log('Offer retry'));",
+          "explanation": "await వద్ద rejection throw అవుతుంది. లోపలి catch Load failed అనే contextతో errorను log చేసి rethrow చేస్తుంది. చివరి catch retry option చూపించాల్సిన boundaryగా పనిచేస్తుంది.",
+          "expectedOutput": "Console లేదా UI ఫలితం code executionపై ఆధారపడి ఉంటుంది; network ఉదాహరణలకు సరైన endpoint, browser environment అవసరం.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Errorకు context జోడించి rethrow చేసే repository function రాయండి. UI boundaryలో చివరి rejectionను handle చేయండి.",
+      "independentTask": "ఒక చిన్న network-driven feature నిర్మించి loading, success, failure, cancellation పరిస్థితులను పరీక్షించండి. ఏ errorsను retry చేయవచ్చో, ఏవి చేయకూడదో వివరించండి.",
+      "hints": [
+        "HTTP errorsను network, parsing errors నుంచి వేరు చేయండి.",
+        "తగిన operationsకే పరిమిత retries ఉపయోగించండి.",
+        "తాజా active requestకే UI updates అనుసంధానించండి."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "javascript",
+    "starterCode": "async function load(){try{return await Promise.reject(Error('Offline'))}catch(error){console.error('Load failed',error.message);throw error}}load().catch(()=>console.log('Offer retry'));",
+    "resetCode": "async function load(){try{return await Promise.reject(Error('Offline'))}catch(error){console.error('Load failed',error.message);throw error}}load().catch(()=>console.log('Offer retry'));"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "j20-4-q1",
+        "prompt": "tryలో await చేసిన Promise reject అయితే ఏమవుతుంది?",
+        "options": [
+          "సంబంధిత catch blockకు control వెళ్తుంది",
+          "HTML title element",
+          "Browser address bar"
+        ],
+        "answer": "సంబంధిత catch blockకు control వెళ్తుంది",
+        "explanation": "await rejection reasonను throw చేస్తుంది; చుట్టూ ఉన్న catch దాన్ని handle చేయగలదు."
+      },
+      {
+        "id": "j20-4-q2",
+        "prompt": "Network-driven UIలో నమ్మదగిన పద్ధతి ఏది?",
+        "options": [
+          "Loading, empty, success, failure, cancellation statesను స్పష్టంగా నిర్వహించడం",
+          "ప్రతి fulfilled fetch HTTP success అని భావించడం",
+          "ప్రతి requestను ఎప్పటికీ retry చేయడం"
+        ],
+        "answer": "Loading, empty, success, failure, cancellation statesను స్పష్టంగా నిర్వహించడం",
+        "explanation": "స్పష్టమైన states, పరిమిత recovery వల్ల network interface ఊహించదగినదిగా ఉంటుంది."
+      }
+    ]
+  },
+  "status": "draft"
+}
