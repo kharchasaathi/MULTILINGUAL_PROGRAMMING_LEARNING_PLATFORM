@@ -1,0 +1,78 @@
+{
+  "id": "javascript.j20.1.te",
+  "courseId": "javascript",
+  "moduleId": "J20",
+  "topicId": "J20.1",
+  "title": "Tasks, Microtasks మరియు Event Loop",
+  "language": "te",
+  "learningObjectives": [
+    "Event loopలో tasks, microtasks ఏ క్రమంలో అమలవుతాయో, renderingపై వాటి ప్రభావాన్ని వివరించగలగాలి."
+  ],
+  "prerequisites": [
+    "J11.1",
+    "J11.4",
+    "J19.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Event loop tasks, microtasksను సమన్వయం చేస్తుంది. ప్రస్తుత call stack పూర్తయ్యాక Promise reactions, queueMicrotask callbacks తదుపరి taskకు ముందు microtask checkpointలో అమలవుతాయి. Timers, అనేక user events tasksగా నిర్వహించబడతాయి.",
+      "whyItMatters": "Callbackల అమలుక్రమాన్ని అర్థం చేసుకోవడానికి ఈ model అవసరం. Microtasks వరుసగా ఎక్కువసేపు కొనసాగితే rendering ఆలస్యం కావచ్చు. Synchronous code main threadను block చేస్తుంది.",
+      "analogy": "ఒక పనిని నిర్వహించే క్రమం, దాని ఫలితాన్ని అందించే విధానం, తప్పు వచ్చినప్పుడు స్పందించే విధానం ముందుగానే నిర్ణయించిన workflowలాగా ఈ అంశాన్ని భావించవచ్చు.",
+      "analogyLimit": "ఈ పోలిక సరళీకరణ మాత్రమే. JavaScript scheduling, HTTP semantics, browser security web platform ప్రమాణాల ప్రకారం నిర్ణయించబడతాయి."
+    },
+    "explain": {
+      "narrative": "Synchronous output ముందుగా వస్తుంది. తర్వాత queueలోని microtasks క్రమంగా అమలవుతాయి; ఆ తర్వాత timer task అమలవుతుంది.",
+      "examples": [
+        {
+          "id": "j20-1-example",
+          "language": "javascript",
+          "code": "console.log('sync');setTimeout(()=>console.log('task'),0);queueMicrotask(()=>console.log('microtask'));Promise.resolve().then(()=>console.log('promise'));console.log('end');",
+          "explanation": "Synchronous statements ముందుగా sync, endను చూపిస్తాయి. తర్వాత queueలో ముందుగా చేరిన microtask, promise reaction అమలవుతాయి. చివరగా timer task అమలవుతుంది.",
+          "expectedOutput": "Console లేదా UI ఫలితం code executionపై ఆధారపడి ఉంటుంది; network ఉదాహరణలకు సరైన endpoint, browser environment అవసరం.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Nested microtasks, timers జోడించి అమలుక్రమాన్ని ముందుగా ఊహించండి. Browser rendering ఎప్పుడు జరగగలదో గుర్తించండి.",
+      "independentTask": "ఒక చిన్న network-driven feature నిర్మించి loading, success, failure, cancellation పరిస్థితులను పరీక్షించండి. ఏ errorsను retry చేయవచ్చో, ఏవి చేయకూడదో వివరించండి.",
+      "hints": [
+        "HTTP errorsను network, parsing errors నుంచి వేరు చేయండి.",
+        "తగిన operationsకే పరిమిత retries ఉపయోగించండి.",
+        "తాజా active requestకే UI updates అనుసంధానించండి."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "javascript",
+    "starterCode": "console.log('sync');setTimeout(()=>console.log('task'),0);queueMicrotask(()=>console.log('microtask'));Promise.resolve().then(()=>console.log('promise'));console.log('end');",
+    "resetCode": "console.log('sync');setTimeout(()=>console.log('task'),0);queueMicrotask(()=>console.log('microtask'));Promise.resolve().then(()=>console.log('promise'));console.log('end');"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "j20-1-q1",
+        "prompt": "తదుపరి timer taskకు ముందు ఏది process అవుతుంది?",
+        "options": [
+          "Microtask queue",
+          "HTML title element",
+          "Browser address bar"
+        ],
+        "answer": "Microtask queue",
+        "explanation": "తదుపరి taskకు వెళ్లే ముందు microtask checkpointలో microtasks అమలవుతాయి."
+      },
+      {
+        "id": "j20-1-q2",
+        "prompt": "Network-driven UIలో నమ్మదగిన పద్ధతి ఏది?",
+        "options": [
+          "Loading, empty, success, failure, cancellation statesను స్పష్టంగా నిర్వహించడం",
+          "ప్రతి fulfilled fetch HTTP success అని భావించడం",
+          "ప్రతి requestను ఎప్పటికీ retry చేయడం"
+        ],
+        "answer": "Loading, empty, success, failure, cancellation statesను స్పష్టంగా నిర్వహించడం",
+        "explanation": "స్పష్టమైన states, పరిమిత recovery వల్ల network interface ఊహించదగినదిగా ఉంటుంది."
+      }
+    ]
+  },
+  "status": "draft"
+}
