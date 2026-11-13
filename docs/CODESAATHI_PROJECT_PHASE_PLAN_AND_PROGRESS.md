@@ -589,3 +589,10 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Registered all lesson paths in curriculum index and updated matching tracker rows where present.
 - Preserved code and technical identifiers; translated learner-facing content, tasks, hints and assessments.
 - Editorial, historical-source, browser and runtime verification remain pending.
+
+
+### Telugu translation batch — JavaScript J1.7–J2.6 (2026-11-13)
+- Added seven Telugu draft lessons for HTML/CSS/JavaScript collaboration, adding scripts, defer/async/modules, statements/expressions, comments/formatting, developer tools, and safe live playground concepts.
+- Registered all lesson paths in curriculum index and updated matching tracker rows where present.
+- Preserved code and technical identifiers; translated learner-facing content, tasks, hints and assessments.
+- Browser execution, module loading, and playground security verification remain pending.
