@@ -48,21 +48,12 @@ jobs:
           if (!i18n.includes('codesaathi.language.v1')) throw new Error('Language preference persistence is missing');
           if (!html.includes('languageFallbackNotice')) throw new Error('Honest translation fallback notice is missing');
           const path = require('path');
-          function scan(dir) {
-            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-              const file = path.join(dir, entry.name);
-              if (entry.isDirectory()) scan(file);
-              else if (entry.name.endsWith('.json')) {
-                const raw = fs.readFileSync(file, 'utf8');
-                JSON.parse(raw);
-                if (/[\u0C00-\u0C7F]/u.test(raw)) throw new Error('Telugu script found in English content: ' + file);
-              }
-            }
-          }
-          for (const file of fs.readdirSync('public/content/en/html').filter(name => /^H1\\.[1-6]\\.json$/.test(name))) {
+          for (const file of fs.readdirSync('public/content/en/html').filter(name => name.startsWith('H1.') && name.endsWith('.json'))) {
             const raw = fs.readFileSync(path.join('public/content/en/html', file), 'utf8');
             JSON.parse(raw);
-            if (/[\\u0C00-\\u0C7F]/u.test(raw)) throw new Error('Telugu script found in English HTML foundation lesson: ' + file);
+            if ([...raw].some(char => char.codePointAt(0) >= 0x0C00 && char.codePointAt(0) <= 0x0C7F)) {
+              throw new Error('Telugu script found in English HTML foundation lesson: ' + file);
+            }
           }
           console.log('CodeSaathi Phase 1 foundation checks passed.');
           NODE
