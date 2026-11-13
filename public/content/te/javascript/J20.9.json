@@ -1,0 +1,78 @@
+{
+  "id": "javascript.j20.9.te",
+  "courseId": "javascript",
+  "moduleId": "J20",
+  "topicId": "J20.9",
+  "title": "Retry సూత్రాలు మరియు Backoff",
+  "language": "te",
+  "learningObjectives": [
+    "Bounded retries, exponential backoff, jitter, idempotencyలను పరిగణించి network retry logic నిర్మించగలగాలి."
+  ],
+  "prerequisites": [
+    "J11.1",
+    "J11.4",
+    "J19.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Transient failures నుంచి కోలుకోవడానికి retry ఉపయోగపడుతుంది; కానీ retriesకు గరిష్ఠ పరిమితి ఉండాలి. Backoffతో ప్రయత్నాల మధ్య వేచి ఉండే సమయాన్ని పెంచుతారు; jitterతో సమయాన్ని కొద్దిగా randomగా మారుస్తారు. Retry చేయదగిన errorsనే మళ్లీ ప్రయత్నించాలి. Non-idempotent operationsకు duplicate side effects నివారించే idempotency protection అవసరం.",
+      "whyItMatters": "అపరిమిత retries outageను మరింత పెంచవచ్చు. Duplicate protection లేకుండా payment లేదా create requestను మళ్లీ పంపితే అనేక side effects జరగవచ్చు.",
+      "analogy": "ఒక పనిని నిర్వహించే క్రమం, దాని ఫలితాన్ని అందించే విధానం, తప్పు వచ్చినప్పుడు స్పందించే విధానం ముందుగానే నిర్ణయించిన workflowలాగా ఈ అంశాన్ని భావించవచ్చు.",
+      "analogyLimit": "ఈ పోలిక సరళీకరణ మాత్రమే. JavaScript scheduling, HTTP semantics, browser security web platform ప్రమాణాల ప్రకారం నిర్ణయించబడతాయి."
+    },
+    "explain": {
+      "narrative": "ప్రతి ప్రయత్నం విఫలమైనప్పుడు కొంచెం ఎక్కువ సమయం వేచి, పరిమిత సంఖ్యలో మళ్లీ ప్రయత్నించే విధానంలా backoff ఉంటుంది.",
+      "examples": [
+        {
+          "id": "j20-9-example",
+          "language": "javascript",
+          "code": "async function wait(ms){return new Promise(r=>setTimeout(r,ms))}async function retry(fn,n=3){for(let i=0;i<n;i++){try{return await fn()}catch(e){if(i===n-1)throw e;await wait(200*2**i+Math.random()*80)}}}",
+          "explanation": "retry function గరిష్ఠంగా n ప్రయత్నాలు చేస్తుంది. ప్రతి failure తర్వాత exponential delayతో పాటు చిన్న jitter జతచేస్తుంది. చివరి ప్రయత్నమూ విఫలమైతే errorను బయటకు పంపుతుంది.",
+          "expectedOutput": "Console లేదా UI ఫలితం code executionపై ఆధారపడి ఉంటుంది; network ఉదాహరణలకు సరైన endpoint, browser environment అవసరం.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Read-only requestకు పరిమిత retries జోడించండి. Validation errorsను retry చేయకుండా, payment creationకు idempotency ఎందుకు అవసరమో వివరించండి.",
+      "independentTask": "ఒక చిన్న network-driven feature నిర్మించి loading, success, failure, cancellation పరిస్థితులను పరీక్షించండి. ఏ errorsను retry చేయవచ్చో, ఏవి చేయకూడదో వివరించండి.",
+      "hints": [
+        "HTTP errorsను network, parsing errors నుంచి వేరు చేయండి.",
+        "తగిన operationsకే పరిమిత retries ఉపయోగించండి.",
+        "తాజా active requestకే UI updates అనుసంధానించండి."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "javascript",
+    "starterCode": "async function wait(ms){return new Promise(r=>setTimeout(r,ms))}async function retry(fn,n=3){for(let i=0;i<n;i++){try{return await fn()}catch(e){if(i===n-1)throw e;await wait(200*2**i+Math.random()*80)}}}",
+    "resetCode": "async function wait(ms){return new Promise(r=>setTimeout(r,ms))}async function retry(fn,n=3){for(let i=0;i<n;i++){try{return await fn()}catch(e){if(i===n-1)throw e;await wait(200*2**i+Math.random()*80)}}}"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "j20-9-q1",
+        "prompt": "Requestను retry చేయడానికి ముందు ఏ అంశాన్ని తప్పనిసరిగా పరిగణించాలి?",
+        "options": [
+          "అది idempotentనా లేదా duplicateల నుంచి రక్షించబడిందా",
+          "HTML title element",
+          "Browser address bar"
+        ],
+        "answer": "అది idempotentనా లేదా duplicateల నుంచి రక్షించబడిందా",
+        "explanation": "Operation safe కాకపోతే retry side effectsను మళ్లీ జరగనివ్వవచ్చు; idempotency లేదా duplicate protection అవసరం."
+      },
+      {
+        "id": "j20-9-q2",
+        "prompt": "Network-driven UIలో నమ్మదగిన పద్ధతి ఏది?",
+        "options": [
+          "Loading, empty, success, failure, cancellation statesను స్పష్టంగా నిర్వహించడం",
+          "ప్రతి fulfilled fetch HTTP success అని భావించడం",
+          "ప్రతి requestను ఎప్పటికీ retry చేయడం"
+        ],
+        "answer": "Loading, empty, success, failure, cancellation statesను స్పష్టంగా నిర్వహించడం",
+        "explanation": "స్పష్టమైన states, పరిమిత recovery వల్ల network interface ఊహించదగినదిగా ఉంటుంది."
+      }
+    ]
+  },
+  "status": "draft"
+}
