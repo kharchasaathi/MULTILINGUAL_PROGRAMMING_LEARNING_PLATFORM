@@ -1,5 +1,5 @@
-const CACHE_NAME = "codesaathi-v2";
-const APP_SHELL = ["/", "/index.html", "/styles.css", "/app.js", "/js/lessons/lesson-template.js", "/manifest.webmanifest", "/icon.svg"];
+const CACHE_NAME = "codesaathi-v3";
+const APP_SHELL = ["/", "/index.html", "/styles.css", "/app.js", "/js/i18n.js", "/js/lessons/lesson-template.js", "/js/lessons/curriculum-loader.js", "/manifest.webmanifest", "/icon.svg"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
   self.skipWaiting();
