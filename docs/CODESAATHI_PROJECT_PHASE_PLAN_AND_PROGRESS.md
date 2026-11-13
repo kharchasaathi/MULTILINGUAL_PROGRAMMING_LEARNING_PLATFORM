@@ -434,3 +434,12 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Added Telugu-language starter/reset code, registered all eight lessons in the curriculum index, and updated tracker rows.
 - Index commit: `e9b27946d8e57cb5a720a35f3a4ab1dc77f546f2`; tracker commit: `122de3d4981f1468ca8ec0fed37102db063735d9`.
 - All lessons remain DRAFT pending editorial review and actual browser/playground verification.
+
+
+## Telugu Translation Batch — CSS C16.1–C16.8 — 2026-11-13
+
+- Added eight Telugu drafts translated against English masters: intrinsic/extrinsic sizing; min-content, max-content, fit-content; aspect-ratio; object-fit and replaced elements; gap across layout systems; overflow axes and clipping; scroll containers and scroll behaviour; sticky positioning constraints.
+- Translated learner-facing explanations, examples, guided/independent tasks, hints, quiz prompts, options, answers and feedback. CSS properties, values, and executable syntax remain unchanged.
+- Added Telugu-language starter/reset code, registered all eight lessons in the curriculum index, and updated tracker rows.
+- Index commit: `4dc82cc3849d0b9f811cf251a46f32ad3516d069`; tracker commit: `ca4c3610a47cdc9857b5dfb928793f5d5f6591f7`.
+- All lessons remain DRAFT pending editorial review and actual browser/playground verification.
