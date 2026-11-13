@@ -1,0 +1,78 @@
+{
+  "id": "javascript.j20.10.te",
+  "courseId": "javascript",
+  "moduleId": "J20",
+  "topicId": "J20.10",
+  "title": "AbortController మరియు Timeout Patterns",
+  "language": "te",
+  "learningObjectives": [
+    "AbortController signalతో fetchను cancel చేయడం, timeout అమలు చేయడం, stale responsesను నిరోధించడం చేయగలగాలి."
+  ],
+  "prerequisites": [
+    "J11.1",
+    "J11.4",
+    "J19.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "AbortController, fetch మరియు ఇతర మద్దతు ఉన్న APIsకు AbortSignalను అందిస్తుంది. Timeout కోసం నిర్దిష్ట సమయం తర్వాత abort() పిలవవచ్చు. మద్దతు ఉన్న environmentsలో AbortSignal.timeout() కూడా ఉపయోగించవచ్చు. Timersను cleanup చేయాలి; user cancellation, timeout మధ్య తేడా అవసరమైతే గుర్తించాలి.",
+      "whyItMatters": "Cancellation వల్ల పాత requests కొత్త resultsను overwrite చేయకుండా, అవసరం లేని వేచిచూపు తగ్గుతుంది. Client timeout జరిగిందని server processing కూడా ఆగిపోయిందని నిర్ధారణ కాదు.",
+      "analogy": "ఒక పనిని నిర్వహించే క్రమం, దాని ఫలితాన్ని అందించే విధానం, తప్పు వచ్చినప్పుడు స్పందించే విధానం ముందుగానే నిర్ణయించిన workflowలాగా ఈ అంశాన్ని భావించవచ్చు.",
+      "analogyLimit": "ఈ పోలిక సరళీకరణ మాత్రమే. JavaScript scheduling, HTTP semantics, browser security web platform ప్రమాణాల ప్రకారం నిర్ణయించబడతాయి."
+    },
+    "explain": {
+      "narrative": "గడువు ముగిసినప్పుడు requestను నిలిపివేసే timerలాగా timeout పనిచేస్తుంది; పని పూర్తయ్యాక timerను తొలగించాలి.",
+      "examples": [
+        {
+          "id": "j20-10-example",
+          "language": "javascript",
+          "code": "async function load(url){const c=new AbortController(),t=setTimeout(()=>c.abort(),3000);try{return await fetch(url,{signal:c.signal})}finally{clearTimeout(t)}}",
+          "explanation": "మూడు సెకన్ల తర్వాత timer controllerను abort చేస్తుంది. Fetch పూర్తయినా లేదా error వచ్చినా finallyలో timer cleanup అవుతుంది.",
+          "expectedOutput": "Console లేదా UI ఫలితం code executionపై ఆధారపడి ఉంటుంది; network ఉదాహరణలకు సరైన endpoint, browser environment అవసరం.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Cancel, Timeout కోసం వేర్వేరు UI paths నిర్మించండి. కొత్త request ప్రారంభమైన తర్వాత పాత response UIను update చేయకుండా చూడండి.",
+      "independentTask": "ఒక చిన్న network-driven feature నిర్మించి loading, success, failure, cancellation పరిస్థితులను పరీక్షించండి. ఏ errorsను retry చేయవచ్చో, ఏవి చేయకూడదో వివరించండి.",
+      "hints": [
+        "HTTP errorsను network, parsing errors నుంచి వేరు చేయండి.",
+        "తగిన operationsకే పరిమిత retries ఉపయోగించండి.",
+        "తాజా active requestకే UI updates అనుసంధానించండి."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "javascript",
+    "starterCode": "async function load(url){const c=new AbortController(),t=setTimeout(()=>c.abort(),3000);try{return await fetch(url,{signal:c.signal})}finally{clearTimeout(t)}}",
+    "resetCode": "async function load(url){const c=new AbortController(),t=setTimeout(()=>c.abort(),3000);try{return await fetch(url,{signal:c.signal})}finally{clearTimeout(t)}}"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "j20-10-q1",
+        "prompt": "fetchకు cancellation తెలియజేయడానికి ఏ valueను పంపుతారు?",
+        "options": [
+          "AbortController.signal",
+          "HTML title element",
+          "Browser address bar"
+        ],
+        "answer": "AbortController.signal",
+        "explanation": "AbortController నుంచి వచ్చిన AbortSignalను fetch optionsలో signalగా అందిస్తారు."
+      },
+      {
+        "id": "j20-10-q2",
+        "prompt": "Network-driven UIలో నమ్మదగిన పద్ధతి ఏది?",
+        "options": [
+          "Loading, empty, success, failure, cancellation statesను స్పష్టంగా నిర్వహించడం",
+          "ప్రతి fulfilled fetch HTTP success అని భావించడం",
+          "ప్రతి requestను ఎప్పటికీ retry చేయడం"
+        ],
+        "answer": "Loading, empty, success, failure, cancellation statesను స్పష్టంగా నిర్వహించడం",
+        "explanation": "స్పష్టమైన states, పరిమిత recovery వల్ల network interface ఊహించదగినదిగా ఉంటుంది."
+      }
+    ]
+  },
+  "status": "draft"
+}
