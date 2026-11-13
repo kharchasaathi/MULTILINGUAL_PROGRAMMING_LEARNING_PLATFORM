@@ -764,3 +764,10 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Registered lesson paths in curriculum index and updated matching tracker rows where present.
 - Preserved executable syntax and technical identifiers; translated learner-facing content, tasks, hints and assessments.
 - Runtime edge-case and engine behaviour verification remain pending.
+
+
+### Telugu translation batch — JavaScript J14.9 and J15.1–J15.3 (2026-11-13)
+- Added four Telugu draft lessons covering garbage collection/memory lifecycle, first-class functions, higher-order functions, and practical UI closures.
+- Registered lesson paths in curriculum index and updated matching tracker rows where present.
+- Preserved executable syntax and technical identifiers; translated learner-facing content, tasks, hints and assessments.
+- Runtime memory and lifecycle edge-case verification remain pending.
