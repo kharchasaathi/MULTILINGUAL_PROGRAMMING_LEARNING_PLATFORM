@@ -1,0 +1,78 @@
+{
+  "id": "javascript.j13.7.en",
+  "courseId": "javascript",
+  "moduleId": "J13",
+  "topicId": "J13.7",
+  "title": "Memory leaks and event cleanup",
+  "language": "en",
+  "learningObjectives": [
+    "Explain memory leaks and event cleanup and apply safe browser programming practices."
+  ],
+  "prerequisites": [
+    "J8.1",
+    "J11.1",
+    "J12.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A memory leak occurs when objects that are no longer needed remain reachable, preventing garbage collection. Common causes include forgotten event listeners, timers, observers, detached DOM references, and long-lived closures. Cleanup removes listeners and cancels work when a component or view is no longer active.",
+      "whyItMatters": "Leaks can make long-running applications slower and consume memory over time. Lifecycle-aware cleanup is especially important in single-page applications and repeated mount/unmount flows.",
+      "analogy": "A memory leak is like keeping old equipment in a workspace after the job is finished, leaving less room for current work.",
+      "analogyLimit": "The analogy is simplified; browser APIs, security boundaries, and accessibility requirements are defined by web platform standards."
+    },
+    "explain": {
+      "narrative": "AbortController can remove listeners registered with its signal, and clearInterval stops the repeating timer. Real components should run cleanup when they are removed.",
+      "examples": [
+        {
+          "id": "j13-7-example",
+          "language": "javascript",
+          "code": "const controller=new AbortController();window.addEventListener('resize',()=>console.log('resize'),{signal:controller.signal});const timer=setInterval(()=>console.log('poll'),5000);// On teardown: controller.abort();clearInterval(timer);",
+          "explanation": "AbortController can remove listeners registered with its signal, and clearInterval stops the repeating timer. Real components should run cleanup when they are removed.",
+          "expectedOutput": "The example demonstrates the API or security principle; browser permission or environment support may be required.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Build a component setup function that returns a cleanup function. Remove event listeners, stop timers, and disconnect observers.",
+      "independentTask": "Build a small browser feature using the API or safety principle. Test normal, denied, unavailable, and invalid cases where relevant.",
+      "hints": [
+        "Treat data from the browser, URL, and network as untrusted.",
+        "Ask permission only after explaining the purpose.",
+        "Keep sensitive authorization and secrets on a trusted backend."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "javascript",
+    "starterCode": "const controller=new AbortController();window.addEventListener('resize',()=>console.log('resize'),{signal:controller.signal});const timer=setInterval(()=>console.log('poll'),5000);// On teardown: controller.abort();clearInterval(timer);",
+    "resetCode": "const controller=new AbortController();window.addEventListener('resize',()=>console.log('resize'),{signal:controller.signal});const timer=setInterval(()=>console.log('poll'),5000);// On teardown: controller.abort();clearInterval(timer);"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "j13-7-q1",
+        "prompt": "Which function stops a repeating timer created by setInterval()?",
+        "options": [
+          "clearInterval()",
+          "The HTML title element",
+          "The browser address bar"
+        ],
+        "answer": "clearInterval()",
+        "explanation": "clearInterval cancels the repeating timer."
+      },
+      {
+        "id": "j13-7-q2",
+        "prompt": "What is a reliable approach for browser-facing features?",
+        "options": [
+          "Use least privilege, clear user feedback, and appropriate server checks",
+          "Trust all client-provided values",
+          "Assume every browser grants every permission"
+        ],
+        "answer": "Use least privilege, clear user feedback, and appropriate server checks",
+        "explanation": "Browser features should respect user choice, validate inputs, and enforce protected actions on the server."
+      }
+    ]
+  },
+  "status": "draft"
+}
