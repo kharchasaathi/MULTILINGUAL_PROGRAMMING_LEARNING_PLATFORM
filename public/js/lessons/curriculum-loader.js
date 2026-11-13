@@ -1,0 +1,208 @@
+/* CodeSaathi curriculum loader v1.
+ * Loads authored lesson JSON by stable topic ID and selected language.
+ * Content is rendered as text; lesson JSON is never inserted as HTML.
+ */
+(() => {
+  "use strict";
+  const INDEX_URL = "/content/curriculum-index.json";
+  const LANGUAGE_KEY = "codesaathi.language.v1";
+  const PROGRESS_KEY = "codesaathi.curriculum.progress.v1";
+  const $ = (selector, root = document) => root.querySelector(selector);
+  const text = (tag, className, value) => {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (value !== undefined) node.textContent = value;
+    return node;
+  };
+  let index = null;
+  let activeCourse = null;
+  const getLanguage = () => {
+    try { return localStorage.getItem(LANGUAGE_KEY) || "en"; } catch { return "en"; }
+  };
+  const readProgress = () => {
+    try { return JSON.parse(localStorage.getItem(PROGRESS_KEY) || "{}"); } catch { return {}; }
+  };
+  const saveProgress = (topicId) => {
+    const progress = readProgress();
+    progress[topicId] = { completed: true, completedAt: new Date().toISOString() };
+    try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress)); } catch {}
+  };
+  const topicsFor = (courseId) => index.topics.filter(item => item.courseId === courseId);
+  const courseNames = {
+    foundation: ["Programming Foundations", "CORE CONCEPTS", "Understand computers, programs and problem-solving before writing code.", "F"],
+    html: ["HTML", "STRUCTURE", "Build meaningful, accessible document structure for the web.", "HTML"],
+    css: ["CSS", "PRESENTATION", "Control layout, typography, colour and responsive design.", "CSS"]
+  };
+
+  function renderCourseCards() {
+    const grid = $("#courseGrid");
+    if (!grid) return;
+    grid.replaceChildren();
+    const progress = readProgress();
+    index.courses.forEach(courseId => {
+      const meta = courseNames[courseId];
+      const items = topicsFor(courseId);
+      const completed = items.filter(item => progress[item.topicId]?.completed).length;
+      const card = text("article", "course-card");
+      const top = text("div", "course-top");
+      top.append(text("span", "course-icon " + (courseId === "html" ? "icon-html" : courseId === "css" ? "icon-css" : ""), meta[3]));
+      top.append(text("span", "course-number", String(items.length).padStart(2, "0") + " TOPICS"));
+      card.append(top, text("h3", "", meta[0]), text("p", "", meta[2]));
+      const metaLine = text("div", "course-meta", items.length + " authored lesson topics · English and Telugu drafts");
+      card.append(metaLine);
+      const footer = text("div", "course-footer");
+      footer.append(text("span", "course-price", "FREE PREVIEW"));
+      const button = text("button", "course-open", "Explore curriculum ↗");
+      button.type = "button";
+      button.dataset.curriculumCourse = courseId;
+      footer.append(button);
+      card.append(footer, text("small", "progress-note", completed + " of " + items.length + " completed"));
+      grid.append(card);
+    });
+  }
+
+  function showCourse(courseId) {
+    activeCourse = courseId;
+    const meta = courseNames[courseId];
+    const topics = topicsFor(courseId);
+    const container = $("#lessonContent");
+    container.replaceChildren();
+    container.append(text("div", "eyebrow", meta[1] + " · " + topics.length + " TOPICS"));
+    container.append(text("h2", "", meta[0] + " curriculum"));
+    container.append(text("p", "", meta[2]));
+    const completed = readProgress();
+    const modules = new Map();
+    topics.forEach(topic => {
+      if (!modules.has(topic.moduleId)) modules.set(topic.moduleId, []);
+      modules.get(topic.moduleId).push(topic);
+    });
+    modules.forEach((moduleTopics, moduleId) => {
+      const section = text("section", "curriculum-module");
+      section.append(text("h3", "", moduleId + " · " + moduleTopics.length + " topics"));
+      const list = text("div", "curriculum-topic-list");
+      moduleTopics.forEach(topic => {
+        const button = text("button", "curriculum-topic-button", (completed[topic.topicId]?.completed ? "✓ " : "○ ") + topic.topicId);
+        button.type = "button";
+        button.dataset.topicId = topic.topicId;
+        button.addEventListener("click", () => loadTopic(topic));
+        list.append(button);
+      });
+      section.append(list);
+      container.append(section);
+    });
+    $("#lessonDialog").showModal();
+  }
+
+  async function loadTopic(topic) {
+    const container = $("#lessonContent");
+    const language = getLanguage();
+    const requestedPath = topic.languages[language];
+    const actualLanguage = requestedPath ? language : "en";
+    const path = requestedPath || topic.languages.en;
+    if (!path) {
+      container.append(text("p", "curriculum-error", "This lesson has not been authored in the selected language yet."));
+      return;
+    }
+    const loading = text("p", "curriculum-loading", "Loading " + topic.topicId + "…");
+    container.replaceChildren(loading);
+    try {
+      const response = await fetch(path, { cache: "no-cache" });
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      const lesson = await response.json();
+      if (!lesson || lesson.topicId !== topic.topicId || !lesson.stages || !lesson.stages.understand || !lesson.stages.explain || !lesson.stages.practise) {
+        throw new Error("Lesson content does not match the expected contract.");
+      }
+      renderLesson(lesson, actualLanguage !== language);
+    } catch (error) {
+      container.replaceChildren(text("p", "curriculum-error", "Could not load this lesson (" + topic.topicId + "). Please retry. " + error.message));
+    }
+  }
+
+  function renderLesson(lesson, usedFallback) {
+    const container = $("#lessonContent");
+    container.replaceChildren();
+    const back = text("button", "curriculum-back", "← Back to " + (courseNames[activeCourse]?.[0] || "curriculum"));
+    back.type = "button";
+    back.addEventListener("click", () => showCourse(activeCourse));
+    container.append(back);
+    if (usedFallback) {
+      container.append(text("p", "curriculum-fallback", "This topic is not yet translated into your selected language. Showing the English lesson instead."));
+    }
+    if (lesson.status !== "released") {
+      container.append(text("p", "curriculum-draft-notice", "DRAFT LESSON · This content is not yet editorially reviewed or approved for release."));
+    }
+    const understand = lesson.stages.understand;
+    const explain = lesson.stages.explain;
+    const practice = lesson.stages.practise;
+    const example = (explain.examples || [])[0] || {};
+    const code = lesson.practice?.starterCode || (example.runnable ? example.code : "");
+    const questions = lesson.assessment?.questions || [];
+    const firstQuestion = questions[0];
+    const onComplete = () => {
+      saveProgress(lesson.topicId);
+      const button = $("#markLesson", container);
+      if (button) { button.textContent = "✓ Lesson saved"; button.disabled = true; }
+    };
+    window.CodeSaathiLessonTemplate.render(container, {
+      title: lesson.topicId + " · " + lesson.title,
+      understand: [understand.concept, understand.whyItMatters].filter(Boolean).join("\n\n"),
+      context: [understand.history, understand.analogyLimit].filter(Boolean).join("\n\n"),
+      explanation: [explain.narrative, example.explanation].filter(Boolean).join("\n\n"),
+      analogy: understand.analogy,
+      code,
+      practice: "Guided: " + (practice.guidedTask || "") + "\n\nIndependent: " + (practice.independentTask || ""),
+      quizQuestion: firstQuestion?.prompt,
+      quizAnswer: firstQuestion ? firstQuestion.answer + " — " + firstQuestion.explanation : "",
+      onComplete
+    });
+    if (questions.length > 1) {
+      const assessment = text("section", "curriculum-assessment");
+      assessment.append(text("h4", "", "More knowledge checks"));
+      questions.slice(1).forEach((question, index) => {
+        const details = text("details", "lesson-knowledge-check");
+        details.append(text("summary", "", question.prompt));
+        details.append(text("p", "", "Answer: " + question.answer + ". " + question.explanation));
+        assessment.append(details);
+      });
+      container.append(assessment);
+    }
+    const link = $(".lesson-practice-link", container);
+    if (link && code) {
+      link.addEventListener("click", () => {
+        const editor = $("#codeEditor");
+        if (editor) {
+          editor.value = code;
+          $("#runCode")?.click();
+        }
+      });
+      link.textContent = "Load this lesson's starter code in the playground";
+    } else if (link) {
+      link.textContent = "Open the practice area";
+    }
+    container.scrollTop = 0;
+  }
+
+  async function init() {
+    const grid = $("#courseGrid");
+    if (!grid || !$("#lessonDialog") || !window.CodeSaathiLessonTemplate) return;
+    try {
+      const response = await fetch(INDEX_URL, { cache: "no-cache" });
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      index = await response.json();
+      if (index.version !== 1 || !Array.isArray(index.topics)) throw new Error("Unsupported curriculum index version.");
+      renderCourseCards();
+      grid.addEventListener("click", event => {
+        const button = event.target.closest("[data-curriculum-course]");
+        if (!button) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        showCourse(button.dataset.curriculumCourse);
+      }, true);
+    } catch (error) {
+      console.error("CodeSaathi curriculum could not initialize:", error);
+      const notice = text("p", "curriculum-error", "The authored curriculum could not be loaded. The original course preview remains available.");
+      grid.prepend(notice);
+    }
+  }
+  init();
+})();
