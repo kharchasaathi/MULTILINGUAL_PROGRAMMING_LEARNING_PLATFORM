@@ -778,3 +778,10 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Preserved executable JavaScript code and lesson IDs; translated learner-facing explanations, practice tasks, hints, quiz prompts, answers, and feedback.
 - Registered Telugu lesson paths in the curriculum index and marked matching tracker rows as Telugu DRAFT.
 - Pedagogical review, JSON-schema validation, and browser execution/output verification remain pending.
+
+
+### Telugu translation batch — JavaScript J15.7–J15.10 (2026-11-13)
+- Added Telugu draft translations from the existing English source lessons for recursion/stack limits, call/apply/bind, arrow-function this behaviour, and debounce/throttle.
+- Preserved runnable JavaScript snippets and stable lesson identifiers; translated explanations, tasks, hints, and assessment feedback.
+- Registered Telugu paths in the curriculum index and marked matching tracker rows as Telugu DRAFT.
+- Pedagogical review, schema validation, and browser runtime/output verification remain pending.
