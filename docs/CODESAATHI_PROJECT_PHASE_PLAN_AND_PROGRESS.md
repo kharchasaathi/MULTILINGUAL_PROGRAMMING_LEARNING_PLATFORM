@@ -849,3 +849,10 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Preserved JavaScript examples and stable lesson identifiers; translated explanations, practice, hints, and assessments.
 - Registered Telugu paths in curriculum index and marked tracker rows as Telugu DRAFT.
 - Pedagogical review, schema validation, browser runtime, permissions, and accessibility verification remain pending.
+
+
+### Telugu translation batch — JavaScript J22.1–J22.12 (2026-11-13)
+- Added Telugu drafts for XSS, safe DOM/sanitization, URL validation, server-side trust boundaries, frontend secrets, CSP, iframe/postMessage origin checks, keyboard/focus accessibility, UI error isolation, performance/long tasks, memory cleanup, and feature detection/fallbacks.
+- Preserved JavaScript examples and lesson identifiers; translated teaching content, practice, hints, and assessments.
+- Registered Telugu paths in curriculum index and marked tracker rows as Telugu DRAFT.
+- Security review, schema validation, and browser runtime/accessibility verification remain pending.
