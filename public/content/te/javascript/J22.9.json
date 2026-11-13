@@ -1,0 +1,78 @@
+{
+  "id": "javascript.j22.9.te",
+  "courseId": "javascript",
+  "moduleId": "J22",
+  "topicId": "J22.9",
+  "title": "UI Codeలో Error Boundaries — Manual Patterns",
+  "language": "te",
+  "learningObjectives": [
+    "Vanilla JavaScriptలో rendering errorsను వేరు చేసి fallback UI చూపడం, asynchronous rejectionsను ప్రత్యేకంగా handle చేయడం చేయగలగాలి."
+  ],
+  "prerequisites": [
+    "J11.1",
+    "J11.4",
+    "J19.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Vanilla JavaScriptలో arbitrary DOM subtrees కోసం React తరహా built-in error boundary లేదు. try/catchతో rendering operationsను వేరు చేయవచ్చు; dataను boundaries వద్ద validate చేసి component-level fallback UI ఇవ్వవచ్చు. Async failuresకు కూడా rejection handling అవసరం.",
+      "whyItMatters": "ఒక malformed record వల్ల మొత్తం page blank కాకుండా independent rendering regionsను వేరు చేయాలి. Userకు secrets లేదా internal stack traces చూపకుండా errorsను report చేయాలి.",
+      "analogy": "ఇది applicationలో data ప్రవేశించే మార్గాలు, వాటిపై విధించే నియంత్రణలు, failure వచ్చినప్పుడు recoveryను నిర్వహించే భద్రతా విధానంలా భావించండి.",
+      "analogyLimit": "ఈ పోలిక సరళీకరణ మాత్రమే. Browser security, CSP, same-origin, accessibility, performance ప్రవర్తన web platform ప్రమాణాల ప్రకారం నిర్ణయించబడుతుంది."
+    },
+    "explain": {
+      "narrative": "ఒక panel విఫలమైనా మిగతా panels పనిచేసేలా ప్రతి భాగానికి స్వంత fallback ఉండేలా రూపొందించాలి.",
+      "examples": [
+        {
+          "id": "j22-9-example",
+          "language": "javascript",
+          "code": "function renderPanel(root,render){try{render(root)}catch(error){console.error(error);root.textContent='This panel could not be displayed.'}}",
+          "explanation": "Synchronous rendering error వస్తే try/catch దాన్ని పట్టుకుని ఆ panelలో మాత్రమే సురక్షితమైన సందేశాన్ని చూపిస్తుంది. Async పనులకు వేరుగా await/try/catch లేదా rejection handler అవసరం.",
+          "expectedOutput": "Console లేదా UI ఫలితం environmentపై ఆధారపడి ఉంటుంది; browser/HTTP configuration అవసరమయ్యే ఉదాహరణలకు సరైన setup అవసరం.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "రెండు independent panels నిర్మించండి. ఒక rendererను ఉద్దేశపూర్వకంగా throw చేయించి, మరో panel పనిచేస్తూనే ఉందని నిర్ధారించండి.",
+      "independentTask": "ఒక చిన్న featureను నిర్మించి threat cases, keyboard accessibility, cleanup, performance లేదా fallback పరిస్థితులను పరీక్షించండి. అవసరమైన security checksను server వైపున కూడా అమలు చేయండి.",
+      "hints": [
+        "Untrusted inputను defaultగా అనుమానంతో చూడండి.",
+        "Client-side checks భద్రతకు తుది హామీ కావు.",
+        "అవసరం లేని permissions, origins, scripts, resourcesను అనుమతించవద్దు."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "javascript",
+    "starterCode": "function renderPanel(root,render){try{render(root)}catch(error){console.error(error);root.textContent='This panel could not be displayed.'}}",
+    "resetCode": "function renderPanel(root,render){try{render(root)}catch(error){console.error(error);root.textContent='This panel could not be displayed.'}}"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "j22-9-q1",
+        "prompt": "Synchronous function చుట్టూ ఉన్న try/catch తర్వాత reject అయిన Promiseను ఆటోమేటిక్‌గా పట్టుకుంటుందా?",
+        "options": [
+          "కాదు; Promiseను await చేయాలి లేదా rejection handler జోడించాలి",
+          "HTML title element",
+          "Browser address bar"
+        ],
+        "answer": "కాదు; Promiseను await చేయాలి లేదా rejection handler జోడించాలి",
+        "explanation": "తర్వాత జరిగే asynchronous rejectionను పట్టుకోవడానికి awaitతో try/catch లేదా rejection handler అవసరం."
+      },
+      {
+        "id": "j22-9-q2",
+        "prompt": "Frontend securityలో సరైన ప్రాథమిక సూత్రం ఏది?",
+        "options": [
+          "Untrusted dataను validate చేసి, అవసరమైన permissionsనే ఇవ్వడం; serverలోనూ enforce చేయడం",
+          "Minification చేస్తే secrets దాచబడతాయని భావించడం",
+          "Client-side validation ఒక్కటే సరిపోతుందని అనుకోవడం"
+        ],
+        "answer": "Untrusted dataను validate చేసి, అవసరమైన permissionsనే ఇవ్వడం; serverలోనూ enforce చేయడం",
+        "explanation": "Frontend controls usabilityకు సహాయపడతాయి; trusted security enforcement serverలో ఉండాలి."
+      }
+    ]
+  },
+  "status": "draft"
+}
