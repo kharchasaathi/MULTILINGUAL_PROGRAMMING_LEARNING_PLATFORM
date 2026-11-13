@@ -15,6 +15,17 @@
     container.replaceChildren();
     if (lesson.title) container.append(make("h3", "lesson-template-title", lesson.title));
 
+    const objectives = Array.isArray(lesson.learningObjectives) ? lesson.learningObjectives.filter(item => typeof item === "string" && item.trim()) : [];
+    if (objectives.length) {
+      const section = make("section", "lesson-objectives");
+      section.append(make("span", "lesson-stage-label", "LEARNING OBJECTIVES"));
+      section.append(make("h4", "", "ఈ పాఠం పూర్తయ్యే సరికి మీరు ఏమి నేర్చుకుంటారు?"));
+      const list = make("ol", "lesson-objectives-list");
+      objectives.forEach(objective => list.append(make("li", "", objective)));
+      section.append(list);
+      container.append(section);
+    }
+
     const stage1 = make("section", "lesson-stage");
     stage1.append(make("span", "lesson-stage-label", "STAGE 1 · UNDERSTAND"));
     stage1.append(make("h4", "", "Understand the idea"));
