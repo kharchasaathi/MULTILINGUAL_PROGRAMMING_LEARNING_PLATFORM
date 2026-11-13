@@ -1,10 +1,6 @@
 (() => {
   "use strict";
   const $ = (selector) => document.querySelector(selector);
-  const translations = {
-    en: {heroLead:"A friendly, practical path to learning HTML, CSS and JavaScript — one clear lesson at a time.",explore:"Explore courses"},
-    te: {heroLead:"HTML, CSS, JavaScript నేర్చుకోవడానికి సులభమైన మార్గం — ఒక్కో పాఠం చొప్పున అర్థం చేసుకుంటూ, మీరే కోడ్ రాయండి.",explore:"కోర్సులు చూడండి"}
-  };
   const courses = [
     {id:"html",number:"01",name:"HTML",tag:"STRUCTURE",icon:"&lt;/&gt;",iconClass:"icon-html",description:"Build the structure of web pages with elements, headings, links, images, forms and semantic HTML.",lessons:["What is HTML?","Your first HTML document","Headings and paragraphs","Links and images","Lists and tables","Forms and input elements","Semantic HTML","Build a profile page"],intro:"HTML (HyperText Markup Language) describes the structure and meaning of content on a web page. It uses elements represented by tags.",example:'<!doctype html>\n<html>\n  <head><title>My page</title></head>\n  <body>\n    <h1>Hello, world!</h1>\n    <p>This is my first page.</p>\n  </body>\n</html>',task:"Create a page with one main heading, one paragraph and a link to your favourite learning resource."},
     {id:"css",number:"02",name:"CSS",tag:"PRESENTATION",icon:"✳",iconClass:"icon-css",description:"Style your pages with colours, typography, spacing, layouts, Flexbox, Grid and responsive design.",lessons:["What is CSS?","Ways to add CSS","Selectors and specificity","Colours and typography","The box model","Display and positioning","Flexbox layouts","CSS Grid","Responsive design","Build a landing page"],intro:"CSS (Cascading Style Sheets) controls how HTML content looks. It defines colours, spacing, typography and page layouts.",example:'body {\n  font-family: Arial, sans-serif;\n  background: #f4f6ff;\n}\nh1 {\n  color: #5145cd;\n  margin-bottom: 12px;\n}',task:"Write a CSS rule that gives the page a light background and makes its main heading purple."},
@@ -72,11 +68,6 @@
   }
   $("#runCode").addEventListener("click",runCode);
   $("#closeLesson").addEventListener("click",()=>$("#lessonDialog").close());
-  $("#languageSelect").addEventListener("change",e=>{
-    const t=translations[e.target.value]||translations.en;
-    document.querySelectorAll("[data-i18n]").forEach(el=>{const key=el.dataset.i18n;if(t[key])el.textContent=t[key];});
-    document.documentElement.lang=e.target.value;
-  });
   $("#startHeader").addEventListener("click",()=>$("#courses").scrollIntoView({behavior:"smooth"}));
   $("#year").textContent=new Date().getFullYear();
   renderCourses();runCode();
@@ -85,76 +76,3 @@
   }
 })();
 
-/* CodeSaathi shared six-language preference and honest translation fallback.
- * Language selection is available for all six planned languages.
- * Actual translated UI strings currently exist only for English and Telugu.
- */
-(() => {
-  "use strict";
-  const LANGUAGE_KEY = "codesaathi.language.v1";
-  const LANGUAGE_NAMES = {
-    en: "English",
-    te: "తెలుగు",
-    ml: "മലയാളം",
-    kn: "ಕನ್ನಡ",
-    ta: "தமிழ்",
-    hi: "हिन्दी"
-  };
-  const TRANSLATIONS = {
-    en: {
-      heroLead: "A friendly, practical path to learning HTML, CSS and JavaScript — one clear lesson at a time.",
-      explore: "Explore courses"
-    },
-    te: {
-      heroLead: "HTML, CSS, JavaScript నేర్చుకోవడానికి సులభమైన మార్గం — ఒక్కో పాఠం చొప్పున అర్థం చేసుకుంటూ, మీరే కోడ్ రాయండి.",
-      explore: "కోర్సులు చూడండి"
-    }
-  };
-  const selector = document.querySelector("#languageSelect");
-  const notice = document.querySelector("#languageFallbackNotice");
-  if (!selector) return;
-
-  const applyLanguage = (requested) => {
-    const selected = Object.prototype.hasOwnProperty.call(LANGUAGE_NAMES, requested) ? requested : "en";
-    const contentLanguage = Object.prototype.hasOwnProperty.call(TRANSLATIONS, selected) ? selected : "en";
-    const strings = TRANSLATIONS[contentLanguage];
-    document.querySelectorAll("[data-i18n]").forEach((element) => {
-      const key = element.dataset.i18n;
-      if (Object.prototype.hasOwnProperty.call(strings, key)) element.textContent = strings[key];
-    });
-    selector.value = selected;
-    document.documentElement.lang = contentLanguage;
-    if (notice) {
-      const isFallback = selected !== contentLanguage;
-      notice.hidden = !isFallback;
-      notice.textContent = isFallback
-        ? LANGUAGE_NAMES[selected] + " selected. Course and interface text is currently shown in English until this translation is published."
-        : "";
-    }
-    return selected;
-  };
-
-  const readPreference = () => {
-    try {
-      return localStorage.getItem(LANGUAGE_KEY) || "en";
-    } catch {
-      return "en";
-    }
-  };
-
-  const initial = applyLanguage(readPreference());
-  try {
-    localStorage.setItem(LANGUAGE_KEY, initial);
-  } catch {
-    // Keep the selector usable for this page if browser storage is unavailable.
-  }
-
-  selector.addEventListener("change", () => {
-    const selected = applyLanguage(selector.value);
-    try {
-      localStorage.setItem(LANGUAGE_KEY, selected);
-    } catch {
-      // Current-page language selection remains available without storage.
-    }
-  });
-})();
