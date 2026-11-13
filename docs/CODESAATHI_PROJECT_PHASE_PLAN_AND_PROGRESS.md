@@ -596,3 +596,10 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Registered all lesson paths in curriculum index and updated matching tracker rows where present.
 - Preserved code and technical identifiers; translated learner-facing content, tasks, hints and assessments.
 - Browser execution, module loading, and playground security verification remain pending.
+
+
+### Telugu translation batch — JavaScript J2.4–J2.6, J3.1–J3.9, J4.1–J4.4 (2026-11-13)
+- Added sixteen Telugu draft lessons for comments/formatting, developer tools, safe playground, data types, declarations/scope, strings, Number/BigInt, booleans, null/undefined, conversion, truthiness, references, arithmetic, assignment, comparison and logical operators.
+- Registered all lesson paths in curriculum index and updated matching tracker rows where present.
+- Preserved executable syntax and technical identifiers; translated learner-facing explanations, tasks, hints and assessments.
+- Browser/runtime/security verification remains pending.
