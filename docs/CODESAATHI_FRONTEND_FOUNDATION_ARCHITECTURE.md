@@ -28,15 +28,15 @@ The current frontend is a static single-page application. A multi-route architec
 
 ## 3. Current language preference implementation
 
-The existing UI has English and Telugu options. An additive language-preference section was appended to `public/app.js`:
+The UI now offers English, Telugu, Malayalam, Kannada, Tamil, and Hindi. The language-preference implementation in `public/app.js`:
 
 - Preference key: `codesaathi.language.v1`
-- Supported values in the current UI: `en`, `te`
+- Supported values in the current UI: `en`, `te`, `ml`, `kn`, `ta`, `hi`
 - Invalid or unavailable values fall back to English.
 - Preference is read during initialization and written on selection.
 - Storage access is guarded so a browser storage exception does not prevent page interaction.
 
-Only the currently translated `data-i18n` strings are translated. This does not mean the entire site or course content is translated. Malayalam, Kannada, Tamil and Hindi remain planned, not implemented.
+Only the currently translated landing-page strings are available in English and Telugu. Malayalam, Kannada, Tamil and Hindi are selectable and persisted, but show an explicit English fallback notice; their translations are not yet authored. This does not mean the entire site or course content is translated.
 
 The current page has no verified multi-route navigation. When course/lesson routes are introduced, they must use the same shared preference source rather than create separate page-local language states.
 
@@ -84,7 +84,7 @@ These are target responsibilities, not claims that these folders or modules alre
 
 ## Phase 1 update — six-language preference and lesson contract
 
-- The language selector now lists all six planned languages: English (`en`), Telugu (`te`), Malayalam (`ml`), Kannada (`kn`), Tamil (`ta`), and Hindi (`hi`).
+- The language selector lists all six planned languages: English (`en`), Telugu (`te`), Malayalam (`ml`), Kannada (`kn`), Tamil (`ta`), and Hindi (`hi`).
 - The selected language code is persisted using `codesaathi.language.v1`.
 - Actual translated landing-page strings currently exist only for English and Telugu. Selecting Malayalam, Kannada, Tamil, or Hindi preserves the selected preference but displays an explicit English fallback notice. These languages must not be described as translated or released until their content is authored and reviewed.
 - The browser document language follows the language of the content currently displayed, not merely the selected preference.
@@ -98,4 +98,11 @@ The current course data is still a small introductory sample. The reusable templ
 ## Verification snapshot — 2026-11-13
 A focused repository structural check passed 12 of 12 assertions for the six-language selector, saved preference key, honest fallback notice, three-stage renderer, renderer integration, lesson completion hook retention, service-worker asset caching/order, JSON lesson schema validity, and documentation alignment.
 
-A real browser interaction and successful latest Hosting deployment have not yet been confirmed. Therefore Phase 1 remains IN PROGRESS until those final checks are evidenced.
+The latest Firebase Hosting deployment is confirmed successful (GitHub Actions run #38). A real browser interaction test remains unverified because no browser/computer automation capability was available in the work session. Therefore Phase 1 remains IN PROGRESS until that runtime check is evidenced.
+
+
+## Latest deployment verification — 2026-11-13
+
+- GitHub Actions run #38 completed successfully; deploy job conclusion: `success`.
+- Hosting deployment is confirmed. The live browser behaviour has not been independently exercised in this session.
+- Phase 1's only remaining acceptance gate is the focused browser smoke check documented in the project phase dashboard.
