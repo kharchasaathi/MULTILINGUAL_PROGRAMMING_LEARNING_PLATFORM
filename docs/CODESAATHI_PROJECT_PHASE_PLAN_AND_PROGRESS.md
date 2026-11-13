@@ -603,3 +603,10 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Registered all lesson paths in curriculum index and updated matching tracker rows where present.
 - Preserved executable syntax and technical identifiers; translated learner-facing explanations, tasks, hints and assessments.
 - Browser/runtime/security verification remains pending.
+
+
+### Telugu translation batch — JavaScript J3.1–J3.9 and J4.1–J4.8 (2026-11-13)
+- Added seventeen Telugu draft lessons for JavaScript values and types, declarations, strings, numbers/BigInt, booleans, null/undefined, conversions, truthiness, references, arithmetic, assignment, comparisons, logical operators, nullish/optional access, ternary, precedence, and numeric safety.
+- Registered all lesson paths in curriculum index and updated matching tracker rows where present.
+- Preserved executable syntax and technical identifiers; translated learner-facing content, tasks, hints and assessments.
+- Editorial, numerical edge-case, and browser verification remain pending.
