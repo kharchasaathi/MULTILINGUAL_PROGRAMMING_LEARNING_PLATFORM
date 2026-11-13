@@ -60,3 +60,53 @@
     window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(err => console.warn("Offline mode unavailable:", err)));
   }
 })();
+
+/* CodeSaathi shared language preference — additive foundation layer.
+ * Supported UI languages in this release: English and Telugu.
+ * Other planned languages remain unavailable until their translations are implemented.
+ */
+(() => {
+  "use strict";
+  const LANGUAGE_KEY = "codesaathi.language.v1";
+  const SUPPORTED_LANGUAGES = new Set(["en", "te"]);
+  const selector = document.querySelector("#languageSelect");
+  if (!selector) return;
+
+  const applyLanguage = (requestedLanguage) => {
+    const language = SUPPORTED_LANGUAGES.has(requestedLanguage) ? requestedLanguage : "en";
+    const translationsForLanguage = translations[language] || translations.en;
+    document.querySelectorAll("[data-i18n]").forEach((element) => {
+      const key = element.dataset.i18n;
+      if (Object.prototype.hasOwnProperty.call(translationsForLanguage, key)) {
+        element.textContent = translationsForLanguage[key];
+      }
+    });
+    selector.value = language;
+    document.documentElement.lang = language;
+    return language;
+  };
+
+  const readSavedLanguage = () => {
+    try {
+      return localStorage.getItem(LANGUAGE_KEY) || "en";
+    } catch {
+      return "en";
+    }
+  };
+
+  const initialLanguage = applyLanguage(readSavedLanguage());
+  try {
+    localStorage.setItem(LANGUAGE_KEY, initialLanguage);
+  } catch {
+    // Language selection still works for this page when storage is unavailable.
+  }
+
+  selector.addEventListener("change", () => {
+    const language = applyLanguage(selector.value);
+    try {
+      localStorage.setItem(LANGUAGE_KEY, language);
+    } catch {
+      // Keep the current page usable when browser storage is unavailable.
+    }
+  });
+})();
