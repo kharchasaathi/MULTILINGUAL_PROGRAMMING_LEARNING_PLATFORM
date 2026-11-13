@@ -2,6 +2,7 @@
 (() => {
   "use strict";
   const KEY = "codesaathi.language.v1";
+  const SUPPORTED_LOCALES = ["en","te","hi","bn","mr","ta","kn","ml","gu","ur","pa","or","as","ne","brx","doi","ks","kok","mai","mni","sa","sat","sd"];
   const te = {
     "Courses":"కోర్సులు","How it works":"ఇది ఎలా పనిచేస్తుంది","Practice":"ప్రాక్టీస్","Language":"భాష",
     "Start learning":"నేర్చుకోవడం ప్రారంభించండి","YOUR JOURNEY INTO TECHNOLOGY STARTS HERE":"సాంకేతిక ప్రపంచంలోకి మీ ప్రయాణం ఇక్కడ ప్రారంభం",
@@ -110,7 +111,7 @@
     });
   }
   function apply(language) {
-    const lang = ["en","te","ml","kn","ta","hi"].includes(language) ? language : "en";
+    const lang = SUPPORTED_LOCALES.includes(language) ? language : "en";
     document.documentElement.lang = lang;
     restore(document.body);
     if (lang === "te") translate(document.body);
@@ -126,7 +127,7 @@
     if (notice) {
       const unsupported = !["en","te"].includes(lang);
       notice.hidden = !unsupported;
-      notice.textContent = unsupported ? "ఈ భాషలో UI అనువాదం ఇంకా అందుబాటులో లేదు. ప్రస్తుతం ఇంగ్లీష్ UI చూపిస్తున్నాము." : "";
+      notice.textContent = unsupported ? "ఎంచుకున్న భాషలో UI అనువాదం ఇంకా పూర్తికాలేదు. అందుబాటులో లేని పాఠాలకు ప్రస్తుతం English చూపిస్తాము." : "";
     }
   }
   function init() {
