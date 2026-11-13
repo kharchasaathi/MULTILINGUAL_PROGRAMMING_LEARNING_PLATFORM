@@ -799,3 +799,11 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Preserved executable code and lesson identifiers; translated learner-facing teaching, tasks, hints, and quiz feedback.
 - Registered Telugu lesson paths in the curriculum index and marked matching tracker rows as Telugu DRAFT.
 - Pedagogical review, schema validation, and browser runtime/output verification remain pending.
+
+
+### Telugu translation batch — JavaScript J16.9–J16.10 (2026-11-13)
+- Added Telugu drafts from the existing English source lessons for private class fields and choosing plain objects/functions over classes.
+- Preserved JavaScript syntax and lesson IDs; translated explanations, exercises, hints, and assessments.
+- Registered Telugu lesson paths in the curriculum index and updated tracker rows.
+- Repaired the J15.8 CSV row structure after detecting a quoted-comma parsing issue; normalized the tracker with proper CSV escaping.
+- Pedagogical review, schema validation, and browser runtime/output verification remain pending.
