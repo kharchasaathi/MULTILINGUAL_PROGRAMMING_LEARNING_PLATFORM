@@ -223,3 +223,30 @@ Only English and Telugu currently have translated landing-page strings. The othe
 3. Continue authoring missing HTML, CSS, JavaScript, Web Platform and project topics in manageable, reviewed batches.
 4. Implement the universal isolated playground and CSS Colour/Property Labs; validate examples against actual browser output.
 5. Complete the full learner journey and release gates, then deploy the verified release.
+
+
+## Curriculum integration milestone — 2026-11-13
+
+### Implemented
+- Added `public/content/curriculum-index.json` as a versioned index of the 97 authored topic IDs across Foundation, HTML and CSS, with English/Telugu file paths and topic titles sourced from the curriculum tracker.
+- Added `public/js/lessons/curriculum-loader.js` and loaded it after the existing app script.
+- The learner course cards now open the authored curriculum by module and topic instead of relying only on the original hard-coded sample lesson text.
+- Selecting a topic loads its JSON in the chosen English or Telugu language, renders the existing three-stage lesson template, shows the draft status, includes assessment checks, and offers the lesson starter code in the existing practice area when available.
+- Added topic completion persistence under `codesaathi.curriculum.progress.v1`.
+- If a selected language does not yet have a lesson file, the loader uses the English file and displays an explicit fallback notice. It does not claim an unavailable translation exists.
+- Added responsive styles for module/topic navigation and draft/fallback notices.
+
+### Evidence
+- Curriculum loader integration commit: `0cb1f3bf93bbe5f3342ee0e125eeafb4fcfefef6`
+- Topic-title navigation refinement commit: `a00b10d8a2ee0f05afe0c5db618b3df8d03bf8f0`
+- Indexed content: 97 unique topics / 194 English-Telugu JSON files.
+
+### Validation and remaining work
+- Repository tree inspection confirmed 194 lesson JSON paths and the index contains 97 unique topic entries.
+- The loader checks the expected topic ID and required three-stage objects before rendering.
+- GitHub Actions deployment for the integration commits is being processed; record its final result after the run completes.
+- Real browser interaction remains unverified: open each course, expand modules, load representative English/Telugu lessons, load starter code, submit completion, and reload to confirm persistence.
+- Lesson JSON files remain DRAFT. Structural loading does not equal pedagogical review, fact-checking, translation QA, or release approval.
+- The universal isolated playground, CSS visual labs, full curriculum authoring, and broader learner journey remain separate incomplete deliverables.
+
+**Phase status:** Phase 1 — IN PROGRESS (browser smoke checks still pending). Phase 2 — IN PROGRESS (97 of 554 tracked topic rows have draft lesson content; 457 remain planned).
