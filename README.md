@@ -1,10 +1,10 @@
 # MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
-A multilingual programming education platform. The initial content locales currently implemented in the curriculum index are English (`en`) and Telugu (`te`).
+
+A multilingual programming education platform designed to teach programming clearly and naturally in English and the 22 languages listed in the Eighth Schedule of the Constitution of India.
 
 ## Language expansion roadmap
 
-### Phase 1 — Priority Indian languages
-Planned language coverage (10 languages):
+### Phase 1 — Priority languages (10 locales including English)
 - English (`en`)
 - Telugu (`te`)
 - Hindi (`hi`)
@@ -21,12 +21,23 @@ Planned language coverage (10 languages):
 - Odia (`or`)
 - Assamese (`as`)
 - Nepali (`ne`)
-- Additional languages to be prioritized after Phase 1.
 
-### Phase 3
-- Remaining languages from the Eighth Schedule of the Constitution of India, followed by other Indian languages based on learner demand.
+### Phase 3 — Remaining scheduled Indian languages
+- Bodo (`brx`)
+- Dogri (`doi`)
+- Kashmiri (`ks`)
+- Konkani (`kok`)
+- Maithili (`mai`)
+- Manipuri / Meitei (`mni`)
+- Sanskrit (`sa`)
+- Santali (`sat`)
+- Sindhi (`sd`)
 
-**Implementation note:** The roadmap records planned coverage; a language must not be presented as available in the product until its locale content, language selector, rendering/font support, and validation are implemented and tested. The curriculum index remains the source of truth for currently available lesson locales.
+The complete roadmap (language codes, phase, script, and implementation status) is registered in `public/content/curriculum-index.json` under `plannedLanguages`.
+
+**Availability rule:** Only locales listed in the curriculum index's `languages` array have lesson content currently available. The `plannedLanguages` array is the approved expansion roadmap; planned locales must not be shown as selectable or described as complete until their translated lessons, language selector, fonts/script rendering, and automated validation are implemented and tested.
+
+**Teaching-quality rule:** Each locale must preserve the same learning objectives, three-stage teaching flow, concept depth, examples, practice tasks, hints, and assessments. Translation must be natural and learner-friendly, not word-for-word substitution. Technical terms may remain in English when that improves clarity, with explanations in the learner's language. Native-language review should be used where available.
 
 ## E13 backup and recovery evidence
 
