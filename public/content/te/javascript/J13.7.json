@@ -1,0 +1,78 @@
+{
+  "id": "javascript.j13.7.te",
+  "courseId": "javascript",
+  "moduleId": "J13",
+  "topicId": "J13.7",
+  "title": "Memory leaks మరియు event cleanup",
+  "language": "te",
+  "learningObjectives": [
+    "Explain memory leaks and event cleanup and apply safe browser programming practices."
+  ],
+  "prerequisites": [
+    "J8.1",
+    "J11.1",
+    "J12.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "ఇక అవసరం లేని objects reachable‌గా ఉండి garbage collection జరగకపోతే memory leak. మరిచిపోయిన event listeners, timers, observers, detached DOM references, long-lived closures సాధారణ కారణాలు. Component లేదా view ఇక active కానప్పుడు cleanup listeners తొలగించి work cancel చేస్తుంది.",
+      "whyItMatters": "Leaks long-running applications‌ను నెమ్మదింపజేసి కాలక్రమంలో memory వాడకం పెంచుతాయి. Single-page apps, repeated mount/unmount flows‌లో lifecycle-aware cleanup ముఖ్యం.",
+      "analogy": "పని పూర్తయ్యాక పాత equipment workspace‌లో ఉంచడం వల్ల ప్రస్తుత పనికి స్థలం తగ్గినట్టే memory leak.",
+      "analogyLimit": "ఇది సరళమైన పోలిక మాత్రమే; browser APIs, security boundaries, accessibility requirements web platform standards‌ను అనుసరిస్తాయి."
+    },
+    "explain": {
+      "narrative": "AbortController signal‌తో register చేసిన listeners తొలగించవచ్చు; clearInterval repeating timer ఆపుతుంది. Component తొలగినప్పుడు నిజమైన cleanup జరగాలి.",
+      "examples": [
+        {
+          "id": "j13-7-example",
+          "language": "te",
+          "code": "const controller=new AbortController();window.addEventListener('resize',()=>console.log('resize'),{signal:controller.signal});const timer=setInterval(()=>console.log('poll'),5000);// On teardown: controller.abort();clearInterval(timer);",
+          "explanation": "AbortController signal‌తో register చేసిన listeners తొలగించవచ్చు; clearInterval repeating timer ఆపుతుంది. Component తొలగినప్పుడు నిజమైన cleanup జరగాలి.",
+          "expectedOutput": "ఈ ఉదాహరణ API లేదా security principle‌ను చూపిస్తుంది; browser permission లేదా environment support అవసరం కావచ్చు.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Cleanup function return చేసే component setup function నిర్మించండి. Event listeners తొలగించి timers ఆపి observers disconnect చేయండి.",
+      "independentTask": "ఈ API లేదా safety principle వాడే చిన్న browser feature నిర్మించండి. Normal, denied, unavailable, invalid cases తగినచోట పరీక్షించండి.",
+      "hints": [
+        "Browser, URL, network నుంచి వచ్చే data‌ను untrusted‌గా పరిగణించండి.",
+        "Purpose వివరించిన తర్వాతే permission అడగండి.",
+        "Sensitive authorization, secrets‌ను trusted backend‌లో ఉంచండి."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "javascript",
+    "starterCode": "const controller=new AbortController();window.addEventListener('resize',()=>console.log('resize'),{signal:controller.signal});const timer=setInterval(()=>console.log('poll'),5000);// On teardown: controller.abort();clearInterval(timer);",
+    "resetCode": "const controller=new AbortController();window.addEventListener('resize',()=>console.log('resize'),{signal:controller.signal});const timer=setInterval(()=>console.log('poll'),5000);// On teardown: controller.abort();clearInterval(timer);"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "j13-7-q1",
+        "prompt": "setInterval() సృష్టించిన repeating timer‌ను ఏ function ఆపుతుంది?",
+        "options": [
+          "clearInterval()",
+          "HTML title element",
+          "Browser address bar"
+        ],
+        "answer": "clearInterval()",
+        "explanation": "ఈ browser security, performance లేదా accessibility నియమం robust web experience నిర్మించడానికి ఉపయోగపడుతుంది."
+      },
+      {
+        "id": "j13-7-q2",
+        "prompt": "Browser-facing features కోసం నమ్మదగిన విధానం ఏది?",
+        "options": [
+          "Least privilege, clear user feedback, తగిన server checks వాడాలి",
+          "Client ఇచ్చిన అన్ని values‌ను నమ్మాలి",
+          "ప్రతి browser ప్రతి permission ఇస్తుందని అనుకోవాలి"
+        ],
+        "answer": "Least privilege, clear user feedback, తగిన server checks వాడాలి",
+        "explanation": "Browser features user choice‌ను గౌరవించి inputs validate చేసి protected actions‌ను server‌లో enforce చేయాలి."
+      }
+    ]
+  },
+  "status": "draft"
+}
