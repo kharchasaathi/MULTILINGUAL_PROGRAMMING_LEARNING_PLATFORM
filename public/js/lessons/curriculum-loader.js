@@ -146,6 +146,7 @@
     };
     window.CodeSaathiLessonTemplate.render(container, {
       title: lesson.topicId + " · " + lesson.title,
+      learningObjectives: lesson.learningObjectives,
       understand: [understand.concept, understand.whyItMatters].filter(Boolean).join("\n\n"),
       context: [understand.history, understand.analogyLimit].filter(Boolean).join("\n\n"),
       explanation: [explain.narrative, example.explanation].filter(Boolean).join("\n\n"),
