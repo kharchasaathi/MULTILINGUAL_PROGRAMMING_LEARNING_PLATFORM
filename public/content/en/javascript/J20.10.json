@@ -1,0 +1,78 @@
+{
+  "id": "javascript.j20.10.en",
+  "courseId": "javascript",
+  "moduleId": "J20",
+  "topicId": "J20.10",
+  "title": "AbortController and timeout patterns",
+  "language": "en",
+  "learningObjectives": [
+    "Explain abortcontroller and timeout patterns and implement reliable browser event and network workflows."
+  ],
+  "prerequisites": [
+    "J11.1",
+    "J11.4",
+    "J19.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "AbortController provides an AbortSignal for fetch and other supported APIs. A timeout can call abort() after a delay; AbortSignal.timeout() is an alternative where supported. Cleanup timers and distinguish user cancellation from timeout when needed.",
+      "whyItMatters": "Cancellation prevents stale requests from overwriting newer results and avoids waiting indefinitely. A client timeout does not prove server processing stopped.",
+      "analogy": "A timeout is a deadline for the caller to stop waiting; an abort signal communicates that the result is no longer needed.",
+      "analogyLimit": "The analogy is simplified; JavaScript scheduling, HTTP semantics, and browser security follow platform standards."
+    },
+    "explain": {
+      "narrative": "The timer aborts the fetch after the deadline and is cleared when the request completes.",
+      "examples": [
+        {
+          "id": "j20-10-example",
+          "language": "javascript",
+          "code": "async function load(url){const c=new AbortController(),t=setTimeout(()=>c.abort(),3000);try{return await fetch(url,{signal:c.signal})}finally{clearTimeout(t)}}",
+          "explanation": "The timer aborts the fetch after the deadline and is cleared when the request completes.",
+          "expectedOutput": "Console or UI output demonstrates the concept; network examples require a configured endpoint.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Add separate Cancel and Timeout paths. Ensure stale responses cannot update the UI after a newer request starts.",
+      "independentTask": "Build an asynchronous feature with explicit states, cancellation, and error handling. Document which failures are safe to retry.",
+      "hints": [
+        "Separate HTTP errors from network and parsing errors.",
+        "Use bounded retries only for suitable operations.",
+        "Tie UI updates to the latest active request."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "javascript",
+    "starterCode": "async function load(url){const c=new AbortController(),t=setTimeout(()=>c.abort(),3000);try{return await fetch(url,{signal:c.signal})}finally{clearTimeout(t)}}",
+    "resetCode": "async function load(url){const c=new AbortController(),t=setTimeout(()=>c.abort(),3000);try{return await fetch(url,{signal:c.signal})}finally{clearTimeout(t)}}"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "j20-10-q1",
+        "prompt": "Which value is passed to fetch to communicate cancellation?",
+        "options": [
+          "AbortController.signal",
+          "The HTML title element",
+          "The browser address bar"
+        ],
+        "answer": "AbortController.signal",
+        "explanation": "The AbortSignal supplied by AbortController communicates cancellation to fetch."
+      },
+      {
+        "id": "j20-10-q2",
+        "prompt": "What is a reliable approach to network-driven UI?",
+        "options": [
+          "Model loading, empty, success, failure, and cancellation states",
+          "Assume every fulfilled fetch means HTTP success",
+          "Retry every request forever"
+        ],
+        "answer": "Model loading, empty, success, failure, and cancellation states",
+        "explanation": "Explicit states and bounded recovery make network interfaces predictable and safe."
+      }
+    ]
+  },
+  "status": "draft"
+}

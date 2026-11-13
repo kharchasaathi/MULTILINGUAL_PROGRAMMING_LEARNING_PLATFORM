@@ -1,0 +1,78 @@
+{
+  "id": "javascript.j20.9.en",
+  "courseId": "javascript",
+  "moduleId": "J20",
+  "topicId": "J20.9",
+  "title": "Retry principles and backoff (safe/idempotent awareness)",
+  "language": "en",
+  "learningObjectives": [
+    "Explain retry principles and backoff (safe/idempotent awareness) and implement reliable browser event and network workflows."
+  ],
+  "prerequisites": [
+    "J11.1",
+    "J11.4",
+    "J19.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Retries can recover from transient failures but should be bounded and use backoff, often with jitter. Retry only suitable failures and consider whether the operation is idempotent. Non-idempotent actions need idempotency protection to avoid duplicate side effects.",
+      "whyItMatters": "Unbounded retries can amplify outages. Repeating payment or create requests without duplicate protection can cause multiple effects.",
+      "analogy": "Retrying is like trying a busy door again after waiting; repeated rapid attempts worsen congestion.",
+      "analogyLimit": "The analogy is simplified; JavaScript scheduling, HTTP semantics, and browser security follow platform standards."
+    },
+    "explain": {
+      "narrative": "The example caps attempts and uses exponential backoff with jitter. Production code must choose retryable errors deliberately.",
+      "examples": [
+        {
+          "id": "j20-9-example",
+          "language": "javascript",
+          "code": "async function wait(ms){return new Promise(r=>setTimeout(r,ms))}async function retry(fn,n=3){for(let i=0;i<n;i++){try{return await fn()}catch(e){if(i===n-1)throw e;await wait(200*2**i+Math.random()*80)}}}",
+          "explanation": "The example caps attempts and uses exponential backoff with jitter. Production code must choose retryable errors deliberately.",
+          "expectedOutput": "Console or UI output demonstrates the concept; network examples require a configured endpoint.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Add retries for a read-only request. Exclude validation failures and explain why payment creation needs idempotency protection.",
+      "independentTask": "Build an asynchronous feature with explicit states, cancellation, and error handling. Document which failures are safe to retry.",
+      "hints": [
+        "Separate HTTP errors from network and parsing errors.",
+        "Use bounded retries only for suitable operations.",
+        "Tie UI updates to the latest active request."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "javascript",
+    "starterCode": "async function wait(ms){return new Promise(r=>setTimeout(r,ms))}async function retry(fn,n=3){for(let i=0;i<n;i++){try{return await fn()}catch(e){if(i===n-1)throw e;await wait(200*2**i+Math.random()*80)}}}",
+    "resetCode": "async function wait(ms){return new Promise(r=>setTimeout(r,ms))}async function retry(fn,n=3){for(let i=0;i<n;i++){try{return await fn()}catch(e){if(i===n-1)throw e;await wait(200*2**i+Math.random()*80)}}}"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "j20-9-q1",
+        "prompt": "What must be considered before retrying a request?",
+        "options": [
+          "Whether it is idempotent or protected against duplicates",
+          "The HTML title element",
+          "The browser address bar"
+        ],
+        "answer": "Whether it is idempotent or protected against duplicates",
+        "explanation": "Retries can repeat side effects unless the operation is safe or protected."
+      },
+      {
+        "id": "j20-9-q2",
+        "prompt": "What is a reliable approach to network-driven UI?",
+        "options": [
+          "Model loading, empty, success, failure, and cancellation states",
+          "Assume every fulfilled fetch means HTTP success",
+          "Retry every request forever"
+        ],
+        "answer": "Model loading, empty, success, failure, and cancellation states",
+        "explanation": "Explicit states and bounded recovery make network interfaces predictable and safe."
+      }
+    ]
+  },
+  "status": "draft"
+}

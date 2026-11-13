@@ -1,0 +1,78 @@
+{
+  "id": "javascript.j20.1.en",
+  "courseId": "javascript",
+  "moduleId": "J20",
+  "topicId": "J20.1",
+  "title": "Tasks, microtasks, and event loop",
+  "language": "en",
+  "learningObjectives": [
+    "Explain tasks, microtasks, and event loop and implement reliable browser event and network workflows."
+  ],
+  "prerequisites": [
+    "J11.1",
+    "J11.4",
+    "J19.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "The event loop coordinates tasks and microtasks. Promise reactions and queueMicrotask callbacks run after the current stack completes, at a microtask checkpoint before the next task. Timers and many user events are tasks.",
+      "whyItMatters": "This model explains callback ordering and why long microtask chains can delay rendering. Synchronous code still blocks the main thread.",
+      "analogy": "Tasks are scheduled jobs; microtasks are follow-up work handled before the next task.",
+      "analogyLimit": "The analogy is simplified; JavaScript scheduling, HTTP semantics, and browser security follow platform standards."
+    },
+    "explain": {
+      "narrative": "Synchronous output appears first, then queued microtasks in order, then the timer task.",
+      "examples": [
+        {
+          "id": "j20-1-example",
+          "language": "javascript",
+          "code": "console.log('sync');setTimeout(()=>console.log('task'),0);queueMicrotask(()=>console.log('microtask'));Promise.resolve().then(()=>console.log('promise'));console.log('end');",
+          "explanation": "Synchronous output appears first, then queued microtasks in order, then the timer task.",
+          "expectedOutput": "Console or UI output demonstrates the concept; network examples require a configured endpoint.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Add nested microtasks and timers. Predict the order and identify when rendering can occur.",
+      "independentTask": "Build an asynchronous feature with explicit states, cancellation, and error handling. Document which failures are safe to retry.",
+      "hints": [
+        "Separate HTTP errors from network and parsing errors.",
+        "Use bounded retries only for suitable operations.",
+        "Tie UI updates to the latest active request."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "javascript",
+    "starterCode": "console.log('sync');setTimeout(()=>console.log('task'),0);queueMicrotask(()=>console.log('microtask'));Promise.resolve().then(()=>console.log('promise'));console.log('end');",
+    "resetCode": "console.log('sync');setTimeout(()=>console.log('task'),0);queueMicrotask(()=>console.log('microtask'));Promise.resolve().then(()=>console.log('promise'));console.log('end');"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "j20-1-q1",
+        "prompt": "Which is processed before the next timer task?",
+        "options": [
+          "The microtask queue",
+          "The HTML title element",
+          "The browser address bar"
+        ],
+        "answer": "The microtask queue",
+        "explanation": "Microtasks are processed at the checkpoint before the next task."
+      },
+      {
+        "id": "j20-1-q2",
+        "prompt": "What is a reliable approach to network-driven UI?",
+        "options": [
+          "Model loading, empty, success, failure, and cancellation states",
+          "Assume every fulfilled fetch means HTTP success",
+          "Retry every request forever"
+        ],
+        "answer": "Model loading, empty, success, failure, and cancellation states",
+        "explanation": "Explicit states and bounded recovery make network interfaces predictable and safe."
+      }
+    ]
+  },
+  "status": "draft"
+}

@@ -1,0 +1,78 @@
+{
+  "id": "javascript.j20.2.en",
+  "courseId": "javascript",
+  "moduleId": "J20",
+  "topicId": "J20.2",
+  "title": "Promise states and chaining",
+  "language": "en",
+  "learningObjectives": [
+    "Explain promise states and chaining and implement reliable browser event and network workflows."
+  ],
+  "prerequisites": [
+    "J11.1",
+    "J11.4",
+    "J19.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A Promise begins pending and settles once as fulfilled or rejected. then() returns a new Promise; returned values fulfil the next stage, returned promises are adopted, and thrown errors reject the next stage.",
+      "whyItMatters": "Promise chaining composes asynchronous operations and propagates errors. Missing return statements can cause later stages to run before nested work completes.",
+      "analogy": "Each promise stage passes a value or failure to the next stage.",
+      "analogyLimit": "The analogy is simplified; JavaScript scheduling, HTTP semantics, and browser security follow platform standards."
+    },
+    "explain": {
+      "narrative": "The first handler returns 8; the next throws, so the chain reaches catch.",
+      "examples": [
+        {
+          "id": "j20-2-example",
+          "language": "javascript",
+          "code": "Promise.resolve(4).then(x=>x*2).then(x=>{if(x>5)throw new Error('Too large');return x}).then(console.log).catch(e=>console.log(e.message));",
+          "explanation": "The first handler returns 8; the next throws, so the chain reaches catch.",
+          "expectedOutput": "Console or UI output demonstrates the concept; network examples require a configured endpoint.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a three-stage chain and intentionally reject in the middle. Trace the value and error path.",
+      "independentTask": "Build an asynchronous feature with explicit states, cancellation, and error handling. Document which failures are safe to retry.",
+      "hints": [
+        "Separate HTTP errors from network and parsing errors.",
+        "Use bounded retries only for suitable operations.",
+        "Tie UI updates to the latest active request."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "javascript",
+    "starterCode": "Promise.resolve(4).then(x=>x*2).then(x=>{if(x>5)throw new Error('Too large');return x}).then(console.log).catch(e=>console.log(e.message));",
+    "resetCode": "Promise.resolve(4).then(x=>x*2).then(x=>{if(x>5)throw new Error('Too large');return x}).then(console.log).catch(e=>console.log(e.message));"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "j20-2-q1",
+        "prompt": "What does then() return?",
+        "options": [
+          "A new Promise",
+          "The HTML title element",
+          "The browser address bar"
+        ],
+        "answer": "A new Promise",
+        "explanation": "then returns a new promise that adopts the handler result or thrown error."
+      },
+      {
+        "id": "j20-2-q2",
+        "prompt": "What is a reliable approach to network-driven UI?",
+        "options": [
+          "Model loading, empty, success, failure, and cancellation states",
+          "Assume every fulfilled fetch means HTTP success",
+          "Retry every request forever"
+        ],
+        "answer": "Model loading, empty, success, failure, and cancellation states",
+        "explanation": "Explicit states and bounded recovery make network interfaces predictable and safe."
+      }
+    ]
+  },
+  "status": "draft"
+}

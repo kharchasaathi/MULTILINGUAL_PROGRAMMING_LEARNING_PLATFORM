@@ -1,0 +1,78 @@
+{
+  "id": "javascript.j20.5.en",
+  "courseId": "javascript",
+  "moduleId": "J20",
+  "topicId": "J20.5",
+  "title": "async iteration and for-await-of",
+  "language": "en",
+  "learningObjectives": [
+    "Explain async iteration and for-await-of and implement reliable browser event and network workflows."
+  ],
+  "prerequisites": [
+    "J11.1",
+    "J11.4",
+    "J19.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "An async iterable exposes Symbol.asyncIterator, returning an async iterator whose next() result is a Promise. for await...of consumes asynchronous values sequentially. It can also consume synchronous iterables.",
+      "whyItMatters": "Async iteration is useful for streams and delayed sequences. Sequential consumption can pace work but may be slower than parallel processing when tasks are independent.",
+      "analogy": "An async iterator prepares each next item when the consumer asks for it.",
+      "analogyLimit": "The analogy is simplified; JavaScript scheduling, HTTP semantics, and browser security follow platform standards."
+    },
+    "explain": {
+      "narrative": "The loop awaits each next result before continuing.",
+      "examples": [
+        {
+          "id": "j20-5-example",
+          "language": "javascript",
+          "code": "async function* updates(){yield 'connected';await new Promise(r=>setTimeout(r,50));yield 'ready'}async function show(){for await(const item of updates())console.log(item)}show();",
+          "explanation": "The loop awaits each next result before continuing.",
+          "expectedOutput": "Console or UI output demonstrates the concept; network examples require a configured endpoint.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create an async generator with delayed updates and consume it with for await...of. Add error handling.",
+      "independentTask": "Build an asynchronous feature with explicit states, cancellation, and error handling. Document which failures are safe to retry.",
+      "hints": [
+        "Separate HTTP errors from network and parsing errors.",
+        "Use bounded retries only for suitable operations.",
+        "Tie UI updates to the latest active request."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "javascript",
+    "starterCode": "async function* updates(){yield 'connected';await new Promise(r=>setTimeout(r,50));yield 'ready'}async function show(){for await(const item of updates())console.log(item)}show();",
+    "resetCode": "async function* updates(){yield 'connected';await new Promise(r=>setTimeout(r,50));yield 'ready'}async function show(){for await(const item of updates())console.log(item)}show();"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "j20-5-q1",
+        "prompt": "Which protocol method starts an async iterator?",
+        "options": [
+          "Symbol.asyncIterator",
+          "The HTML title element",
+          "The browser address bar"
+        ],
+        "answer": "Symbol.asyncIterator",
+        "explanation": "Async iterables expose Symbol.asyncIterator to obtain an async iterator."
+      },
+      {
+        "id": "j20-5-q2",
+        "prompt": "What is a reliable approach to network-driven UI?",
+        "options": [
+          "Model loading, empty, success, failure, and cancellation states",
+          "Assume every fulfilled fetch means HTTP success",
+          "Retry every request forever"
+        ],
+        "answer": "Model loading, empty, success, failure, and cancellation states",
+        "explanation": "Explicit states and bounded recovery make network interfaces predictable and safe."
+      }
+    ]
+  },
+  "status": "draft"
+}

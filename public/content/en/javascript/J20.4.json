@@ -1,0 +1,78 @@
+{
+  "id": "javascript.j20.4.en",
+  "courseId": "javascript",
+  "moduleId": "J20",
+  "topicId": "J20.4",
+  "title": "Error propagation in async code",
+  "language": "en",
+  "learningObjectives": [
+    "Explain error propagation in async code and implement reliable browser event and network workflows."
+  ],
+  "prerequisites": [
+    "J11.1",
+    "J11.4",
+    "J19.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "An async function returns a Promise. A rejected awaited promise throws at the await expression and can be handled with try/catch. Errors should be handled at a boundary that can recover, add context, or show a useful message.",
+      "whyItMatters": "Clear error propagation avoids false success states and preserves information needed for recovery.",
+      "analogy": "An error travels through the async call chain until a handler takes responsibility for it.",
+      "analogyLimit": "The analogy is simplified; JavaScript scheduling, HTTP semantics, and browser security follow platform standards."
+    },
+    "explain": {
+      "narrative": "The inner catch adds context and rethrows; the outer boundary chooses the recovery action.",
+      "examples": [
+        {
+          "id": "j20-4-example",
+          "language": "javascript",
+          "code": "async function load(){try{return await Promise.reject(Error('Offline'))}catch(error){console.error('Load failed',error.message);throw error}}load().catch(()=>console.log('Offer retry'));",
+          "explanation": "The inner catch adds context and rethrows; the outer boundary chooses the recovery action.",
+          "expectedOutput": "Console or UI output demonstrates the concept; network examples require a configured endpoint.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Write a repository function that adds context to an error and rethrows it; handle the final rejection in the UI.",
+      "independentTask": "Build an asynchronous feature with explicit states, cancellation, and error handling. Document which failures are safe to retry.",
+      "hints": [
+        "Separate HTTP errors from network and parsing errors.",
+        "Use bounded retries only for suitable operations.",
+        "Tie UI updates to the latest active request."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "javascript",
+    "starterCode": "async function load(){try{return await Promise.reject(Error('Offline'))}catch(error){console.error('Load failed',error.message);throw error}}load().catch(()=>console.log('Offer retry'));",
+    "resetCode": "async function load(){try{return await Promise.reject(Error('Offline'))}catch(error){console.error('Load failed',error.message);throw error}}load().catch(()=>console.log('Offer retry'));"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "j20-4-q1",
+        "prompt": "What happens when an awaited promise rejects inside try?",
+        "options": [
+          "Control moves to the matching catch block",
+          "The HTML title element",
+          "The browser address bar"
+        ],
+        "answer": "Control moves to the matching catch block",
+        "explanation": "await throws the rejection reason and surrounding catch can handle it."
+      },
+      {
+        "id": "j20-4-q2",
+        "prompt": "What is a reliable approach to network-driven UI?",
+        "options": [
+          "Model loading, empty, success, failure, and cancellation states",
+          "Assume every fulfilled fetch means HTTP success",
+          "Retry every request forever"
+        ],
+        "answer": "Model loading, empty, success, failure, and cancellation states",
+        "explanation": "Explicit states and bounded recovery make network interfaces predictable and safe."
+      }
+    ]
+  },
+  "status": "draft"
+}

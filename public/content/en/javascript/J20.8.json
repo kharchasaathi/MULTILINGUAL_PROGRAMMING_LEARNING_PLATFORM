@@ -1,0 +1,78 @@
+{
+  "id": "javascript.j20.8.en",
+  "courseId": "javascript",
+  "moduleId": "J20",
+  "topicId": "J20.8",
+  "title": "JSON parsing and malformed responses",
+  "language": "en",
+  "learningObjectives": [
+    "Explain json parsing and malformed responses and implement reliable browser event and network workflows."
+  ],
+  "prerequisites": [
+    "J11.1",
+    "J11.4",
+    "J19.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "response.json() reads and parses a response body asynchronously. It rejects if the body cannot be read or is not valid JSON. Reading consumes the body; clone the Response first if separate consumers need to read it.",
+      "whyItMatters": "A server may return HTML, an empty body, or malformed JSON. Handle parsing failures separately from HTTP status errors.",
+      "analogy": "Parsing checks whether received text follows JSON grammar before using it as structured data.",
+      "analogyLimit": "The analogy is simplified; JavaScript scheduling, HTTP semantics, and browser security follow platform standards."
+    },
+    "explain": {
+      "narrative": "The function checks HTTP status and then wraps parsing failure with clearer context.",
+      "examples": [
+        {
+          "id": "j20-8-example",
+          "language": "javascript",
+          "code": "async function read(response){if(!response.ok)throw Error(`HTTP ${response.status}`);try{return await response.json()}catch(error){throw new Error('Invalid JSON response',{cause:error})}}",
+          "explanation": "The function checks HTTP status and then wraps parsing failure with clearer context.",
+          "expectedOutput": "Console or UI output demonstrates the concept; network examples require a configured endpoint.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Test valid JSON, malformed JSON, and an empty body. Show a safe UI message for each failure.",
+      "independentTask": "Build an asynchronous feature with explicit states, cancellation, and error handling. Document which failures are safe to retry.",
+      "hints": [
+        "Separate HTTP errors from network and parsing errors.",
+        "Use bounded retries only for suitable operations.",
+        "Tie UI updates to the latest active request."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "javascript",
+    "starterCode": "async function read(response){if(!response.ok)throw Error(`HTTP ${response.status}`);try{return await response.json()}catch(error){throw new Error('Invalid JSON response',{cause:error})}}",
+    "resetCode": "async function read(response){if(!response.ok)throw Error(`HTTP ${response.status}`);try{return await response.json()}catch(error){throw new Error('Invalid JSON response',{cause:error})}}"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "j20-8-q1",
+        "prompt": "What happens when response.json() receives malformed JSON?",
+        "options": [
+          "Its Promise rejects",
+          "The HTML title element",
+          "The browser address bar"
+        ],
+        "answer": "Its Promise rejects",
+        "explanation": "JSON parsing failure causes response.json() to reject."
+      },
+      {
+        "id": "j20-8-q2",
+        "prompt": "What is a reliable approach to network-driven UI?",
+        "options": [
+          "Model loading, empty, success, failure, and cancellation states",
+          "Assume every fulfilled fetch means HTTP success",
+          "Retry every request forever"
+        ],
+        "answer": "Model loading, empty, success, failure, and cancellation states",
+        "explanation": "Explicit states and bounded recovery make network interfaces predictable and safe."
+      }
+    ]
+  },
+  "status": "draft"
+}
