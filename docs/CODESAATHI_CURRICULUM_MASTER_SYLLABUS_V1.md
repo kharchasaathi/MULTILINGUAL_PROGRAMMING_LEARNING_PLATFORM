@@ -484,3 +484,370 @@ The curriculum architecture must leave room for future courses.
 ## 11. Current completion statement
 
 **Syllabus coverage baseline created.** This file defines the intended scope. It does not mean that the lessons, translations, playgrounds, projects, assessments, or tests have already been implemented. The next work item is to convert this master syllabus into a machine-readable topic tracker and then author the foundation and first HTML lessons using the mandatory three-stage format.
+
+
+## 12. Extended HTML coverage — complete reference checklist
+
+The following items extend H1–H10 and must be mapped to lessons or explicitly marked as intentionally out of beginner scope. They must not be silently omitted.
+
+### H11. Advanced forms and browser form behaviour
+- H11.1 Form submission lifecycle and successful controls
+- H11.2 name/value pairs and form data
+- H11.3 input types: search, tel, url, range, color, file, hidden
+- H11.4 date, time, datetime-local, month, week support considerations
+- H11.5 autocomplete tokens and autofill usability
+- H11.6 inputmode, enterkeyhint, placeholder limitations
+- H11.7 pattern syntax and validation messages
+- H11.8 disabled vs readonly vs required
+- H11.9 multiple, accept, step, list and datalist
+- H11.10 FormData API concept and file upload boundaries
+- H11.11 Client-side validation vs server-side validation
+- H11.12 Accessible error summaries and field-level errors
+
+### H12. Interactive and disclosure elements
+- H12.1 details and summary
+- H12.2 dialog element and modal/non-modal behaviour
+- H12.3 open state and accessible dialog naming
+- H12.4 Keyboard operation and focus return
+- H12.5 Popover API overview and support-aware use
+- H12.6 Native controls vs custom widgets
+
+### H13. Graphics, vector, and embedded content
+- H13.1 SVG fundamentals: vector vs raster
+- H13.2 Inline SVG structure and accessible naming
+- H13.3 SVG shapes, paths, viewBox, preserveAspectRatio
+- H13.4 Canvas element purpose and fallback content
+- H13.5 Canvas drawing concepts (JavaScript-led practical)
+- H13.6 picture, source, srcset, sizes
+- H13.7 Responsive image art direction
+- H13.8 iframe title, sandbox, allow, referrerpolicy
+- H13.9 Object/embed legacy context and safer alternatives
+
+### H14. Metadata, discoverability, and document integration
+- H14.1 title and description metadata
+- H14.2 Canonical URL concept (not a guarantee of indexing)
+- H14.3 Robots directives overview
+- H14.4 Open Graph/social preview metadata
+- H14.5 Favicon and web app icons
+- H14.6 Language declaration and document direction
+- H14.7 Structured data concept and semantic accuracy
+- H14.8 Linking manifests and browser metadata
+- H14.9 Print styles and print-friendly document structure
+
+### H15. Accessibility and inclusive HTML
+- H15.1 Semantic HTML before ARIA
+- H15.2 Accessible names and descriptions
+- H15.3 Keyboard access and focus order
+- H15.4 Images: informative, decorative, and complex
+- H15.5 Form labels, instructions, and error identification
+- H15.6 Tables and relationships
+- H15.7 Audio/video captions and transcripts
+- H15.8 Language changes and pronunciation support
+- H15.9 ARIA roles, states, and properties: introductory rules
+- H15.10 Common accessibility anti-patterns
+
+## 13. Extended CSS coverage — complete reference checklist
+
+### C15. Selectors and selector logic — deeper practice
+- C15.1 Selector lists and forgiving selector lists
+- C15.2 Attribute matching operators
+- C15.3 Structural pseudo-classes: first/last/nth child and of-type
+- C15.4 :not(), :is(), :where(), :has()
+- C15.5 Form-state pseudo-classes
+- C15.6 Link, target, focus, hover, active states
+- C15.7 ::before, ::after, ::marker, ::selection, ::placeholder
+- C15.8 Specificity and selector complexity review
+
+### C16. Layout details and intrinsic sizing
+- C16.1 Intrinsic and extrinsic sizing
+- C16.2 min-content, max-content, fit-content
+- C16.3 aspect-ratio
+- C16.4 object-fit and replaced elements
+- C16.5 Gap across layout systems
+- C16.6 Overflow axes and clipping
+- C16.7 Scroll containers and scroll behaviour
+- C16.8 Sticky positioning constraints
+
+### C17. Advanced responsive layout
+- C17.1 Media query feature types
+- C17.2 Range syntax and breakpoint strategy
+- C17.3 Orientation, hover, pointer, and resolution features
+- C17.4 Container queries
+- C17.5 Container query units
+- C17.6 Responsive component patterns
+- C17.7 Fluid type and spacing with clamp()
+- C17.8 Print and screen media
+- C17.9 Feature detection and graceful fallback
+
+### C18. Advanced visual styling
+- C18.1 Multiple backgrounds and background clipping
+- C18.2 Gradients: linear, radial, conic, repeating
+- C18.3 Border images (overview)
+- C18.4 Masks and clipping paths (intro)
+- C18.5 Filters and backdrop filters (support-aware)
+- C18.6 Blend modes and isolation
+- C18.7 Shadows, outlines, and focus rings
+- C18.8 Scroll snap
+- C18.9 Scroll-driven effects (advanced, support-aware)
+
+### C19. Motion and interaction preferences
+- C19.1 Transition property lists and discrete transitions overview
+- C19.2 Keyframe design and animation composition
+- C19.3 Transform functions and 3D overview
+- C19.4 Animation performance and compositor concepts
+- C19.5 prefers-reduced-motion
+- C19.6 prefers-color-scheme
+- C19.7 Forced-colours and contrast preferences
+- C19.8 Avoiding motion that causes discomfort
+
+### C20. CSS architecture and maintainable systems
+- C20.1 Naming conventions and component classes
+- C20.2 Design tokens using custom properties
+- C20.3 Theme scopes and dark/light themes
+- C20.4 Cascade layers and @layer
+- C20.5 @media, @supports, @container organization
+- C20.6 @font-face and font loading strategy
+- C20.7 CSS modules/tooling as future awareness only
+- C20.8 Refactoring duplication
+- C20.9 Debugging layout and computed values
+- C20.10 Cross-browser testing and progressive enhancement
+
+### C21. CSS visual laboratories
+- C21.1 Colour Lab: synchronized picker, HEX, RGB, HSL, alpha, copy
+- C21.2 Typography Lab: family, size, weight, line-height, spacing
+- C21.3 Box Model Lab: margin, border, padding, content dimensions
+- C21.4 Selector Lab: select elements and see matched rules
+- C21.5 Cascade Lab: change specificity and source order
+- C21.6 Flexbox Lab: direction, wrap, alignment, grow/shrink
+- C21.7 Grid Lab: tracks, gaps, placement, auto-fit
+- C21.8 Positioning Lab: relative/absolute/fixed/sticky and stacking
+- C21.9 Responsive Lab: viewport resizing and media query changes
+- C21.10 Animation Lab: timing, duration, iteration, reduced motion
+- C21.11 Every lab must show editable CSS and the actual rendered result
+
+## 14. Extended JavaScript coverage — complete reference checklist
+
+### J14. Language mechanics and execution model
+- J14.1 Parsing, execution, and runtime errors
+- J14.2 Execution contexts and call stack
+- J14.3 Scope chain and lexical environment
+- J14.4 Hoisting behaviour of var, let, const, and functions
+- J14.5 Temporal dead zone
+- J14.6 Strict mode
+- J14.7 Equality, coercion, and predictable comparisons
+- J14.8 Object identity and mutation
+- J14.9 Garbage collection concept and memory lifecycle
+
+### J15. Functions and functional patterns — deeper coverage
+- J15.1 First-class functions
+- J15.2 Higher-order functions
+- J15.3 Closures in practical UI examples
+- J15.4 Callback patterns and error-first callback history (overview)
+- J15.5 Function composition
+- J15.6 Immutability and copying
+- J15.7 Recursion and stack limits
+- J15.8 this: call, apply, bind
+- J15.9 Arrow function this behaviour
+- J15.10 Debounce and throttle as practical patterns
+
+### J16. Objects, prototypes, and classes
+- J16.1 Object creation patterns
+- J16.2 Property descriptors
+- J16.3 Getters and setters
+- J16.4 Prototype chain
+- J16.5 Constructor functions
+- J16.6 Class syntax and constructors
+- J16.7 Inheritance and composition
+- J16.8 Static methods and fields
+- J16.9 Private fields
+- J16.10 When plain objects/functions are simpler than classes
+
+### J17. Collections, iteration, and data transformation
+- J17.1 Array iteration and mutation vs non-mutation
+- J17.2 map/filter/reduce in realistic examples
+- J17.3 Sorting, localeCompare, and comparator functions
+- J17.4 Set and uniqueness
+- J17.5 Map and key/value collections
+- J17.6 WeakMap and WeakSet overview
+- J17.7 Iterables and iterators
+- J17.8 Generator functions
+- J17.9 Typed arrays and binary data overview
+- J17.10 Structured cloning and copying limitations
+
+### J18. Modules and application organization
+- J18.1 Why modules exist
+- J18.2 Named and default exports
+- J18.3 Import aliases and re-exports
+- J18.4 Module scope
+- J18.5 Dynamic import
+- J18.6 Circular dependency awareness
+- J18.7 Organizing files by responsibility
+- J18.8 Browser module loading and CORS requirements
+
+### J19. Browser events and interaction
+- J19.1 Event propagation phases
+- J19.2 Bubbling and capturing
+- J19.3 preventDefault and stopPropagation
+- J19.4 Event delegation
+- J19.5 Keyboard, pointer, mouse, touch, and input events
+- J19.6 Focus and composition events
+- J19.7 Custom events
+- J19.8 Event listener options and cleanup
+- J19.9 Accessible interaction patterns
+
+### J20. Asynchronous programming — deeper coverage
+- J20.1 Tasks, microtasks, and event loop
+- J20.2 Promise states and chaining
+- J20.3 Promise.all, allSettled, race, any
+- J20.4 Error propagation in async code
+- J20.5 async iteration and for-await-of
+- J20.6 Fetch request configuration
+- J20.7 HTTP methods, status codes, headers
+- J20.8 JSON parsing and malformed responses
+- J20.9 Retry principles and backoff (safe/idempotent awareness)
+- J20.10 AbortController and timeout patterns
+- J20.11 CORS, same-origin policy, credentials
+- J20.12 Loading, empty, success, failure, offline UI states
+
+### J21. Browser platform APIs
+- J21.1 DOM traversal and mutation
+- J21.2 Templates and DocumentFragment
+- J21.3 IntersectionObserver
+- J21.4 ResizeObserver
+- J21.5 MutationObserver
+- J21.6 URL, URLSearchParams, and History
+- J21.7 localStorage, sessionStorage, storage events
+- J21.8 IndexedDB overview
+- J21.9 Clipboard and permission handling
+- J21.10 Geolocation and privacy consent
+- J21.11 File input and File API
+- J21.12 Drag and drop
+- J21.13 Canvas 2D API
+- J21.14 Web Workers overview and limits
+- J21.15 Service workers and PWA concepts (introductory)
+- J21.16 Notifications and permission UX (overview)
+
+### J22. JavaScript security, accessibility, and reliability
+- J22.1 XSS and unsafe HTML insertion
+- J22.2 textContent, safe DOM construction, sanitization concepts
+- J22.3 URL validation and safe navigation
+- J22.4 Client-side validation vs trusted server validation
+- J22.5 Avoiding secrets in browser bundles
+- J22.6 Content Security Policy concept
+- J22.7 iframe sandbox and postMessage origin checks
+- J22.8 Keyboard accessibility and focus management
+- J22.9 Error boundaries in UI code (manual patterns)
+- J22.10 Performance profiling and long tasks
+- J22.11 Memory leaks and cleanup
+- J22.12 Feature detection and graceful degradation
+
+### J23. JavaScript testing and maintainability
+- J23.1 Testable functions and deterministic logic
+- J23.2 Assertions and test cases
+- J23.3 Unit testing concepts
+- J23.4 Integration and browser testing concepts
+- J23.5 Edge cases and boundary tests
+- J23.6 Linting and formatting concepts
+- J23.7 Code review and readable naming
+- J23.8 Documentation and API contracts
+
+## 15. Web platform, accessibility, and developer workflow curriculum
+
+### W1. How the web works
+- W1.1 Internet, networks, DNS, domain names
+- W1.2 URLs: scheme, host, path, query, fragment
+- W1.3 HTTP request and response
+- W1.4 HTTPS and certificates at a conceptual level
+- W1.5 Browser rendering pipeline overview
+- W1.6 Cache and browser storage distinction
+- W1.7 Static hosting and deployment concepts
+
+### W2. Accessibility foundations
+- W2.1 Disability and situational access needs
+- W2.2 Semantic structure and accessible names
+- W2.3 Keyboard-only navigation
+- W2.4 Focus visibility and logical order
+- W2.5 Screen reader basics and landmarks
+- W2.6 Colour contrast and non-colour cues
+- W2.7 Zoom, reflow, and text resizing
+- W2.8 Captions, transcripts, and alternatives
+- W2.9 Reduced motion
+- W2.10 Manual and automated accessibility checks
+
+### W3. Developer tools and debugging
+- W3.1 Elements/DOM inspector
+- W3.2 Styles and computed styles
+- W3.3 Console and error messages
+- W3.4 Network requests and response inspection
+- W3.5 Responsive/device emulation
+- W3.6 Sources, breakpoints, and stepping
+- W3.7 Storage inspection
+- W3.8 Performance panel overview
+- W3.9 Reproducing and documenting bugs
+
+### W4. Git and publishing
+- W4.1 Repository and version control concepts
+- W4.2 Working tree, staging, commit
+- W4.3 Branches and merging
+- W4.4 Pull requests and review
+- W4.5 .gitignore and safe repository hygiene
+- W4.6 README and project documentation
+- W4.7 Static hosting and deployment
+- W4.8 Custom domain and DNS concepts
+- W4.9 Release checks and rollback awareness
+
+## 16. Full project ladder and final outcomes
+
+Projects must be introduced only after their prerequisite concepts. Each project includes a brief, constraints, starter state, milestones, test checklist, rubric, reflection, and extension challenge.
+
+1. Foundation: personal learning workspace and file map
+2. HTML: profile card, article, navigation site, accessible form, media page
+3. CSS: typography page, colour theme, box model experiment, flex layout, grid gallery, responsive landing page
+4. JavaScript: calculator, counter, quiz, task list, searchable catalogue, form validation, API viewer
+5. Integrated: multi-page portfolio, responsive knowledge hub, interactive dashboard using local data
+6. Capstone: independently planned and built responsive website with semantic HTML, maintainable CSS, JavaScript interactions, accessibility checks, and deployment README
+
+## 17. Lesson authoring contract — required fields
+
+Every lesson record must contain:
+- Stable lesson ID and course/module/topic IDs
+- Prerequisites and measurable learning outcomes
+- Learner-facing title and estimated effort
+- Stage 1: plain-language explanation and concept context
+- History/name-origin note only when relevant and fact-checked
+- Stage 2: worked example, analogy, step-by-step walkthrough, expected output
+- Stage 3: editable code, live output, guided exercise, independent exercise
+- Telugu and English content status (other languages later)
+- Common mistakes and debugging hints
+- Quiz questions with answer explanations
+- Accessibility notes
+- Technical review and last-reviewed version
+- References used for fact checking (not copied lesson prose)
+- Completion criteria and next lesson link
+
+## 18. Live code execution contract
+
+- HTML examples render as actual HTML in a sandboxed preview.
+- CSS examples render against a known sample document; learners can edit CSS and immediately see the visual result.
+- JavaScript examples execute in an isolated preview context; console output and runtime errors are visible.
+- Combined HTML/CSS/JavaScript examples render together in the same isolated preview.
+- Reset, Run, and optionally auto-run controls must behave predictably.
+- The preview must not expose the learning platform's origin, storage, authentication state, or parent window to learner code.
+- Every code example shown as runnable must have a verified expected result and a regression test.
+- Non-executable snippets (for example, isolated syntax fragments) must be clearly labelled and paired with a complete runnable example.
+
+## 19. Curriculum completeness and quality gates
+
+A topic is not complete merely because it appears in this syllabus. It is complete only when:
+1. All required subtopics have been mapped to one or more lessons.
+2. Learning outcomes are measurable and assessed.
+3. All three teaching stages are written in human, beginner-friendly language.
+4. Every runnable code example has a working live output.
+5. Common mistakes and corrections are included.
+6. Telugu and English versions are reviewed for meaning, not just literal translation.
+7. Keyboard and accessibility checks are completed.
+8. Technical facts and history are verified.
+9. Exercises and assessment are reviewed.
+10. The tracker records evidence and release status.
+
+**Scope note:** This extended checklist is the intended complete beginner-to-practical front-end pathway for Version 1.0. Specialized standards, browser APIs, framework ecosystems, TypeScript, backend development, and advanced computer science topics can be separate future courses.
