@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codesaathi.invalid/schemas/lesson.schema.json",
+  "title": "CodeSaathi Three-Stage Lesson",
+  "description": "Shared content contract for syllabus-oriented programming lessons.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "courseId", "moduleId", "topicId", "title", "language", "stages", "practice", "assessment"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9.-]+$" },
+    "courseId": { "type": "string", "enum": ["foundation", "html", "css", "javascript", "web-platform", "integrated"] },
+    "moduleId": { "type": "string" },
+    "topicId": { "type": "string" },
+    "title": { "type": "string", "minLength": 1 },
+    "language": { "type": "string", "enum": ["en", "te", "ml", "kn", "ta", "hi"] },
+    "learningObjectives": { "type": "array", "items": { "type": "string" } },
+    "prerequisites": { "type": "array", "items": { "type": "string" } },
+    "stages": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["understand", "explain", "practise"],
+      "properties": {
+        "understand": {
+          "type": "object",
+          "required": ["concept", "whyItMatters"],
+          "properties": {
+            "concept": { "type": "string" },
+            "whyItMatters": { "type": "string" },
+            "history": { "type": "string" },
+            "analogy": { "type": "string" },
+            "analogyLimit": { "type": "string" }
+          }
+        },
+        "explain": {
+          "type": "object",
+          "required": ["narrative", "examples"],
+          "properties": {
+            "narrative": { "type": "string" },
+            "examples": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["id", "language", "code", "explanation"],
+                "properties": {
+                  "id": { "type": "string" },
+                  "language": { "type": "string", "enum": ["en", "te", "ml", "kn", "ta", "hi"] },
+                  "code": { "type": "string" },
+                  "explanation": { "type": "string" },
+                  "expectedOutput": { "type": "string" },
+                  "runnable": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "practise": {
+          "type": "object",
+          "required": ["guidedTask", "independentTask"],
+          "properties": {
+            "guidedTask": { "type": "string" },
+            "independentTask": { "type": "string" },
+            "hints": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "practice": {
+      "type": "object",
+      "required": ["playgroundMode"],
+      "properties": {
+        "playgroundMode": { "type": "string", "enum": ["html", "css", "javascript", "combined", "none"] },
+        "starterCode": { "type": "string" },
+        "resetCode": { "type": "string" }
+      }
+    },
+    "assessment": {
+      "type": "object",
+      "required": ["questions"],
+      "properties": {
+        "questions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "prompt", "answer", "explanation"],
+            "properties": {
+              "id": { "type": "string" },
+              "prompt": { "type": "string" },
+              "options": { "type": "array", "items": { "type": "string" } },
+              "answer": { "type": "string" },
+              "explanation": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "status": { "type": "string", "enum": ["planned", "draft", "reviewed", "released"] }
+  }
+}
