@@ -97,3 +97,29 @@ Use honest status values: `NOT STARTED`, `IN PROGRESS`, `BLOCKED`, `COMPLETE`, `
 1. Perform a focused browser/syntax smoke check for language preference initialization and persistence; fix only any observed issue.
 2. Define and implement the reusable three-stage lesson template without rewriting the existing site wholesale.
 3. Establish the shared curriculum/lesson metadata shape and begin the Foundation lesson pathway.
+
+## Phase 1 continuation — 2026-11-13
+
+### Additional completed work
+- Expanded the language selector to all six planned choices: English, Telugu, Malayalam, Kannada, Tamil, and Hindi.
+- Added an explicit English-fallback notice for Malayalam, Kannada, Tamil, and Hindi because their translations have not yet been authored. Selection is persisted without falsely claiming those languages are translated.
+- Added and connected the reusable three-stage lesson renderer at `public/js/lessons/lesson-template.js`.
+- Added the shared lesson data contract at `public/content/lesson.schema.json`.
+- Updated the service worker app-shell cache to include the lesson renderer and advanced the cache version to `codesaathi-v2`.
+- Added styling for the reusable lesson structure.
+
+### Phase 1 evidence
+- Three-stage lesson renderer: `503f381ee0fd9bef42e3f5bf20f3c8dcae14c82a`
+- Six-language selector and template integration: `fd789728a5ceaff8a85d4116b1df07e8f76cc019`, `295cea8f1cc96de74e3bb9579ca898e2ac8f59f6`
+- Lesson schema: `ae124f8a4051381af9c27da297f8988b9873bdce`
+- Service worker cache update: `fae363217733318411446481f7db1b3ca2d3e008`
+
+### Remaining Phase 1 verification
+- Run a focused browser check of all six selector choices, reload persistence, and fallback notice.
+- Confirm the lesson dialog renders all three stages and its completion button still records progress.
+- Confirm the updated service worker installs the new app-shell module.
+
+### Phase 1 status
+**IN PROGRESS — implementation foundation is committed; final browser smoke verification is pending.**
+
+Phase 2 curriculum content, Phase 4 universal playground, and Phase 5 CSS labs remain separate work and must not be marked complete by this foundation work.
