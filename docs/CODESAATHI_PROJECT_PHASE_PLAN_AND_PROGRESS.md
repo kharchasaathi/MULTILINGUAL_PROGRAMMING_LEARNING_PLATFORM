@@ -757,3 +757,10 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Registered lesson paths in curriculum index and updated matching tracker rows where present.
 - Preserved executable syntax and technical identifiers; translated learner-facing content, tasks, hints and assessments.
 - Engine-specific and runtime edge-case verification remain pending.
+
+
+### Telugu translation batch — JavaScript J14.5–J14.8 (2026-11-13)
+- Added four Telugu draft lessons covering the temporal dead zone, strict mode, equality/coercion, and object identity/mutation.
+- Registered lesson paths in curriculum index and updated matching tracker rows where present.
+- Preserved executable syntax and technical identifiers; translated learner-facing content, tasks, hints and assessments.
+- Runtime edge-case and engine behaviour verification remain pending.
