@@ -1,0 +1,78 @@
+{
+  "id": "javascript.j22.10.te",
+  "courseId": "javascript",
+  "moduleId": "J22",
+  "topicId": "J22.10",
+  "title": "Performance Profiling మరియు Long Tasks",
+  "language": "te",
+  "learningObjectives": [
+    "Browser profiling tools, PerformanceObserverతో long tasksను గుర్తించి main thread పనిని optimize చేయగలగాలి."
+  ],
+  "prerequisites": [
+    "J11.1",
+    "J11.4",
+    "J19.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Performance profiling browser developer tools, performance APIsతో నిజమైన page behaviourను కొలుస్తుంది. Long task అనేది main threadను ఎక్కువసేపు ఆక్రమించే task; performance reportingలో సాధారణంగా 50 millisecondsకు మించినది. ఖరీదైన పనిని విడగొట్టాలి లేదా సరిపోయే computationను Workerకు మార్చాలి.",
+      "whyItMatters": "Long tasks వల్ల input, rendering, animation ఆలస్యం అవుతాయి. Bottleneckను కొలిచి, optimization తర్వాత user experience మెరుగైందో నిర్ధారించాలి.",
+      "analogy": "ఇది applicationలో data ప్రవేశించే మార్గాలు, వాటిపై విధించే నియంత్రణలు, failure వచ్చినప్పుడు recoveryను నిర్వహించే భద్రతా విధానంలా భావించండి.",
+      "analogyLimit": "ఈ పోలిక సరళీకరణ మాత్రమే. Browser security, CSP, same-origin, accessibility, performance ప్రవర్తన web platform ప్రమాణాల ప్రకారం నిర్ణయించబడుతుంది."
+    },
+    "explain": {
+      "narrative": "ఒక పని ఎక్కువసేపు main threadను ఆక్రమిస్తే మిగతా UI పనులు వేచి ఉండాల్సి వస్తుంది.",
+      "examples": [
+        {
+          "id": "j22-10-example",
+          "language": "javascript",
+          "code": "if('PerformanceObserver'in window){const observer=new PerformanceObserver(list=>{for(const entry of list.getEntries())console.log('Long task:',entry.duration)});try{observer.observe({type:'longtask',buffered:true})}catch(error){console.log('Long task entry type unavailable')}}",
+          "explanation": "PerformanceObserver మద్దతు ఉంటే longtask entriesను గమనిస్తుంది. Browserలో ఈ entry type అందుబాటులో లేకపోతే catch ద్వారా తెలియజేస్తుంది. లోతైన diagnosisకు developer tools అవసరం.",
+          "expectedOutput": "Console లేదా UI ఫలితం environmentపై ఆధారపడి ఉంటుంది; browser/HTTP configuration అవసరమయ్యే ఉదాహరణలకు సరైన setup అవసరం.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Heavy interactionను profile చేసి long taskను గుర్తించండి. పనిని విడగొట్టండి లేదా Workerకు మార్చి measurementsను పోల్చండి.",
+      "independentTask": "ఒక చిన్న featureను నిర్మించి threat cases, keyboard accessibility, cleanup, performance లేదా fallback పరిస్థితులను పరీక్షించండి. అవసరమైన security checksను server వైపున కూడా అమలు చేయండి.",
+      "hints": [
+        "Untrusted inputను defaultగా అనుమానంతో చూడండి.",
+        "Client-side checks భద్రతకు తుది హామీ కావు.",
+        "అవసరం లేని permissions, origins, scripts, resourcesను అనుమతించవద్దు."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "javascript",
+    "starterCode": "if('PerformanceObserver'in window){const observer=new PerformanceObserver(list=>{for(const entry of list.getEntries())console.log('Long task:',entry.duration)});try{observer.observe({type:'longtask',buffered:true})}catch(error){console.log('Long task entry type unavailable')}}",
+    "resetCode": "if('PerformanceObserver'in window){const observer=new PerformanceObserver(list=>{for(const entry of list.getEntries())console.log('Long task:',entry.duration)});try{observer.observe({type:'longtask',buffered:true})}catch(error){console.log('Long task entry type unavailable')}}"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "j22-10-q1",
+        "prompt": "Browser performance reportingలో long taskకు సాధారణంగా ఉపయోగించే duration threshold ఎంత?",
+        "options": [
+          "50 milliseconds",
+          "HTML title element",
+          "Browser address bar"
+        ],
+        "answer": "50 milliseconds",
+        "explanation": "Main-thread task 50 msకు మించినప్పుడు సాధారణంగా long taskగా report చేస్తారు."
+      },
+      {
+        "id": "j22-10-q2",
+        "prompt": "Frontend securityలో సరైన ప్రాథమిక సూత్రం ఏది?",
+        "options": [
+          "Untrusted dataను validate చేసి, అవసరమైన permissionsనే ఇవ్వడం; serverలోనూ enforce చేయడం",
+          "Minification చేస్తే secrets దాచబడతాయని భావించడం",
+          "Client-side validation ఒక్కటే సరిపోతుందని అనుకోవడం"
+        ],
+        "answer": "Untrusted dataను validate చేసి, అవసరమైన permissionsనే ఇవ్వడం; serverలోనూ enforce చేయడం",
+        "explanation": "Frontend controls usabilityకు సహాయపడతాయి; trusted security enforcement serverలో ఉండాలి."
+      }
+    ]
+  },
+  "status": "draft"
+}
