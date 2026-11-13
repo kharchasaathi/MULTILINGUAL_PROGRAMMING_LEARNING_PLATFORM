@@ -1,0 +1,78 @@
+{
+  "id": "javascript.j17.6.te",
+  "courseId": "javascript",
+  "moduleId": "J17",
+  "topicId": "J17.6",
+  "title": "WeakMap మరియు WeakSet పరిచయం",
+  "language": "te",
+  "learningObjectives": [
+    "WeakMap, WeakSetలో object references ఎలా weakగా నిర్వహించబడతాయో, వాటిని ఎందుకు iterate చేయలేమో వివరించగలగాలి."
+  ],
+  "prerequisites": [
+    "J7.1",
+    "J10.5",
+    "J10.6"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "WeakMap object keysను weakగా ఉంచుతుంది; WeakSet object valuesను weakగా ఉంచుతుంది. ఇవి enumerable కావు. Collectionలో ఉన్నాయనే కారణంతో మాత్రమే object memoryలో తప్పనిసరిగా నిలిచి ఉండదు. Object lifetimeకు అనుసంధానమైన metadata నిల్వ చేయడానికి ఇవి ఉపయోగపడతాయి. ఆధునిక JavaScript specificationలో నిర్దిష్ట non-registered symbols కూడా WeakMap keysగా అనుమతించబడతాయి; సాధారణ strings, numbers అనుమతించబడవు.",
+      "whyItMatters": "Metadata registry వల్ల objects అనవసరంగా memoryలో కొనసాగకుండా ఉండేందుకు weak collections సహాయపడతాయి. Garbage collection సమయం deterministic కాదు కాబట్టి వీటిని enumerate చేసే API ఇవ్వలేదు.",
+      "analogy": "ఒక objectకు సంబంధించిన గమనికను దానితో అనుసంధానించి ఉంచినట్లుగా WeakMapను ఊహించవచ్చు; ఆ గమనిక ఒక్కటే objectను memoryలో ఉంచే కారణం కాదు.",
+      "analogyLimit": "ఈ పోలిక సరళీకరణ మాత్రమే. Collection identity, iteration మరియు memory నిర్వహణ JavaScript specification, runtime నియమాల ప్రకారం జరుగుతాయి."
+    },
+    "explain": {
+      "narrative": "WeakMap objectకు metadataను అనుసంధానిస్తుంది. దీన్ని iterate చేయలేం; object ఎప్పుడు garbage collected అవుతుందో కూడా code ద్వారా హామీ ఇవ్వలేం.",
+      "examples": [
+        {
+          "id": "j17-6-example",
+          "language": "javascript",
+          "code": "const metadata=new WeakMap();let panel={id:'panel-1'};metadata.set(panel,{visited:true});console.log(metadata.get(panel));panel=null;",
+          "explanation": "metadata అనే WeakMapలో panel object keyగా ఉంది. get(panel) ద్వారా దాని metadataను చదువుతాం. తర్వాత panel variableను nullగా మార్చడం వల్ల ఆ objectకు ఆ variable ద్వారా reference ఉండదు; అయితే garbage collection వెంటనే జరుగుతుందని హామీ లేదు.",
+          "expectedOutput": "{ visited: true }",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "DOM elementకు సంబంధించిన metadataను WeakMapలో నిల్వ చేయండి. Mapలాగా WeakMapను ఎందుకు iterate చేయలేమో వివరించండి.",
+      "independentTask": "ఒక UI component objectకు private metadataను WeakMapతో అనుసంధానించండి. Strong Mapతో పోల్చి object lifetime మరియు memory implicationsను వివరించండి.",
+      "hints": [
+        "ఏ key లేదా value రకాలు అనుమతించబడతాయో పరిశీలించండి.",
+        "Collection iteration order, identity మరియు lifetime ప్రవర్తనను పరీక్షించండి.",
+        "Garbage collection ఎప్పుడు జరుగుతుందో ఖచ్చితంగా ఊహించవద్దు; runtime దాన్ని నిర్ణయిస్తుంది."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "javascript",
+    "starterCode": "const metadata=new WeakMap();let panel={id:'panel-1'};metadata.set(panel,{visited:true});console.log(metadata.get(panel));panel=null;",
+    "resetCode": "const metadata=new WeakMap();let panel={id:'panel-1'};metadata.set(panel,{visited:true});console.log(metadata.get(panel));panel=null;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "j17-6-q1",
+        "prompt": "WeakMap keysగా సాధారణంగా ఏవి ఉపయోగించవచ్చు?",
+        "options": [
+          "Objects మరియు specification అనుమతించే non-registered symbols",
+          "సాధారణ strings మరియు numbers మాత్రమే",
+          "ఏ value అయినా ఎలాంటి పరిమితి లేకుండా"
+        ],
+        "answer": "Objects మరియు specification అనుమతించే non-registered symbols",
+        "explanation": "WeakMap keysకు అర్హత కలిగిన objects, అలాగే specification మద్దతు ఇచ్చే non-registered symbols మాత్రమే ఉపయోగించవచ్చు; strings, numbers చెల్లవు."
+      },
+      {
+        "id": "j17-6-q2",
+        "prompt": "JavaScript collectionను ఎంచుకునేటప్పుడు ఏ అంశాలు ముఖ్యం?",
+        "options": [
+          "అవసరమైన key రకాలు, uniqueness, ordering, iteration ప్రవర్తన",
+          "UIలోని రంగు",
+          "File extension"
+        ],
+        "answer": "అవసరమైన key రకాలు, uniqueness, ordering, iteration ప్రవర్తన",
+        "explanation": "Data modelకు, అవసరమైన operationsకు సరిపోయే collectionను ఎంచుకోవాలి."
+      }
+    ]
+  },
+  "status": "draft"
+}
