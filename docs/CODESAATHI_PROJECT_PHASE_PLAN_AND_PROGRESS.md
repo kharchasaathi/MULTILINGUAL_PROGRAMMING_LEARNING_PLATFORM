@@ -389,3 +389,12 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Registered all seven lesson paths in the curriculum index and updated the existing tracker rows; no duplicate topics were added.
 - Index commit: `6ddb9cfc8cde649af9d763df6ed979f137c6f173`; tracker commit: `128b839baf5ed131df966f51711b6f70d92f21ed`.
 - All seven lessons remain DRAFT pending editorial review and actual browser/playground verification.
+
+
+## Telugu Translation Batch — CSS C11.1–C11.8 — 2026-11-13
+
+- Added eight Telugu draft lessons translated from the matching English master files: Grid container and tracks; columns, rows and gaps; fractional units and repeat(); minmax(), auto-fit and auto-fill; Grid placement and named areas; alignment and implicit grids; responsive card/dashboard layouts; interactive Grid playground.
+- Translated learner-facing explanations, example labels, guided and independent tasks, hints, quiz prompts, options, answers and feedback into Telugu. CSS properties, values, and executable syntax remain unchanged.
+- Added Telugu-language starter and reset code, registered all eight paths in the curriculum index, and updated the existing tracker rows.
+- Index commit: `0dc3728ad09baafb8137252fd310ea37650b91a1`; tracker commit: `e9ee043e5fb5d5dad2c7d73288e5e02787ad69f4`.
+- All lessons remain DRAFT pending editorial review and actual browser/playground verification.
