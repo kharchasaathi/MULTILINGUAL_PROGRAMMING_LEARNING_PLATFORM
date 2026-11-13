@@ -69,12 +69,22 @@
   "use strict";
   const LANGUAGE_KEY = "codesaathi.language.v1";
   const SUPPORTED_LANGUAGES = new Set(["en", "te"]);
+  const UI_TRANSLATIONS = {
+    en: {
+      heroLead: "A friendly, practical path to learning HTML, CSS and JavaScript — one clear lesson at a time.",
+      explore: "Explore courses"
+    },
+    te: {
+      heroLead: "HTML, CSS, JavaScript నేర్చుకోవడానికి సులభమైన మార్గం — ఒక్కో పాఠం చొప్పున అర్థం చేసుకుంటూ, మీరే కోడ్ రాయండి.",
+      explore: "కోర్సులు చూడండి"
+    }
+  };
   const selector = document.querySelector("#languageSelect");
   if (!selector) return;
 
   const applyLanguage = (requestedLanguage) => {
     const language = SUPPORTED_LANGUAGES.has(requestedLanguage) ? requestedLanguage : "en";
-    const translationsForLanguage = translations[language] || translations.en;
+    const translationsForLanguage = UI_TRANSLATIONS[language];
     document.querySelectorAll("[data-i18n]").forEach((element) => {
       const key = element.dataset.i18n;
       if (Object.prototype.hasOwnProperty.call(translationsForLanguage, key)) {
