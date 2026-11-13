@@ -191,3 +191,35 @@ Only English and Telugu currently have translated landing-page strings. The othe
 ### Tracker detail correction — 2026-11-13
 - Updated the six existing C3 subtopic rows in place (rather than adding duplicates): C3.1–C3.6 now show DRAFT with the three lesson stages and runnable HTML starter present, while both language columns remain DRAFT.
 - Pedagogical review, browser execution and learner-facing integration remain pending.
+
+
+## Verified curriculum and deployment audit — 2026-11-13
+
+### Current repository evidence
+- Active branch: `release/v1-frontend`; audited HEAD before this log: `f6e04b798df83a71e4371a8aa7387d0257d26172`.
+- The curriculum tracker contains 554 detailed topic rows across Foundation, HTML, CSS, JavaScript, Web Platform and Integrated Projects.
+- Tracker breakdown (topic rows, not module summary rows):
+  - Foundation: 14 topics — 14 DRAFT.
+  - HTML: 110 topics — 64 DRAFT, 46 PLANNED.
+  - CSS: 164 topics — 19 DRAFT, 145 PLANNED.
+  - JavaScript: 213 topics — 213 PLANNED, no lesson drafts yet.
+  - Web Platform: 35 topics — 35 PLANNED.
+  - Integrated Projects: 18 topics — 18 PLANNED.
+- Current bilingual lesson JSON inventory: 194 files (97 English/Telugu topic pairs), comprising Foundation 14, HTML 64 and CSS 19 topics. These are drafts, not reviewed/released lessons.
+- Phase 2 is therefore materially incomplete. Do not mark it complete until the 554-topic curriculum scope, original lesson content, review, exercises/assessments, runnable examples, integration and acceptance checks are actually complete.
+
+### Deployment evidence
+- GitHub Actions run #217 for HEAD `f6e04b798df83a71e4371a8aa7387d0257d26172` completed successfully, including Hosting file validation, OIDC authentication and Firebase Hosting deployment.
+- This confirms deployment of the current repository state only. It does not mean the incomplete curriculum has become a finished learning platform.
+
+### Current phase decisions
+- Phase 1: IN PROGRESS until the real browser interaction gate is verified (six language choices + reload persistence/fallback, lesson rendering/completion, and service-worker update).
+- Phase 2: IN PROGRESS. The lesson files currently exist as drafts; the current app still uses its original hard-coded course/lesson data and does not yet load the new per-topic JSON curriculum as the learner's complete course catalogue.
+- Phase 3 onward: do not mark complete merely because foundation components or draft content exist.
+
+### Next implementation sequence
+1. Build and validate the curriculum index/loader contract so the existing lesson JSON files can be loaded by stable topic IDs and language, without replacing existing app architecture wholesale.
+2. Integrate and smoke-test the existing Foundation, HTML and CSS draft lessons through the learner interface.
+3. Continue authoring missing HTML, CSS, JavaScript, Web Platform and project topics in manageable, reviewed batches.
+4. Implement the universal isolated playground and CSS Colour/Property Labs; validate examples against actual browser output.
+5. Complete the full learner journey and release gates, then deploy the verified release.
