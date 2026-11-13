@@ -25,12 +25,36 @@
     const c=courses.find(x=>x.id===id); if(!c)return;
     const completed=progress[c.id]||[];
     $("#lessonContent").innerHTML='<div class="eyebrow">'+c.tag+' · '+c.lessons.length+' LESSONS</div><h2>'+c.name+' course</h2><p>'+c.intro+'</p><h3>Course roadmap</h3><ol class="lesson-list">'+c.lessons.map((l,i)=>'<li><button class="lesson-select" data-lesson="'+i+'">'+(completed.includes(i)?'✓':'○')+' &nbsp;'+l+'</button></li>').join("")+'</ol><div id="activeLesson"><h3>Start here: '+c.lessons[0]+'</h3><p>'+c.intro+'</p><pre></pre><div class="lesson-task"><strong>Try it:</strong> '+c.task+'</div><p class="lesson-explain">Choose a lesson above to explore the roadmap. Your completion is saved on this device.</p><button class="lesson-complete" id="markLesson">Mark lesson complete</button></div>';
-    $("#activeLesson pre").textContent=c.example;
+    if (window.CodeSaathiLessonTemplate) {
+      window.CodeSaathiLessonTemplate.render($("#activeLesson"), {
+        title: c.lessons[0],
+        understand: c.intro,
+        explanation: "Study this original example. Notice the important tags, properties or statements and connect them to what the browser displays.",
+        analogy: c.id === "html" ? "HTML is like the structural plan of a page; the analogy helps with structure, but HTML itself is a markup language interpreted by the browser." : c.id === "css" ? "CSS is like the visual design and arrangement of a page; the browser applies actual style rules rather than painting a physical object." : "JavaScript is like the controls that respond to a person's actions; the browser executes instructions rather than moving physical parts.",
+        code: c.example,
+        practice: c.task,
+        quizQuestion: "What part of this example controls the result you see?",
+        quizAnswer: "Identify the element, rule or statement responsible, then change it and run the example again.",
+        onComplete: () => {}
+      });
+    }
     $("#lessonDialog").showModal();
     $("#lessonContent").querySelectorAll("[data-lesson]").forEach(btn=>btn.addEventListener("click",()=>{
       const i=Number(btn.dataset.lesson);
       $("#activeLesson").innerHTML='<h3>'+c.lessons[i]+'</h3><p>'+c.intro+'</p><pre></pre><div class="lesson-task"><strong>Practice:</strong> '+c.task+'</div><p class="lesson-explain">Read the example, change it in the playground, and practise until you can explain each line.</p><button class="lesson-complete" id="markLesson" data-index="'+i+'">Mark lesson complete</button>';
-      $("#activeLesson pre").textContent=c.example;
+      if (window.CodeSaathiLessonTemplate) {
+        window.CodeSaathiLessonTemplate.render($("#activeLesson"), {
+          title: c.lessons[i],
+          understand: c.intro,
+          explanation: "Study this original example. Notice the important tags, properties or statements and connect them to what the browser displays.",
+          analogy: c.id === "html" ? "HTML is like the structural plan of a page; the analogy helps with structure, but HTML itself is a markup language interpreted by the browser." : c.id === "css" ? "CSS is like the visual design and arrangement of a page; the browser applies actual style rules rather than painting a physical object." : "JavaScript is like the controls that respond to a person's actions; the browser executes instructions rather than moving physical parts.",
+          code: c.example,
+          practice: c.task,
+          quizQuestion: "What part of this example controls the result you see?",
+          quizAnswer: "Identify the element, rule or statement responsible, then change it and run the example again.",
+          onComplete: () => {}
+        });
+      }
       bindComplete(c.id,i);
     }));
     bindComplete(c.id,0);
@@ -61,15 +85,22 @@
   }
 })();
 
-/* CodeSaathi shared language preference — additive foundation layer.
- * Supported UI languages in this release: English and Telugu.
- * Other planned languages remain unavailable until their translations are implemented.
+/* CodeSaathi shared six-language preference and honest translation fallback.
+ * Language selection is available for all six planned languages.
+ * Actual translated UI strings currently exist only for English and Telugu.
  */
 (() => {
   "use strict";
   const LANGUAGE_KEY = "codesaathi.language.v1";
-  const SUPPORTED_LANGUAGES = new Set(["en", "te"]);
-  const UI_TRANSLATIONS = {
+  const LANGUAGE_NAMES = {
+    en: "English",
+    te: "తెలుగు",
+    ml: "മലയാളം",
+    kn: "ಕನ್ನಡ",
+    ta: "தமிழ்",
+    hi: "हिन्दी"
+  };
+  const TRANSLATIONS = {
     en: {
       heroLead: "A friendly, practical path to learning HTML, CSS and JavaScript — one clear lesson at a time.",
       explore: "Explore courses"
@@ -80,23 +111,30 @@
     }
   };
   const selector = document.querySelector("#languageSelect");
+  const notice = document.querySelector("#languageFallbackNotice");
   if (!selector) return;
 
-  const applyLanguage = (requestedLanguage) => {
-    const language = SUPPORTED_LANGUAGES.has(requestedLanguage) ? requestedLanguage : "en";
-    const translationsForLanguage = UI_TRANSLATIONS[language];
+  const applyLanguage = (requested) => {
+    const selected = Object.prototype.hasOwnProperty.call(LANGUAGE_NAMES, requested) ? requested : "en";
+    const contentLanguage = Object.prototype.hasOwnProperty.call(TRANSLATIONS, selected) ? selected : "en";
+    const strings = TRANSLATIONS[contentLanguage];
     document.querySelectorAll("[data-i18n]").forEach((element) => {
       const key = element.dataset.i18n;
-      if (Object.prototype.hasOwnProperty.call(translationsForLanguage, key)) {
-        element.textContent = translationsForLanguage[key];
-      }
+      if (Object.prototype.hasOwnProperty.call(strings, key)) element.textContent = strings[key];
     });
-    selector.value = language;
-    document.documentElement.lang = language;
-    return language;
+    selector.value = selected;
+    document.documentElement.lang = contentLanguage;
+    if (notice) {
+      const isFallback = selected !== contentLanguage;
+      notice.hidden = !isFallback;
+      notice.textContent = isFallback
+        ? LANGUAGE_NAMES[selected] + " selected. Course and interface text is currently shown in English until this translation is published."
+        : "";
+    }
+    return selected;
   };
 
-  const readSavedLanguage = () => {
+  const readPreference = () => {
     try {
       return localStorage.getItem(LANGUAGE_KEY) || "en";
     } catch {
@@ -104,19 +142,19 @@
     }
   };
 
-  const initialLanguage = applyLanguage(readSavedLanguage());
+  const initial = applyLanguage(readPreference());
   try {
-    localStorage.setItem(LANGUAGE_KEY, initialLanguage);
+    localStorage.setItem(LANGUAGE_KEY, initial);
   } catch {
-    // Language selection still works for this page when storage is unavailable.
+    // Keep the selector usable for this page if browser storage is unavailable.
   }
 
   selector.addEventListener("change", () => {
-    const language = applyLanguage(selector.value);
+    const selected = applyLanguage(selector.value);
     try {
-      localStorage.setItem(LANGUAGE_KEY, language);
+      localStorage.setItem(LANGUAGE_KEY, selected);
     } catch {
-      // Keep the current page usable when browser storage is unavailable.
+      // Current-page language selection remains available without storage.
     }
   });
 })();
