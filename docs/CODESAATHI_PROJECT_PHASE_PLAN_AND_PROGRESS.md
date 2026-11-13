@@ -792,3 +792,10 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Preserved executable JavaScript snippets and IDs; translated teaching explanations, guided/independent tasks, hints, and quiz feedback.
 - Registered Telugu paths in the curriculum index and marked matching tracker rows as Telugu DRAFT.
 - Pedagogical review, schema validation, and browser runtime/output verification remain pending.
+
+
+### Telugu translation batch — JavaScript J16.5–J16.8 (2026-11-13)
+- Added Telugu drafts from existing English lessons for constructor functions, class syntax/constructors, inheritance/composition, and static methods/fields.
+- Preserved executable code and lesson identifiers; translated learner-facing teaching, tasks, hints, and quiz feedback.
+- Registered Telugu lesson paths in the curriculum index and marked matching tracker rows as Telugu DRAFT.
+- Pedagogical review, schema validation, and browser runtime/output verification remain pending.
