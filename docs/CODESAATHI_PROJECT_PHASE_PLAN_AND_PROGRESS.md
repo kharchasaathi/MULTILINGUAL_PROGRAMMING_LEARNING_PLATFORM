@@ -694,3 +694,10 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Registered lesson paths in curriculum index and updated matching tracker rows where present.
 - Preserved executable syntax and technical identifiers; translated learner-facing content, tasks, hints and assessments.
 - Browser module loading, prototype, receiver-binding, and accessor verification remain pending.
+
+
+### Telugu translation batch — JavaScript J10.5–J10.8 (2026-11-13)
+- Added four Telugu draft lessons covering iterators/generators, Set/Map collections, Date/Intl formatting, and regular expressions.
+- Registered lesson paths in curriculum index and updated matching tracker rows where present.
+- Preserved executable syntax and technical identifiers; translated learner-facing content, tasks, hints and assessments.
+- Runtime compatibility, locale, and pattern edge-case verification remain pending.
