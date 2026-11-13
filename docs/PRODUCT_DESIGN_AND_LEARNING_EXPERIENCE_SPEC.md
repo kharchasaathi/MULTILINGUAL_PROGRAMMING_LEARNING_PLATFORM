@@ -84,8 +84,8 @@ CSS must be taught visually and interactively. A learner should understand not o
 - Display the exact colour value beneath/alongside the swatch in useful formats such as HEX, RGB, and HSL. Example: a selected swatch must visibly show a code such as `#A8C686`, not just a colour name.
 - Provide copyable code snippets for common CSS uses, including `color`, `background-color`, and `border-color`.
 - Allow learners to edit the HEX/RGB/HSL value and see the preview update; validate invalid values and explain the problem.
-- Include a palette of curated sample colours and shades (for example, sage green, warm ivory, lavender, and neutral tones) as teaching examples. These are learning swatches, not claims of official paint-brand catalog codes.
-- If paint-brand colours such as Asian Paints are ever shown, distinguish the brand's official catalogue shade/code from a CSS HEX approximation. Never invent an official paint shade code or imply a CSS HEX value is the manufacturer's code.
+- Include an original palette of sample colours and shades (for example, sage green, warm ivory, lavender, and neutral tones) created and maintained within CodeSaathi.
+- Keep all lessons, code examples, palettes, sample projects, UI labels, and learning assets self-contained and original to CodeSaathi. Do not introduce or reference outside brands, products, services, company catalogues, or their proprietary colour codes as part of the learning experience. Use generic colour names and standard CSS colour values only.
 - Demonstrate foreground/background contrast and explain readability and accessibility, not just aesthetics.
 - Colour swatches must have text labels/codes and accessible controls; do not rely on colour alone.
 
@@ -147,7 +147,7 @@ A lesson is not complete merely because its page renders. It is complete only wh
 3. The example is original, correct, and explained in human-friendly language.
 4. The playground actually runs and displays the result safely.
 5. Every executable code example has an appropriate live output or an honestly labelled alternative.
-6. CSS colour lessons include interactive swatches and visible/copyable colour codes.
+6. CSS colour lessons include CodeSaathi's own interactive swatches and visible/copyable standard CSS colour codes; no external brand references or proprietary catalogues appear in the learning experience.
 7. CSS property lessons visibly update a live preview when code or values change.
 8. Exercises and quiz have useful feedback and expected outcomes.
 9. The lesson works on mobile and desktop.
