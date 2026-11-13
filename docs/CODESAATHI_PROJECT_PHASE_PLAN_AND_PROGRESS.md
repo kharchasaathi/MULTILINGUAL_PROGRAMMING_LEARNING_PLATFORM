@@ -554,3 +554,10 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Registered lesson paths in the curriculum index and updated matching tracker rows where present.
 - Preserved runnable code and technical identifiers; translated learner-facing content, tasks, hints and assessments.
 - Editorial and browser/project verification remain pending.
+
+
+### Telugu translation batch — Integrated P2.2–P2.5 (2026-11-13)
+- Added four Telugu project drafts for a fictional small-business information site, responsive knowledge site, interactive calculator/planner, and multi-page capstone using browser storage.
+- Registered lesson paths in curriculum index and updated matching tracker rows where present.
+- Preserved runnable code and technical identifiers; translated learner-facing content, tasks, hints and assessments.
+- Editorial and browser/project verification remain pending.
