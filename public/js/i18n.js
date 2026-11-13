@@ -55,6 +55,7 @@
   };
   const dictionaries = { te };
   const protectedTags = new Set(["SCRIPT","STYLE","CODE","PRE","TEXTAREA"]);
+  const originals = new WeakMap();
   function translate(root, dictionary) {
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
     const nodes = [];
@@ -64,7 +65,9 @@
       nodes.push(node);
     }
     nodes.forEach(node => {
-      const original = node.nodeValue;
+      if (!originals.has(node)) originals.set(node, node.nodeValue);
+      const original = originals.get(node);
+      node.nodeValue = original;
       const trimmed = original.trim();
       if (dictionary[trimmed]) node.nodeValue = original.replace(trimmed, dictionary[trimmed]);
     });
@@ -78,6 +81,9 @@
   function apply(language) {
     const lang = ["en","te","ml","kn","ta","hi"].includes(language) ? language : "en";
     document.documentElement.lang = lang;
+    document.body.querySelectorAll("*").forEach(el => {
+      el.childNodes.forEach(node => { if (node.nodeType === Node.TEXT_NODE && originals.has(node)) node.nodeValue = originals.get(node); });
+    });
     if (lang === "te") translate(document.body, dictionaries.te);
     const notice = document.querySelector("#languageFallbackNotice");
     if (notice) {
@@ -103,8 +109,9 @@
       records.forEach(record => {
         record.addedNodes.forEach(node => {
           if (node.nodeType === Node.TEXT_NODE) {
-            const value = node.nodeValue.trim();
-            if (dictionaries.te[value]) node.nodeValue = node.nodeValue.replace(value, dictionaries.te[value]);
+            if (!originals.has(node)) originals.set(node, node.nodeValue);
+            const value = originals.get(node).trim();
+            if (dictionaries.te[value]) node.nodeValue = originals.get(node).replace(value, dictionaries.te[value]);
           } else if (node.nodeType === Node.ELEMENT_NODE && !protectedTags.has(node.tagName)) translate(node, dictionaries.te);
         });
       });
