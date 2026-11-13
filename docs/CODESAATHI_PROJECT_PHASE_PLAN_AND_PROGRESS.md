@@ -250,3 +250,33 @@ Only English and Telugu currently have translated landing-page strings. The othe
 - The universal isolated playground, CSS visual labs, full curriculum authoring, and broader learner journey remain separate incomplete deliverables.
 
 **Phase status:** Phase 1 — IN PROGRESS (browser smoke checks still pending). Phase 2 — IN PROGRESS (97 of 554 tracked topic rows have draft lesson content; 457 remain planned).
+
+
+## English-first curriculum authoring update — 2026-11-13
+
+### Agreed content-production workflow
+- Create and quality-review the English master lesson first for every topic.
+- Translate the approved English master into Telugu, Malayalam, Kannada, and Hindi in a later dedicated pass.
+- Preserve topic IDs, schema, code samples, technical identifiers, and learning outcomes across languages.
+- Translation completion does not equal language-quality approval; regional-language review remains a separate gate.
+- A topic is not considered fully multilingual/released until all six language versions have passed their respective quality gates.
+
+### Work completed
+- Added English-only draft lessons for CSS C4.1–C4.11 (colour models, backgrounds, contrast, and Colour Lab introduction).
+- Added the 11 new English lessons to public/content/curriculum-index.json.
+- Updated the existing C4 topic rows in the curriculum tracker without duplicating rows.
+- Each lesson contains the three required stages, an executable HTML/CSS starter example, guided and independent practice, and two knowledge checks.
+- Repository JSON parsing and required-field structural checks were performed before commit; the 11 files were fetched back from GitHub and confirmed to contain all three stages and two questions.
+
+### Evidence
+- Commit: 930a6875e5c8304241bf356757a199fabf5b4166
+- Firebase Hosting workflow: https://github.com/kharchasaathi/MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM/actions/runs/43399420150 — completed successfully.
+
+### Honest status
+- English lesson drafts represented in the tracker before this batch: 97 topics.
+- New English drafts in this batch: 11 topics.
+- English draft topics now represented: 108 of 554.
+- English drafts still to author: 446.
+- All new lessons remain draft; pedagogical/editorial review and real browser/playground verification are pending.
+- This batch does not complete CSS C4 as a reviewed/released module and does not complete the English curriculum.
+- No regional-language translation work is included in this batch.
