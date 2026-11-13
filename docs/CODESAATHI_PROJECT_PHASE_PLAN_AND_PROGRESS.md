@@ -72,3 +72,28 @@ Use honest status values: `NOT STARTED`, `IN PROGRESS`, `BLOCKED`, `COMPLETE`, `
 - Curriculum scope exists but topic-level authoring and tracker expansion remain.
 - Website is live, but this is not yet a completed course platform.
 - No claims of full syllabus, lesson, payment, or playground completion until implemented.
+
+## Phase 1 work log — 2026-11-13
+
+### Completed in this session
+- Inspected the current learner frontend files: `public/index.html`, `public/app.js`, `public/styles.css`, and `firebase.json`.
+- Confirmed the current learner experience is a static single-page frontend; multi-route navigation is not yet implemented.
+- Expanded `docs/CODESAATHI_CURRICULUM_PROGRESS_TRACKER.csv` by appending 540 previously untracked syllabus subtopics. The existing 14 detailed Foundation rows were preserved, giving 554 detailed subtopics represented in the tracker. Existing module summary rows were also retained.
+- Added an additive language preference implementation to the end of `public/app.js`. It stores the selected English/Telugu preference under `codesaathi.language.v1`, restores it on page initialization, validates stored values, and falls back to English.
+- Added `docs/CODESAATHI_FRONTEND_FOUNDATION_ARCHITECTURE.md` to record the actual frontend baseline, decisions to preserve, incremental target structure, and Phase 1 acceptance checkpoints.
+
+### Evidence / commits
+- Curriculum tracker expansion: `361d79b6d3357927cbbbfb1e95e2653dcc9fddba`
+- Language preference implementation: `e182fd784e9acb8275613da394c636eb5772bf6b`
+- Frontend foundation architecture: `dc4475fe8fd6f0f29f51bd9aab8c51863ffe560b`
+
+### Current status
+- Phase 1 — IN PROGRESS.
+- Phase 2 — IN PROGRESS; detailed topic tracker now includes 554 syllabus subtopics, but lessons are not yet authored.
+- Language preference code is committed, but runtime/browser verification has not yet been performed. Multi-route persistence remains pending because the inspected frontend currently has no multi-route system.
+- Reusable lesson template and shared lesson-content structure remain pending.
+
+### Next concrete tasks
+1. Perform a focused browser/syntax smoke check for language preference initialization and persistence; fix only any observed issue.
+2. Define and implement the reusable three-stage lesson template without rewriting the existing site wholesale.
+3. Establish the shared curriculum/lesson metadata shape and begin the Foundation lesson pathway.
