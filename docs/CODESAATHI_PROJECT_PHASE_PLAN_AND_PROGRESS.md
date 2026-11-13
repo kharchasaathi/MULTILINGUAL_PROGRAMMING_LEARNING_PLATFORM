@@ -645,3 +645,10 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Registered lesson paths in curriculum index and updated matching tracker rows where present.
 - Preserved executable syntax and technical identifiers; translated learner-facing content, tasks, hints and assessments.
 - Browser execution and array/recursion edge-case verification remain pending.
+
+
+### Telugu translation batch — JavaScript J7.3–J7.6 (2026-11-13)
+- Added four Telugu draft lessons for array mutation methods, iteration methods, safe sorting/copying, and object properties/methods.
+- Registered lesson paths in curriculum index and updated matching tracker rows where present.
+- Preserved executable syntax and technical identifiers; translated learner-facing content, tasks, hints and assessments.
+- Browser execution and mutation/copy edge-case verification remain pending.
