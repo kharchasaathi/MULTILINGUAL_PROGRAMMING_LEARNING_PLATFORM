@@ -335,3 +335,12 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - The 11 newly translated CSS colour lessons C4.1–C4.11 remain part of the current Telugu content set.
 - Current Telugu indexed topic count remains 108/554. Of the older 97 Telugu drafts, 14 have been refreshed in this pass; the remaining 83 older HTML/CSS drafts still require review and retranslation. The remaining 446 topics still require first-time Telugu translation.
 - All refreshed lessons remain DRAFT. Schema checks, pedagogical review, and actual browser/playground execution are separate release gates; no release approval is implied by translation completion.
+
+
+## Telugu Translation Progress Update — 2026-11-13
+
+- Added Telugu drafts for CSS C5.1–C5.6 (typography), C6.1–C6.7 (box model), and C7.1–C7.3 (CSS sizing units): 16 new topics.
+- Refreshed the earlier Foundation Telugu drafts F0.1–F0.7 and F1.1–F1.7: 14 topics. Added a missing second assessment question to F0.1 during validation.
+- The earlier Telugu content baseline was 108 topics. Current curriculum index now lists 124 Telugu topics out of 554.
+- Remaining first-time Telugu translations: 430 topics. Earlier HTML/CSS drafts still awaiting style refresh: 83 topics. These are separate work queues and must not be counted as released content.
+- All newly added lessons remain DRAFT. Schema checks and index presence do not replace pedagogical review, accessibility review, or actual browser/playground testing.
