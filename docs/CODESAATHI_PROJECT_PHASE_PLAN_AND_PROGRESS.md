@@ -186,3 +186,8 @@ Only English and Telugu currently have translated landing-page strings. The othe
 - The latest confirmed Hosting workflow before this curriculum commit was run #214 (success). The deployment triggered by the C3 commit must be checked separately.
 
 **Phase 2 remains IN PROGRESS. Next curriculum task: CSS C4 (Colour and backgrounds), including the future interactive Colour Lab requirements; do not mark the Colour Lab implemented merely because the topic drafts exist.**
+
+
+### Tracker detail correction — 2026-11-13
+- Updated the six existing C3 subtopic rows in place (rather than adding duplicates): C3.1–C3.6 now show DRAFT with the three lesson stages and runnable HTML starter present, while both language columns remain DRAFT.
+- Pedagogical review, browser execution and learner-facing integration remain pending.
