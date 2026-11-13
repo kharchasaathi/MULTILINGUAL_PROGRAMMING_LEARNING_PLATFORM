@@ -19,7 +19,7 @@
 | Phase | Scope | Status | Completion evidence / remaining work |
 |---|---|---|---|
 | 0. Product direction | CodeSaathi identity, target learners, ₹1 concept, first-release scope | COMPLETE | Product direction established in conversation; confirm pricing/payment implementation separately |
-| 1. Foundation & architecture | Repository, static frontend, hosting baseline, design requirements, course architecture | IN PROGRESS | Website is live on Firebase Hosting; design specification and curriculum baseline exist. Need inspect/fix current frontend architecture and route structure |
+| 1. Foundation & architecture | Repository, static frontend, hosting baseline, design requirements, course architecture | IN PROGRESS | Implementation committed and latest Firebase Hosting workflow succeeded (run #38). Final live-browser interaction check is still unverified; current app remains a single-page frontend, not a multi-route app |
 | 2. Complete curriculum | Foundation + HTML + CSS + JavaScript + projects, lessons, exercises, assessments | IN PROGRESS | Master syllabus baseline created and expanded. Detailed lesson map, topic tracker, and all lesson content remain |
 | 3. Core learning experience | Navigation, persistent language preference, course/module/lesson pages, responsive UI | NOT STARTED | Existing language selector does not persist across pages; fix and make shared site-wide state |
 | 4. Universal live playground | HTML, CSS, JS and combined editor/output; run/reset; isolated preview; errors | NOT STARTED | Must implement actual runnable preview for all executable examples |
@@ -33,7 +33,7 @@
 ## Current progress snapshot
 
 **Current phase:** Phase 1 — Foundation & architecture, while Phase 2 — Curriculum completion is active in parallel.  
-**Immediate next task:** Convert the expanded master syllabus into a complete topic-level tracker, then start building the core lesson template and shared language preference.  
+**Immediate next task:** Close the Phase 1 live-browser smoke-check gate, then continue Phase 2 curriculum authoring.  
 **Current learner-facing state:** The Firebase-hosted site is live, but the full curriculum and promised interactive learning experience are not yet complete.
 
 ### Confirmed completed deliverables
@@ -150,11 +150,21 @@ Phase 2 curriculum content, Phase 4 universal playground, and Phase 5 CSS labs r
 These are source-structure checks, not a substitute for a real browser interaction test.
 
 ### Still required before Phase 1 can be marked COMPLETE
-- Confirm the latest Firebase Hosting deployment succeeded.
-- In a real browser, select each of the six languages, refresh, and confirm the choice remains selected and fallback notice appears only for languages without translations.
-- Open a course lesson and confirm the three-stage template renders and the existing lesson completion action still works.
+- Latest Firebase Hosting deployment is confirmed successful (GitHub Actions run #38).
+- Still requires a real browser interaction check: select each of the six languages, refresh, and confirm persistence and fallback visibility.
+- Still requires a real browser lesson check: open a course lesson, confirm all three stages render, and confirm lesson completion still records progress.
+- No browser automation/computer-control capability is available in this work session, so these runtime interactions cannot honestly be marked verified here.
 
 **Status: IN PROGRESS — implementation and structural checks are committed; live browser/deployment verification is the final Phase 1 gate.**
 
 ### Scope clarification
 Only English and Telugu currently have translated landing-page strings. The other four language options are preference/fallback support, not completed translations. Full translation work belongs to curriculum/content production and must be tracked separately.
+
+
+## Phase 1 final deployment update — 2026-11-13
+
+- Latest workflow run #38 (`636bd39e86b0b9be79bd5f8c01b88509604cf0db`) completed with conclusion `success`; the deploy job succeeded.
+- Firebase Hosting deployment is therefore confirmed; this is no longer a pending deployment gate.
+- Focused repository checks remain 12/12 passed.
+- A live browser interaction could not be executed from this session because no browser/computer automation tool is available and the hosted URL is not readable through the available page fetch. Do not treat source checks as proof of runtime behaviour.
+- **Phase 1 remains IN PROGRESS only for the final browser smoke check** (six language choices + reload persistence/fallback + three-stage lesson dialog + completion action). No other implementation task is outstanding in the defined Phase 1 scope.
