@@ -344,3 +344,26 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - The earlier Telugu content baseline was 108 topics. Current curriculum index now lists 124 Telugu topics out of 554.
 - Remaining first-time Telugu translations: 430 topics. Earlier HTML/CSS drafts still awaiting style refresh: 83 topics. These are separate work queues and must not be counted as released content.
 - All newly added lessons remain DRAFT. Schema checks and index presence do not replace pedagogical review, accessibility review, or actual browser/playground testing.
+
+
+## Telugu Translation Continuation — 2026-11-13
+
+### Completed in this batch
+- Corrected the CSS C9.7 English master where its analogy limit, practice hints, and second quiz question incorrectly referred to Flexbox rather than Float and clear.
+- Added the Telugu draft lesson at `public/content/te/css/C9.7.json`, preserving the lesson contract, topic ID, runnable example semantics, and two assessment questions.
+- Registered the Telugu lesson path in `public/content/curriculum-index.json` and updated the existing C9.7 row in the progress tracker; no duplicate topic row was created.
+
+### Evidence
+- English master correction: `c6b5f59dc946c0a324592d0c833029c99a660614`
+- Telugu C9.7 lesson: `6e92384ed5f04cd97eb319f384ba29657a9d7869`
+- Curriculum index update: `c7773b0375d71065710a184a7bb0ff3b96c54e41`
+- Progress tracker update: `68a119215268a9c8959054dee0a578c451bc8637`
+
+### Current translation count
+- Telugu indexed topics before this batch: 139 / 554.
+- Telugu indexed topics after this batch: 140 / 554.
+- First-time Telugu translations still missing: 414.
+- C9.7 remains a DRAFT; structural/index presence is not editorial approval or browser/playground verification.
+
+### Next translation topic
+- Continue in curriculum order with CSS C10.1 — Flex container and items.
