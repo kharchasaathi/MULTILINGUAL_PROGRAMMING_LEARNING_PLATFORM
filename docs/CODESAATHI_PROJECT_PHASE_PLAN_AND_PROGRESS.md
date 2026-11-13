@@ -666,3 +666,10 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Registered lesson paths in curriculum index and updated matching tracker rows where present.
 - Preserved executable syntax and technical identifiers; translated learner-facing content, tasks, hints and assessments.
 - Browser execution, accessibility-state synchronisation, and security review remain pending.
+
+
+### Telugu translation batch — JavaScript J8.5–J8.8 (2026-11-13)
+- Added four Telugu draft lessons covering safe DOM node creation/removal, event listeners, event bubbling/delegation, and form/input events.
+- Registered lesson paths in curriculum index and updated matching tracker rows where present.
+- Preserved executable syntax and technical identifiers; translated learner-facing content, tasks, hints and assessments.
+- Browser execution, keyboard accessibility, and security review remain pending.
