@@ -498,3 +498,10 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Registered every Telugu lesson path in the curriculum index and updated matching tracker rows.
 - Preserved executable HTML/CSS/JS syntax; translated learner-facing explanations, practice tasks, hints, assessment text, and starter HTML language metadata.
 - Drafts require editorial review and actual browser/playground verification; no runtime verification is claimed.
+
+
+### Telugu translation batch — HTML H11.1–H11.12 (2026-11-13)
+- Added twelve Telugu draft lessons covering successful controls, FormData name/value pairs, specialised input types, date/time inputs, autocomplete, mobile input hints, pattern validation, disabled/readonly/required states, multiple/accept/step/datalist, FormData and upload boundaries, client/server validation, and accessible error reporting.
+- Registered all Telugu lesson paths in the curriculum index and updated corresponding tracker rows.
+- Preserved HTML attributes, code identifiers, executable syntax and validation examples; translated learner-facing prose, tasks, hints, assessments and starter page language metadata.
+- Editorial and real-browser/playground verification remain pending; no runtime pass is claimed.
