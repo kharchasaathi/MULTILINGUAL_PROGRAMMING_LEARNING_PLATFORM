@@ -540,3 +540,10 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Registered all four lessons in the curriculum index and updated matching tracker rows.
 - Preserved code syntax and technical identifiers; translated learner-facing explanations, tasks, hints and assessments.
 - Editorial and browser/assistive-technology verification remain pending.
+
+
+### Telugu translation batch — Integrated P1.1–P1.4 (2026-11-13)
+- Added four Telugu project lessons covering brief-to-plan, semantic HTML structure, reusable CSS, and JavaScript interaction.
+- Registered the lesson paths in curriculum index and updated matching tracker rows where present.
+- Preserved runnable code and technical identifiers; translated learner-facing explanations, tasks, hints and assessments.
+- Editorial and browser/project verification remain pending.
