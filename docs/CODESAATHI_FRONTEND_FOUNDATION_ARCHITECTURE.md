@@ -81,3 +81,16 @@ These are target responsibilities, not claims that these folders or modules alre
 
 ---
 **End of initial frontend foundation architecture.**
+
+## Phase 1 update — six-language preference and lesson contract
+
+- The language selector now lists all six planned languages: English (`en`), Telugu (`te`), Malayalam (`ml`), Kannada (`kn`), Tamil (`ta`), and Hindi (`hi`).
+- The selected language code is persisted using `codesaathi.language.v1`.
+- Actual translated landing-page strings currently exist only for English and Telugu. Selecting Malayalam, Kannada, Tamil, or Hindi preserves the selected preference but displays an explicit English fallback notice. These languages must not be described as translated or released until their content is authored and reviewed.
+- The browser document language follows the language of the content currently displayed, not merely the selected preference.
+- A reusable renderer is implemented in `public/js/lessons/lesson-template.js` and is connected to the existing course lesson dialog. It presents the required three stages and uses DOM text nodes for lesson-provided content.
+- The shared lesson content contract is defined in `public/content/lesson.schema.json`. It includes stable topic IDs, language, learning objectives, the three teaching stages, executable examples, practice, and assessment.
+- The service worker cache version was advanced and the new lesson renderer was added to the app shell so returning visitors can receive the new module.
+
+### Phase 1 implementation boundaries
+The current course data is still a small introductory sample. The reusable template is in place, but complete syllabus lessons, genuine per-topic quizzes, fully translated course content, the universal isolated playground, and CSS labs remain separate implementation work. Do not infer their completion from the template.
