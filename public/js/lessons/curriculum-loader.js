@@ -31,7 +31,8 @@
   const courseNames = {
     foundation: ["Programming Foundations", "CORE CONCEPTS", "Understand computers, programs and problem-solving before writing code.", "F"],
     html: ["HTML", "STRUCTURE", "Build meaningful, accessible document structure for the web.", "HTML"],
-    css: ["CSS", "PRESENTATION", "Control layout, typography, colour and responsive design.", "CSS"]
+    css: ["CSS", "PRESENTATION", "Control layout, typography, colour and responsive design.", "CSS"],
+    javascript: ["JavaScript", "INTERACTION", "Build interactive behaviour, logic and dynamic web experiences.", "JS"]
   };
 
   function renderCourseCards() {
