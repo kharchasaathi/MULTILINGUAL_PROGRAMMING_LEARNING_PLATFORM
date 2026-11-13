@@ -29,12 +29,15 @@ jobs:
           test -f public/styles.css
           test -f public/app.js
           node --check public/app.js
+          node --check public/js/i18n.js
           node --check public/js/lessons/lesson-template.js
+          node --check public/js/lessons/curriculum-loader.js
+          node --check public/sw.js
           node -e "JSON.parse(require('fs').readFileSync('public/content/lesson.schema.json', 'utf8'))"
           node <<'NODE'
           const fs = require('fs');
           const html = fs.readFileSync('public/index.html', 'utf8');
-          const app = fs.readFileSync('public/app.js', 'utf8');
+          const i18n = fs.readFileSync('public/js/i18n.js', 'utf8');
           const requiredLanguages = ['en', 'te', 'ml', 'kn', 'ta', 'hi'];
           for (const code of requiredLanguages) {
             if (!html.includes('value="' + code + '"')) throw new Error('Missing language option: ' + code);
@@ -42,8 +45,21 @@ jobs:
           if (html.indexOf('/js/lessons/lesson-template.js') > html.indexOf('/app.js')) {
             throw new Error('Lesson template must load before app.js');
           }
-          if (!app.includes('codesaathi.language.v1')) throw new Error('Language preference persistence is missing');
-          if (!app.includes('languageFallbackNotice')) throw new Error('Honest translation fallback notice is missing');
+          if (!i18n.includes('codesaathi.language.v1')) throw new Error('Language preference persistence is missing');
+          if (!html.includes('languageFallbackNotice')) throw new Error('Honest translation fallback notice is missing');
+          const path = require('path');
+          function scan(dir) {
+            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+              const file = path.join(dir, entry.name);
+              if (entry.isDirectory()) scan(file);
+              else if (entry.name.endsWith('.json')) {
+                const raw = fs.readFileSync(file, 'utf8');
+                JSON.parse(raw);
+                if (/[\\u0C00-\\u0C7F]/u.test(raw)) throw new Error('Telugu script found in English content: ' + file);
+              }
+            }
+          }
+          scan('public/content/en');
           console.log('CodeSaathi Phase 1 foundation checks passed.');
           NODE
 
