@@ -477,3 +477,10 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Registered both Telugu paths in the curriculum index and updated their detailed tracker rows.
 - Preserved executable CSS and translated the learner-facing explanations, practice, hints, assessment content and starter HTML language metadata.
 - Status remains DRAFT pending editorial review and browser/playground verification.
+
+
+### Telugu translation batch — CSS C19.3–C19.8 (2026-11-13)
+- Added six Telugu lesson drafts covering 2D/3D transforms, animation performance/compositing, reduced-motion, colour-scheme, forced-colours/contrast preferences, and motion comfort.
+- Registered all six lesson paths in the curriculum index and updated the corresponding detailed tracker rows.
+- Preserved CSS declarations and runnable examples; translated learner-facing explanations, practice guidance, hints, quiz text, and starter HTML metadata.
+- Drafts still require editorial review and browser/playground verification.
