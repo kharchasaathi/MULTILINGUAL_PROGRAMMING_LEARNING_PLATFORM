@@ -807,3 +807,10 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Registered Telugu lesson paths in the curriculum index and updated tracker rows.
 - Repaired the J15.8 CSV row structure after detecting a quoted-comma parsing issue; normalized the tracker with proper CSV escaping.
 - Pedagogical review, schema validation, and browser runtime/output verification remain pending.
+
+
+### Telugu translation batch — JavaScript J17.1–J17.4 (2026-11-13)
+- Added Telugu drafts from existing English lessons for array mutation/non-mutation, map/filter/reduce, sorting/comparators/localeCompare, and Set uniqueness.
+- Preserved executable JavaScript and lesson IDs; translated explanations, exercises, hints, and assessments.
+- Registered Telugu paths in the curriculum index and marked tracker Telugu status as DRAFT.
+- Pedagogical review, schema validation, and browser runtime/output verification remain pending.
