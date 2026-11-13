@@ -491,3 +491,10 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Registered all ten Telugu lesson paths in the curriculum index and updated the matching detailed tracker rows.
 - Preserved CSS syntax and runnable code; translated learner-facing lesson content, practice, hints, assessment prompts/options/answers/feedback, and starter HTML language metadata.
 - Status remains DRAFT pending editorial review and browser/playground verification.
+
+
+### Telugu translation batch — CSS C21.1–C21.11 (2026-11-13)
+- Added eleven Telugu draft lessons for the interactive CSS labs: colour, typography, box model, selectors, cascade, flexbox, grid, positioning, responsive layout, animation, and real editable CSS/live rendered previews.
+- Registered every Telugu lesson path in the curriculum index and updated matching tracker rows.
+- Preserved executable HTML/CSS/JS syntax; translated learner-facing explanations, practice tasks, hints, assessment text, and starter HTML language metadata.
+- Drafts require editorial review and actual browser/playground verification; no runtime verification is claimed.
