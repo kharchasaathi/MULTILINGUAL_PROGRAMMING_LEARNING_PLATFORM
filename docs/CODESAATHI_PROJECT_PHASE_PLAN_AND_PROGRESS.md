@@ -512,3 +512,10 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Registered every lesson in the curriculum index and updated matching tracker rows.
 - Preserved executable markup and API names while translating learner-facing content and starter page language metadata.
 - Editorial and live-browser/playground verification remain pending; no runtime pass is claimed.
+
+
+### Telugu translation batch — HTML H13.9 and H14.1–H14.3 (2026-11-13)
+- Added four Telugu drafts covering safer alternatives to legacy object/embed, title/description metadata, canonical URL semantics, and crawler directives versus access control.
+- Registered lesson paths in curriculum index and updated matching tracker rows.
+- Preserved HTML syntax and technical identifiers; translated learner-facing explanations, tasks, hints and assessment items.
+- Editorial and browser verification remain pending.
