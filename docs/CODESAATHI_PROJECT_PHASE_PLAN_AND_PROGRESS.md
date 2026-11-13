@@ -856,3 +856,14 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Preserved JavaScript examples and lesson identifiers; translated teaching content, practice, hints, and assessments.
 - Registered Telugu paths in curriculum index and marked tracker rows as Telugu DRAFT.
 - Security review, schema validation, and browser runtime/accessibility verification remain pending.
+
+
+### Telugu translation batch — JavaScript J23.1–J23.8 (2026-11-13)
+- Added Telugu drafts for deterministic/testable functions, assertions/test cases, unit testing, integration/browser testing, boundary testing, linting/formatting, code review/naming, and documentation/API contracts.
+- Preserved JavaScript examples and stable lesson identifiers; translated teaching content, practice, hints, and assessments.
+- Registered Telugu paths in curriculum index and marked tracker rows as Telugu DRAFT.
+- Pedagogical review, schema validation, and actual test-run verification remain pending.
+
+### JavaScript Telugu translation scope checkpoint (2026-11-13)
+- Completed the identified remaining English-draft sequence J15.4 through J23.8: 92 lesson drafts in total, including the previously committed J15.4–J17.4 batch.
+- The 92 lesson files are Telugu DRAFT translations, not yet editorially approved or production-verified.
