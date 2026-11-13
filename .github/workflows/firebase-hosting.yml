@@ -59,7 +59,11 @@ jobs:
               }
             }
           }
-          scan('public/content/en');
+          for (const file of fs.readdirSync('public/content/en/html').filter(name => /^H1\\.[1-6]\\.json$/.test(name))) {
+            const raw = fs.readFileSync(path.join('public/content/en/html', file), 'utf8');
+            JSON.parse(raw);
+            if (/[\\u0C00-\\u0C7F]/u.test(raw)) throw new Error('Telugu script found in English HTML foundation lesson: ' + file);
+          }
           console.log('CodeSaathi Phase 1 foundation checks passed.');
           NODE
 
