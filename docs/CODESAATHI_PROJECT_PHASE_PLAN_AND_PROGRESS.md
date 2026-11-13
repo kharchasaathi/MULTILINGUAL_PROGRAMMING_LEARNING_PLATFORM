@@ -452,3 +452,12 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Added Telugu-language starter/reset code, registered all nine lessons in the curriculum index, and updated tracker rows.
 - Index commit: `4beda98b7a19f8874fd4d4d0f4b896a32b5da4f4`; tracker commit: `e5a7a9d13638dedec35ebb722f09bce086998adf`.
 - All lessons remain DRAFT pending editorial review and actual browser/playground verification.
+
+
+## Telugu Translation Batch — CSS C18.1–C18.8 — 2026-11-13
+
+- Added eight Telugu drafts translated against English masters: multiple backgrounds and clipping; linear/radial/conic/repeating gradients; border images; masks and clipping paths; filters and backdrop filters; blend modes and isolation; shadows/outlines/focus rings; scroll snap.
+- Translated learner-facing explanations, examples, guided/independent tasks, hints, quiz prompts, options, answers and feedback. CSS property names, functions, values, and executable syntax remain unchanged.
+- Added Telugu-language starter/reset code, registered all eight lessons in the curriculum index, and updated tracker rows.
+- Index commit: `6d7abf2fc324efd951e68a1fdbf3252fa4e0b952`; tracker commit: `0863136cb42bd8fc86ce730404b7837ff894a27e`.
+- All lessons remain DRAFT pending editorial review and actual browser/playground verification.
