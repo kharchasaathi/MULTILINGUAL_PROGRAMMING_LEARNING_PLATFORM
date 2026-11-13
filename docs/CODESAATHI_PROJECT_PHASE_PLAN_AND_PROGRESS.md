@@ -470,3 +470,10 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Preserved CSS syntax and executable code; translated learner-facing explanations, practice tasks, hints, quiz prompts/options/answers/feedback, and set the HTML language to `te`.
 - Lesson status remains DRAFT; editorial review and browser/playground execution are still pending.
 - Latest index count before this addition: 212/554 Telugu topics; after this addition: 213/554, with 341 topics still missing Telugu.
+
+
+### Telugu translation batch — CSS C19.1–C19.2 (2026-11-13)
+- Added Telugu lesson drafts for transition property lists/discrete transitions and keyframe design/animation composition.
+- Registered both Telugu paths in the curriculum index and updated their detailed tracker rows.
+- Preserved executable CSS and translated the learner-facing explanations, practice, hints, assessment content and starter HTML language metadata.
+- Status remains DRAFT pending editorial review and browser/playground verification.
