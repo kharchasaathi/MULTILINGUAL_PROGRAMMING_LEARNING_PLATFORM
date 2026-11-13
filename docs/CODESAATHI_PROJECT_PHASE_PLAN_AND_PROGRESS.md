@@ -519,3 +519,10 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Registered lesson paths in curriculum index and updated matching tracker rows.
 - Preserved HTML syntax and technical identifiers; translated learner-facing explanations, tasks, hints and assessment items.
 - Editorial and browser verification remain pending.
+
+
+### Telugu translation batch — HTML H14.4–H14.9 and H15.1–H15.2 (2026-11-13)
+- Added eight Telugu draft lessons for Open Graph metadata, favicon/manifest icons, language and direction, structured data, web app manifest, print styles, semantic HTML, and accessible names/descriptions.
+- Registered every Telugu lesson path in curriculum index and updated matching tracker rows.
+- Preserved HTML/JSON syntax and technical identifiers; translated learner-facing content, tasks, hints and assessments.
+- Editorial and browser verification remain pending.
