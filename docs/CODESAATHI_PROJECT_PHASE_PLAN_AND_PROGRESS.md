@@ -631,3 +631,10 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Registered lesson paths in curriculum index and updated matching tracker rows where present.
 - Preserved executable syntax and technical identifiers; translated learner-facing content, tasks, hints and assessments.
 - Browser execution and edge-case verification remain pending.
+
+
+### Telugu translation batch — JavaScript J6.5–J6.8 (2026-11-13)
+- Added four Telugu draft lessons covering arrow functions, lexical scope, closures, and callbacks.
+- Registered lesson paths in curriculum index and updated matching tracker rows where present.
+- Preserved executable syntax and technical identifiers; translated learner-facing content, tasks, hints and assessments.
+- Browser execution, this-binding, and closure behaviour verification remain pending.
