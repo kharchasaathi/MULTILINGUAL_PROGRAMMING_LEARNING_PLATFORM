@@ -561,3 +561,10 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Registered lesson paths in curriculum index and updated matching tracker rows where present.
 - Preserved runnable code and technical identifiers; translated learner-facing content, tasks, hints and assessments.
 - Editorial and browser/project verification remain pending.
+
+
+### Telugu translation batch — Integrated P3.1–P3.4 (2026-11-13)
+- Added four Telugu project drafts covering Git concepts, meaningful commits/branches, README documentation, and browser testing/issue reports.
+- Registered lesson paths in curriculum index and updated matching tracker rows where present.
+- Preserved commands and code identifiers; translated learner-facing explanations, tasks, hints and assessments.
+- Editorial and repository/browser verification remain pending.
