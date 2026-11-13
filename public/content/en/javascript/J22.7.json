@@ -1,0 +1,78 @@
+{
+  "id": "javascript.j22.7.en",
+  "courseId": "javascript",
+  "moduleId": "J22",
+  "topicId": "J22.7",
+  "title": "iframe sandbox and postMessage origin checks",
+  "language": "en",
+  "learningObjectives": [
+    "Explain iframe sandbox and postmessage origin checks and apply secure, accessible, maintainable browser practices."
+  ],
+  "prerequisites": [
+    "J13.1",
+    "J13.4",
+    "J21.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "iframe sandbox restricts capabilities of embedded content. postMessage allows communication between browsing contexts, but receivers must verify event.origin and, where appropriate, event.source and message shape. Send messages to a specific target origin rather than wildcard when possible.",
+      "whyItMatters": "An iframe is not automatically a trusted boundary. Incorrect origin checks can let an attacker send forged commands or read sensitive messages.",
+      "analogy": "The sandbox limits what the embedded page can do; origin checks verify who sent a message before accepting it.",
+      "analogyLimit": "The analogy is simplified; browser security, accessibility, and performance rules depend on platform behaviour and server configuration."
+    },
+    "explain": {
+      "narrative": "The listener accepts only messages from the exact trusted origin and checks the message type. Production code should also validate payload shape and source where needed.",
+      "examples": [
+        {
+          "id": "j22-7-example",
+          "language": "javascript",
+          "code": "window.addEventListener('message',event=>{if(event.origin!=='https://trusted.example.com')return;if(!event.data||event.data.type!=='lesson-ready')return;console.log('Trusted message received')});",
+          "explanation": "The listener accepts only messages from the exact trusted origin and checks the message type. Production code should also validate payload shape and source where needed.",
+          "expectedOutput": "Browser console or UI output demonstrates the security or reliability principle.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Build a sandboxed preview messaging contract. Reject unknown origins, unexpected sources, and malformed message data.",
+      "independentTask": "Review a small browser feature for security, accessibility, performance, and lifecycle risks. Add a fallback and document the server-side controls required.",
+      "hints": [
+        "Treat all browser and network input as untrusted.",
+        "Use exact origin checks and least privilege.",
+        "Measure performance and clean up resources."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "javascript",
+    "starterCode": "window.addEventListener('message',event=>{if(event.origin!=='https://trusted.example.com')return;if(!event.data||event.data.type!=='lesson-ready')return;console.log('Trusted message received')});",
+    "resetCode": "window.addEventListener('message',event=>{if(event.origin!=='https://trusted.example.com')return;if(!event.data||event.data.type!=='lesson-ready')return;console.log('Trusted message received')});"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "j22-7-q1",
+        "prompt": "What should a postMessage receiver verify before trusting a message?",
+        "options": [
+          "The sender origin and the message schema",
+          "The HTML title element",
+          "The browser address bar"
+        ],
+        "answer": "The sender origin and the message schema",
+        "explanation": "Check event.origin and validate the expected message structure."
+      },
+      {
+        "id": "j22-7-q2",
+        "prompt": "What is a sound browser engineering principle?",
+        "options": [
+          "Defence in depth, least privilege, and usable fallbacks",
+          "Trust all client input",
+          "Assume all browser features are always available"
+        ],
+        "answer": "Defence in depth, least privilege, and usable fallbacks",
+        "explanation": "Secure and reliable interfaces combine trusted server enforcement with careful client behaviour."
+      }
+    ]
+  },
+  "status": "draft"
+}

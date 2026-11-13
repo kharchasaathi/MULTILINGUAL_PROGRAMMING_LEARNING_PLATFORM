@@ -1,0 +1,78 @@
+{
+  "id": "javascript.j22.9.en",
+  "courseId": "javascript",
+  "moduleId": "J22",
+  "topicId": "J22.9",
+  "title": "Error boundaries in UI code (manual patterns)",
+  "language": "en",
+  "learningObjectives": [
+    "Explain error boundaries in ui code (manual patterns) and apply secure, accessible, maintainable browser practices."
+  ],
+  "prerequisites": [
+    "J13.1",
+    "J13.4",
+    "J21.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Vanilla JavaScript does not provide a built-in React-style error boundary for arbitrary DOM subtrees. Applications can isolate rendering operations with try/catch, validate data at boundaries, and provide component-level fallback UI. Async failures need rejection handling as well.",
+      "whyItMatters": "A single malformed record should not blank an entire page. Isolate independent rendering regions and report errors without exposing secrets or internal stack traces to users.",
+      "analogy": "A component boundary is a fire door that contains a local failure and leaves other parts of the page usable.",
+      "analogyLimit": "The analogy is simplified; browser security, accessibility, and performance rules depend on platform behaviour and server configuration."
+    },
+    "explain": {
+      "narrative": "The wrapper catches a synchronous rendering error and replaces only that panel with a safe message. Async work needs its own try/catch or rejection handler.",
+      "examples": [
+        {
+          "id": "j22-9-example",
+          "language": "javascript",
+          "code": "function renderPanel(root,render){try{render(root)}catch(error){console.error(error);root.textContent='This panel could not be displayed.'}}",
+          "explanation": "The wrapper catches a synchronous rendering error and replaces only that panel with a safe message. Async work needs its own try/catch or rejection handler.",
+          "expectedOutput": "Browser console or UI output demonstrates the security or reliability principle.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create two independent panels. Force one renderer to throw and confirm the other panel remains usable.",
+      "independentTask": "Review a small browser feature for security, accessibility, performance, and lifecycle risks. Add a fallback and document the server-side controls required.",
+      "hints": [
+        "Treat all browser and network input as untrusted.",
+        "Use exact origin checks and least privilege.",
+        "Measure performance and clean up resources."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "javascript",
+    "starterCode": "function renderPanel(root,render){try{render(root)}catch(error){console.error(error);root.textContent='This panel could not be displayed.'}}",
+    "resetCode": "function renderPanel(root,render){try{render(root)}catch(error){console.error(error);root.textContent='This panel could not be displayed.'}}"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "j22-9-q1",
+        "prompt": "Does try/catch around a synchronous function automatically catch a later rejected Promise?",
+        "options": [
+          "No, the Promise rejection must also be awaited or handled",
+          "The HTML title element",
+          "The browser address bar"
+        ],
+        "answer": "No, the Promise rejection must also be awaited or handled",
+        "explanation": "A later asynchronous rejection requires await inside try/catch or a rejection handler."
+      },
+      {
+        "id": "j22-9-q2",
+        "prompt": "What is a sound browser engineering principle?",
+        "options": [
+          "Defence in depth, least privilege, and usable fallbacks",
+          "Trust all client input",
+          "Assume all browser features are always available"
+        ],
+        "answer": "Defence in depth, least privilege, and usable fallbacks",
+        "explanation": "Secure and reliable interfaces combine trusted server enforcement with careful client behaviour."
+      }
+    ]
+  },
+  "status": "draft"
+}
