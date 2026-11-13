@@ -81,7 +81,7 @@
       section.append(text("h3", "", moduleId + " · " + moduleTopics.length + " topics"));
       const list = text("div", "curriculum-topic-list");
       moduleTopics.forEach(topic => {
-        const button = text("button", "curriculum-topic-button", (completed[topic.topicId]?.completed ? "✓ " : "○ ") + topic.topicId);
+        const button = text("button", "curriculum-topic-button", (completed[topic.topicId]?.completed ? "✓ " : "○ ") + (topic.title || topic.topicId));
         button.type = "button";
         button.dataset.topicId = topic.topicId;
         button.addEventListener("click", () => loadTopic(topic));
