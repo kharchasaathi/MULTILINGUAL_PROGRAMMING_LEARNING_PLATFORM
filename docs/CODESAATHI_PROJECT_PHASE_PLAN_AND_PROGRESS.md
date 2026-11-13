@@ -168,3 +168,21 @@ Only English and Telugu currently have translated landing-page strings. The othe
 - Focused repository checks remain 12/12 passed.
 - A live browser interaction could not be executed from this session because no browser/computer automation tool is available and the hosted URL is not readable through the available page fetch. Do not treat source checks as proof of runtime behaviour.
 - **Phase 1 remains IN PROGRESS only for the final browser smoke check** (six language choices + reload persistence/fallback + three-stage lesson dialog + completion action). No other implementation task is outstanding in the defined Phase 1 scope.
+
+
+## Phase 2 curriculum authoring update — 2026-11-13
+
+### CSS C3 bilingual lesson drafts committed
+- Added 12 original lesson JSON files: C3.1–C3.6 in English and Telugu.
+- Topics cover cascade/source order, specificity, inheritance, CSS-wide keywords, careful use of `!important`, and developer-tools debugging.
+- Each draft follows the shared three-stage lesson contract and includes runnable HTML/CSS starter code, guided and independent practice, and two quiz questions.
+- Updated the curriculum tracker: C3 module is IN PROGRESS; C3.1–C3.6 are DRAFT, with pedagogical review and website integration still pending.
+- Commit: `b95f74d5270a8e07c8aac24a63b12652d115f746`.
+
+### Validation and honest status
+- All 12 lesson files were fetched back from the active branch and parsed as valid JSON.
+- Confirmed each file has the expected topic ID, language, three lesson stages, two assessment questions, and HTML playground starter code.
+- Draft content has not yet passed pedagogical review, browser/playground execution, or learner-facing website integration. Do not mark these topics reviewed or released.
+- The latest confirmed Hosting workflow before this curriculum commit was run #214 (success). The deployment triggered by the C3 commit must be checked separately.
+
+**Phase 2 remains IN PROGRESS. Next curriculum task: CSS C4 (Colour and backgrounds), including the future interactive Colour Lab requirements; do not mark the Colour Lab implemented merely because the topic drafts exist.**
