@@ -83,10 +83,10 @@
       let translated = te[trimmed];
       if (!translated) {
         translated = trimmed
-          .replace(/^(\\d+) authored lesson topics · English and Telugu drafts$/, "$1 పాఠ్య అంశాలు · English, తెలుగు పాఠ్యాలు")
-          .replace(/^(\\d+) TOPICS$/, "$1 అంశాలు")
-          .replace(/^(\\d+) of (\\d+) completed$/, "$1 / $2 పూర్తయ్యాయి")
-          .replace(/^(\\d+) lessons$/, "$1 పాఠాలు")
+          .replace(/^(\d+) authored lesson topics · English and Telugu drafts$/, "$1 పాఠ్య అంశాలు · English, తెలుగు పాఠ్యాలు")
+          .replace(/^(\d+) TOPICS$/, "$1 అంశాలు")
+          .replace(/^(\d+) of (\d+) completed$/, "$1 / $2 పూర్తయ్యాయి")
+          .replace(/^(\d+) lessons$/, "$1 పాఠాలు")
           .replace(/^([A-Z]+) course$/, "$1 కోర్సు");
       }
       node.nodeValue = translated ? original.replace(trimmed, translated) : original;
@@ -150,10 +150,10 @@
           let translated = te[trimmed];
           if (!translated) {
             translated = trimmed
-              .replace(/^(\\d+) authored lesson topics · English and Telugu drafts$/, "$1 పాఠ్య అంశాలు · English, తెలుగు పాఠ్యాలు")
-              .replace(/^(\\d+) TOPICS$/, "$1 అంశాలు")
-              .replace(/^(\\d+) of (\\d+) completed$/, "$1 / $2 పూర్తయ్యాయి")
-              .replace(/^(\\d+) lessons$/, "$1 పాఠాలు");
+              .replace(/^(\d+) authored lesson topics · English and Telugu drafts$/, "$1 పాఠ్య అంశాలు · English, తెలుగు పాఠ్యాలు")
+              .replace(/^(\d+) TOPICS$/, "$1 అంశాలు")
+              .replace(/^(\d+) of (\d+) completed$/, "$1 / $2 పూర్తయ్యాయి")
+              .replace(/^(\d+) lessons$/, "$1 పాఠాలు");
           }
           if (translated) node.nodeValue = original.replace(trimmed,translated);
         } else if (node.nodeType === Node.ELEMENT_NODE && !protectedTags.has(node.tagName)) translate(node);
