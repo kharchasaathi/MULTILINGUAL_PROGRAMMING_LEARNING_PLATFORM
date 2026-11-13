@@ -379,3 +379,13 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Tracker commit: `eb43f848a75bfbededd5bf3caf704bce47bcb6bc`
 - Telugu indexed topic count after this batch: 141 / 554. First-time Telugu translations still missing: 413.
 - Lesson remains DRAFT pending editorial review and real browser/playground verification.
+
+
+## Telugu Translation Batch — CSS C10.2–C10.8 — 2026-11-13
+
+- Added seven Telugu lesson drafts translated against their English master files: main/cross axes; direction, wrapping and gap; justify-content and align-items; align-content and align-self; flex sizing (grow, shrink, basis); common layout patterns and debugging; interactive Flexbox playground.
+- Preserved CSS identifiers and executable declarations while translating learner-facing explanations, examples, tasks, hints, quiz prompts, choices, answers, and feedback into Telugu.
+- Added Telugu-language starter/reset documents and localized visible example labels.
+- Registered all seven lesson paths in the curriculum index and updated the existing tracker rows; no duplicate topics were added.
+- Index commit: `6ddb9cfc8cde649af9d763df6ed979f137c6f173`; tracker commit: `128b839baf5ed131df966f51711b6f70d92f21ed`.
+- All seven lessons remain DRAFT pending editorial review and actual browser/playground verification.
