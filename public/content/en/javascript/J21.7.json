@@ -1,0 +1,78 @@
+{
+  "id": "javascript.j21.7.en",
+  "courseId": "javascript",
+  "moduleId": "J21",
+  "topicId": "J21.7",
+  "title": "localStorage, sessionStorage, storage events",
+  "language": "en",
+  "learningObjectives": [
+    "Explain localstorage, sessionstorage, storage events and use the browser API with appropriate lifecycle and privacy safeguards."
+  ],
+  "prerequisites": [
+    "J12.4",
+    "J12.5",
+    "J19.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Web Storage stores string key-value pairs. localStorage persists across browser sessions; sessionStorage is scoped to a page session and browsing context. The storage event notifies other documents sharing the relevant storage area when a value changes; it does not fire in the document that made the change.",
+      "whyItMatters": "Storage is convenient for non-sensitive preferences but is not a secure vault or a permanent database. Handle unavailable storage and malformed data.",
+      "analogy": "Storage is a small browser-side notebook; the storage event tells other open pages when a note changes.",
+      "analogyLimit": "The analogy is simplified; browser API support, permission, lifecycle, and security rules vary by platform."
+    },
+    "explain": {
+      "narrative": "The listener runs in other same-origin documents that share the storage area, not in the tab that performed the write.",
+      "examples": [
+        {
+          "id": "j21-7-example",
+          "language": "javascript",
+          "code": "window.addEventListener('storage',event=>{if(event.key==='theme')console.log('Theme changed in another document:',event.newValue)});localStorage.setItem('theme','dark');",
+          "explanation": "The listener runs in other same-origin documents that share the storage area, not in the tab that performed the write.",
+          "expectedOutput": "Browser console or UI output demonstrates the API; permission and secure-context features require a supported environment.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Open two same-origin tabs. Change a preference in one and update the other tab when its storage event fires.",
+      "independentTask": "Build a small feature using the API. Include feature detection, permission or failure handling, cleanup, and an accessible alternative where relevant.",
+      "hints": [
+        "Do not assume the API is available in every browser.",
+        "Request sensitive permissions only after explaining why.",
+        "Clean up observers, workers, and listeners when no longer needed."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "javascript",
+    "starterCode": "window.addEventListener('storage',event=>{if(event.key==='theme')console.log('Theme changed in another document:',event.newValue)});localStorage.setItem('theme','dark');",
+    "resetCode": "window.addEventListener('storage',event=>{if(event.key==='theme')console.log('Theme changed in another document:',event.newValue)});localStorage.setItem('theme','dark');"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "j21-7-q1",
+        "prompt": "Does the storage event fire in the same document that calls localStorage.setItem()?",
+        "options": [
+          "No",
+          "The HTML title element",
+          "The browser address bar"
+        ],
+        "answer": "No",
+        "explanation": "The storage event is dispatched to other documents sharing the storage area."
+      },
+      {
+        "id": "j21-7-q2",
+        "prompt": "What is a reliable approach when using browser APIs?",
+        "options": [
+          "Feature-detect, handle denial or failure, and clean up resources",
+          "Assume every permission is granted",
+          "Ignore lifecycle and privacy"
+        ],
+        "answer": "Feature-detect, handle denial or failure, and clean up resources",
+        "explanation": "Browser features need graceful fallback, privacy-aware permission, and lifecycle management."
+      }
+    ]
+  },
+  "status": "draft"
+}
