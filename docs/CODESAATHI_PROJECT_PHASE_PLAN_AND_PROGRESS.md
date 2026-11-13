@@ -814,3 +814,10 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Preserved executable JavaScript and lesson IDs; translated explanations, exercises, hints, and assessments.
 - Registered Telugu paths in the curriculum index and marked tracker Telugu status as DRAFT.
 - Pedagogical review, schema validation, and browser runtime/output verification remain pending.
+
+
+### Telugu translation batch — JavaScript J17.5–J17.10 (2026-11-13)
+- Added Telugu drafts from English source lessons for Map, WeakMap/WeakSet, iterables/iterators, generators, typed arrays/binary data, and structured cloning.
+- Preserved JavaScript snippets and lesson IDs; translated teaching content, exercises, hints, and assessments.
+- Registered Telugu paths in curriculum index and marked tracker rows as Telugu DRAFT.
+- Pedagogical review, schema validation, and browser runtime/output verification remain pending.
