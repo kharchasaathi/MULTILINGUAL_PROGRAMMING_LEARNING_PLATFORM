@@ -1,0 +1,78 @@
+{
+  "id": "javascript.j22.7.te",
+  "courseId": "javascript",
+  "moduleId": "J22",
+  "topicId": "J22.7",
+  "title": "iframe Sandbox మరియు postMessage Origin Checks",
+  "language": "te",
+  "learningObjectives": [
+    "iframe sandbox పరిమితులు, postMessage receiverలో event.origin, source, message schema తనిఖీలను అమలు చేయగలగాలి."
+  ],
+  "prerequisites": [
+    "J11.1",
+    "J11.4",
+    "J19.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "iframe sandbox embedded content సామర్థ్యాలను పరిమితం చేస్తుంది. postMessage browsing contexts మధ్య సమాచార మార్పిడిని అనుమతిస్తుంది. Receiver event.originను, అవసరమైతే event.sourceను, message structureను తనిఖీ చేయాలి. సాధ్యమైనప్పుడు wildcard బదులు నిర్దిష్ట target originకు పంపాలి.",
+      "whyItMatters": "iframe స్వయంగా trusted security boundary కాదు. తప్పు origin checks వల్ల attacker నకిలీ commands పంపవచ్చు లేదా sensitive messages చదవవచ్చు.",
+      "analogy": "ఇది applicationలో data ప్రవేశించే మార్గాలు, వాటిపై విధించే నియంత్రణలు, failure వచ్చినప్పుడు recoveryను నిర్వహించే భద్రతా విధానంలా భావించండి.",
+      "analogyLimit": "ఈ పోలిక సరళీకరణ మాత్రమే. Browser security, CSP, same-origin, accessibility, performance ప్రవర్తన web platform ప్రమాణాల ప్రకారం నిర్ణయించబడుతుంది."
+    },
+    "explain": {
+      "narrative": "సందేశం పంపిన వ్యక్తి నిజంగా అనుమతించినవాడేనా అని నిర్ధారించిన తర్వాతే shared channelలో వచ్చిన సమాచారాన్ని నమ్మాలి.",
+      "examples": [
+        {
+          "id": "j22-7-example",
+          "language": "javascript",
+          "code": "window.addEventListener('message',event=>{if(event.origin!=='https://trusted.example.com')return;if(!event.data||event.data.type!=='lesson-ready')return;console.log('Trusted message received')});",
+          "explanation": "Listener ఖచ్చితమైన trusted origin నుంచి వచ్చిన messagesనే స్వీకరిస్తుంది. Message typeను కూడా తనిఖీ చేస్తుంది. Productionలో payload schema, అవసరమైతే sourceను కూడా validate చేయాలి.",
+          "expectedOutput": "Console లేదా UI ఫలితం environmentపై ఆధారపడి ఉంటుంది; browser/HTTP configuration అవసరమయ్యే ఉదాహరణలకు సరైన setup అవసరం.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Sandboxed preview కోసం messaging contract నిర్మించండి. Unknown origins, unexpected sources, malformed dataను reject చేయండి.",
+      "independentTask": "ఒక చిన్న featureను నిర్మించి threat cases, keyboard accessibility, cleanup, performance లేదా fallback పరిస్థితులను పరీక్షించండి. అవసరమైన security checksను server వైపున కూడా అమలు చేయండి.",
+      "hints": [
+        "Untrusted inputను defaultగా అనుమానంతో చూడండి.",
+        "Client-side checks భద్రతకు తుది హామీ కావు.",
+        "అవసరం లేని permissions, origins, scripts, resourcesను అనుమతించవద్దు."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "javascript",
+    "starterCode": "window.addEventListener('message',event=>{if(event.origin!=='https://trusted.example.com')return;if(!event.data||event.data.type!=='lesson-ready')return;console.log('Trusted message received')});",
+    "resetCode": "window.addEventListener('message',event=>{if(event.origin!=='https://trusted.example.com')return;if(!event.data||event.data.type!=='lesson-ready')return;console.log('Trusted message received')});"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "j22-7-q1",
+        "prompt": "postMessage receiver ఒక messageను నమ్మే ముందు ఏమి తనిఖీ చేయాలి?",
+        "options": [
+          "Sender origin మరియు message schema",
+          "HTML title element",
+          "Browser address bar"
+        ],
+        "answer": "Sender origin మరియు message schema",
+        "explanation": "event.originను తనిఖీ చేసి, message structureను validate చేయాలి."
+      },
+      {
+        "id": "j22-7-q2",
+        "prompt": "Frontend securityలో సరైన ప్రాథమిక సూత్రం ఏది?",
+        "options": [
+          "Untrusted dataను validate చేసి, అవసరమైన permissionsనే ఇవ్వడం; serverలోనూ enforce చేయడం",
+          "Minification చేస్తే secrets దాచబడతాయని భావించడం",
+          "Client-side validation ఒక్కటే సరిపోతుందని అనుకోవడం"
+        ],
+        "answer": "Untrusted dataను validate చేసి, అవసరమైన permissionsనే ఇవ్వడం; serverలోనూ enforce చేయడం",
+        "explanation": "Frontend controls usabilityకు సహాయపడతాయి; trusted security enforcement serverలో ఉండాలి."
+      }
+    ]
+  },
+  "status": "draft"
+}
