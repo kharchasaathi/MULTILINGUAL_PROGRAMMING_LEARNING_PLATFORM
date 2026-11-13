@@ -624,3 +624,10 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Registered lesson paths in curriculum index and updated matching tracker rows where present.
 - Preserved executable syntax and technical identifiers; translated learner-facing content, tasks, hints and assessments.
 - Browser execution and loop-boundary verification remain pending.
+
+
+### Telugu translation batch — JavaScript J5.5–J5.8 and J6.1–J6.4 (2026-11-13)
+- Added eight Telugu draft lessons covering break/continue, iterable/object loops, nested control flow, structure selection, function purpose, declarations/expressions, parameters/return values, and defaults.
+- Registered lesson paths in curriculum index and updated matching tracker rows where present.
+- Preserved executable syntax and technical identifiers; translated learner-facing content, tasks, hints and assessments.
+- Browser execution and edge-case verification remain pending.
