@@ -828,3 +828,10 @@ Do not describe the 554 lessons as fully reviewed, browser-tested, or released u
 - Preserved source code examples and lesson identifiers; translated explanations, practice tasks, hints, and assessments.
 - Registered Telugu paths in the curriculum index and marked tracker rows as Telugu DRAFT.
 - Pedagogical review, schema validation, and browser runtime/output verification remain pending.
+
+
+### Telugu translation batch — JavaScript J19.1–J19.9 (2026-11-13)
+- Added Telugu drafts for event propagation, capture/bubbling, default actions/propagation control, delegation, keyboard/pointer/input events, focus/IME composition, custom events, listener options/cleanup, and accessible interactions.
+- Preserved source code examples and stable lesson IDs; translated teaching content, practice, hints, and assessments.
+- Registered Telugu paths in the curriculum index and marked tracker rows as Telugu DRAFT.
+- Pedagogical review, schema validation, and browser runtime/accessibility verification remain pending.
