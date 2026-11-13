@@ -325,3 +325,13 @@ Current phase interpretation:
 - Phase 10 Payment & Accounts: DEFERRED.
 
 Do not describe the 554 lessons as fully reviewed, browser-tested, or released until the relevant evidence is recorded in the tracker.
+
+
+## Telugu Translation Quality Refresh — 2026-11-13
+
+- The earlier 97 Telugu drafts are not being treated as final. They are being refreshed against the English master lessons using a consistent learner-first Telugu teaching style.
+- Refreshed and re-checked the 14 Foundation lessons: F0.1–F0.7 and F1.1–F1.7. Their Telugu explanations, examples, practice prompts and assessment questions were rewritten for clarity; technical identifiers and code semantics were preserved.
+- Added a second assessment question to F0.1 after validation found it had only one question.
+- The 11 newly translated CSS colour lessons C4.1–C4.11 remain part of the current Telugu content set.
+- Current Telugu indexed topic count remains 108/554. Of the older 97 Telugu drafts, 14 have been refreshed in this pass; the remaining 83 older HTML/CSS drafts still require review and retranslation. The remaining 446 topics still require first-time Telugu translation.
+- All refreshed lessons remain DRAFT. Schema checks, pedagogical review, and actual browser/playground execution are separate release gates; no release approval is implied by translation completion.
