@@ -117,7 +117,7 @@
     const editor = document.getElementById("codeEditor");
     if (editor) {
       const current = editor.value;
-      if (current === editorEnglish || current === editorTelugu) {
+      if (current.trim() === editorEnglish.trim() || current.trim() === editorTelugu.trim()) {
         editor.value = lang === "te" ? editorTelugu : editorEnglish;
         document.getElementById("runCode")?.click();
       }
