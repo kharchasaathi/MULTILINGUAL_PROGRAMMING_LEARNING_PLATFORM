@@ -280,3 +280,48 @@ Only English and Telugu currently have translated landing-page strings. The othe
 - All new lessons remain draft; pedagogical/editorial review and real browser/playground verification are pending.
 - This batch does not complete CSS C4 as a reviewed/released module and does not complete the English curriculum.
 - No regional-language translation work is included in this batch.
+
+
+## English-first curriculum drafting milestone — 2026-11-13
+
+The English-first drafting pass has now created and indexed an English draft lesson for every topic in the 554-topic curriculum.
+
+| Course | Topic count | English draft paths |
+|---|---:|---:|
+| Foundation | 14 | 14 |
+| HTML | 110 | 110 |
+| CSS | 164 | 164 |
+| JavaScript | 213 | 213 |
+| Web Platform | 35 | 35 |
+| Integrated Projects | 18 | 18 |
+| **Total** | **554** | **554** |
+
+Verification performed against the `release/v1-frontend` branch:
+- Curriculum index contains 554 unique topic IDs.
+- Every indexed English lesson path resolves to a file in the Git tree.
+- Progress tracker contains 554 detailed topic rows marked DRAFT.
+- The index currently contains 554 English paths and 97 Telugu paths. The 97 Telugu paths are the earlier bilingual drafts; no new regional translations were created in this English-first pass.
+- All new lessons remain DRAFT. This milestone is content drafting and indexing, not editorial approval or release certification.
+
+Quality gates still required before marking lessons reviewed or released:
+1. Validate every lesson JSON against the current lesson schema and check all required fields and IDs.
+2. Review technical accuracy, teaching progression, examples, quiz correctness, and topic coverage.
+3. Execute code examples in the actual isolated playground and test browser-dependent examples in supported browsers.
+4. Review accessibility, mobile behaviour, and fallback behaviour for browser APIs.
+5. Resolve known draft issues, including the placeholder image URL in CSS C4.7 and the partial RGB/HSL implementation in CSS C4.11.
+6. Complete the five regional-language translations (Telugu, Malayalam, Kannada, Tamil, Hindi) only after the English master review process is defined and approved.
+
+Current phase interpretation:
+- Phase 0 Product Direction: COMPLETE.
+- Phase 1 Foundation & Architecture: IN PROGRESS; integration and browser verification remain.
+- Phase 2 Complete Curriculum Structure: DRAFT STRUCTURE INDEXED for all 554 topics; content review remains.
+- Phase 3 Core Learning Experience: NOT STARTED.
+- Phase 4 Universal Live Code Playground: NOT STARTED.
+- Phase 5 CSS Visual Labs: NOT STARTED.
+- Phase 6 Learning Activities & Progress: NOT STARTED.
+- Phase 7 Original Course Content Production: DRAFTING COMPLETE for English topic coverage; review, execution, and release remain NOT STARTED.
+- Phase 8 Projects & Capstone: DRAFTED as 18 integrated project lessons; project implementation and assessment remain NOT STARTED.
+- Phase 9 Release Readiness: NOT STARTED.
+- Phase 10 Payment & Accounts: DEFERRED.
+
+Do not describe the 554 lessons as fully reviewed, browser-tested, or released until the relevant evidence is recorded in the tracker.
