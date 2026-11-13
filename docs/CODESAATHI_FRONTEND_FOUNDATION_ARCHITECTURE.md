@@ -94,3 +94,8 @@ These are target responsibilities, not claims that these folders or modules alre
 
 ### Phase 1 implementation boundaries
 The current course data is still a small introductory sample. The reusable template is in place, but complete syllabus lessons, genuine per-topic quizzes, fully translated course content, the universal isolated playground, and CSS labs remain separate implementation work. Do not infer their completion from the template.
+
+## Verification snapshot — 2026-11-13
+A focused repository structural check passed 12 of 12 assertions for the six-language selector, saved preference key, honest fallback notice, three-stage renderer, renderer integration, lesson completion hook retention, service-worker asset caching/order, JSON lesson schema validity, and documentation alignment.
+
+A real browser interaction and successful latest Hosting deployment have not yet been confirmed. Therefore Phase 1 remains IN PROGRESS until those final checks are evidenced.
