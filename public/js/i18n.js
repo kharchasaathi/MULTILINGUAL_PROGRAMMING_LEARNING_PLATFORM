@@ -80,7 +80,16 @@
     nodes.forEach(node => {
       if (!originals.has(node)) originals.set(node, node.nodeValue);
       const original = originals.get(node), trimmed = original.trim();
-      node.nodeValue = te[trimmed] ? original.replace(trimmed, te[trimmed]) : original;
+      let translated = te[trimmed];
+      if (!translated) {
+        translated = trimmed
+          .replace(/^(\\d+) authored lesson topics · English and Telugu drafts$/, "$1 పాఠ్య అంశాలు · English, తెలుగు పాఠ్యాలు")
+          .replace(/^(\\d+) TOPICS$/, "$1 అంశాలు")
+          .replace(/^(\\d+) of (\\d+) completed$/, "$1 / $2 పూర్తయ్యాయి")
+          .replace(/^(\\d+) lessons$/, "$1 పాఠాలు")
+          .replace(/^([A-Z]+) course$/, "$1 కోర్సు");
+      }
+      node.nodeValue = translated ? original.replace(trimmed, translated) : original;
     });
     root.querySelectorAll("[aria-label],[title],[placeholder]").forEach(el => {
       ["aria-label","title","placeholder"].forEach(attr => {
@@ -107,8 +116,11 @@
     if (lang === "te") translate(document.body);
     const editor = document.getElementById("codeEditor");
     if (editor) {
-      editor.value = lang === "te" ? editorTelugu : editorEnglish;
-      document.getElementById("runCode")?.click();
+      const current = editor.value;
+      if (current === editorEnglish || current === editorTelugu) {
+        editor.value = lang === "te" ? editorTelugu : editorEnglish;
+        document.getElementById("runCode")?.click();
+      }
     }
     const notice = document.querySelector("#languageFallbackNotice");
     if (notice) {
@@ -135,7 +147,15 @@
         if (node.nodeType === Node.TEXT_NODE) {
           if (!originals.has(node)) originals.set(node,node.nodeValue);
           const original = originals.get(node), trimmed = original.trim();
-          if (te[trimmed]) node.nodeValue = original.replace(trimmed,te[trimmed]);
+          let translated = te[trimmed];
+          if (!translated) {
+            translated = trimmed
+              .replace(/^(\\d+) authored lesson topics · English and Telugu drafts$/, "$1 పాఠ్య అంశాలు · English, తెలుగు పాఠ్యాలు")
+              .replace(/^(\\d+) TOPICS$/, "$1 అంశాలు")
+              .replace(/^(\\d+) of (\\d+) completed$/, "$1 / $2 పూర్తయ్యాయి")
+              .replace(/^(\\d+) lessons$/, "$1 పాఠాలు");
+          }
+          if (translated) node.nodeValue = original.replace(trimmed,translated);
         } else if (node.nodeType === Node.ELEMENT_NODE && !protectedTags.has(node.tagName)) translate(node);
       }));
     });
