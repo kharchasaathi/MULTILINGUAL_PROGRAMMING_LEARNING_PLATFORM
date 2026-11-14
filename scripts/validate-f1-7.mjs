@@ -51,6 +51,7 @@ for (const locale of locales) {
 
 const loader = await readFile(join(root, "public/js/lessons/curriculum-loader.js"), "utf8");
 const renderer = await readFile(join(root, "public/js/lessons/lesson-template.js"), "utf8");
+const serviceWorker = await readFile(join(root, "public/sw.js"), "utf8");
 assert.ok(loader.includes("examples,"), "curriculum loader must pass every worked example");
 assert.ok(loader.includes("hints: practice.hints || []"), "curriculum loader must pass practice hints");
 assert.ok(loader.includes("questions,"), "curriculum loader must pass the complete assessment");
@@ -58,5 +59,6 @@ assert.ok(!loader.includes("questions.slice(1)"), "legacy duplicate static asses
 assert.ok(renderer.includes("lesson-example"), "renderer must render worked examples");
 assert.ok(renderer.includes("lesson-answer-option"), "renderer must render selectable assessment options");
 assert.ok(renderer.includes("lesson-question-feedback"), "renderer must show assessment feedback");
+assert.ok(serviceWorker.includes('const CACHE_NAME = "codesaathi-v5";'), "service worker cache must be bumped for the updated lesson UI");
 
 console.log(`F1.7 validation passed: ${locales.length} locales, ${locales.length * 14} objectives, ${locales.length * 2} worked examples, ${locales.length * 5} assessment questions.`);
