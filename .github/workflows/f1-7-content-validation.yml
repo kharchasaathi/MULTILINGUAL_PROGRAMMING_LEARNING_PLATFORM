@@ -1,0 +1,43 @@
+name: F1.7 curriculum validation
+
+on:
+  push:
+    branches: [release/v1-frontend]
+    paths:
+      - "public/content/**/foundation/F1.7.json"
+      - "public/content/curriculum-index.json"
+      - "public/js/lessons/**"
+      - "public/styles.css"
+      - "scripts/validate-f1-7.mjs"
+      - ".github/workflows/f1-7-content-validation.yml"
+  pull_request:
+    branches: [release/v1-frontend]
+    paths:
+      - "public/content/**/foundation/F1.7.json"
+      - "public/content/curriculum-index.json"
+      - "public/js/lessons/**"
+      - "public/styles.css"
+      - "scripts/validate-f1-7.mjs"
+      - ".github/workflows/f1-7-content-validation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-f1-7:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check JavaScript syntax
+        run: |
+          node --check public/js/lessons/lesson-template.js
+          node --check public/js/lessons/curriculum-loader.js
+          node --check public/app.js
+          node --check public/js/i18n.js
+      - name: Validate all F1.7 locales and UI contract
+        run: node scripts/validate-f1-7.mjs
