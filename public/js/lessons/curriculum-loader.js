@@ -157,18 +157,7 @@
       questions,
       onComplete
     });
-    if (questions.length > 1) {
-      const assessment = text("section", "curriculum-assessment");
-      assessment.append(text("h4", "", "More knowledge checks"));
-      questions.slice(1).forEach((question, index) => {
-        const details = text("details", "lesson-knowledge-check");
-        details.append(text("summary", "", question.prompt));
-        details.append(text("p", "", "Answer: " + question.answer + ". " + question.explanation));
-        assessment.append(details);
-      });
-      container.append(assessment);
-    }
-    const link = $(".lesson-practice-link", container);
+const link = $(".lesson-practice-link", container);
     if (link && code) {
       link.addEventListener("click", () => {
         const editor = $("#codeEditor");
