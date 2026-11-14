@@ -37,6 +37,23 @@ jobs:
           node -e "JSON.parse(require('fs').readFileSync('public/content/lesson.schema.json', 'utf8'))"
           node <<'NODE'
           const fs = require('fs');
+          const languages = ['en','te','hi','kn','ta','ml','mr','bn','gu','pa','ne','or','ur','sa','as','brx','doi','kok','ks','mai','mni','sat','sd'];
+          for (const lang of languages) {
+            const file = `public/content/${lang}/foundation/F1.3.json`;
+            const lesson = JSON.parse(fs.readFileSync(file, 'utf8'));
+            const questions = lesson.assessment?.questions || [];
+            if (lesson.id !== `foundation.f1.3.${lang}` || lesson.topicId !== 'F1.3') throw new Error('Wrong lesson identity: ' + lang);
+            if (lesson.learningObjectives?.length !== 20) throw new Error('Expected 20 learning objectives: ' + lang);
+            if (lesson.stages?.explain?.examples?.length !== 3) throw new Error('Expected 3 code examples: ' + lang);
+            if (!lesson.stages?.understand?.concept || !lesson.stages?.practise?.guidedTask || lesson.stages.practise.hints?.length < 4) throw new Error('Missing lesson stage content: ' + lang);
+            if (questions.length !== 5 || questions.some(q => !q.options?.includes(q.answer))) throw new Error('Invalid assessment answers: ' + lang);
+            if (lesson.stages.explain.examples.some(example => !example.code.includes('\\n'))) throw new Error('Code example must contain real line breaks: ' + lang);
+            if (lesson.status !== 'draft') throw new Error('Unreviewed lesson must remain draft: ' + lang);
+          }
+          console.log('F1.3 multilingual structure, assessment, and code formatting checks passed for all 23 languages.');
+          NODE
+          node <<'NODE'
+          const fs = require('fs');
           const html = fs.readFileSync('public/index.html', 'utf8');
           const i18n = fs.readFileSync('public/js/i18n.js', 'utf8');
           const requiredLanguages = ['en', 'te', 'ml', 'kn', 'ta', 'hi'];
