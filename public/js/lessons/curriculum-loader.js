@@ -135,10 +135,9 @@
     const understand = lesson.stages.understand;
     const explain = lesson.stages.explain;
     const practice = lesson.stages.practise;
-    const example = (explain.examples || [])[0] || {};
-    const code = lesson.practice?.starterCode || (example.runnable ? example.code : "");
+    const examples = Array.isArray(explain.examples) ? explain.examples : [];
+    const code = lesson.practice?.starterCode || "";
     const questions = lesson.assessment?.questions || [];
-    const firstQuestion = questions[0];
     const onComplete = () => {
       saveProgress(lesson.topicId);
       const button = $("#markLesson", container);
@@ -149,12 +148,13 @@
       learningObjectives: lesson.learningObjectives,
       understand: [understand.concept, understand.whyItMatters].filter(Boolean).join("\n\n"),
       context: [understand.history, understand.analogyLimit].filter(Boolean).join("\n\n"),
-      explanation: [explain.narrative, example.explanation].filter(Boolean).join("\n\n"),
+      explanation: explain.narrative || "",
       analogy: understand.analogy,
+      examples,
       code,
       practice: "Guided: " + (practice.guidedTask || "") + "\n\nIndependent: " + (practice.independentTask || ""),
-      quizQuestion: firstQuestion?.prompt,
-      quizAnswer: firstQuestion ? firstQuestion.answer + " — " + firstQuestion.explanation : "",
+      hints: practice.hints || [],
+      questions,
       onComplete
     });
     if (questions.length > 1) {
