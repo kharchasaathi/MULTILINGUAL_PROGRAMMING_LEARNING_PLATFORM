@@ -184,6 +184,7 @@ const link = $(".lesson-practice-link", container);
         if (editor) {
           const mode = lesson.practice?.playgroundMode || "html";
           editor.dataset.playgroundMode = mode;
+          editor.setAttribute("aria-label", mode === "css" ? "CSS code editor" : mode === "javascript" ? "JavaScript code editor" : mode === "combined" ? "Combined HTML CSS JavaScript code editor" : "HTML code editor");
           editor.value = code;
           const fileLabel = $(".editor-toolbar span");
           if (fileLabel) {
