@@ -3,10 +3,21 @@
   "courseId": "css",
   "moduleId": "C1",
   "topicId": "C1.2",
-  "title": "Separation of structure and presentation",
+  "title": "Separating Structure and Presentation for Maintainable Interfaces",
   "language": "en",
   "learningObjectives": [
-    "Explain and apply separation of structure and presentation."
+    "Explain separation of concerns and how semantic HTML and CSS serve different responsibilities.",
+    "Compare inline styles, internal style elements and external stylesheets in terms of scope and maintainability.",
+    "Explain why external stylesheets support reuse, caching and consistent design across multiple pages.",
+    "Identify how HTML classes and ids provide hooks for CSS without making visual styling the purpose of semantic markup.",
+    "Design a small component using reusable classes rather than repeating inline declarations.",
+    "Explain how CSS custom properties can centralize design tokens such as colours, spacing and typography.",
+    "Recognize how cascade layers and naming conventions can help organize larger stylesheets.",
+    "Explain how component boundaries and predictable class names reduce unintended style leakage.",
+    "Describe how content changes and design changes can be made independently when structure and presentation are separated.",
+    "Identify trade-offs of CSS frameworks, utility classes, component-scoped styles and handwritten stylesheets.",
+    "Explain why inline styles and excessive !important declarations can make maintenance and theming harder.",
+    "Refactor a small page so meaningful content remains in HTML and reusable presentation rules are moved into CSS."
   ],
   "prerequisites": [
     "H2.6",
@@ -14,13 +25,14 @@
   ],
   "stages": {
     "understand": {
-      "concept": "Keeping semantic HTML separate from CSS makes content easier to maintain, restyle and reuse. Inline styles are possible but should not become the default architecture.",
-      "whyItMatters": "HTML works without CSS, but CSS makes content clearer, more usable and adaptable to different screens.",
-      "analogy": "If HTML is a building's structure, CSS is its visual finish and interior design.",
-      "analogyLimit": "CSS is more than colour; it affects layout, responsive behaviour, interaction states and accessibility preferences."
+      "concept": "Separation of structure and presentation is a design practice: HTML describes what content means and how it is organized, while CSS describes how that content is presented. The separation is not absolute—HTML elements and attributes provide hooks for CSS, and CSS selectors depend on document structure—but keeping responsibilities clear makes a project easier to restyle, reuse, test and maintain. Inline styles can be useful for narrowly scoped dynamic values, but repeated presentation rules usually belong in reusable stylesheets.",
+      "whyItMatters": "A site may need a new brand theme, responsive layout or high-contrast mode without rewriting every content element. If styling is scattered through inline attributes and duplicated rules, changes become expensive and inconsistent. A clear separation supports shared components, design tokens, team collaboration and progressive enhancement.",
+      "analogy": "HTML is the content and labelled structure of a document; CSS is the shared visual system applied to that structure. A common design system can update many pages without rewriting their meaning.",
+      "analogyLimit": "The separation is a maintainability principle, not a strict wall. CSS selectors target HTML structure, classes are often added to support styling, and JavaScript may update classes or custom properties. The goal is clear ownership and low coupling rather than pretending the technologies never interact.",
+      "history": "This lesson focuses on the current use of these ideas in modern web development."
     },
     "explain": {
-      "narrative": "Keeping semantic HTML separate from CSS makes content easier to maintain, restyle and reuse. Inline styles are possible but should not become the default architecture.",
+      "narrative": "A page can receive CSS in three common ways. An inline style attribute places declarations directly on one element. An internal style element contains rules for one document. An external stylesheet is linked with a link element and can be reused by many pages. External stylesheets are generally the best default for shared site design because they avoid duplicating rules and can be cached independently. Inline styles may still be appropriate for a value generated dynamically, but they should not become a substitute for a maintainable styling system.\n\nSeparate content from presentation. Put headings, paragraphs, lists, navigation and form controls in semantic HTML. Use classes to identify styling roles such as .course-card or .notice. Keep CSS declarations in a stylesheet and use custom properties for design tokens that need to remain consistent. Avoid using ids as the primary styling system when reusable classes are more appropriate.\n\nAs a project grows, organize CSS deliberately. Use predictable naming conventions, component boundaries and cascade layers where they help control precedence. Avoid selectors that depend on many unrelated ancestors; they are fragile when markup changes. Avoid solving every conflict with !important, because that makes future overrides harder. A CSS framework or utility-class system can be useful, but it still needs consistent design decisions and accessible markup.\n\nSeparation makes changes safer. A content editor can update the wording without changing the visual system. A designer can adjust a shared class or custom property without editing every HTML page. A developer can inspect the cascade and understand which rule is responsible. The goal is not maximum file separation at any cost; it is a clear, reusable boundary between content meaning and presentation.",
       "examples": [
         {
           "id": "c1.2-example",
@@ -29,15 +41,65 @@
           "explanation": "Change the style rule and observe how colour, spacing and layout change.",
           "expectedOutput": "The browser displays the HTML content according to the CSS declarations.",
           "runnable": true
+        },
+        {
+          "id": "c1.2-inline-vs-external",
+          "language": "en",
+          "title": "Inline, internal and external CSS",
+          "code": "<!-- Inline: tied to this element -->\n<p style=\"color: teal\">Notice</p>\n\n<!-- Internal: rules for this document -->\n<style>\n  .notice { color: teal; }\n</style>\n\n<!-- External: reusable across documents -->\n<link rel=\"stylesheet\" href=\"/styles/site.css\">",
+          "explanation": "All three can provide CSS declarations, but an external stylesheet is easier to share and maintain across multiple pages. Inline styles are difficult to reuse and can complicate overrides.",
+          "expectedOutput": "You can identify the scope and trade-offs of each styling method.",
+          "runnable": false
+        },
+        {
+          "id": "c1.2-design-tokens",
+          "language": "en",
+          "title": "Centralize shared presentation values",
+          "code": ":root {\n  --brand-color: #155e75;\n  --surface-color: #f8fafc;\n  --space-card: 1rem;\n}\n\n.notice {\n  color: var(--brand-color);\n  background: var(--surface-color);\n  padding: var(--space-card);\n}",
+          "explanation": "Custom properties let the project reuse a small set of design decisions. A theme can override these values without rewriting every component rule.",
+          "expectedOutput": "Multiple components can share a consistent colour and spacing system.",
+          "runnable": false
+        },
+        {
+          "id": "c1.2-css-layers",
+          "language": "en",
+          "title": "Organize precedence with cascade layers",
+          "code": "@layer reset, base, components, utilities;\n\n@layer base {\n  body { margin: 0; font-family: system-ui, sans-serif; }\n}\n\n@layer components {\n  .notice { padding: 1rem; border-radius: .5rem; }\n}",
+          "explanation": "Cascade layers establish an explicit order among groups of styles. Layer order is one part of the cascade and should be planned consistently; unlayered rules have their own precedence behaviour.",
+          "expectedOutput": "A stylesheet with named layers for base and component rules.",
+          "runnable": false
+        },
+        {
+          "id": "c1.2-component-class",
+          "language": "en",
+          "title": "Use a reusable component class",
+          "code": "<article class=\"course-card\">\n  <h2 class=\"course-card__title\">HTML</h2>\n  <p>Learn document structure.</p>\n</article>\n\n.course-card { padding: 1rem; border: 1px solid #d0d5dd; }\n.course-card__title { margin-block-start: 0; }",
+          "explanation": "The class names describe component roles and can be reused. The CSS does not need to know the exact position of the card in the page's entire DOM tree.",
+          "expectedOutput": "A reusable course card whose presentation is defined outside the content markup.",
+          "runnable": false
+        },
+        {
+          "id": "c1.2-csp-boundary",
+          "language": "en",
+          "title": "External CSS supports stricter content policies",
+          "code": "<link rel=\"stylesheet\" href=\"/styles/site.css\">\n\n<!-- Avoid relying on style attributes for every component. -->\n<p class=\"notice\">A reusable notice</p>",
+          "explanation": "A carefully configured Content Security Policy can restrict inline styles and scripts. External stylesheets can make policy management easier, although exact CSP rules must match the application's deployment and security needs.",
+          "expectedOutput": "A document that uses a shared stylesheet and semantic class hooks.",
+          "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Change one CSS property value and observe the result.",
-      "independentTask": "Design a small information card using semantic HTML and a reusable CSS rule.",
+      "guidedTask": "Refactor a page that uses repeated inline styles. Move shared declarations into an external stylesheet, replace repeated values with custom properties and use reusable component classes. Compare the source before and after and explain which parts became easier to change.",
+      "independentTask": "Create two HTML pages that share one external stylesheet. Use a consistent component naming system and design tokens. Add a theme override and explain how the design can change without rewriting the document content. Inspect the Network panel to confirm the stylesheet is requested and reused appropriately.",
       "hints": [
-        "Identify which elements the selector matches.",
-        "Change one property at a time."
+        "Use external stylesheets for reusable site-wide presentation.",
+        "Use classes for reusable styling roles; reserve ids for unique document identity and scripting where appropriate.",
+        "Keep content meaning in semantic HTML rather than using CSS classes as a substitute for semantics.",
+        "Use custom properties for shared design tokens.",
+        "Avoid long, fragile selectors that depend on unrelated nesting.",
+        "Do not use !important as the default way to resolve cascade conflicts.",
+        "Choose CSS architecture based on project size and team needs, not fashion."
       ]
     }
   },
@@ -68,6 +130,50 @@
         ],
         "answer": "No",
         "explanation": "HTML provides meaning and structure; CSS controls presentation."
+      },
+      {
+        "id": "c1.2-q3",
+        "prompt": "Which approach is usually best for shared styles across several pages?",
+        "options": [
+          "Repeating the same inline style on every element",
+          "Using only HTML heading levels",
+          "Putting all styles in image filenames"
+        ],
+        "answer": "An external stylesheet linked by each page",
+        "explanation": "An external stylesheet supports reuse and consistent maintenance."
+      },
+      {
+        "id": "c1.2-q4",
+        "prompt": "What is a design token commonly used for?",
+        "options": [
+          "A unique HTML page title",
+          "A JavaScript event object",
+          "A browser cache entry"
+        ],
+        "answer": "A shared value such as brand colour or spacing stored in a reusable variable",
+        "explanation": "Design tokens centralize repeated design decisions such as colour and spacing."
+      },
+      {
+        "id": "c1.2-q5",
+        "prompt": "Why can very specific CSS selectors become a maintenance problem?",
+        "options": [
+          "They always improve performance.",
+          "They automatically create semantic HTML.",
+          "They remove the cascade."
+        ],
+        "answer": "They tightly couple styling to document nesting and make later changes harder.",
+        "explanation": "Fragile selectors depend on markup details that may change."
+      },
+      {
+        "id": "c1.2-q6",
+        "prompt": "Which statement about separation of structure and presentation is most accurate?",
+        "options": [
+          "HTML and CSS never interact.",
+          "CSS replaces all HTML semantics.",
+          "Inline styles are always required for accessibility."
+        ],
+        "answer": "It is a maintainability practice; HTML and CSS still interact through elements, attributes and selectors.",
+        "explanation": "The goal is clear responsibility and low coupling, not complete isolation."
       }
     ]
   },
