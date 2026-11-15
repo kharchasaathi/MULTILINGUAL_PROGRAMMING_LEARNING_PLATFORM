@@ -62,7 +62,7 @@ These are the first representative expanded lessons, not a claim that all existi
 - Completion is persisted locally and the course-card progress count is refreshed. Previously completed lessons retain their completed state when reopened.
 - Added stale-request protection so a slower previous lesson response cannot overwrite a more recently selected course or topic.
 - Added a visible disabled state and keyboard focus style for the lesson-completion control.
-- The playground remains inside a sandboxed iframe; it does not receive same-origin access to the parent application.
+- The playground remains inside a sandboxed iframe; it does not receive same-origin access to the parent application. Lesson-specific modes now support HTML, CSS, JavaScript and combined previews.
 
 ### Focused checks performed
 - JSON parse and lesson-contract checks: F0.1–F0.7 and F1.1.
@@ -73,7 +73,7 @@ These are the first representative expanded lessons, not a claim that all existi
 ### Still open — do not claim release readiness
 1. Expand and review the remaining English topic files across Programming Foundations, HTML, CSS and JavaScript; this pass only upgrades the topics listed above.
 2. Complete the W3Schools topic/subtopic coverage matrix and identify missing subtopics without copying protected wording.
-3. Add and test proper HTML, CSS, JavaScript and combined playground modes; the current landing playground is an HTML-fragment preview and must not be represented as a complete multi-language editor.
+3. The playground now selects HTML, CSS, JavaScript or combined preview mode from each lesson's playgroundMode; full HTML documents and HTML fragments are supported, CSS is injected as a stylesheet, and JavaScript is executed inside the sandboxed iframe. Real browser smoke tests remain pending.
 4. Perform real browser smoke tests at desktop and mobile widths, including keyboard navigation, dialog focus, course selection, language selection, quiz completion, local progress persistence and playground isolation.
 5. Verify the latest Firebase Hosting deployment and exercise the live site before calling the interaction audit complete.
 6. Keep all lessons in draft until editorial and technical review evidence is complete.
