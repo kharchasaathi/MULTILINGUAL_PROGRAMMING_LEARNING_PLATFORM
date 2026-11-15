@@ -3,10 +3,21 @@
   "courseId": "javascript",
   "moduleId": "J1",
   "topicId": "J1.7",
-  "title": "HTML, CSS, and JavaScript working together",
+  "title": "How HTML, CSS and JavaScript Work Together in an Interactive Web Page",
   "language": "en",
   "learningObjectives": [
-    "Explain html, css, and javascript working together and create a small runnable JavaScript example."
+    "Explain the distinct primary responsibilities of HTML, CSS and JavaScript in a web application.",
+    "Describe how the browser parses HTML into the DOM and discovers linked stylesheets and scripts.",
+    "Explain how CSS rules match DOM elements and contribute to computed styles and layout.",
+    "Describe how JavaScript uses DOM APIs and events to respond to user actions.",
+    "Trace a user interaction from a semantic HTML control through an event handler to a visible state update.",
+    "Explain how JavaScript can update classes and attributes so CSS responds to application state.",
+    "Distinguish a full document navigation from an in-place DOM update.",
+    "Explain why semantic HTML and native controls should remain the foundation of an interactive interface.",
+    "Identify integration failures such as missing resources, selector mismatches, event timing and runtime exceptions.",
+    "Use Network, Elements, Styles and Console panels to diagnose cross-technology problems.",
+    "Explain why client-side behaviour does not replace server-side validation, authentication or authorization.",
+    "Build a small accessible interface that keeps content, presentation and behaviour understandable and testable."
   ],
   "prerequisites": [
     "J1.1",
@@ -14,13 +25,14 @@
   ],
   "stages": {
     "understand": {
-      "concept": "HTML provides document structure and meaning, CSS controls presentation and layout, and JavaScript adds behaviour. A browser combines these layers to render and update a page. Good projects keep responsibilities clear while allowing the layers to work together.",
-      "whyItMatters": "Separating responsibilities makes code easier to understand, test, and maintain. JavaScript should not be used to replace semantic HTML or basic CSS layout without a clear reason.",
-      "analogy": "HTML is the structure, CSS is the visual design, and JavaScript is the interaction that makes the interface respond.",
-      "analogyLimit": "The analogy is simplified; script loading and JavaScript evaluation follow browser parsing and language rules."
+      "concept": "HTML describes the structure and meaning of the page, CSS controls presentation and layout, and JavaScript implements programmable behaviour. The browser coordinates these layers: it parses HTML into the DOM, applies CSS rules, executes JavaScript in a runtime and updates the rendered page as the document or application state changes. The technologies have different primary responsibilities but are designed to work together.",
+      "whyItMatters": "Real websites are not built with one technology in isolation. A button needs HTML semantics, CSS for visible states and JavaScript for custom behaviour. Understanding the integration points helps developers build accessible interfaces and debug problems without changing unrelated code.",
+      "analogy": "HTML provides the meaningful parts, CSS defines how people see and arrange them, and JavaScript coordinates what happens when users interact with them.",
+      "analogyLimit": "The layers are not independent teams that never communicate. JavaScript can update the DOM and CSS classes, CSS can respond to element states and attributes, and semantic HTML affects native browser behaviour. The browser continuously coordinates these parts.",
+      "history": "The Web began with linked documents, then stylesheets helped separate presentation and browser scripting enabled richer interactions. Modern Web applications combine these capabilities with APIs, responsive layouts and server communication while retaining the original document model."
     },
     "explain": {
-      "narrative": "HTML creates the button and paragraph, CSS defines the highlight class, and JavaScript responds to the click by updating text and class.",
+      "narrative": "Start with HTML. It creates meaningful content and controls such as headings, links, forms and buttons. The browser parses the document and builds the DOM. It discovers linked CSS and JavaScript resources and loads them according to their URLs and script attributes.\n\nCSS selects elements in the DOM and supplies presentation declarations. The cascade and inheritance determine computed styles, while layout algorithms arrange boxes. Media queries can adapt the design to viewport size and user preferences. CSS can also style interaction states such as :hover, :focus-visible and [aria-expanded=\"true\"].\n\nJavaScript adds behaviour. It can register event listeners, read form values, update text or attributes, change classes, request data and coordinate application state. When a user activates a button, the browser dispatches an event and the handler runs. The handler may update the DOM, which can cause the browser to recalculate styles or layout and render the new state.\n\nKeep responsibilities clear. Use a native button for an action and an anchor for navigation. Use CSS for presentation rather than inserting presentational markup through JavaScript. Use JavaScript for behaviour rather than replacing semantic controls with generic clickable containers. Provide keyboard operation, focus visibility and clear feedback for loading, success and failure states.\n\nDebug the integration in layers. If a style is missing, check whether the stylesheet request succeeded, then inspect selector matching and computed styles. If a button does nothing, check that the script loaded, the selector found the button, the listener was registered and no runtime error stopped execution. If data is saved remotely, the server must validate and authorize the operation independently of browser checks.",
       "examples": [
         {
           "id": "j1-7-example",
@@ -29,16 +41,46 @@
           "explanation": "HTML creates the button and paragraph, CSS defines the highlight class, and JavaScript responds to the click by updating text and class.",
           "expectedOutput": "The browser page or developer console shows the result described in the example.",
           "runnable": true
+        },
+        {
+          "id": "j1.7-three-layers",
+          "language": "en",
+          "title": "One interaction across all three technologies",
+          "code": "<!-- HTML -->\n<button id=\"toggle\" type=\"button\" aria-expanded=\"false\">Show details</button>\n<p id=\"details\" hidden>Additional information.</p>\n\n/* CSS */\nbutton:focus-visible { outline: 3px solid teal; }\n\n// JavaScript\nconst button = document.querySelector(\"#toggle\");\nconst details = document.querySelector(\"#details\");\nbutton.addEventListener(\"click\", () => {\n  const open = button.getAttribute(\"aria-expanded\") === \"true\";\n  button.setAttribute(\"aria-expanded\", String(!open));\n  details.hidden = open;\n});",
+          "explanation": "HTML provides a native button and content. CSS styles its focus state. JavaScript toggles the state and hidden property. The attribute can also be used by CSS and assistive technology to communicate the state.",
+          "expectedOutput": "Activating the button reveals or hides the details and updates aria-expanded.",
+          "runnable": false
+        },
+        {
+          "id": "j1.7-css-state",
+          "language": "en",
+          "title": "JavaScript can update state that CSS styles",
+          "code": "<button id=\"menuButton\" aria-expanded=\"false\">Menu</button>\n\n.menu-panel[hidden] { display: none; }\n\n// On activation, update aria-expanded and hidden state.",
+          "explanation": "The DOM attributes and properties represent application state. CSS can style that state through attribute selectors, while JavaScript controls the interaction.",
+          "expectedOutput": "The menu's visible state stays synchronized with the control's expanded state.",
+          "runnable": false
+        },
+        {
+          "id": "j1.7-debug-map",
+          "language": "en",
+          "title": "Choose a tool for the failing layer",
+          "code": "Resource missing → Network panel\nElement missing → Elements / DOM\nWrong appearance → Styles / Computed\nClick handler not running → Sources / Console\nSlow visual update → Performance panel\nServer rejects save → Network response + server logs",
+          "explanation": "A symptom can originate in a different layer. Use the evidence from the appropriate tool before changing code.",
+          "expectedOutput": "A targeted debugging plan for cross-technology failures.",
+          "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Build a small card with semantic HTML, a CSS class for appearance, and JavaScript to toggle a visible state. Identify each layer's responsibility.",
-      "independentTask": "Create a small page with an external or embedded script. Test its execution order and inspect the console for errors.",
+      "guidedTask": "Create a button that toggles a details panel. Use semantic HTML and aria-expanded, CSS for focus and visible states, and JavaScript for the state transition. Test with mouse and keyboard. Break the selector and stylesheet path separately and use Developer Tools to identify each problem.",
+      "independentTask": "Build an accessible interactive course card with a link to the course, a button that reveals details, responsive CSS and JavaScript state. Test keyboard interaction, narrow screens, missing resources and a runtime error. Document which layer owns each responsibility and which operations would require a trusted server.",
       "hints": [
-        "Keep behaviour separate from semantic markup where practical.",
-        "Choose defer, async, or module based on dependencies and ordering.",
-        "Do not log sensitive information."
+        "HTML supplies meaning and native controls; CSS controls presentation; JavaScript adds behaviour.",
+        "Use a button for actions and an anchor for navigation.",
+        "JavaScript can update DOM text, attributes and classes.",
+        "CSS can respond to state through pseudo-classes and attribute selectors.",
+        "Use Network, Elements, Styles, Console and Performance for different evidence.",
+        "Client-side validation is not a substitute for server-side trust."
       ]
     }
   },
@@ -70,6 +112,39 @@
         ],
         "answer": "Inspect the console and source location",
         "explanation": "Developer tools show runtime messages and help locate the source of an issue."
+      },
+      {
+        "id": "j1.7-q3",
+        "prompt": "Which technology primarily provides semantic page structure?",
+        "options": [
+          "HTML",
+          "CSS",
+          "JavaScript"
+        ],
+        "answer": "HTML",
+        "explanation": "HTML describes the structure and meaning of document content."
+      },
+      {
+        "id": "j1.7-q4",
+        "prompt": "How can JavaScript cause CSS to show a different visual state?",
+        "options": [
+          "By changing a class or attribute that CSS selectors match.",
+          "By changing the CSS file name only.",
+          "By restarting the browser."
+        ],
+        "answer": "By changing a class or attribute that CSS selectors match.",
+        "explanation": "JavaScript can update the DOM, and CSS rules can respond to the changed class or attribute."
+      },
+      {
+        "id": "j1.7-q5",
+        "prompt": "A stylesheet request returns 404. What should you inspect first?",
+        "options": [
+          "The stylesheet URL and server path in the Network panel.",
+          "The JavaScript variable names.",
+          "The user's keyboard layout."
+        ],
+        "answer": "The stylesheet URL and server path in the Network panel.",
+        "explanation": "A 404 indicates the requested resource was not found at that URL; fix the resource path before debugging CSS selectors."
       }
     ]
   },
