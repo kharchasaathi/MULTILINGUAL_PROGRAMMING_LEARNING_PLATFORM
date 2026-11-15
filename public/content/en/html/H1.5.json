@@ -3,26 +3,35 @@
   "courseId": "html",
   "moduleId": "H1",
   "topicId": "H1.5",
-  "title": "Elements, Tags, Attributes, Content and Nesting",
+  "title": "HTML Elements, Tags, Attributes, Content, Nesting and Parsing Rules",
   "language": "en",
   "learningObjectives": [
-    "Explain HTML's role in your own words",
-    "Identify the relevant HTML structure",
-    "Distinguish the roles of HTML, CSS and JavaScript"
+    "Distinguish an HTML element from its start tag, end tag, attributes and content.",
+    "Identify tag names, attribute names and values in real HTML source.",
+    "Explain the difference between normal elements, void elements and raw-text or special parsing contexts at a beginner level.",
+    "Use quoted attribute values and valid attribute syntax consistently.",
+    "Explain nesting and parent-child relationships in an HTML document tree.",
+    "Recognize invalid or misnested markup and explain why browser error recovery should not be relied upon as authoring practice.",
+    "Identify global attributes such as id, class, lang, title and hidden and describe their common uses.",
+    "Explain boolean attributes and why their presence can enable a feature even when the value is empty.",
+    "Use data-* attributes for application-specific data without confusing them with semantic meaning.",
+    "Distinguish attributes in HTML source from corresponding DOM properties at a conceptual level.",
+    "Choose meaningful element and attribute combinations for links, images, forms and buttons.",
+    "Validate a small HTML fragment and inspect its parsed DOM to confirm the intended structure."
   ],
   "prerequisites": [
     "F0.5"
   ],
   "stages": {
     "understand": {
-      "concept": "An element is the complete construct: usually a start tag, content and an end tag. A tag is the markup token such as p or h1. Attributes add information in the start tag, for example lang or id. Nesting places one element inside another; valid nesting must respect the document structure. Some elements are void and do not have end tags.",
-      "whyItMatters": "Understanding HTML helps you choose elements that make pages meaningful, maintainable and easier for different users and tools to interpret.",
-      "history": "HTML grew from the early linked-document web. Verify exact historical milestones against authoritative standards sources before publishing dates.",
-      "analogy": "HTML is like a plan that organizes the roles of parts in a document.",
-      "analogyLimit": "HTML is not a visual design tool; CSS controls visual presentation."
+      "concept": "An HTML element is the complete structural unit, usually made from a start tag, content and an end tag. The tag is the markup token that names the element. Attributes in the start tag add information or configure behaviour. Elements can contain other elements, creating parent-child relationships. Some elements are void and do not have end tags. The browser parser follows defined rules, including error recovery, but authors should write clear, conforming markup rather than depend on recovery behaviour.",
+      "whyItMatters": "Understanding the parts of an element helps you write valid markup, choose the correct attributes and diagnose unexpected DOM structures. Many HTML bugs come from a missing quote, incorrect nesting, a misspelled attribute or a path placed in the wrong attribute.",
+      "history": "HTML syntax evolved to be readable and forgiving enough for the Web's broad authoring environment. The parser's error-recovery rules help browsers display imperfect pages, but they are not a substitute for writing valid source and checking it with a validator.",
+      "analogy": "An element is like a labelled entry in a structured document: the label identifies the type, attributes add details and nested entries show relationships.",
+      "analogyLimit": "HTML parsing is not a simple text replacement. The browser uses a defined parser that creates nodes, handles certain malformed input and treats some elements and contexts specially. The resulting DOM may differ from the exact source text."
     },
     "explain": {
-      "narrative": "An element is the complete construct: usually a start tag, content and an end tag. A tag is the markup token such as p or h1. Attributes add information in the start tag, for example lang or id. Nesting places one element inside another; valid nesting must respect the document structure. Some elements are void and do not have end tags.",
+      "narrative": "Consider `<a href=\"/courses/html\" class=\"course-link\">HTML course</a>`. The start tag is `<a ...>`, the tag name is a, href and class are attribute names, their quoted strings are values, and `HTML course` is the text content. The complete element includes the start tag, content and end tag. Attributes provide destination, identity, styling hooks or other configuration.\n\nMost elements have start and end tags, but void elements such as img, input, br and meta do not have end tags. Their required information is supplied through attributes. Boolean attributes such as disabled and required are enabled by their presence; writing `disabled=\"false\"` still means the attribute is present and therefore enabled. Use the standard syntax rather than assuming the string false disables it.\n\nNesting creates relationships. A strong element may be inside a paragraph, and a list item may be inside a list. Close elements in the correct order. Browsers can repair some malformed nesting, but the resulting DOM may not match what the author intended. Use a validator and inspect the Elements panel when structure is uncertain.\n\nGlobal attributes such as id, class, lang, title and hidden can appear on many elements, subject to their definitions. Use id values that are unique within the document. Use class for reusable grouping and styling. data-* attributes can hold application-specific data, but they do not add built-in semantic meaning to the element. Avoid placing secrets or sensitive personal information in data attributes because client-side markup can be inspected.\n\nHTML attributes and DOM properties are related but not always identical. The source attribute describes markup; the DOM property represents the live object state. JavaScript can change properties or attributes after parsing. Learn to inspect both when a form control or dynamic element behaves unexpectedly.",
       "examples": [
         {
           "id": "h1.5-example",
@@ -31,16 +40,47 @@
           "explanation": "The p element is a complete element. Its id and lang attributes provide additional information. The strong element marks importance. The img element is a void element and does not have an end tag.",
           "expectedOutput": "The browser displays the meaningful HTML content.",
           "runnable": true
+        },
+        {
+          "id": "h1.5-attribute-anatomy",
+          "language": "en",
+          "title": "Start tag, attributes, content and end tag",
+          "code": "<a href=\"/courses/html\" class=\"course-link\" id=\"htmlCourse\">\n  HTML course\n</a>",
+          "explanation": "The anchor element has two attributes and text content. The id identifies this particular element; the class is a reusable hook; href defines its destination.",
+          "expectedOutput": "A navigable link with a destination, unique id and reusable class.",
+          "runnable": false
+        },
+        {
+          "id": "h1.5-void-and-boolean",
+          "language": "en",
+          "title": "Void and boolean attributes",
+          "code": "<img src=\"logo.svg\" alt=\"CodeSaathi logo\">\n<input type=\"email\" required>\n<button type=\"button\" disabled>Continue</button>",
+          "explanation": "img and input are void elements and do not use end tags. required and disabled are boolean attributes: their presence enables the state. `disabled=\"false\"` would still be present and therefore disabled.",
+          "expectedOutput": "An image, a required email input and a disabled button.",
+          "runnable": false
+        },
+        {
+          "id": "h1.5-data-attributes",
+          "language": "en",
+          "title": "Use data attributes for non-semantic application data",
+          "code": "<button type=\"button\" data-action=\"save\" data-record-id=\"42\">\n  Save record\n</button>\n\nconst button = document.querySelector(\"[data-action='save']\");\nconsole.log(button.dataset.recordId);",
+          "explanation": "data-* attributes let an application attach custom data to an element. They do not replace semantic attributes and must not be used to store credentials or private data.",
+          "expectedOutput": "The console displays the string value 42.",
+          "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Identify each element and attribute in the example and explain its role.",
-      "independentTask": "Write your own small HTML fragment using the same concept and open it in a browser.",
+      "guidedTask": "Annotate an HTML fragment by labelling each tag, element, attribute, attribute value and text node. Identify void elements and boolean attributes. Correct a deliberately misnested example and explain how the browser's parser might repair it.",
+      "independentTask": "Build a profile card with semantic elements, an image, a link, a required input and a button. Use id, class, lang and one data-* attribute appropriately. Validate the markup and inspect the DOM. Explain which values are public and why secrets must not be stored in attributes.",
       "hints": [
-        "Distinguish elements, tags and attributes.",
-        "Separate HTML structure, CSS presentation and JavaScript behaviour.",
-        "A visible page alone does not guarantee valid markup."
+        "The element includes more than its tag name.",
+        "Void elements such as img and input do not have closing tags.",
+        "Boolean attributes are enabled by their presence.",
+        "Close nested elements in the reverse order in which they were opened.",
+        "Use id for a unique element and class for reusable grouping.",
+        "data-* attributes are application data, not built-in semantics.",
+        "Never put passwords or access tokens in HTML attributes."
       ]
     }
   },
@@ -72,6 +112,39 @@
         ],
         "answer": "Parses document structure and builds a DOM",
         "explanation": "The DOM represents document nodes and their relationships."
+      },
+      {
+        "id": "h1.5-q3",
+        "prompt": "Which statement about the img element is correct?",
+        "options": [
+          "It is a void element and uses attributes such as src and alt.",
+          "It must always have an </img> closing tag.",
+          "It is a CSS selector."
+        ],
+        "answer": "It is a void element and uses attributes such as src and alt.",
+        "explanation": "img is a void element. The source and alternative text are provided through attributes."
+      },
+      {
+        "id": "h1.5-q4",
+        "prompt": "What happens when a boolean attribute such as disabled is present?",
+        "options": [
+          "The boolean state is enabled, even if its text value is false.",
+          "The browser ignores the attribute.",
+          "It becomes a JavaScript variable."
+        ],
+        "answer": "The boolean state is enabled, even if its text value is false.",
+        "explanation": "Boolean HTML attributes are controlled by presence, not by a string value of true or false."
+      },
+      {
+        "id": "h1.5-q5",
+        "prompt": "What is the intended use of a data-* attribute?",
+        "options": [
+          "To attach application-specific data to an element without giving it built-in semantic meaning.",
+          "To store a private password securely.",
+          "To replace the element's tag name."
+        ],
+        "answer": "To attach application-specific data to an element without giving it built-in semantic meaning.",
+        "explanation": "data-* attributes expose custom data to scripts and remain inspectable in the client-side document."
       }
     ]
   },
