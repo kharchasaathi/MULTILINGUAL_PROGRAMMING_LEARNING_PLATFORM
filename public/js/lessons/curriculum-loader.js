@@ -137,12 +137,15 @@
     const back = text("button", "curriculum-back", "← Back to " + (courseNames[activeCourse]?.[0] || "curriculum"));
     back.type = "button";
     back.addEventListener("click", () => showCourse(activeCourse));
-    container.append(back);
+    let noticeAnchor = back;
     if (usedFallback) {
-      container.append(text("p", "curriculum-fallback", "This topic is not yet translated into your selected language. Showing the English lesson instead."));
+      const fallbackNotice = text("p", "curriculum-fallback", "This topic is not yet translated into your selected language. Showing the English lesson instead.");
+      noticeAnchor.after(fallbackNotice);
+      noticeAnchor = fallbackNotice;
     }
     if (lesson.status !== "released") {
-      container.append(text("p", "curriculum-draft-notice", "DRAFT LESSON · This content is not yet editorially reviewed or approved for release."));
+      const draftNotice = text("p", "curriculum-draft-notice", "DRAFT LESSON · This content is not yet editorially reviewed or approved for release.");
+      noticeAnchor.after(draftNotice);
     }
     const understand = lesson.stages.understand;
     const explain = lesson.stages.explain;
@@ -170,7 +173,7 @@
       questions,
       onComplete
     });
-    if (readProgress()[lesson.topicId]?.completed) {
+    container.prepend(back);\n    if (readProgress()[lesson.topicId]?.completed) {
       const completedButton = $("#markLesson", container);
       if (completedButton) {
         completedButton.textContent = "✓ Lesson saved";
