@@ -1,0 +1,123 @@
+{
+  "id": "javascript.j24.6.en",
+  "courseId": "javascript",
+  "moduleId": "J24",
+  "topicId": "J24.6",
+  "title": "AJAX and XMLHttpRequest: legacy request lifecycle",
+  "language": "en",
+  "learningObjectives": [
+    "Explain ajax and xmlhttprequest: legacy request lifecycle and the problem it addresses.",
+    "Use the relevant language or browser API with valid syntax.",
+    "Compare the technique with modern alternatives and identify when each is appropriate.",
+    "Handle errors, boundaries, security, and compatibility deliberately.",
+    "Test the implementation and explain its behaviour with evidence."
+  ],
+  "prerequisites": [
+    "J3.1",
+    "J4.1",
+    "J8.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "AJAX describes browser techniques for exchanging data with a server without a full page navigation. XMLHttpRequest (XHR) is the older browser API used for these requests. It exposes events and states such as load, error, timeout, abort, readyState, status, responseText, and response. Modern projects usually prefer fetch because it has a promise-based interface and integrates naturally with async/await. XHR remains important in legacy code, upload progress, and some compatibility scenarios. Both APIs are subject to same-origin rules and CORS; neither makes an untrusted server response safe to insert as HTML.",
+      "whyItMatters": "Developers frequently maintain code that still uses XHR. Understanding its lifecycle helps diagnose older applications and migrate them safely to fetch.",
+      "analogy": "AJAX is like requesting one updated page section from a service desk instead of replacing the entire notice board.",
+      "analogyLimit": "The analogy does not describe asynchronous callbacks, HTTP status handling, browser security boundaries, or request cancellation."
+    },
+    "explain": {
+      "narrative": "Create an XHR GET request, handle load and error events, and check the HTTP status before parsing the response. Compare the same operation with fetch.",
+      "examples": [
+        {
+          "id": "j24-6-example-1",
+          "language": "javascript",
+          "code": "const xhr=new XMLHttpRequest(); xhr.open('GET','/api/lessons'); xhr.responseType='json'; xhr.addEventListener('load',()=>{if(xhr.status>=200&&xhr.status<300){console.log(xhr.response);}else{console.error('HTTP status',xhr.status);}}); xhr.addEventListener('error',()=>console.error('Network error')); xhr.send();",
+          "explanation": "XHR is configured before send. The load event means a response was received; the code still checks the HTTP status because HTTP errors do not necessarily trigger the network error event.",
+          "expectedOutput": "Logs parsed JSON for a successful 2xx response; otherwise logs the HTTP status or network error.",
+          "runnable": true
+        },
+        {
+          "id": "j24-6-example-2",
+          "language": "javascript",
+          "code": "async function loadLessons(){const response=await fetch('/api/lessons');if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json();}",
+          "explanation": "Fetch provides a promise-based alternative. It does not reject solely because the server returned a 404 or 500, so check response.ok.",
+          "expectedOutput": "Returns parsed JSON for a successful response; callers should handle rejected promises.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Implement the same read-only API request with XHR and fetch. Compare event handling, status checks, response parsing, timeout/cancellation, and error reporting.",
+      "independentTask": "Migrate a legacy XHR module to fetch without changing its public behaviour. Preserve loading, empty, success, and error states; add cancellation and regression tests.",
+      "hints": [
+        "Check xhr.status in the load handler; network errors and HTTP error statuses are different.",
+        "Fetch does not reject automatically for HTTP 404 or 500 responses.",
+        "Treat server data as untrusted input and render text safely."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "javascript",
+    "starterCode": "const xhr=new XMLHttpRequest(); xhr.open('GET','/api/lessons'); xhr.responseType='json'; xhr.addEventListener('load',()=>{if(xhr.status>=200&&xhr.status<300){console.log(xhr.response);}else{console.error('HTTP status',xhr.status);}}); xhr.addEventListener('error',()=>console.error('Network error')); xhr.send();",
+    "resetCode": "const xhr=new XMLHttpRequest(); xhr.open('GET','/api/lessons'); xhr.responseType='json'; xhr.addEventListener('load',()=>{if(xhr.status>=200&&xhr.status<300){console.log(xhr.response);}else{console.error('HTTP status',xhr.status);}}); xhr.addEventListener('error',()=>console.error('Network error')); xhr.send();"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "j24-6-q1",
+        "prompt": "What does AJAX describe?",
+        "options": [
+          "Asynchronous browser-server data exchange without a full page navigation",
+          "A CSS animation system",
+          "A database query language"
+        ],
+        "answer": "Asynchronous browser-server data exchange without a full page navigation",
+        "explanation": "AJAX is a technique for updating parts of a page using background requests."
+      },
+      {
+        "id": "j24-6-q2",
+        "prompt": "Which event commonly indicates an XHR response has completed?",
+        "options": [
+          "load",
+          "hover",
+          "DOMContentLoaded only"
+        ],
+        "answer": "load",
+        "explanation": "The XHR load event fires when the request completes successfully at the transport level."
+      },
+      {
+        "id": "j24-6-q3",
+        "prompt": "Does XHR load guarantee an HTTP 2xx status?",
+        "options": [
+          "No, the code must inspect status",
+          "Yes, all HTTP responses are 200",
+          "Only when responseType is json"
+        ],
+        "answer": "No, the code must inspect status",
+        "explanation": "A 404 or 500 response can still trigger load; inspect the status code."
+      },
+      {
+        "id": "j24-6-q4",
+        "prompt": "What is a modern promise-based alternative to XHR?",
+        "options": [
+          "fetch",
+          "document.write",
+          "setInterval"
+        ],
+        "answer": "fetch",
+        "explanation": "Fetch provides a promise-based interface for network requests."
+      },
+      {
+        "id": "j24-6-q5",
+        "prompt": "Does fetch reject automatically for HTTP 404?",
+        "options": [
+          "No, check response.ok or status",
+          "Yes, every non-2xx is a rejected promise",
+          "Only when JSON is invalid"
+        ],
+        "answer": "No, check response.ok or status",
+        "explanation": "Fetch resolves with a Response for HTTP error statuses; application code must check them."
+      }
+    ]
+  },
+  "status": "draft"
+}
