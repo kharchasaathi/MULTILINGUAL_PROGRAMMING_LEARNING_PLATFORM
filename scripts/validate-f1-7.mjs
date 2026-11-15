@@ -21,8 +21,11 @@ for (const locale of locales) {
   assert.equal(topic.languages?.[locale], `/content/${locale}/foundation/F1.7.json`, `${locale}: index path`);
 
   const examples = lesson.stages.explain.examples;
-  assert.equal(examples?.length, 2, `${locale}: worked examples`);
-  assert.deepEqual(examples.map((item) => item.id), ["f1.7-concept", "f1.7-hypothesis"], `${locale}: example IDs`);
+  const expectedExampleIds = locale === "en"
+    ? ["f1.7-concept", "f1.7-hypothesis", "f1.7-data-boundaries", "f1.7-regression", "f1.7-observability"]
+    : ["f1.7-concept", "f1.7-hypothesis"];
+  assert.equal(examples?.length, expectedExampleIds.length, `${locale}: worked examples`);
+  assert.deepEqual(examples.map((item) => item.id), expectedExampleIds, `${locale}: example IDs`);
   for (const example of examples) {
     assert.equal(example.language, locale, `${locale}: example language`);
     assert.equal(example.runnable, false, `${locale}: examples are diagnostic scenarios, not executable programs`);
@@ -37,11 +40,11 @@ for (const locale of locales) {
   const practice = lesson.stages.practise;
   assert.ok(practice.guidedTask?.length > 30, `${locale}: guided task`);
   assert.ok(practice.independentTask?.length > 30, `${locale}: independent task`);
-  assert.equal(practice.hints?.length, 5, `${locale}: hints`);
+  assert.equal(practice.hints?.length, locale === "en" ? 7 : 5, `${locale}: hints`);
   assert.equal(lesson.practice?.playgroundMode, "none", `${locale}: no runnable starter code expected`);
 
   const questions = lesson.assessment?.questions;
-  assert.equal(questions?.length, 5, `${locale}: assessment count`);
+  assert.equal(questions?.length, locale === "en" ? 7 : 5, `${locale}: assessment count`);
   for (const question of questions) {
     assert.equal(question.options?.length, 3, `${locale}: assessment options`);
     assert.ok(question.options.includes(question.answer), `${locale}: answer must match an option`);
@@ -59,6 +62,6 @@ assert.ok(!loader.includes("questions.slice(1)"), "legacy duplicate static asses
 assert.ok(renderer.includes("lesson-example"), "renderer must render worked examples");
 assert.ok(renderer.includes("lesson-answer-option"), "renderer must render selectable assessment options");
 assert.ok(renderer.includes("lesson-question-feedback"), "renderer must show assessment feedback");
-assert.ok(serviceWorker.includes('const CACHE_NAME = "codesaathi-v5";'), "service worker cache must be bumped for the updated lesson UI");
+assert.ok(serviceWorker.includes('const CACHE_NAME = "codesaathi-v6";'), "service worker cache must be bumped for the updated lesson UI");
 
-console.log(`F1.7 validation passed: ${locales.length} locales, ${locales.length * 14} objectives, ${locales.length * 2} worked examples, ${locales.length * 5} assessment questions.`);
+console.log(`F1.7 validation passed: ${locales.length} locales; regional lessons retain 2 examples/5 questions, while English has 5 examples/7 questions.`);
