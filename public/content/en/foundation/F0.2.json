@@ -3,51 +3,106 @@
   "courseId": "foundation",
   "moduleId": "F0",
   "topicId": "F0.2",
-  "title": "How a Browser Requests and Displays a Web Page",
+  "title": "How a Browser Requests, Receives and Renders a Web Page",
   "language": "en",
   "learningObjectives": [
-    "Describe the complete, simplified journey from entering a URL to seeing a web page, and put the major steps in their correct order.",
-    "Identify the main parts of a URL, such as the scheme, domain name and path, and explain how the browser uses the address to identify the requested resource.",
-    "Explain how DNS helps the browser find the network address associated with a domain name, and recognize that cached DNS information may sometimes be reused.",
-    "Explain why the browser establishes a network connection before requesting a resource, and describe how TLS helps protect a connection when a website uses HTTPS.",
-    "Describe an HTTP request at a beginner level, including how the browser tells the server which resource it wants and may include a method and headers.",
-    "Explain what an HTTP response contains, including the status code, headers and, when provided, a response body, and interpret the basic meaning of a successful response and an error response.",
-    "Explain how the browser reads HTML to understand a page's structure and uses CSS to determine how its elements should look.",
-    "Describe how a browser discovers and requests additional resources such as stylesheets, images, fonts and JavaScript files, and explain the role scripts can play in page behaviour.",
-    "Distinguish receiving data from displaying a page, and explain in simple terms how the browser calculates layout, paints content and renders the result on screen.",
-    "Use the request-and-rendering flow to reason about common problems, such as a DNS lookup failure, a server error, missing styles or a slow resource, while recognizing that caching, redirects and parallel requests can change the simplified sequence."
+    "Trace a browser navigation from URL parsing through resource retrieval, document parsing and visual rendering, while recognizing that the actual browser pipeline can overlap and repeat steps.",
+    "Identify the scheme, host, optional port, path, query string and fragment in a URL, and explain which parts are sent to the server in an HTTP request.",
+    "Explain DNS resolution, recursive resolvers, authoritative answers, address records and caching at a conceptual level, and distinguish DNS lookup from establishing a transport connection.",
+    "Compare the purposes of TCP and TLS in a typical HTTP/1.1 or HTTP/2 HTTPS connection, and recognize that HTTP/3 uses QUIC over UDP.",
+    "Explain the structure of an HTTP request and response, including request methods, target, headers, status codes and message body.",
+    "Distinguish common HTTP methods such as GET, POST, PUT, PATCH and DELETE, and understand safe and idempotent behaviour at a practical introductory level.",
+    "Interpret important HTTP status-code families and examples, including 2xx, 3xx, 4xx and 5xx, without treating every non-200 response as the same failure.",
+    "Explain how HTML parsing builds the DOM, how CSS parsing and the cascade contribute to the CSSOM and computed styles, and how these structures participate in rendering.",
+    "Describe how JavaScript loading attributes, DOM dependencies, style calculation, layout, paint and compositing can affect when and how a page becomes usable.",
+    "Use browser Developer Tools, especially Network, Elements, Console and Performance panels, to collect evidence and distinguish DNS, connection, HTTP, resource-loading, parsing and runtime failures.",
+    "Explain the roles of browser cache, HTTP cache headers, redirects, compression, content delivery networks and parallel subresource requests in a modern page load.",
+    "Apply the request-and-rendering model to debug realistic performance and reliability problems without assuming that a page is processed as one simple linear request."
   ],
   "prerequisites": [
     "F0.1"
   ],
   "stages": {
     "understand": {
-      "concept": "When you enter a web address, the browser locates the right server, requests a resource and interprets the response. The server sends data; the browser processes supported web resources into the page you see.",
-      "whyItMatters": "This process helps explain failures caused by a wrong address, network problem, server error or page code issue. It prepares you to understand URLs, DNS, HTTP, HTML, CSS and JavaScript.",
-      "history": "The web's early architecture used URLs to identify resources, HTTP to request and transfer them, and HTML to describe documents. These remain central ideas, although modern browsers and network protocols are more capable.",
-      "analogy": "Imagine asking a library for a book: you find its catalogue location, make a request, receive the book and read it. A browser similarly locates, requests and interprets web resources.",
-      "analogyLimit": "A browser does not literally visit a physical place. DNS, networking, encryption, server software and browser rendering are distinct technical processes, often happening quickly and partly in parallel."
+      "concept": "A browser navigation is a coordinated set of client, network and server operations. The browser parses the URL, determines which resource is being requested, obtains network address information when needed, establishes an appropriate connection, sends an HTTP request and processes the response. It then parses the document, discovers dependent resources and builds the structures needed to calculate styles, layout and pixels. The page may continue changing as scripts run and data arrives. The browser is not simply downloading a finished picture of a page: it is interpreting documents, styles, scripts and media.",
+      "whyItMatters": "A developer needs to identify which layer is responsible for a failure. A DNS error, a refused connection, an HTTP 500 response, a stylesheet 404, a JavaScript exception and a slow layout are different problems with different evidence and fixes. Understanding the pipeline prevents random changes to unrelated code.",
+      "history": "The original Web model used URLs, HTTP and HTML to identify, request and describe linked resources. Modern deployments add encrypted transport, persistent and multiplexed connections, browser caches, service workers, content delivery networks, compression, responsive resources and increasingly complex rendering pipelines. The foundational request/response model remains useful, but real browsers optimize and overlap many operations.",
+      "analogy": "Imagine a logistics process: an address identifies a destination, a routing system helps find where it is, a secure delivery channel carries a request, the recipient returns a package, and the receiving system checks and organizes its contents before presenting them.",
+      "analogyLimit": "The analogy hides important details. DNS is not the same as routing, TLS is not an HTTP status mechanism, servers may be distributed, and browsers can fetch resources concurrently, reuse connections, serve cached responses and progressively render content."
     },
     "explain": {
-      "narrative": "A simplified visit has several stages. The browser reads the URL. DNS may help find the server's network address. The browser establishes the required connection and sends an HTTP request. The server returns an HTTP response with a status and often page data. The browser parses HTML, discovers other resources, applies CSS, runs JavaScript when appropriate and paints the result. Real sites may use caches, redirects, multiple servers and many resource requests.",
+      "narrative": "Start with the URL. The scheme selects the protocol family, the host identifies the destination, an optional port selects a service endpoint, the path identifies a resource, and the query carries parameters. A fragment identifies a position or client-side state within the resource; it is not normally sent as part of the HTTP request target. The browser may consult its DNS cache or ask a configured resolver to obtain address information. DNS resolution is distinct from the later connection. For HTTPS over HTTP/1.1 or HTTP/2, the browser normally establishes a TCP connection and negotiates TLS; HTTP/3 uses QUIC over UDP with TLS integrated into the protocol. The browser then sends an HTTP request containing a method, request target and headers, and sometimes a body. The response contains a status code, headers and optionally a body. A redirect can cause another request. A successful HTML response is only the start: parsing the document builds the DOM, and resource discovery can trigger additional requests for CSS, JavaScript, images, fonts and media. CSS is parsed and combined through the cascade to determine computed styles. The browser performs layout to determine geometry, paints visual output and may composite layers. JavaScript can alter the DOM or styles and cause additional rendering work. These activities can overlap; browsers optimize scheduling and may progressively display content.",
       "examples": [
         {
           "id": "page-request-flow",
           "language": "en",
-          "code": "Enter a web address\\n↓\\nResolve the domain (DNS, if needed)\\n↓\\nConnect securely when HTTPS is used\\n↓\\nSend an HTTP request\\n↓\\nReceive an HTTP response\\n↓\\nParse HTML, load CSS/images, run scripts\\n↓\\nRender the page",
-          "explanation": "This is a learning model, not a strict one-request sequence. Browsers may reuse cached data and request many resources in parallel. HTTPS protects data in transit using TLS; HTTP describes the request/response exchange.",
-          "expectedOutput": "The browser displays the page after processing the response and required resources.",
+          "title": "The end-to-end browser navigation pipeline",
+          "code": "URL entered\n  ↓\nParse scheme, host, port, path and query\n  ↓\nDNS lookup (unless a usable answer is cached)\n  ↓\nEstablish transport connection\n  ↓\nTLS negotiation for HTTPS (QUIC/TLS for HTTP/3)\n  ↓\nSend HTTP request\n  ↓\nReceive status + headers + optional body\n  ↓\nHandle redirects / cache / response policy\n  ↓\nParse HTML → DOM; discover subresources\n  ↓\nFetch CSS, JS, images, fonts and other data\n  ↓\nParse CSS → CSSOM; calculate styles\n  ↓\nLayout → Paint → Composite\n  ↓\nInteractive page; scripts and data may continue updating it",
+          "explanation": "This is a conceptual map, not a mandatory one-way sequence. DNS may be cached, connections may be reused, HTTP/2 and HTTP/3 can multiplex requests, resources can load in parallel, and JavaScript can trigger more requests and rendering work.",
+          "expectedOutput": "You can describe the major responsibilities and explain why several requests and rendering stages may overlap.",
+          "runnable": false
+        },
+        {
+          "id": "url-request-target",
+          "language": "en",
+          "title": "Which URL parts reach the server?",
+          "code": "https://learn.example.test:8443/catalog/items?category=books&page=2#featured\n\nscheme:   https\nhost:     learn.example.test\nport:     8443\npath:     /catalog/items\nquery:    ?category=books&page=2\nfragment: #featured\n\nHTTP request target (simplified):\n/catalog/items?category=books&page=2",
+          "explanation": "The fragment is handled by the client and is not included in the HTTP request target. The host and port are represented in request routing and connection details; the exact HTTP wire format depends on the protocol version.",
+          "expectedOutput": "You can separate the resource request from the fragment used to locate a position or client-side state.",
+          "runnable": false
+        },
+        {
+          "id": "http-request-response",
+          "language": "en",
+          "title": "Read a simplified HTTP exchange",
+          "code": "GET /products?page=2 HTTP/1.1\nHost: shop.example.test\nAccept: text/html\n\nHTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nCache-Control: max-age=60\n\n<!doctype html>\n<html lang=\"en\">...</html>",
+          "explanation": "The request uses GET and includes headers describing the target and accepted response type. The response status is 200, the Content-Type describes the representation, and Cache-Control gives caching guidance. Modern HTTP/2 and HTTP/3 use different wire framing, even though the HTTP semantics are similar.",
+          "expectedOutput": "You can identify method, request target, headers, status, response headers and body.",
+          "runnable": false
+        },
+        {
+          "id": "status-code-families",
+          "language": "en",
+          "title": "Status codes point to different classes of outcome",
+          "code": "200 OK                  successful response\n301 Moved Permanently   redirect\n304 Not Modified        cached representation may be reused\n400 Bad Request         request could not be processed as sent\n401 Unauthorized        authentication is required or failed\n403 Forbidden           server refuses the request\n404 Not Found           resource not found\n429 Too Many Requests   rate limit response\n500 Internal Server Error\n502 Bad Gateway\n503 Service Unavailable",
+          "explanation": "Status codes are grouped by their first digit: 2xx success, 3xx redirection, 4xx client/request-side conditions and 5xx server or gateway-side failures. Interpret the exact code and response headers rather than assuming every error has the same cause.",
+          "expectedOutput": "You can classify the response and choose a sensible next diagnostic step.",
+          "runnable": false
+        },
+        {
+          "id": "devtools-diagnosis",
+          "language": "en",
+          "title": "Choose the right browser panel for evidence",
+          "code": "Network: request URL, method, status, timing, headers, initiator, cache\nElements: parsed DOM and applied styles\nConsole: JavaScript errors, warnings and logged diagnostics\nPerformance: main-thread activity, rendering and long tasks",
+          "explanation": "If a stylesheet is missing, inspect its Network request before changing selectors. If a button does nothing, inspect the Console and event wiring. If the page loads but feels slow, compare Network timing with Performance traces. Use evidence to narrow the responsible layer.",
+          "expectedOutput": "You can select a useful diagnostic panel based on the symptom.",
+          "runnable": false
+        },
+        {
+          "id": "rendering-dom-cssom",
+          "language": "en",
+          "title": "Document structure and presentation are separate inputs",
+          "code": "HTML source  → HTML parser → DOM\nCSS sources  → CSS parser  → CSSOM\nDOM + CSSOM + computed styles\n             ↓\n           Layout\n             ↓\n            Paint\n             ↓\n          Composite",
+          "explanation": "This is a simplified rendering model. JavaScript can read and modify the DOM and styles; some changes require layout, while others may only require paint or compositing. Expensive repeated layout reads and writes can cause performance problems.",
+          "expectedOutput": "You can explain why changing text, styles or geometry may trigger different browser work.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "A page address is correct, but the browser shows a server error. Which part may have failed? Compare this with a page that loads but has missing styling.",
-      "independentTask": "Write the page-loading stages in order. For each stage, name the responsible component: browser, DNS, network connection or server.",
+      "guidedTask": "Open a page you are allowed to inspect in your browser and keep Developer Tools open. In Network, select the main document and record its request method, status, content type, cache-related headers and timing. Identify one stylesheet and one JavaScript resource. In Elements, locate a visible heading and inspect the rule that determines its colour. In Console, check for errors. Explain which parts of the pipeline each observation represents.",
+      "independentTask": "Investigate a deliberately broken local practice page containing three independent defects: an incorrect stylesheet URL, a JavaScript selector that targets a missing element, and a link to a resource that returns 404. Use Network, Elements and Console to diagnose each defect. Fix one defect at a time, reload and record the evidence that confirms the correction. Then explain why the three failures belong to different layers.",
       "hints": [
-        "DNS helps locate a server using a domain name.",
-        "An HTTP response includes a status code.",
-        "CSS affects presentation after the browser obtains and processes it."
+        "DNS resolution provides address information. It does not create the TCP or QUIC connection and does not render the document.",
+        "HTTPS protects communication using TLS. A valid TLS connection does not mean that the server's application returned a successful HTTP status.",
+        "GET is intended for retrieving a representation and is safe; POST commonly submits data or requests processing. PUT is generally idempotent replacement, PATCH applies partial modification, and DELETE requests removal. Actual server behaviour still depends on the API contract.",
+        "2xx, 3xx, 4xx and 5xx describe broad status families. Inspect the exact status and response headers before choosing a fix.",
+        "The fragment after # is not normally sent in the HTTP request. Query parameters are part of the request target.",
+        "DOM represents the parsed document structure. CSSOM represents parsed CSS rules. The browser uses them and other information to calculate styles and render output.",
+        "defer, async and module affect script fetching and execution. A script can run at a time that matters to DOM availability and rendering.",
+        "Network identifies failed resources and timing; Elements shows the parsed DOM and matched styles; Console shows script and runtime diagnostics; Performance helps locate main-thread and rendering costs.",
+        "Cache hits, redirects, service workers and content delivery networks can change what appears in the Network panel. A response may be served without contacting the origin server.",
+        "Do not publish cookies, authorization headers, session identifiers, private URLs or personal information when sharing diagnostic screenshots."
       ]
     }
   },
@@ -58,25 +113,69 @@
     "questions": [
       {
         "id": "f0-2-q1",
-        "prompt": "What is DNS mainly used for in a typical web visit?",
+        "prompt": "What is DNS primarily responsible for in a typical navigation?",
         "options": [
-          "To style the page",
-          "To help find the network address associated with a domain name",
-          "To execute JavaScript"
+          "Calculating CSS specificity",
+          "Resolving a host name to network address information",
+          "Executing JavaScript modules"
         ],
-        "answer": "To help find the network address associated with a domain name",
-        "explanation": "DNS helps translate a domain name into information used to locate the destination server."
+        "answer": "Resolving a host name to network address information",
+        "explanation": "DNS helps a client discover address information for a host. It is separate from connection establishment and browser rendering."
       },
       {
         "id": "f0-2-q2",
-        "prompt": "What does an HTTP response normally contain?",
+        "prompt": "Which part of a URL is normally not included in the HTTP request target sent to the server?",
         "options": [
-          "A status and response data or headers",
-          "Only the browser's screen pixels",
-          "The user's keyboard settings"
+          "The path",
+          "The query string",
+          "The fragment identifier after #"
         ],
-        "answer": "A status and response data or headers",
-        "explanation": "HTTP responses carry a status code, headers and often a body containing the requested resource or an error explanation."
+        "answer": "The fragment identifier after #",
+        "explanation": "The fragment is processed client-side to identify a location or state within the resource. It is not normally transmitted in the HTTP request."
+      },
+      {
+        "id": "f0-2-q3",
+        "prompt": "A browser receives HTTP 404 for a stylesheet. Which conclusion is most appropriate?",
+        "options": [
+          "The browser has proved that the CSS selector is invalid.",
+          "The requested stylesheet resource was not found at that URL; inspect the request path and server routing.",
+          "DNS necessarily failed."
+        ],
+        "answer": "The requested stylesheet resource was not found at that URL; inspect the request path and server routing.",
+        "explanation": "A 404 is an HTTP response. The next step is to inspect the requested URL and server response, not to assume the CSS rules are wrong."
+      },
+      {
+        "id": "f0-2-q4",
+        "prompt": "Which statement about HTTPS and HTTP is accurate?",
+        "options": [
+          "HTTPS replaces HTTP status codes with TLS status codes.",
+          "HTTPS uses TLS to protect the connection while HTTP defines request and response semantics.",
+          "HTTPS guarantees that the server's content is safe and correct."
+        ],
+        "answer": "HTTPS uses TLS to protect the connection while HTTP defines request and response semantics.",
+        "explanation": "TLS protects communication in transit, while HTTP describes the application-level request and response. Encryption does not guarantee trustworthy content."
+      },
+      {
+        "id": "f0-2-q5",
+        "prompt": "Which browser panel is most useful for checking whether a CSS file failed to load with a 404?",
+        "options": [
+          "Network panel",
+          "Elements panel only",
+          "Performance panel only"
+        ],
+        "answer": "Network panel",
+        "explanation": "The Network panel shows the resource request, URL, status code, headers and timing. The Elements panel is useful after the stylesheet has loaded to inspect matched styles."
+      },
+      {
+        "id": "f0-2-q6",
+        "prompt": "What is the most accurate description of DOM and CSSOM in the rendering process?",
+        "options": [
+          "DOM stores CSS declarations and CSSOM stores image pixels.",
+          "The HTML parser builds the DOM; CSS parsing builds CSSOM, and both contribute to style calculation and rendering.",
+          "DOM and CSSOM are server databases that store page content."
+        ],
+        "answer": "The HTML parser builds the DOM; CSS parsing builds CSSOM, and both contribute to style calculation and rendering.",
+        "explanation": "The DOM represents document structure and CSSOM represents parsed style rules. The browser combines them with other inputs to calculate styles and render the page."
       }
     ]
   },
