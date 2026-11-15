@@ -141,9 +141,7 @@
     if (usedFallback) {
       notices.push(text("p", "curriculum-fallback", "This topic is not yet translated into the selected language. Showing the English lesson instead."));
     }
-    if (lesson.status !== "released") {
-      notices.push(text("p", "curriculum-draft-notice", "DRAFT LESSON · This content is not yet editorially reviewed or approved for release."));
-    }
+    // Editorial workflow status stays in lesson metadata; do not expose internal draft labels in the learner UI.
     const understand = lesson.stages.understand;
     const explain = lesson.stages.explain;
     const practice = lesson.stages.practise;
