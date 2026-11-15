@@ -3,10 +3,21 @@
   "courseId": "javascript",
   "moduleId": "J1",
   "topicId": "J1.1",
-  "title": "Why browser pages needed behaviour",
+  "title": "Why JavaScript Exists: Behaviour, Events and the Browser Runtime",
   "language": "en",
   "learningObjectives": [
-    "Explain why browser pages needed behaviour and describe JavaScript's role in web development."
+    "Explain why static hypertext documents alone were insufficient for many interactive web applications.",
+    "Describe JavaScript's role in adding programmable behaviour to web pages alongside HTML and CSS.",
+    "Distinguish the JavaScript language and ECMAScript specification from browser-provided Web APIs such as the DOM.",
+    "Explain what a runtime environment provides and compare browser JavaScript with JavaScript running in a server-side runtime.",
+    "Trace a simple event-driven interaction from a user action through event dispatch and a registered handler to a visible result.",
+    "Explain how JavaScript can read and update the DOM without confusing the live DOM with the original HTML source.",
+    "Distinguish synchronous execution from asynchronous operations such as timers, network requests and event handling.",
+    "Recognize that JavaScript can communicate with servers and other APIs, and that client-side validation does not replace server-side validation.",
+    "Explain why JavaScript should enhance a meaningful HTML document and why native controls and progressive enhancement are valuable.",
+    "Identify security boundaries around browser code, including why client-side code cannot safely contain private credentials.",
+    "Describe practical uses of JavaScript in front-end interfaces, data handling, validation, browser APIs and server-side applications.",
+    "Use browser Developer Tools to observe event handlers, runtime errors, network requests and changes to the live DOM."
   ],
   "prerequisites": [
     "F1.1",
@@ -15,13 +26,14 @@
   ],
   "stages": {
     "understand": {
-      "concept": "Early web pages were primarily documents that linked to other documents. As pages became interactive, developers needed a way to respond to user actions, update content, validate input, and communicate with browser capabilities. JavaScript became a major language for adding this behaviour.",
-      "whyItMatters": "Understanding why scripting exists explains the role JavaScript plays alongside HTML structure and CSS presentation. It also helps separate browser behaviour from server processing.",
-      "analogy": "HTML provides the document, CSS controls presentation, and JavaScript adds behaviour when a user interacts with the page.",
-      "analogyLimit": "The analogy is simplified; language standards and host runtime APIs have precise technical boundaries."
+      "concept": "JavaScript is a general-purpose programming language widely used to add behaviour to web pages. It can respond to user events, calculate values, validate input, update the live DOM, communicate with network services and coordinate application state. HTML provides document structure and semantics; CSS describes presentation; JavaScript expresses programmable behaviour. The JavaScript language is standardized through ECMAScript, while browsers provide host APIs such as the DOM, Fetch, timers and storage. Those APIs are not all part of the core language itself.",
+      "whyItMatters": "A modern interface often needs to respond without reloading the whole document, coordinate multiple UI states, request data and communicate clearly with users. JavaScript provides the programming model for those tasks. Understanding the boundary between the language and browser APIs helps developers write portable code and avoid assuming that every JavaScript runtime provides the same features.",
+      "analogy": "HTML describes the interface's meaningful controls, CSS defines how they appear, and JavaScript coordinates what happens when people use them.",
+      "analogyLimit": "JavaScript is not merely a collection of click handlers. It is a full programming language with data structures, functions, asynchronous execution and modules. Browser APIs are host-provided capabilities, and the same language can run in environments without a DOM.",
+      "history": "JavaScript was created for scripting in web browsers and later standardized as ECMAScript. Its use expanded from small page interactions to complex browser applications, server-side development, tooling and cross-platform runtimes. Modern JavaScript includes modules, classes, promises and other language features, while browser APIs continue to evolve separately through Web platform standards."
     },
     "explain": {
-      "narrative": "The button listens for a click and JavaScript updates the text. The page responds without requiring a full document navigation.",
+      "narrative": "Early Web pages were mainly documents connected by links. That model is still useful for reading and navigation, but interactive applications also need to respond to user actions, update information, validate data, load remote content and maintain state. JavaScript makes those behaviours programmable inside the browser and is also used in server-side runtimes and development tools.\n\nSeparate the language from its host environment. ECMAScript defines core language behaviour such as values, variables, functions, objects, modules and promises. A browser adds Web APIs such as document, querySelector, addEventListener, fetch and localStorage. A server-side runtime may provide file-system, networking and process APIs instead. Code that uses document is browser-specific even though it is written in JavaScript.\n\nA browser interaction is often event-driven. HTML supplies a native button. JavaScript registers a listener for its click event. When the user activates the button, the browser dispatches an event and calls the handler. The handler can update application state or the DOM; the browser then reflects the change. This does not require a full page navigation, although the handler may choose to navigate or request data.\n\nJavaScript execution is not limited to one immediate line after another. Timers, user events, network responses and promise callbacks are scheduled through the runtime's event-loop model. A network request is asynchronous: code can continue while the request is pending, and a later continuation handles the response. Understanding this model is essential for avoiding race conditions and unhandled failures.\n\nClient-side validation improves feedback, but it cannot be trusted as the only protection for data or operations. Users can alter browser code and send requests directly. A server must independently validate input, authenticate users and authorize every protected operation. Never place private credentials in JavaScript delivered to a browser.\n\nUse JavaScript to enhance a meaningful HTML document. Prefer native links, buttons and form controls; keep content understandable without unnecessary scripting where practical; and provide clear feedback when an action is pending, succeeds or fails. Use Developer Tools to inspect runtime errors, event behaviour, network requests and live DOM changes.",
       "examples": [
         {
           "id": "j1-1-example",
@@ -30,16 +42,67 @@
           "explanation": "The button listens for a click and JavaScript updates the text. The page responds without requiring a full document navigation.",
           "expectedOutput": "A browser page displays or updates text using JavaScript.",
           "runnable": true
+        },
+        {
+          "id": "j1.1-event-driven",
+          "language": "en",
+          "title": "A user event updates the page",
+          "code": "<button id=\"countButton\" type=\"button\">Add one</button>\n<p id=\"countOutput\" aria-live=\"polite\">Count: 0</p>\n\n<script>\n  let count = 0;\n  const button = document.querySelector(\"#countButton\");\n  const output = document.querySelector(\"#countOutput\");\n\n  button.addEventListener(\"click\", () => {\n    count += 1;\n    output.textContent = `Count: ${count}`;\n  });\n</script>",
+          "explanation": "The browser provides the DOM and event APIs. JavaScript stores a value, registers a handler and updates text when the click event occurs. The aria-live region helps communicate the changed status to assistive technology.",
+          "expectedOutput": "Each activation increments the count without reloading the document.",
+          "runnable": false
+        },
+        {
+          "id": "j1.1-language-vs-web-api",
+          "language": "en",
+          "title": "Core language and browser APIs are different layers",
+          "code": "// Core JavaScript language\nconst total = 12 + 8;\nconst double = value => value * 2;\n\n// Browser-provided Web APIs\nconst heading = document.querySelector(\"h1\");\nwindow.setTimeout(() => {\n  heading.textContent = double(total);\n}, 500);",
+          "explanation": "Variables, arithmetic and arrow functions are language features. document and setTimeout are host APIs exposed by the browser environment. A different runtime may provide different APIs.",
+          "expectedOutput": "After the timer callback runs, the heading displays 40.",
+          "runnable": false
+        },
+        {
+          "id": "j1.1-asynchronous",
+          "language": "en",
+          "title": "Network work completes asynchronously",
+          "code": "async function loadProfile() {\n  try {\n    const response = await fetch(\"/api/profile\");\n    if (!response.ok) throw new Error(`HTTP ${response.status}`);\n    const profile = await response.json();\n    console.log(profile);\n  } catch (error) {\n    console.error(\"Could not load profile:\", error);\n  }\n}\n\nloadProfile();",
+          "explanation": "fetch returns a Promise. await pauses this async function until the promise settles, not the entire browser interface. Production code should handle loading, error and empty states and should not assume the response always succeeds.",
+          "expectedOutput": "The function logs parsed profile data on success or reports a handled failure.",
+          "runnable": false
+        },
+        {
+          "id": "j1.1-browser-vs-server",
+          "language": "en",
+          "title": "The same language can run in different hosts",
+          "code": "Browser host APIs:\ndocument.querySelector(...)\nwindow.addEventListener(...)\n\nServer runtime APIs (example):\nprocess.env\nfilesystem APIs\nserver networking APIs",
+          "explanation": "The ECMAScript language is shared, but host environments expose different capabilities. Browser code can interact with a page; server-side code can use privileged APIs that should not be exposed to visitors.",
+          "expectedOutput": "You can identify when code depends on a browser-only API or a server-side runtime.",
+          "runnable": false
+        },
+        {
+          "id": "j1.1-security-boundary",
+          "language": "en",
+          "title": "Client-side checks improve usability, not server trust",
+          "code": "Browser:\n- validate a form for fast user feedback\n- display loading and error states\n- send a request to an API\n\nServer:\n- authenticate the caller\n- authorize the requested action\n- validate all received data\n- protect private credentials",
+          "explanation": "A user can modify client-side code or send requests without using the interface. The server must enforce security decisions. Browser validation is helpful but cannot be the trust boundary.",
+          "expectedOutput": "You can explain why the server must validate and authorize sensitive operations independently.",
+          "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Add a button that changes a message and explain which part is HTML, which part is CSS, and which part is JavaScript.",
-      "independentTask": "Create a short explanation and runnable example that separates core JavaScript language features from browser-specific APIs.",
+      "guidedTask": "Create a native button and a status paragraph. Register a click listener that updates a counter and announces the result. Then add an asynchronous request to a public test endpoint or a local mock, and display loading, success and error states. Use the Console and Network panels to observe the event and request. Explain which APIs belong to the browser host rather than the core language.",
+      "independentTask": "Build a small interactive search interface with a form, input, submit button and result region. Use JavaScript to validate empty input, handle submission, request or simulate data asynchronously, and show loading, success, empty and failure states. Keep server-side trust requirements explicit: explain which validation and authorization checks must be repeated by a real server.",
       "hints": [
-        "Keep Java and JavaScript distinct.",
-        "Identify the runtime before using host APIs.",
-        "Use original examples and explain each line."
+        "JavaScript and Java are different programming languages.",
+        "ECMAScript specifies core language behaviour; the browser adds Web APIs such as the DOM and Fetch.",
+        "Identify the host runtime before using document, window, process or file-system APIs.",
+        "Use addEventListener rather than inline onclick attributes for maintainable event handling.",
+        "An event handler runs when the relevant event is dispatched; registering the handler does not run it immediately.",
+        "Network requests are asynchronous and can fail, return non-success status codes or produce unexpected data.",
+        "Client-side validation improves feedback but does not replace server-side validation and authorization.",
+        "Never put private API credentials, signing keys or privileged tokens in browser-delivered code.",
+        "Use native controls and provide keyboard operation and clear feedback for pending, successful and failed actions."
       ]
     }
   },
@@ -71,6 +134,50 @@
         ],
         "answer": "The runtime or host environment",
         "explanation": "Available APIs depend on whether code runs in a browser, server runtime, or another host."
+      },
+      {
+        "id": "j1-1-q3",
+        "prompt": "Which item is a browser-provided Web API rather than a core ECMAScript language feature?",
+        "options": [
+          "document.querySelector",
+          "const declaration",
+          "Arrow function syntax"
+        ],
+        "answer": "document.querySelector",
+        "explanation": "document is provided by the browser DOM API. const and arrow functions are core JavaScript language features."
+      },
+      {
+        "id": "j1-1-q4",
+        "prompt": "What happens when a registered click event listener is invoked?",
+        "options": [
+          "The browser calls the handler in response to the dispatched click event.",
+          "The HTML source file is automatically rewritten.",
+          "The server is always restarted."
+        ],
+        "answer": "The browser calls the handler in response to the dispatched click event.",
+        "explanation": "Event listeners allow code to respond when the relevant event is dispatched."
+      },
+      {
+        "id": "j1-1-q5",
+        "prompt": "Why must a server validate data even when the browser already validates a form?",
+        "options": [
+          "Users can modify client code or send requests without using the interface.",
+          "Browser validation encrypts the request.",
+          "The server cannot receive strings."
+        ],
+        "answer": "Users can modify client code or send requests without using the interface.",
+        "explanation": "Client-side checks are not a security boundary. The server must validate and authorize operations independently."
+      },
+      {
+        "id": "j1-1-q6",
+        "prompt": "What is the role of the JavaScript runtime environment?",
+        "options": [
+          "It provides the execution context and host services needed by the program.",
+          "It defines the HTML page's colour palette.",
+          "It replaces the programming language syntax."
+        ],
+        "answer": "It provides the execution context and host services needed by the program.",
+        "explanation": "A runtime executes code and exposes environment-specific services and APIs."
       }
     ]
   },
