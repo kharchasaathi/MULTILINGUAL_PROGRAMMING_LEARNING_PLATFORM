@@ -64,6 +64,9 @@ assert.ok(renderer.includes("lesson-answer-option"), "renderer must render selec
 assert.ok(renderer.includes("lesson-question-feedback"), "renderer must show assessment feedback");
 assert.ok(serviceWorker.includes('const CACHE_NAME = "codesaathi-v6";'), "service worker cache must be bumped for the updated lesson UI");
 const app = await readFile(join(root, "public/app.js"), "utf8");
+const html = await readFile(join(root, "public/index.html"), "utf8");
+assert.ok(html.includes('sandbox="allow-scripts"'), "playground iframe must remain sandboxed without same-origin access");
+assert.ok(html.includes('role="status" aria-live="polite"'), "preview status must be announced accessibly");
 assert.ok(loader.includes("editor.dataset.playgroundMode = mode"), "lesson loader must pass the selected playground mode");
 assert.ok(app.includes('mode === "css"'), "playground must support CSS mode");
 assert.ok(app.includes('mode === "javascript"'), "playground must support JavaScript mode");
