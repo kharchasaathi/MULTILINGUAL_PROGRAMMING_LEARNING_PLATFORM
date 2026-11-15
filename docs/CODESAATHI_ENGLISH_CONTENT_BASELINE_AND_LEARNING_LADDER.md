@@ -109,4 +109,4 @@ Progress from statements, values and variables to operators, control flow, funct
 - Existing first practical topic `J2.1` was previously expanded.
 
 ### Remaining work
-These expansions establish the English-first learning ladder, but they do not complete the 501 English topic files or prove full W3Schools coverage. Continue auditing the remaining HTML, CSS and JavaScript topics in order. Do not begin translating newly expanded material until the corresponding English source has passed review. All edited lessons remain draft unless a separately evidenced review gate changes their status.
+These expansions establish the English-first learning ladder, but they do not complete the 501 English topic files or prove full W3Schools coverage. The lesson playground is now mode-aware for HTML, CSS, JavaScript and combined starter code, subject to browser smoke testing. Continue auditing the remaining HTML, CSS and JavaScript topics in order. Do not begin translating newly expanded material until the corresponding English source has passed review. All edited lessons remain draft unless a separately evidenced review gate changes their status.
