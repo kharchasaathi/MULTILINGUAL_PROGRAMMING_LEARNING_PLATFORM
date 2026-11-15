@@ -3,10 +3,21 @@
   "courseId": "css",
   "moduleId": "C1",
   "topicId": "C1.6",
-  "title": "Browser style calculation at beginner level",
+  "title": "How Browsers Calculate Styles: Matching, Cascade, Inheritance and Rendering",
   "language": "en",
   "learningObjectives": [
-    "Explain and apply browser style calculation at beginner level."
+    "Describe the simplified path from stylesheet parsing to selector matching and computed styles.",
+    "Explain the roles of user-agent, user and author style origins at a conceptual level.",
+    "Explain how importance and cascade layers affect which declarations are considered before specificity.",
+    "Calculate simple selector specificity and use it as one part of cascade reasoning.",
+    "Explain how source order resolves conflicts when higher-priority cascade factors are equal.",
+    "Distinguish inherited properties from properties that normally do not inherit.",
+    "Explain the difference between specified, computed, used and actual values at a beginner level.",
+    "Describe how computed styles contribute to layout, paint and compositing.",
+    "Recognize that some style or DOM changes trigger layout while others may only require paint or compositing.",
+    "Use Developer Tools to inspect matched rules, overridden declarations, computed values and box geometry.",
+    "Diagnose a simple style conflict without relying on unnecessary !important declarations.",
+    "Explain why browser style calculation is more complex than selecting the last matching rule."
   ],
   "prerequisites": [
     "H2.6",
@@ -14,13 +25,14 @@
   ],
   "stages": {
     "understand": {
-      "concept": "The browser matches selectors, considers origin, importance, cascade layers, specificity and source order, then resolves inheritance and computes values before layout and painting. This is a simplified overview.",
-      "whyItMatters": "HTML works without CSS, but CSS makes content clearer, more usable and adaptable to different screens.",
-      "analogy": "If HTML is a building's structure, CSS is its visual finish and interior design.",
-      "analogyLimit": "CSS is more than colour; it affects layout, responsive behaviour, interaction states and accessibility preferences."
+      "concept": "The browser calculates styles by matching selectors to elements and resolving competing declarations through the cascade. The result is influenced by origin, importance, cascade layers, specificity and source order. Inherited values and default values also contribute. The browser then computes values used by layout and rendering. This is a simplified view of a larger process that includes custom properties, animations, transitions, writing modes, viewport conditions and other features.",
+      "whyItMatters": "Understanding style calculation helps you diagnose why a rule is crossed out, why a child inherits a value or why changing one property affects layout. It also discourages fragile CSS fixes such as adding increasingly specific selectors or routine !important declarations.",
+      "analogy": "Imagine several rulebooks applying to the same element. The browser follows a defined priority system to decide which instruction controls each property.",
+      "analogyLimit": "The browser does not simply choose one winning rule for the whole element. It resolves each property separately, considers inheritance and computed values, and then uses those results in layout and painting.",
+      "history": "The cascade is a foundational CSS design feature. As CSS gained more origins, modules, layers, animations and dynamic states, the style calculation model expanded while preserving the core idea of resolving competing declarations in a defined order."
     },
     "explain": {
-      "narrative": "The browser matches selectors, considers origin, importance, cascade layers, specificity and source order, then resolves inheritance and computes values before layout and painting. This is a simplified overview.",
+      "narrative": "The browser first parses CSS into rules and matches selectors against elements in the DOM. For each property, it gathers declarations that apply and resolves conflicts through the cascade. A useful beginner model is to consider origin and importance, cascade layer order, specificity and source order. Specificity is important, but it is not the first or only factor. Animations, transitions, user styles and important declarations have defined places in the cascade.\n\nAfter the winning declaration is identified, inheritance and defaulting help determine values for elements. Some properties, such as color and font-family, normally inherit from a parent. Others, such as margin and border, normally do not. The CSS value process distinguishes specified, computed, used and actual values. For example, a percentage width may be specified in the stylesheet but resolved using the containing block during layout.\n\nComputed styles contribute to layout, which determines the geometry and position of boxes. The browser then paints visual output and may composite layers. A change to color may require repainting; a change to width may require layout and paint. Browser optimizations vary, so use Performance tools rather than assuming every property has the same cost.\n\nWhen a rule appears not to work, inspect the element in Developer Tools. Check whether the selector matches, whether the declaration is valid, which declarations are crossed out and what value appears in Computed. Then examine inheritance and the box model. Fix the underlying conflict instead of escalating specificity or adding !important without a reason.",
       "examples": [
         {
           "id": "c1.6-example",
@@ -29,15 +41,46 @@
           "explanation": "Change the style rule and observe how colour, spacing and layout change.",
           "expectedOutput": "The browser displays the HTML content according to the CSS declarations.",
           "runnable": true
+        },
+        {
+          "id": "c1.6-cascade-priority",
+          "language": "en",
+          "title": "Specificity is one part of the cascade",
+          "code": "p { color: navy; }\n.notice { color: teal; }\n#status { color: purple; }\n\n<p id=\"status\" class=\"notice\">Ready</p>",
+          "explanation": "All three selectors match. In this simplified case, the ID selector has higher specificity than the class and type selectors. Other cascade factors such as importance, origin and layers can change which declaration wins.",
+          "expectedOutput": "The computed colour is purple when no higher-priority declaration overrides it.",
+          "runnable": false
+        },
+        {
+          "id": "c1.6-inheritance",
+          "language": "en",
+          "title": "Some properties inherit and others do not",
+          "code": "body {\n  color: #263238;\n  font-family: system-ui, sans-serif;\n  border: 1px solid #999;\n}\n\n.card p {\n  /* color and font-family can inherit */\n  /* border does not normally inherit */\n}",
+          "explanation": "Text-related properties commonly inherit from ancestors. Borders and margins normally do not. Use the Computed panel to see whether a value is inherited or set directly.",
+          "expectedOutput": "The paragraph inherits text colour and font family but does not inherit the body's border.",
+          "runnable": false
+        },
+        {
+          "id": "c1.6-render-pipeline",
+          "language": "en",
+          "title": "Styles feed layout and rendering",
+          "code": "CSS rules → matched declarations\n           ↓\n        Cascade\n           ↓\n   Inheritance / computed values\n           ↓\n         Layout\n           ↓\n          Paint\n           ↓\n       Composite",
+          "explanation": "This is a conceptual rendering pipeline. Modern browsers optimize and combine work, and some changes can skip stages. Use profiling tools to understand real performance.",
+          "expectedOutput": "You can explain why a width change may require more work than a simple colour change.",
+          "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Change one CSS property value and observe the result.",
-      "independentTask": "Design a small information card using semantic HTML and a reusable CSS rule.",
+      "guidedTask": "Create three competing rules for one element. Predict which colour will win, then inspect Matched and Computed styles. Add an inherited property and a non-inherited property and compare a child element. Change width and colour separately and observe the browser's layout and paint behaviour.",
+      "independentTask": "Build a small page with a nested card component. Use type, class and id selectors, a cascade layer and inherited typography. Diagnose a deliberate conflict using Developer Tools. Explain the winning declaration and identify which changes affect geometry versus paint.",
       "hints": [
-        "Identify which elements the selector matches.",
-        "Change one property at a time."
+        "The cascade evaluates more than source order.",
+        "Specificity matters after earlier cascade factors such as origin, importance and layer order.",
+        "Inheritance applies only to properties defined to inherit.",
+        "Computed values may differ from the literal values written in CSS.",
+        "Width and layout changes can trigger layout; colour changes often need paint.",
+        "Inspect Matched and Computed styles instead of guessing."
       ]
     }
   },
@@ -68,6 +111,39 @@
         ],
         "answer": "No",
         "explanation": "HTML provides meaning and structure; CSS controls presentation."
+      },
+      {
+        "id": "c1.6-q3",
+        "prompt": "Which factor is part of the CSS cascade?",
+        "options": [
+          "Origin, importance, layers, specificity and source order",
+          "Only the last line in the file",
+          "The browser's screen brightness"
+        ],
+        "answer": "Origin, importance, layers, specificity and source order",
+        "explanation": "The cascade resolves declarations using a defined order of factors; source order alone is not enough."
+      },
+      {
+        "id": "c1.6-q4",
+        "prompt": "Which property normally inherits from a parent?",
+        "options": [
+          "color",
+          "margin",
+          "border"
+        ],
+        "answer": "color",
+        "explanation": "Text colour normally inherits, while margin and border do not normally inherit."
+      },
+      {
+        "id": "c1.6-q5",
+        "prompt": "What does the Computed panel show?",
+        "options": [
+          "The resolved property values for the selected element",
+          "The original HTML response only",
+          "The Git commit history"
+        ],
+        "answer": "The resolved property values for the selected element",
+        "explanation": "Computed styles show the values after the browser processes applicable declarations and inheritance."
       }
     ]
   },
