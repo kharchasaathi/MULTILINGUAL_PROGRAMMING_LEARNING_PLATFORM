@@ -11,6 +11,7 @@
   const frame = $("#previewFrame");
   const runButton = $("#runCode");
   const previewStatus = $(".preview-live");
+  let previewRunId = 0;
 
   function runCode() {
     if (!editor || !frame) return;
@@ -18,6 +19,8 @@
     try {
       const source = editor.value;
       const mode = editor.dataset.playgroundMode || "html";
+      const runId = ++previewRunId;
+      const readyScript = '<script>parent.postMessage({type:"codesaathi-preview-ready",runId:' + runId + '}, "*");</script>';
       const isFullDocument = /^\s*(?:<!doctype\s+html\b[^>]*>\s*)?<html\b/i.test(source);
       const fixtureStyles = "<style>body{font:16px Arial,sans-serif;padding:22px;color:#172033}" +
         ".demo-card,.article,.alert{max-width:36rem;padding:1rem;border:1px solid #cbd5e1;border-radius:12px}" +
@@ -38,8 +41,12 @@
         "<pre id=\"playgroundConsole\" role=\"status\" aria-live=\"polite\">Console output appears here.</pre></main>";
       let html;
       if (isFullDocument || mode === "html" || mode === "combined") {
-        html = isFullDocument ? source : "<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">" +
-          fixtureStyles + "</head><body>" + source + "</body></html>";
+        if (isFullDocument) {
+          html = /<\/body\s*>/i.test(source) ? source.replace(/<\/body\s*>/i, readyScript + "</body>") : source + readyScript;
+        } else {
+          html = "<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">" +
+            fixtureStyles + "</head><body>" + source + readyScript + "</body></html>";
+        }
       } else {
         const customCss = mode === "css" ? "<style>" + source.replace(/<\/style/gi, "<\\/style") + "</style>" : "";
         const consoleBootstrap = "(function(){var output=document.getElementById('playgroundConsole');" +
@@ -50,17 +57,20 @@
           "output.textContent=current+(current?'\\n':'')+(method==='log'?'':method.toUpperCase()+': ')+line;};});})();";
         const customScript = mode === "javascript" ? "<script>" + consoleBootstrap + "\n" + source.replace(/<\/script/gi, "<\\/script") + "</script>" : "";
         html = "<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">" +
-          fixtureStyles + customCss + "</head><body>" + fixtureBody + customScript + "</body></html>";
+          fixtureStyles + customCss + "</head><body>" + fixtureBody + customScript + readyScript + "</body></html>";
       }
-      frame.addEventListener("load", () => {
-        if (previewStatus) previewStatus.textContent = "● READY";
-      }, { once: true });
       frame.srcdoc = html;
     } catch (error) {
       if (previewStatus) previewStatus.textContent = "● PREVIEW ERROR";
       console.error("CodeSaathi playground could not render the preview:", error);
     }
   }
+  window.addEventListener("message", event => {
+    if (event.source !== frame?.contentWindow) return;
+    const data = event.data;
+    if (!data || data.type !== "codesaathi-preview-ready" || data.runId !== previewRunId) return;
+    if (previewStatus) previewStatus.textContent = "● READY";
+  });
   runButton?.addEventListener("click", runCode);
 
   const closeLessonButton = $("#closeLesson");
