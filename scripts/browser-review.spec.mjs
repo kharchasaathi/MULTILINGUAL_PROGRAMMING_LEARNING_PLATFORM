@@ -1,7 +1,8 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-const baseURL = process.env.BASE_URL || "http://127.0.0.1:4173";\ntest.use({ serviceWorkers: "block" });
+const baseURL = process.env.BASE_URL || "http://127.0.0.1:4173";
+test.use({ serviceWorkers: "block" });
 const groups = {
   html: ["H16.1","H16.2","H16.3","H16.4","H16.5","H16.6","H16.7","H16.8","H16.9","H16.10"],
   css: ["C22.1","C22.2","C22.3","C22.4","C22.5","C22.6"],
@@ -49,7 +50,9 @@ test("all 25 added lessons render and their runnable starter code executes in th
     await expect(dialog).toBeVisible();
     for (const topicId of topicIds) {
       await dialog.locator(`[data-topic-id="${topicId}"]`).click();
-      await expect(dialog.locator(".lesson-template-title")).toContainText(topicId);\n      await expect(dialog.locator(".curriculum-back")).toBeVisible();\n      await expect(dialog.locator(".curriculum-draft-notice")).toBeVisible();
+      await expect(dialog.locator(".lesson-template-title")).toContainText(topicId);
+      await expect(dialog.locator(".curriculum-back")).toBeVisible();
+      await expect(dialog.locator(".curriculum-draft-notice")).toBeVisible();
       await expect(dialog.locator(".lesson-objectives-list li")).toHaveCount(5);
       await expect(dialog.locator(".lesson-example")).toHaveCount(2);
       await expect(dialog.locator(".lesson-question")).toHaveCount(5);
