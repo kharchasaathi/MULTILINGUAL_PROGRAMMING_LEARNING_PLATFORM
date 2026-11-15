@@ -3,70 +3,183 @@
   "courseId": "html",
   "moduleId": "H2",
   "topicId": "H2.6",
-  "title": "Build a complete HTML document",
+  "title": "Build, validate, and debug a complete HTML document",
   "language": "en",
   "learningObjectives": [
-    "Identify and assemble the parts of a complete HTML document"
+    "Assemble a complete modern HTML document with a doctype, html root, language declaration, head metadata, meaningful title, and body content in the correct order.",
+    "Explain the separate responsibilities of document mode selection, document language, character encoding, viewport configuration, metadata, and visible page structure.",
+    "Choose appropriate semantic elements to organize page content and distinguish document structure from CSS presentation and JavaScript behaviour.",
+    "Create a maintainable document with external stylesheet and script references, correct resource paths, and a deliberate script-loading strategy.",
+    "Use browser Developer Tools to inspect the original source, parsed DOM, computed styles, Console output, and Network requests when diagnosing document problems.",
+    "Use an HTML conformance checker to identify source errors and distinguish conformance validation from browser rendering and accessibility testing.",
+    "Diagnose common document failures such as incorrect file extensions, missing or misplaced doctype, invalid nesting, encoding mismatches, broken resource paths, and scripts that run before required DOM elements exist.",
+    "Apply accessibility and responsive-design checks to a complete page, including language metadata, semantic structure, keyboard operation, zoom, and narrow-screen reflow.",
+    "Build and independently verify a small multi-page HTML project using consistent document structure, relative navigation, reusable resources, and evidence-based debugging."
   ],
   "prerequisites": [
-    "H1.5"
+    "H1.5",
+    "H1.6",
+    "H2.1",
+    "H2.2",
+    "H2.3",
+    "H2.4",
+    "H2.5"
   ],
   "stages": {
     "understand": {
-      "concept": "A basic document combines doctype, html root, head metadata and body content. Indentation helps people inspect nesting but does not create structure.",
-      "whyItMatters": "A consistent skeleton prevents missing metadata and provides a reliable starting point.",
-      "analogy": "A building plan shows relationships between parts, but HTML is parsed into a document tree, not built from concrete.",
-      "analogyLimit": "The analogy is only a memory aid; HTML should not be interpreted literally through it."
+      "concept": "A complete modern HTML document is more than a heading and a paragraph. It is a structured text resource that the browser parses into a DOM and uses as the basis for styling, scripting, accessibility, and rendering. A reliable starting document begins with the modern doctype declaration, has one html root element with an appropriate lang value, contains a head section for metadata and resource references, and contains a body section for page content. The head commonly declares UTF-8 encoding, a viewport configuration, and a meaningful title. The body organizes content using appropriate semantic and content elements. CSS controls presentation, and JavaScript adds behaviour when needed. External resources must resolve correctly, and the document should be checked in a browser and with appropriate validation and accessibility techniques.",
+      "whyItMatters": "A consistent document foundation prevents many avoidable development problems. Correct language and encoding metadata help browsers and assistive technologies interpret text. A modern doctype avoids the usual quirks-mode fallback. A meaningful title improves orientation, while viewport metadata provides a suitable starting point for responsive CSS. Semantic body structure improves navigation and maintainability. Correct resource paths and script timing prevent stylesheets and JavaScript from silently failing. Finally, validation and browser inspection provide different kinds of evidence: a document can render despite source errors, and a conforming document can still have usability, accessibility, or responsive-design problems. Professional developers check each concern separately.",
+      "analogy": "Think of a complete HTML document as a well-organized technical specification: it identifies the document, describes how it should be interpreted, references supporting resources, and contains the content that users interact with.",
+      "analogyLimit": "A browser does not simply read a document from top to bottom and display every line. It follows parsing, resource loading, CSS cascade, layout, scripting, accessibility, and rendering algorithms. The browser may recover from malformed markup, but recovery does not make the source conforming or the user experience correct."
     },
     "explain": {
-      "narrative": "A basic document combines doctype, html root, head metadata and body content. Indentation helps people inspect nesting but does not create structure.",
+      "narrative": "Start with a predictable project folder and a plain-text code editor. Save the page with the intended .html extension, such as index.html, and confirm that the operating system has not silently added .txt. The extension affects how tools identify the file, but the browser still parses the document contents according to their actual bytes and response context. For a local project, keep related files in a clear structure, for example index.html, about.html, css/site.css, and js/app.js.\n\nBegin the HTML source with <!doctype html>. This declaration tells the HTML parser to use the modern document mode rather than the usual quirks-mode fallback. Follow it with the html root element and a lang attribute that identifies the page's primary language. Put document metadata in head: declare UTF-8 early, provide viewport metadata, set a specific title, and reference stylesheets or other required resources. Put the page's content in body and organize it with semantic elements where their meaning fits. Write explicit start and end tags for the main structural elements even where HTML syntax permits some tags to be omitted. Explicit source structure is easier to review and maintain.\n\nUse the title to identify the page in browser tabs, history, and bookmarks. Do not assume it must exactly duplicate the visible h1, although both should describe the same page accurately. Use meta name=description for a concise page summary when useful, remembering that external search systems may generate their own snippets. Use meta charset=utf-8 for character decoding and lang for the human language; these are different declarations. The viewport meta element establishes a suitable layout viewport on mobile devices, but responsive CSS is still needed for flexible sizing, reflow, and breakpoints. Do not restrict user zoom as a shortcut to fixing layout problems.\n\nInside body, create a logical content hierarchy. A typical page may use header, nav, main, section, article, aside, and footer according to the meaning of its content. Use headings in a logical hierarchy, links for navigation, buttons for actions, labels for form controls, and suitable alternatives for non-text content. A div is appropriate when a generic grouping is needed and no semantic element better describes the role. Do not select an element merely because its default browser styling looks convenient. CSS belongs in stylesheets and JavaScript behaviour belongs in scripts or modules; keep each technology's responsibility clear.\n\nReference an external stylesheet with a link element in head and an external script with a script element. Relative URLs are resolved against the document's base URL, which can be affected by a base element. A broken path, case mismatch on a case-sensitive server, missing file, incorrect MIME type, or blocked request can prevent a resource from working. Use the Network panel to inspect the requested URL, status, response headers, and loading errors. For a classic external script that needs the parsed document, defer is often a good default: the browser can fetch it while parsing continues and execute it after parsing completes. Module scripts are deferred by default and use import/export and module loading rules. Use async only when a script is independent of execution order. Choose based on dependencies, not simply because one attribute sounds faster.\n\nAfter saving the file, open the exact file or served URL in a browser. Check that the browser tab title is correct, the expected content appears, images and stylesheets load, links navigate to the intended locations, and interactive controls work. Use View Source to inspect the original source text and the Elements panel to inspect the current DOM. The browser may insert implied structure or repair malformed markup, and JavaScript can modify the DOM after parsing. Use the Console for JavaScript errors and diagnostic expressions such as document.compatMode, document.documentElement.lang, document.title, and document.body. Check for null before using an element that may not exist.\n\nRun the document through an HTML conformance checker to find source errors. A checker can identify invalid element placement, missing required attributes, duplicate IDs, and other conformance problems, but passing validation does not prove the page is accessible, secure, responsive, or visually correct. Conversely, a page appearing in the browser does not prove its source is valid: browsers implement error recovery to handle real-world documents. Correct the source rather than relying on recovery.\n\nPerform separate accessibility and responsive checks. Navigate with the keyboard, verify visible focus, ensure controls have accessible names and labels, inspect heading and landmark structure, check language metadata, and confirm that content remains usable when zoomed. Resize to narrow widths and test that text, images, forms, navigation, and tables do not lose information or functionality. Use semantic HTML first and add ARIA only when native HTML does not already provide the required semantics. Do not treat an automated scan or a single screenshot as complete accessibility testing.\n\nFor a small multi-page project, create index.html and about.html, share one stylesheet and one script where appropriate, and use correct relative links between pages. Keep titles and descriptions specific to each page. Test both pages from the same local server or hosting environment that reflects the intended deployment path. A file that works from a local folder can fail after deployment if resource paths, filename case, or server configuration differ. Record the problem, the evidence, the likely cause, the correction, and the retest result. This is a repeatable professional debugging workflow.",
       "examples": [
         {
-          "id": "h2.6-example",
+          "id": "h2.6-complete-document",
           "language": "en",
-          "code": "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>My Page</title></head><body><h1>My first complete page</h1><p>I am learning HTML.</p></body></html>",
-          "explanation": "The page shows a heading and paragraph; the tab displays My Page.",
-          "expectedOutput": "The page shows a heading and paragraph; the tab displays My Page.",
+          "title": "A complete modern HTML page",
+          "code": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <meta name=\"description\" content=\"A practical example of a complete HTML document.\">\n  <title>Complete HTML page | CodeSaathi</title>\n  <link rel=\"stylesheet\" href=\"css/site.css\">\n  <script src=\"js/app.js\" defer></script>\n</head>\n<body>\n  <header><a href=\"index.html\">CodeSaathi</a></header>\n  <main>\n    <h1>My first complete page</h1>\n    <p>The document has metadata, structure, styling, and behaviour.</p>\n    <button id=\"showMessage\" type=\"button\">Show message</button>\n    <p id=\"message\" role=\"status\">Waiting.</p>\n  </main>\n  <footer><small>HTML document practice</small></footer>\n</body>\n</html>",
+          "explanation": "The doctype selects the modern document mode. The root language, charset, viewport, title, description, stylesheet, and deferred script are declared in head. The body contains semantic page regions and interactive content. The CSS and JavaScript files must exist at the referenced paths for those resources to load.",
+          "expectedOutput": "The browser displays the page heading, paragraph, button, and footer. If the referenced files exist, the stylesheet is applied and the deferred script can attach behaviour after parsing.",
+          "runnable": true
+        },
+        {
+          "id": "h2.6-external-resources",
+          "language": "en",
+          "title": "Connect a shared stylesheet and a deferred script",
+          "code": "<!-- index.html -->\n<link rel=\"stylesheet\" href=\"css/site.css\">\n<script src=\"js/app.js\" defer></script>\n\n/* css/site.css */\nbody { font-family: system-ui, sans-serif; }\nmain { max-width: 60rem; margin-inline: auto; padding: 1rem; }\n\n// js/app.js\nconst heading = document.querySelector('h1');\nif (heading) {\n  heading.textContent = 'Initialized after parsing';\n}",
+          "explanation": "The HTML references two separate resources. The stylesheet path is resolved relative to the HTML document URL. The deferred classic script is executed after parsing completes, so the h1 is available for selection. In a real project, each resource belongs in its own file at the stated path; the combined snippet is shown only to explain their relationship.",
+          "expectedOutput": "The page uses the external CSS rules and the heading text changes after the deferred script runs, provided both resource paths resolve successfully.",
+          "runnable": false
+        },
+        {
+          "id": "h2.6-debug-file-path",
+          "language": "en",
+          "title": "Diagnose a stylesheet path failure",
+          "code": "<!-- Project layout -->\nproject/\n  index.html\n  css/\n    site.css\n\n<!-- Correct link in index.html -->\n<link rel=\"stylesheet\" href=\"css/site.css\">\n\n<!-- Incorrect example -->\n<link rel=\"stylesheet\" href=\"styles/site.css\">",
+          "explanation": "The correct path matches the actual css folder. The incorrect path points to a different directory. A browser may still render the HTML, but the stylesheet request will fail. Inspect the Network panel and correct the URL based on the real project structure.",
+          "expectedOutput": "The correct link requests css/site.css successfully when the file exists. The incorrect link typically produces a failed request such as 404.",
+          "runnable": false
+        },
+        {
+          "id": "h2.6-inspect-document",
+          "language": "en",
+          "title": "Use Console expressions to inspect document setup",
+          "code": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Document diagnostics</title>\n</head>\n<body>\n  <main><h1>Inspect this page</h1></main>\n</body>\n</html>\n\n// Run these separately in the browser Console:\ndocument.compatMode\ndocument.documentElement.lang\ndocument.title\ndocument.body",
+          "explanation": "These expressions provide quick diagnostic evidence about the active document mode, root language, title, and body element. They do not replace source validation or a full accessibility and responsive review.",
+          "expectedOutput": "The Console reports CSS1Compat for the modern doctype, en for the root language, Document diagnostics for the title, and the body element object.",
+          "runnable": false
+        },
+        {
+          "id": "h2.6-html-recovery",
+          "language": "en",
+          "title": "A browser rendering successfully does not prove valid source",
+          "code": "<!doctype html>\n<html lang=\"en\">\n<head><title>Markup check</title></head>\n<body>\n  <p><strong>Important text</p>\n</body>\n</html>",
+          "explanation": "The strong element is not explicitly closed before the paragraph ends. Browsers may repair the tree during parsing and still display the text, but the source contains a conformance problem. Correct the nesting and use a conformance checker rather than relying on parser recovery.",
+          "expectedOutput": "The browser generally displays the text, but an HTML conformance checker reports a markup error that should be fixed.",
+          "runnable": true
+        },
+        {
+          "id": "h2.6-responsive-document",
+          "language": "en",
+          "title": "Test a document at narrow and wide viewports",
+          "code": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Responsive document</title>\n  <style>\n    * { box-sizing: border-box; }\n    body { margin: 0; font-family: system-ui, sans-serif; }\n    main { width: min(100% - 2rem, 64rem); margin-inline: auto; padding-block: 2rem; }\n    img { max-width: 100%; height: auto; }\n    .layout { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; }\n    @media (max-width: 42rem) { .layout { grid-template-columns: 1fr; } }\n  </style>\n</head>\n<body>\n  <main><h1>Responsive page</h1><div class=\"layout\"><article><h2>Article</h2><p>Main content.</p></article><aside><h2>Related</h2><p>Supporting content.</p></aside></div></main>\n</body>\n</html>",
+          "explanation": "The viewport metadata establishes the layout viewport. CSS controls the actual responsive layout: a two-column grid becomes one column at the chosen breakpoint, and images are constrained to their container width.",
+          "expectedOutput": "The page displays two columns on wider viewports and stacks the article and related content on narrow viewports.",
           "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Complete the starter document with a title, heading and paragraph in the correct places.",
-      "independentTask": "Create your own small page, open it in a browser and inspect the result.",
+      "guidedTask": "Create a project folder named complete-html-lab with index.html, css/site.css, and js/app.js. Build a complete document with the modern doctype, lang attribute, UTF-8 declaration, viewport metadata, meaningful title, description, stylesheet link, and deferred script. In body, add a semantic header, navigation, main section with a heading and paragraph, a labelled input, a button, a status region, and a footer. Use the external script to attach a click listener and update the status with textContent. Open the page in a browser, inspect the source and live DOM, check the Console and Network panels, and validate the HTML.",
+      "independentTask": "Build a two-page mini-site with index.html and about.html, a shared responsive stylesheet, and a shared JavaScript file. Each page must have its own meaningful title and description, correct language and encoding metadata, and a logical semantic structure. Add working relative navigation between the pages, an accessible interactive control, and at least one responsive layout rule. Test both pages from a local development server. Deliberately introduce and then diagnose three defects: an incorrect stylesheet path, a script that runs before its target element exists, and incorrectly nested markup. Use browser Developer Tools and an HTML conformance checker to record evidence, fix each defect, and retest. Finish with a short checklist covering keyboard access, focus visibility, zoom, mobile reflow, resource loading, and console errors.",
       "hints": [
-        "Check that each element is nested under the correct parent."
+        "Use the document skeleton consistently: doctype, html, head, and body. Keep metadata and resource references in head and page content in body.",
+        "Set the root lang value to the actual primary language and declare UTF-8 separately with meta charset.",
+        "Keep the charset declaration early in head and ensure the file is saved using the encoding you declare.",
+        "Viewport metadata does not replace responsive CSS. Test reflow, flexible content, and user zoom.",
+        "Use page-specific titles and descriptions. A title is not the same thing as the visible h1.",
+        "Resolve relative resource paths from the document URL and confirm the actual request in the Network panel.",
+        "Use defer for a classic external script that needs the parsed DOM; module scripts are deferred by default. Use async only when execution order is not a dependency.",
+        "Use View Source for the original response and Elements for the current parsed DOM, which scripts may have changed.",
+        "A browser can render malformed source through error recovery. Run a conformance checker and fix the source errors instead of relying on recovery.",
+        "Check keyboard operation, labels, focus visibility, semantic landmarks, accessible names, responsive reflow, and 200% zoom before considering the page ready."
       ]
     }
   },
   "practice": {
     "playgroundMode": "html",
-    "starterCode": "<!doctype html>\n<html lang=\"en\">\n<head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Practice</title></head>\n<body>\n<h1>My first page</h1><p>I am learning HTML.</p>\n</body>\n</html>",
-    "resetCode": "<!doctype html>\n<html lang=\"en\">\n<head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Practice</title></head>\n<body>\n<h1>My first page</h1><p>I am learning HTML.</p>\n</body>\n</html>"
+    "starterCode": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <meta name=\"description\" content=\"A complete HTML document practice project.\">\n  <title>Complete HTML document | CodeSaathi</title>\n  <style>\n    * { box-sizing: border-box; }\n    body { margin: 0; font-family: system-ui, sans-serif; color: #182230; }\n    header, footer { padding: 1rem; background: #eef2f6; }\n    main { width: min(100% - 2rem, 60rem); margin-inline: auto; padding-block: 2rem; }\n    button, input { font: inherit; padding: 0.5rem; }\n  </style>\n  <script defer>\n    document.addEventListener('DOMContentLoaded', () => {\n      const button = document.querySelector('#update');\n      const status = document.querySelector('#status');\n      button?.addEventListener('click', () => {\n        status.textContent = 'The document is working.';\n      });\n    });\n  </script>\n</head>\n<body>\n  <header><strong>Complete HTML document</strong></header>\n  <main>\n    <h1>Build and inspect a page</h1>\n    <p>Use this starter to practise document structure and browser debugging.</p>\n    <button id=\"update\" type=\"button\">Test interaction</button>\n    <p id=\"status\" role=\"status\">Waiting.</p>\n  </main>\n  <footer><small>CodeSaathi HTML practice</small></footer>\n</body>\n</html>",
+    "resetCode": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <meta name=\"description\" content=\"A complete HTML document practice project.\">\n  <title>Complete HTML document | CodeSaathi</title>\n  <style>\n    * { box-sizing: border-box; }\n    body { margin: 0; font-family: system-ui, sans-serif; color: #182230; }\n    header, footer { padding: 1rem; background: #eef2f6; }\n    main { width: min(100% - 2rem, 60rem); margin-inline: auto; padding-block: 2rem; }\n    button, input { font: inherit; padding: 0.5rem; }\n  </style>\n  <script defer>\n    document.addEventListener('DOMContentLoaded', () => {\n      const button = document.querySelector('#update');\n      const status = document.querySelector('#status');\n      button?.addEventListener('click', () => {\n        status.textContent = 'The document is working.';\n      });\n    });\n  </script>\n</head>\n<body>\n  <header><strong>Complete HTML document</strong></header>\n  <main>\n    <h1>Build and inspect a page</h1>\n    <p>Use this starter to practise document structure and browser debugging.</p>\n    <button id=\"update\" type=\"button\">Test interaction</button>\n    <p id=\"status\" role=\"status\">Waiting.</p>\n  </main>\n  <footer><small>CodeSaathi HTML practice</small></footer>\n</body>\n</html>"
   },
   "assessment": {
     "questions": [
       {
         "id": "h2.6-q1",
-        "prompt": "Where does the main page content belong?",
+        "prompt": "Which sequence represents the normal high-level structure of a modern HTML document?",
         "options": [
-          "body",
-          "head",
-          "doctype"
+          "doctype, html root, head metadata, body content",
+          "body, doctype, title, html root",
+          "head, body, doctype, html root"
         ],
-        "answer": "body",
-        "explanation": "The body contains page content."
+        "answer": "doctype, html root, head metadata, body content",
+        "explanation": "The doctype appears before the html root. The root contains head for metadata and body for page content."
       },
       {
         "id": "h2.6-q2",
-        "prompt": "What is the root element?",
+        "prompt": "A page displays correctly, but the HTML conformance checker reports an incorrectly nested element. What should the developer conclude?",
         "options": [
-          "html",
-          "title",
-          "p"
+          "The source is valid because the browser displayed it.",
+          "The browser may have recovered during parsing, but the source should still be corrected.",
+          "The conformance checker is only checking CSS colours."
         ],
-        "answer": "html",
-        "explanation": "html is the document root."
+        "answer": "The browser may have recovered during parsing, but the source should still be corrected.",
+        "explanation": "Browser error recovery allows many malformed documents to render. Rendering is not proof of source conformance."
+      },
+      {
+        "id": "h2.6-q3",
+        "prompt": "A deferred classic script needs to query an element in the page. Why is defer often suitable?",
+        "options": [
+          "It executes the script after HTML parsing completes while allowing the browser to fetch it during parsing.",
+          "It guarantees the script runs before the html element is created.",
+          "It makes every script execute in parallel without order."
+        ],
+        "answer": "It executes the script after HTML parsing completes while allowing the browser to fetch it during parsing.",
+        "explanation": "Deferred classic scripts execute after parsing and preserve order relative to other deferred classic scripts. They are useful when code needs the parsed DOM."
+      },
+      {
+        "id": "h2.6-q4",
+        "prompt": "Which browser tool is most useful for finding why an external stylesheet failed to load?",
+        "options": [
+          "The Network panel, by inspecting the request URL and response status.",
+          "The browser tab title alone.",
+          "The page's visible h1 text."
+        ],
+        "answer": "The Network panel, by inspecting the request URL and response status.",
+        "explanation": "The Network panel exposes requested resource URLs, status codes, response details, and loading failures."
+      },
+      {
+        "id": "h2.6-q5",
+        "prompt": "What is the key difference between UTF-8 metadata and the lang attribute?",
+        "options": [
+          "UTF-8 identifies character encoding; lang identifies the human language of the content.",
+          "UTF-8 identifies the language; lang controls the browser viewport.",
+          "They are two names for the same document property."
+        ],
+        "answer": "UTF-8 identifies character encoding; lang identifies the human language of the content.",
+        "explanation": "Encoding tells the browser how to decode text bytes into characters. Language metadata helps language-aware tools interpret the text."
+      },
+      {
+        "id": "h2.6-q6",
+        "prompt": "Which set of checks gives a more reliable picture of page readiness?",
+        "options": [
+          "Only checking whether the page looks correct in one desktop screenshot.",
+          "Combining source validation, browser Console and Network inspection, keyboard and zoom checks, and responsive viewport testing.",
+          "Only checking that the file has an .html extension."
+        ],
+        "answer": "Combining source validation, browser Console and Network inspection, keyboard and zoom checks, and responsive viewport testing.",
+        "explanation": "No single check proves overall quality. Validation, runtime diagnostics, accessibility checks, and responsive tests reveal different classes of problems."
       }
     ]
   },
