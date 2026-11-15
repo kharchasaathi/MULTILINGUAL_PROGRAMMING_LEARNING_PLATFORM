@@ -173,7 +173,8 @@
       questions,
       onComplete
     });
-    container.prepend(back);\n    if (readProgress()[lesson.topicId]?.completed) {
+    container.prepend(back);
+    if (readProgress()[lesson.topicId]?.completed) {
       const completedButton = $("#markLesson", container);
       if (completedButton) {
         completedButton.textContent = "✓ Lesson saved";
