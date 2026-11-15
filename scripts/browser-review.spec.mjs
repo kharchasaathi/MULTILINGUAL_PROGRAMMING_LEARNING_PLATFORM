@@ -44,6 +44,35 @@ test("landing-page HTML playground renders real output and its button interactio
   await expect(frame.locator("p")).toHaveText("Second run works.");
 });
 
+
+test("lesson practice links close the dialog and navigate to the playground", async ({ page }) => {
+  await page.goto(baseURL, { waitUntil: "domcontentloaded" });
+
+  // A lesson without runnable starter code must still open the practice area.
+  await page.locator('[data-course-nav="foundation"]').click();
+  const dialog = page.locator("#lessonDialog");
+  await expect(dialog).toBeVisible();
+  await dialog.locator('[data-topic-id="F0.1"]').click();
+  const openPractice = dialog.locator(".lesson-practice-link");
+  await expect(openPractice).toHaveText("Open the practice area");
+  await openPractice.click();
+  await expect(dialog).not.toBeVisible();
+  await expect(page.locator("#practice")).toBeInViewport();
+
+  // A lesson with starter code must load and run it before navigating.
+  await page.locator('[data-course-nav="html"]').click();
+  await expect(dialog).toBeVisible();
+  await dialog.locator('[data-topic-id="H16.1"]').click();
+  const loadStarter = dialog.locator(".lesson-practice-link");
+  await expect(loadStarter).toContainText("starter code");
+  await loadStarter.click();
+  await expect(dialog).not.toBeVisible();
+  await expect(page.locator("#practice")).toBeInViewport();
+  await expect(page.locator("#codeEditor")).toHaveValue(/Named and hexadecimal colours/);
+  await expect(page.locator(".preview-live")).toContainText("READY");
+  await expect(page.frameLocator("#previewFrame").locator("p")).toHaveText("Named and hexadecimal colours");
+});
+
 test("keyboard users can open and dismiss the curriculum dialog", async ({ page }) => {
   await page.goto(baseURL, { waitUntil: "domcontentloaded" });
   const navButton = page.locator('[data-course-nav="html"]');
