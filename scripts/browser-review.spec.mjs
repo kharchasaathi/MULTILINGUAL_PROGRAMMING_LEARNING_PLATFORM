@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-const baseURL = process.env.BASE_URL || "http://127.0.0.1:4173";
+const baseURL = process.env.BASE_URL || "http://127.0.0.1:4173";\ntest.use({ serviceWorkers: "block" });
 const groups = {
   html: ["H16.1","H16.2","H16.3","H16.4","H16.5","H16.6","H16.7","H16.8","H16.9","H16.10"],
   css: ["C22.1","C22.2","C22.3","C22.4","C22.5","C22.6"],
@@ -9,7 +9,7 @@ const groups = {
 };
 
 test("homepage and lesson dialog have no serious or critical WCAG axe violations", async ({ page }) => {
-  await page.goto(baseURL);
+  await page.goto(baseURL, { waitUntil: "domcontentloaded" });
   await expect(page.locator("#courseGrid .course-card")).toHaveCount(4);
   const home = await new AxeBuilder({ page }).withTags(["wcag2a","wcag2aa","wcag21a","wcag21aa"]).analyze();
   const seriousHome = home.violations.filter((item) => ["serious","critical"].includes(item.impact));
@@ -49,7 +49,7 @@ test("all 25 added lessons render and their runnable starter code executes in th
     await expect(dialog).toBeVisible();
     for (const topicId of topicIds) {
       await dialog.locator(`[data-topic-id="${topicId}"]`).click();
-      await expect(dialog.locator(".lesson-template-title")).toContainText(topicId);
+      await expect(dialog.locator(".lesson-template-title")).toContainText(topicId);\n      await expect(dialog.locator(".curriculum-back")).toBeVisible();\n      await expect(dialog.locator(".curriculum-draft-notice")).toBeVisible();
       await expect(dialog.locator(".lesson-objectives-list li")).toHaveCount(5);
       await expect(dialog.locator(".lesson-example")).toHaveCount(2);
       await expect(dialog.locator(".lesson-question")).toHaveCount(5);
@@ -61,7 +61,7 @@ test("all 25 added lessons render and their runnable starter code executes in th
         await dialog.locator(".lesson-practice-link").click();
         await expect(page.locator(".preview-live")).toContainText("READY");
         const preview = page.frameLocator("#previewFrame");
-        await expect(preview.locator("body")).not.toBeEmpty();
+        await expect(preview.locator("body"), topicId + " preview body").not.toBeEmpty();
         if (lesson.practice.playgroundMode === "javascript") {
           await expect(preview.locator("#playgroundConsole")).not.toContainText("Console output appears here.");
         }
