@@ -71,7 +71,7 @@
     const container = $("#lessonContent");
     container.replaceChildren();
     container.append(text("div", "eyebrow", meta[1] + " · " + topics.length + " TOPICS"));
-    const courseHeading = text("h2", "", meta[0] + " curriculum");\n    courseHeading.id = "lessonDialogTitle";\n    container.append(courseHeading);
+    const courseHeading = text("h2", "", meta[0] + " curriculum");\n    container.append(courseHeading);
     container.append(text("p", "", meta[2]));
     const completed = readProgress();
     const modules = new Map();
