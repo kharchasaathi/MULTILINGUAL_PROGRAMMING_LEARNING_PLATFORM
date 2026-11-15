@@ -1,0 +1,123 @@
+{
+  "id": "html.h16.8.en",
+  "courseId": "html",
+  "moduleId": "H16",
+  "topicId": "H16.8",
+  "title": "HTML versus XHTML: parsing and serialization rules",
+  "language": "en",
+  "learningObjectives": [
+    "Explain html versus xhtml: parsing and serialization rules and its role in modern HTML.",
+    "Select the correct elements, attributes, APIs, or browser behaviour for a practical use case.",
+    "Distinguish current practices from obsolete, limited, or legacy techniques.",
+    "Build and inspect a working example while considering accessibility and maintainability.",
+    "Diagnose common implementation errors and explain the trade-offs of the chosen approach."
+  ],
+  "prerequisites": [
+    "H1.5",
+    "H2.1",
+    "H2.4"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "HTML and XHTML can describe similar document structures but use different parsing rules. HTML served as text/html is parsed with the HTML parser, which has defined error-recovery behaviour. XHTML is HTML expressed using XML syntax and must be well-formed: elements must be properly nested and closed, attribute values quoted, and case rules followed. XHTML served as application/xhtml+xml is parsed as XML, where malformed markup can cause a fatal parse error. Do not assume that adding a slash to every HTML void element makes a document XHTML; the serialization, namespace, MIME type, and XML rules all matter.",
+      "whyItMatters": "Understanding the distinction helps developers maintain legacy XML-served content and avoid confusing HTML's tolerant parser with XML's well-formedness requirements.",
+      "analogy": "HTML parsing is like a proofreader who can recover from some mistakes; XML parsing expects the document to obey a strict grammar.",
+      "analogyLimit": "The analogy simplifies browser parsing. Real parsing rules are formal algorithms and MIME type determines which parser is used."
+    },
+    "explain": {
+      "narrative": "Compare a valid HTML fragment with a well-formed XHTML-style fragment. Then identify how the response media type affects parsing and why XHTML errors can stop rendering.",
+      "examples": [
+        {
+          "id": "h16-8-example-1",
+          "language": "html",
+          "code": "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><title>HTML document</title></head><body><img src=\"logo.svg\" alt=\"Company logo\"><p>Welcome</p></body></html>",
+          "explanation": "This is an HTML document intended to be served as text/html. The img element is a void element and does not need an XML-style closing slash.",
+          "expectedOutput": "A valid HTML page with a logo and paragraph.",
+          "runnable": true
+        },
+        {
+          "id": "h16-8-example-2",
+          "language": "html",
+          "code": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\"><head><title>XHTML document</title></head><body><img src=\"logo.svg\" alt=\"Company logo\" /><p>Welcome</p></body></html>",
+          "explanation": "This illustrates XML-style well-formed markup and the XHTML namespace. Actual XHTML delivery must use the correct media type and satisfy XML parsing rules.",
+          "expectedOutput": "A well-formed XHTML-style document when served with an appropriate XML media type and supported by the client.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Inspect two sample documents. Correct the malformed nesting and unquoted attributes in the XML-served example, and identify the media type each document requires.",
+      "independentTask": "Write a migration note for a legacy XHTML page. Explain parser selection, namespace, encoding, void-element syntax, and the operational risk of malformed XML.",
+      "hints": [
+        "The response Content-Type affects whether the HTML or XML parser is used.",
+        "XML requires well-formed nesting and quoted attribute values.",
+        "Do not confuse XHTML syntax with ordinary HTML served as text/html."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "html",
+    "starterCode": "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><title>HTML document</title></head><body><img src=\"logo.svg\" alt=\"Company logo\"><p>Welcome</p></body></html>",
+    "resetCode": "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><title>HTML document</title></head><body><img src=\"logo.svg\" alt=\"Company logo\"><p>Welcome</p></body></html>"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "h16-8-q1",
+        "prompt": "Which parser is used for a document served as text/html?",
+        "options": [
+          "The HTML parser",
+          "The XML parser in every browser",
+          "A CSS parser"
+        ],
+        "answer": "The HTML parser",
+        "explanation": "The media type text/html selects HTML parsing."
+      },
+      {
+        "id": "h16-8-q2",
+        "prompt": "What happens when XML parsing encounters malformed nesting?",
+        "options": [
+          "The XML document is not well-formed and parsing can fail",
+          "The browser always repairs it like HTML",
+          "The CSS parser fixes it"
+        ],
+        "answer": "The XML document is not well-formed and parsing can fail",
+        "explanation": "XML requires well-formed markup and does not use HTML's normal error-recovery rules."
+      },
+      {
+        "id": "h16-8-q3",
+        "prompt": "Which media type is associated with XML-served XHTML?",
+        "options": [
+          "application/xhtml+xml",
+          "image/xhtml",
+          "text/css"
+        ],
+        "answer": "application/xhtml+xml",
+        "explanation": "XHTML delivered as XML uses an XML media type such as application/xhtml+xml."
+      },
+      {
+        "id": "h16-8-q4",
+        "prompt": "Are HTML void elements required to use XML-style closing slashes in text/html?",
+        "options": [
+          "No",
+          "Yes, every HTML document is XML",
+          "Only when CSS is present"
+        ],
+        "answer": "No",
+        "explanation": "HTML has its own void-element syntax; XML serialization rules are separate."
+      },
+      {
+        "id": "h16-8-q5",
+        "prompt": "What determines parser behaviour most directly?",
+        "options": [
+          "The document's media type and parsing context",
+          "The file's visual design",
+          "The name of the CSS class"
+        ],
+        "answer": "The document's media type and parsing context",
+        "explanation": "The browser selects parsing behaviour based on the delivered media type and context."
+      }
+    ]
+  },
+  "status": "draft"
+}
