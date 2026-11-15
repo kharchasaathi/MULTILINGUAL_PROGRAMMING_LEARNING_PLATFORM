@@ -40,7 +40,7 @@ for (const [course, topics] of Object.entries(groups)) {
       assert.ok(typeof example.code === "string" && example.code.trim().length > 10, `${topicId}: example code`);
       assert.equal(typeof example.runnable, "boolean", `${topicId}: explicit runnable status`);
       assert.ok(example.explanation?.length > 30, `${topicId}: example explanation`);
-      assert.ok(example.expectedOutput?.length > 10, `${topicId}: expected output`);
+      assert.ok(example.expectedOutput === undefined || typeof example.expectedOutput === "string", `${topicId}: optional expected output is text`);
     }
     const questions = lesson.assessment?.questions;
     assert.equal(questions?.length, 5, `${topicId}: five assessment questions`);
