@@ -23,7 +23,7 @@ test("homepage and lesson dialog have no serious or critical WCAG axe violations
   await dialog.locator('[data-topic-id="H16.1"]').click();
   await expect(dialog.locator(".lesson-template-title")).toContainText("H16.1");
   await expect(dialog.locator(".curriculum-back")).toBeVisible();
-  await expect(dialog.locator(".curriculum-draft-notice")).toBeVisible();
+  await expect(dialog.locator(".curriculum-draft-notice")).toHaveCount(0);
   const lesson = await new AxeBuilder({ page }).include("#lessonDialog").withTags(["wcag2a","wcag2aa","wcag21a","wcag21aa"]).analyze();
   const seriousLesson = lesson.violations.filter((item) => ["serious","critical"].includes(item.impact));
   expect(seriousLesson, JSON.stringify(seriousLesson.map(({ id, impact, description, nodes }) => ({ id, impact, description, count:nodes.length })), null, 2)).toEqual([]);
@@ -98,7 +98,7 @@ test("all 25 lessons render in the UI and all runnable starter programs execute 
     await dialog.locator(`[data-topic-id="${topicId}"]`).click();
     await expect(dialog.locator(".lesson-template-title")).toContainText(topicId);
     await expect(dialog.locator(".curriculum-back")).toBeVisible();
-    await expect(dialog.locator(".curriculum-draft-notice")).toBeVisible();
+    await expect(dialog.locator(".curriculum-draft-notice")).toHaveCount(0);
     await expect(dialog.locator(".lesson-objectives-list li")).toHaveCount(5);
     await expect(dialog.locator(".lesson-example")).toHaveCount(2);
     await expect(dialog.locator(".lesson-question")).toHaveCount(5);
