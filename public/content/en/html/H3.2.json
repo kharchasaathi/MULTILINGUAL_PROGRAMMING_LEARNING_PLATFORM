@@ -6,67 +6,173 @@
   "title": "Line breaks and thematic breaks",
   "language": "en",
   "learningObjectives": [
-    "Choose semantic text elements and inspect their browser output"
+    "Explain the semantic purpose and HTML content model of the br element.",
+    "Distinguish a content-significant line break from a new paragraph and from visual spacing.",
+    "Explain the semantic role of hr as a thematic break between paragraph-level topics or changes in scene.",
+    "Use br appropriately for addresses, poetry and other content where line boundaries matter.",
+    "Use hr where a thematic shift is meaningful and understand its semantic role as a separator.",
+    "Explain why repeated br elements, empty paragraphs and decorative hr elements are poor layout techniques.",
+    "Style br and hr with CSS without changing their meaning or replacing native semantics unnecessarily.",
+    "Inspect parsed DOM, accessibility exposure, responsive wrapping and visual separators in browser tools."
   ],
   "prerequisites": [
-    "H2.6"
+    "H3.1"
   ],
   "stages": {
     "understand": {
-      "concept": "Use br only when a line break is part of the content, such as an address or poem. Use hr when the topic or section changes; do not use either as a spacing tool.",
-      "whyItMatters": "CSS margin and padding control visual spacing; semantic HTML elements communicate content structure.",
-      "analogy": "A book uses headings, paragraphs and notes for different purposes; HTML gives those roles explicit structure.",
-      "analogyLimit": "The book analogy is a memory aid; a browser parses HTML according to defined rules."
+      "concept": "The br element represents a line break that is part of the content, while hr represents a thematic break between paragraph-level topics or a change in scene. Neither element is a general-purpose spacing control. A line break can be meaningful inside an address or a poem, where line boundaries belong to the content. A thematic break can communicate a transition between related but distinct topics. For ordinary paragraphs, create separate p elements. For visual spacing, use CSS margin, padding and layout gap.",
+      "whyItMatters": "When br and hr are used as visual hacks, the document becomes harder to maintain and can behave poorly when text wraps, users zoom, or content changes language. Semantic breaks help assistive technologies and other tools interpret the document. CSS spacing is more flexible because it adapts to screen size and design changes without altering the content's meaning.",
+      "analogy": "A written address may need a line boundary between a street and a city, while a chapter may use a divider to signal a change in topic. These are different jobs: one breaks a line within content, and the other signals a thematic transition.",
+      "analogyLimit": "The appearance of a line on screen does not determine its HTML meaning. A CSS border can look like a divider without being a thematic break, and a br may not always look like a large visual gap. Choose semantics from the content, then style the result."
     },
     "explain": {
-      "narrative": "Use br only when a line break is part of the content, such as an address or poem. Use hr when the topic or section changes; do not use either as a spacing tool.",
+      "narrative": "The br element creates a line break within a block of text. It is a void element: it has no end tag and cannot contain child content. It is appropriate when the line boundary is meaningful and should remain part of the content, such as the separate lines of a postal address, a poem, song-like verse supplied by the author, or a compact line-oriented item. It is not appropriate simply because the developer wants the next sentence to appear lower on the page. Separate paragraphs should be represented by separate p elements, and visual gaps should be controlled with CSS.\n\nA br does not create a new paragraph, section, list item or heading. It also does not guarantee a fixed vertical distance. The next line begins in the same surrounding text block, and the line may wrap naturally if the available width is too small. This matters on mobile screens: a long address line can still wrap even when br marks a deliberate boundary. Do not use non-breaking spaces or fixed-width tricks to force text to fit; allow sensible reflow and preserve readable content.\n\nThe hr element represents a thematic break at the paragraph level, such as a change of topic within a section or a shift in scene in a narrative. Browsers commonly render it as a horizontal rule, but its meaning is not “draw a decorative line”. It is a semantic separator. It is also a void element and has no end tag. Use it when the content has a real thematic transition. Do not insert hr after every paragraph merely to create visual rhythm, and do not use it as a replacement for section headings or CSS borders.\n\nConsider the content structure before choosing an element. If two passages are separate prose units, use two p elements. If the next content is a list, use ul or ol. If a heading introduces a new section, use an appropriate heading element. If a line boundary inside a single item is meaningful, br may be suitable. If the topic changes without a new heading, hr may express a thematic break. If a decorative separator is required but no thematic break exists, use a CSS border on an appropriate container or pseudo-element instead of adding a semantic hr.\n\nAvoid repeated br elements to create blank space. A chain of br elements couples layout to markup, becomes difficult to tune at different breakpoints, and can create awkward gaps when text size changes. Avoid empty paragraphs for the same reason: a p should contain a real paragraph. Use margin-block on paragraphs, padding on containers, and gap in flex or grid layouts. CSS properties can be changed without rewriting the content structure.\n\nThe default appearance of br and hr is controlled by browser styles and rendering behaviour. CSS can style hr using border, margin-block, opacity, width and other properties. A borderless hr may be styled deliberately, but keep enough visual distinction for users to perceive the transition. Avoid using CSS to hide a meaningful separator from all users unless the design intentionally communicates the same change another way. A purely decorative border is better implemented with CSS on a non-semantic wrapper.\n\nTest the content at several viewport widths. A br creates a forced break at its position, but text before or after it can still wrap. Long addresses, names and URLs need sensible overflow and wrapping strategies. A thematic hr should not cause horizontal overflow, and its margins should remain appropriate when text is enlarged. Test at 200% zoom and with browser text enlargement where available.\n\nInspect the source and live DOM in Developer Tools. Check that br and hr are used as void elements, and confirm that each break has a content reason. Use the accessibility tree or assistive technology to verify that the surrounding text remains understandable; do not assume that a visual line alone communicates the full relationship. Disable CSS temporarily: meaningful line and thematic boundaries should still make sense. Then restore styles and adjust spacing with CSS rather than adding more break elements.",
       "examples": [
         {
-          "id": "h3.2-example",
+          "id": "h3.2-example-1",
           "language": "en",
-          "code": "<p>12 Market Road<br>Rajahmundry</p><hr><p>Opening hours: 9–5</p>",
-          "explanation": "Each element gives meaning to its content. Render it in a browser and observe how changing an element affects meaning and presentation.",
-          "expectedOutput": "The browser displays the corresponding heading, paragraph, inline formatting or text structure.",
+          "title": "Line breaks in a postal address",
+          "code": "<address>\n  CodeSaathi Learning Centre<br>\n  12 Garden Road<br>\n  Rajahmundry, Andhra Pradesh\n</address>",
+          "explanation": "Each br marks a meaningful line boundary within one postal address. The address element identifies contact information; br does not create separate paragraphs.",
+          "expectedOutput": "The address is displayed across separate lines. At a narrow width, a long line may still wrap naturally.",
+          "runnable": true
+        },
+        {
+          "id": "h3.2-example-2",
+          "language": "en",
+          "title": "Use separate paragraphs instead of spacing breaks",
+          "code": "<!-- Avoid using repeated br elements for layout -->\n<p>First idea.</p>\n<br><br><br>\n<p>Second idea.</p>\n\n<!-- Prefer CSS-controlled paragraph spacing -->\n<p class='intro'>First idea.</p>\n<p>Second idea.</p>\n<style>\np { margin-block: 0 1rem; }\n.intro { margin-block-end: 2rem; }\n</style>",
+          "explanation": "The paragraphs are separate prose units. CSS controls their visual separation. Repeated br elements add content line breaks rather than a maintainable spacing rule.",
+          "expectedOutput": "The second approach creates a deliberate gap through CSS while preserving two semantic paragraphs.",
+          "runnable": true
+        },
+        {
+          "id": "h3.2-example-3",
+          "language": "en",
+          "title": "A thematic break between related topics",
+          "code": "<section>\n  <h2>Preparing the garden</h2>\n  <p>Remove weeds and check the soil before planting.</p>\n  <hr>\n  <p>After preparation, plan the watering schedule for the new plants.</p>\n</section>",
+          "explanation": "The hr marks a thematic transition between two related passages within the section. It is not a substitute for a heading if the second passage begins a named subsection.",
+          "expectedOutput": "The browser displays a horizontal separator between the two passages. The document contains a thematic break at that point.",
+          "runnable": true
+        },
+        {
+          "id": "h3.2-example-4",
+          "language": "en",
+          "title": "A decorative divider belongs in CSS",
+          "code": "<div class='card-divider' aria-hidden='true'></div>\n<style>\n.card-divider {\n  border-top: 1px solid #cbd5e1;\n  margin-block: 1.5rem;\n}\n</style>",
+          "explanation": "This divider is purely decorative and does not communicate a change in topic. A CSS border on a neutral container is more appropriate than a semantic hr.",
+          "expectedOutput": "A visual line appears with spacing, without adding a thematic-break element to the document structure.",
+          "runnable": true
+        },
+        {
+          "id": "h3.2-example-5",
+          "language": "en",
+          "title": "Poetry line boundaries are part of the content",
+          "code": "<p>\n  Morning light crosses the hill,<br>\n  Quiet leaves are standing still,<br>\n  Birds begin their day in flight.\n</p>",
+          "explanation": "The br elements preserve authored verse line boundaries inside one poem stanza. Separate stanzas may be represented as separate paragraphs or another suitable structure.",
+          "expectedOutput": "Each authored verse line begins on a new line while the stanza remains one paragraph.",
+          "runnable": true
+        },
+        {
+          "id": "h3.2-example-6",
+          "language": "en",
+          "title": "Responsive styling for a thematic rule",
+          "code": "<main>\n  <h1>Field notes</h1>\n  <p>Observations from the first visit.</p>\n  <hr class='topic-break'>\n  <p>Observations from the follow-up visit.</p>\n</main>\n<style>\nmain { width: min(100% - 2rem, 60rem); margin-inline: auto; }\n.topic-break { border: 0; border-top: 1px solid #94a3b8; margin-block: 1.5rem; }\n</style>",
+          "explanation": "The hr retains its thematic meaning while CSS controls its appearance and spacing. The content container uses a flexible width so the rule and text reflow on narrow screens.",
+          "expectedOutput": "A horizontal thematic separator appears between the two observations and remains within the responsive content width.",
           "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Inspect the H3.2 concept in the starter code and add one more example.",
-      "independentTask": "Write a short semantic article on a topic you choose; use CSS rather than misusing HTML for visual spacing.",
+      "guidedTask": "Create a contact-information block for a fictional learning centre. Use address or contact semantics where appropriate and br only for meaningful address line boundaries. Add two prose paragraphs as separate p elements. Insert one hr only where the topic genuinely changes. Style paragraph spacing and the separator with CSS. Resize the page and confirm that long lines wrap without horizontal scrolling.",
+      "independentTask": "Build a short field-notes page with an address, a three-line poem stanza, two sections of prose and one meaningful thematic transition. Choose br, p, headings and hr according to content meaning. Add a separate decorative divider using CSS to demonstrate the difference between decoration and a thematic break. Test at mobile width and 200% zoom, disable CSS to review the semantic structure, inspect the DOM, and explain why each br and hr is present.",
       "hints": [
-        "Choose elements for their meaning, not their default appearance."
+        "br is a void element that creates a content line break; it does not create a new paragraph.",
+        "Use br only when the line boundary is meaningful, such as an address or authored verse.",
+        "Use separate p elements for separate paragraphs.",
+        "Use hr for a thematic break between paragraph-level topics or a change in scene.",
+        "Do not use hr merely because you want a horizontal decorative line.",
+        "Use CSS border on an appropriate wrapper for a purely decorative divider.",
+        "Repeated br elements and empty paragraphs are not spacing systems.",
+        "Use margin, padding and gap to control layout and visual rhythm.",
+        "Text before and after br can still wrap at narrow viewport widths.",
+        "Disable CSS and inspect the DOM to confirm that the breaks still make semantic sense."
       ]
     }
   },
   "practice": {
     "playgroundMode": "html",
-    "starterCode": "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>HTML practice</title></head><body>\n<p>12 Market Road<br>Rajahmundry</p><hr><p>Opening hours: 9–5</p>\n</body></html>",
-    "resetCode": "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>HTML practice</title></head><body>\n<p>12 Market Road<br>Rajahmundry</p><hr><p>Opening hours: 9–5</p>\n</body></html>"
+    "starterCode": "<!doctype html>\n<html lang='en'>\n<head>\n  <meta charset='utf-8'>\n  <meta name='viewport' content='width=device-width, initial-scale=1'>\n  <title>Line breaks and thematic breaks | CodeSaathi</title>\n  <style>\n    * { box-sizing: border-box; }\n    body { margin: 0; font-family: system-ui, sans-serif; line-height: 1.6; }\n    main { width: min(100% - 2rem, 60rem); margin-inline: auto; padding-block: 2rem; }\n    p { margin-block: 0 1rem; }\n    hr { border: 0; border-top: 1px solid #94a3b8; margin-block: 1.5rem; }\n  </style>\n</head>\n<body>\n  <main>\n    <h1>Learning centre field notes</h1>\n    <address>CodeSaathi Learning Centre<br>12 Garden Road<br>Rajahmundry, Andhra Pradesh</address>\n    <p>First visit: the soil was dry near the path.</p>\n    <hr>\n    <p>Follow-up visit: new leaves appeared after the rain.</p>\n  </main>\n</body>\n</html>",
+    "resetCode": "<!doctype html>\n<html lang='en'>\n<head>\n  <meta charset='utf-8'>\n  <meta name='viewport' content='width=device-width, initial-scale=1'>\n  <title>Line breaks and thematic breaks | CodeSaathi</title>\n  <style>\n    * { box-sizing: border-box; }\n    body { margin: 0; font-family: system-ui, sans-serif; line-height: 1.6; }\n    main { width: min(100% - 2rem, 60rem); margin-inline: auto; padding-block: 2rem; }\n    p { margin-block: 0 1rem; }\n    hr { border: 0; border-top: 1px solid #94a3b8; margin-block: 1.5rem; }\n  </style>\n</head>\n<body>\n  <main>\n    <h1>Learning centre field notes</h1>\n    <address>CodeSaathi Learning Centre<br>12 Garden Road<br>Rajahmundry, Andhra Pradesh</address>\n    <p>First visit: the soil was dry near the path.</p>\n    <hr>\n    <p>Follow-up visit: new leaves appeared after the rain.</p>\n  </main>\n</body>\n</html>"
   },
   "assessment": {
     "questions": [
       {
         "id": "h3.2-q1",
-        "prompt": "What should primarily guide your choice of an HTML element?",
+        "prompt": "Which is an appropriate use of br?",
         "options": [
-          "Meaning and purpose",
-          "Default font size",
-          "Colour"
+          "Marking meaningful line boundaries in a postal address",
+          "Creating a large vertical gap between two sections",
+          "Replacing every paragraph boundary"
         ],
-        "answer": "Meaning and purpose",
-        "explanation": "Semantic HTML communicates the role of content."
+        "answer": "Marking meaningful line boundaries in a postal address",
+        "explanation": "br represents a line break that belongs to the content, such as an address line or authored verse."
       },
       {
         "id": "h3.2-q2",
-        "prompt": "What is appropriate for visual spacing alone?",
+        "prompt": "What does hr semantically represent?",
         "options": [
-          "CSS margin and padding",
-          "Empty paragraphs",
-          "Repeated br elements"
+          "A thematic break between paragraph-level topics or a change in scene",
+          "A decorative border required after every paragraph",
+          "A new heading with the same meaning as h2"
         ],
-        "answer": "CSS margin and padding",
-        "explanation": "CSS should control layout spacing."
+        "answer": "A thematic break between paragraph-level topics or a change in scene",
+        "explanation": "hr marks a thematic transition. Its common horizontal-rule appearance is presentation, not its full semantic meaning."
+      },
+      {
+        "id": "h3.2-q3",
+        "prompt": "Two independent ideas are written as separate prose units. What is the best structure?",
+        "options": [
+          "Two p elements with CSS controlling their spacing",
+          "One p containing many repeated br elements",
+          "One hr element for each sentence"
+        ],
+        "answer": "Two p elements with CSS controlling their spacing",
+        "explanation": "Paragraph elements represent prose units. CSS margin or gap controls their visual separation."
+      },
+      {
+        "id": "h3.2-q4",
+        "prompt": "A designer wants a thin decorative line between cards, but the content has no thematic transition. What should be used?",
+        "options": [
+          "A CSS border on a suitable wrapper",
+          "A semantic hr in every card",
+          "Several br elements"
+        ],
+        "answer": "A CSS border on a suitable wrapper",
+        "explanation": "A decorative border is presentation. Do not add a thematic-break element when the content has no thematic break."
+      },
+      {
+        "id": "h3.2-q5",
+        "prompt": "Which statement about br is correct?",
+        "options": [
+          "It is a void element and does not create a new paragraph.",
+          "It requires a closing br tag.",
+          "It guarantees a fixed vertical gap."
+        ],
+        "answer": "It is a void element and does not create a new paragraph.",
+        "explanation": "br has no end tag or child content. It creates a line break within the surrounding text block."
+      },
+      {
+        "id": "h3.2-q6",
+        "prompt": "What should a developer test after adding a meaningful br to an address?",
+        "options": [
+          "Check natural wrapping at narrow widths and enlarged text.",
+          "Assume each address line will always fit on one visual line.",
+          "Add non-breaking spaces until the address cannot wrap."
+        ],
+        "answer": "Check natural wrapping at narrow widths and enlarged text.",
+        "explanation": "A forced content line break does not prevent long text from wrapping. Responsive layouts must remain usable."
       }
     ]
   },
