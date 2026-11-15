@@ -6,7 +6,11 @@
   "title": "Tasks, microtasks, and event loop",
   "language": "en",
   "learningObjectives": [
-    "Explain tasks, microtasks, and event loop and implement reliable browser event and network workflows."
+    "Distinguish synchronous execution, the call stack, tasks and microtasks.",
+    "Predict ordering of Promise reactions, queueMicrotask callbacks and timer callbacks.",
+    "Explain that a microtask checkpoint drains the microtask queue, including newly queued microtasks.",
+    "Explain how long tasks and unbounded microtask chains delay other work and rendering opportunities.",
+    "Apply event-loop knowledge when debugging asynchronous browser code."
   ],
   "prerequisites": [
     "J11.1",
@@ -15,62 +19,133 @@
   ],
   "stages": {
     "understand": {
-      "concept": "The event loop coordinates tasks and microtasks. Promise reactions and queueMicrotask callbacks run after the current stack completes, at a microtask checkpoint before the next task. Timers and many user events are tasks.",
-      "whyItMatters": "This model explains callback ordering and why long microtask chains can delay rendering. Synchronous code still blocks the main thread.",
-      "analogy": "Tasks are scheduled jobs; microtasks are follow-up work handled before the next task.",
-      "analogyLimit": "The analogy is simplified; JavaScript scheduling, HTTP semantics, and browser security follow platform standards."
+      "concept": "Synchronous JavaScript runs on the call stack. When the current stack is empty, the host environment coordinates queued work through the event loop. In browsers, timer callbacks and many user events are tasks. Promise reactions and queueMicrotask callbacks are microtasks. At a microtask checkpoint, the queue is processed until empty, including microtasks added by other microtasks. The browser can then proceed with other event-loop work and may render at an appropriate point. A zero-delay timer does not run immediately; it makes a callback eligible as a future task. Rendering opportunities are controlled by the browser and are not guaranteed after every callback.",
+      "whyItMatters": "This model explains callback ordering, why timers are not precise clocks, and why heavy synchronous work freezes an interface. An endless microtask chain can also postpone other tasks and rendering opportunities. These details matter when debugging responsive interfaces, asynchronous requests, race conditions and UI updates.",
+      "analogy": "Tasks are scheduled jobs; microtasks are follow-up work that must be cleared before the next scheduled job is selected.",
+      "analogyLimit": "The analogy is simplified. Browser scheduling includes task sources, rendering lifecycle and host-specific behaviour; do not infer that every callback is a task or that a paint must happen after each task."
     },
     "explain": {
-      "narrative": "Synchronous output appears first, then queued microtasks in order, then the timer task.",
+      "narrative": "The current synchronous stack finishes first. Promise.then and queueMicrotask schedule microtasks. At the next microtask checkpoint, queued microtasks run in order; a microtask that queues another microtask adds work to the same checkpoint. Once the queue is empty, the event loop can select another task, such as an eligible timer callback. An async function runs synchronously until it suspends at await; its continuation resumes asynchronously. Avoid endless microtask chains because they can starve tasks. Do not assume the browser paints after every individual callback.",
       "examples": [
         {
-          "id": "j20-1-example",
+          "id": "j20-1-example-1",
           "language": "javascript",
-          "code": "console.log('sync');setTimeout(()=>console.log('task'),0);queueMicrotask(()=>console.log('microtask'));Promise.resolve().then(()=>console.log('promise'));console.log('end');",
-          "explanation": "Synchronous output appears first, then queued microtasks in order, then the timer task.",
-          "expectedOutput": "Console or UI output demonstrates the concept; network examples require a configured endpoint.",
+          "code": "console.log('sync start');\nsetTimeout(() => console.log('timer task'), 0);\nqueueMicrotask(() => console.log('queued microtask'));\nPromise.resolve().then(() => console.log('promise reaction'));\nconsole.log('sync end');",
+          "explanation": "Synchronous statements finish first. Microtasks then run in queue order. The timer callback runs as a later task; zero delay does not mean immediate execution.",
+          "expectedOutput": "sync start\\nsync end\\nqueued microtask\\npromise reaction\\ntimer task",
+          "runnable": true
+        },
+        {
+          "id": "j20-1-example-2",
+          "language": "javascript",
+          "code": "Promise.resolve().then(() => {\n  console.log('microtask 1');\n  queueMicrotask(() => console.log('microtask 3'));\n});\nqueueMicrotask(() => console.log('microtask 2'));\nsetTimeout(() => console.log('timer task'), 0);",
+          "explanation": "The first reaction queues microtask 3. The checkpoint continues until all microtasks, including newly queued ones, have run.",
+          "expectedOutput": "microtask 1\\nmicrotask 2\\nmicrotask 3\\ntimer task",
+          "runnable": true
+        },
+        {
+          "id": "j20-1-example-3",
+          "language": "javascript",
+          "code": "async function show() {\n  console.log('before await');\n  await Promise.resolve();\n  console.log('after await');\n}\nconsole.log('before call');\nshow();\nconsole.log('after call');",
+          "explanation": "An async function begins synchronously. Its continuation after await is scheduled asynchronously, so the caller continues first.",
+          "expectedOutput": "before call\\nbefore await\\nafter call\\nafter await",
+          "runnable": true
+        },
+        {
+          "id": "j20-1-example-4",
+          "language": "javascript",
+          "code": "let count = 0;\nfunction next() {\n  count++;\n  console.log('microtask', count);\n  if (count < 3) queueMicrotask(next);\n}\nqueueMicrotask(next);\nsetTimeout(() => console.log('timer'), 0);",
+          "explanation": "Each microtask queues another. The checkpoint drains this finite chain before the timer task. An unbounded chain can prevent the event loop from progressing.",
+          "expectedOutput": "microtask 1\\nmicrotask 2\\nmicrotask 3\\ntimer",
           "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Add nested microtasks and timers. Predict the order and identify when rendering can occur.",
-      "independentTask": "Build an asynchronous feature with explicit states, cancellation, and error handling. Document which failures are safe to retry.",
+      "guidedTask": "Predict the output of examples 1-3 before running them. Add one nested queueMicrotask call and explain why it runs before the next timer task.",
+      "independentTask": "Build a small interaction that logs a click handler, a Promise continuation and a timer callback. Add loading and completion states. Explain which code is synchronous, which callbacks are microtasks, which are tasks, and why rendering is not guaranteed after every callback.",
       "hints": [
-        "Separate HTTP errors from network and parsing errors.",
-        "Use bounded retries only for suitable operations.",
-        "Tie UI updates to the latest active request."
+        "Write synchronous output first.",
+        "Promise reactions and queueMicrotask callbacks are microtasks.",
+        "A microtask can queue another microtask in the same checkpoint.",
+        "setTimeout with zero delay is still a future task.",
+        "An async function runs until it reaches await, then resumes asynchronously.",
+        "Long synchronous tasks and endless microtask chains both harm responsiveness."
       ]
     }
   },
   "practice": {
     "playgroundMode": "javascript",
-    "starterCode": "console.log('sync');setTimeout(()=>console.log('task'),0);queueMicrotask(()=>console.log('microtask'));Promise.resolve().then(()=>console.log('promise'));console.log('end');",
-    "resetCode": "console.log('sync');setTimeout(()=>console.log('task'),0);queueMicrotask(()=>console.log('microtask'));Promise.resolve().then(()=>console.log('promise'));console.log('end');"
+    "starterCode": "console.log('sync start');\nsetTimeout(() => console.log('timer task'), 0);\nqueueMicrotask(() => console.log('queued microtask'));\nPromise.resolve().then(() => console.log('promise reaction'));\nconsole.log('sync end');",
+    "resetCode": "console.log('sync start');\nsetTimeout(() => console.log('timer task'), 0);\nqueueMicrotask(() => console.log('queued microtask'));\nPromise.resolve().then(() => console.log('promise reaction'));\nconsole.log('sync end');"
   },
   "assessment": {
     "questions": [
       {
         "id": "j20-1-q1",
-        "prompt": "Which is processed before the next timer task?",
+        "prompt": "Which runs before the event loop selects the next task after the synchronous stack is empty?",
         "options": [
-          "The microtask queue",
-          "The HTML title element",
-          "The browser address bar"
+          "The microtask checkpoint",
+          "Every timer immediately",
+          "A mandatory browser paint"
         ],
-        "answer": "The microtask queue",
-        "explanation": "Microtasks are processed at the checkpoint before the next task."
+        "answer": "The microtask checkpoint",
+        "explanation": "Microtasks are processed at the checkpoint before the next task is selected."
       },
       {
         "id": "j20-1-q2",
-        "prompt": "What is a reliable approach to network-driven UI?",
+        "prompt": "Which callbacks are microtasks?",
         "options": [
-          "Model loading, empty, success, failure, and cancellation states",
-          "Assume every fulfilled fetch means HTTP success",
-          "Retry every request forever"
+          "Promise reactions and queueMicrotask callbacks",
+          "setTimeout callbacks only",
+          "All click handlers"
         ],
-        "answer": "Model loading, empty, success, failure, and cancellation states",
-        "explanation": "Explicit states and bounded recovery make network interfaces predictable and safe."
+        "answer": "Promise reactions and queueMicrotask callbacks",
+        "explanation": "Promise reactions and queueMicrotask enqueue microtasks; timer callbacks are tasks."
+      },
+      {
+        "id": "j20-1-q3",
+        "prompt": "A microtask queues another microtask. When can the new callback run?",
+        "options": [
+          "During the same checkpoint after earlier queued work",
+          "Before the current callback completes",
+          "Only after page reload"
+        ],
+        "answer": "During the same checkpoint after earlier queued work",
+        "explanation": "The microtask queue is drained until empty, including newly queued microtasks."
+      },
+      {
+        "id": "j20-1-q4",
+        "prompt": "What does setTimeout(callback, 0) mean?",
+        "options": [
+          "The callback becomes eligible as a future task",
+          "The callback interrupts current synchronous code",
+          "The callback runs before Promise reactions"
+        ],
+        "answer": "The callback becomes eligible as a future task",
+        "explanation": "A zero delay does not make the callback synchronous or immediate."
+      },
+      {
+        "id": "j20-1-q5",
+        "prompt": "What happens when an async function reaches await?",
+        "options": [
+          "Its continuation resumes asynchronously and the caller can continue",
+          "The browser freezes",
+          "The function becomes a timer task"
+        ],
+        "answer": "Its continuation resumes asynchronously and the caller can continue",
+        "explanation": "The async function suspends at await and resumes through Promise scheduling."
+      },
+      {
+        "id": "j20-1-q6",
+        "prompt": "Why can an endless microtask chain harm responsiveness?",
+        "options": [
+          "It can prevent the event loop from selecting other tasks and reaching rendering opportunities",
+          "It moves work to a worker automatically",
+          "It makes timers run earlier"
+        ],
+        "answer": "It can prevent the event loop from selecting other tasks and reaching rendering opportunities",
+        "explanation": "The checkpoint is drained before another task is selected."
       }
     ]
   },
