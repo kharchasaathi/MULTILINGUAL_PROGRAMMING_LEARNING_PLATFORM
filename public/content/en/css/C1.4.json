@@ -3,10 +3,19 @@
   "courseId": "css",
   "moduleId": "C1",
   "topicId": "C1.4",
-  "title": "CSS as visual rules for a page; analogy and limits",
+  "title": "CSS as a System of Visual Rules: Analogy, Computation and Limits",
   "language": "en",
   "learningObjectives": [
-    "Explain and apply css as visual rules for a page; analogy and limits."
+    "Explain CSS as a system of rules that matches elements and contributes declarations to their presentation.",
+    "Identify how selectors, declarations and the cascade work together to produce computed styles.",
+    "Explain why CSS is more than a set of paint instructions or a list of colours.",
+    "Describe how layout properties affect the geometry and flow of elements.",
+    "Recognize how inheritance and user-agent styles influence the final presentation.",
+    "Explain how responsive rules adapt presentation to viewport conditions and user preferences.",
+    "Distinguish a CSS declaration from the final computed value used by the browser.",
+    "Use a visual-rules analogy while identifying where the analogy fails to describe browser computation.",
+    "Inspect computed styles and layout geometry in browser Developer Tools.",
+    "Explain why CSS presentation should support content readability, keyboard focus and accessibility preferences."
   ],
   "prerequisites": [
     "H2.6",
@@ -14,13 +23,14 @@
   ],
   "stages": {
     "understand": {
-      "concept": "A CSS rule matches elements and supplies declarations that influence presentation. Think of visual design rules, but remember the cascade, inheritance, layout algorithms and user preferences also affect the result.",
-      "whyItMatters": "HTML works without CSS, but CSS makes content clearer, more usable and adaptable to different screens.",
-      "analogy": "If HTML is a building's structure, CSS is its visual finish and interior design.",
-      "analogyLimit": "CSS is more than colour; it affects layout, responsive behaviour, interaction states and accessibility preferences."
+      "concept": "CSS can be imagined as a system of visual rules applied to document elements. A selector identifies elements and declarations describe presentation properties. The browser combines matching declarations through the cascade, inheritance and value computation. CSS also controls layout algorithms and responsive behaviour, so it is not simply a paint layer applied after the page has been arranged.",
+      "whyItMatters": "This mental model helps explain how a small stylesheet can control many elements and how the browser resolves competing rules. It also prevents a common misconception: changing CSS can change layout geometry and document flow, not just colours or fonts.",
+      "analogy": "Think of CSS as a set of design rules for a document: when an element matches a rule, the browser considers the declarations that describe how it should appear.",
+      "analogyLimit": "The browser does not simply read one rule and paint it. It considers multiple origins and layers, resolves conflicts, inherits selected properties, computes values and runs layout algorithms. User preferences and browser defaults can also affect the result.",
+      "history": "The separation of structure and presentation was one of CSS's central goals. Modern CSS expands that idea into a rich presentation and layout system with modules for selectors, values, layout, colour, typography and motion."
     },
     "explain": {
-      "narrative": "A CSS rule matches elements and supplies declarations that influence presentation. Think of visual design rules, but remember the cascade, inheritance, layout algorithms and user preferences also affect the result.",
+      "narrative": "A CSS rule can be understood as a condition and a set of presentation instructions. A selector such as `.notice` matches elements with that class. Declarations such as `color: teal` and `padding: 1rem` provide values for properties. The browser collects the declarations that apply to each element and resolves conflicts through the cascade.\n\nThe visual-rules analogy is useful, but incomplete. The browser also considers user-agent styles, author styles, user styles, importance, cascade layers, specificity and source order. Inherited properties can pass from parent to child, while other properties use initial or computed values. The result is a computed style for each element.\n\nCSS controls layout as well as appearance. Display, width, min/max constraints, grid and flex properties, positioning and margins influence where elements appear and how space is distributed. Media queries can adapt the presentation to viewport width, print, colour scheme, reduced motion and other conditions. A CSS change can therefore affect the position and size of many elements, not just their colour.\n\nInspect the browser's Computed and Layout panels to see the final values and geometry. When a rule appears to have no effect, check whether its selector matches, whether the declaration is valid, whether another declaration wins and whether the property is inherited. Do not add !important or increasingly complex selectors before understanding the cascade.",
       "examples": [
         {
           "id": "c1.4-example",
@@ -29,15 +39,45 @@
           "explanation": "Change the style rule and observe how colour, spacing and layout change.",
           "expectedOutput": "The browser displays the HTML content according to the CSS declarations.",
           "runnable": true
+        },
+        {
+          "id": "c1.4-rule-to-computed",
+          "language": "en",
+          "title": "From selector to computed style",
+          "code": ".notice { color: teal; }\n#main .notice { color: purple; }\n\n<div id=\"main\">\n  <p class=\"notice\">Important notice</p>\n</div>",
+          "explanation": "Both rules match the paragraph, but the second selector has greater specificity in this simplified example. The browser computes the final colour after considering all applicable declarations and cascade rules.",
+          "expectedOutput": "The paragraph's computed text colour is purple, assuming no higher-priority cascade rule overrides it.",
+          "runnable": false
+        },
+        {
+          "id": "c1.4-layout-not-paint-only",
+          "language": "en",
+          "title": "CSS changes geometry as well as appearance",
+          "code": ".panel {\n  display: grid;\n  grid-template-columns: 1fr 2fr;\n  gap: 1rem;\n  padding: 1rem;\n  max-width: 60rem;\n}",
+          "explanation": "These declarations affect layout, spacing and the available width. They do not merely change the colour or visual finish of an already arranged page.",
+          "expectedOutput": "The panel lays out its children in two columns with a one-to-two track ratio.",
+          "runnable": false
+        },
+        {
+          "id": "c1.4-user-preference",
+          "language": "en",
+          "title": "Presentation can respond to user preferences",
+          "code": "@media (prefers-reduced-motion: reduce) {\n  .animated-panel {\n    animation: none;\n    transition: none;\n  }\n}",
+          "explanation": "CSS can adapt presentation to user preferences. Respecting reduced motion can make an interface more comfortable for people who prefer less animation.",
+          "expectedOutput": "The animated panel avoids non-essential motion when reduced motion is requested.",
+          "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Change one CSS property value and observe the result.",
-      "independentTask": "Design a small information card using semantic HTML and a reusable CSS rule.",
+      "guidedTask": "Choose one element and inspect its matched declarations, computed styles and layout geometry. Add two conflicting rules and predict which one wins. Then add a media query and explain how the browser's computed result changes under that condition.",
+      "independentTask": "Create a responsive panel with grid or flex layout, inherited typography and a visible focus state. Explain which rules match, how the cascade resolves a conflict and how the layout changes at a narrow viewport.",
       "hints": [
-        "Identify which elements the selector matches.",
-        "Change one property at a time."
+        "A selector identifies candidate elements; it does not by itself determine the final value.",
+        "The cascade resolves competing declarations using several factors.",
+        "CSS affects layout geometry as well as colour and typography.",
+        "Computed styles show the resolved values used by the browser.",
+        "User preferences can influence CSS through media queries."
       ]
     }
   },
@@ -68,6 +108,39 @@
         ],
         "answer": "No",
         "explanation": "HTML provides meaning and structure; CSS controls presentation."
+      },
+      {
+        "id": "c1.4-q3",
+        "prompt": "What does a CSS selector do?",
+        "options": [
+          "Identifies elements to which a rule may apply",
+          "Executes JavaScript",
+          "Creates a database table"
+        ],
+        "answer": "Identifies elements to which a rule may apply",
+        "explanation": "Selectors match elements; the cascade then determines which applicable declarations win."
+      },
+      {
+        "id": "c1.4-q4",
+        "prompt": "Why is CSS more than a paint layer?",
+        "options": [
+          "It controls layout, geometry, responsive behaviour and visual states as well as appearance.",
+          "It changes the server's source code.",
+          "It replaces HTML semantics."
+        ],
+        "answer": "It controls layout, geometry, responsive behaviour and visual states as well as appearance.",
+        "explanation": "CSS layout algorithms affect how elements are sized and arranged."
+      },
+      {
+        "id": "c1.4-q5",
+        "prompt": "Where can you inspect the final resolved value of a CSS property?",
+        "options": [
+          "The Computed styles panel in Developer Tools",
+          "The browser address bar",
+          "The file name only"
+        ],
+        "answer": "The Computed styles panel in Developer Tools",
+        "explanation": "Computed styles show the resolved property values after the browser processes applicable declarations."
       }
     ]
   },
