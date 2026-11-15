@@ -79,6 +79,15 @@
     }
     container.append(stage1, stage2, stage3);
     const questions = Array.isArray(lesson.questions) ? lesson.questions : [];
+    const questionResults = new Array(questions.length).fill(false);
+    let completionButton = null;
+    const refreshCompletionState = () => {
+      if (!completionButton || !questions.length) return;
+      const ready = questionResults.every(Boolean);
+      completionButton.disabled = !ready;
+      completionButton.setAttribute("aria-disabled", String(!ready));
+      completionButton.title = ready ? "" : "Answer every question correctly to complete this lesson.";
+    };
     if (questions.length) {
       const assessment = make("section", "lesson-stage lesson-assessment");
       assessment.append(make("span", "lesson-stage-label", "ASSESSMENT"));
@@ -97,8 +106,10 @@
           input.value = option;
           input.addEventListener("change", () => {
             const isCorrect = option === question.answer;
+            questionResults[questionIndex] = isCorrect;
             feedback.className = "lesson-question-feedback " + (isCorrect ? "is-correct" : "is-incorrect");
-            feedback.textContent = (isCorrect ? t.correct : t.incorrect) + " " + t.answer + question.answer + " " + t.explanation + (question.explanation || "");
+            feedback.textContent = isCorrect ? t.correct + " " + t.explanation + (question.explanation || "") : t.incorrect;
+            refreshCompletionState();
           });
           label.append(input, document.createTextNode(" "), make("span", "", option));
           item.append(label);
@@ -109,11 +120,12 @@
       container.append(assessment);
     }
     if (lesson.onComplete) {
-      const button = make("button", "lesson-complete", lesson.completeLabel || "Mark lesson complete");
-      button.type = "button";
-      button.id = "markLesson";
-      button.addEventListener("click", lesson.onComplete);
-      container.append(button);
+      completionButton = make("button", "lesson-complete", lesson.completeLabel || "Mark lesson complete");
+      completionButton.type = "button";
+      completionButton.id = "markLesson";
+      completionButton.addEventListener("click", lesson.onComplete);
+      container.append(completionButton);
+      refreshCompletionState();
     }
   };
   window.CodeSaathiLessonTemplate = Object.freeze({ render });
