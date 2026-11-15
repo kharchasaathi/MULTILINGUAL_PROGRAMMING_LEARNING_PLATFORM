@@ -63,5 +63,11 @@ assert.ok(renderer.includes("lesson-example"), "renderer must render worked exam
 assert.ok(renderer.includes("lesson-answer-option"), "renderer must render selectable assessment options");
 assert.ok(renderer.includes("lesson-question-feedback"), "renderer must show assessment feedback");
 assert.ok(serviceWorker.includes('const CACHE_NAME = "codesaathi-v6";'), "service worker cache must be bumped for the updated lesson UI");
+const app = await readFile(join(root, "public/app.js"), "utf8");
+assert.ok(loader.includes("editor.dataset.playgroundMode = mode"), "lesson loader must pass the selected playground mode");
+assert.ok(app.includes('mode === "css"'), "playground must support CSS mode");
+assert.ok(app.includes('mode === "javascript"'), "playground must support JavaScript mode");
+assert.ok(app.includes('mode === "combined"'), "playground must support combined mode");
+assert.ok(app.includes("frame.sandbox") || app.includes("sandboxed iframe") || app.includes("documentInFrame"), "playground renderer must remain isolated in its iframe");
 
 console.log(`F1.7 validation passed: ${locales.length} locales; regional lessons retain 2 examples/5 questions, while English has 5 examples/7 questions.`);
