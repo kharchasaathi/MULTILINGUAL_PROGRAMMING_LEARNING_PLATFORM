@@ -3,70 +3,176 @@
   "courseId": "html",
   "moduleId": "H2",
   "topicId": "H2.3",
-  "title": "The html root element and lang",
+  "title": "The html root element, document language, and global direction",
   "language": "en",
   "learningObjectives": [
-    "Identify and assemble the parts of a complete HTML document"
+    "Explain why the html element is the root of an HTML document and how it contains the document's head and body sections.",
+    "Write an html start tag with a meaningful lang attribute and choose a valid language tag for the primary language of the page.",
+    "Interpret common BCP 47 language-tag patterns, including a primary language subtag and an optional regional subtag such as en, en-US, te, and te-IN.",
+    "Explain how the document language is inherited by content and how a nested lang attribute can identify a passage written in a different language.",
+    "Describe how language metadata supports screen readers, speech synthesis, text processing, spell-checking, hyphenation, and language-aware tools without automatically translating the page.",
+    "Distinguish the lang attribute from charset metadata, dir directionality, hreflang link metadata, and a page's visible text.",
+    "Inspect and correct document language and directionality using browser Developer Tools, and apply appropriate language metadata to multilingual content."
   ],
   "prerequisites": [
-    "H1.5"
+    "H1.5",
+    "H1.6",
+    "H2.1",
+    "H2.2"
   ],
   "stages": {
     "understand": {
-      "concept": "The html element is the document root. Its lang attribute identifies the primary language, such as en or te.",
-      "whyItMatters": "Language metadata helps screen readers pronounce content and supports text processing.",
-      "analogy": "A book's language label helps classify it, while lang also informs assistive technology.",
-      "analogyLimit": "The analogy is only a memory aid; HTML should not be interpreted literally through it."
+      "concept": "The html element is the root element of an HTML document: the document's other elements are contained within it. A typical document has a head section for metadata and resource references and a body section for the page's content. The html start tag can include global attributes that describe the document. One of the most important is lang, which identifies the primary language of the document's text. For example, lang=\"en\" identifies English and lang=\"te\" identifies Telugu. The language value is a language tag, commonly written using a primary language subtag and, when useful, additional subtags such as a region. The language declaration is metadata; it does not translate the words or change the actual language of the content.",
+      "whyItMatters": "Browsers, assistive technologies, search systems, spell-checkers, speech tools, and other software may use language metadata to interpret text appropriately. A screen reader can use the declared language to select pronunciation rules and a suitable voice. Language-aware tools can also make better decisions about hyphenation, text processing, and spelling. If the page is written in Telugu but declares English as its language, assistive technology may pronounce Telugu text incorrectly. Correct language metadata is therefore part of building understandable and accessible web content, not merely a code-style preference.",
+      "analogy": "The html root element is like the outer cover that holds all sections of a document. The lang attribute is like a language label that tells reading tools which language rules are likely to apply to the text.",
+      "analogyLimit": "The html element is not a visual page frame, and lang is not a translation setting. Language metadata provides information to software; it does not rewrite the content, guarantee a particular screen-reader voice, or force every tool to behave identically."
     },
     "explain": {
-      "narrative": "The html element is the document root. Its lang attribute identifies the primary language, such as en or te.",
+      "narrative": "A normal HTML document begins with the doctype and then has one html root element. Inside html, head contains document metadata such as title, charset, viewport settings, and resource links. Body contains the content that forms the page. Browsers can infer or create some omitted structural elements during HTML parsing, but writing the document structure explicitly makes source code easier to understand, maintain, and inspect.\n\nThe lang attribute is a global HTML attribute, so it can be used on the html element and on many other elements. Set it on the root html element to identify the primary language of the page. Use a valid language tag, preferably following BCP 47 conventions. A simple primary language tag such as en, te, hi, or kn is suitable when the content does not need a more specific distinction. Add a region subtag when it meaningfully identifies a regional variety, such as en-US or te-IN. Language tags are not arbitrary labels: use recognized subtags rather than inventing values. The conventional casing is lowercase for the primary language and uppercase for a two-letter region, although language-tag matching is case-insensitive.\n\nThe root language is inherited by descendant content unless a more specific lang attribute is provided. This matters on multilingual pages. If an English page contains a Telugu quotation, wrap that passage in an element with lang=\"te\". When the passage ends, the surrounding content returns to the inherited language. Do not mark every word or sentence separately unless the language actually changes; use the smallest meaningful section that contains the different-language passage.\n\nLanguage and direction are related but separate. The lang attribute identifies the language; the dir attribute identifies text direction. Most English and Telugu text is written left-to-right, while Arabic and Urdu are generally right-to-left. Set direction intentionally where needed, for example dir=\"rtl\" for a page or region whose base direction is right-to-left. For user-entered text whose direction is not known in advance, dir=\"auto\" can allow the browser to determine direction from the content. Do not use lang as a substitute for dir, or dir as a substitute for lang.\n\nThe lang attribute is also different from character encoding. A UTF-8 declaration tells the browser how to decode bytes into characters; lang tells language-aware tools what language the text represents. A page can use UTF-8 and still need lang=\"te\". Likewise, hreflang on a link or link element describes the language of the linked resource; it does not set the language of the current document.\n\nYou can inspect the root element in Developer Tools or run document.documentElement.lang in the Console. The property exposes the lang value on the root html element. You can also inspect a selected element's lang attribute in the Elements panel. A correct value is useful evidence, but it does not prove that every passage is written in that language. Check multilingual sections individually and ensure their lang attributes match the actual text.\n\nFor accessibility, the default human language of a page should be programmatically determinable. WCAG's Language of Page requirement is one reason to declare the primary language on the root element. If a passage changes language, mark that change when the language can be programmatically determined. This supports assistive technology, but the exact pronunciation still depends on the assistive technology, available voices, and user settings.",
       "examples": [
         {
-          "id": "h2.3-example",
+          "id": "h2.3-root-language",
           "language": "en",
-          "code": "<!doctype html>\n<html lang=\"en\"><body><h1>Hello</h1></body></html>",
-          "explanation": "The page shows Hello; the document language is declared as English.",
-          "expectedOutput": "The page shows Hello; the document language is declared as English.",
+          "title": "Declare the primary language on the root element",
+          "code": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Language example</title>\n</head>\n<body>\n  <h1>Welcome</h1>\n  <p>This page is written primarily in English.</p>\n</body>\n</html>",
+          "explanation": "The html element is the root of the document, and lang=\"en\" identifies English as the primary language. Descendant text inherits this language unless another element declares a different language.",
+          "expectedOutput": "A page displays the Welcome heading and paragraph. Language-aware tools can identify English as the document's primary language.",
+          "runnable": true
+        },
+        {
+          "id": "h2.3-telugu-language",
+          "language": "en",
+          "title": "Declare Telugu as the document language",
+          "code": "<!doctype html>\n<html lang=\"te\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>తెలుగు పేజీ</title>\n</head>\n<body>\n  <h1>నమస్కారం</h1>\n  <p>ఇది తెలుగులో రాసిన వెబ్ పేజీ.</p>\n</body>\n</html>",
+          "explanation": "The page's primary text is Telugu, so the root language is te. The UTF-8 declaration separately identifies the character encoding used for the document. Both are useful, but they communicate different information.",
+          "expectedOutput": "The page displays Telugu text. The document language is declared as Telugu and its character encoding is UTF-8.",
+          "runnable": true
+        },
+        {
+          "id": "h2.3-mixed-language",
+          "language": "en",
+          "title": "Mark a passage that changes language",
+          "code": "<!doctype html>\n<html lang=\"en\">\n<head><meta charset=\"utf-8\"><title>Mixed-language page</title></head>\n<body>\n  <p>Our lesson begins with this English sentence.</p>\n  <p lang=\"te\">ఈ వాక్యం తెలుగులో ఉంది.</p>\n  <p>This sentence returns to the inherited English language.</p>\n</body>\n</html>",
+          "explanation": "The document's primary language is English. The second paragraph overrides the inherited language with Telugu. The final paragraph does not need another lang attribute because it inherits English from the root element.",
+          "expectedOutput": "The page displays three paragraphs. Language-aware tools can identify the middle paragraph as Telugu and the surrounding paragraphs as English.",
+          "runnable": true
+        },
+        {
+          "id": "h2.3-region-tag",
+          "language": "en",
+          "title": "Use a regional language tag when it is meaningful",
+          "code": "<html lang=\"en-US\">\n  <head><title>Regional English</title></head>\n  <body><p>This example identifies US English.</p></body>\n</html>",
+          "explanation": "The primary language subtag is en and the region subtag is US. A region should be included when the distinction matters to the content or language-aware processing; do not add a region merely as decoration.",
+          "expectedOutput": "The document language is identified as US English.",
+          "runnable": true
+        },
+        {
+          "id": "h2.3-language-direction",
+          "language": "en",
+          "title": "Language and direction are separate attributes",
+          "code": "<!doctype html>\n<html lang=\"ur\" dir=\"rtl\">\n<head><meta charset=\"utf-8\"><title>اردو صفحہ</title></head>\n<body>\n  <h1>اردو میں خوش آمدید</h1>\n  <p>یہ دائیں سے بائیں لکھی جانے والی عبارت ہے۔</p>\n</body>\n</html>",
+          "explanation": "lang identifies Urdu as the language. dir=\"rtl\" sets the base direction from right to left. The two attributes describe different characteristics and are used together here.",
+          "expectedOutput": "The page displays Urdu content with right-to-left base direction.",
+          "runnable": true
+        },
+        {
+          "id": "h2.3-inspect-root-lang",
+          "language": "en",
+          "title": "Inspect the root language in Developer Tools",
+          "code": "<!doctype html>\n<html lang=\"en\">\n<head><title>Inspect language</title></head>\n<body><p>Open the Console and run document.documentElement.lang.</p></body>\n</html>",
+          "explanation": "The expression reads the lang property of the root html element. It returns the declared value, en in this example. It does not inspect every descendant passage, so inspect nested language overrides separately.",
+          "expectedOutput": "The Console returns en.",
           "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Set lang to en or te and add a heading in that language.",
-      "independentTask": "Create your own small page, open it in a browser and inspect the result.",
+      "guidedTask": "Create a page whose main content is in Telugu. Set the root html element's lang attribute to te, include UTF-8 metadata, and write a title, heading, and two paragraphs in Telugu. Add one short English paragraph using a nested element with lang=\"en\". Open the page and inspect the root element and the English paragraph in Developer Tools. In the Console, run document.documentElement.lang and compare the result with the nested element's lang attribute.",
+      "independentTask": "Build a small multilingual information page with English as its primary language and separate Telugu and Urdu sections. Declare the correct primary language on html, mark each language-changing section with its own lang attribute, and set text direction appropriately for the Urdu section. Do not use dir to identify language or lang to set direction. Inspect the DOM, test the page with a screen reader if one is available, and write a short review explaining how language and direction metadata support users and what they do not automatically do.",
       "hints": [
-        "Check that each element is nested under the correct parent."
+        "Put the primary document language on the root html element, not on the doctype or title element.",
+        "Use recognized language tags such as en, te, hi, kn, ta, ml, ur, en-US, or te-IN where appropriate.",
+        "The primary language subtag identifies the language; a region subtag adds regional information when it is useful.",
+        "A nested lang attribute overrides the inherited language for that element and its descendants.",
+        "Use lang for language and dir for direction. They solve different problems and may both be needed.",
+        "UTF-8 describes character encoding; it does not tell assistive technology which language is being spoken.",
+        "A root language declaration does not automatically translate text or prove that every passage uses the declared language.",
+        "Inspect document.documentElement.lang in the Console, then inspect nested language overrides in the Elements panel."
       ]
     }
   },
   "practice": {
     "playgroundMode": "html",
-    "starterCode": "<!doctype html>\n<html lang=\"en\">\n<head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Practice</title></head>\n<body>\n<h1>My first page</h1><p>I am learning HTML.</p>\n</body>\n</html>",
-    "resetCode": "<!doctype html>\n<html lang=\"en\">\n<head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Practice</title></head>\n<body>\n<h1>My first page</h1><p>I am learning HTML.</p>\n</body>\n</html>"
+    "starterCode": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Multilingual document</title>\n</head>\n<body>\n  <main>\n    <h1>Welcome</h1>\n    <p>This paragraph is in English.</p>\n    <p lang=\"te\">ఈ పేరా తెలుగులో ఉంది.</p>\n    <p lang=\"ur\" dir=\"rtl\">یہ پیراگراف اردو میں ہے۔</p>\n  </main>\n</body>\n</html>",
+    "resetCode": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Multilingual document</title>\n</head>\n<body>\n  <main>\n    <h1>Welcome</h1>\n    <p>This paragraph is in English.</p>\n    <p lang=\"te\">ఈ పేరా తెలుగులో ఉంది.</p>\n    <p lang=\"ur\" dir=\"rtl\">یہ پیراگراف اردو میں ہے۔</p>\n  </main>\n</body>\n</html>"
   },
   "assessment": {
     "questions": [
       {
         "id": "h2.3-q1",
-        "prompt": "Where does the main page content belong?",
+        "prompt": "What is the role of the html element in an HTML document?",
         "options": [
-          "body",
-          "head",
-          "doctype"
+          "It is the root element that contains the document's head and body sections.",
+          "It is a metadata element that appears only inside head.",
+          "It is a visible container that must be displayed as a box around the page."
         ],
-        "answer": "body",
-        "explanation": "The body contains page content."
+        "answer": "It is the root element that contains the document's head and body sections.",
+        "explanation": "The html element is the document root. The head and body are its main structural children in a typical HTML document."
       },
       {
         "id": "h2.3-q2",
-        "prompt": "What is the root element?",
+        "prompt": "What does lang=\"te\" on the root html element communicate?",
         "options": [
-          "html",
-          "title",
-          "p"
+          "The document's primary language is Telugu.",
+          "The browser must translate the page into Telugu.",
+          "The document uses UTF-8 character encoding."
         ],
-        "answer": "html",
-        "explanation": "html is the document root."
+        "answer": "The document's primary language is Telugu.",
+        "explanation": "The lang attribute identifies the language of the content. Character encoding is declared separately, for example with meta charset=\"utf-8\"."
+      },
+      {
+        "id": "h2.3-q3",
+        "prompt": "An English page contains one paragraph in Telugu. What is the most appropriate approach?",
+        "options": [
+          "Change the root language to Telugu even though most of the page is English.",
+          "Add lang=\"te\" to the Telugu paragraph while keeping the root language as English.",
+          "Use dir=\"rtl\" on the paragraph to identify Telugu."
+        ],
+        "answer": "Add lang=\"te\" to the Telugu paragraph while keeping the root language as English.",
+        "explanation": "The root language describes the primary language of the page. A nested lang attribute identifies a passage that changes language. Direction is a separate concern."
+      },
+      {
+        "id": "h2.3-q4",
+        "prompt": "Which statement correctly distinguishes lang from dir?",
+        "options": [
+          "lang identifies the language; dir sets the text direction.",
+          "lang sets text direction; dir identifies the language.",
+          "Both attributes only control font size."
+        ],
+        "answer": "lang identifies the language; dir sets the text direction.",
+        "explanation": "Language and direction are related but distinct. A right-to-left language may need both language metadata and an appropriate direction setting."
+      },
+      {
+        "id": "h2.3-q5",
+        "prompt": "What is the difference between lang=\"te\" and meta charset=\"utf-8\"?",
+        "options": [
+          "They are interchangeable ways to identify Telugu.",
+          "lang identifies the language; charset identifies how document bytes are decoded into characters.",
+          "charset identifies the language while lang controls image encoding."
+        ],
+        "answer": "lang identifies the language; charset identifies how document bytes are decoded into characters.",
+        "explanation": "Language metadata helps language-aware tools interpret text. Character encoding tells the browser how to decode the document's text data."
+      },
+      {
+        "id": "h2.3-q6",
+        "prompt": "What does a nested lang attribute do when it is placed on an element inside the body?",
+        "options": [
+          "It overrides the inherited language for that element and its descendants.",
+          "It changes the language of every page on the same website.",
+          "It automatically translates the element's text."
+        ],
+        "answer": "It overrides the inherited language for that element and its descendants.",
+        "explanation": "Language metadata is inherited through the document tree. A nested lang attribute identifies a region whose language differs from the inherited language."
       }
     ]
   },
