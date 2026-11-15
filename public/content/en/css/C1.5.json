@@ -3,10 +3,21 @@
   "courseId": "css",
   "moduleId": "C1",
   "topicId": "C1.5",
-  "title": "Rule sets, selectors, declarations, properties, values",
+  "title": "CSS Rule Sets, Selectors, Declarations, Properties and Values",
   "language": "en",
   "learningObjectives": [
-    "Explain and apply rule sets, selectors, declarations, properties, values."
+    "Identify the selector and declaration block in a CSS qualified rule.",
+    "Distinguish a declaration from a complete rule set and from a stylesheet.",
+    "Identify a property name and its value in a declaration.",
+    "Explain how a selector matches one or more elements in the document.",
+    "Read grouped selectors and explain why a comma creates separate selector lists.",
+    "Recognize common selector categories including type, class, id, attribute and pseudo-class selectors.",
+    "Explain the role of braces, colons, semicolons and commas in CSS syntax.",
+    "Recognize valid and invalid declarations and explain how browsers handle an unrecognized property or value.",
+    "Use units such as px, rem, %, vw and ch appropriately at an introductory level.",
+    "Explain shorthand and longhand declarations and how shorthand can reset related properties.",
+    "Use custom properties and var() to reuse values across declarations.",
+    "Write and debug a small stylesheet by matching selectors to elements and inspecting the resulting styles."
   ],
   "prerequisites": [
     "H2.6",
@@ -14,13 +25,14 @@
   ],
   "stages": {
     "understand": {
-      "concept": "A rule set contains a selector and declaration block. Each declaration pairs a property with a value, such as color: blue. Selectors determine which elements match.",
-      "whyItMatters": "HTML works without CSS, but CSS makes content clearer, more usable and adaptable to different screens.",
-      "analogy": "If HTML is a building's structure, CSS is its visual finish and interior design.",
-      "analogyLimit": "CSS is more than colour; it affects layout, responsive behaviour, interaction states and accessibility preferences."
+      "concept": "A CSS rule set, commonly called a qualified rule, contains a selector followed by a declaration block. The selector describes which elements can match. Each declaration pairs a property with a value, such as `color: teal;`. A stylesheet contains one or more rules and possibly other constructs such as at-rules. Correct punctuation and valid property values are necessary for declarations to be applied.",
+      "whyItMatters": "Understanding rule anatomy helps you read, write and debug CSS. When a style does not appear, you can check whether the selector matches, whether the declaration syntax is valid and whether the browser supports the property and value.",
+      "analogy": "A selector is like the group of people a rule applies to; declarations are the instructions given to that group.",
+      "analogyLimit": "A CSS selector is not a natural-language description. It follows formal matching rules, and declarations can be overridden or ignored depending on validity and the cascade.",
+      "history": "CSS uses a human-readable syntax designed for writing style rules in text files. Its selector system and property-value declarations allow the same stylesheet to describe presentation for many elements and documents."
     },
     "explain": {
-      "narrative": "A rule set contains a selector and declaration block. Each declaration pairs a property with a value, such as color: blue. Selectors determine which elements match.",
+      "narrative": "A basic CSS rule looks like `.card-title { color: #17324d; font-size: 1.25rem; }`. The selector `.card-title` matches elements with that class. The braces contain a declaration block. Each declaration has a property name, a colon, a value and usually a semicolon. The browser parses the stylesheet and applies valid declarations to matching elements.\n\nSelectors can target element names, classes, ids, attributes, states and relationships. A comma separates selectors into a list: `h1, h2 { font-family: system-ui; }` applies the rule to both types. A space between selectors has a different meaning: it represents a descendant relationship. Learn the syntax carefully because a missing comma or misplaced combinator can change which elements match.\n\nProperties describe the aspect being controlled, such as color, display, width or margin. Values depend on the property. A length may use px, rem, em, %, vw or other units; a colour may use a name, hex notation, rgb() or hsl(); a layout property may accept keywords or functions. An unrecognized property or invalid value is generally ignored for that declaration, while other valid declarations in the rule can still apply.\n\nShorthand properties such as margin or background can set several related longhand properties. They are convenient but can reset values you did not intend to change. Custom properties beginning with -- let you define reusable values and use them through var(). Inspect the matched rules and computed values when a declaration does not produce the expected result.",
       "examples": [
         {
           "id": "c1.5-example",
@@ -29,15 +41,46 @@
           "explanation": "Change the style rule and observe how colour, spacing and layout change.",
           "expectedOutput": "The browser displays the HTML content according to the CSS declarations.",
           "runnable": true
+        },
+        {
+          "id": "c1.5-rule-anatomy",
+          "language": "en",
+          "title": "Selector, declaration block, property and value",
+          "code": ".card-title {\n  color: #17324d;\n  font-size: 1.25rem;\n  margin-block-end: .5rem;\n}",
+          "explanation": "The class selector matches elements with card-title. color, font-size and margin-block-end are properties; each value defines how that property should be computed for matching elements.",
+          "expectedOutput": "A matching heading receives the specified colour, size and block-end spacing.",
+          "runnable": false
+        },
+        {
+          "id": "c1.5-selector-list",
+          "language": "en",
+          "title": "A comma groups independent selectors",
+          "code": "h1, h2, .section-title {\n  font-family: system-ui, sans-serif;\n  line-height: 1.2;\n}",
+          "explanation": "The comma creates a selector list. The rule applies to h1 elements, h2 elements and elements with the section-title class. A space would instead describe a descendant relationship.",
+          "expectedOutput": "All three selector groups receive the same typography declarations.",
+          "runnable": false
+        },
+        {
+          "id": "c1.5-units-custom",
+          "language": "en",
+          "title": "Use appropriate units and reusable values",
+          "code": ":root { --content-width: 68rem; }\n\n.article {\n  width: min(100% - 2rem, var(--content-width));\n  font-size: 1rem;\n  padding: 1.25rem;\n}",
+          "explanation": "rem scales relative to the root font size, percentages depend on a containing context, and custom properties provide reusable values. Choose units according to the layout requirement rather than using px for everything.",
+          "expectedOutput": "The article uses a fluid width constrained by a reusable maximum.",
+          "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Change one CSS property value and observe the result.",
-      "independentTask": "Design a small information card using semantic HTML and a reusable CSS rule.",
+      "guidedTask": "Write a stylesheet containing a type selector, class selector, grouped selector, attribute selector and pseudo-class. Label each selector and declaration. Introduce one invalid property and one invalid value, then use Developer Tools to see which declarations are applied.",
+      "independentTask": "Create a reusable card component with CSS rules for typography, spacing, responsive width and focus state. Use at least one custom property and one shorthand declaration. Explain how the selectors match and how each property-value pair affects the component.",
       "hints": [
-        "Identify which elements the selector matches.",
-        "Change one property at a time."
+        "A rule set has a selector and a declaration block.",
+        "A declaration is a property-value pair.",
+        "A comma groups selectors; a space represents a descendant relationship.",
+        "Property values must be valid for the property being used.",
+        "Use rem and flexible sizing where they suit the design.",
+        "Custom properties begin with two hyphens and are read with var()."
       ]
     }
   },
@@ -68,6 +111,39 @@
         ],
         "answer": "No",
         "explanation": "HTML provides meaning and structure; CSS controls presentation."
+      },
+      {
+        "id": "c1.5-q3",
+        "prompt": "In `.notice { color: teal; }`, what is `teal`?",
+        "options": [
+          "The value of the color property",
+          "The selector",
+          "The declaration block"
+        ],
+        "answer": "The value of the color property",
+        "explanation": "color is the property and teal is the value assigned to it."
+      },
+      {
+        "id": "c1.5-q4",
+        "prompt": "What does a comma do in `h1, h2 { ... }`?",
+        "options": [
+          "Groups two independent selectors in one rule",
+          "Selects only h1 elements inside h2",
+          "Creates a child relationship"
+        ],
+        "answer": "Groups two independent selectors in one rule",
+        "explanation": "A comma-separated selector list applies the same declarations to each listed selector."
+      },
+      {
+        "id": "c1.5-q5",
+        "prompt": "What is the purpose of a CSS custom property?",
+        "options": [
+          "To store a reusable CSS value that can be referenced with var().",
+          "To create a new HTML element.",
+          "To execute a JavaScript function."
+        ],
+        "answer": "To store a reusable CSS value that can be referenced with var().",
+        "explanation": "Custom properties help centralize values such as colours, spacing and sizes."
       }
     ]
   },
