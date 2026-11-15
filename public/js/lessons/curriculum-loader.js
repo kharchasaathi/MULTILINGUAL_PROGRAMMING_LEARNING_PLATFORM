@@ -180,24 +180,27 @@
       }
     }
 const link = $(".lesson-practice-link", container);
-    if (link && code) {
-      link.addEventListener("click", () => {
-        const editor = $("#codeEditor");
-        if (editor) {
-          const mode = lesson.practice?.playgroundMode || "html";
-          editor.dataset.playgroundMode = mode;
-          editor.setAttribute("aria-label", mode === "css" ? "CSS code editor" : mode === "javascript" ? "JavaScript code editor" : mode === "combined" ? "Combined HTML CSS JavaScript code editor" : "HTML code editor");
-          editor.value = code;
-          const fileLabel = $(".editor-toolbar span");
-          if (fileLabel) {
-            fileLabel.textContent = mode === "css" ? "styles.css" : mode === "javascript" ? "app.js" : mode === "combined" ? "index.html + styles + script" : "index.html";
+    if (link) {
+      link.addEventListener("click", event => {
+        event.preventDefault();
+        if (code) {
+          const editor = $("#codeEditor");
+          if (editor) {
+            const mode = lesson.practice?.playgroundMode || "html";
+            editor.dataset.playgroundMode = mode;
+            editor.setAttribute("aria-label", mode === "css" ? "CSS code editor" : mode === "javascript" ? "JavaScript code editor" : mode === "combined" ? "Combined HTML CSS JavaScript code editor" : "HTML code editor");
+            editor.value = code;
+            const fileLabel = $(".editor-toolbar span");
+            if (fileLabel) {
+              fileLabel.textContent = mode === "css" ? "styles.css" : mode === "javascript" ? "app.js" : mode === "combined" ? "index.html + styles + script" : "index.html";
+            }
+            $("#runCode")?.click();
           }
-          $("#runCode")?.click();
         }
+        $("#lessonDialog")?.close();
+        $("#practice")?.scrollIntoView({ behavior: "smooth", block: "start" });
       });
-      link.textContent = "Load this lesson's starter code in the playground";
-    } else if (link) {
-      link.textContent = "Open the practice area";
+      link.textContent = code ? "Load this lesson's starter code in the playground" : "Open the practice area";
     }
     container.scrollTop = 0;
   }
