@@ -3,10 +3,21 @@
   "courseId": "css",
   "moduleId": "C1",
   "topicId": "C1.1",
-  "title": "What CSS controls and why it exists",
+  "title": "What CSS Controls: Presentation, Layout, Responsive Design and Visual States",
   "language": "en",
   "learningObjectives": [
-    "Explain and apply what css controls and why it exists."
+    "Define CSS as a stylesheet language that describes how HTML and other structured documents are presented.",
+    "Explain the distinction between document semantics and visual presentation, and why CSS should not replace meaningful HTML.",
+    "Read a CSS qualified rule and identify its selector, declaration block, property and value.",
+    "Explain how selectors match elements and how the cascade resolves competing declarations.",
+    "Identify the roles of inheritance, specificity, source order, importance and cascade layers at an introductory level.",
+    "Describe the box model and explain how content, padding, border and margin contribute to element geometry.",
+    "Recognize that CSS controls more than colour, including typography, layout, positioning, responsive behaviour and visual states.",
+    "Explain how Flexbox and Grid provide layout systems for one-dimensional and two-dimensional arrangements.",
+    "Use media queries and flexible sizing to adapt a design to different viewport sizes and user preferences.",
+    "Identify pseudo-classes and pseudo-elements as tools for describing element states and generated presentation.",
+    "Explain how CSS custom properties support reusable design tokens and consistent theming.",
+    "Use browser Developer Tools to inspect matched rules, computed values, overridden declarations and layout geometry."
   ],
   "prerequisites": [
     "H2.6",
@@ -14,13 +25,14 @@
   ],
   "stages": {
     "understand": {
-      "concept": "CSS controls presentation: colour, typography, spacing, layout and responsive visual behaviour. HTML provides structure and meaning; CSS describes how that structure is presented.",
-      "whyItMatters": "HTML works without CSS, but CSS makes content clearer, more usable and adaptable to different screens.",
-      "analogy": "If HTML is a building's structure, CSS is its visual finish and interior design.",
-      "analogyLimit": "CSS is more than colour; it affects layout, responsive behaviour, interaction states and accessibility preferences."
+      "concept": "CSS (Cascading Style Sheets) is a stylesheet language that describes how structured content is presented. A CSS rule selects elements and supplies declarations such as colour, typography, spacing, borders, layout and visual states. The browser combines applicable rules through the cascade, inheritance and computed-value processing to determine the styles used for rendering. CSS is not a replacement for HTML semantics and is not normally used to implement application logic.",
+      "whyItMatters": "CSS turns a document into a usable interface across screen sizes, input methods and user preferences. Good CSS separates design decisions from content, encourages reusable rules and helps teams maintain a consistent visual system. Understanding the cascade and layout model is essential for diagnosing why an element looks or behaves differently from what a developer expected.",
+      "analogy": "If HTML describes the rooms and purpose of a building, CSS describes the materials, spacing, arrangement and visual finish people experience.",
+      "analogyLimit": "CSS does not simply decorate a finished document. Layout rules affect geometry and flow, responsive rules adapt to available space, and visual states can communicate focus or interaction. The browser computes styles from many interacting sources rather than applying one paint instruction.",
+      "history": "CSS was developed to separate document structure from presentation on the Web. Its capabilities expanded from basic typography and colours to sophisticated layout, responsive design, animations, custom properties and user-preference media queries. Modern CSS is defined through modular specifications that evolve independently rather than as one small fixed feature set."
     },
     "explain": {
-      "narrative": "CSS controls presentation: colour, typography, spacing, layout and responsive visual behaviour. HTML provides structure and meaning; CSS describes how that structure is presented.",
+      "narrative": "A CSS qualified rule has a selector and a declaration block. In `.notice { color: #174f46; padding: 1rem; }`, `.notice` is the selector, the braces delimit the declaration block, and each declaration pairs a property with a value. The selector determines which elements are candidates for the rule; the cascade determines which applicable declaration wins when rules compete.\n\nCSS controls many dimensions of presentation. Typography controls readable text; the box model defines content, padding, border and margin; layout systems such as Flexbox and Grid arrange items; positioning controls placement relative to a containing block or viewport; media queries adapt styles to viewport size and user preferences; pseudo-classes describe states such as hover, focus and checked; and pseudo-elements style generated parts such as a marker or first line.\n\nThe cascade is not simply “the last rule always wins.” Origin, importance, cascade layers, specificity and source order all participate. Inheritance passes selected properties from ancestors to descendants, while other properties are not inherited by default. Developer Tools can show matched rules, overridden declarations and final computed values. Inspect those values before increasing selector complexity or adding unnecessary `!important` declarations.\n\nResponsive design is not a list of device-specific widths alone. Use flexible sizing, intrinsic layout, minmax(), percentages, relative units and media queries where the design genuinely needs a change. Consider keyboard focus, contrast, zoom, reduced motion and content growth. A layout that only works for one screenshot is not a robust design.\n\nCSS should remain focused on presentation. Use semantic HTML for meaning and native controls; use JavaScript for application behaviour. CSS can react to states such as :hover, :focus-visible or [aria-expanded=\"true\"], but it should not be used to conceal essential information or replace an accessible interaction. The goal is a consistent, responsive and understandable presentation layer.",
       "examples": [
         {
           "id": "c1.1-example",
@@ -29,15 +41,67 @@
           "explanation": "Change the style rule and observe how colour, spacing and layout change.",
           "expectedOutput": "The browser displays the HTML content according to the CSS declarations.",
           "runnable": true
+        },
+        {
+          "id": "c1.1-rule-anatomy",
+          "language": "en",
+          "title": "Read a CSS rule",
+          "code": ".card-title {\n  color: #17324d;\n  font-size: 1.25rem;\n  margin-block: 0 0.5rem;\n}",
+          "explanation": "The class selector matches elements with class card-title. The declaration block contains property-value pairs. Logical properties such as margin-block adapt to writing direction more appropriately than assuming every layout is left-to-right.",
+          "expectedOutput": "A matching heading receives the specified text colour, size and block spacing.",
+          "runnable": false
+        },
+        {
+          "id": "c1.1-box-model",
+          "language": "en",
+          "title": "Understand the box model",
+          "code": ".card {\n  width: 20rem;\n  padding: 1rem;\n  border: 2px solid #64748b;\n  margin: 1.5rem;\n  box-sizing: border-box;\n}",
+          "explanation": "The box model includes content, padding, border and margin. With border-box, the declared width includes content, padding and border; margin remains outside that width. Inspect the rendered box in Developer Tools to see its geometry.",
+          "expectedOutput": "The card has a predictable outer sizing model and spacing around it.",
+          "runnable": false
+        },
+        {
+          "id": "c1.1-responsive",
+          "language": "en",
+          "title": "Adapt layout to available space",
+          "code": ".cards {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));\n  gap: 1rem;\n}\n\n@media (prefers-reduced-motion: reduce) {\n  *, *::before, *::after {\n    scroll-behavior: auto !important;\n    animation-duration: 0.01ms !important;\n  }\n}",
+          "explanation": "Grid can create as many columns as fit the available width. A preference media query can reduce motion for people who request it. Test with real content and zoom levels rather than only one viewport width.",
+          "expectedOutput": "Cards reflow based on available space and motion is reduced when the preference is active.",
+          "runnable": false
+        },
+        {
+          "id": "c1.1-cascade",
+          "language": "en",
+          "title": "Inspect why one declaration wins",
+          "code": "h1 { color: navy; }\n.page-title { color: teal; }\n#welcome { color: purple; }\n\n<h1 id=\"welcome\" class=\"page-title\">Welcome</h1>",
+          "explanation": "All three selectors match the heading. The ID selector has higher specificity than the class and type selectors in this example, so purple wins, assuming no competing origin, importance or cascade-layer rule changes the result. Avoid solving every conflict by adding more IDs.",
+          "expectedOutput": "The computed colour is purple in this simplified cascade example.",
+          "runnable": false
+        },
+        {
+          "id": "c1.1-custom-properties",
+          "language": "en",
+          "title": "Use CSS custom properties as design tokens",
+          "code": ":root {\n  --color-brand: #155e75;\n  --space-card: 1rem;\n}\n\n.card {\n  border-color: var(--color-brand);\n  padding: var(--space-card);\n}",
+          "explanation": "Custom properties allow repeated design values to be defined centrally and reused. They participate in the cascade and can be overridden for themes or component contexts.",
+          "expectedOutput": "The card uses shared colour and spacing values that can be changed in one place.",
+          "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Change one CSS property value and observe the result.",
-      "independentTask": "Design a small information card using semantic HTML and a reusable CSS rule.",
+      "guidedTask": "Create a content card using semantic HTML. Write CSS rules for its typography, box model, border, spacing and responsive layout. Add a visible :focus-visible style to a link or button and a reduced-motion preference. Inspect the computed styles and box model in Developer Tools. Introduce two competing selectors and explain why the winning declaration is applied.",
+      "independentTask": "Build a responsive course-card grid using CSS Grid or Flexbox. Define design tokens with custom properties, use fluid sizing and an appropriate breakpoint only where needed, and support keyboard focus and reduced motion. Test at narrow and wide widths, with long content and browser zoom. Record the computed style and layout evidence for one card.",
       "hints": [
-        "Identify which elements the selector matches.",
-        "Change one property at a time."
+        "A selector identifies candidate elements; the cascade decides which declarations win.",
+        "Specificity is only one part of the cascade. Origin, importance and cascade layers are considered before specificity and source order.",
+        "Inheritance applies only to properties defined as inherited; do not assume every property passes to children.",
+        "Use box-sizing: border-box when you want declared dimensions to include padding and border.",
+        "Flexbox is useful for one-dimensional alignment; Grid is useful for two-dimensional row-and-column layouts.",
+        "Use flexible constraints and intrinsic sizing before adding many fixed-width breakpoints.",
+        "Use :focus-visible to provide a clear keyboard focus indicator.",
+        "Use custom properties for reusable design values and themes.",
+        "Inspect Computed and Layout in Developer Tools instead of guessing which rule controls an element."
       ]
     }
   },
@@ -68,6 +132,50 @@
         ],
         "answer": "No",
         "explanation": "HTML provides meaning and structure; CSS controls presentation."
+      },
+      {
+        "id": "c1.1-q3",
+        "prompt": "Which parts make up a basic CSS qualified rule?",
+        "options": [
+          "Selector and declaration block",
+          "HTML document and browser window",
+          "JavaScript function and return value"
+        ],
+        "answer": "Selector and declaration block",
+        "explanation": "A CSS qualified rule has a selector followed by a declaration block containing declarations."
+      },
+      {
+        "id": "c1.1-q4",
+        "prompt": "Which statement about the cascade is accurate?",
+        "options": [
+          "The last declaration always wins in every situation.",
+          "Specificity is one factor; origin, importance, layers and source order also matter.",
+          "Only inline styles can apply CSS."
+        ],
+        "answer": "Specificity is one factor; origin, importance, layers and source order also matter.",
+        "explanation": "The cascade evaluates several dimensions in a defined order; source order is not the only rule."
+      },
+      {
+        "id": "c1.1-q5",
+        "prompt": "Which CSS layout tool is designed for two-dimensional rows and columns?",
+        "options": [
+          "CSS Grid",
+          "A text-decoration property",
+          "The HTML title element"
+        ],
+        "answer": "CSS Grid",
+        "explanation": "Grid provides a two-dimensional layout system for rows and columns."
+      },
+      {
+        "id": "c1.1-q6",
+        "prompt": "What is the purpose of a :focus-visible style?",
+        "options": [
+          "To show a visible focus indicator when keyboard-style focus indication is appropriate.",
+          "To hide all interactive controls.",
+          "To change the server response."
+        ],
+        "answer": "To show a visible focus indicator when keyboard-style focus indication is appropriate.",
+        "explanation": "A visible focus indicator helps keyboard users understand which control currently has focus."
       }
     ]
   },
