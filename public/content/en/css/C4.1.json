@@ -6,7 +6,11 @@
   "title": "Named colours and currentColor",
   "language": "en",
   "learningObjectives": [
-    "Explain named colours and currentcolor and apply it correctly in a small CSS example."
+    "Identify named CSS color keywords and distinguish them from color functions and hexadecimal notation.",
+    "Explain how currentColor resolves from the element's computed color value.",
+    "Use currentColor consistently for borders, outlines, SVG-related styling and other color-capable properties.",
+    "Explain inheritance and why a child element's currentColor follows its own computed color.",
+    "Inspect color values with browser developer tools and evaluate contrast rather than relying on color names alone."
   ],
   "prerequisites": [
     "C1.5",
@@ -14,31 +18,65 @@
   ],
   "stages": {
     "understand": {
-      "concept": "Named colours are predefined CSS colour keywords such as rebeccapurple, tomato, and transparent. The currentColor keyword represents the computed value of the element's color property, allowing borders, outlines, and other colour-capable properties to follow the text colour.",
-      "whyItMatters": "Named colours are quick to read, but a keyword is still a specific CSS value. currentColor is different: it is a contextual keyword that reuses the element's computed color. If color changes through a state or inherited rule, currentColor follows that computed value.",
-      "analogy": "A reusable badge can use color: #174a36 and border-color: currentColor. Changing the badge text colour then changes its border too, avoiding duplicated colour values.",
-      "analogyLimit": "The analogy helps build intuition, but the browser follows the CSS specifications and computed-style rules rather than human intentions."
+      "concept": "CSS accepts named color keywords such as tomato, rebeccapurple, teal, transparent, black and white. A named color is a fixed keyword value; it is not a theme token and does not adapt to the surrounding design. currentColor is different: it represents the computed value of the element's color property. A border-color, outline-color, text-decoration-color, box-shadow color or SVG fill/stroke declaration can use currentColor to stay coordinated with the element's text color. If color is inherited, currentColor resolves from the value computed for that element. The keyword transparent represents a fully transparent color; it is not the same as the absence of a declaration.",
+      "whyItMatters": "Named colors make small examples readable, but production interfaces usually need a deliberate palette and sufficient contrast. currentColor reduces duplicated values and helps component states remain consistent when the text color changes. Understanding computed color prevents the mistaken assumption that currentColor always means the root element's color or a global theme color.",
+      "analogy": "A component can treat its text color as the component's accent: its border and icon use currentColor, so one state change updates all of them together.",
+      "analogyLimit": "This is a design-system analogy. CSS resolves currentColor according to the cascade, inheritance and computed-value rules for each element; it is not a live variable that reads an arbitrary parent at paint time."
     },
     "explain": {
-      "narrative": "The badge text and border appear in the same colour. Try replacing rebeccapurple with tomato.",
+      "narrative": "Use a named color when a fixed keyword communicates the intent clearly. Use currentColor when another color-capable property should reuse the element's computed text color. The cascade first determines the element's color; currentColor then uses that computed value. If a child sets its own color, its currentColor follows that child's color. If the child inherits color, it follows the inherited computed value. Do not confuse currentColor with the CSS custom-property system: it cannot store arbitrary values and is specifically tied to color.",
       "examples": [
         {
-          "id": "c4-1-example",
-          "language": "en",
-          "code": "<div class=\"badge\">Ready to learn</div><style>.badge{color:rebeccapurple;border:2px solid currentColor;padding:.5rem;border-radius:.5rem}</style>",
-          "explanation": "The badge text and border appear in the same colour. Try replacing rebeccapurple with tomato.",
-          "runnable": true,
-          "expectedOutput": "A browser-rendered demonstration of the CSS concept described in the lesson."
+          "id": "c4-1-example-1",
+          "language": "html",
+          "code": "<button class=\"action\">Save changes</button><style>.action{color:rebeccapurple;border:2px solid currentColor;padding:.6rem 1rem;background:transparent}</style>",
+          "explanation": "The border uses the computed text color. Change rebeccapurple to teal and both text and border update together.",
+          "expectedOutput": "A button-like control whose text and border share the same color.",
+          "runnable": true
+        },
+        {
+          "id": "c4-1-example-2",
+          "language": "html",
+          "code": "<div class=\"parent\"><span class=\"child\">Inherited color</span></div><style>.parent{color:teal}.child{border-bottom:2px solid currentColor}</style>",
+          "explanation": "The child inherits the parent's computed color. Its currentColor therefore matches the inherited text color.",
+          "expectedOutput": "Teal text with a teal underline-like border.",
+          "runnable": true
+        },
+        {
+          "id": "c4-1-example-3",
+          "language": "html",
+          "code": "<div class=\"parent\"><span class=\"child\">Own color</span></div><style>.parent{color:teal}.child{color:tomato;border:2px solid currentColor}</style>",
+          "explanation": "The child overrides the inherited color. currentColor on the child now resolves to tomato, not teal.",
+          "expectedOutput": "The child text and border are tomato while the parent's computed color remains teal.",
+          "runnable": true
+        },
+        {
+          "id": "c4-1-example-4",
+          "language": "html",
+          "code": "<p class=\"note\">Important note</p><style>.note{color:#174a36;border-inline-start:4px solid currentColor;padding:.5rem 1rem;background:transparent}</style>",
+          "explanation": "A component can use one color declaration for text and its accent border. This reduces repeated color literals.",
+          "expectedOutput": "A note with a green accent border matching its text.",
+          "runnable": true
+        },
+        {
+          "id": "c4-1-example-5",
+          "language": "html",
+          "code": "<p class=\"muted\">Secondary information</p><style>.muted{color:gray;border-bottom:1px solid currentColor}</style>",
+          "explanation": "The example is syntactically valid, but named colors do not guarantee accessible contrast. Check the actual foreground/background contrast and choose a suitable palette.",
+          "expectedOutput": "Gray text and matching border; contrast depends on the background and exact color value.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Create two badges with different text colours and use currentColor for each border.",
-      "independentTask": "Which value follows the computed color property?",
+      "guidedTask": "Create three status badges: success, warning and error. Give each badge its own color and use currentColor for its border and small icon. Then change one badge color and verify that all currentColor-based details follow it.",
+      "independentTask": "Build a compact notification component with default, hover, focus-visible and disabled states. Use named colors for a quick prototype, then replace them with a consistent palette. Use currentColor for the border/icon where appropriate. Record the computed color for each state and check text contrast against its actual background.",
       "hints": [
-        "Change one CSS value at a time and observe the result.",
-        "Use browser developer tools to inspect the computed value.",
-        "Keep meaningful content in HTML; use CSS for presentation."
+        "currentColor follows the computed color of the element on which it is used.",
+        "A child that overrides color gets a different currentColor from its parent.",
+        "transparent is a color value with zero alpha; it does not remove a declaration.",
+        "Use developer tools' Computed panel to inspect resolved color values.",
+        "Do not assume a named color is accessible; evaluate foreground/background contrast."
       ]
     }
   },
@@ -51,24 +89,69 @@
     "questions": [
       {
         "id": "c4-1-q1",
-        "prompt": "currentColor",
+        "prompt": "What value does currentColor represent?",
         "options": [
-          "currentColor uses the element's computed color value.",
-          "The browser's default stylesheet",
-          "The HTML document title"
+          "The element's computed color property",
+          "The browser's default background",
+          "The color of the nearest image"
         ],
-        "answer": "currentColor uses the element's computed color value."
+        "answer": "The element's computed color property",
+        "explanation": "currentColor is tied to the computed value of color on the element."
       },
       {
         "id": "c4-1-q2",
-        "prompt": "What is the best way to learn the effect of a CSS value?",
+        "prompt": "A child inherits teal from its parent and uses border-color: currentColor. What color is its border?",
         "options": [
-          "Change one value and inspect the rendered result",
-          "Add unrelated declarations until it looks right",
-          "Assume every browser calculates styles identically in every context"
+          "Teal",
+          "Always black",
+          "Always the root element's color"
         ],
-        "answer": "Change one value and inspect the rendered result",
-        "explanation": "Controlled experiments make it easier to connect a CSS declaration with its visible effect."
+        "answer": "Teal",
+        "explanation": "The child inherits the computed color, so its currentColor resolves to teal."
+      },
+      {
+        "id": "c4-1-q3",
+        "prompt": "The child sets color: tomato. What does currentColor on that child resolve to?",
+        "options": [
+          "Tomato",
+          "The parent's teal value in every case",
+          "Transparent"
+        ],
+        "answer": "Tomato",
+        "explanation": "The child's own computed color is tomato."
+      },
+      {
+        "id": "c4-1-q4",
+        "prompt": "Which statement about transparent is correct?",
+        "options": [
+          "It is a color value with zero alpha",
+          "It means no CSS declaration exists",
+          "It always inherits the parent color"
+        ],
+        "answer": "It is a color value with zero alpha",
+        "explanation": "transparent is a predefined transparent color keyword."
+      },
+      {
+        "id": "c4-1-q5",
+        "prompt": "Does using a named color guarantee accessible contrast?",
+        "options": [
+          "No; evaluate the actual foreground and background",
+          "Yes, all named colors are accessible",
+          "Only when the name has more than six letters"
+        ],
+        "answer": "No; evaluate the actual foreground and background",
+        "explanation": "Contrast depends on the color values and their background, not on whether a color is named."
+      },
+      {
+        "id": "c4-1-q6",
+        "prompt": "Why use currentColor for a component border?",
+        "options": [
+          "To reuse the element's computed text color and reduce duplicated values",
+          "To force every component on the page to use one global color",
+          "To disable the cascade"
+        ],
+        "answer": "To reuse the element's computed text color and reduce duplicated values",
+        "explanation": "currentColor keeps related visual details coordinated with the element's computed color."
       }
     ]
   },
