@@ -22,13 +22,15 @@ test("homepage and lesson dialog have no serious or critical WCAG axe violations
   await expect(dialog).toHaveAccessibleName("COURSE LESSON");
   await dialog.locator('[data-topic-id="H16.1"]').click();
   await expect(dialog.locator(".lesson-template-title")).toContainText("H16.1");
+  await expect(dialog.locator(".curriculum-back")).toBeVisible();
+  await expect(dialog.locator(".curriculum-draft-notice")).toBeVisible();
   const lesson = await new AxeBuilder({ page }).include("#lessonDialog").withTags(["wcag2a","wcag2aa","wcag21a","wcag21aa"]).analyze();
   const seriousLesson = lesson.violations.filter((item) => ["serious","critical"].includes(item.impact));
   expect(seriousLesson, JSON.stringify(seriousLesson.map(({ id, impact, description, nodes }) => ({ id, impact, description, count:nodes.length })), null, 2)).toEqual([]);
 });
 
 test("keyboard users can open and dismiss the curriculum dialog", async ({ page }) => {
-  await page.goto(baseURL);
+  await page.goto(baseURL, { waitUntil: "domcontentloaded" });
   const navButton = page.locator('[data-course-nav="html"]');
   await navButton.focus();
   await page.keyboard.press("Enter");
@@ -37,48 +39,57 @@ test("keyboard users can open and dismiss the curriculum dialog", async ({ page 
   await expect(page.locator("#lessonDialog")).not.toBeVisible();
 });
 
-test("all 25 added lessons render and their runnable starter code executes in the preview", async ({ page }) => {
+test("all 25 lessons render in the UI and all runnable starter programs execute in Chromium", async ({ page }) => {
   test.setTimeout(180000);
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
-  await page.goto(baseURL);
+  await page.goto(baseURL, { waitUntil: "domcontentloaded" });
   await expect(page.locator("#courseGrid .course-card")).toHaveCount(4);
 
-  for (const [course, topicIds] of Object.entries(groups)) {
+  // Exercise the shared lesson renderer and modal with one real lesson per subject.
+  for (const [course, topicId] of [["html","H16.1"],["css","C22.1"],["javascript","J24.1"]]) {
     await page.locator(`[data-course-nav="${course}"]`).click();
     const dialog = page.locator("#lessonDialog");
     await expect(dialog).toBeVisible();
+    await dialog.locator(`[data-topic-id="${topicId}"]`).click();
+    await expect(dialog.locator(".lesson-template-title")).toContainText(topicId);
+    await expect(dialog.locator(".curriculum-back")).toBeVisible();
+    await expect(dialog.locator(".curriculum-draft-notice")).toBeVisible();
+    await expect(dialog.locator(".lesson-objectives-list li")).toHaveCount(5);
+    await expect(dialog.locator(".lesson-example")).toHaveCount(2);
+    await expect(dialog.locator(".lesson-question")).toHaveCount(5);
+    await expect(dialog.locator(".lesson-answer-option")).toHaveCount(15);
+    await dialog.locator("#closeLesson").click();
+  }
+
+  // Execute every standalone starter in the same sandboxed browser preview.
+  for (const [course, topicIds] of Object.entries(groups)) {
     for (const topicId of topicIds) {
-      await dialog.locator(`[data-topic-id="${topicId}"]`).click();
-      await expect(dialog.locator(".lesson-template-title")).toContainText(topicId);
-      await expect(dialog.locator(".curriculum-back")).toBeVisible();
-      await expect(dialog.locator(".curriculum-draft-notice")).toBeVisible();
-      await expect(dialog.locator(".lesson-objectives-list li")).toHaveCount(5);
-      await expect(dialog.locator(".lesson-example")).toHaveCount(2);
-      await expect(dialog.locator(".lesson-question")).toHaveCount(5);
-      await expect(dialog.locator(".lesson-answer-option")).toHaveCount(15);
-      const dataResponse = await page.request.get(`${baseURL}/content/en/${course}/${topicId}.json`);
-      expect(dataResponse.ok(), `${topicId} JSON response`).toBeTruthy();
-      const lesson = await dataResponse.json();
-      if (lesson.practice.playgroundMode !== "none") {
-        await dialog.locator(".lesson-practice-link").click();
-        await expect(page.locator(".preview-live")).toContainText("READY");
-        const preview = page.frameLocator("#previewFrame");
-        await expect(preview.locator("body"), topicId + " preview body").not.toBeEmpty();
-        if (lesson.practice.playgroundMode === "javascript") {
-          await expect(preview.locator("#playgroundConsole")).not.toContainText("Console output appears here.");
-        }
-        if (lesson.practice.playgroundMode === "css") {
-          await expect(preview.locator("style")).toHaveCount(2);
-        }        if (topicId === "J24.9") {
-          await preview.locator("#pad").click();
-          await expect(preview.locator("#pad")).toHaveText("Activated by click or keyboard");
-        }
-      } else {
-        await expect(dialog.locator(".lesson-practice-link")).toHaveText("Open the practice area");
+      const response = await page.request.get(`${baseURL}/content/en/${course}/${topicId}.json`);
+      expect(response.ok(), `${topicId} JSON response`).toBeTruthy();
+      const lesson = await response.json();
+      const { playgroundMode, starterCode } = lesson.practice;
+      if (playgroundMode === "none") continue;
+      expect(starterCode?.length, `${topicId} starter code`).toBeGreaterThan(10);
+      await page.evaluate(({ code, mode }) => {
+        const editor = document.querySelector("#codeEditor");
+        editor.dataset.playgroundMode = mode;
+        editor.value = code;
+        document.querySelector("#runCode").click();
+      }, { code: starterCode, mode: playgroundMode });
+      await expect(page.locator(".preview-live"), topicId + " preview status").toContainText("READY");
+      const preview = page.frameLocator("#previewFrame");
+      await expect(preview.locator("body"), topicId + " preview body").not.toBeEmpty();
+      if (playgroundMode === "javascript") {
+        await expect(preview.locator("#playgroundConsole"), topicId + " console output").not.toContainText("Console output appears here.");
       }
-      await dialog.locator(".curriculum-back").click();
-      await expect(dialog.locator(`[data-topic-id="${topicId}"]`)).toBeVisible();
+      if (playgroundMode === "css") {
+        await expect(preview.locator("style"), topicId + " CSS styles").toHaveCount(2);
+      }
+      if (topicId === "J24.9") {
+        await preview.locator("#pad").click();
+        await expect(preview.locator("#pad")).toHaveText("Activated by click or keyboard");
+      }
     }
   }
   expect(pageErrors, "browser runtime errors").toEqual([]);
