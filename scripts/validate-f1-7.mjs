@@ -40,7 +40,7 @@ for (const locale of locales) {
   const practice = lesson.stages.practise;
   assert.ok(practice.guidedTask?.length > 30, `${locale}: guided task`);
   assert.ok(practice.independentTask?.length > 30, `${locale}: independent task`);
-  assert.equal(practice.hints?.length, locale === "en" ? 7 : 5, `${locale}: hints`);
+  assert.equal(practice.hints?.length, 5, `${locale}: hints`);
   assert.equal(lesson.practice?.playgroundMode, "none", `${locale}: no runnable starter code expected`);
 
   const questions = lesson.assessment?.questions;
