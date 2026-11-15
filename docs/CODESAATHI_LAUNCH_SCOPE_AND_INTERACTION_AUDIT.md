@@ -25,6 +25,7 @@ These are the first representative expanded lessons, not a claim that all existi
 | Brand and in-page navigation links | Navigate to page sections | Present in markup; browser verification pending |
 | Start learning | Scroll to course section | Handler present |
 | Language selector | Persist selected locale and apply available UI translation/fallback | Handler present; full multilingual content is outside current authoring scope |
+| Core course navigation bar | Open the selected Foundations, HTML, CSS or JavaScript curriculum; retain selected state | Buttons and event delegation implemented; browser verification pending |
 | Mobile menu toggle | Open/close primary navigation; close on link selection, outside click and Escape; update ARIA state | Handler and responsive CSS added in this pass; browser verification pending |
 | Course card action | Open selected course curriculum dialog | Curriculum loader handler present |
 | Topic buttons | Load selected topic lesson | Handler present |
