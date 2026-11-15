@@ -3,7 +3,7 @@
   "courseId": "foundation",
   "moduleId": "F0",
   "topicId": "F0.6",
-  "title": "Your First Project Folder and Safe Working Habits",
+  "title": "Project Structure, Version Control and Safe Development Practices",
   "language": "en",
   "learningObjectives": [
     "Explain what a project folder is and why all files belonging to one website should be kept inside a clearly named root folder.",
@@ -33,7 +33,7 @@
       "analogyLimit": "Real projects do not all need the same layout. Frameworks, build tools, team conventions and project size can change the structure. A backup is also different from version control, which records a sequence of changes."
     },
     "explain": {
-      "narrative": "Build a small project in a deliberate order. First create a root folder named `my-first-site/`. Add `index.html` as the page you will open, then create `css/`, `js/` and `images/` folders. Put `styles.css`, `app.js` and `logo.png` in their matching folders. In `index.html`, reference the stylesheet with `href=\"css/styles.css\"` and the script with `src=\"js/app.js\"`. The path must match the actual names and locations exactly.\\n\\nNext, open the page and check that its resources load. If the styling is missing, verify the stylesheet reference and confirm that the file exists at that location. If an image or script is missing, check its corresponding path. Save after each meaningful change and test again so that a mistake is easy to locate.\\n\\nProtect the project as you work. Keep a backup outside the working folder or use version control so you can recover an earlier state. Remember that HTML, CSS and JavaScript sent to a browser can be inspected by visitors; do not put passwords, private keys, access tokens or private API credentials there. Store secrets in an appropriate server-side environment. Before copying an image, font or code sample, check its licence and any attribution requirements.",
+      "narrative": "Begin with a clearly named project root and a structure that matches the size of the application. A small static site may use index.html, css/, js/ and assets/. A larger application may add pages or routes, components, tests, documentation, configuration and build output. Do not create folders simply to imitate a framework; make the structure explain where responsibilities live.\n\nA reliable project includes more than source files. A README should explain prerequisites, how to run the project, its scripts and its configuration. A .gitignore should exclude generated output, local dependencies and secret-bearing environment files where appropriate. A licence should make reuse terms clear when the project is distributed. Use version control to record intentional changes in small commits with descriptive messages. A backup is a separate recovery copy; Git history is useful but is not a substitute for a remote backup or disaster-recovery plan.\n\nTreat everything delivered to a browser as public. HTML, CSS, JavaScript, source maps, bundled assets and network responses can be inspected. Never place passwords, private keys, access tokens or private service credentials in client-side code. Public configuration values such as a Firebase web app configuration are not equivalent to secret credentials, but access must still be protected by authentication, authorization rules, App Check where appropriate and server-side validation. Store actual secrets in a protected server-side environment.\n\nBefore adding third-party images, fonts, packages or code, check the licence, maintenance status and security implications. Keep dependencies intentional and update them through a controlled process. Use consistent naming, avoid committing local machine paths and remove temporary files before sharing a project.",
       "examples": [
         {
           "id": "f0.6-project-structure",
@@ -42,12 +42,57 @@
           "explanation": "This structure keeps the entry page, styles, scripts and images in predictable locations. The relative paths connect the HTML page to the matching files.",
           "expectedOutput": "A small website project with a clear root folder, separate subfolders and matching file paths.",
           "runnable": false
+        },
+        {
+          "id": "f0.6-structure",
+          "language": "en",
+          "title": "A small project that can grow",
+          "code": "my-site/\n├── index.html\n├── css/\n│   └── styles.css\n├── js/\n│   └── app.js\n├── assets/\n├── README.md\n├── .gitignore\n└── LICENSE",
+          "explanation": "The structure separates application resources from project documentation and repository metadata. A larger application can introduce src/, tests/, components/ or build configuration when the need is real.",
+          "expectedOutput": "A predictable project root with a clear entry point and handover documentation.",
+          "runnable": false
+        },
+        {
+          "id": "f0.6-git-cycle",
+          "language": "en",
+          "title": "Inspect before committing",
+          "code": "git status\ngit diff\ngit add index.html css/styles.css js/app.js\ngit diff --cached\ngit commit -m \"Add initial responsive page structure\"",
+          "explanation": "Review unstaged and staged changes before committing. Stage explicit paths when practical so local files, generated output or secrets are not accidentally included.",
+          "expectedOutput": "A commit containing only the intended source changes.",
+          "runnable": false
+        },
+        {
+          "id": "f0.6-gitignore",
+          "language": "en",
+          "title": "Ignore local-only and generated files",
+          "code": "node_modules/\ndist/\nbuild/\n.env\n.env.*\n!.env.example\n.DS_Store",
+          "explanation": "Ignore patterns depend on the project stack. Keep a safe example configuration file when useful, but never put real secrets in it. If a secret was committed, deleting the file in a later commit does not make the exposed credential safe; rotate it.",
+          "expectedOutput": "Generated files and local secret-bearing environment files are excluded from ordinary commits.",
+          "runnable": false
+        },
+        {
+          "id": "f0.6-public-client",
+          "language": "en",
+          "title": "Public browser code is not a secret store",
+          "code": "Browser-delivered code:\n- HTML, CSS, JavaScript\n- public asset URLs\n- public application identifiers\n\nServer-side secret storage:\n- private API credentials\n- signing keys\n- service account secrets\n- privileged tokens",
+          "explanation": "Users can inspect client bundles and requests. Authorization must be enforced by trusted server-side logic or properly configured service security rules; hiding a value in minified JavaScript does not protect it.",
+          "expectedOutput": "You can distinguish public client configuration from credentials that must remain private.",
+          "runnable": false
+        },
+        {
+          "id": "f0.6-dependency-review",
+          "language": "en",
+          "title": "Review a dependency before adopting it",
+          "code": "Before adding a package:\n1. Confirm the need.\n2. Check licence and maintenance.\n3. Review known vulnerabilities.\n4. Pin or lock dependency versions.\n5. Test the update.\n6. Remove unused packages.",
+          "explanation": "Every dependency adds code, maintenance and supply-chain risk. Prefer a small, justified dependency set and review changes before updating production projects.",
+          "expectedOutput": "A documented reason for each important dependency and a repeatable update process.",
+          "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Create a `my-first-site` folder on your computer. Inside it, create `index.html`, `css/styles.css`, `js/app.js` and an `images/` folder. Add the CSS and JavaScript paths to the HTML file. Add a heading, open the page in a browser, and check that the stylesheet and script load. Save after each change.",
-      "independentTask": "Design a folder structure for a small personal profile website. List the HTML, CSS, JavaScript and image files it needs. Identify which files will be public and which information must remain secret. Explain how you will keep a backup or version history. Write brief instructions so another person can open the project.",
+      "guidedTask": "Create a project root containing index.html, css/styles.css, js/app.js, assets/, README.md and .gitignore. Initialize Git, inspect the status, stage only the intended source files and create a descriptive first commit. Add a local environment file containing a dummy placeholder and confirm that it is ignored. Do not use a real credential. Make a second small change and inspect the diff before committing.",
+      "independentTask": "Prepare a handover-ready starter project. Include a clear folder structure, README instructions, an appropriate .gitignore, a licence decision and a short dependency inventory. Demonstrate a clean Git status after committing the intended files. Explain which configuration is public, which values are secrets, how secrets would be supplied securely at runtime and how the project can be restored from a remote repository.",
       "hints": [
         "Start with one clearly named root folder and keep the project files inside it.",
         "Use a consistent naming convention; names should explain each file's purpose.",
@@ -107,6 +152,50 @@
         ],
         "answer": "They help recover earlier work after an unwanted change or loss",
         "explanation": "A backup keeps an extra copy; version control records changes and can help restore an earlier state."
+      },
+      {
+        "id": "f0.6-en-q5",
+        "prompt": "What should a .gitignore file do?",
+        "options": [
+          "Store private API keys in the repository.",
+          "Exclude selected local, generated or secret-bearing files from Git tracking.",
+          "Replace the README."
+        ],
+        "answer": "Exclude selected local, generated or secret-bearing files from Git tracking.",
+        "explanation": "A .gitignore defines untracked paths Git should normally ignore. It does not remove a file that is already tracked."
+      },
+      {
+        "id": "f0.6-en-q6",
+        "prompt": "A private API key was accidentally committed. What is the correct immediate response?",
+        "options": [
+          "Delete the line in a later commit and assume the key is safe.",
+          "Rotate or revoke the exposed key, then review repository history and access.",
+          "Rename the file extension."
+        ],
+        "answer": "Rotate or revoke the exposed key, then review repository history and access.",
+        "explanation": "A credential exposed in Git history must be treated as compromised. Removing it later does not invalidate copies already made."
+      },
+      {
+        "id": "f0.6-en-q7",
+        "prompt": "Which statement about Git and backups is most accurate?",
+        "options": [
+          "Git history and an independent backup serve related but different recovery purposes.",
+          "A local Git repository guarantees off-site disaster recovery.",
+          "A backup automatically records every source change as a commit."
+        ],
+        "answer": "Git history and an independent backup serve related but different recovery purposes.",
+        "explanation": "Git records versioned changes; an independent remote backup protects against loss of the working machine or repository."
+      },
+      {
+        "id": "f0.6-en-q8",
+        "prompt": "Why should a developer inspect git diff before committing?",
+        "options": [
+          "To review exactly what changed and avoid committing unintended files or content.",
+          "To automatically publish the website.",
+          "To encrypt every file."
+        ],
+        "answer": "To review exactly what changed and avoid committing unintended files or content.",
+        "explanation": "Reviewing the diff helps catch accidental edits, generated files and sensitive data before they enter repository history."
       }
     ]
   },
