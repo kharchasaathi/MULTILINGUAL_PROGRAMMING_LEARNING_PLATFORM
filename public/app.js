@@ -69,6 +69,27 @@
   $("#runCode").addEventListener("click",runCode);
   $("#closeLesson").addEventListener("click",()=>$("#lessonDialog").close());
   $("#startHeader").addEventListener("click",()=>$("#courses").scrollIntoView({behavior:"smooth"}));
+  const menuButton = $("#menuToggle");
+  const primaryNavigation = $("#primaryNavigation");
+  if (menuButton && primaryNavigation) {
+    const closeMenu = () => {
+      primaryNavigation.classList.remove("is-open");
+      menuButton.setAttribute("aria-expanded", "false");
+      menuButton.setAttribute("aria-label", "Open navigation menu");
+      menuButton.textContent = "☰";
+    };
+    menuButton.addEventListener("click", () => {
+      const isOpen = primaryNavigation.classList.toggle("is-open");
+      menuButton.setAttribute("aria-expanded", String(isOpen));
+      menuButton.setAttribute("aria-label", isOpen ? "Close navigation menu" : "Open navigation menu");
+      menuButton.textContent = isOpen ? "×" : "☰";
+    });
+    primaryNavigation.querySelectorAll("a[href^=\"#\"]").forEach(link => link.addEventListener("click", closeMenu));
+    document.addEventListener("keydown", event => { if (event.key === "Escape") closeMenu(); });
+    document.addEventListener("click", event => {
+      if (!primaryNavigation.contains(event.target) && !menuButton.contains(event.target)) closeMenu();
+    });
+  }
   $("#year").textContent=new Date().getFullYear();
   renderCourses();runCode();
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
