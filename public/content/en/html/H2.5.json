@@ -3,70 +3,181 @@
   "courseId": "html",
   "moduleId": "H2",
   "topicId": "H2.5",
-  "title": "The body element and visible content",
+  "title": "The body element, document content, and browser DOM",
   "language": "en",
   "learningObjectives": [
-    "Identify and assemble the parts of a complete HTML document"
+    "Explain the role of the body element as the container for the document's page content and distinguish it from the head metadata section and the html root element.",
+    "Identify common categories of content placed in body, including semantic regions, headings, text, links, media, forms, interactive controls, scripts, and embedded content.",
+    "Describe the relationship between the HTML source, the body element, the parsed DOM tree, and the content that a browser actually renders.",
+    "Use document.body and Developer Tools to inspect the body element, query its descendants, and understand why the live DOM may differ from the original source.",
+    "Explain how CSS layout, visibility, the hidden attribute, and scripting affect whether body descendants are visible, while distinguishing DOM presence from visual rendering.",
+    "Use semantic HTML elements to organize page content and avoid obsolete presentational body attributes or misuse of body as a universal wrapper for every interface component.",
+    "Apply safe, maintainable patterns for adding page content and scripts, including event listeners, progressive enhancement, and avoiding inline event-handler attributes.",
+    "Build and debug a structured page body, verifying its content, accessibility, responsive behaviour, and DOM structure with browser Developer Tools."
   ],
   "prerequisites": [
-    "H1.5"
+    "H1.5",
+    "H1.6",
+    "H2.1",
+    "H2.2",
+    "H2.3",
+    "H2.4"
   ],
   "stages": {
     "understand": {
-      "concept": "The body contains page content such as headings, paragraphs, links, images and forms.",
-      "whyItMatters": "Separating metadata from page content makes documents easier to maintain.",
-      "analogy": "A theatre has backstage preparation and a stage performance; this is only a memory aid, not a literal mapping.",
-      "analogyLimit": "The analogy is only a memory aid; HTML should not be interpreted literally through it."
+      "concept": "In a typical HTML document, the body element contains the content that belongs to the page itself. This can include headings, paragraphs, navigation, links, images, audio and video, forms, buttons, tables, lists, semantic page regions, and scripts that support page behaviour. The body is a child of the html root element and is separate from head, which contains document metadata and resource references. The browser parses the source into a document tree called the DOM (Document Object Model). The body element is represented as a node in that tree, and its descendants can be styled, inspected, and changed by JavaScript. The content in body is not necessarily all visible at once: CSS, attributes such as hidden, scripting, viewport size, and user interaction can affect what is rendered.",
+      "whyItMatters": "The body is where the main page experience is organized. Placing visible content and interactive elements in the correct document structure helps browsers, assistive technologies, search systems, and developers understand the page. A clear body structure also makes CSS targeting, JavaScript interaction, debugging, and future maintenance easier. Confusing body with head can lead to misplaced content or invalid document organization. Assuming that every DOM element is automatically visible can also lead to incorrect debugging conclusions: an element may exist in the DOM but be hidden, outside the viewport, covered by another element, or not rendered because of CSS or browser behaviour.",
+      "analogy": "Think of head as the document's descriptive information and body as the content area that the reader interacts with. The body can contain many organized sections, just as a long document can contain chapters, headings, tables, illustrations, and interactive references.",
+      "analogyLimit": "The body is not simply a visual rectangle or a guaranteed single scrolling container. CSS can change layout and scrolling behaviour, and browsers construct a DOM according to parsing rules. Some content may be present in the DOM without being visible, while generated content and embedded resources can affect rendering without appearing as ordinary text nodes."
     },
     "explain": {
-      "narrative": "The body contains page content such as headings, paragraphs, links, images and forms.",
+      "narrative": "A normal HTML document has one body element in its document structure. The body is placed after head and inside html. In HTML syntax, some start and end tags are permitted to be omitted under specific parsing conditions, but developers should normally write the body tags explicitly. Explicit structure makes the source easier to read, reduces ambiguity for people maintaining the project, and gives a predictable place for page content. Do not confuse this with the browser's ability to infer omitted elements: parser recovery is not a reason to write unclear source.\n\nThe body can contain flow content such as headings, paragraphs, lists, links, images, forms, tables, and semantic sectioning elements. A common page structure uses header for introductory content, nav for major navigation, main for the dominant content, section or article for meaningful content groupings, aside for complementary content, and footer for closing or related information. These elements are not mandatory in every page, but they communicate useful structure. A page should generally have one main element representing its dominant content, subject to the rules for document contexts and embedded documents. Do not add semantic elements only to obtain a visual effect; use them according to their meaning.\n\nThe body is not a replacement for every possible container. A div is a generic grouping element when no more meaningful semantic element fits. A span is an inline phrasing-content wrapper. A header or footer inside a section can describe that section rather than the entire page. Use the element that matches the role of the content. CSS should control visual layout; HTML should communicate document structure and meaning. Avoid old presentational body attributes such as bgcolor, text, background, link, vlink, and alink. Use CSS properties such as background-color, color, background-image, and link-state pseudo-classes instead.\n\nThe browser parses HTML source and creates a DOM tree. The source file and the live DOM are related but are not always identical. The parser may insert implied elements, normalize certain structures, or repair malformed markup according to the HTML parsing algorithm. JavaScript can also add, remove, move, or update nodes after parsing. Developer Tools' Elements panel shows the current DOM, not simply a character-for-character copy of the original source. Use View Source when you need to inspect the original response text and Elements when you need to inspect the current document tree.\n\nJavaScript can access the body element through document.body. For example, document.body.classList.add('compact-layout') adds a class to the body element, and document.body.querySelector('main') searches within its descendants. document.body can be null before the body element has been parsed or when the current document has no body element. A script that runs in the head before parsing reaches body must therefore wait until the relevant DOM is available, use an appropriate loading strategy such as defer for an external classic script, or respond to DOMContentLoaded. Do not assume that a query always succeeds; check for null when the element may not exist.\n\nDOM presence and visual visibility are different concepts. An element can exist in the DOM while hidden by the hidden attribute, display: none, visibility: hidden, opacity, clipping, off-screen positioning, or another layout condition. These mechanisms are not interchangeable. display: none removes the element's box from layout and normally removes it from the accessibility tree; visibility: hidden preserves its layout space but hides it visually and from assistive technology in typical cases; opacity: 0 makes it transparent but does not by itself remove it from keyboard focus or the accessibility tree. The hidden attribute indicates that content is not currently relevant and should not be presented; CSS can override the usual rendering behaviour, so inspect both markup and computed styles. Never use visual hiding as a substitute for a proper accessible interaction pattern.\n\nThe body element can be styled like other elements, but avoid relying on browser defaults for critical layout. Use CSS to establish page-level typography, colours, spacing, and layout. Remember that body and html have distinct roles in viewport and scrolling behaviour, and browsers have special rules for propagating some properties from body to the document canvas. For robust page backgrounds, understand how background properties on the root element and body interact rather than assuming body is always the entire visible viewport. Test the result in target browsers and device sizes.\n\nScripts may appear in body, but script placement should be deliberate. A classic script placed after the content it needs can run after those elements have been parsed. External classic scripts can use defer in head to download while parsing continues and execute after parsing completes. Module scripts are deferred by default and use module loading semantics. Prefer addEventListener for event wiring instead of inline attributes such as onclick. Avoid putting secrets or privileged business rules in browser-delivered code: users can inspect the DOM and downloaded scripts. The body is public client-side content, not a secure storage location.\n\nUse Developer Tools to inspect the Elements tree, computed styles, event listeners, Console output, and Network requests. Check whether the target element exists, whether it is hidden, which CSS rule controls its display, and whether JavaScript changed it after the initial response. For accessibility, inspect landmarks, heading order, keyboard access, focus behaviour, and accessible names. For responsive behaviour, test narrow and wide viewports and ensure that content reflows without loss of information or functionality.",
       "examples": [
         {
-          "id": "h2.5-example",
+          "id": "h2.5-structured-body",
           "language": "en",
-          "code": "<!doctype html>\n<html lang=\"en\"><head><title>Body</title></head><body><h1>Welcome</h1><p>Page content.</p></body></html>",
-          "explanation": "The browser displays Welcome and the paragraph.",
-          "expectedOutput": "The browser displays Welcome and the paragraph.",
+          "title": "Organize page content with semantic regions",
+          "code": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Project dashboard</title>\n</head>\n<body>\n  <header>\n    <a href=\"/\">CodeSaathi</a>\n    <nav aria-label=\"Primary\">\n      <a href=\"/courses\">Courses</a>\n      <a href=\"/practice\">Practice</a>\n    </nav>\n  </header>\n  <main>\n    <h1>Project dashboard</h1>\n    <section aria-labelledby=\"progress-heading\">\n      <h2 id=\"progress-heading\">Your progress</h2>\n      <p>Continue with the next lesson.</p>\n    </section>\n  </main>\n  <footer><p>Learning resources and support.</p></footer>\n</body>\n</html>",
+          "explanation": "The body contains the page's semantic regions. header introduces the site, nav groups primary navigation, main identifies the dominant content, section groups a related topic, and footer contains related closing information. These elements communicate structure; CSS can control their visual arrangement.",
+          "expectedOutput": "The page displays a site header with navigation, a main dashboard heading and progress section, and a footer.",
+          "runnable": true
+        },
+        {
+          "id": "h2.5-dom-inspection",
+          "language": "en",
+          "title": "Inspect body and its descendants with JavaScript",
+          "code": "<!doctype html>\n<html lang=\"en\">\n<head><meta charset=\"utf-8\"><title>DOM inspection</title></head>\n<body>\n  <main id=\"content\"><h1>DOM inspection</h1><p class=\"status\">Ready</p></main>\n  <script>\n    console.log(document.body.tagName);\n    const main = document.body.querySelector('#content');\n    const status = main.querySelector('.status');\n    status.textContent = 'The live DOM was updated.';\n  </script>\n</body>\n</html>",
+          "explanation": "document.body references the body element. querySelector searches for a matching descendant. JavaScript updates the paragraph node's textContent, so the live DOM and rendered page change after the original HTML has been parsed.",
+          "expectedOutput": "The Console logs BODY, and the paragraph changes to The live DOM was updated.",
+          "runnable": true
+        },
+        {
+          "id": "h2.5-source-vs-dom",
+          "language": "en",
+          "title": "The live DOM can differ from the original source",
+          "code": "<!doctype html>\n<html lang=\"en\">\n<head><title>DOM vs source</title></head>\n<body>\n  <main><h1>Original source heading</h1></main>\n  <script>\n    const note = document.createElement('p');\n    note.textContent = 'Added after parsing';\n    document.querySelector('main').append(note);\n  </script>\n</body>\n</html>",
+          "explanation": "The paragraph is not present in the original HTML text. The script creates a new p element and appends it to main after parsing. View Source shows the original response, while the Elements panel shows the new paragraph in the current DOM.",
+          "expectedOutput": "The page displays the heading and the Added after parsing paragraph. The paragraph appears in the live DOM but not in the original source.",
+          "runnable": true
+        },
+        {
+          "id": "h2.5-hidden-vs-removed",
+          "language": "en",
+          "title": "Hidden content still exists in the DOM",
+          "code": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <title>Visibility test</title>\n  <style>\n    .visually-hidden-demo { display: none; }\n    .transparent-demo { opacity: 0; }\n  </style>\n</head>\n<body>\n  <p id=\"shown\">Visible paragraph</p>\n  <p id=\"hidden\" class=\"visually-hidden-demo\">Display none paragraph</p>\n  <p id=\"transparent\" class=\"transparent-demo\">Transparent paragraph</p>\n  <script>\n    console.log(Boolean(document.querySelector('#hidden')));\n    console.log(getComputedStyle(document.querySelector('#hidden')).display);\n  </script>\n</body>\n</html>",
+          "explanation": "The hidden paragraph still exists as a DOM node, so querySelector finds it. Its computed display value is none, so it does not generate a normal layout box. The transparent paragraph still occupies layout space and may remain interactive unless other rules change that behaviour.",
+          "expectedOutput": "The page visibly shows the first paragraph. The second is not displayed. The third is transparent. The Console logs true and none.",
+          "runnable": true
+        },
+        {
+          "id": "h2.5-safe-event-wiring",
+          "language": "en",
+          "title": "Use event listeners for body interactions",
+          "code": "<!doctype html>\n<html lang=\"en\">\n<head><meta charset=\"utf-8\"><title>Event wiring</title></head>\n<body>\n  <main>\n    <h1>Save a note</h1>\n    <label for=\"note\">Note</label>\n    <input id=\"note\" type=\"text\">\n    <button id=\"save\" type=\"button\">Show note</button>\n    <p id=\"result\" role=\"status\">No note shown yet.</p>\n  </main>\n  <script>\n    const input = document.querySelector('#note');\n    const result = document.querySelector('#result');\n    document.querySelector('#save').addEventListener('click', () => {\n      result.textContent = input.value;\n    });\n  </script>\n</body>\n</html>",
+          "explanation": "The body contains a labelled input, a button, and a status region. JavaScript attaches a click listener and writes user-provided text through textContent, which treats the value as text rather than parsing it as HTML. This is a local demonstration, not persistent storage.",
+          "expectedOutput": "Entering text and selecting Show note displays that text in the status paragraph.",
+          "runnable": true
+        },
+        {
+          "id": "h2.5-page-background",
+          "language": "en",
+          "title": "Use CSS rather than obsolete body presentation attributes",
+          "code": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Page styling</title>\n  <style>\n    body {\n      margin: 0;\n      min-height: 100vh;\n      color: #182230;\n      background: #f2f5f8;\n      font-family: system-ui, sans-serif;\n    }\n    main { max-width: 60rem; margin-inline: auto; padding: 2rem; }\n  </style>\n</head>\n<body>\n  <main><h1>Styled page</h1><p>Presentation belongs in CSS.</p></main>\n</body>\n</html>",
+          "explanation": "The body is styled using CSS properties instead of obsolete attributes such as bgcolor or text. min-height: 100vh establishes a minimum height relative to the viewport, while the main element receives a readable maximum width and spacing.",
+          "expectedOutput": "The page has a light background, readable text, and a centered content region with padding.",
           "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Place a heading and paragraph inside body, not head.",
-      "independentTask": "Create your own small page, open it in a browser and inspect the result.",
+      "guidedTask": "Create a page with an explicit html, head, and body structure. Inside body, add a semantic header with navigation, one main element with a heading and two sections, and a footer. Use Developer Tools to inspect the body node and its descendants. Add a script after the main content that selects one paragraph through document.body.querySelector and updates its textContent. Compare View Source with the Elements panel and explain why the two views differ after the script runs.",
+      "independentTask": "Build a responsive article page with a header, navigation, main article, complementary aside, and footer. Add a labelled form control and a button that updates a role=status region using addEventListener and textContent. Include one element hidden with the hidden attribute and another controlled by a CSS class; inspect both in the DOM and compare their computed styles and accessibility implications. Test keyboard navigation, focus visibility, 200% zoom, and narrow-screen reflow. In a short debugging report, distinguish DOM existence, CSS visibility, accessibility exposure, and actual user interaction.",
       "hints": [
-        "Check that each element is nested under the correct parent."
+        "Keep document metadata such as title, charset, and resource links in head; place the page's actual content in body.",
+        "Use semantic elements when they describe the content's role. Do not choose elements only because their default appearance seems convenient.",
+        "The live DOM may contain nodes inserted by JavaScript or implied by the HTML parser that were not written explicitly in the original source.",
+        "document.body can be null before the body has been parsed. Choose a suitable script loading strategy or wait for the relevant DOM event.",
+        "An element can exist in the DOM while hidden. Inspect the Elements panel and computed styles rather than relying only on what is visible.",
+        "display: none, visibility: hidden, opacity: 0, and the hidden attribute have different layout and accessibility consequences.",
+        "Use textContent for plain user-provided text. Do not insert untrusted strings with innerHTML unless they are safely sanitized and HTML insertion is genuinely required.",
+        "Use addEventListener instead of inline onclick attributes, and give form controls accessible labels and buttons explicit types where appropriate.",
+        "Avoid obsolete presentational body attributes. Use CSS for colours, typography, spacing, and layout.",
+        "Test the page with keyboard interaction, responsive viewport sizes, and browser zoom; a DOM that looks correct in the inspector is not by itself proof of usability."
       ]
     }
   },
   "practice": {
     "playgroundMode": "html",
-    "starterCode": "<!doctype html>\n<html lang=\"en\">\n<head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Practice</title></head>\n<body>\n<h1>My first page</h1><p>I am learning HTML.</p>\n</body>\n</html>",
-    "resetCode": "<!doctype html>\n<html lang=\"en\">\n<head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Practice</title></head>\n<body>\n<h1>My first page</h1><p>I am learning HTML.</p>\n</body>\n</html>"
+    "starterCode": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Body and DOM practice</title>\n  <style>\n    body { margin: 0; font-family: system-ui, sans-serif; color: #182230; }\n    header, footer { padding: 1rem; background: #eef2f6; }\n    main { max-width: 60rem; margin-inline: auto; padding: 1rem; }\n    .panel { padding: 1rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; margin-block: 1rem; }\n    .muted { color: #526174; }\n    button, input { font: inherit; padding: 0.5rem; }\n  </style>\n</head>\n<body>\n  <header><strong>CodeSaathi practice</strong></header>\n  <main>\n    <h1>The body element</h1>\n    <section class=\"panel\" aria-labelledby=\"demo-heading\">\n      <h2 id=\"demo-heading\">DOM interaction</h2>\n      <label for=\"message\">Your message</label>\n      <input id=\"message\" type=\"text\">\n      <button id=\"update\" type=\"button\">Update status</button>\n      <p id=\"status\" class=\"muted\" role=\"status\">Waiting for input.</p>\n    </section>\n  </main>\n  <footer><small>Inspect this page in Developer Tools.</small></footer>\n  <script>\n    const input = document.querySelector('#message');\n    const status = document.querySelector('#status');\n    document.querySelector('#update').addEventListener('click', () => {\n      status.textContent = input.value || 'Please enter a message.';\n    });\n  </script>\n</body>\n</html>",
+    "resetCode": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Body and DOM practice</title>\n  <style>\n    body { margin: 0; font-family: system-ui, sans-serif; color: #182230; }\n    header, footer { padding: 1rem; background: #eef2f6; }\n    main { max-width: 60rem; margin-inline: auto; padding: 1rem; }\n    .panel { padding: 1rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; margin-block: 1rem; }\n    .muted { color: #526174; }\n    button, input { font: inherit; padding: 0.5rem; }\n  </style>\n</head>\n<body>\n  <header><strong>CodeSaathi practice</strong></header>\n  <main>\n    <h1>The body element</h1>\n    <section class=\"panel\" aria-labelledby=\"demo-heading\">\n      <h2 id=\"demo-heading\">DOM interaction</h2>\n      <label for=\"message\">Your message</label>\n      <input id=\"message\" type=\"text\">\n      <button id=\"update\" type=\"button\">Update status</button>\n      <p id=\"status\" class=\"muted\" role=\"status\">Waiting for input.</p>\n    </section>\n  </main>\n  <footer><small>Inspect this page in Developer Tools.</small></footer>\n  <script>\n    const input = document.querySelector('#message');\n    const status = document.querySelector('#status');\n    document.querySelector('#update').addEventListener('click', () => {\n      status.textContent = input.value || 'Please enter a message.';\n    });\n  </script>\n</body>\n</html>"
   },
   "assessment": {
     "questions": [
       {
         "id": "h2.5-q1",
-        "prompt": "Where does the main page content belong?",
+        "prompt": "Which statement best describes the role of the body element?",
         "options": [
-          "body",
-          "head",
-          "doctype"
+          "It contains the document's page content, including structural regions and interactive elements.",
+          "It contains only metadata that is not shown to users.",
+          "It is the root element that contains html, head, and every other document node."
         ],
-        "answer": "body",
-        "explanation": "The body contains page content."
+        "answer": "It contains the document's page content, including structural regions and interactive elements.",
+        "explanation": "The html element is the root, head contains metadata and resource references, and body contains the document's page content."
       },
       {
         "id": "h2.5-q2",
-        "prompt": "What is the root element?",
+        "prompt": "A paragraph appears in the Elements panel but is not visible on the page. What is the most useful first investigation?",
         "options": [
-          "html",
-          "title",
-          "p"
+          "Assume the browser deleted the paragraph from the HTML source.",
+          "Inspect the element's attributes and computed CSS, including display, visibility, opacity, and hidden state.",
+          "Immediately recreate the entire page with a different framework."
         ],
-        "answer": "html",
-        "explanation": "html is the document root."
+        "answer": "Inspect the element's attributes and computed CSS, including display, visibility, opacity, and hidden state.",
+        "explanation": "DOM existence and visual rendering are different. The node may exist but be hidden, transparent, clipped, or positioned outside the visible area."
+      },
+      {
+        "id": "h2.5-q3",
+        "prompt": "Which statement correctly distinguishes View Source from the Elements panel?",
+        "options": [
+          "View Source shows the original response source, while Elements shows the current parsed DOM that scripts may have changed.",
+          "Both always show exactly the same text and nodes.",
+          "The Elements panel displays only CSS and never document elements."
+        ],
+        "answer": "View Source shows the original response source, while Elements shows the current parsed DOM that scripts may have changed.",
+        "explanation": "The browser parses source into a DOM and scripts can modify that tree. The live DOM is therefore not necessarily identical to the original response text."
+      },
+      {
+        "id": "h2.5-q4",
+        "prompt": "Why is textContent generally safer than assigning an untrusted string to innerHTML when displaying user input?",
+        "options": [
+          "textContent treats the value as text instead of parsing it as markup.",
+          "textContent automatically stores the input in a secure database.",
+          "innerHTML and textContent always behave identically."
+        ],
+        "answer": "textContent treats the value as text instead of parsing it as markup.",
+        "explanation": "textContent does not interpret a string as HTML. Assigning untrusted content to innerHTML can create an injection risk if it is not correctly sanitized and controlled."
+      },
+      {
+        "id": "h2.5-q5",
+        "prompt": "Which statement about display: none and opacity: 0 is accurate?",
+        "options": [
+          "Both always remove the element from the DOM.",
+          "display: none removes the element's normal layout box, while opacity: 0 makes it transparent but can leave it in layout and interaction order.",
+          "opacity: 0 always prevents keyboard focus and removes the element from the accessibility tree."
+        ],
+        "answer": "display: none removes the element's normal layout box, while opacity: 0 makes it transparent but can leave it in layout and interaction order.",
+        "explanation": "The properties have different layout and accessibility consequences. Transparent content may still be focusable or exposed to assistive technology unless additional handling is applied."
+      },
+      {
+        "id": "h2.5-q6",
+        "prompt": "Which is the most maintainable way to style the page background and text?",
+        "options": [
+          "Use obsolete body presentation attributes such as bgcolor and text.",
+          "Use CSS properties such as background-color and color.",
+          "Put presentation instructions into the doctype declaration."
+        ],
+        "answer": "Use CSS properties such as background-color and color.",
+        "explanation": "Modern HTML separates document structure from presentation. CSS is the appropriate place for colours, typography, spacing, and layout."
       }
     ]
   },
