@@ -18,7 +18,7 @@
     try {
       const source = editor.value;
       const mode = editor.dataset.playgroundMode || "html";
-      const isFullDocument = /^\\s*(?:<!doctype\\s+html\\b[^>]*>\\s*)?<html\\b/i.test(source);
+      const isFullDocument = /^\s*(?:<!doctype\s+html\b[^>]*>\s*)?<html\b/i.test(source);
       const fixtureStyles = "<style>body{font:16px Arial,sans-serif;padding:22px;color:#172033}" +
         ".demo-card,.article,.alert{max-width:36rem;padding:1rem;border:1px solid #cbd5e1;border-radius:12px}" +
         ".button,button{padding:9px 14px;border:0;border-radius:7px;background:#3157a4;color:white;cursor:pointer}" +
@@ -26,30 +26,30 @@
         ".card{padding:1rem;border:1px solid #cbd5e1;border-radius:8px}.article{column-count:1}.alert{margin-block:1rem}" +
         "button:focus-visible,a:focus-visible{outline:3px solid #172033;outline-offset:3px}" +
         "#playgroundConsole{white-space:pre-wrap;overflow-wrap:anywhere;margin:1rem 0 0;padding:12px;background:#101828;color:#e6edf7;border-radius:8px;min-height:2.5rem;font:12px/1.5 monospace}</style>";
-      const fixtureBody = "<main class=\\"demo-card\\"><h1>CodeSaathi preview</h1>" +
-        "<p id=\\"demoMessage\\">Edit the code to see the result.</p><p id=\\"status\\">Status: waiting</p>" +
-        "<div class=\\"alert\\">Sample alert banner</div><section class=\\"article\\">" +
+      const fixtureBody = "<main class=\"demo-card\"><h1>CodeSaathi preview</h1>" +
+        "<p id=\"demoMessage\">Edit the code to see the result.</p><p id=\"status\">Status: waiting</p>" +
+        "<div class=\"alert\">Sample alert banner</div><section class=\"article\">" +
         "<h2>First section</h2><p>Sample article content for layout demonstrations.</p>" +
         "<h2>Second section</h2><p>More content for counters and columns.</p></section>" +
-        "<ol class=\\"steps\\"><li>Plan</li><li>Build</li><li>Review</li></ol>" +
-        "<div class=\\"cards\\"><article class=\\"card\\"><h2>Card one</h2></article>" +
-        "<article class=\\"card\\"><h2>Card two</h2></article></div>" +
-        "<button class=\\"button\\" id=\\"demoButton\\" type=\\"button\\">Test interaction</button>" +
-        "<pre id=\\"playgroundConsole\\" role=\\"status\\" aria-live=\\"polite\\">Console output appears here.</pre></main>";
+        "<ol class=\"steps\"><li>Plan</li><li>Build</li><li>Review</li></ol>" +
+        "<div class=\"cards\"><article class=\"card\"><h2>Card one</h2></article>" +
+        "<article class=\"card\"><h2>Card two</h2></article></div>" +
+        "<button class=\"button\" id=\"demoButton\" type=\"button\">Test interaction</button>" +
+        "<pre id=\"playgroundConsole\" role=\"status\" aria-live=\"polite\">Console output appears here.</pre></main>";
       let html;
       if (isFullDocument || mode === "html" || mode === "combined") {
-        html = isFullDocument ? source : "<!doctype html><html><head><meta charset=\\"utf-8\\"><meta name=\\"viewport\\" content=\\"width=device-width,initial-scale=1\\">" +
+        html = isFullDocument ? source : "<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">" +
           fixtureStyles + "</head><body>" + source + "</body></html>";
       } else {
-        const customCss = mode === "css" ? "<style>" + source.replace(/<\\/style/gi, "<\\\\/style") + "</style>" : "";
+        const customCss = mode === "css" ? "<style>" + source.replace(/<\/style/gi, "<\\/style") + "</style>" : "";
         const consoleBootstrap = "(function(){var output=document.getElementById('playgroundConsole');" +
           "['log','info','warn','error'].forEach(function(method){console[method]=function(){if(!output)return;" +
           "var line=Array.prototype.map.call(arguments,function(value){if(typeof value==='string')return value;" +
           "try{return JSON.stringify(value)}catch(error){return String(value)}}).join(' ');" +
           "var current=output.textContent==='Console output appears here.'?'':output.textContent;" +
-          "output.textContent=current+(current?'\\\\n':'')+(method==='log'?'':method.toUpperCase()+': ')+line;};});})();";
-        const customScript = mode === "javascript" ? "<script>" + consoleBootstrap + "\\n" + source.replace(/<\\/script/gi, "<\\\\/script") + "<\\/script>" : "";
-        html = "<!doctype html><html><head><meta charset=\\"utf-8\\"><meta name=\\"viewport\\" content=\\"width=device-width,initial-scale=1\\">" +
+          "output.textContent=current+(current?'\\n':'')+(method==='log'?'':method.toUpperCase()+': ')+line;};});})();";
+        const customScript = mode === "javascript" ? "<script>" + consoleBootstrap + "\n" + source.replace(/<\/script/gi, "<\\/script") + "</script>" : "";
+        html = "<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">" +
           fixtureStyles + customCss + "</head><body>" + fixtureBody + customScript + "</body></html>";
       }
       frame.addEventListener("load", () => {
