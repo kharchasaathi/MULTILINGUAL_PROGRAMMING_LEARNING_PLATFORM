@@ -71,6 +71,7 @@ assert.ok(loader.includes("editor.dataset.playgroundMode = mode"), "lesson loade
 assert.ok(app.includes('mode === "css"'), "playground must support CSS mode");
 assert.ok(app.includes('mode === "javascript"'), "playground must support JavaScript mode");
 assert.ok(app.includes('mode === "combined"'), "playground must support combined mode");
-assert.ok(app.includes("frame.sandbox") || app.includes("sandboxed iframe") || app.includes("documentInFrame"), "playground renderer must remain isolated in its iframe");
+assert.ok(html.includes('sandbox="allow-scripts"'), "playground iframe must remain sandboxed");
+assert.ok(app.includes("frame.srcdoc = html"), "playground must render through the sandboxed iframe srcdoc");
 
 console.log(`F1.7 validation passed: ${locales.length} locales; regional lessons retain 2 examples/5 questions, while English has 5 examples/7 questions.`);
