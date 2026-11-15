@@ -889,3 +889,41 @@ Do not pad lessons with repeated wording. Add depth that improves a learner's ab
 6. Only after English content is approved for the launch scope, resume regional-language authoring.
 
 **Scope decision:** The first launch is a focused, professionally detailed Foundations + HTML + CSS + JavaScript learning product, not a catalogue of many shallow courses.
+
+
+## 13. W3Schools coverage additions — English-first draft scope
+
+These additions close the dedicated-topic gaps recorded in the W3Schools coverage audit. W3Schools is used only as a coverage benchmark; explanations, code, tasks, and assessments are original CodeSaathi material. All newly created lessons remain **draft** until technical, editorial, accessibility, and live-playground checks are evidenced.
+
+### H16. Additional HTML coverage
+- H16.1 HTML colours: legacy attributes and modern CSS migration
+- H16.2 Image maps: map, area, shapes, coordinates, and accessible names
+- H16.3 Background images: legacy patterns and modern CSS migration
+- H16.4 The div element: generic grouping and semantic alternatives
+- H16.5 Integrated HTML project: structured multi-section website
+- H16.6 HTML style guide and maintainable markup
+- H16.7 URL encoding and percent-encoded components
+- H16.8 HTML versus XHTML: parser, syntax, namespace, and media type
+- H16.9 Server-Sent Events and the EventSource browser API
+- H16.10 HTML comments: syntax, use, parsing, and security limitations
+
+### C22. Additional CSS coverage
+- C22.1 CSS comments and maintainable annotations
+- C22.2 Icons: SVG, icon fonts, library choices, and accessible controls
+- C22.3 CSS counters, nested counters, and generated numbering
+- C22.4 Tooltips and accessible disclosure alternatives
+- C22.5 Multiple-column layout and column fragmentation
+- C22.6 Typed custom properties with the @property at-rule
+
+### J24. Additional JavaScript and browser-platform coverage
+- J24.1 Bitwise operators and 32-bit conversion behaviour
+- J24.2 Math object, numeric methods, and random-number ranges
+- J24.3 HTML-first development and progressive enhancement
+- J24.4 Temporal API and explicit date/time modelling (runtime support must be checked)
+- J24.5 Proxy, Reflect, and metaprogramming invariants
+- J24.6 AJAX and XMLHttpRequest legacy lifecycle; compare with fetch
+- J24.7 jQuery selector and DOM patterns for legacy maintenance
+- J24.8 JSONP as a legacy executable-script technique and its risks
+- J24.9 Pointer Events for mouse, pen, and touch input
+
+**Scope note:** HTML comments were not separately present as a lesson even though the master syllabus had listed them under H2; H16.10 now provides the dedicated lesson. File paths are already taught in Foundation F0.3, so no duplicate HTML file-path lesson was created. All new lessons are English drafts; the curriculum loader falls back to English where a translation path is not yet available.
