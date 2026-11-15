@@ -1,0 +1,123 @@
+{
+  "id": "javascript.j24.8.en",
+  "courseId": "javascript",
+  "moduleId": "J24",
+  "topicId": "J24.8",
+  "title": "JSONP: legacy cross-origin script technique and risks",
+  "language": "en",
+  "learningObjectives": [
+    "Explain jsonp: legacy cross-origin script technique and risks and the problem it addresses.",
+    "Use the relevant language or browser API with valid syntax.",
+    "Compare the technique with modern alternatives and identify when each is appropriate.",
+    "Handle errors, boundaries, security, and compatibility deliberately.",
+    "Test the implementation and explain its behaviour with evidence."
+  ],
+  "prerequisites": [
+    "J3.1",
+    "J4.1",
+    "J8.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "JSONP (JSON with Padding) is a legacy technique that uses a script element to load a JavaScript response from another origin. The server wraps data in a callback function call, and the page defines that callback before loading the script. Because script loading executes code, JSONP is not equivalent to parsing passive JSON: the remote response runs with the page's privileges. JSONP is generally limited to GET-style requests and does not provide the same request controls as fetch. Modern APIs should use CORS-enabled fetch or another authenticated cross-origin design. Never use JSONP with an untrusted endpoint.",
+      "whyItMatters": "JSONP appears in older codebases and helps explain why CORS and safer data transport matter. Treating it as ordinary JSON can create a serious script-execution risk.",
+      "analogy": "JSONP is like asking another party to send you a message as an instruction that your computer immediately executes.",
+      "analogyLimit": "The analogy does not cover the browser's origin model, script loading policy, callback naming, or CSP restrictions."
+    },
+    "explain": {
+      "narrative": "Inspect a minimal callback-wrapped response and identify that the browser executes it as JavaScript. Then replace the pattern with a CORS-enabled JSON endpoint and fetch.",
+      "examples": [
+        {
+          "id": "j24-8-example-1",
+          "language": "javascript",
+          "code": "function receiveData(data){console.log(data.items);} const script=document.createElement('script'); script.src='https://api.example.test/legacy?callback=receiveData'; document.head.append(script);",
+          "explanation": "This illustrates the JSONP client pattern only. The endpoint must return executable JavaScript such as receiveData({...}); the example domain is a placeholder and should never be treated as a trusted live service.",
+          "expectedOutput": "The callback logs items if the remote script calls receiveData with an object.",
+          "runnable": true
+        },
+        {
+          "id": "j24-8-example-2",
+          "language": "javascript",
+          "code": "async function getData(){const response=await fetch('https://api.example.test/data');if(!response.ok)throw new Error('Request failed');return response.json();}",
+          "explanation": "A modern alternative uses fetch and a server configured with appropriate CORS headers. The browser treats the response as data rather than executing it as a script.",
+          "expectedOutput": "The function returns parsed JSON if the server permits the cross-origin request.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Trace a legacy JSONP request from callback declaration to script insertion and callback execution. Document why the response is executable code and identify the trust boundary.",
+      "independentTask": "Replace a JSONP integration with a CORS-enabled fetch endpoint. Define allowed origins, authentication, error handling, and a safe data schema; remove the global callback.",
+      "hints": [
+        "JSONP loads JavaScript, not inert JSON data.",
+        "The remote response executes in the embedding page's context.",
+        "Prefer fetch with CORS and a properly configured server."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "javascript",
+    "starterCode": "function receiveData(data){console.log(data.items);} const script=document.createElement('script'); script.src='https://api.example.test/legacy?callback=receiveData'; document.head.append(script);",
+    "resetCode": "function receiveData(data){console.log(data.items);} const script=document.createElement('script'); script.src='https://api.example.test/legacy?callback=receiveData'; document.head.append(script);"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "j24-8-q1",
+        "prompt": "How does JSONP deliver its data?",
+        "options": [
+          "As executable JavaScript that calls a named callback",
+          "As a CSS file",
+          "As a WebSocket frame"
+        ],
+        "answer": "As executable JavaScript that calls a named callback",
+        "explanation": "JSONP wraps the data in a callback invocation and loads it as a script."
+      },
+      {
+        "id": "j24-8-q2",
+        "prompt": "What is a major JSONP security risk?",
+        "options": [
+          "The remote response executes as script in the page context",
+          "It cannot contain data",
+          "It always uses encrypted storage"
+        ],
+        "answer": "The remote response executes as script in the page context",
+        "explanation": "The response is executable code and must be fully trusted."
+      },
+      {
+        "id": "j24-8-q3",
+        "prompt": "Which request method pattern is JSONP generally limited to?",
+        "options": [
+          "GET-style script loading",
+          "Arbitrary POST bodies",
+          "WebSocket frames"
+        ],
+        "answer": "GET-style script loading",
+        "explanation": "A script element fetches a URL and does not provide general request-body controls."
+      },
+      {
+        "id": "j24-8-q4",
+        "prompt": "What is the modern preferred alternative for cross-origin JSON APIs?",
+        "options": [
+          "fetch with appropriate CORS configuration",
+          "A hidden script callback",
+          "A CSS import"
+        ],
+        "answer": "fetch with appropriate CORS configuration",
+        "explanation": "Fetch treats the response as data and uses the browser's CORS model."
+      },
+      {
+        "id": "j24-8-q5",
+        "prompt": "Should JSONP be used with an untrusted endpoint?",
+        "options": [
+          "No",
+          "Yes, because callbacks sanitize it",
+          "Only if the response is minified"
+        ],
+        "answer": "No",
+        "explanation": "An untrusted script can execute arbitrary code in the page's context."
+      }
+    ]
+  },
+  "status": "draft"
+}
