@@ -77,6 +77,12 @@
       if (!modules.has(topic.moduleId)) modules.set(topic.moduleId, []);
       modules.get(topic.moduleId).push(topic);
     });
+    document.querySelectorAll("[data-course-nav]").forEach(button => {
+      const selected = button.dataset.courseNav === courseId;
+      button.classList.toggle("is-active", selected);
+      if (selected) button.setAttribute("aria-current", "page");
+      else button.removeAttribute("aria-current");
+    });
     modules.forEach((moduleTopics, moduleId) => {
       const section = text("section", "curriculum-module");
       section.append(text("h3", "", moduleId + " · " + moduleTopics.length + " topics"));
@@ -182,6 +188,12 @@ const link = $(".lesson-practice-link", container);
       index = await response.json();
       if (index.version !== 1 || !Array.isArray(index.topics)) throw new Error("Unsupported curriculum index version.");
       renderCourseCards();
+      const subjectNavigation = $("#subjectNavigation");
+      subjectNavigation?.addEventListener("click", event => {
+        const button = event.target.closest("[data-course-nav]");
+        if (!button) return;
+        showCourse(button.dataset.courseNav);
+      });
       grid.addEventListener("click", event => {
         const button = event.target.closest("[data-curriculum-course]");
         if (!button) return;
