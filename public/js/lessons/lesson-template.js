@@ -23,7 +23,7 @@
     if (!container || !lesson) return;
     container.replaceChildren();
     const t = currentLabels();
-    if (lesson.title) container.append(make("h3", "lesson-template-title", lesson.title));
+    if (lesson.title) {\n      const title = make("h3", "lesson-template-title", lesson.title);\n      title.id = "lessonDialogTitle";\n      container.append(title);\n    }
     const objectives = Array.isArray(lesson.learningObjectives) ? lesson.learningObjectives.filter(item => typeof item === "string" && item.trim()) : [];
     if (objectives.length) {
       const section = make("section", "lesson-objectives");
