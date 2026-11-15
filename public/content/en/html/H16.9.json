@@ -1,0 +1,123 @@
+{
+  "id": "html.h16.9.en",
+  "courseId": "html",
+  "moduleId": "H16",
+  "topicId": "H16.9",
+  "title": "Server-Sent Events with EventSource",
+  "language": "en",
+  "learningObjectives": [
+    "Explain server-sent events with eventsource and its role in modern HTML.",
+    "Select the correct elements, attributes, APIs, or browser behaviour for a practical use case.",
+    "Distinguish current practices from obsolete, limited, or legacy techniques.",
+    "Build and inspect a working example while considering accessibility and maintainability.",
+    "Diagnose common implementation errors and explain the trade-offs of the chosen approach."
+  ],
+  "prerequisites": [
+    "H1.5",
+    "H2.1",
+    "H2.4"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Server-Sent Events (SSE) provide a one-way stream of text events from a server to a browser over an HTTP connection. The server responds with Content-Type text/event-stream and sends records separated by blank lines. Fields can include data, event, id, and retry. The browser's EventSource API receives messages and can reconnect automatically after a connection is interrupted. SSE is useful for live status, notifications, and feeds; it is not a bidirectional channel, does not replace ordinary request/response operations, and should not be used to send client messages back to the server. Consider authentication, authorization, connection limits, proxies, and event replay.",
+      "whyItMatters": "Developers need to distinguish server push from polling, WebSockets, and ordinary fetch requests. SSE is a relatively simple fit when data only needs to flow from server to client.",
+      "analogy": "SSE is like a radio broadcast: the server sends updates and connected listeners receive them.",
+      "analogyLimit": "Unlike a radio broadcast, an SSE connection is an authenticated network request with HTTP and browser lifecycle constraints."
+    },
+    "explain": {
+      "narrative": "Create an EventSource client that listens for default messages and a named event. Explain how the server's event-stream response is formatted and how the browser handles reconnects.",
+      "examples": [
+        {
+          "id": "h16-9-example-1",
+          "language": "html",
+          "code": "const stream = new EventSource(\"/events\"); stream.onmessage = event => { console.log(\"Update:\", event.data); }; stream.onerror = () => { console.log(\"Stream interrupted; browser may reconnect.\"); };",
+          "explanation": "The browser opens a persistent connection to the endpoint. The server must send a valid text/event-stream response; this client code alone does not create a working stream.",
+          "expectedOutput": "Console logs each received message and reports connection errors; a compatible server endpoint is required.",
+          "runnable": true
+        },
+        {
+          "id": "h16-9-example-2",
+          "language": "html",
+          "code": "const source = new EventSource(\"/events\"); source.addEventListener(\"stock-update\", event => { const update = JSON.parse(event.data); console.log(update.sku, update.quantity); }); // Call source.close() when the stream is no longer needed.",
+          "explanation": "Named events are handled with addEventListener. Parse the event payload as data only after validating the expected schema. Close the stream when the page no longer needs it.",
+          "expectedOutput": "The listener logs a SKU and quantity from each stock-update event.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Implement a client that listens to a documented SSE endpoint. Display connection state, validate event data before rendering, and close the stream when the component is disposed.",
+      "independentTask": "Design an SSE event contract with event names, IDs, retry behaviour, payload versioning, and authorization. Explain how reconnect and last-event-id handling affect duplicate or missed updates.",
+      "hints": [
+        "The server must send Content-Type: text/event-stream and separate events with blank lines.",
+        "EventSource is one-way; use fetch or another mechanism for client-to-server commands.",
+        "Do not inject event data with innerHTML; validate it and render as text."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "html",
+    "starterCode": "const stream = new EventSource(\"/events\"); stream.onmessage = event => { console.log(\"Update:\", event.data); }; stream.onerror = () => { console.log(\"Stream interrupted; browser may reconnect.\"); };",
+    "resetCode": "const stream = new EventSource(\"/events\"); stream.onmessage = event => { console.log(\"Update:\", event.data); }; stream.onerror = () => { console.log(\"Stream interrupted; browser may reconnect.\"); };"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "h16-9-q1",
+        "prompt": "What is the direction of an SSE stream?",
+        "options": [
+          "Server to browser",
+          "Browser to server only",
+          "Both directions over the same EventSource channel"
+        ],
+        "answer": "Server to browser",
+        "explanation": "SSE is a one-way server-to-client event stream."
+      },
+      {
+        "id": "h16-9-q2",
+        "prompt": "Which response Content-Type is required for an SSE endpoint?",
+        "options": [
+          "text/event-stream",
+          "application/json",
+          "text/html"
+        ],
+        "answer": "text/event-stream",
+        "explanation": "The browser expects the event-stream media type."
+      },
+      {
+        "id": "h16-9-q3",
+        "prompt": "Which browser API opens an SSE connection?",
+        "options": [
+          "EventSource",
+          "XMLSerializer",
+          "MutationObserver"
+        ],
+        "answer": "EventSource",
+        "explanation": "EventSource creates and manages the server-sent event connection."
+      },
+      {
+        "id": "h16-9-q4",
+        "prompt": "How are SSE event records separated?",
+        "options": [
+          "By a blank line",
+          "By a comma",
+          "By an HTML closing tag"
+        ],
+        "answer": "By a blank line",
+        "explanation": "A blank line terminates an event record in the event-stream format."
+      },
+      {
+        "id": "h16-9-q5",
+        "prompt": "Which technology is better suited to bidirectional low-latency communication?",
+        "options": [
+          "WebSocket",
+          "EventSource alone",
+          "A CSS animation"
+        ],
+        "answer": "WebSocket",
+        "explanation": "WebSocket supports two-way communication; EventSource is one-way."
+      }
+    ]
+  },
+  "status": "draft"
+}
