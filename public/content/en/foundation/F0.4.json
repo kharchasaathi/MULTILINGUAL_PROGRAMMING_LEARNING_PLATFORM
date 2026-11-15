@@ -3,51 +3,105 @@
   "courseId": "foundation",
   "moduleId": "F0",
   "topicId": "F0.4",
-  "title": "Text Editors, Browser Developer Tools, Saving and Refreshing",
+  "title": "Code Editors, Browser Developer Tools and the Professional Debugging Workflow",
   "language": "en",
   "learningObjectives": [
-    "Explain the purpose of a text editor and how it is used to create and modify source code as plain text.",
-    "Compare a code-focused editor with a basic text editor, and identify useful beginner features such as syntax highlighting, line numbers, search, and auto-indentation.",
-    "Create, open, rename, and save a project file using a suitable filename, folder, and extension without accidentally saving it in the wrong location.",
-    "Describe the edit–save–refresh workflow and explain why saving the source file must happen before refreshing the browser to view the latest changes.",
-    "Open a local HTML file in a browser, refresh the page, and verify that the displayed content matches the saved source code.",
-    "Open browser Developer Tools and identify the Elements panel as the place to inspect the page's live document structure and selected element styles.",
-    "Use the Console panel to view JavaScript messages, warnings, and errors, and identify useful clues such as the error text, source filename, and line number.",
-    "Distinguish between editing the original source file in a text editor and making temporary live changes in Developer Tools; explain why temporary changes are not automatically saved to the source file.",
-    "Diagnose common beginner problems such as unsaved edits, refreshing the wrong tab, opening the wrong file, syntax errors, and changes hidden by browser cache.",
-    "Apply a careful troubleshooting routine: confirm the file and path, save changes, refresh the correct page, inspect Elements and Console, correct the source, and test again."
+    "Choose a suitable plain-text or code editor and explain the role of syntax highlighting, indentation, file navigation, search, extensions and integrated terminals.",
+    "Create, save, rename and reopen project files while verifying their exact path, filename, extension and encoding.",
+    "Use a reliable edit-save-refresh workflow and distinguish source files from the browser's currently loaded document and runtime state.",
+    "Inspect the parsed DOM, computed styles, accessibility-relevant properties and live element state using the Elements panel.",
+    "Use the Console to interpret syntax errors, runtime exceptions, warnings, stack traces and source locations.",
+    "Use the Network panel to inspect request URLs, methods, status codes, headers, initiators, timing, cache behaviour and failed resources.",
+    "Use breakpoints, step controls, scope inspection and watch expressions to investigate JavaScript execution rather than relying only on console logging.",
+    "Distinguish temporary live edits in Developer Tools from persistent changes to source files, and understand the role and limits of source maps.",
+    "Apply hard reload, cache disabling and storage inspection carefully when diagnosing stale content or client-side state.",
+    "Create a repeatable debugging process based on reproducing a problem, collecting evidence, forming a hypothesis, testing one change and verifying the result.",
+    "Protect private data when sharing logs or screenshots and avoid treating client-side debugging as a substitute for server-side validation or security."
   ],
   "prerequisites": [
     "F0.3"
   ],
   "stages": {
     "understand": {
-      "concept": "A text editor is a tool for writing and changing code as plain text. A browser displays the web page. Browser developer tools help inspect page structure, applied styles and JavaScript errors. After changing code, save the file; refresh the browser page to load the saved change.",
-      "whyItMatters": "A reliable edit-save-refresh routine prevents confusion between old and new code. Developer tools let you inspect evidence instead of guessing when something goes wrong.",
-      "history": "Early web workflows used separate tools for editing and viewing pages. Browsers gradually gained built-in developer tools for inspecting page structure, styles, network activity and errors.",
-      "analogy": "A text editor is like writing instructions in a notebook. Saving preserves the instructions; the browser shows the result produced from them. Developer tools are an inspection window.",
-      "analogyLimit": "A browser does more than read notes: it parses HTML, calculates CSS and executes JavaScript. Temporary edits made in developer tools do not automatically change the original file."
+      "concept": "A code editor changes the source files in your project. A browser loads and runs those files. Browser Developer Tools let you inspect what the browser actually received, parsed, calculated and executed. These views can differ: the live DOM may have been changed by JavaScript, computed styles may differ from the declarations you expected, and cached resources may not match the file currently open in the editor. A reliable developer workflow connects source editing with runtime evidence.",
+      "whyItMatters": "Professional development is not just writing code that looks correct once. Developers need to reproduce problems, isolate the responsible layer, inspect evidence, make controlled changes and verify that the fix works across relevant states and devices.",
+      "history": "Browser developer tools evolved from simple page inspection into integrated environments for DOM inspection, CSS editing, JavaScript debugging, network analysis, performance profiling, accessibility inspection and storage management. Modern editors also provide language services, version-control integration, terminals and automated formatting.",
+      "analogy": "The editor is where the blueprint is changed; the browser is where the system is running; Developer Tools are diagnostic instruments that reveal the system's current state.",
+      "analogyLimit": "The browser is not a passive viewer of the source file. It parses and transforms resources, executes code, applies runtime state and may fetch data from servers. A live edit in Developer Tools does not necessarily change the original source."
     },
     "explain": {
-      "narrative": "Open an HTML file in a text editor and change its heading. Save the file. Open that file in a browser and refresh it; the new heading should appear. Open developer tools and inspect the HTML structure in the Elements panel. The Console displays JavaScript messages and errors. When an error appears, note its first line, filename and line number. A live edit in developer tools is temporary; make permanent changes in the source file and save it.",
+      "narrative": "Start by confirming the project folder and exact file path in the editor. Save the source, then reload the correct browser tab. Use Elements to inspect the live DOM and matched/computed CSS. Use Console to inspect exceptions and stack traces. Use Network to confirm that the expected HTML, stylesheet, script and data requests succeeded and returned appropriate headers. When JavaScript behaviour is wrong, set a breakpoint at the relevant statement, reproduce the action, inspect local variables and the call stack, and step through execution. If the browser shows old content, inspect cache status and the requested URL before using a hard reload or disabling cache. Source maps can map generated code back to original source during debugging, but only when the map is available and correctly configured. Treat every observation as evidence; change one likely cause at a time and repeat the test.",
       "examples": [
         {
-          "id": "edit-save-refresh",
+          "id": "f0-4-edit-save-refresh",
           "language": "en",
-          "code": "1. Open index.html in a text editor\\n2. Change the heading text\\n3. Save the file\\n4. Refresh the page in the browser\\n5. Observe the updated heading",
-          "explanation": "If you do not save, the browser may not receive the new change. If you do not refresh, you may still see the previously loaded page. Caching can sometimes require a hard refresh, but begin with a normal refresh.",
-          "expectedOutput": "The browser displays the updated heading.",
+          "title": "The source-to-browser feedback loop",
+          "code": "1. Confirm the project folder and target file.\n2. Edit the source in the code editor.\n3. Save the file.\n4. Reload the matching browser tab.\n5. Reproduce the expected state.\n6. Inspect DOM, Console and Network evidence.\n7. Correct the source, save and test again.",
+          "explanation": "If the browser does not show the edit, first confirm that the correct file was saved and the correct URL is open. Do not immediately assume a cache problem.",
+          "expectedOutput": "The browser's loaded document reflects the saved source and the correct runtime state.",
+          "runnable": false
+        },
+        {
+          "id": "f0-4-inspect-dom-style",
+          "language": "en",
+          "title": "Inspect live DOM and computed styles",
+          "code": "<button class=\"action\" type=\"button\">Save</button>\n\n.action {\n  color: white;\n  background: #145c52;\n}\n\nDeveloper Tools → Elements:\n- select the button\n- inspect its attributes and DOM position\n- inspect matched CSS rules\n- inspect computed color and background",
+          "explanation": "The Elements panel shows the live document tree. The Styles panel shows matched declarations and overrides; Computed shows the final values after the cascade and inheritance are resolved.",
+          "expectedOutput": "You can identify the element, the rule that matches it and the final computed property values.",
+          "runnable": false
+        },
+        {
+          "id": "f0-4-console-stack",
+          "language": "en",
+          "title": "Read a runtime error as a debugging clue",
+          "code": "function renderProfile(profile) {\n  return profile.name.toUpperCase();\n}\n\nrenderProfile(null);\n\n// TypeError: cannot read properties of null\n// (reading 'name')",
+          "explanation": "The exception indicates that the value passed as profile is null when the function tries to read name. The stack trace helps identify where the call occurred. A robust fix should clarify whether null is valid input and handle that contract deliberately, rather than hiding every error with a broad try/catch.",
+          "expectedOutput": "You can identify the failing expression and trace the invalid value to its source.",
+          "runnable": false
+        },
+        {
+          "id": "f0-4-network-investigation",
+          "language": "en",
+          "title": "Use Network evidence to diagnose a missing stylesheet",
+          "code": "Request: /styles/site.css\nMethod: GET\nStatus: 404 Not Found\nInitiator: index.html\n\nInvestigation:\n1. Open the failed request.\n2. Confirm the exact Request URL.\n3. Inspect redirects and response headers.\n4. Compare the URL with the actual deployed file path.\n5. Correct the href and reload.",
+          "explanation": "A stylesheet that returns 404 is a resource-location or server-routing problem before it is a CSS selector problem. Fix the request first; then inspect styles if the file loads but rules do not match.",
+          "expectedOutput": "The stylesheet request returns a successful response and its rules appear in the Styles panel.",
+          "runnable": false
+        },
+        {
+          "id": "f0-4-breakpoint-debugging",
+          "language": "en",
+          "title": "Pause execution and inspect state",
+          "code": "function calculateTotal(price, quantity) {\n  const total = price * quantity;\n  return total;\n}\n\nconst amount = calculateTotal(19.5, 3);",
+          "explanation": "Set a breakpoint on the multiplication statement, reload or reproduce the call, and inspect price, quantity and total in the Scope panel. Step over the statement to see the computed value. A breakpoint lets you inspect execution at the moment the code runs.",
+          "expectedOutput": "The debugger pauses with price = 19.5 and quantity = 3; stepping over calculates total = 58.5.",
+          "runnable": false
+        },
+        {
+          "id": "f0-4-source-vs-runtime",
+          "language": "en",
+          "title": "Source code, generated code and live runtime are different views",
+          "code": "Editor source file\n      ↓ build / transform (if used)\nGenerated browser resource + optional source map\n      ↓ browser parses and executes\nLive DOM + runtime variables + computed styles",
+          "explanation": "In a simple project the browser may load the source file directly. In a bundled application, generated files may differ from authoring files. Source maps can help connect them, but they do not change the fact that the browser executes the delivered resources.",
+          "expectedOutput": "You can explain why a change in an editor, a generated file and the live browser state may not appear simultaneously.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Change a paragraph in index.html, save and refresh. Then locate that paragraph in the Elements panel of developer tools.",
-      "independentTask": "Introduce one small intentional mistake in a practice page. Observe the browser and check the Console for an error. Correct the source file, save and refresh.",
+      "guidedTask": "Create a small page with a button that updates a message. Add a deliberate error by querying a non-existent element and calling addEventListener on the result. Save and reload. Use the Console stack trace to find the failing line, use Elements to confirm the missing ID, correct the selector and verify the click interaction.",
+      "independentTask": "Perform a structured debugging exercise: make a stylesheet path incorrect, introduce a JavaScript null-reference error, and leave an unsaved source change. Diagnose each independently. Record the symptom, evidence, likely cause, one corrective change and the verification result. Then set a breakpoint in a working function and inspect its local variables and call stack.",
       "hints": [
-        "First confirm that the source file was saved.",
-        "Elements shows document structure; Console shows messages and errors.",
-        "Edits made in developer tools are not automatically saved to the source file."
+        "Before debugging code, confirm the correct project folder, file path, filename and browser URL.",
+        "Save source changes before reloading. A live DOM edit in Developer Tools is not a permanent source-file edit.",
+        "Elements answers questions about the live DOM and styles; Console answers questions about JavaScript messages and exceptions.",
+        "Network answers whether the browser requested the expected resource, what response it received and how long it took.",
+        "Read the first meaningful stack-trace frame in your own code. Inspect the value that caused the failing operation.",
+        "Use a breakpoint to pause execution and inspect variables, scope and call stack. Step over, into or out according to the question you are investigating.",
+        "Disable cache only when investigating a suspected caching issue; keep in mind that doing so changes normal loading behaviour.",
+        "Source maps can map generated code to original files, but a missing or stale map can make debugging locations misleading.",
+        "Reproduce the issue before changing code. Change one likely cause at a time and verify the original failure is gone.",
+        "Remove passwords, cookies, authorization headers, session IDs, personal data and private environment details from shared diagnostic output."
       ]
     }
   },
@@ -58,27 +112,59 @@
     "questions": [
       {
         "id": "f0-4-q1",
-        "prompt": "What is the usual order after editing a source file?",
+        "prompt": "Which panel is best for checking the final computed colour of a selected element?",
         "options": [
-          "Refresh, then save",
-          "Save, then refresh the browser",
-          "Only close developer tools"
+          "Elements / Computed styles",
+          "Network / Timing",
+          "Console / Call stack"
         ],
-        "answer": "Save, then refresh the browser",
-        "explanation": "Save the source change first, then refresh the browser page to load it."
+        "answer": "Elements / Computed styles",
+        "explanation": "The Computed view shows the final resolved CSS property values for the selected element."
       },
       {
         "id": "f0-4-q2",
-        "prompt": "Where can you usually inspect JavaScript errors?",
+        "prompt": "A stylesheet request returns 404. What should you investigate first?",
         "options": [
-          "The browser Console",
-          "The images folder",
-          "Only the HTML title"
+          "The selector specificity of every CSS rule.",
+          "The requested URL, file path and server routing.",
+          "The user's JavaScript variables."
         ],
-        "answer": "The browser Console",
-        "explanation": "The Console displays JavaScript errors, warnings and messages."
+        "answer": "The requested URL, file path and server routing.",
+        "explanation": "A 404 means the requested resource was not found at that URL. Confirm the path and server mapping before debugging CSS rules."
+      },
+      {
+        "id": "f0-4-q3",
+        "prompt": "What is the main benefit of a JavaScript breakpoint?",
+        "options": [
+          "It automatically fixes the program.",
+          "It pauses execution so you can inspect variables and the call stack.",
+          "It saves the browser's live DOM into the source file."
+        ],
+        "answer": "It pauses execution so you can inspect variables and the call stack.",
+        "explanation": "Breakpoints let you examine program state at a specific point during execution."
+      },
+      {
+        "id": "f0-4-q4",
+        "prompt": "Why might the browser's live DOM differ from the original HTML source?",
+        "options": [
+          "JavaScript may have modified the DOM after parsing.",
+          "The source file extension always changes the markup.",
+          "The Network panel rewrites all HTML."
+        ],
+        "answer": "JavaScript may have modified the DOM after parsing.",
+        "explanation": "The DOM is a live in-memory representation and scripts can add, remove or change nodes and attributes."
+      },
+      {
+        "id": "f0-4-q5",
+        "prompt": "What is a sound first step when a change does not appear in the browser?",
+        "options": [
+          "Immediately clear all browser data.",
+          "Confirm the saved file, its path and the URL open in the browser.",
+          "Rewrite unrelated CSS and JavaScript."
+        ],
+        "answer": "Confirm the saved file, its path and the URL open in the browser.",
+        "explanation": "Many apparent cache problems are caused by editing one file while viewing another or forgetting to save the change."
       }
     ]
-  },
-  "status": "draft"
+  }
 }
