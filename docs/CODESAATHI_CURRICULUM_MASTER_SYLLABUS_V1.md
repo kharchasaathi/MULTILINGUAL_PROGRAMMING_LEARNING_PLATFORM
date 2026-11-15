@@ -56,7 +56,7 @@ Every executable example across HTML, CSS, and JavaScript must have a live outpu
 - H2.2 Doctype and standards mode
 - H2.3 html, head, and body
 - H2.4 Page title, metadata, character encoding, viewport
-- H2.5 Comments and readable indentation
+- H2.5 The body element, document content, and browser DOM
 - H2.6 Live preview: change code and observe page
 
 ### H3. Text and content
