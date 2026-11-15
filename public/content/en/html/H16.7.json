@@ -1,0 +1,123 @@
+{
+  "id": "html.h16.7.en",
+  "courseId": "html",
+  "moduleId": "H16",
+  "topicId": "H16.7",
+  "title": "HTML URL encoding and percent-encoded data",
+  "language": "en",
+  "learningObjectives": [
+    "Explain html url encoding and percent-encoded data and its role in modern HTML.",
+    "Select the correct elements, attributes, APIs, or browser behaviour for a practical use case.",
+    "Distinguish current practices from obsolete, limited, or legacy techniques.",
+    "Build and inspect a working example while considering accessibility and maintainability.",
+    "Diagnose common implementation errors and explain the trade-offs of the chosen approach."
+  ],
+  "prerequisites": [
+    "H1.5",
+    "H2.1",
+    "H2.4"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A URL has structural delimiters such as scheme separators, path slashes, query markers, and fragment markers. Data that conflicts with those delimiters or is not permitted in a URL component must be percent-encoded as UTF-8 bytes, represented by % followed by two hexadecimal digits. Encoding is component-specific: encodeURIComponent is appropriate for an individual query value, while encodeURI preserves URL structure delimiters. Do not encode an entire URL as though it were one data value, and do not decode untrusted data repeatedly. URLSearchParams is usually the clearest way to construct query strings.",
+      "whyItMatters": "Incorrect encoding can change the meaning of a URL, break links, or cause data to be interpreted as structure. Correct component encoding is important when user-provided text is included in links or requests.",
+      "analogy": "URL delimiters are punctuation in a sentence; encoding protects data characters so they are not mistaken for punctuation.",
+      "analogyLimit": "Percent encoding is not encryption, validation, authorization, or protection against every injection attack."
+    },
+    "explain": {
+      "narrative": "Build a query string containing a name with spaces and reserved characters. Compare manual concatenation with URLSearchParams and encodeURIComponent, then inspect the decoded value.",
+      "examples": [
+        {
+          "id": "h16-7-example-1",
+          "language": "html",
+          "code": "const value = \"tea & coffee / 250g\"; const url = \"/search?q=\" + encodeURIComponent(value); console.log(url);",
+          "explanation": "encodeURIComponent encodes the value as one query component, so its ampersand and slash cannot be mistaken for query structure.",
+          "expectedOutput": "/search?q=tea%20%26%20coffee%20%2F%20250g",
+          "runnable": true
+        },
+        {
+          "id": "h16-7-example-2",
+          "language": "html",
+          "code": "const params = new URLSearchParams({ q: \"tea & coffee\", page: \"2\" }); console.log(\"/search?\" + params.toString());",
+          "explanation": "URLSearchParams serializes query parameters and handles component encoding without manual delimiter management.",
+          "expectedOutput": "/search?q=tea+%26+coffee&page=2",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a search link from a user-entered phrase containing spaces, ampersands, plus signs, and non-ASCII characters. Use URLSearchParams and verify the parsed values.",
+      "independentTask": "Review a page that concatenates user data into URL paths and query strings. Replace unsafe construction, distinguish path segments from query values, and document that encoding does not validate or authorize the data.",
+      "hints": [
+        "Encode individual components, not the complete URL structure.",
+        "Use URLSearchParams for query strings.",
+        "Percent encoding is reversible representation, not encryption."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "html",
+    "starterCode": "const value = \"tea & coffee / 250g\"; const url = \"/search?q=\" + encodeURIComponent(value); console.log(url);",
+    "resetCode": "const value = \"tea & coffee / 250g\"; const url = \"/search?q=\" + encodeURIComponent(value); console.log(url);"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "h16-7-q1",
+        "prompt": "What does %20 represent in a percent-encoded URL?",
+        "options": [
+          "A space byte in UTF-8 encoding",
+          "A password hash",
+          "A URL fragment"
+        ],
+        "answer": "A space byte in UTF-8 encoding",
+        "explanation": "Percent encoding represents bytes using a percent sign and two hexadecimal digits."
+      },
+      {
+        "id": "h16-7-q2",
+        "prompt": "Which function is suitable for encoding one query value?",
+        "options": [
+          "encodeURIComponent",
+          "encodeURI for the entire query value",
+          "JSON.stringify"
+        ],
+        "answer": "encodeURIComponent",
+        "explanation": "encodeURIComponent encodes reserved characters that would otherwise affect URL component structure."
+      },
+      {
+        "id": "h16-7-q3",
+        "prompt": "Why is URLSearchParams useful?",
+        "options": [
+          "It safely constructs and parses query parameters",
+          "It encrypts query values",
+          "It validates user identity"
+        ],
+        "answer": "It safely constructs and parses query parameters",
+        "explanation": "URLSearchParams handles query separators and component serialization."
+      },
+      {
+        "id": "h16-7-q4",
+        "prompt": "Is percent encoding encryption?",
+        "options": [
+          "No",
+          "Yes, it hides data with a secret key",
+          "Only when HTTPS is used"
+        ],
+        "answer": "No",
+        "explanation": "Encoding is a representation format; it does not provide confidentiality."
+      },
+      {
+        "id": "h16-7-q5",
+        "prompt": "What is a common mistake when encoding URLs?",
+        "options": [
+          "Encoding the entire URL as one component and destroying its delimiters",
+          "Encoding an individual query value",
+          "Using URLSearchParams"
+        ],
+        "answer": "Encoding the entire URL as one component and destroying its delimiters",
+        "explanation": "The URL's structural delimiters should remain structure, while individual data components are encoded."
+      }
+    ]
+  },
+  "status": "draft"
+}
