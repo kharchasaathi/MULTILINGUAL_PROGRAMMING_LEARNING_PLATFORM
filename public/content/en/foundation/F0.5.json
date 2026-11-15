@@ -3,7 +3,7 @@
   "courseId": "foundation",
   "moduleId": "F0",
   "topicId": "F0.5",
-  "title": "How HTML, CSS and JavaScript Work Together",
+  "title": "How HTML, CSS and JavaScript Work Together in a Modern Web Application",
   "language": "en",
   "learningObjectives": [
     "Explain that HTML defines the meaning and structure of content, including headings, paragraphs, links, images, forms and buttons, rather than deciding the complete visual design or behaviour by itself.",
@@ -34,7 +34,7 @@
       "analogyLimit": "The comparison is only a memory aid. HTML, CSS and JavaScript can influence one another: JavaScript can change content or classes, CSS can respond to states, and HTML semantics affect accessibility and browser behaviour. Their technical roles are more flexible than separate theatre teams."
     },
     "explain": {
-      "narrative": "A browser starts with an HTML document. As it parses that document, it creates a structured representation of the elements, commonly called the DOM. The HTML can reference a stylesheet with a `link` element and a JavaScript file with a `script` element. The browser loads those resources, applies matching CSS rules to the page, and runs JavaScript according to the script's loading behaviour. The result is one rendered page, not three separate documents shown to the user.\\n\\nThe technologies also work together after the page loads. A CSS selector targets elements in the document. JavaScript can find an element through the DOM, listen for an event such as a click, and update text or attributes. The browser then reflects the change in the displayed page.\\n\\nWhen something does not work, identify the responsibility before editing. Missing content usually points first to HTML; an incorrect appearance points first to CSS; an interaction that does not respond points first to JavaScript or the connection between the script and the page. These are starting points for investigation, not guarantees: a wrong file path or selector can break the connection between technologies.",
+      "narrative": "A browser begins with an HTML response and parses it into a document structure represented by the DOM. The document can reference stylesheets with link elements and scripts with script elements. CSS is parsed into rules that participate in the cascade and produce computed styles for matching elements. JavaScript executes according to its loading mode and can read or change the DOM, respond to events, request data and update application state. The browser coordinates these resources and rendering work; it does not simply display three separate files.\n\nKeep the responsibilities clear. HTML should express meaningful structure and semantics: headings, navigation, forms, buttons, tables and landmarks. CSS should express presentation and responsive behaviour, including layout, typography, states and media queries. JavaScript should implement behaviour, state transitions, validation and communication with APIs. This separation is a maintainability guideline, not a claim that the technologies cannot interact. CSS selectors depend on document structure, JavaScript can change classes and content, and semantic HTML provides built-in browser behaviour and accessibility.\n\nFor an interaction, trace the full chain: the HTML supplies a real button; JavaScript selects it and registers an event listener; a user action dispatches an event; the handler updates the DOM or application state; and the browser recalculates the affected rendering output. A missing stylesheet, wrong script URL, selector mismatch, script timing problem, runtime exception or incorrect event handling can break a different link in this chain.\n\nUse browser Developer Tools to identify the failing layer. Network confirms whether CSS and JavaScript resources loaded and which response they received. Elements shows the live DOM and matched styles. Console reveals script errors. Performance helps identify expensive work. Avoid using a clickable div when a native button provides the required keyboard and accessibility behaviour. Prefer semantic HTML first, then add CSS and JavaScript where they provide a real benefit.",
       "examples": [
         {
           "id": "f0.5-example",
@@ -43,12 +43,57 @@
           "explanation": "The HTML creates the heading and button and connects the other files. The CSS changes how the page looks. The JavaScript listens for a click and changes the heading text through the DOM. The browser combines these contributions into one interactive page. In a real project, put each part in its own file exactly as indicated.",
           "expectedOutput": "The page shows a heading and a button. The button has CSS styling. When the user clicks it, the heading changes to “Hello from JavaScript!”.",
           "runnable": false
+        },
+        {
+          "id": "f0.5-architecture",
+          "language": "en",
+          "title": "The browser-side responsibility map",
+          "code": "HTML response → DOM\nCSS files → CSS rules → cascade → computed styles\nJavaScript → event handlers + application state + DOM updates\nDOM + computed styles + assets → layout → paint → composite",
+          "explanation": "The three technologies have distinct primary roles, but their outputs cooperate. JavaScript can update structure or classes; CSS can respond to state; HTML semantics influence browser behaviour and accessibility.",
+          "expectedOutput": "You can identify which layer owns structure, presentation and behaviour, and where their integration points occur.",
+          "runnable": false
+        },
+        {
+          "id": "f0.5-script-loading",
+          "language": "en",
+          "title": "Script loading affects when code can access the document",
+          "code": "<!-- Preferred for many external page scripts -->\n<script src=\"app.js\" defer></script>\n\n<!-- Runs when fetched; ordering is not guaranteed -->\n<script src=\"analytics.js\" async></script>\n\n<!-- Module scripts are deferred by default -->\n<script type=\"module\" src=\"main.js\"></script>",
+          "explanation": "defer downloads in parallel and runs after HTML parsing, preserving order among deferred classic scripts. async runs as soon as it is ready and does not guarantee order. Module scripts are deferred by default. Choose based on dependencies, not habit.",
+          "expectedOutput": "You can explain why a script may run before or after a DOM element is parsed.",
+          "runnable": false
+        },
+        {
+          "id": "f0.5-semantic-interaction",
+          "language": "en",
+          "title": "Use native HTML controls before adding behaviour",
+          "code": "<button id=\"saveButton\" type=\"button\">Save</button>\n<p id=\"status\" role=\"status\" aria-live=\"polite\"></p>\n\nconst button = document.querySelector(\"#saveButton\");\nconst status = document.querySelector(\"#status\");\nbutton.addEventListener(\"click\", () => {\n  status.textContent = \"Saved\";\n});",
+          "explanation": "A native button supports keyboard activation and exposes button semantics. The status region can announce a dynamic update to assistive technology. A clickable generic element would require additional keyboard and accessibility work.",
+          "expectedOutput": "The button works with pointer and keyboard input and updates a status message.",
+          "runnable": false
+        },
+        {
+          "id": "f0.5-cascade-integration",
+          "language": "en",
+          "title": "CSS selectors connect styles to document structure",
+          "code": "<button class=\"primary\" type=\"button\">Continue</button>\n\n.primary {\n  background: #155e75;\n  color: white;\n}\n\n.primary:focus-visible {\n  outline: 3px solid currentColor;\n  outline-offset: 3px;\n}",
+          "explanation": "The class in HTML gives CSS a stable styling hook. The focus-visible state provides a visible keyboard focus indicator. Avoid styling through fragile selectors that depend on unrelated nesting.",
+          "expectedOutput": "The same semantic button receives the intended default and keyboard-focus presentation.",
+          "runnable": false
+        },
+        {
+          "id": "f0.5-integration-debug",
+          "language": "en",
+          "title": "Debug the connection between the three technologies",
+          "code": "Network → Did the CSS and JS requests succeed?\nElements → Does the expected element exist?\nStyles → Which rule wins in the cascade?\nConsole → Did JavaScript throw an exception?\nSources → Does the event handler run?",
+          "explanation": "A symptom can originate in another layer. For example, a correct CSS selector cannot style an element that is not present, and a correct event handler cannot run if the script failed to load.",
+          "expectedOutput": "You can use evidence to locate the broken integration point before editing code.",
+          "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Create three files named `index.html`, `styles.css` and `app.js` in one project folder. Add a heading and button in HTML, style them in CSS, and use a JavaScript click event to change the heading text. Save all files, open the HTML page in a browser and test the button.",
-      "independentTask": "Build a small personal introduction page with a heading, paragraph and button. Keep the content in HTML, the visual design in CSS, and one interactive action in JavaScript. Then explain which file is responsible for each part and what happens when the button is clicked.",
+      "guidedTask": "Build a small accessible interaction with three separate files. In HTML, create a main landmark, a heading, a paragraph and a button with a descriptive accessible name. In CSS, create a responsive layout and visible keyboard focus style. In JavaScript, register an event listener that updates the paragraph and an aria-live status message. Test with mouse and keyboard. Then deliberately break the stylesheet path, script path and selector one at a time; use Network, Elements and Console to identify each failure.",
+      "independentTask": "Create a responsive task counter. HTML must provide semantic structure and a native button. CSS must handle layout, spacing, focus visibility and a reduced-motion preference. JavaScript must keep a numeric state, update the displayed count and prevent invalid values. Keep the files separate, document the interaction contract and test keyboard operation, narrow screens and repeated clicks.",
       "hints": [
         "Check that the stylesheet path in the `link` element matches the actual file name and folder.",
         "Check that the script path is correct; `defer` lets the browser run the script after the HTML has been parsed.",
@@ -105,6 +150,50 @@
         ],
         "answer": "It makes the project easier to understand, test and maintain",
         "explanation": "Clear separation of primary responsibilities improves readability and troubleshooting."
+      },
+      {
+        "id": "f0.5-q5",
+        "prompt": "Which script loading mode normally waits until HTML parsing has completed while preserving order among deferred classic scripts?",
+        "options": [
+          "async",
+          "defer",
+          "A script with no loading attribute always"
+        ],
+        "answer": "defer",
+        "explanation": "defer scripts are fetched in parallel and execute after parsing, in document order."
+      },
+      {
+        "id": "f0.5-q6",
+        "prompt": "Why is a native button usually preferable to a clickable div for an action?",
+        "options": [
+          "A button automatically writes server code.",
+          "A button already provides native interactive semantics and keyboard behaviour.",
+          "A div cannot be styled."
+        ],
+        "answer": "A button already provides native interactive semantics and keyboard behaviour.",
+        "explanation": "Native controls provide built-in interaction semantics and reduce the extra work needed for accessibility."
+      },
+      {
+        "id": "f0.5-q7",
+        "prompt": "A click handler does not run and the script request returns 404. What should be fixed first?",
+        "options": [
+          "The JavaScript event logic.",
+          "The script URL or server path so the file loads.",
+          "The button's CSS colour."
+        ],
+        "answer": "The script URL or server path so the file loads.",
+        "explanation": "The browser cannot execute a script resource that it failed to retrieve."
+      },
+      {
+        "id": "f0.5-q8",
+        "prompt": "What is the cascade responsible for?",
+        "options": [
+          "Selecting and resolving applicable CSS declarations into computed styles.",
+          "Executing JavaScript functions.",
+          "Resolving DNS names."
+        ],
+        "answer": "Selecting and resolving applicable CSS declarations into computed styles.",
+        "explanation": "The cascade determines which declarations apply when rules overlap, taking origin, importance, layers, specificity and source order into account."
       }
     ]
   },
