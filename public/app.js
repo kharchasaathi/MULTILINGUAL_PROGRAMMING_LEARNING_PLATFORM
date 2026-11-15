@@ -20,16 +20,22 @@
     if (previewStatus) previewStatus.textContent = "● RUNNING";
     try {
       documentInFrame.open();
-      documentInFrame.write(
-        "<!doctype html><html><head><meta charset=\"utf-8\">" +
-        "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">" +
-        "<style>body{font:16px Arial,sans-serif;padding:22px;color:#172033}" +
-        "button{padding:9px 14px;border:0;border-radius:7px;background:#6558e8;" +
-        "color:white;cursor:pointer}button:focus-visible{outline:3px solid #172033;" +
-        "outline-offset:3px}</style></head><body>" +
-        editor.value +
-        "</body></html>"
-      );
+      const source = editor.value;
+      const isFullDocument = /^\\s*(?:<!doctype\\s+html\\b[^>]*>\\s*)?<html\\b/i.test(source);
+      if (isFullDocument) {
+        documentInFrame.write(source);
+      } else {
+        documentInFrame.write(
+          "<!doctype html><html><head><meta charset=\"utf-8\">" +
+          "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">" +
+          "<style>body{font:16px Arial,sans-serif;padding:22px;color:#172033}" +
+          "button{padding:9px 14px;border:0;border-radius:7px;background:#6558e8;" +
+          "color:white;cursor:pointer}button:focus-visible{outline:3px solid #172033;" +
+          "outline-offset:3px}</style></head><body>" +
+          source +
+          "</body></html>"
+        );
+      }
       documentInFrame.close();
       if (previewStatus) previewStatus.textContent = "● READY";
     } catch (error) {
