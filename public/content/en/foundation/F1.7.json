@@ -50,12 +50,39 @@
           "explanation": "A hypothesis is a testable possible explanation based on observations. Test it directly instead of changing unrelated code.",
           "expectedOutput": "A testable explanation and a focused next step.",
           "runnable": false
+        },
+        {
+          "id": "f1.7-data-boundaries",
+          "language": "en",
+          "title": "Inspect component contracts at each boundary",
+          "code": "Form input\n  ↓ values + types\nValidation\n  ↓ accepted data or errors\nRequest builder\n  ↓ payload + headers\nAPI response handler\n  ↓ parsed result or failure\nUI state update\n  ↓ visible confirmation",
+          "explanation": "Each boundary has a contract: expected inputs, outputs and failure behaviour. Inspecting the boundary where data changes unexpectedly is often more effective than reading the whole application at once.",
+          "expectedOutput": "A traceable path from user input to a visible result.",
+          "runnable": false
+        },
+        {
+          "id": "f1.7-regression",
+          "language": "en",
+          "title": "Retest related behaviour after a focused fix",
+          "code": "Original bug: empty quantity was accepted.\nFix: require a positive integer.\nRegression checks:\n- quantity 1 is accepted\n- quantity 5 is accepted\n- quantity 0 is rejected\n- negative quantity is rejected\n- decimal quantity is rejected\n- empty quantity is rejected",
+          "explanation": "A fix should be checked against the original failure and nearby valid and invalid cases. Regression testing guards against correcting one case while breaking another.",
+          "expectedOutput": "All listed cases follow the documented validation rule.",
+          "runnable": false
+        },
+        {
+          "id": "f1.7-observability",
+          "language": "en",
+          "title": "Use logs and request evidence without leaking secrets",
+          "code": "Useful diagnostic fields:\n- request correlation ID\n- operation name\n- status and duration\n- sanitized error category\n\nNever log:\n- passwords\n- access tokens\n- session cookies\n- private personal data",
+          "explanation": "Useful observability helps trace a request across components. Logs should be structured and privacy-aware; secrets must not be copied into console output or shared bug reports.",
+          "expectedOutput": "A diagnostic record that helps trace a failure without exposing credentials.",
+          "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "A button should display a message, but nothing happens. Divide the feature into the HTML button, event listener, JavaScript handler, message element, and browser Console. Record expected and actual results, checks, one hypothesis, and how you would retest.",
-      "independentTask": "Choose or create a small bug in a practice project. Record expected and actual results, exact reproduction steps, evidence, hypothesis, one focused change, retest result, and regression checks.",
+      "guidedTask": "Draw the component and data-flow map for a registration or checkout feature. Define the input and output contract for each component. Create one failure at a boundary, collect evidence, identify the first incorrect value or missing event and document a focused correction and regression test.",
+      "independentTask": "Investigate a multi-step bug using a minimal reproduction. Map the data flow, inspect component boundaries, state a testable hypothesis, apply one focused fix and create regression cases for valid, invalid and boundary inputs. Write a privacy-safe bug report that another developer can reproduce.",
       "hints": [
         "Reproduce the same problem before changing code.",
         "Compare expected and actual behaviour.",
@@ -124,6 +151,28 @@
         ],
         "answer": "Retest the original case and check related features",
         "explanation": "Retesting confirms the fix and regression checks help protect existing behaviour."
+      },
+      {
+        "id": "f1.7-q6",
+        "prompt": "What should you inspect when debugging a multi-component feature?",
+        "options": [
+          "Only the colour of the final screen",
+          "Every file at once without a hypothesis",
+          "Only the final visible message"
+        ],
+        "answer": "The inputs, outputs and dependencies at component boundaries",
+        "explanation": "Component contracts and boundaries help locate where data or control flow first becomes incorrect."
+      },
+      {
+        "id": "f1.7-q7",
+        "prompt": "Why should diagnostic logs avoid secrets and personal information?",
+        "options": [
+          "Secrets make logs slower to display.",
+          "A browser cannot log text.",
+          "Personal data is required in every stack trace."
+        ],
+        "answer": "Logs may be stored, shared or accessed by people and systems that should not receive sensitive values.",
+        "explanation": "Diagnostic data should provide useful evidence while minimizing privacy and credential exposure."
       }
     ]
   },
