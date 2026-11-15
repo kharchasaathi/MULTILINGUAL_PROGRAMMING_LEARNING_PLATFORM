@@ -217,8 +217,9 @@ const link = $(".lesson-practice-link", container);
       }, true);
     } catch (error) {
       console.error("CodeSaathi curriculum could not initialize:", error);
-      const notice = text("p", "curriculum-error", "The authored curriculum could not be loaded. The original course preview remains available.");
+      const notice = text("p", "curriculum-error", "The curriculum could not be loaded. Check your connection and reload the page to try again.");
       grid.prepend(notice);
+      document.querySelectorAll("[data-course-nav]").forEach(button => { button.disabled = true; });
     }
   }
   init();
