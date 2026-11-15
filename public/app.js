@@ -19,24 +19,45 @@
 
     if (previewStatus) previewStatus.textContent = "● RUNNING";
     try {
-      documentInFrame.open();
       const source = editor.value;
+      const mode = editor.dataset.playgroundMode || "html";
       const isFullDocument = /^\s*(?:<!doctype\s+html\b[^>]*>\s*)?<html\b/i.test(source);
-      if (isFullDocument) {
-        documentInFrame.write(source);
+      if (isFullDocument || mode === "html" || mode === "combined") {
+        const html = isFullDocument
+          ? source
+          : "<!doctype html><html><head><meta charset=\"utf-8\">" +
+            "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">" +
+            "<style>body{font:16px Arial,sans-serif;padding:22px;color:#172033}" +
+            "button{padding:9px 14px;border:0;border-radius:7px;background:#6558e8;" +
+            "color:white;cursor:pointer}button:focus-visible{outline:3px solid #172033;" +
+            "outline-offset:3px}</style></head><body>" + source + "</body></html>";
+        documentInFrame.open();
+        documentInFrame.write(html);
+        documentInFrame.close();
       } else {
+        documentInFrame.open();
         documentInFrame.write(
           "<!doctype html><html><head><meta charset=\"utf-8\">" +
           "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">" +
           "<style>body{font:16px Arial,sans-serif;padding:22px;color:#172033}" +
-          "button{padding:9px 14px;border:0;border-radius:7px;background:#6558e8;" +
-          "color:white;cursor:pointer}button:focus-visible{outline:3px solid #172033;" +
-          "outline-offset:3px}</style></head><body>" +
-          source +
-          "</body></html>"
+          ".demo-card{max-width:36rem;padding:1.5rem;border:1px solid #cbd5e1;border-radius:12px}" +
+          "button{padding:9px 14px;border:0;border-radius:7px;background:#6558e8;color:white}" +
+          "</style></head><body><main class=\"demo-card\">" +
+          "<h1>CodeSaathi preview</h1><p id=\"demoMessage\">Edit the code to see the result.</p>" +
+          "<button id=\"demoButton\" type=\"button\">Test interaction</button>" +
+          "</main></body></html>"
         );
+        documentInFrame.close();
+        if (mode === "css") {
+          const style = documentInFrame.createElement("style");
+          style.textContent = source;
+          documentInFrame.head.appendChild(style);
+        } else if (mode === "javascript") {
+          const script = documentInFrame.createElement("script");
+          script.textContent = source;
+          documentInFrame.body.appendChild(script);
+        }
       }
-      documentInFrame.close();
       if (previewStatus) previewStatus.textContent = "● READY";
     } catch (error) {
       if (previewStatus) previewStatus.textContent = "● PREVIEW ERROR";
