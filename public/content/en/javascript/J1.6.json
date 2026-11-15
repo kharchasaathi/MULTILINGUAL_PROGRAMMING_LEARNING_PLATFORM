@@ -3,10 +3,21 @@
   "courseId": "javascript",
   "moduleId": "J1",
   "topicId": "J1.6",
-  "title": "Where JavaScript runs: browser and server runtimes",
+  "title": "Where JavaScript Runs: Browser, Server and Other Runtime Environments",
   "language": "en",
   "learningObjectives": [
-    "Explain where javascript runs: browser and server runtimes and describe JavaScript's role in web development."
+    "Define a runtime environment as the execution context and host services available to a program.",
+    "Explain how JavaScript executes in browser engines and server-side runtimes.",
+    "Distinguish core ECMAScript features from APIs supplied by a host environment.",
+    "Identify browser APIs such as document, window, events, Fetch and localStorage.",
+    "Identify common server-side capabilities such as file access, process information and server networking.",
+    "Explain why browser code cannot assume that Node.js APIs are available and server code cannot assume a DOM exists.",
+    "Describe how a JavaScript engine and host runtime cooperate to execute code and provide services.",
+    "Explain the event loop at a conceptual level and identify timers, user events and network completions as sources of asynchronous work.",
+    "Recognize security differences between browser sandboxes and server processes with access to protected resources.",
+    "Compare common deployment contexts such as a browser page, a Node.js server, a serverless function and an edge runtime.",
+    "Choose environment-appropriate APIs and avoid exposing privileged server capabilities to client-side code.",
+    "Debug a runtime-specific error by identifying the environment and checking its available APIs."
   ],
   "prerequisites": [
     "F1.1",
@@ -15,13 +26,14 @@
   ],
   "stages": {
     "understand": {
-      "concept": "JavaScript can run in browsers and server-side runtimes such as Node.js and other compatible environments. The language is shared, but the available host APIs differ: browsers provide DOM and window-related APIs, while server runtimes provide file, process, and networking capabilities under their own security models.",
-      "whyItMatters": "Code that uses document or window will not run unchanged in a server runtime. Understanding the host environment prevents accidental assumptions about APIs and permissions.",
-      "analogy": "The language is the same toolkit, but the workbench and available tools differ between a browser and a server runtime.",
-      "analogyLimit": "The analogy is simplified; language standards and host runtime APIs have precise technical boundaries."
+      "concept": "JavaScript can run in several environments. In a browser, a JavaScript engine executes the language and the browser supplies Web APIs such as the DOM, events, Fetch and storage. In a server-side runtime such as Node.js, the engine is hosted with APIs for processes, files, networking and server applications. The core language is broadly shared, but the host APIs and security boundaries differ.",
+      "whyItMatters": "A common beginner error is to copy code from one JavaScript environment into another and assume its APIs exist. Identifying the runtime first helps you choose the right documentation, protect privileged operations and understand why a program works in one environment but fails in another.",
+      "analogy": "The language is like a common set of instructions; the runtime is the workplace that provides the tools and resources available to carry them out.",
+      "analogyLimit": "The analogy does not show the technical security model. A browser page runs under browser sandbox and origin rules, while a server process may have access to files, secrets and network services according to its permissions.",
+      "history": "JavaScript began in browsers, but independent engines and server-side runtimes expanded where it could be used. Modern JavaScript tooling also runs in command-line and build environments. The language is shared, while the host environment determines which APIs are available."
     },
     "explain": {
-      "narrative": "This example depends on the browser DOM. A server-side JavaScript program would use different APIs to produce output.",
+      "narrative": "The JavaScript language describes syntax and core behaviour, but it does not provide every capability an application needs. A runtime executes the code and supplies host APIs. In a browser, document.querySelector() accesses the page's DOM, addEventListener() responds to events, fetch() can request resources and localStorage can store origin-scoped data. These are Web platform APIs.\n\nIn Node.js, code commonly uses process information, file-system APIs, server networking and package modules. A Node.js process does not automatically have a document or window because it is not running inside a browser page. Other runtimes, such as serverless and edge environments, provide their own combinations of APIs and restrictions.\n\nThe engine and runtime work together. The engine evaluates JavaScript, while the host environment schedules events and exposes services. Asynchronous operations such as timers and network requests complete later and schedule callbacks or promise continuations. The event loop coordinates when this work can run. A program that assumes a network response arrives immediately or that an event handler runs synchronously can contain race conditions.\n\nSecurity boundaries differ. Browser code is delivered to a user's device and can be inspected or modified; it must not contain privileged credentials. Server code can access protected resources, but only according to its identity and permissions. Validate and authorize operations on the server. Do not expose file-system or secret-management capabilities to untrusted browser code.\n\nBefore using an API, identify the runtime and consult its documentation. If an error says document is not defined, ask whether the code is running outside a browser. If process is unavailable, check whether the code is actually running in Node.js or a restricted browser/edge runtime.",
       "examples": [
         {
           "id": "j1-6-example",
@@ -30,16 +42,45 @@
           "explanation": "This example depends on the browser DOM. A server-side JavaScript program would use different APIs to produce output.",
           "expectedOutput": "A browser page displays or updates text using JavaScript.",
           "runnable": true
+        },
+        {
+          "id": "j1.6-browser-runtime",
+          "language": "en",
+          "title": "Browser JavaScript uses Web APIs",
+          "code": "const heading = document.querySelector(\"h1\");\n\nif (heading) {\n  heading.textContent = \"Updated in the browser\";\n}",
+          "explanation": "document is provided by the browser DOM environment. This code expects a page and will not work unchanged in a basic server runtime without a DOM implementation.",
+          "expectedOutput": "The page heading changes when the code runs in a browser.",
+          "runnable": false
+        },
+        {
+          "id": "j1.6-node-runtime",
+          "language": "en",
+          "title": "Server-side JavaScript uses runtime APIs",
+          "code": "// Node.js example\nimport { readFile } from \"node:fs/promises\";\n\nconst text = await readFile(\"./notes.txt\", \"utf8\");\nconsole.log(text);",
+          "explanation": "The node:fs/promises module is a Node.js API. It is not a browser DOM feature and should not be imported into ordinary client-side code.",
+          "expectedOutput": "The program reads a local file when run in a permitted Node.js environment.",
+          "runnable": false
+        },
+        {
+          "id": "j1.6-runtime-boundary",
+          "language": "en",
+          "title": "Choose APIs according to the host",
+          "code": "Browser host: document, window, DOM events, localStorage\nNode.js host: process, file system, server networking\nEdge host: request/response APIs and runtime-specific limits\nCore language: variables, functions, objects, promises, modules",
+          "explanation": "The host environment determines available APIs and permissions. A runtime-specific program should document and test its environment assumptions.",
+          "expectedOutput": "You can classify an API by the runtime that supplies it.",
+          "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Identify which parts of a sample script depend on the browser DOM and which use core JavaScript language features.",
-      "independentTask": "Create a short explanation and runnable example that separates core JavaScript language features from browser-specific APIs.",
+      "guidedTask": "Take one browser JavaScript example and identify every API it uses. Then explain which parts are core ECMAScript and which parts require a browser. Compare it with a simple Node.js file-reading example and list the runtime assumptions.",
+      "independentTask": "Design a small application split into browser and server responsibilities. List which code runs in each runtime, which APIs each side can use, what data crosses the network and where authentication, authorization and secrets are handled.",
       "hints": [
-        "Keep Java and JavaScript distinct.",
-        "Identify the runtime before using host APIs.",
-        "Use original examples and explain each line."
+        "The runtime supplies host APIs; ECMAScript defines the core language.",
+        "document and window are browser APIs, not universal JavaScript globals.",
+        "Node.js provides file and process APIs but does not automatically provide a page DOM.",
+        "Server-side code must protect secrets and enforce authorization.",
+        "Asynchronous network and timer work completes later through the runtime's scheduling model."
       ]
     }
   },
@@ -71,6 +112,39 @@
         ],
         "answer": "The runtime or host environment",
         "explanation": "Available APIs depend on whether code runs in a browser, server runtime, or another host."
+      },
+      {
+        "id": "j1.6-q3",
+        "prompt": "Why does document.querySelector fail in a basic Node.js process?",
+        "options": [
+          "The Node.js environment does not automatically provide a browser DOM.",
+          "JavaScript has no functions.",
+          "The document object is part of CSS."
+        ],
+        "answer": "The Node.js environment does not automatically provide a browser DOM.",
+        "explanation": "document is a browser Web API. A server runtime does not automatically include the DOM."
+      },
+      {
+        "id": "j1.6-q4",
+        "prompt": "Which capability is commonly provided by Node.js rather than the browser page environment?",
+        "options": [
+          "Access to the server process and file-system APIs, subject to permissions",
+          "The CSS cascade",
+          "The HTML heading outline"
+        ],
+        "answer": "Access to the server process and file-system APIs, subject to permissions",
+        "explanation": "Node.js exposes server/runtime APIs that are not generally available to ordinary browser page scripts."
+      },
+      {
+        "id": "j1.6-q5",
+        "prompt": "What should you identify before selecting a JavaScript API?",
+        "options": [
+          "The runtime or host environment",
+          "Only the file extension",
+          "The page background colour"
+        ],
+        "answer": "The runtime or host environment",
+        "explanation": "Available APIs depend on whether the code runs in a browser, server runtime or another host."
       }
     ]
   },
