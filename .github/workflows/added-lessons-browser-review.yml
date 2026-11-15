@@ -1,0 +1,71 @@
+name: Added lessons browser, technical and accessibility review
+
+on:
+  push:
+    branches: [release/v1-frontend]
+    paths:
+      - "public/content/en/html/H16.*.json"
+      - "public/content/en/css/C22.*.json"
+      - "public/content/en/javascript/J24.*.json"
+      - "public/content/curriculum-index.json"
+      - "public/index.html"
+      - "public/app.js"
+      - "public/styles.css"
+      - "public/js/lessons/**"
+      - "scripts/validate-added-lessons.mjs"
+      - "scripts/browser-review.spec.mjs"
+      - ".github/workflows/added-lessons-browser-review.yml"
+  pull_request:
+    branches: [release/v1-frontend]
+    paths:
+      - "public/content/en/html/H16.*.json"
+      - "public/content/en/css/C22.*.json"
+      - "public/content/en/javascript/J24.*.json"
+      - "public/content/curriculum-index.json"
+      - "public/index.html"
+      - "public/app.js"
+      - "public/styles.css"
+      - "public/js/lessons/**"
+      - "scripts/validate-added-lessons.mjs"
+      - "scripts/browser-review.spec.mjs"
+      - ".github/workflows/added-lessons-browser-review.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  browser-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check application JavaScript syntax
+        run: |
+          node --check public/app.js
+          node --check public/js/lessons/lesson-template.js
+          node --check public/js/lessons/curriculum-loader.js
+          node --check public/js/i18n.js
+      - name: Validate added lesson contracts
+        run: node scripts/validate-added-lessons.mjs
+      - name: Install browser test dependencies
+        run: npm install --no-save @playwright/test @axe-core/playwright
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Start local static site
+        run: |
+          python3 -m http.server 4173 --directory public > /tmp/codesaathi-http.log 2>&1 &
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:4173/ > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/codesaathi-http.log
+          exit 1
+      - name: Run browser output, keyboard and accessibility review
+        env:
+          BASE_URL: http://127.0.0.1:4173
+        run: npx playwright test scripts/browser-review.spec.mjs --reporter=line --workers=1
