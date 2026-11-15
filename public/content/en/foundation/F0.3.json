@@ -3,19 +3,20 @@
   "courseId": "foundation",
   "moduleId": "F0",
   "topicId": "F0.3",
-  "title": "Files, Folders, File Extensions and Paths",
+  "title": "Files, Directories, File Types and Path Resolution in Web Projects",
   "language": "en",
   "learningObjectives": [
-    "Explain what a file is and describe how files store different kinds of information, such as HTML documents, CSS rules, JavaScript instructions, images and text.",
-    "Explain what a folder or directory is and how grouping related files into folders makes a project easier to understand, navigate, maintain and expand.",
-    "Read a simple folder tree and identify the project root, nested folders and the files contained in each folder.",
-    "Identify common file extensions such as .html, .css, .js, .json, .png and .jpg, and describe the usual purpose of each in a web project.",
-    "Explain that a file extension is a naming clue or convention, not guaranteed proof of a file's actual contents or format.",
-    "Define a path as the location description for a file or folder, and explain how folder names, file names and separators combine to locate an item.",
-    "Distinguish relative paths from absolute paths, identify the starting location used by each, and explain why a relative path can change when the referring page moves.",
-    "Resolve simple relative paths using folder navigation, including entering a child folder and using ../ to move to a parent folder.",
-    "Use paths in common web references, such as linking a stylesheet, loading a JavaScript file or displaying an image, and predict when an incorrect path will cause a resource not to load.",
-    "Apply clear and safe project naming practices by using descriptive, consistent names, checking spelling and letter case, and avoiding unnecessary spaces or unusual characters."
+    "Explain files, directories, file names and extensions using familiar examples before applying them to a software project.",
+    "Read a project tree and identify the project root, nested directories, sibling files and resource locations.",
+    "Distinguish a file extension from the actual content format and explain why changing a filename ending does not convert the file.",
+    "Compare relative, root-relative and absolute paths, including the base location used to resolve each kind of path.",
+    "Resolve paths using child directories, parent-directory segments, current-directory notation and path separators.",
+    "Explain how browsers resolve relative resource URLs against the document base URL and how a base element can affect resolution.",
+    "Use correct paths for stylesheets, scripts, images, hyperlinks and module imports in a multi-folder website.",
+    "Diagnose resource-loading failures caused by spelling, letter case, file extension, directory location, URL encoding, deployment root or incorrect base paths.",
+    "Explain why file-system paths and web URLs are related but different, including differences in separators, origins, URL encoding and server routing.",
+    "Organize a small multi-page web project with predictable naming, reusable assets and maintainable directory boundaries.",
+    "Apply safe project hygiene by avoiding secrets in public folders, excluding generated or private files from version control, and checking case-sensitive deployment behaviour."
   ],
   "prerequisites": [
     "F0.1",
@@ -23,40 +24,85 @@
   ],
   "stages": {
     "understand": {
-      "concept": "A file stores information, such as text, an image or program code. A folder (also called a directory) groups files and other folders so a project stays organized. A path describes how to locate a file or folder. A file extension is the ending of a filename, commonly used by systems and applications as a clue about its format or intended handling.",
-      "whyItMatters": "Web projects quickly contain HTML pages, CSS stylesheets, JavaScript files, images and other resources. Clear folders and correct paths help the browser and developer tools find the right resources and make projects easier to maintain.",
-      "history": "Early file systems organized information into named files and directories. Extensions became a widely used convention for indicating file types, especially in systems that associate applications with filename endings. Modern systems may also inspect file contents, so an extension alone does not prove a file's actual format.",
-      "analogy": "Think of a school library: the library is the project, shelves are folders, each book is a file, and a catalogue location is a path. A book's label can hint at its subject, but the label alone does not prove what is inside.",
-      "analogyLimit": "Digital folders are logical locations, not physical shelves. A path follows exact naming and separator rules, and two files can have the same name when they are in different folders."
+      "concept": "A file is a named unit of stored information: a text document, image, stylesheet or program file. A directory (often called a folder) groups files and other directories. A path describes how to locate an item. A filename extension such as .html, .css, .js or .png is a convention that gives people and tools a clue about the file type. It is not a guarantee: renaming photo.txt to photo.png does not convert its contents into a PNG image.",
+      "whyItMatters": "A website is made from many files that refer to one another. The browser must be able to find the correct stylesheet, script, image, font and linked page. Developers also need a project structure that teammates can understand, build tools can process and deployment systems can publish consistently. A single incorrect letter or path segment can make a resource fail even when the file exists elsewhere.",
+      "history": "Hierarchical file systems organize information into directories and named files. Web URLs borrowed a slash-separated path style, but a URL identifies a network resource within an origin and is not identical to a path on a developer's computer. Servers can map URL paths to files, application routes or generated responses.",
+      "analogy": "Think of a project as a school campus. Directories are buildings and rooms, files are the resources stored there, and a path is a set of directions to reach one resource.",
+      "analogyLimit": "A digital path is interpreted by a defined file-system or URL-resolution rule, not by visual intuition. A browser URL may be routed by a server rather than mapped directly to a physical file, and letter-case rules can differ between a local machine and a deployment server."
     },
     "explain": {
-      "narrative": "Consider this project tree: my-site/ contains index.html, css/styles.css, js/app.js and images/logo.png. The slash separates folder names in these web-style paths. From the project root, css/styles.css is a relative path: it tells us where to go starting from the current base folder. An absolute path identifies a location from a file-system root or another defined root, and its exact form depends on the operating system. In an HTML file at the project root, href=\"css/styles.css\" points to the stylesheet. In a page inside a subfolder, the relative path may need to change. Names and letter case can matter, especially on web servers. Spaces and unusual characters are best avoided in beginner project filenames; use short descriptive names and hyphens when needed.",
+      "narrative": "Start with a project root: the top-level directory for a website. A simple project might contain index.html, a css directory, a js directory and an images directory. If index.html is in the project root, the relative URL css/site.css means enter the css child directory and request site.css. If a page is inside pages/, it may need ../css/site.css to move up one directory and then enter css. A path beginning with / is root-relative to the URL origin (or to the configured base URL), not necessarily to the project folder on your computer. An absolute URL such as https://cdn.example.test/site.css includes a scheme and host. Relative URL resolution uses the document's base URL; a base element can change that base. File-system paths, URL paths and module specifiers have different resolution rules. Check the Network panel to see the final URL the browser actually requested. On deployment, servers and operating systems may be case-sensitive even if a local development machine is not. Never place private keys, credentials or confidential files in a publicly served directory.",
       "examples": [
         {
           "id": "project-tree",
           "language": "en",
-          "code": "my-site/\\n├── index.html\\n├── css/\\n│   └── styles.css\\n├── js/\\n│   └── app.js\\n└── images/\\n    └── logo.png",
-          "explanation": "The tree shows one project folder and three resource folders. Each indented item belongs to the folder immediately above it. The path from the project root to the logo is images/logo.png.",
-          "expectedOutput": "A clear project structure with separate folders for styles, scripts and images.",
+          "title": "A predictable project directory",
+          "code": "my-site/\n├── index.html\n├── pages/\n│   ├── about.html\n│   └── contact.html\n├── css/\n│   └── site.css\n├── js/\n│   └── app.js\n└── assets/\n    ├── images/\n    │   └── logo.png\n    └── fonts/\n        └── interface.woff2",
+          "explanation": "The project root contains the main page and clear directories for pages, styles, scripts and assets. The structure is a convention, not a browser requirement; consistency matters more than one mandatory folder naming scheme.",
+          "expectedOutput": "A tree that lets another developer predict where common resources belong.",
           "runnable": false
         },
         {
-          "id": "relative-path",
+          "id": "relative-path-resolution",
           "language": "en",
-          "code": "Page:       my-site/index.html\\nStylesheet: my-site/css/styles.css\\nRelative URL from index.html: css/styles.css",
-          "explanation": "The browser resolves this relative URL using the document's base URL. It enters the css folder and looks for styles.css. A leading slash or a different document location changes how a path is resolved.",
-          "expectedOutput": "The page can locate the stylesheet when the file and path match.",
+          "title": "Resolve paths from the referring document",
+          "code": "my-site/index.html  → css/site.css\nmy-site/pages/about.html → ../css/site.css\nmy-site/pages/contact.html → ../assets/images/logo.png\n\n.   means the current directory\n..  means the parent directory\n/   at the start of a URL path means origin-root-relative",
+          "explanation": "For a relative URL, begin from the directory represented by the current document URL. Move into a child directory or use .. to move to its parent. A root-relative URL starts at the origin root and is not the same as an operating-system absolute path.",
+          "expectedOutput": "You can calculate the correct relative URL from each HTML document.",
+          "runnable": false
+        },
+        {
+          "id": "url-vs-filesystem",
+          "language": "en",
+          "title": "A file-system path is not the same as a URL",
+          "code": "Windows file path: C:\\\\projects\\\\my-site\\\\css\\\\site.css\nPOSIX file path:   /home/dev/my-site/css/site.css\nWeb URL:           https://learn.example.test/css/site.css\n\nURL origin:        https://learn.example.test\nURL path:          /css/site.css",
+          "explanation": "File-system paths locate items on a machine or mounted volume. A web URL identifies a resource using a scheme, authority and path. A server may map that URL to a file, route or generated response. Do not paste a local disk path into an HTML href and expect a remote visitor's browser to access your computer.",
+          "expectedOutput": "You can explain why a local path such as C:\\\\projects\\\\... is not a valid public resource URL.",
+          "runnable": false
+        },
+        {
+          "id": "case-and-encoding",
+          "language": "en",
+          "title": "Names, letter case and URL encoding matter",
+          "code": "Actual file: assets/CompanyLogo.png\nRequested URL: assets/companylogo.png\n\nThese names may refer to different paths on a case-sensitive server.\n\nA URL containing spaces may be encoded, for example:\nassets/team%20photo.png",
+          "explanation": "Use the exact spelling and case of deployed file names. Browsers and URL parsers encode or normalize some characters, but developers should prefer clear URL-safe names such as team-photo.png rather than depending on ambiguous names.",
+          "expectedOutput": "The requested path matches the actual deployed resource name.",
+          "runnable": false
+        },
+        {
+          "id": "resource-reference-examples",
+          "language": "en",
+          "title": "Paths appear in many HTML and JavaScript references",
+          "code": "<link rel=\"stylesheet\" href=\"css/site.css\">\n<script src=\"js/app.js\" defer></script>\n<img src=\"assets/images/logo.png\" alt=\"Site logo\">\n<a href=\"pages/about.html\">About</a>\n\n// In a JavaScript module:\nimport { formatPrice } from \"./utils/format-price.js\";",
+          "explanation": "Each reference has its own context and resolution rules. HTML resource URLs are resolved against the document base URL. Relative module specifiers are resolved relative to the importing module URL. Confirm the resulting request in Developer Tools rather than assuming every path starts from the project root.",
+          "expectedOutput": "The browser or module loader requests the intended resource from the correct location.",
+          "runnable": false
+        },
+        {
+          "id": "deployment-security",
+          "language": "en",
+          "title": "Project structure is also a security boundary",
+          "code": "public-site/\n├── index.html\n├── css/\n├── js/\n└── assets/\n\nKeep outside the public directory:\n- private keys\n- service-account credentials\n- local environment files\n- private backups and customer exports",
+          "explanation": "Anything served as a public static asset should be treated as readable by visitors. A folder name such as private does not protect a file if it is still publicly served. Keep secrets on trusted server infrastructure and exclude them from version control and deployment artifacts.",
+          "expectedOutput": "The public project contains only resources intended for visitors.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Using the project tree above, write the relative path from index.html to app.js and to logo.png. Then explain why css/style.css would fail if the actual filename is styles.css.",
-      "independentTask": "Draw a folder tree for a small profile website containing one HTML page, one CSS file, one JavaScript file and two images. Write the relative path to each resource from index.html.",
+      "guidedTask": "Use the project tree in the first example. Write the path from index.html to site.css, from pages/about.html to site.css, and from pages/contact.html to logo.png. Then change the actual file name from logo.png to Logo.png and explain why the old path may work on one computer but fail after deployment.",
+      "independentTask": "Design a multi-page website structure with a home page, two pages in a pages directory, a shared stylesheet, an external JavaScript module, two images and one font. For every reference, write the URL or module path from the file that uses it. Create one intentional error involving letter case and one involving ../, then use the browser Network panel to identify the final requested URL and fix both errors. Add a short note identifying which files must never be placed in the public deployment folder.",
       "hints": [
-        "Start from the folder containing the page, unless the URL begins with a root-relative slash.",
-        "Check every folder name and filename, including spelling and letter case.",
-        "An extension is a clue, not a guarantee of file contents."
+        "First identify the location of the HTML document that contains the reference. Relative paths start from that document's base URL, not automatically from the project root.",
+        "Use ../ to move up one directory. Use a child directory name to move down into that folder.",
+        "A path starting with / is URL-root-relative. It does not mean the root of the developer's hard drive.",
+        "A file extension is a naming convention. Renaming a file does not convert its bytes into another format.",
+        "Check exact spelling and letter case. Deployment environments may use case-sensitive file systems.",
+        "Use the Network panel to inspect the final resolved request URL and response status.",
+        "HTML resource URLs and JavaScript module specifiers can have different base-resolution rules. Check the importing file when resolving a relative module specifier.",
+        "Do not use a local computer path such as C:\\\\... in a public href or src attribute.",
+        "URL encoding can represent spaces and special characters. Prefer simple lowercase names with hyphens to reduce mistakes.",
+        "Never place passwords, private keys, service-account files or customer exports in a public directory or commit them to a public repository."
       ]
     }
   },
@@ -67,25 +113,58 @@
     "questions": [
       {
         "id": "f0-3-q1",
-        "prompt": "From my-site/index.html, which relative path points to my-site/css/styles.css?",
+        "prompt": "From my-site/pages/about.html, which relative URL points to my-site/css/site.css?",
         "options": [
-          "images/styles.css",
-          "css/styles.css",
-          "../styles.css"
+          "css/site.css",
+          "../css/site.css",
+          "../../css/site.css"
         ],
-        "answer": "css/styles.css",
-        "explanation": "The css folder is a child of the project root, so the path starts with css/."
+        "answer": "../css/site.css",
+        "explanation": "The about.html file is one directory below the project root. Move to the parent directory with .. and then enter css."
       },
       {
         "id": "f0-3-q2",
-        "prompt": "What does a file extension tell you?",
+        "prompt": "What does renaming report.txt to report.pdf do?",
         "options": [
-          "It always proves the exact contents",
-          "It is a common clue about a file's format or intended handling",
-          "It tells you the file's folder path"
+          "It converts the text into a PDF document.",
+          "It changes the filename but does not necessarily convert the file contents.",
+          "It uploads the file to a web server."
         ],
-        "answer": "It is a common clue about a file's format or intended handling",
-        "explanation": "Extensions are useful conventions, but a filename can be misleading and systems may inspect file contents."
+        "answer": "It changes the filename but does not necessarily convert the file contents.",
+        "explanation": "An extension is a naming convention. Actual conversion requires transforming the file's contents into the target format."
+      },
+      {
+        "id": "f0-3-q3",
+        "prompt": "What does a URL path beginning with / normally indicate?",
+        "options": [
+          "The root of the user's hard drive.",
+          "A path relative to the URL origin root.",
+          "The parent directory of the current HTML file."
+        ],
+        "answer": "A path relative to the URL origin root.",
+        "explanation": "A leading slash in a URL path is root-relative to the origin, subject to the document's configured base URL. It is not a local disk path."
+      },
+      {
+        "id": "f0-3-q4",
+        "prompt": "A stylesheet works on a developer's computer but returns 404 after deployment. The actual file is Site.css while the HTML requests site.css. What is a likely cause?",
+        "options": [
+          "The deployment environment treats the path's letter case as significant.",
+          "CSS does not support external files.",
+          "The browser cannot read file extensions."
+        ],
+        "answer": "The deployment environment treats the path's letter case as significant.",
+        "explanation": "Some local file systems are case-insensitive, while many web servers and deployment environments are case-sensitive."
+      },
+      {
+        "id": "f0-3-q5",
+        "prompt": "Where should a private service-account key be stored for a static website?",
+        "options": [
+          "Inside the public assets folder with a hidden filename.",
+          "In a public JavaScript file with an encoded value.",
+          "It should not be shipped to the browser; keep it in trusted server-side infrastructure."
+        ],
+        "answer": "It should not be shipped to the browser; keep it in trusted server-side infrastructure.",
+        "explanation": "Anything delivered to the browser can be inspected. Secrets must not be included in public assets or client-side code."
       }
     ]
   },
