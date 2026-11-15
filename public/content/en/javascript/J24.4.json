@@ -1,0 +1,123 @@
+{
+  "id": "javascript.j24.4.en",
+  "courseId": "javascript",
+  "moduleId": "J24",
+  "topicId": "J24.4",
+  "title": "JavaScript Temporal API: modern date and time modelling",
+  "language": "en",
+  "learningObjectives": [
+    "Explain javascript temporal api: modern date and time modelling and the problem it addresses.",
+    "Use the relevant language or browser API with valid syntax.",
+    "Compare the technique with modern alternatives and identify when each is appropriate.",
+    "Handle errors, boundaries, security, and compatibility deliberately.",
+    "Test the implementation and explain its behaviour with evidence."
+  ],
+  "prerequisites": [
+    "J3.1",
+    "J4.1",
+    "J8.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "The Temporal API is designed to model dates, times, time zones, durations, and instants more clearly than the legacy Date object. Its types distinguish concepts such as Temporal.Instant (a point on the UTC timeline), Temporal.PlainDate (a calendar date without a time zone), Temporal.PlainTime, Temporal.PlainDateTime, and Temporal.ZonedDateTime. This distinction prevents mistakes such as treating a birthday as a UTC instant or assuming every local day is exactly 24 hours. Runtime availability varies, so feature-detect Temporal and use an approved polyfill or a deliberate fallback when required. Do not parse ambiguous date strings or assume local time-zone rules are constant.",
+      "whyItMatters": "Date and time bugs affect bookings, payments, deadlines, and reporting. Temporal's explicit types make domain assumptions visible and reduce accidental mixing of calendar values with timestamps.",
+      "analogy": "Temporal offers different labelled containers for a calendar date, a clock time, and a globally ordered instant.",
+      "analogyLimit": "The container analogy cannot express time-zone database changes, calendar systems, daylight-saving transitions, or leap-second policy."
+    },
+    "explain": {
+      "narrative": "Feature-detect the Temporal global. If available, create a PlainDate for a birthday and an Instant for a timestamp. Explain why these values should not be interchangeable.",
+      "examples": [
+        {
+          "id": "j24-4-example-1",
+          "language": "javascript",
+          "code": "if (globalThis.Temporal) { const birthday = Temporal.PlainDate.from('2000-05-20'); console.log(birthday.toString()); } else { console.log('Temporal is not available in this runtime'); }",
+          "explanation": "The code checks availability before using the API. PlainDate represents a calendar date without attaching a time zone or instant.",
+          "expectedOutput": "A date string is logged when Temporal is available; otherwise a clear fallback message appears.",
+          "runnable": true
+        },
+        {
+          "id": "j24-4-example-2",
+          "language": "javascript",
+          "code": "if (globalThis.Temporal) { const instant = Temporal.Instant.from('2026-11-16T10:30:00Z'); console.log(instant.toString()); }",
+          "explanation": "Instant represents a precise point on the UTC timeline. Convert it to a ZonedDateTime only when a named time zone is part of the requirement.",
+          "expectedOutput": "The normalized UTC instant is logged when supported.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Model three values: a person's birthday, a shop's local opening time, and a payment timestamp. Choose the appropriate Temporal type for each and explain the time-zone assumptions.",
+      "independentTask": "Review a booking workflow that stores local dates as ISO timestamps. Refactor the model so calendar dates, local times, zoned appointments, and instants are distinct; test daylight-saving transitions.",
+      "hints": [
+        "Use PlainDate for a calendar date with no time zone.",
+        "Use Instant for a point on the UTC timeline and ZonedDateTime when a time zone matters.",
+        "Feature-detect support and verify the API status in your target runtime."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "javascript",
+    "starterCode": "if (globalThis.Temporal) { const birthday = Temporal.PlainDate.from('2000-05-20'); console.log(birthday.toString()); } else { console.log('Temporal is not available in this runtime'); }",
+    "resetCode": "if (globalThis.Temporal) { const birthday = Temporal.PlainDate.from('2000-05-20'); console.log(birthday.toString()); } else { console.log('Temporal is not available in this runtime'); }"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "j24-4-q1",
+        "prompt": "Which Temporal type represents a calendar date without a time zone?",
+        "options": [
+          "Temporal.PlainDate",
+          "Temporal.Instant",
+          "Temporal.Duration"
+        ],
+        "answer": "Temporal.PlainDate",
+        "explanation": "PlainDate represents a calendar date independent of a time zone."
+      },
+      {
+        "id": "j24-4-q2",
+        "prompt": "Which type represents a point on the UTC timeline?",
+        "options": [
+          "Temporal.Instant",
+          "Temporal.PlainTime",
+          "Temporal.PlainDate"
+        ],
+        "answer": "Temporal.Instant",
+        "explanation": "Instant represents an exact point in time."
+      },
+      {
+        "id": "j24-4-q3",
+        "prompt": "Why distinguish PlainDate from Instant?",
+        "options": [
+          "A birthday is a calendar date, not necessarily a timestamp",
+          "They always have identical meaning",
+          "PlainDate stores CSS values"
+        ],
+        "answer": "A birthday is a calendar date, not necessarily a timestamp",
+        "explanation": "Different domain concepts should not be represented by interchangeable date-time values."
+      },
+      {
+        "id": "j24-4-q4",
+        "prompt": "What should code do before using Temporal in a browser?",
+        "options": [
+          "Check runtime support or use an approved polyfill strategy",
+          "Assume every browser supports it",
+          "Convert all values to strings"
+        ],
+        "answer": "Check runtime support or use an approved polyfill strategy",
+        "explanation": "Availability varies across runtimes, so feature detection and compatibility planning are needed."
+      },
+      {
+        "id": "j24-4-q5",
+        "prompt": "Why are time zones important in scheduling?",
+        "options": [
+          "Local clock changes and offsets can vary, including daylight-saving transitions",
+          "Every day is always exactly 24 hours locally",
+          "UTC changes with the browser language"
+        ],
+        "answer": "Local clock changes and offsets can vary, including daylight-saving transitions",
+        "explanation": "A local calendar day may not correspond to a fixed 24-hour duration."
+      }
+    ]
+  },
+  "status": "draft"
+}
