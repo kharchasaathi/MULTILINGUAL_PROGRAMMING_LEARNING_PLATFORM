@@ -3,7 +3,7 @@
   "courseId": "foundation",
   "moduleId": "F0",
   "topicId": "F0.7",
-  "title": "Reading Errors, Asking Useful Debugging Questions and Saving Versions",
+  "title": "Evidence-Based Debugging, Testing and Version Recovery",
   "language": "en",
   "learningObjectives": [
     "Explain the difference between syntax errors, runtime errors and logic errors, using simple examples.",
@@ -32,7 +32,7 @@
       "analogyLimit": "Software faults may depend on input, program state, timing, browser or device environment, and interactions between components. One visible error message may point to a symptom rather than the original cause."
     },
     "explain": {
-      "narrative": "Use a repeatable investigation. First reproduce the problem and record the input and actions that trigger it. Write down the expected result and the actual result. Read the first relevant diagnostic message, noting the file, line and error type, then inspect the nearby code and the steps that led to it. The first message is a useful clue, but it does not always identify the root cause. Form one explanation that can be tested, make one focused change, and repeat the same test.\\n\\nWhen asking for help, provide a concise report: expected result, actual result, exact reproduction steps, full relevant error text, the smallest relevant code sample, what you have already checked, and the result after a change. Remove passwords, private keys, access tokens and personal information. Before a risky edit, preserve a working copy or use version control; after restoring an earlier version, run the relevant test again.",
+      "narrative": "Debugging is a controlled investigation, not a sequence of guesses. First reproduce the failure with known inputs and steps. Record the expected result and the actual result. Identify the layer involved: editor or build process, browser resource loading, HTML structure, CSS calculation, JavaScript execution, API response or server behaviour. Read diagnostic messages and stack traces, but treat them as evidence rather than proof of the original cause.\n\nForm a testable hypothesis. Change one relevant thing, rerun the same reproduction steps and compare the result. If the failure disappears, test nearby cases so the fix has not introduced a regression. A minimal reproduction removes unrelated code and makes the failure easier to isolate. For complex bugs, add temporary logging or breakpoints, inspect state at the point of failure and remove diagnostic noise when finished.\n\nTesting and debugging are related but different. A test checks whether specified behaviour holds; debugging investigates why it does not. Keep a record of the test input, expected result, actual result and environment. After changing code, rerun the failing test and relevant regression tests. When possible, automate repeatable checks so a future change does not silently reintroduce the problem.\n\nUse Git deliberately to protect working states. Inspect the diff, make small commits, and use branches for isolated work. If a change is wrong, choose a recovery operation that matches the situation: revert creates a new commit that undoes a prior commit; restore or checkout can replace working-tree content; reset moves a branch reference and can discard work if used carelessly. Before destructive recovery, inspect status and preserve uncommitted work. Never share credentials, session cookies, private URLs or personal information in a debugging report.",
       "examples": [
         {
           "id": "f0.7-en-debugging-report",
@@ -41,12 +41,57 @@
           "explanation": "Create a small intentional error in a practice project. Reproduce it, read the first useful console or editor message, record the file and line, inspect the relevant code, change one thing and test again. Write a short report with Expected, Actual, Steps to reproduce, Error, Relevant code and Fix. Never include passwords or private API keys.",
           "expectedOutput": "A clear debugging report and a safely saved working version.",
           "runnable": false
+        },
+        {
+          "id": "f0.7-debug-loop",
+          "language": "en",
+          "title": "A repeatable evidence-based debugging loop",
+          "code": "Reproduce → Observe → Record expected vs actual\n    ↓\nCollect evidence → Form one hypothesis\n    ↓\nChange one thing → Repeat the same test\n    ↓\nVerify the fix → Run regression checks\n    ↓\nDocument and commit the correction",
+          "explanation": "The same reproduction steps make before-and-after comparisons meaningful. If several unrelated changes are made together, it becomes difficult to know which change fixed or caused the behaviour.",
+          "expectedOutput": "A focused diagnosis with evidence and a repeatable verification step.",
+          "runnable": false
+        },
+        {
+          "id": "f0.7-minimal-reproduction",
+          "language": "en",
+          "title": "Reduce a bug to the smallest useful case",
+          "code": "Original report: button sometimes does not update the page.\n\nMinimal reproduction:\n1. Load the page.\n2. Click the Update button once.\n3. Observe whether #status changes.\n4. Inspect Console for the first exception.\n\nRecord browser, input and exact result.",
+          "explanation": "A minimal reproduction removes unrelated features while preserving the failure. It helps determine whether the problem is caused by event wiring, selector mismatch, state or another dependency.",
+          "expectedOutput": "A short test case that another developer can follow consistently.",
+          "runnable": false
+        },
+        {
+          "id": "f0.7-test-vs-debug",
+          "language": "en",
+          "title": "Testing and debugging answer different questions",
+          "code": "Test: Does the function return 12 for input (7, 5)?\nDebug: Why did the function return 11 instead?\nRegression test: Does the corrected function still pass for other cases?",
+          "explanation": "Tests provide repeatable checks against expected behaviour. Debugging investigates the reason for a failure. Regression checks help ensure a fix does not break behaviour that previously worked.",
+          "expectedOutput": "You can distinguish checking behaviour from investigating a cause.",
+          "runnable": false
+        },
+        {
+          "id": "f0.7-git-recovery",
+          "language": "en",
+          "title": "Choose a safe Git recovery action",
+          "code": "git status\n# inspect current work first\n\ngit revert <commit>\n# create a new commit that reverses a prior commit\n\ngit diff\n# inspect working-tree changes before restoring anything",
+          "explanation": "Revert preserves shared history by creating a new inverse commit. Reset moves a branch reference and can discard commits or changes depending on options. Always inspect and preserve uncommitted work before destructive operations.",
+          "expectedOutput": "You can describe why a revert is often safer for undoing a commit already shared with others.",
+          "runnable": false
+        },
+        {
+          "id": "f0.7-debug-report",
+          "language": "en",
+          "title": "A useful issue report",
+          "code": "Title:\nEnvironment:\nExpected result:\nActual result:\nSteps to reproduce:\nRelevant logs / stack trace:\nMinimal code sample:\nWhat I checked:\nProposed hypothesis:\nRetest result:",
+          "explanation": "A concise report gives another developer enough information to reproduce and investigate the problem. Remove secrets, cookies, tokens, personal data and private production identifiers before sharing.",
+          "expectedOutput": "A reproducible report with privacy-sensitive values removed.",
+          "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Create a small intentional error in a practice project. Reproduce it, read the first useful message from the editor or browser Console, and record the file and line if available. Inspect the relevant code, make one focused correction and repeat the same test. Write a report containing the expected result, actual result, reproduction steps, exact error, relevant code and retest result. Do not include passwords or private API credentials.",
-      "independentTask": "Choose a bug from a practice project or create a harmless one deliberately. Prepare a debugging report with the expected result, actual result, reproduction steps, diagnostic evidence, likely cause, focused change and retest result. State how you would recover the previous working version if the change made the project worse. Remove secrets and personal information.",
+      "guidedTask": "Create a harmless bug in a practice page. Write exact reproduction steps, expected and actual results, and capture the relevant Console or Network evidence. State one hypothesis, change one line, rerun the same test and record the result. Then add a small regression test or repeatable checklist that would detect the bug if it returned.",
+      "independentTask": "Choose a multi-step failure in a practice project. Produce a minimal reproduction, classify the likely layer, collect evidence, form and test a hypothesis, apply a focused fix and run regression checks. Commit the fix on a branch. Explain how you would safely undo the commit with a new revert commit and how you would protect uncommitted work before attempting any destructive reset.",
       "hints": [
         "Repeat the same steps and inputs so the problem can be observed consistently.",
         "Record the expected result and the actual result separately.",
@@ -84,6 +129,50 @@
         ],
         "answer": "Reproduce the problem and inspect evidence",
         "explanation": "Reproduction and evidence make the problem specific and help you form a testable explanation."
+      },
+      {
+        "id": "f0.7-en-q3",
+        "prompt": "What is the main purpose of a minimal reproduction?",
+        "options": [
+          "To include the entire application even when most of it is unrelated.",
+          "To isolate the smallest set of steps and code that still demonstrates the failure.",
+          "To hide the error message."
+        ],
+        "answer": "To isolate the smallest set of steps and code that still demonstrates the failure.",
+        "explanation": "A minimal reproduction reduces unrelated variables and helps others investigate the same failure."
+      },
+      {
+        "id": "f0.7-en-q4",
+        "prompt": "Which Git operation normally undoes a shared commit by creating a new commit?",
+        "options": [
+          "git revert",
+          "git reset --hard",
+          "Deleting the repository folder"
+        ],
+        "answer": "git revert",
+        "explanation": "git revert records an inverse change in a new commit and is generally appropriate for undoing commits already shared."
+      },
+      {
+        "id": "f0.7-en-q5",
+        "prompt": "After a bug fix appears successful, what should happen next?",
+        "options": [
+          "Skip all further checks.",
+          "Repeat the failing test and run relevant regression checks.",
+          "Delete the test case."
+        ],
+        "answer": "Repeat the failing test and run relevant regression checks.",
+        "explanation": "The original failure must be verified as fixed, and related behaviour should be checked for regressions."
+      },
+      {
+        "id": "f0.7-en-q6",
+        "prompt": "What is the safest first step before a potentially destructive Git recovery command?",
+        "options": [
+          "Inspect git status and preserve any uncommitted work.",
+          "Run reset --hard immediately.",
+          "Delete all branches."
+        ],
+        "answer": "Inspect git status and preserve any uncommitted work.",
+        "explanation": "Checking status and saving work prevents accidental loss when using commands that can replace or discard working-tree changes."
       }
     ]
   },
