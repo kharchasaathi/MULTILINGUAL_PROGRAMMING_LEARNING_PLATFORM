@@ -10,7 +10,9 @@ Inspected on 2026-11-13 from the active branch.
 
 - `public/index.html`: single-page learner landing experience, course dialog, editor and preview iframe.
 - `public/styles.css`: global responsive styling.
-- `public/app.js`: course data, dialog rendering, local progress, editor execution and language selector.
+- `public/app.js`: landing-page shell interactions, mobile menu, dialog closing, playground execution and service-worker registration.
+- `public/js/lessons/curriculum-loader.js`: curriculum index, course navigation, lesson fetching, fallback messaging and device-local completion progress.
+- `public/js/lessons/lesson-template.js`: safe three-stage lesson rendering and assessment interactions.
 - `firebase.json`: Firebase Hosting serves the `public` directory.
 - Firebase Hosting deployment is already configured; do not repeat setup without evidence of a deployment problem.
 
@@ -28,10 +30,10 @@ The current frontend is a static single-page application. A multi-route architec
 
 ## 3. Current language preference implementation
 
-The UI now offers English, Telugu, Malayalam, Kannada, Tamil, and Hindi. The language-preference implementation in `public/app.js`:
+The UI currently offers 23 language codes in `public/index.html`. Language preference is handled by `public/js/i18n.js`:
 
 - Preference key: `codesaathi.language.v1`
-- Supported values in the current UI: `en`, `te`, `ml`, `kn`, `ta`, `hi`
+- Supported values in the current UI: `en`, `te`, `hi`, `bn`, `mr`, `ta`, `kn`, `ml`, `gu`, `ur`, `pa`, `or`, `as`, `ne`, `brx`, `doi`, `ks`, `kok`, `mai`, `mni`, `sa`, `sat`, `sd`
 - Invalid or unavailable values fall back to English.
 - Preference is read during initialization and written on selection.
 - Storage access is guarded so a browser storage exception does not prevent page interaction.
@@ -106,3 +108,13 @@ The latest Firebase Hosting deployment is confirmed successful (GitHub Actions r
 - GitHub Actions run #38 completed successfully; deploy job conclusion: `success`.
 - Hosting deployment is confirmed. The live browser behaviour has not been independently exercised in this session.
 - Phase 1's only remaining acceptance gate is the focused browser smoke check documented in the project phase dashboard.
+
+
+## Implementation update — 2026-11-15
+
+- Course cards and subject navigation are owned by the curriculum loader; the legacy duplicate hard-coded course renderer was removed from `public/app.js`.
+- The lesson renderer now gates completion on correctly answering every available assessment question, keeps completion state visible when a lesson is reopened, and stores progress locally on the device.
+- Lesson loading now ignores stale asynchronous responses after a learner changes course or returns to the course list.
+- The global app script is limited to shell interactions and the isolated HTML playground.
+- The language selector exposes 23 language codes, but the landing-page translation dictionary currently provides authored UI translations only for English and Telugu. Other selections must continue to show the explicit fallback notice. Do not describe all 23 languages as fully translated.
+- These changes passed focused JavaScript syntax and lesson JSON/assessment integrity checks. Real browser interaction and latest live deployment verification remain pending.
