@@ -1,0 +1,123 @@
+{
+  "id": "javascript.j24.1.en",
+  "courseId": "javascript",
+  "moduleId": "J24",
+  "topicId": "J24.1",
+  "title": "JavaScript bitwise operators and 32-bit integer behaviour",
+  "language": "en",
+  "learningObjectives": [
+    "Explain javascript bitwise operators and 32-bit integer behaviour and the problem it addresses.",
+    "Use the relevant language or browser API with valid syntax.",
+    "Compare the technique with modern alternatives and identify when each is appropriate.",
+    "Handle errors, boundaries, security, and compatibility deliberately.",
+    "Test the implementation and explain its behaviour with evidence."
+  ],
+  "prerequisites": [
+    "J3.1",
+    "J4.1",
+    "J8.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Bitwise operators treat Number operands as 32-bit integers after conversion. The main operators are AND (&), OR (|), XOR (^), NOT (~), left shift (<<), sign-propagating right shift (>>), and zero-fill right shift (>>>). Bitwise operations are useful for flags, masks, compact binary protocols, and low-level numeric tasks, but they truncate fractional parts and wrap values into 32-bit ranges. BigInt supports bitwise operations on arbitrary-size integers except unsigned right shift (>>>), which is not defined for BigInt. Prefer ordinary arithmetic and clear boolean properties unless bit-level representation is genuinely required.",
+      "whyItMatters": "Bitwise operators can produce surprising results when developers assume JavaScript Number values remain ordinary floating-point numbers. Knowing the conversion rules prevents subtle bugs in IDs, timestamps, and large numeric values.",
+      "analogy": "A bit mask is like a row of switches: each position can be checked, turned on, or toggled independently.",
+      "analogyLimit": "The switch analogy omits signed integer representation, two's-complement conversion, and JavaScript's separate Number and BigInt rules."
+    },
+    "explain": {
+      "narrative": "Represent permission flags using bit masks. Combine flags with OR, test a flag with AND, toggle it with XOR, and inspect why a large Number changes after bitwise conversion.",
+      "examples": [
+        {
+          "id": "j24-1-example-1",
+          "language": "javascript",
+          "code": "const READ=1, WRITE=2, DELETE=4; let permissions=READ|WRITE; console.log((permissions&READ)!==0); console.log((permissions&DELETE)!==0);",
+          "explanation": "OR combines flags and AND tests whether a bit is set. The values are small 32-bit masks, not independent boolean variables.",
+          "expectedOutput": "true\\nfalse",
+          "runnable": true
+        },
+        {
+          "id": "j24-1-example-2",
+          "language": "javascript",
+          "code": "const value=5; console.log(value<<1); console.log(value>>1); console.log(value>>>1);",
+          "explanation": "Left shift moves bits left; signed right shift preserves the sign bit, while zero-fill right shift inserts zero bits. These operators use 32-bit conversion for Number values.",
+          "expectedOutput": "10\\n2\\n2",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Build a permission-mask example with READ, WRITE, and DELETE flags. Add and remove one flag without disturbing the others, and test the results with boundary values.",
+      "independentTask": "Review code that uses bitwise operators on timestamps or large IDs. Replace the bitwise conversion with safe arithmetic or BigInt where appropriate, and explain why the original result was incorrect.",
+      "hints": [
+        "Number bitwise operations use 32-bit integer conversion.",
+        "Use & to test, | to set, and ^ to toggle a flag.",
+        "Do not apply bitwise operators to arbitrary large Number values."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "javascript",
+    "starterCode": "const READ=1, WRITE=2, DELETE=4; let permissions=READ|WRITE; console.log((permissions&READ)!==0); console.log((permissions&DELETE)!==0);",
+    "resetCode": "const READ=1, WRITE=2, DELETE=4; let permissions=READ|WRITE; console.log((permissions&READ)!==0); console.log((permissions&DELETE)!==0);"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "j24-1-q1",
+        "prompt": "Which operator performs bitwise AND?",
+        "options": [
+          "&",
+          "&&",
+          "|"
+        ],
+        "answer": "&",
+        "explanation": "& compares corresponding bits and sets a result bit only when both input bits are 1."
+      },
+      {
+        "id": "j24-1-q2",
+        "prompt": "What is a common Number bitwise conversion rule?",
+        "options": [
+          "Operands are converted to 32-bit integers",
+          "Operands remain arbitrary-precision decimals",
+          "All values become strings"
+        ],
+        "answer": "Operands are converted to 32-bit integers",
+        "explanation": "Number bitwise operators apply 32-bit integer conversion."
+      },
+      {
+        "id": "j24-1-q3",
+        "prompt": "Which operator can test whether a flag is set?",
+        "options": [
+          "permissions & FLAG",
+          "permissions + FLAG only",
+          "permissions / FLAG"
+        ],
+        "answer": "permissions & FLAG",
+        "explanation": "AND with a mask isolates the bits represented by the flag."
+      },
+      {
+        "id": "j24-1-q4",
+        "prompt": "Which right-shift operator fills leftmost bits with zeros?",
+        "options": [
+          " >>> ",
+          " >> ",
+          " << "
+        ],
+        "answer": " >>> ",
+        "explanation": "The unsigned right-shift operator performs zero-fill shifting for Number operands."
+      },
+      {
+        "id": "j24-1-q5",
+        "prompt": "Why should bitwise operators not be used casually on timestamps?",
+        "options": [
+          "They truncate and convert Number values to 32-bit integers",
+          "They automatically encrypt the timestamp",
+          "They preserve every floating-point bit"
+        ],
+        "answer": "They truncate and convert Number values to 32-bit integers",
+        "explanation": "Bitwise conversion can discard high-order bits and change the numeric value."
+      }
+    ]
+  },
+  "status": "draft"
+}
