@@ -79,3 +79,13 @@ These are the first representative expanded lessons, not a claim that all existi
 6. Keep all lessons in draft until editorial and technical review evidence is complete.
 
 **Current status remains IN PROGRESS. No release approval is implied.**
+
+
+## Additional curriculum expansion — 2026-11-15
+
+- Completed an English-depth expansion pass across the full existing Programming Foundations inventory: F0.1–F0.7 and F1.1–F1.7. This preserves all 14 topic IDs and the three-stage lesson structure. F1.3 and F1.4 were returned to draft because their content changed after the earlier reviewed state.
+- Expanded the first two topic entries in each language course: HTML H1.1–H1.2, CSS C1.1–C1.2 and JavaScript J1.1–J1.2. The previously expanded H2.1, C2.1 and J2.1 remain part of the English sample set.
+- Added more worked examples, guided and independent practice, and additional assessments to the newly expanded lessons.
+- Updated the service-worker cache version to ensure returning clients do not remain pinned to the previous app-shell scripts.
+
+**Scope limitation:** This is a meaningful foundational expansion, not completion of all 554 English topic files or the W3Schools coverage matrix. Remaining course topics still require systematic review and expansion.
