@@ -3,71 +3,134 @@
   "courseId": "css",
   "moduleId": "C2",
   "topicId": "C2.1",
-  "title": "Inline, internal, and external CSS",
+  "title": "Applying CSS: inline, internal and external stylesheets",
   "language": "en",
   "learningObjectives": [
-    "Choose and write maintainable CSS selectors for inline, internal, and external css."
+    "Compare inline declarations, internal style blocks and external stylesheets in terms of scope, reuse, precedence and maintainability.",
+    "Write a valid CSS rule and identify its selector, declaration block, property and value.",
+    "Link an external stylesheet using the correct relative path and diagnose common path and loading failures.",
+    "Explain why external stylesheets are the normal choice for multi-page projects and component-based styling.",
+    "Use browser developer tools to identify the source of a computed style and understand why a declaration is overridden.",
+    "Recognize the interaction between cascade origin, importance, cascade layers, specificity and source order at an introductory level.",
+    "Choose an appropriate styling approach for a given project constraint without relying on excessive inline styles or !important."
   ],
   "prerequisites": [
     "C1.5",
-    "C1.6"
+    "C1.6",
+    "H2.1"
   ],
   "stages": {
     "understand": {
-      "concept": "CSS can be added with a style attribute, a style element or an external .css file linked with link. External stylesheets are usually easier to reuse and maintain.",
-      "whyItMatters": "Good selectors target intended elements and keep styles maintainable.",
-      "analogy": "Selectors are like finding items in a list by their labels or relationships.",
-      "analogyLimit": "Selectors are not just labels; the document tree, state and specificity also matter."
+      "concept": "CSS can be attached to an element through its style attribute, declared inside a style element in the document head, or loaded from an external .css file using a link element. These methods all provide CSS declarations, but differ in scope and maintainability. Inline styles are tied to individual elements; internal styles apply to one document; an external stylesheet can be shared by multiple documents and cached independently.",
+      "whyItMatters": "A maintainable front end separates document meaning from presentation and keeps styling changes predictable. External stylesheets make shared design rules easier to review, reuse, test and update across a site. Knowing where a rule originates is also essential when debugging the cascade.",
+      "history": "CSS was designed to separate presentation rules from document structure. The separation allows the same semantic HTML to be presented differently across screen sizes, devices and user preferences.",
+      "analogy": "Treat the stylesheet as a set of presentation rules applied to a document tree. The HTML provides the structure; CSS rules select parts of that structure and describe how they should be presented.",
+      "analogyLimit": "CSS is not a sequential paint script. The browser matches selectors, resolves competing declarations through the cascade, computes values and uses them during layout and painting."
     },
     "explain": {
-      "narrative": "CSS can be added with a style attribute, a style element or an external .css file linked with link. External stylesheets are usually easier to reuse and maintain.",
+      "narrative": "A CSS qualified rule consists of a selector followed by a declaration block. Each declaration contains a property, a colon and a value, normally ending with a semicolon. The style attribute is useful for narrowly scoped programmatic values but mixes presentation into markup and is difficult to maintain at scale. An internal style element is useful for a self-contained demonstration or single document. An external stylesheet is generally preferred for reusable site styling. The href in the link element is resolved relative to the HTML document's URL, not relative to the stylesheet itself. A 404 or incorrect MIME type can prevent the browser from applying the file. In Developer Tools, inspect the matched rules and computed panel to see which declaration wins and which declarations are crossed out.",
       "examples": [
         {
-          "id": "c2.1-example",
+          "id": "c2-1-inline",
           "language": "en",
-          "code": "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Inline, internal, and external CSS</title><style>\n.note{color:teal}\n</style></head><body>\n<p class=\"note\">Reusable styles</p>\n</body></html>",
-          "explanation": "Change the selector and observe which elements match.",
-          "expectedOutput": "Matching elements receive the CSS styles.",
+          "title": "Inline CSS: one element, local declaration",
+          "code": "<p style=\"color: #145c52; margin-block: 0.5rem;\">\n  A locally styled paragraph.\n</p>",
+          "explanation": "The style attribute contains declarations for this element. It can be useful when a value is generated dynamically, but repeating style attributes across many elements makes design changes harder.",
+          "expectedOutput": "The paragraph uses the specified text colour and block spacing.",
           "runnable": true
+        },
+        {
+          "id": "c2-1-internal",
+          "language": "en",
+          "title": "Internal CSS: rules for one document",
+          "code": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <style>\n    .notice {\n      color: #145c52;\n      background: #e8f5f1;\n      padding: 1rem;\n      border-inline-start: 4px solid currentColor;\n    }\n  </style>\n</head>\n<body>\n  <p class=\"notice\">A reusable rule within this document.</p>\n  <p class=\"notice\">The same selector styles another element.</p>\n</body>\n</html>",
+          "explanation": "The style element keeps CSS out of the body content, and the class selector can match multiple elements in this document. The rules are not automatically shared with another HTML file.",
+          "expectedOutput": "Both notice paragraphs receive the same presentation.",
+          "runnable": true
+        },
+        {
+          "id": "c2-1-external",
+          "language": "en",
+          "title": "External CSS: share a stylesheet between pages",
+          "code": "<!-- index.html -->\n<head>\n  <link rel=\"stylesheet\" href=\"css/site.css\">\n</head>\n\n/* css/site.css */\n:root {\n  color-scheme: light;\n  font-family: system-ui, sans-serif;\n}\n.notice {\n  border-inline-start: 4px solid #145c52;\n  padding: 1rem;\n}",
+          "explanation": "The link element belongs in the document head. The example assumes a project layout where index.html sits beside a css folder containing site.css. A wrong relative path means the stylesheet will not load.",
+          "expectedOutput": "The browser requests css/site.css and applies its matching rules if the response succeeds.",
+          "runnable": false
+        },
+        {
+          "id": "c2-1-cascade-debug",
+          "language": "en",
+          "title": "Why a declaration may not win",
+          "code": "p { color: #145c52; }\n.article p { color: #8b2d3b; }\n\n<p class=\"article\">Which rule applies?</p>",
+          "explanation": "The second selector is more specific because it includes a class selector as well as an element selector. The browser's cascade also considers origin, importance, cascade layers and source order; specificity is not the only factor.",
+          "expectedOutput": "The paragraph text is #8b2d3b in this example.",
+          "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Change one selector and observe how many elements match.",
-      "independentTask": "Create a small stylesheet with reusable classes for cards, headings and link states.",
+      "guidedTask": "Create index.html and css/site.css in a two-file project. Move the internal .notice rule into the external stylesheet, link it with the correct relative path, and verify the request in Developer Tools → Network. Add a second page and reuse the same stylesheet without duplicating its declarations.",
+      "independentTask": "Build a small article page with a reusable design system: CSS custom properties for colour and spacing, shared classes for the header, article and callout, and visible keyboard focus styles for links. Deliberately break the stylesheet path, diagnose the failed request, restore the path and explain the evidence you used.",
       "hints": [
-        "Keep class selectors reusable.",
-        "Do not remove visible keyboard focus styles."
+        "Use a style attribute only when a narrowly scoped inline value is justified; avoid using it as the main site-wide styling system.",
+        "An internal style element is document-scoped. An external stylesheet can be shared by multiple HTML documents.",
+        "Resolve a stylesheet href relative to the HTML document URL. Confirm the actual request path in the Network panel.",
+        "Use the Styles and Computed panels to identify matched rules, overridden declarations and the final computed value.",
+        "Do not assume specificity always decides the result: origin, importance, cascade layers and source order also participate.",
+        "Prefer clear reusable selectors and design tokens over deeply nested selectors and repeated one-off declarations."
       ]
     }
   },
   "practice": {
     "playgroundMode": "html",
-    "starterCode": "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Inline, internal, and external CSS</title><style>\n.note{color:teal}\n</style></head><body>\n<p class=\"note\">Reusable styles</p>\n</body></html>",
-    "resetCode": "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Inline, internal, and external CSS</title><style>\n.note{color:teal}\n</style></head><body>\n<p class=\"note\">Reusable styles</p>\n</body></html>"
+    "starterCode": "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>CSS application methods</title>\n<style>\n:root { font-family: system-ui, sans-serif; color: #172033; }\n.notice { color: #145c52; background: #e8f5f1; padding: 1rem; border-inline-start: 4px solid currentColor; }\n</style>\n</head>\n<body>\n<h1>CSS application methods</h1>\n<p class=\"notice\">This paragraph is styled by an internal stylesheet.</p>\n<p style=\"font-weight: 700\">This paragraph has an inline declaration.</p>\n</body>\n</html>",
+    "resetCode": "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>CSS application methods</title>\n<style>\n:root { font-family: system-ui, sans-serif; color: #172033; }\n.notice { color: #145c52; background: #e8f5f1; padding: 1rem; border-inline-start: 4px solid currentColor; }\n</style>\n</head>\n<body>\n<h1>CSS application methods</h1>\n<p class=\"notice\">This paragraph is styled by an internal stylesheet.</p>\n<p style=\"font-weight: 700\">This paragraph has an inline declaration.</p>\n</body>\n</html>"
   },
   "assessment": {
     "questions": [
       {
-        "id": "c2.1-q1",
-        "prompt": "Which approach is generally easiest to reuse across pages?",
+        "id": "c2-1-q1",
+        "prompt": "Which method is generally the best default for sharing a consistent design across multiple pages?",
         "options": [
-          "External stylesheet",
-          "Selectors cannot match states",
-          "All selectors have equal specificity"
+          "Repeat inline style attributes on every element.",
+          "Use a shared external stylesheet.",
+          "Place a separate internal style block in every paragraph."
         ],
-        "answer": "External stylesheet",
-        "explanation": "Identify the selector syntax and matching rule."
+        "answer": "Use a shared external stylesheet.",
+        "explanation": "An external stylesheet centralizes reusable rules and can be cached and maintained independently of each page."
       },
       {
-        "id": "c2.1-q2",
-        "prompt": "Do overly complex selectors usually improve maintainability?",
+        "id": "c2-1-q2",
+        "prompt": "From which location is a relative href such as css/site.css resolved?",
         "options": [
-          "Yes",
-          "No"
+          "Relative to the HTML document's URL.",
+          "Relative to the user's desktop folder in every browser.",
+          "Relative to the CSS selector name."
         ],
-        "answer": "No",
-        "explanation": "Short, clear reusable selectors are easier to maintain."
+        "answer": "Relative to the HTML document's URL.",
+        "explanation": "The browser resolves the stylesheet URL against the document's base URL, subject to any base element."
+      },
+      {
+        "id": "c2-1-q3",
+        "prompt": "A CSS declaration is crossed out in Developer Tools. What is the best next step?",
+        "options": [
+          "Assume the browser cannot understand CSS.",
+          "Inspect the matched rules, cascade factors and computed value.",
+          "Add !important to every declaration."
+        ],
+        "answer": "Inspect the matched rules, cascade factors and computed value.",
+        "explanation": "The crossed-out declaration lost in the cascade. Inspecting the winning declaration reveals whether the cause is specificity, importance, layer, origin or source order."
+      },
+      {
+        "id": "c2-1-q4",
+        "prompt": "Which statement about inline styles is accurate?",
+        "options": [
+          "They are always the best architecture for large sites.",
+          "They are attached to an individual element and can make broad styling changes harder to maintain.",
+          "They automatically create a reusable class."
+        ],
+        "answer": "They are attached to an individual element and can make broad styling changes harder to maintain.",
+        "explanation": "Inline declarations are local to the element. Reusable rules generally belong in stylesheets."
       }
     ]
   },
