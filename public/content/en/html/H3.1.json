@@ -6,67 +6,195 @@
   "title": "Headings and paragraphs",
   "language": "en",
   "learningObjectives": [
-    "Choose semantic text elements and inspect their browser output"
+    "Explain the semantic purpose and ranking of h1 through h6 and distinguish hierarchy from visual typography.",
+    "Design a logical heading sequence for a page or article based on content relationships.",
+    "Explain h1 as a useful primary page-heading convention without claiming exactly one h1 is universally required.",
+    "Use p to group prose and distinguish paragraphs from headings, lists, quotations, containers and line breaks.",
+    "Recognize heading and paragraph content models, including phrasing-content rules and paragraph end-tag omission during parsing.",
+    "Explain HTML whitespace processing and use CSS for typography, line length, spacing and responsive presentation.",
+    "Inspect source, parsed DOM, accessibility information, computed styles and heading order with browser tools.",
+    "Build and test a semantic article with meaningful headings and paragraphs."
   ],
   "prerequisites": [
     "H2.6"
   ],
   "stages": {
     "understand": {
-      "concept": "Headings: h1–h6 express a document outline; paragraphs group prose. Choose heading levels by hierarchy, not by default visual size.",
-      "whyItMatters": "Use one clear page heading, then nested section headings; do not skip levels just to change appearance.",
-      "analogy": "A book uses headings, paragraphs and notes for different purposes; HTML gives those roles explicit structure.",
-      "analogyLimit": "The book analogy is a memory aid; a browser parses HTML according to defined rules."
+      "concept": "HTML headings and paragraphs describe the role and organization of text, not merely its appearance. The six heading elements h1 through h6 represent six ranks, from highest to lowest. Use them to express a meaningful hierarchy: a primary title, major sections and nested subsections. The p element represents a paragraph of prose. Browsers apply default styles, but those styles are user-agent CSS, not the meaning of the elements. CSS controls font size, weight, line height, width, colour and spacing. A sound document remains understandable when styles are removed or changed.",
+      "whyItMatters": "People do not experience a page only as pixels. Screen-reader users may navigate by headings, reading tools may use document structure, and developers maintain content more easily when its hierarchy is explicit. Choosing headings only for visual size can misrepresent relationships. Empty paragraphs and repeated line breaks create fragile layouts. Semantic markup gives content a stable meaning while CSS adapts presentation to different screens and user preferences.",
+      "analogy": "A well-organized book uses titles, chapters, sections and paragraphs to help readers understand where ideas belong. HTML headings and paragraphs provide comparable structural signals.",
+      "analogyLimit": "HTML does not automatically create a universally exposed outline merely because headings are present. Browsers and assistive technologies expose heading levels through their own interfaces. The analogy is a memory aid; actual content models and parsing rules are defined by HTML."
     },
     "explain": {
-      "narrative": "Headings: h1–h6 express a document outline; paragraphs group prose. Choose heading levels by hierarchy, not by default visual size.",
+      "narrative": "A heading labels the topic of the content that follows. HTML provides h1, h2, h3, h4, h5 and h6. Their ranks run from highest to lowest. A typical article may use h1 for its main title, h2 for major sections, and h3 for a subsection inside one of those sections. Use h4 through h6 only when the content genuinely has that many nested levels. Do not choose h4 because its default text happens to be the size you want. If a heading needs a different appearance, keep the correct semantic level and style it with CSS.\n\nThe h1 usually communicates the primary subject of a page or main content region. One clear page-level h1 is a strong authoring convention because it makes the page subject easy to identify. However, HTML does not impose a universal rule that every document must contain exactly one h1. Multiple h1 elements can be conforming in appropriate contexts. The important quality requirement is that heading ranks communicate the relationships among the content. Do not rely on the outdated idea that sectioning elements automatically create a separate browser outline.\n\nRead only the headings in order. They should form a meaningful navigation path and tell a reader what each section covers. A jump from h2 to h4 may indicate that h3 was omitted, but a skipped rank is not automatically a parser error in every situation. Decide whether the sequence makes the hierarchy confusing. Do not add a heading merely to obtain bold text or spacing. If a line is not a section label, choose an element that matches its real meaning.\n\nThe p element represents a paragraph of prose: an explanation, introduction, description or article paragraph. It is not a generic wrapper for every block. A paragraph can contain phrasing content such as text, em, strong, a, code, span and br, subject to those elements' rules. It cannot contain another p, a div, section, heading, list or other disallowed flow content. When the parser encounters a start tag that cannot appear inside an open paragraph, HTML parsing can implicitly close the paragraph before processing the next element. This recovery can make malformed source look plausible in the live DOM, so write explicit, valid markup and validate it.\n\nUse br only when a line boundary is part of the content, such as an address or a poem. Do not use repeated br elements to create vertical gaps, and do not create empty paragraphs for spacing. Use CSS margin, padding and gap for presentation. Use blockquote for an extended quotation, pre when preformatted whitespace is significant, and ul or ol for lists. These elements communicate different purposes and should not be substituted just because their default styles look similar.\n\nWhitespace in HTML source is not a reliable layout tool. In ordinary text, runs of collapsible spaces, tabs and line breaks are generally collapsed for rendering. A source newline does not necessarily create a visible line break. CSS white-space can change whitespace handling; br creates a content line break. Browsers commonly style headings and paragraphs as block elements with margins, but exact default values are user-agent choices. A CSS reset may remove those margins without changing semantic meaning.\n\nSeparate structure from presentation. Use CSS font-size, font-weight, line-height, max-width, margin-block and responsive rules to establish a readable type scale. Keep paragraph line length comfortable, allow text to reflow at narrow widths, and avoid fixed heights that clip text when users zoom or enlarge fonts. If you reset default margins, deliberately restore a consistent spacing system. Logical properties such as margin-block and padding-inline can make styles easier to adapt to different writing directions.\n\nInspect the page in several ways. View Source shows the original response; Elements shows the current DOM after parsing and script changes. The accessibility tree can help inspect exposed heading information, but it does not replace testing with assistive technology. In the Console, run document.querySelectorAll('h1, h2, h3, h4, h5, h6') to inspect heading order. Check computed styles to see whether a reset changed margins or font sizes. Test heading navigation and resize the viewport to verify that long headings wrap without clipping.\n\nBuild an article with a descriptive h1, h2 headings for major sections and h3 only for genuine subsections. Write complete paragraphs and use inline emphasis or links only when meaningful. Style the article with CSS rather than empty paragraphs or repeated br elements. Temporarily disable the stylesheet: the document should still communicate a coherent structure. Finally inspect heading order, validate markup, test zoom and narrow-screen reflow, and correct confusing hierarchy.",
       "examples": [
         {
-          "id": "h3.1-example",
+          "id": "h3.1-example-1",
           "language": "en",
-          "code": "<h1>Garden guide</h1><h2>Watering</h2><p>Water the soil when it begins to dry.</p>",
-          "explanation": "Each element gives meaning to its content. Render it in a browser and observe how changing an element affects meaning and presentation.",
-          "expectedOutput": "The browser displays the corresponding heading, paragraph, inline formatting or text structure.",
+          "title": "A meaningful heading hierarchy",
+          "code": "<article>\n  <h1>A practical guide to garden watering</h1>\n  <p>Healthy watering starts with understanding the plant and soil.</p>\n  <h2>Understand your soil</h2>\n  <p>Soil texture affects drainage and water retention.</p>\n  <h3>Check drainage</h3>\n  <p>Observe how quickly water moves through the soil.</p>\n  <h2>Choose a watering schedule</h2>\n  <p>Adjust the schedule to weather and plant needs.</p>\n</article>",
+          "explanation": "The h1 identifies the article, h2 introduces major sections, and h3 identifies a subsection within the soil section. The ranks communicate relationships; CSS can style each level independently.",
+          "expectedOutput": "The browser displays a primary heading, two section headings, one nested subsection and paragraphs. Heading navigation exposes the same meaningful sequence.",
+          "runnable": true
+        },
+        {
+          "id": "h3.1-example-2",
+          "language": "en",
+          "title": "Style a heading without changing its rank",
+          "code": "<h2 class='section-title'>Why soil matters</h2>\n<p>Soil structure affects drainage and water retention.</p>\n<style>\n.section-title { font-size: 1.35rem; font-weight: 700; line-height: 1.25; margin-block: 2rem 0.75rem; }\n</style>",
+          "explanation": "This remains an h2 because it is a second-level section heading. CSS changes appearance without changing structural rank. Do not replace it with h4 merely to obtain a smaller default font.",
+          "expectedOutput": "The heading appears at the chosen size and spacing while remaining an h2 in the document structure.",
+          "runnable": true
+        },
+        {
+          "id": "h3.1-example-3",
+          "language": "en",
+          "title": "Paragraphs with inline phrasing content",
+          "code": "<p>Use <strong>clean tools</strong> when pruning, and read the <a href='care.html'>plant-care guide</a> before changing the schedule.</p>\n<p>The code element can identify a technical term such as <code>margin-block</code>.</p>",
+          "explanation": "The p elements group prose. Strong communicates importance, a creates a link, and code marks a code fragment. These are phrasing elements that can appear inside a paragraph.",
+          "expectedOutput": "Two paragraphs appear with important text, a link and a code fragment represented by their respective semantics.",
+          "runnable": true
+        },
+        {
+          "id": "h3.1-example-4",
+          "language": "en",
+          "title": "Do not nest a div inside a paragraph",
+          "code": "<!-- Avoid this structure -->\n<p>First part of the text.\n  <div>Related content</div>\n  More text.</p>\n\n<!-- Correct structure -->\n<p>First part of the text.</p>\n<div>Related content</div>\n<p>More text.</p>",
+          "explanation": "A div is not permitted as a child of p. During HTML parsing, the browser implicitly closes the paragraph when it encounters the div start tag. Use separate elements instead of relying on parser recovery.",
+          "expectedOutput": "The corrected source creates separate paragraph and generic container elements without relying on malformed nesting.",
+          "runnable": false
+        },
+        {
+          "id": "h3.1-example-5",
+          "language": "en",
+          "title": "Choose paragraph, line break or list by meaning",
+          "code": "<p>CodeSaathi Learning Centre<br>12 Garden Road<br>Rajahmundry</p>\n<p>Our next lesson explains soil drainage.</p>\n<ul>\n  <li>Check the soil.</li>\n  <li>Observe the weather.</li>\n  <li>Adjust the schedule.</li>\n</ul>",
+          "explanation": "The address uses br for meaningful line boundaries. The explanatory sentence is a paragraph. Independent steps form a list rather than a paragraph with manual line breaks.",
+          "expectedOutput": "The address appears on separate lines, the explanation appears as a paragraph, and the steps appear as a bulleted list.",
+          "runnable": true
+        },
+        {
+          "id": "h3.1-example-6",
+          "language": "en",
+          "title": "Source whitespace is not a spacing system",
+          "code": "<p>One sentence.\n\n\nAnother sentence after several source line breaks.</p>\n<style>\np { max-width: 65ch; line-height: 1.6; margin-block: 0 1.25rem; }\n</style>",
+          "explanation": "Ordinary source newlines and repeated spaces are collapsed during normal text rendering. CSS establishes readable line height, measure and paragraph spacing. Use white-space only when a particular whitespace-preservation behaviour is required.",
+          "expectedOutput": "The paragraph wraps naturally, with spacing controlled by CSS rather than the number of blank lines in the source.",
           "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Inspect the H3.1 concept in the starter code and add one more example.",
-      "independentTask": "Write a short semantic article on a topic you choose; use CSS rather than misusing HTML for visual spacing.",
+      "guidedTask": "Create an article titled “A Beginner’s Guide to Web Accessibility”. Use one descriptive h1, at least three h2 sections, and two h3 subsections nested under the appropriate h2. Write at least two complete paragraphs in each major section. Include one inline link, one strong emphasis and one short code fragment where they genuinely help. Add CSS for readable font size, line height, content width and consistent block spacing. Disable the stylesheet temporarily and confirm that the content hierarchy still makes sense. Inspect heading order and validate the HTML.",
+      "independentTask": "Build a responsive technical article with a primary h1, four or more logically ordered h2 sections, and h3 subsections only where needed. Write meaningful paragraphs rather than empty p elements for spacing. Use br only if a content line boundary is genuinely meaningful. Add a CSS type scale and spacing system using logical properties. Test at a narrow mobile width and 200% zoom, inspect the accessibility tree and heading navigation, and print all heading elements in document order in the Console. In a separate test snippet, deliberately create one confusing heading-level jump and one invalid p nesting example; explain, correct and validate each issue.",
       "hints": [
-        "Choose elements for their meaning, not their default appearance."
+        "Choose h1 through h6 by content hierarchy, not desired font size.",
+        "A clear page-level h1 is a useful convention, but exactly one h1 is not a universal HTML requirement.",
+        "Read headings in document order; they should form a useful map of the page.",
+        "Use a lower-ranked heading for a genuine subsection, not simply to change appearance.",
+        "Use p for a paragraph of prose, not as a generic wrapper for every block.",
+        "A p element cannot contain another p, div, section, heading or other disallowed flow content.",
+        "Use br only when a line boundary is part of the content; use CSS for visual spacing.",
+        "Normal HTML whitespace is generally collapsed; use CSS for line height, width and spacing.",
+        "Inspect source and live DOM because parsing can implicitly close paragraphs and repair malformed markup.",
+        "Test heading navigation, zoom, narrow-screen reflow and the page with CSS disabled."
       ]
     }
   },
   "practice": {
     "playgroundMode": "html",
-    "starterCode": "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>HTML practice</title></head><body>\n<h1>Garden guide</h1><h2>Watering</h2><p>Water the soil when it begins to dry.</p>\n</body></html>",
-    "resetCode": "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>HTML practice</title></head><body>\n<h1>Garden guide</h1><h2>Watering</h2><p>Water the soil when it begins to dry.</p>\n</body></html>"
+    "starterCode": "<!doctype html>\n<html lang='en'>\n<head>\n  <meta charset='utf-8'>\n  <meta name='viewport' content='width=device-width, initial-scale=1'>\n  <title>Headings and paragraphs | CodeSaathi</title>\n  <style>\n    * { box-sizing: border-box; }\n    body { margin: 0; font-family: system-ui, sans-serif; line-height: 1.6; color: #182230; }\n    main { width: min(100% - 2rem, 68ch); margin-inline: auto; padding-block: 2rem; }\n    h1, h2, h3 { line-height: 1.2; }\n    h2 { margin-block: 2rem 0.75rem; }\n    h3 { margin-block: 1.5rem 0.5rem; }\n    p { margin-block: 0 1rem; }\n  </style>\n</head>\n<body>\n  <main>\n    <article>\n      <h1>A practical guide to garden watering</h1>\n      <p>Good watering begins with understanding the soil, the plant and the weather.</p>\n      <h2>Understand your soil</h2>\n      <p>Soil texture affects drainage and water retention.</p>\n      <h3>Check drainage</h3>\n      <p>Notice how quickly water drains after a measured application.</p>\n      <h2>Choose a watering schedule</h2>\n      <p>Adjust watering to the plant’s needs and current conditions.</p>\n    </article>\n  </main>\n</body>\n</html>",
+    "resetCode": "<!doctype html>\n<html lang='en'>\n<head>\n  <meta charset='utf-8'>\n  <meta name='viewport' content='width=device-width, initial-scale=1'>\n  <title>Headings and paragraphs | CodeSaathi</title>\n  <style>\n    * { box-sizing: border-box; }\n    body { margin: 0; font-family: system-ui, sans-serif; line-height: 1.6; color: #182230; }\n    main { width: min(100% - 2rem, 68ch); margin-inline: auto; padding-block: 2rem; }\n    h1, h2, h3 { line-height: 1.2; }\n    h2 { margin-block: 2rem 0.75rem; }\n    h3 { margin-block: 1.5rem 0.5rem; }\n    p { margin-block: 0 1rem; }\n  </style>\n</head>\n<body>\n  <main>\n    <article>\n      <h1>A practical guide to garden watering</h1>\n      <p>Good watering begins with understanding the soil, the plant and the weather.</p>\n      <h2>Understand your soil</h2>\n      <p>Soil texture affects drainage and water retention.</p>\n      <h3>Check drainage</h3>\n      <p>Notice how quickly water drains after a measured application.</p>\n      <h2>Choose a watering schedule</h2>\n      <p>Adjust watering to the plant’s needs and current conditions.</p>\n    </article>\n  </main>\n</body>\n</html>"
   },
   "assessment": {
     "questions": [
       {
         "id": "h3.1-q1",
-        "prompt": "What should primarily guide your choice of an HTML element?",
+        "prompt": "What should determine whether an element is h2 or h3?",
         "options": [
-          "Meaning and purpose",
-          "Default font size",
-          "Colour"
+          "The relationship of the section to surrounding content",
+          "Which default font size looks better",
+          "How many pixels of margin are needed"
         ],
-        "answer": "Meaning and purpose",
-        "explanation": "Semantic HTML communicates the role of content."
+        "answer": "The relationship of the section to surrounding content",
+        "explanation": "Heading rank communicates content hierarchy. CSS controls visual size and spacing."
       },
       {
         "id": "h3.1-q2",
-        "prompt": "What is appropriate for visual spacing alone?",
+        "prompt": "Which statement about h1 is accurate?",
         "options": [
-          "CSS margin and padding",
-          "Empty paragraphs",
-          "Repeated br elements"
+          "HTML universally requires exactly one h1 in every document.",
+          "A clear page-level h1 is a useful convention, but exactly one h1 is not a universal HTML requirement.",
+          "An h1 must always be the largest visible text after CSS is applied."
         ],
-        "answer": "CSS margin and padding",
-        "explanation": "CSS should control layout spacing."
+        "answer": "A clear page-level h1 is a useful convention, but exactly one h1 is not a universal HTML requirement.",
+        "explanation": "Use headings to communicate meaningful hierarchy. Do not turn common design guidance into a false conformance rule."
+      },
+      {
+        "id": "h3.1-q3",
+        "prompt": "Which content is most appropriate inside a p element?",
+        "options": [
+          "A coherent paragraph containing text and phrasing elements such as em or a",
+          "A complete section containing h2, div and a nested p",
+          "A navigation list containing several li elements"
+        ],
+        "answer": "A coherent paragraph containing text and phrasing elements such as em or a",
+        "explanation": "Paragraphs represent prose and may contain phrasing content, not arbitrary flow-content containers."
+      },
+      {
+        "id": "h3.1-q4",
+        "prompt": "Why should repeated br elements not be used to create vertical gaps?",
+        "options": [
+          "They create presentational spacing that should be controlled by CSS and do not represent separate paragraphs.",
+          "They automatically create semantic h2 headings.",
+          "They prevent the browser from parsing the page."
+        ],
+        "answer": "They create presentational spacing that should be controlled by CSS and do not represent separate paragraphs.",
+        "explanation": "Use paragraph boundaries for separate prose units and CSS margin, padding or gap for layout."
+      },
+      {
+        "id": "h3.1-q5",
+        "prompt": "What normally happens to repeated spaces and source newlines in ordinary HTML text?",
+        "options": [
+          "They are generally collapsed for rendering.",
+          "Each source newline always creates a new paragraph.",
+          "Every sequence becomes a visible tab character."
+        ],
+        "answer": "They are generally collapsed for rendering.",
+        "explanation": "Normal whitespace processing collapses runs of collapsible whitespace. CSS white-space can change this behaviour."
+      },
+      {
+        "id": "h3.1-q6",
+        "prompt": "Why might the Elements panel show a paragraph closed before a div even though the source appears to nest the div inside it?",
+        "options": [
+          "The HTML parser implicitly closed the p because div is not permitted inside it.",
+          "The browser converted the div into a heading.",
+          "CSS moved the div into a different DOM parent."
+        ],
+        "answer": "The HTML parser implicitly closed the p because div is not permitted inside it.",
+        "explanation": "HTML parsing includes defined error recovery. Inspect the live DOM and correct the source instead of relying on parser recovery."
+      },
+      {
+        "id": "h3.1-q7",
+        "prompt": "What is the best way to make a semantically correct h2 appear smaller?",
+        "options": [
+          "Keep the h2 and set its font-size in CSS.",
+          "Replace it with h5 even though it is a major section.",
+          "Use an empty paragraph before it to reduce its size."
+        ],
+        "answer": "Keep the h2 and set its font-size in CSS.",
+        "explanation": "HTML communicates structure; CSS controls typography and presentation."
+      },
+      {
+        "id": "h3.1-q8",
+        "prompt": "Which check most directly helps assess whether the heading sequence is useful for navigation?",
+        "options": [
+          "Read or navigate the headings in document order and evaluate their hierarchy.",
+          "Compare only their default font sizes.",
+          "Count blank lines in the source."
+        ],
+        "answer": "Read or navigate the headings in document order and evaluate their hierarchy.",
+        "explanation": "Heading navigation should expose a coherent structure that communicates content relationships."
       }
     ]
   },
