@@ -64,6 +64,7 @@
   }
 
   function showCourse(courseId) {
+    loadSequence += 1;
     activeCourse = courseId;
     const meta = courseNames[courseId];
     const topics = topicsFor(courseId);
@@ -168,6 +169,14 @@
       questions,
       onComplete
     });
+    if (readProgress()[lesson.topicId]?.completed) {
+      const completedButton = $("#markLesson", container);
+      if (completedButton) {
+        completedButton.textContent = "✓ Lesson saved";
+        completedButton.disabled = true;
+        completedButton.setAttribute("aria-disabled", "true");
+      }
+    }
 const link = $(".lesson-practice-link", container);
     if (link && code) {
       link.addEventListener("click", () => {
