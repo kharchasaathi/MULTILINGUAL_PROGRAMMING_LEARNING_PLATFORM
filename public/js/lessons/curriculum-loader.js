@@ -16,6 +16,7 @@
   };
   let index = null;
   let activeCourse = null;
+  let loadSequence = 0;
   const getLanguage = () => {
     try { return localStorage.getItem(LANGUAGE_KEY) || "en"; } catch { return "en"; }
   };
@@ -106,8 +107,9 @@
     const requestedPath = topic.languages[language];
     const actualLanguage = requestedPath ? language : "en";
     const path = requestedPath || topic.languages.en;
+    const sequence = ++loadSequence;
     if (!path) {
-      container.append(text("p", "curriculum-error", "This lesson has not been authored in the selected language yet."));
+      container.replaceChildren(text("p", "curriculum-error", "This lesson has not been authored in the selected language yet."));
       return;
     }
     const loading = text("p", "curriculum-loading", "Loading " + topic.topicId + "…");
@@ -116,11 +118,13 @@
       const response = await fetch(path, { cache: "no-cache" });
       if (!response.ok) throw new Error("HTTP " + response.status);
       const lesson = await response.json();
+      if (sequence !== loadSequence) return;
       if (!lesson || lesson.topicId !== topic.topicId || !lesson.stages || !lesson.stages.understand || !lesson.stages.explain || !lesson.stages.practise) {
         throw new Error("Lesson content does not match the expected contract.");
       }
       renderLesson(lesson, actualLanguage !== language);
     } catch (error) {
+      if (sequence !== loadSequence) return;
       container.replaceChildren(text("p", "curriculum-error", "Could not load this lesson (" + topic.topicId + "). Please retry. " + error.message));
     }
   }
@@ -148,6 +152,7 @@
       saveProgress(lesson.topicId);
       const button = $("#markLesson", container);
       if (button) { button.textContent = "✓ Lesson saved"; button.disabled = true; }
+      renderCourseCards();
     };
     window.CodeSaathiLessonTemplate.render(container, {
       title: lesson.topicId + " · " + lesson.title,
