@@ -851,3 +851,41 @@ A topic is not complete merely because it appears in this syllabus. It is comple
 10. The tracker records evidence and release status.
 
 **Scope note:** This extended checklist is the intended complete beginner-to-practical front-end pathway for Version 1.0. Specialized standards, browser APIs, framework ecosystems, TypeScript, backend development, and advanced computer science topics can be separate future courses.
+
+## 20. Launch scope lock — English core courses only
+
+This section supersedes broader future-course suggestions when deciding what to implement before the first public launch.
+
+### In scope before launch
+1. Programming Foundations (`foundation`)
+2. HTML (`html`)
+3. CSS (`css`)
+4. JavaScript (`javascript`)
+
+Only these four courses are to receive new curriculum authoring and launch-critical UI work before the first release. Author and review the English source first. Do not spend launch effort translating new material into the other supported languages until the English lesson has passed technical, pedagogical, runnable-example and accessibility checks. Existing translated files must be preserved; do not bulk-delete or overwrite them.
+
+### Out of scope until after launch
+New courses such as Python, SQL, C/C++, Java, C#, TypeScript, React, Angular, Vue, Node.js, backend development, databases, data structures and algorithms, data science and AI are deferred. Existing foundational references needed to teach the four in-scope courses may remain, but no new standalone course should be added to the pre-launch workstream.
+
+### Required depth for in-scope lessons
+A lesson is not adequate merely because it has a short definition and one simple code snippet. Depending on the topic, the English lesson should cover:
+- precise terminology, purpose, constraints and relevant standards/browser behaviour;
+- syntax and constituent parts, including attributes, properties, values, methods, parameters or return values where applicable;
+- realistic examples that progress from a minimal case to a maintainable implementation;
+- expected browser output and a line-by-line or decision-by-decision explanation;
+- interactions with adjacent concepts and prerequisites;
+- edge cases, common implementation errors, debugging evidence and safe alternatives;
+- accessibility, security, performance and compatibility implications where relevant;
+- guided practice, an independent task and meaningful assessment questions.
+
+Do not pad lessons with repeated wording. Add depth that improves a learner's ability to design, implement, debug and explain real front-end work. Keep each lesson's stable topic ID and existing three-stage schema. Lesson status remains `draft` until its release gates are evidenced.
+
+### English-first workflow
+1. Audit the existing topic inventory in the four courses against the agreed W3Schools coverage reference.
+2. Keep the existing course/module/topic identifiers; identify genuine missing subtopics within the four courses before adding any new topic IDs.
+3. Expand English lessons systematically, module by module, without changing IDs or silently changing prerequisites.
+4. Validate lesson JSON against the schema, verify every answer against its options, and run every example in the appropriate isolated playground mode.
+5. Complete the UI interaction audit and responsive/accessibility checks.
+6. Only after English content is approved for the launch scope, resume regional-language authoring.
+
+**Scope decision:** The first launch is a focused, professionally detailed Foundations + HTML + CSS + JavaScript learning product, not a catalogue of many shallow courses.
