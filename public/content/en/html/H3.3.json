@@ -6,67 +6,196 @@
   "title": "Strong importance and emphasis",
   "language": "en",
   "learningObjectives": [
-    "Choose semantic text elements and inspect their browser output"
+    "Explain the semantic difference between strong importance and em stress emphasis.",
+    "Use strong to identify content with heightened importance, seriousness or urgency within its surrounding context.",
+    "Use em to mark stress emphasis that can change the intended meaning or interpretation of a sentence.",
+    "Explain how nested strong and em elements can express degrees or scopes of importance and stress.",
+    "Distinguish strong and em from b and i, and choose elements according to meaning rather than default bold or italic appearance.",
+    "Use CSS to change the visual presentation of semantic text without removing its meaning.",
+    "Apply strong and em without overusing them, nesting them incorrectly or relying on visual styling alone to communicate critical information.",
+    "Inspect the resulting DOM and accessibility representation, and test the content with styles disabled and assistive technology where available."
   ],
   "prerequisites": [
-    "H2.6"
+    "H3.1",
+    "H3.2"
   ],
   "stages": {
     "understand": {
-      "concept": "strong marks importance, seriousness or urgency; em marks stress emphasis that can affect sentence meaning. They are not merely bold and italic styling controls.",
-      "whyItMatters": "Choose these elements for meaning; use CSS when you only want a visual style.",
-      "analogy": "A book uses headings, paragraphs and notes for different purposes; HTML gives those roles explicit structure.",
-      "analogyLimit": "The book analogy is a memory aid; a browser parses HTML according to defined rules."
+      "concept": "The strong element marks content that has strong importance, seriousness or urgency in its surrounding context. The em element marks stress emphasis: the word or phrase is emphasized in a way that can affect the meaning or interpretation of the sentence. Both are semantic inline elements, not simply instructions to make text bold or italic. Browsers commonly render strong in bold and em in italics by default, but CSS can change those appearances without changing the underlying meaning.",
+      "whyItMatters": "Semantic emphasis helps communicate how a phrase relates to the rest of the content. A warning, critical instruction or deadline may need strong importance. A sentence may need em to show which word receives contrastive stress. If developers choose elements only for their default appearance, the source communicates the wrong meaning and becomes harder to maintain. Semantic markup also gives browsers and assistive technologies information beyond visual styling, although the exact spoken presentation depends on the assistive technology and its settings.",
+      "analogy": "In a spoken instruction, a speaker may stress one word to clarify what they mean, while a safety notice may identify a particularly important warning. em is comparable to the change in spoken stress; strong marks the importance of the information itself.",
+      "analogyLimit": "HTML semantics do not guarantee that every screen reader will announce strong or em with a particular voice, pitch or sound. The elements express meaning in the document; visual and spoken presentation varies by browser, assistive technology and user settings."
     },
     "explain": {
-      "narrative": "strong marks importance, seriousness or urgency; em marks stress emphasis that can affect sentence meaning. They are not merely bold and italic styling controls.",
+      "narrative": "Use strong when a phrase has heightened importance in its surrounding context. For example, “<strong>Disconnect the power before opening the device.</strong>” identifies a safety-critical instruction. A warning label, an important condition, a critical step or an urgent deadline may justify strong. The element does not mean “make this text bold”; it means that this content has greater importance. A browser commonly displays strong text in bold by default, but a stylesheet can render it with a different weight, colour, border or other visual treatment while preserving its semantics.\n\nUse em when stress emphasis belongs on a particular word or phrase and changes how the sentence should be understood. Consider “I asked for the <em>blue</em> cable, not the black one.” The emphasized word contrasts blue with another colour. Move the em element to another word and the sentence's implied contrast changes: “I <em>asked</em> for the blue cable” stresses that the request was made. The surrounding sentence supplies the context, so em should be used where the stress is meaningful rather than as a general italic style.\n\nThe distinction is important: strong answers “How important is this information in this context?” while em answers “Which part receives stress emphasis?” A safety warning may use strong without needing stress emphasis. A contrastive word may use em without being urgent or more important as a fact. A phrase can legitimately need both meanings, but do not add both elements automatically. Use the smallest markup that accurately represents the intended meaning.\n\nBoth elements are phrasing content and can appear inside paragraphs and other phrasing contexts where permitted. They can contain phrasing content, so a strong element may contain an em element and vice versa when the meaning genuinely overlaps. Nested em elements can indicate an increased level of stress emphasis; nested strong elements can indicate increasing importance. Nesting should represent a real distinction in emphasis or importance, not be used to produce extra-bold or extra-italic text. Keep the source structure readable and avoid unnecessary nesting.\n\nDo not confuse strong with b or em with i. The b element draws attention to text without conveying extra importance, such as a product name or a key term in a passage where no stronger semantic role applies. The i element represents text in an alternate voice or mood, a technical term, a taxonomic designation or another idiomatic offset, depending on context. The em element adds stress emphasis that can change sentence meaning. These distinctions matter because all four elements may have familiar default visual styles, but their semantics differ. If the only requirement is a visual appearance, a class and CSS are often more suitable than selecting a semantic element for its default style.\n\nAvoid wrapping an entire paragraph in strong or em when only a few words deserve that meaning. Overuse weakens the distinction and makes the content harder to scan. Do not use strong as a substitute for a heading, and do not use em to create a section title. Headings organize sections; strong and em express meaning within text. Do not communicate an essential warning through colour alone: retain clear wording and semantic markup, and ensure sufficient visual contrast.\n\nCSS can style semantic emphasis independently. For example, strong { font-weight: 700; } is a common visual choice, while em { font-style: italic; } is a common default. You may change those properties, but avoid removing all visual distinction if it is useful to sighted readers. If you use colour, weight, underline or background to reinforce a message, make sure the text itself still communicates the message and that contrast remains sufficient. A CSS class can add a design treatment, but the class does not replace the semantic role of the element.\n\nInspect the page with styles disabled and in the browser's Elements panel. The DOM should contain strong and em elements where intended, not merely spans with visual classes. Check computed styles to understand the visual result. Where possible, test the content with a screen reader and inspect the browser accessibility tree, while remembering that announcement details vary. Ask a reviewer to read the sentence aloud: if moving the em element changes the intended stress, it is likely doing meaningful work. If strong appears only because you wanted a bold font, reconsider whether b or CSS is more accurate.",
       "examples": [
         {
-          "id": "h3.3-example",
+          "id": "h3.3-example-1",
           "language": "en",
-          "code": "<p><strong>Warning:</strong> Save your work.</p><p>I <em>really</em> need the file today.</p>",
-          "explanation": "Each element gives meaning to its content. Render it in a browser and observe how changing an element affects meaning and presentation.",
-          "expectedOutput": "The browser displays the corresponding heading, paragraph, inline formatting or text structure.",
+          "title": "Mark a safety-critical instruction as important",
+          "code": "<p><strong>Warning:</strong> Disconnect the battery before opening the device.</p>\n<p>Keep the work area dry and well lit.</p>",
+          "explanation": "Strong marks the warning and safety instruction as important in context. The paragraph remains ordinary prose, and the second instruction is not automatically marked strong unless its context warrants heightened importance.",
+          "expectedOutput": "The browser commonly displays the warning text in bold. The DOM identifies it as strong importance rather than just a visual style.",
+          "runnable": true
+        },
+        {
+          "id": "h3.3-example-2",
+          "language": "en",
+          "title": "Stress emphasis can change the intended meaning",
+          "code": "<p>I asked for the <em>blue</em> cable, not the black one.</p>\n<p>I <em>asked</em> for the blue cable; I did not take it without permission.</p>",
+          "explanation": "The first em stresses the colour to create a contrast. The second stresses the act of asking. The emphasized word changes the implied correction or contrast, so em communicates sentence-level stress rather than generic italic styling.",
+          "expectedOutput": "The browser commonly renders the emphasized words in italics. Reading the sentences aloud with stress on those words demonstrates the change in meaning.",
+          "runnable": true
+        },
+        {
+          "id": "h3.3-example-3",
+          "language": "en",
+          "title": "Importance and stress emphasis are different",
+          "code": "<p><strong>Save a backup before updating the firmware.</strong></p>\n<p>Use the <em>original</em> configuration file, not an exported copy.</p>",
+          "explanation": "The first sentence is an important precaution. In the second, original receives contrastive stress. Strong and em have different jobs even though browsers commonly use bold and italic presentation.",
+          "expectedOutput": "The first instruction is commonly bold; the word original is commonly italic. Their semantic roles differ in the DOM.",
+          "runnable": true
+        },
+        {
+          "id": "h3.3-example-4",
+          "language": "en",
+          "title": "Nested emphasis only when the meaning requires it",
+          "code": "<p>I said the update was <em>very <em>important</em></em>, not optional.</p>\n<p><strong>Critical: <strong>Do not disconnect power during the firmware write.</strong></strong></p>",
+          "explanation": "Nested em can represent an increased level of stress, and nested strong can represent greater importance. This is not a technique for generating heavier visual styles; use nesting only when the meaning genuinely has levels.",
+          "expectedOutput": "The browser displays nested emphasis according to its styles. The DOM preserves the nested semantic structure for tools that interpret it.",
+          "runnable": true
+        },
+        {
+          "id": "h3.3-example-5",
+          "language": "en",
+          "title": "Choose b and i when their meanings fit better",
+          "code": "<p>In this catalogue, <b>Model X7</b> is the product name.</p>\n<p>The term <i>cache</i> is discussed here as a technical term.</p>\n<p><em>Only</em> the administrator can approve this request.</p>",
+          "explanation": "The product name is drawn to attention without being declared more important, so b can fit. The technical term is offset in an idiomatic way, so i may fit. Only receives stress emphasis that changes the sentence's interpretation, so em is appropriate.",
+          "expectedOutput": "The browser commonly displays b in bold and i in italics. The em element also commonly appears italic, but it carries stress-emphasis meaning rather than merely an offset style.",
+          "runnable": true
+        },
+        {
+          "id": "h3.3-example-6",
+          "language": "en",
+          "title": "Change appearance with CSS while preserving semantics",
+          "code": "<p><strong class='safety-note'>Important safety note:</strong> Use an insulated tool when the procedure requires one.</p>\n<p>Choose the <em class='contrast'>correct</em> connector before applying power.</p>\n<style>\n.safety-note { color: #8a1c1c; font-weight: 700; }\n.contrast { font-style: normal; text-decoration: underline; }\n</style>",
+          "explanation": "CSS changes the presentation of strong and em, but the DOM retains their semantic roles. The safety message is still marked important and correct still receives stress emphasis even though it is underlined rather than italic.",
+          "expectedOutput": "The safety phrase appears with the chosen colour and weight. The word correct is underlined. The elements remain strong and em in the DOM.",
           "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Inspect the H3.3 concept in the starter code and add one more example.",
-      "independentTask": "Write a short semantic article on a topic you choose; use CSS rather than misusing HTML for visual spacing.",
+      "guidedTask": "Write a short device-repair safety note. Use strong for the genuinely critical warning and em for one word whose stress changes the instruction's interpretation. Add one example where b or i is more accurate than strong or em. Style the elements with CSS, then inspect the DOM and computed styles. Read the sentences aloud with and without the emphasis to confirm that the meaning is intentional.",
+      "independentTask": "Create a troubleshooting article with at least four paragraphs. Include a safety-critical instruction, a contrastive sentence where the emphasized word changes the meaning, a product name or technical term that does not need importance or stress emphasis, and one case where no emphasis element is appropriate. Use strong, em, b and i only where their distinct meanings fit. Add a CSS theme that changes at least one default appearance without removing the semantic distinction. Validate the markup, inspect the accessibility tree if available, test with CSS disabled, and write a short explanation of why each marked phrase uses its chosen element.",
       "hints": [
-        "Choose elements for their meaning, not their default appearance."
+        "Use strong for heightened importance, seriousness or urgency in the surrounding context.",
+        "Use em for stress emphasis that can change the meaning or interpretation of a sentence.",
+        "Ask whether the phrase is important or whether a particular word needs vocal stress; these are different questions.",
+        "Do not select strong merely because you want bold text, or em merely because you want italics.",
+        "Consider b for attention without added importance and i for an alternate voice, mood or idiomatic offset.",
+        "Use strong and em inside phrasing contexts such as paragraphs; do not use them as substitutes for headings.",
+        "Nested strong or em can express degrees of meaning, but avoid nesting solely to intensify visual styling.",
+        "Do not over-mark entire paragraphs; emphasize only the phrases that genuinely need it.",
+        "CSS can change visual presentation without changing the element's semantic role.",
+        "Test the text with styles disabled and, where possible, with assistive technology; announcement behaviour varies."
       ]
     }
   },
   "practice": {
     "playgroundMode": "html",
-    "starterCode": "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>HTML practice</title></head><body>\n<p><strong>Warning:</strong> Save your work.</p><p>I <em>really</em> need the file today.</p>\n</body></html>",
-    "resetCode": "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>HTML practice</title></head><body>\n<p><strong>Warning:</strong> Save your work.</p><p>I <em>really</em> need the file today.</p>\n</body></html>"
+    "starterCode": "<!doctype html>\n<html lang='en'>\n<head>\n  <meta charset='utf-8'>\n  <meta name='viewport' content='width=device-width, initial-scale=1'>\n  <title>Strong importance and emphasis | CodeSaathi</title>\n  <style>\n    * { box-sizing: border-box; }\n    body { margin: 0; font-family: system-ui, sans-serif; line-height: 1.65; color: #182230; }\n    main { width: min(100% - 2rem, 65ch); margin-inline: auto; padding-block: 2rem; }\n    p { margin-block: 0 1rem; }\n    .safety-note { color: #8a1c1c; font-weight: 700; }\n    .contrast { font-style: normal; text-decoration: underline; text-decoration-thickness: 0.12em; }\n  </style>\n</head>\n<body>\n  <main>\n    <h1>Device repair: safe working notes</h1>\n    <p><strong class='safety-note'>Important safety instruction:</strong> Disconnect the battery before handling the exposed board.</p>\n    <p>Use the <em>correct</em> connector, not a visually similar one.</p>\n    <p>The <b>Model X7</b> service guide lists the connector location.</p>\n    <p>Check the technical term <i>continuity</i> in the glossary before testing.</p>\n  </main>\n</body>\n</html>",
+    "resetCode": "<!doctype html>\n<html lang='en'>\n<head>\n  <meta charset='utf-8'>\n  <meta name='viewport' content='width=device-width, initial-scale=1'>\n  <title>Strong importance and emphasis | CodeSaathi</title>\n  <style>\n    * { box-sizing: border-box; }\n    body { margin: 0; font-family: system-ui, sans-serif; line-height: 1.65; color: #182230; }\n    main { width: min(100% - 2rem, 65ch); margin-inline: auto; padding-block: 2rem; }\n    p { margin-block: 0 1rem; }\n    .safety-note { color: #8a1c1c; font-weight: 700; }\n    .contrast { font-style: normal; text-decoration: underline; text-decoration-thickness: 0.12em; }\n  </style>\n</head>\n<body>\n  <main>\n    <h1>Device repair: safe working notes</h1>\n    <p><strong class='safety-note'>Important safety instruction:</strong> Disconnect the battery before handling the exposed board.</p>\n    <p>Use the <em>correct</em> connector, not a visually similar one.</p>\n    <p>The <b>Model X7</b> service guide lists the connector location.</p>\n    <p>Check the technical term <i>continuity</i> in the glossary before testing.</p>\n  </main>\n</body>\n</html>"
   },
   "assessment": {
     "questions": [
       {
         "id": "h3.3-q1",
-        "prompt": "What should primarily guide your choice of an HTML element?",
+        "prompt": "What does strong primarily communicate?",
         "options": [
-          "Meaning and purpose",
-          "Default font size",
-          "Colour"
+          "Heightened importance, seriousness or urgency in context",
+          "A request to use a bold font regardless of meaning",
+          "Stress on a word that changes sentence interpretation"
         ],
-        "answer": "Meaning and purpose",
-        "explanation": "Semantic HTML communicates the role of content."
+        "answer": "Heightened importance, seriousness or urgency in context",
+        "explanation": "strong marks importance in the surrounding context. Its common bold appearance is a default presentation, not its definition."
       },
       {
         "id": "h3.3-q2",
-        "prompt": "What is appropriate for visual spacing alone?",
+        "prompt": "What does em primarily communicate?",
         "options": [
-          "CSS margin and padding",
-          "Empty paragraphs",
-          "Repeated br elements"
+          "Stress emphasis that can affect sentence meaning or interpretation",
+          "A warning that must always be red",
+          "A generic request to italicize a technical term"
         ],
-        "answer": "CSS margin and padding",
-        "explanation": "CSS should control layout spacing."
+        "answer": "Stress emphasis that can affect sentence meaning or interpretation",
+        "explanation": "em marks stress emphasis. Moving it to another word can change the intended contrast or interpretation."
+      },
+      {
+        "id": "h3.3-q3",
+        "prompt": "Which markup best identifies a safety-critical instruction?",
+        "options": [
+          "<strong>Disconnect power before opening the device.</strong>",
+          "<em>Disconnect power before opening the device.</em>",
+          "<i>Disconnect power before opening the device.</i>"
+        ],
+        "answer": "<strong>Disconnect power before opening the device.</strong>",
+        "explanation": "The instruction has heightened importance and seriousness, so strong is appropriate."
+      },
+      {
+        "id": "h3.3-q4",
+        "prompt": "A sentence says, “I asked for the blue cable, not the black one.” Which word is most useful to stress with em to highlight the colour contrast?",
+        "options": [
+          "blue",
+          "asked",
+          "cable"
+        ],
+        "answer": "blue",
+        "explanation": "Stressing blue highlights the colour distinction. Stressing another word would create a different contrast."
+      },
+      {
+        "id": "h3.3-q5",
+        "prompt": "Which statement best distinguishes strong from b?",
+        "options": [
+          "strong marks importance; b draws attention without adding that importance.",
+          "strong and b have identical semantics and differ only in browser support.",
+          "b always means urgency while strong means a product name."
+        ],
+        "answer": "strong marks importance; b draws attention without adding that importance.",
+        "explanation": "Choose the element according to the content's meaning, not because both commonly appear bold."
+      },
+      {
+        "id": "h3.3-q6",
+        "prompt": "A designer wants strong text to appear in a different colour and weight. What happens to its semantics?",
+        "options": [
+          "The strong meaning remains; CSS changes only its presentation.",
+          "The strong meaning disappears as soon as font-weight changes.",
+          "It automatically becomes an em element."
+        ],
+        "answer": "The strong meaning remains; CSS changes only its presentation.",
+        "explanation": "CSS presentation does not change the semantic element in the DOM."
+      },
+      {
+        "id": "h3.3-q7",
+        "prompt": "When is nested em or strong appropriate?",
+        "options": [
+          "When the content genuinely expresses nested or increased degrees of stress or importance",
+          "Whenever a designer wants heavier bold or darker italic text",
+          "Whenever the paragraph contains more than two sentences"
+        ],
+        "answer": "When the content genuinely expresses nested or increased degrees of stress or importance",
+        "explanation": "Nesting can represent semantic levels. It should not be used as a visual formatting trick."
+      },
+      {
+        "id": "h3.3-q8",
+        "prompt": "Which is a reliable way to check whether emphasis markup is meaningful?",
+        "options": [
+          "Review the intended sentence meaning, inspect the DOM, and test with styles disabled and assistive technology where available.",
+          "Check only whether the browser displays bold and italic text.",
+          "Add strong and em to every paragraph to make the page easier to scan."
+        ],
+        "answer": "Review the intended sentence meaning, inspect the DOM, and test with styles disabled and assistive technology where available.",
+        "explanation": "Semantic meaning, DOM structure and actual presentation should be reviewed separately. Assistive-technology output can vary."
       }
     ]
   },
