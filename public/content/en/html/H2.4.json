@@ -3,70 +3,176 @@
   "courseId": "html",
   "moduleId": "H2",
   "topicId": "H2.4",
-  "title": "The head element and metadata",
+  "title": "Page titles, metadata, character encoding, and viewport",
   "language": "en",
   "learningObjectives": [
-    "Identify and assemble the parts of a complete HTML document"
+    "Explain the purpose of the head element and distinguish document metadata and resource references from the visible content placed in body.",
+    "Create a meaningful, page-specific title element and explain where browsers and other systems use the document title.",
+    "Declare UTF-8 character encoding with a meta charset element placed early in the document, and explain how character encoding differs from the document's language.",
+    "Describe the purpose of the viewport meta element and correctly use width=device-width and initial-scale=1 for a modern mobile-friendly starting point.",
+    "Explain why viewport metadata does not create a responsive layout and identify the CSS techniques still needed for flexible, device-appropriate design.",
+    "Add common metadata such as a page description and distinguish standard HTML metadata from platform-specific metadata conventions.",
+    "Inspect document.title, character encoding, and viewport metadata with browser Developer Tools, and diagnose common head-section mistakes without weakening accessibility or user zoom."
   ],
   "prerequisites": [
-    "H1.5"
+    "H1.5",
+    "H1.6",
+    "H2.1",
+    "H2.3"
   ],
   "stages": {
     "understand": {
-      "concept": "The head contains document metadata and resource references. Its title element supplies the browser-tab title.",
-      "whyItMatters": "A useful title helps identify tabs, bookmarks and search results.",
-      "analogy": "A package label describes the product but is not the product; metadata describes a page but is not its main content.",
-      "analogyLimit": "The analogy is only a memory aid; HTML should not be interpreted literally through it."
+      "concept": "The head element contains information about the HTML document and references to resources that the browser or other systems need. Much of this information is not displayed as ordinary page content. The title element gives the document its title, which browsers commonly show in a tab, window title, history entry, or bookmark. Meta elements provide metadata such as character encoding, viewport instructions, and a description. Link elements in head can reference external resources such as stylesheets and icons. The body element, by contrast, contains the document's page content. A well-organized head gives browsers, assistive technologies, search systems, and users useful information about the page before or while they interact with it.",
+      "whyItMatters": "Incorrect or missing head information can cause text to display incorrectly, make a page difficult to identify among open tabs, produce poor previews, or create an unsuitable initial viewport on mobile devices. A UTF-8 declaration supports reliable text decoding across writing systems. A meaningful title improves navigation and orientation, especially for people using screen readers or many browser tabs. Viewport metadata helps mobile browsers establish an appropriate layout viewport, while CSS is still responsible for adapting the layout. These small document-level decisions improve reliability, usability, and maintainability.",
+      "analogy": "Think of head as the information sheet attached to a document: it describes the document and points to resources needed to use it. The title is the document's identifying name, while body is the content the reader came to see.",
+      "analogyLimit": "The browser does not simply read head as a printed cover sheet. It processes metadata and resource links according to defined browser algorithms. Some metadata is used by browsers, some by assistive technology or external services, and some is ignored when unsupported. Metadata also cannot replace clear page content or responsive CSS."
     },
     "explain": {
-      "narrative": "The head contains document metadata and resource references. Its title element supplies the browser-tab title.",
+      "narrative": "A complete modern document places its head inside the html root element and before body. The title element belongs in head and should describe the page's specific purpose. Prefer a concise title that distinguishes this page from other pages on the same site, for example 'Account settings | CodeSaathi' rather than a vague title such as 'Page' or a repeated title used everywhere. Browsers commonly show the title in the tab and use it in bookmarks and history. Search systems may use it when presenting a result, but they can choose a different title for a search snippet. The title is not the same as the visible h1: a page can have a tab title and a separate visible heading, and both should accurately describe the page.\n\nDeclare the document's character encoding with <meta charset=\"utf-8\"> near the beginning of head. UTF-8 can represent characters from the world's writing systems and is the normal choice for modern web documents. The declaration tells the browser how to decode the document's bytes into characters; it does not identify the human language. Use lang on html for language metadata. For reliable HTML encoding detection, keep the charset declaration within the first 1024 bytes of the document and place it before content that could be misinterpreted. Save the file using the same encoding you declare. A mismatch between the actual file encoding and the declared encoding can produce replacement characters or garbled text.\n\nA common viewport declaration is <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">. The width=device-width part asks the browser to set the layout viewport to the device's CSS-pixel width instead of using a wide desktop-style layout viewport on a narrow mobile screen. initial-scale=1 sets the initial zoom scale. This gives responsive CSS a useful starting point, but it does not automatically create breakpoints, flexible images, fluid grids, or mobile-friendly navigation. Those behaviours require CSS techniques such as flexible sizing, media queries, Flexbox, and Grid. Avoid disabling or restricting user zoom with user-scalable=no or restrictive maximum-scale values; users must be able to enlarge content when needed.\n\nA description meta element can provide a concise summary of the page, for example <meta name=\"description\" content=\"Learn HTML document structure and metadata.\">. Search engines may use this description when generating a result snippet, but they are not required to display it. It should summarize the actual page rather than contain a list of unrelated keywords. Other metadata conventions exist, including social-sharing metadata, but not every convention is part of the HTML standard. Use documented metadata names and platform guidance rather than inventing arbitrary attributes.\n\nThe head can also contain link elements that connect the document to external resources. For example, <link rel=\"stylesheet\" href=\"styles.css\"> references a stylesheet, and a link with rel=\"icon\" can identify a site icon. A stylesheet link is a resource reference, not visible body content. The browser may fetch and process linked resources as part of loading the page. Use correct relative or absolute URLs and inspect the Network panel if a resource fails to load.\n\nYou can inspect the document title by running document.title in the Console. In the Elements panel, inspect head to review meta and link elements. The Network panel can help confirm which stylesheet or icon resource was requested and whether it loaded successfully. Developer Tools can show the document's encoding and viewport-related information, although exact panels differ between browsers. Do not assume that a correct metadata declaration proves the page is accessible or responsive: inspect the page at different widths, test zoom, validate the source, and verify that linked resources load.",
       "examples": [
         {
-          "id": "h2.4-example",
+          "id": "h2.4-complete-head",
           "language": "en",
-          "code": "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><title>Learning Notes</title></head><body><h1>Welcome</h1></body></html>",
-          "explanation": "The tab says Learning Notes; the page displays Welcome.",
-          "expectedOutput": "The tab says Learning Notes; the page displays Welcome.",
+          "title": "A useful head section for a modern page",
+          "code": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <meta name=\"description\" content=\"A practical introduction to HTML document structure.\">\n  <title>HTML document structure | CodeSaathi</title>\n</head>\n<body>\n  <main>\n    <h1>HTML document structure</h1>\n    <p>Learn how a document is organized.</p>\n  </main>\n</body>\n</html>",
+          "explanation": "The head contains the character encoding, viewport settings, page description, and title. The body contains the visible heading and paragraph. The title identifies the page in browser UI; the h1 identifies its main visible content.",
+          "expectedOutput": "The browser tab displays HTML document structure | CodeSaathi. The page displays the HTML document structure heading and paragraph.",
+          "runnable": true
+        },
+        {
+          "id": "h2.4-title-inspection",
+          "language": "en",
+          "title": "Inspect and update the document title",
+          "code": "<!doctype html>\n<html lang=\"en\">\n<head><meta charset=\"utf-8\"><title>Before update</title></head>\n<body>\n  <h1>Account settings</h1>\n  <script>document.title = 'Account settings | Example site';</script>\n</body>\n</html>",
+          "explanation": "The title element provides the initial document title. JavaScript can later update document.title, and browsers generally update the tab title. The visible h1 remains separate and is not automatically changed by updating the document title.",
+          "expectedOutput": "The tab title becomes Account settings | Example site, while the visible heading remains Account settings.",
+          "runnable": true
+        },
+        {
+          "id": "h2.4-utf8-multilingual",
+          "language": "en",
+          "title": "Use UTF-8 for multilingual text",
+          "code": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Multilingual text</title>\n</head>\n<body>\n  <p>English</p>\n  <p lang=\"te\">తెలుగు</p>\n  <p lang=\"hi\">हिन्दी</p>\n</body>\n</html>",
+          "explanation": "UTF-8 allows the document to represent text from multiple writing systems. The lang attributes identify the language of the Telugu and Hindi passages. Encoding and language are separate pieces of information.",
+          "expectedOutput": "The page displays English, Telugu, and Hindi text when the file is saved and served using the declared UTF-8 encoding.",
+          "runnable": true
+        },
+        {
+          "id": "h2.4-viewport",
+          "language": "en",
+          "title": "Establish a mobile-friendly layout viewport",
+          "code": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Viewport example</title>\n  <style>\n    main { max-width: 60rem; margin-inline: auto; padding: 1rem; }\n    img { max-width: 100%; height: auto; }\n  </style>\n</head>\n<body>\n  <main><h1>Flexible content</h1><p>Resize the viewport to observe the content width.</p></main>\n</body>\n</html>",
+          "explanation": "The viewport declaration makes the layout viewport correspond to the device width. The CSS max-width, padding, and flexible image rule help the content adapt. The metadata alone would not create these responsive layout behaviours.",
+          "expectedOutput": "The content uses the available viewport width on narrow screens and remains constrained to a readable maximum width on wider screens.",
+          "runnable": true
+        },
+        {
+          "id": "h2.4-description",
+          "language": "en",
+          "title": "Write a page-specific description",
+          "code": "<head>\n  <meta charset=\"utf-8\">\n  <title>CSS grid layout | CodeSaathi</title>\n  <meta name=\"description\" content=\"Learn how CSS Grid places content into rows and columns.\">\n</head>",
+          "explanation": "The title and description identify and summarize this particular page. Search engines may use the description when creating a result snippet, but the displayed snippet is selected by the search system and is not guaranteed to match the metadata exactly.",
+          "expectedOutput": "The document has a descriptive title and a concise summary in its metadata. Neither item is rendered as an ordinary paragraph in the page body.",
+          "runnable": false
+        },
+        {
+          "id": "h2.4-stylesheet-link",
+          "language": "en",
+          "title": "Reference an external stylesheet from head",
+          "code": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>External stylesheet</title>\n  <link rel=\"stylesheet\" href=\"styles.css\">\n</head>\n<body><h1>Styled page</h1></body>\n</html>",
+          "explanation": "The link element references an external CSS resource. The browser requests styles.css relative to the document URL. If the path is wrong or the server returns an error or an unexpected content type, the stylesheet may not apply; inspect the Network panel to diagnose the request.",
+          "expectedOutput": "If styles.css exists at the referenced location and contains valid CSS, its rules are applied to the page. Otherwise the browser displays the page without those stylesheet rules.",
           "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Add a descriptive title and UTF-8 charset inside head.",
-      "independentTask": "Create your own small page, open it in a browser and inspect the result.",
+      "guidedTask": "Create a complete HTML document for a multilingual learning lesson. Add a concise, page-specific title, a UTF-8 charset declaration near the beginning of head, a viewport declaration using width=device-width and initial-scale=1, and a short description meta element. Add a visible h1 in body. Open the page and compare the browser tab title with the visible h1. Use Developer Tools to inspect the head and run document.title in the Console. Then resize the viewport and observe what the metadata changes and what still depends on CSS.",
+      "independentTask": "Create a two-page mini-site with index.html and lesson.html. Give each page a distinct and meaningful title, correct lang metadata, UTF-8 encoding, viewport settings, and a description that accurately summarizes that page. Link a shared stylesheet from both pages and use responsive CSS so content fits a narrow screen without horizontal scrolling. Test browser zoom at 200%, inspect the document title and head elements, and use the Network panel to confirm the stylesheet loads. Write a short report distinguishing the responsibilities of title, description, charset, viewport, lang, and CSS.",
       "hints": [
-        "Check that each element is nested under the correct parent."
+        "Keep title, meta, and link elements in head; place headings, paragraphs, and other page content in body.",
+        "Write a meaningful title for each page. A visible h1 and the document title can be related but serve different browser and page-navigation roles.",
+        "Put meta charset=\"utf-8\" near the beginning of head and save the source file using UTF-8.",
+        "Use lang on html to identify the document language; charset identifies character encoding.",
+        "Use width=device-width and initial-scale=1 as a modern viewport starting point, but use CSS for flexible layout and breakpoints.",
+        "Do not disable or restrict browser zoom. Test that users can enlarge content without losing information or functionality.",
+        "A meta description may be used in a search snippet, but search engines can generate a different snippet from page content.",
+        "If an external stylesheet does not apply, inspect its URL and response in the Network panel rather than assuming the link element itself is broken."
       ]
     }
   },
   "practice": {
     "playgroundMode": "html",
-    "starterCode": "<!doctype html>\n<html lang=\"en\">\n<head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Practice</title></head>\n<body>\n<h1>My first page</h1><p>I am learning HTML.</p>\n</body>\n</html>",
-    "resetCode": "<!doctype html>\n<html lang=\"en\">\n<head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Practice</title></head>\n<body>\n<h1>My first page</h1><p>I am learning HTML.</p>\n</body>\n</html>"
+    "starterCode": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <meta name=\"description\" content=\"A practical page about HTML metadata.\">\n  <title>HTML metadata practice | CodeSaathi</title>\n  <style>\n    main { max-width: 60rem; margin-inline: auto; padding: 1rem; }\n  </style>\n</head>\n<body>\n  <main>\n    <h1>HTML metadata practice</h1>\n    <p>Inspect the browser tab, then resize the viewport.</p>\n  </main>\n</body>\n</html>",
+    "resetCode": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <meta name=\"description\" content=\"A practical page about HTML metadata.\">\n  <title>HTML metadata practice | CodeSaathi</title>\n  <style>\n    main { max-width: 60rem; margin-inline: auto; padding: 1rem; }\n  </style>\n</head>\n<body>\n  <main>\n    <h1>HTML metadata practice</h1>\n    <p>Inspect the browser tab, then resize the viewport.</p>\n  </main>\n</body>\n</html>"
   },
   "assessment": {
     "questions": [
       {
         "id": "h2.4-q1",
-        "prompt": "Where does the main page content belong?",
+        "prompt": "Which element provides the document title commonly shown in a browser tab?",
         "options": [
-          "body",
-          "head",
-          "doctype"
+          "title inside head",
+          "h1 inside body",
+          "meta name=description"
         ],
-        "answer": "body",
-        "explanation": "The body contains page content."
+        "answer": "title inside head",
+        "explanation": "The title element defines the document title used by browser UI such as tabs and history. The h1 is visible page content, while the description is metadata."
       },
       {
         "id": "h2.4-q2",
-        "prompt": "What is the root element?",
+        "prompt": "What does meta charset=\"utf-8\" communicate to the browser?",
         "options": [
-          "html",
-          "title",
-          "p"
+          "The document's primary spoken language.",
+          "The character encoding used to decode the document text.",
+          "The maximum width of the page layout."
         ],
-        "answer": "html",
-        "explanation": "html is the document root."
+        "answer": "The character encoding used to decode the document text.",
+        "explanation": "The charset declaration identifies the encoding used to interpret the document's bytes as characters. Use lang separately to identify language."
+      },
+      {
+        "id": "h2.4-q3",
+        "prompt": "What is the main purpose of width=device-width in the viewport meta element?",
+        "options": [
+          "It makes every element automatically fit every screen.",
+          "It asks the browser to use the device width as the layout viewport width.",
+          "It forces the user to view the page at 100% zoom."
+        ],
+        "answer": "It asks the browser to use the device width as the layout viewport width.",
+        "explanation": "The viewport declaration establishes a useful layout viewport. Responsive CSS is still required to adapt content to different widths."
+      },
+      {
+        "id": "h2.4-q4",
+        "prompt": "A page has viewport metadata but its wide table causes horizontal scrolling on a phone. What is the best conclusion?",
+        "options": [
+          "The viewport declaration automatically failed because it should create responsive tables.",
+          "The viewport metadata establishes the layout viewport, but the table still needs an appropriate responsive design.",
+          "The page should disable user zoom to remove the horizontal scrollbar."
+        ],
+        "answer": "The viewport metadata establishes the layout viewport, but the table still needs an appropriate responsive design.",
+        "explanation": "Viewport metadata does not rewrite the layout. Developers must use suitable CSS and content strategies for wide tables and other complex components."
+      },
+      {
+        "id": "h2.4-q5",
+        "prompt": "Which statement about a meta description is accurate?",
+        "options": [
+          "It is always displayed as the first paragraph on the page.",
+          "Search systems may use it for a result snippet, but they can generate a different snippet.",
+          "It replaces the title element and the visible h1."
+        ],
+        "answer": "Search systems may use it for a result snippet, but they can generate a different snippet.",
+        "explanation": "The description is metadata that summarizes a page. Search systems may use it, but they control the final snippet shown to users."
+      },
+      {
+        "id": "h2.4-q6",
+        "prompt": "Why should developers avoid user-scalable=no and restrictive maximum-scale settings in viewport metadata?",
+        "options": [
+          "They can prevent users from zooming and make content harder to access.",
+          "They automatically improve responsive design.",
+          "They change the document language."
+        ],
+        "answer": "They can prevent users from zooming and make content harder to access.",
+        "explanation": "Users may need to enlarge content. Do not unnecessarily restrict browser zoom; design pages so that zooming remains usable."
       }
     ]
   },
