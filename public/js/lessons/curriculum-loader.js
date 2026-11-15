@@ -182,7 +182,13 @@ const link = $(".lesson-practice-link", container);
       link.addEventListener("click", () => {
         const editor = $("#codeEditor");
         if (editor) {
+          const mode = lesson.practice?.playgroundMode || "html";
+          editor.dataset.playgroundMode = mode;
           editor.value = code;
+          const fileLabel = $(".editor-toolbar span");
+          if (fileLabel) {
+            fileLabel.textContent = mode === "css" ? "styles.css" : mode === "javascript" ? "app.js" : mode === "combined" ? "index.html + styles + script" : "index.html";
+          }
           $("#runCode")?.click();
         }
       });
