@@ -3,73 +3,134 @@
   "courseId": "javascript",
   "moduleId": "J2",
   "topicId": "J2.1",
-  "title": "Adding JavaScript to a page",
+  "title": "Loading and executing JavaScript in an HTML document",
   "language": "en",
   "learningObjectives": [
-    "Explain adding javascript to a page and create a small runnable JavaScript example."
+    "Explain how the script element embeds JavaScript or loads an external script resource.",
+    "Compare inline scripts, external classic scripts, deferred scripts, asynchronous scripts and JavaScript modules.",
+    "Predict when a script can access DOM elements based on parser position and loading attributes.",
+    "Use addEventListener rather than inline event-handler attributes to connect behaviour to document elements.",
+    "Explain the different purposes of defer, async and type=\"module\" and choose an appropriate loading strategy.",
+    "Diagnose common script-loading failures using the Network and Console panels.",
+    "Keep JavaScript source separate from markup and avoid exposing secrets or trusting client-side checks as security controls."
   ],
   "prerequisites": [
     "J1.1",
-    "J1.7"
+    "J1.7",
+    "H2.1"
   ],
   "stages": {
     "understand": {
-      "concept": "JavaScript can be added inline in a script element or loaded from an external file using src. External scripts separate behaviour from markup and can be reused. Script placement and loading attributes affect when code executes relative to document parsing.",
-      "whyItMatters": "Separating scripts improves organisation and maintainability. Inline event-handler attributes mix behaviour with markup and are generally less maintainable than addEventListener.",
-      "analogy": "A script element is the doorway that connects a document to JavaScript instructions.",
-      "analogyLimit": "The analogy is simplified; script loading and JavaScript evaluation follow browser parsing and language rules."
+      "concept": "A browser executes JavaScript when it encounters executable script code or loads a script resource. The HTML script element can contain code directly or reference an external file through src. Script placement and attributes influence when the browser fetches and executes that code relative to HTML parsing. This timing matters because a script that queries an element before the parser has created it may receive null.",
+      "whyItMatters": "Understanding script loading prevents race conditions, missing-element errors, blocked rendering and fragile page initialization. External files also make code easier to reuse, cache, test and maintain. For most page behaviour, a deferred external script or a module script is a strong default.",
+      "history": "Early web pages often used small inline scripts. As sites grew, external scripts and standardized loading behaviours became important for maintainability and performance. JavaScript modules later added explicit import/export relationships and module-scoped execution.",
+      "analogy": "Think of HTML parsing as constructing the document structure and JavaScript as code that may inspect or modify that structure.",
+      "analogyLimit": "The browser does not simply finish all HTML and then run every script in one universal order. Classic scripts, async scripts, deferred scripts and modules have different fetch and execution rules."
     },
     "explain": {
-      "narrative": "The script finds the heading and updates its text after the parser has created the element.",
+      "narrative": "A classic script without async or defer can pause HTML parsing while it is fetched and executed. A script with defer is fetched in parallel with parsing and executes after parsing completes, preserving order among deferred classic scripts. An async script is fetched in parallel and executes as soon as it is ready; ordering relative to other async scripts is not guaranteed. A module script is deferred by default and supports import/export. Use defer when a classic script depends on the parsed DOM and ordering matters. Use async for independent scripts where execution order is not required. Use modules when the code is organized with imports and exports. Avoid inline event-handler attributes because they mix behaviour into markup and complicate maintenance and Content Security Policy.",
       "examples": [
         {
-          "id": "j2-1-example",
+          "id": "j2-1-inline-script",
           "language": "en",
-          "code": "<h1 id='title'>Before JavaScript</h1><script>document.querySelector('#title').textContent='JavaScript is connected';</script>",
-          "explanation": "The script finds the heading and updates its text after the parser has created the element.",
-          "expectedOutput": "The browser page or developer console shows the result described in the example.",
+          "title": "A script embedded in the document",
+          "code": "<h1 id=\"status\">Waiting</h1>\n<script>\n  const status = document.querySelector(\"#status\");\n  status.textContent = \"The script ran\";\n</script>",
+          "explanation": "The script appears after the heading, so the parser has already created that element before this code runs. Moving the script earlier without changing its loading strategy could make the query return null.",
+          "expectedOutput": "The heading changes from Waiting to The script ran.",
+          "runnable": true
+        },
+        {
+          "id": "j2-1-defer",
+          "language": "en",
+          "title": "Load an external script with defer",
+          "code": "<!-- index.html -->\n<script src=\"./js/app.js\" defer></script>\n\n// js/app.js\nconst status = document.querySelector(\"#status\");\nstatus.textContent = \"Deferred script initialized\";",
+          "explanation": "The defer attribute lets the browser fetch the classic external script while parsing continues, then execute it after parsing is complete. The example assumes the page contains an element with id=\"status\".",
+          "expectedOutput": "The script can query the parsed element without moving the script to the end of body.",
+          "runnable": false
+        },
+        {
+          "id": "j2-1-async-module",
+          "language": "en",
+          "title": "Async and module scripts have different contracts",
+          "code": "<script src=\"analytics.js\" async></script>\n<script type=\"module\" src=\"./js/main.js\"></script>",
+          "explanation": "The async script executes when it is ready and should not rely on execution order relative to other async scripts. A module script is deferred by default and uses the module loading system. Module scripts are subject to CORS rules when loaded from another origin.",
+          "expectedOutput": "Choose the loading attribute based on dependencies and execution-order requirements, not as interchangeable performance switches.",
+          "runnable": false
+        },
+        {
+          "id": "j2-1-event-listener",
+          "language": "en",
+          "title": "Connect behaviour with addEventListener",
+          "code": "<button id=\"saveButton\" type=\"button\">Save draft</button>\n<p id=\"message\" aria-live=\"polite\">No action yet.</p>\n<script>\n  const saveButton = document.querySelector(\"#saveButton\");\n  const message = document.querySelector(\"#message\");\n\n  saveButton.addEventListener(\"click\", () => {\n    message.textContent = \"Draft saved in this demonstration.\";\n  });\n</script>",
+          "explanation": "The event listener keeps the behaviour in JavaScript rather than adding an onclick attribute to the HTML. The aria-live region makes the status update available to assistive technology. This demonstration does not send data to a server or persist a real draft.",
+          "expectedOutput": "Selecting Save draft updates the status paragraph.",
           "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Move the JavaScript into an external file and load it using a script src attribute. Compare the two approaches.",
-      "independentTask": "Create a small page with an external or embedded script. Test its execution order and inspect the console for errors.",
+      "guidedTask": "Create an HTML page with a status heading and a button. First place a classic script in the head and observe the null-related failure when it queries the heading. Then add defer and repeat the test. Finally move the code to an external app.js file and attach a click handler with addEventListener.",
+      "independentTask": "Create a page with two independent scripts and one script that depends on a DOM element. Decide whether each should use defer, async or type=\"module\". Document the dependency/order reason for each choice, test the page with Network and Console open, and deliberately break one script path to diagnose the resulting failure.",
       "hints": [
-        "Keep behaviour separate from semantic markup where practical.",
-        "Choose defer, async, or module based on dependencies and ordering.",
-        "Do not log sensitive information."
+        "An element query can return null when the element does not yet exist in the parsed DOM.",
+        "defer and async are not interchangeable: defer preserves order among deferred classic scripts; async does not promise execution order.",
+        "Module scripts are deferred by default and use import/export. They also have different origin and MIME requirements.",
+        "Use addEventListener for maintainable event wiring and keep markup focused on document structure.",
+        "Check the Network panel for failed script requests and the Console for parse-time or runtime errors.",
+        "Never place API secrets, private keys or authorization decisions in browser-delivered JavaScript."
       ]
     }
   },
   "practice": {
     "playgroundMode": "html",
-    "starterCode": "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Adding JavaScript to a page</title></head><body>\n<h1 id='title'>Before JavaScript</h1><script>document.querySelector('#title').textContent='JavaScript is connected';</script>\n</body></html>",
-    "resetCode": "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Adding JavaScript to a page</title></head><body>\n<h1 id='title'>Before JavaScript</h1><script>document.querySelector('#title').textContent='JavaScript is connected';</script>\n</body></html>"
+    "starterCode": "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>JavaScript loading and events</title>\n</head>\n<body>\n<h1 id=\"status\">Waiting</h1>\n<button id=\"runAction\" type=\"button\">Run interaction</button>\n<p id=\"message\" aria-live=\"polite\">No action yet.</p>\n<script>\nconst status = document.querySelector(\"#status\");\nconst message = document.querySelector(\"#message\");\nconst button = document.querySelector(\"#runAction\");\nstatus.textContent = \"JavaScript initialized\";\nbutton.addEventListener(\"click\", () => {\n  message.textContent = \"The event listener ran successfully.\";\n});\n</script>\n</body>\n</html>",
+    "resetCode": "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>JavaScript loading and events</title>\n</head>\n<body>\n<h1 id=\"status\">Waiting</h1>\n<button id=\"runAction\" type=\"button\">Run interaction</button>\n<p id=\"message\" aria-live=\"polite\">No action yet.</p>\n<script>\nconst status = document.querySelector(\"#status\");\nconst message = document.querySelector(\"#message\");\nconst button = document.querySelector(\"#runAction\");\nstatus.textContent = \"JavaScript initialized\";\nbutton.addEventListener(\"click\", () => {\n  message.textContent = \"The event listener ran successfully.\";\n});\n</script>\n</body>\n</html>"
   },
   "assessment": {
     "questions": [
       {
         "id": "j2-1-q1",
-        "prompt": "Which HTML element contains or loads JavaScript?",
+        "prompt": "What is the primary effect of defer on a classic external script?",
         "options": [
-          "script",
-          "CSS",
-          "HTML"
+          "It executes before HTML parsing begins.",
+          "It is fetched while parsing continues and executes after parsing completes, preserving order among deferred classic scripts.",
+          "It executes at an unpredictable time and ignores document order."
         ],
-        "answer": "script",
-        "explanation": "The script element embeds or references JavaScript code."
+        "answer": "It is fetched while parsing continues and executes after parsing completes, preserving order among deferred classic scripts.",
+        "explanation": "Deferred classic scripts do not block HTML parsing while downloading and execute after parsing, in document order relative to other deferred classic scripts."
       },
       {
         "id": "j2-1-q2",
-        "prompt": "What is a useful way to diagnose a JavaScript runtime issue?",
+        "prompt": "When is async a suitable choice?",
         "options": [
-          "Inspect the console and source location",
-          "Change unrelated CSS values",
-          "Ignore the error message"
+          "When the script must run after a specific preceding script.",
+          "When the script is independent and its execution order relative to other scripts is not important.",
+          "Whenever the script needs to query DOM elements before they are parsed."
         ],
-        "answer": "Inspect the console and source location",
-        "explanation": "Developer tools show runtime messages and help locate the source of an issue."
+        "answer": "When the script is independent and execution order is not important.",
+        "explanation": "Async scripts execute as soon as they are ready, so their order is not guaranteed. They should not depend on another script having run first."
+      },
+      {
+        "id": "j2-1-q3",
+        "prompt": "Why can querySelector return null when called from a script in the document head?",
+        "options": [
+          "The selector API works only in CSS files.",
+          "The target element may not have been parsed yet.",
+          "The browser cannot select elements by ID."
+        ],
+        "answer": "The target element may not have been parsed yet.",
+        "explanation": "A parser-blocking script in the head can run before the body element and its descendants have been created."
+      },
+      {
+        "id": "j2-1-q4",
+        "prompt": "What is a maintainable way to attach a button interaction?",
+        "options": [
+          "Use addEventListener in JavaScript.",
+          "Put all logic in a long onclick attribute.",
+          "Use a CSS class as executable JavaScript."
+        ],
+        "answer": "Use addEventListener in JavaScript.",
+        "explanation": "addEventListener separates behaviour from markup and supports multiple listeners and clearer code organization."
       }
     ]
   },
