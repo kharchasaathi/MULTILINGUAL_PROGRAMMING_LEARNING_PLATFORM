@@ -89,12 +89,24 @@ Progress from statements, values and variables to operators, control flow, funct
 7. Do not translate new content until the English source has passed review.
 8. Do not claim browser testing, native-speaker review or release readiness without evidence.
 
-## Current first-pass expanded lessons
+## Current expanded English lessons — 2026-11-15
 
-- `foundation/F0.1.json`
-- `foundation/F0.2.json`
-- `html/H2.1.json`
-- `css/C2.1.json`
-- `javascript/J2.1.json`
+### Programming Foundations
+- All existing Foundation topics are expanded in English: `F0.1–F0.7` and `F1.1–F1.7` (14 topics).
+- F0.2–F0.7 and F1.1–F1.7 were enriched with more detailed explanations, worked examples, guided/independent tasks and assessments.
+- F1.3 and F1.4 were returned to `draft` after their content was changed, so the earlier reviewed status is not misrepresented.
 
-These first-pass expansions are a starting batch, not completion of the remaining curriculum.
+### HTML
+- First conceptual module expanded: `H1.1–H1.6`.
+- Existing first practical topic `H2.1` was previously expanded.
+
+### CSS
+- First conceptual module expanded: `C1.1–C1.6`.
+- Existing first practical topic `C2.1` was previously expanded.
+
+### JavaScript
+- First conceptual module expanded: `J1.1–J1.7`.
+- Existing first practical topic `J2.1` was previously expanded.
+
+### Remaining work
+These expansions establish the English-first learning ladder, but they do not complete the 501 English topic files or prove full W3Schools coverage. Continue auditing the remaining HTML, CSS and JavaScript topics in order. Do not begin translating newly expanded material until the corresponding English source has passed review. All edited lessons remain draft unless a separately evidenced review gate changes their status.
