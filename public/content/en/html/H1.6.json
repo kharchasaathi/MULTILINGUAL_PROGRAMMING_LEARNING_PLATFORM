@@ -3,26 +3,35 @@
   "courseId": "html",
   "moduleId": "H1",
   "topicId": "H1.6",
-  "title": "Browser Parsing and the DOM at Beginner Level",
+  "title": "How Browsers Parse HTML and Build the Live Document Object Model",
   "language": "en",
   "learningObjectives": [
-    "Explain HTML's role in your own words",
-    "Identify the relevant HTML structure",
-    "Distinguish the roles of HTML, CSS and JavaScript"
+    "Explain HTML parsing as the process of turning source markup into a structured document representation.",
+    "Define the Document Object Model and describe its role as a node-based representation of the document.",
+    "Identify common DOM node types including document, element, text and comment nodes.",
+    "Explain parent, child and sibling relationships in a DOM tree.",
+    "Distinguish the original HTML response from the live DOM after scripts or user interactions modify it.",
+    "Describe at a high level how the browser parser handles tokens, elements and malformed markup.",
+    "Explain why invalid nesting can produce a DOM different from the author's intended structure.",
+    "Use querySelector and related DOM APIs conceptually to locate elements in the live document.",
+    "Explain how DOM changes can affect the displayed page and why some changes trigger style calculation or layout.",
+    "Use View Source and the Elements panel to compare source markup with the live DOM.",
+    "Recognize that the DOM is an API and data model, not a screenshot or a copy of the rendered pixels.",
+    "Debug a simple DOM mismatch by inspecting source, parsed structure and script execution."
   ],
   "prerequisites": [
     "F0.5"
   ],
   "stages": {
     "understand": {
-      "concept": "A browser parses HTML markup and builds a document structure commonly exposed as the Document Object Model (DOM). The DOM represents elements and relationships as nodes that scripts can inspect or update. The browser may also repair certain malformed markup, so a page appearing on screen does not prove the source is valid or accessible.",
-      "whyItMatters": "Understanding HTML helps you choose elements that make pages meaningful, maintainable and easier for different users and tools to interpret.",
-      "history": "HTML grew from the early linked-document web. Verify exact historical milestones against authoritative standards sources before publishing dates.",
-      "analogy": "HTML is like a plan that organizes the roles of parts in a document.",
-      "analogyLimit": "HTML is not a visual design tool; CSS controls visual presentation."
+      "concept": "The browser parses HTML source and constructs a live document structure called the Document Object Model (DOM). The DOM represents the document as related nodes: elements can contain other elements and text nodes, and scripts can inspect or update those nodes. The DOM is not a screenshot and is not always an exact copy of the source. Browser parsing rules may normalize or repair markup, and JavaScript can change the live tree after parsing.",
+      "whyItMatters": "The DOM is the connection between HTML structure and browser scripting. CSS selectors target elements in the document, JavaScript uses DOM APIs to find and update them, and accessibility tools rely on the structure and semantics exposed by the browser. Understanding the DOM makes it easier to debug selectors, dynamic updates and unexpected page structure.",
+      "history": "The DOM became a standardized programming interface for documents so scripts and tools could interact with page structure in a consistent way. Modern browsers expose DOM APIs as part of the Web platform, separate from the core JavaScript language specification.",
+      "analogy": "Think of HTML source as instructions for assembling a tree. The DOM is the actual tree the browser constructs and keeps in memory so scripts and browser features can work with it.",
+      "analogyLimit": "The DOM is not a physical tree and not a visual rendering. It is a structured object model with defined APIs. CSSOM, computed styles, layout and painting are separate browser processes that use the document structure."
     },
     "explain": {
-      "narrative": "A browser parses HTML markup and builds a document structure commonly exposed as the Document Object Model (DOM). The DOM represents elements and relationships as nodes that scripts can inspect or update. The browser may also repair certain malformed markup, so a page appearing on screen does not prove the source is valid or accessible.",
+      "narrative": "When a browser receives an HTML document, it does not simply display the characters. It parses the markup and builds a node-based representation. A document node contains element nodes; element nodes can contain other element nodes and text nodes. Comments may also appear in the DOM. These relationships form a tree that scripts can traverse.\n\nThe DOM is live. JavaScript can select an element, change its text, add a child, remove a node or update an attribute. The original response source does not automatically change when the DOM changes. View Source shows the delivered HTML text; the Elements panel in Developer Tools shows the current live DOM. Use the correct view for the question you are investigating.\n\nThe browser parser follows HTML parsing rules, including special handling for some elements and recovery from certain malformed input. This means invalid source may still produce a visible page, but the DOM can differ from the intended structure. For example, invalidly nested elements may be rearranged by parser rules. Use a validator to identify source problems and inspect the resulting tree to understand browser behaviour.\n\nThe DOM also connects to rendering. CSS selectors match elements in the document, and JavaScript can change classes or content. The browser may then recalculate styles, layout or paint depending on the kind of change. Not every DOM change has the same performance cost. Reading and writing layout-related properties repeatedly can force expensive synchronous layout work, so developers should understand the effect of their updates.\n\nUse simple DOM APIs deliberately. `document.querySelector(\"#status\")` returns the first matching element or null when no match exists. Check that an element exists before using it, and ensure scripts run after the relevant markup is parsed. A selector mismatch is a common reason an event handler or content update does not work.",
       "examples": [
         {
           "id": "h1.6-example",
@@ -31,16 +40,46 @@
           "explanation": "The browser parses HTML and builds a Document Object Model (DOM). Elements and their relationships are represented as nodes that scripts can inspect or update.",
           "expectedOutput": "The browser displays the meaningful HTML content.",
           "runnable": true
+        },
+        {
+          "id": "h1.6-dom-tree",
+          "language": "en",
+          "title": "A simple DOM tree",
+          "code": "Document\n└── html\n    ├── head\n    │   └── title\n    │       └── \"Course page\"\n    └── body\n        ├── h1\n        │   └── \"Welcome\"\n        └── p\n            └── \"Learn HTML\"",
+          "explanation": "The DOM represents nodes and their relationships. Text is represented by text nodes inside element nodes. This tree is a conceptual view of the parsed document.",
+          "expectedOutput": "A hierarchy of document, element and text nodes.",
+          "runnable": false
+        },
+        {
+          "id": "h1.6-live-dom",
+          "language": "en",
+          "title": "JavaScript changes the live DOM",
+          "code": "<p id=\"status\">Waiting</p>\n<script>\n  const status = document.querySelector(\"#status\");\n  if (status) status.textContent = \"Ready\";\n</script>",
+          "explanation": "The source contains Waiting. After the script runs, the live DOM contains Ready. The null check prevents an error if the selector does not find the element.",
+          "expectedOutput": "The page displays Ready while the original source remains unchanged.",
+          "runnable": false
+        },
+        {
+          "id": "h1.6-dom-inspection",
+          "language": "en",
+          "title": "Compare source and live DOM",
+          "code": "View Source:\n<p id=\"message\">Initial</p>\n\nAfter JavaScript runs:\n<p id=\"message\">Updated</p>\n\nDeveloper Tools → Elements shows the live version.",
+          "explanation": "Use View Source to inspect the original response and Elements to inspect the current in-memory document. They answer different debugging questions.",
+          "expectedOutput": "You can identify which changes were made after the HTML was parsed.",
+          "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Identify each element and attribute in the example and explain its role.",
-      "independentTask": "Write your own small HTML fragment using the same concept and open it in a browser.",
+      "guidedTask": "Open a page in a browser. Compare View Source with the Elements panel. Add a script that changes a paragraph's text, then inspect the live DOM again. Create a selector that intentionally matches no element and explain why querySelector returns null.",
+      "independentTask": "Create a page with nested elements, a list and a button. Use JavaScript to add a new list item and update a status paragraph. Inspect the DOM before and after the action. Explain the difference between the source response, the live DOM and the visual rendering.",
       "hints": [
-        "Distinguish elements, tags and attributes.",
-        "Separate HTML structure, CSS presentation and JavaScript behaviour.",
-        "A visible page alone does not guarantee valid markup."
+        "The DOM is a live object model, not a screenshot.",
+        "Text inside an element is represented by a text node.",
+        "JavaScript can change the DOM without changing the original source file.",
+        "querySelector returns null when no matching element is found.",
+        "The Elements panel shows the live DOM; View Source shows the response source.",
+        "Invalid HTML may be repaired by the parser, so validate the source."
       ]
     }
   },
@@ -72,6 +111,39 @@
         ],
         "answer": "Parses document structure and builds a DOM",
         "explanation": "The DOM represents document nodes and their relationships."
+      },
+      {
+        "id": "h1.6-q3",
+        "prompt": "What does the DOM represent?",
+        "options": [
+          "A live node-based model of the document structure",
+          "A screenshot of the page",
+          "A CSS file stored on the server"
+        ],
+        "answer": "A live node-based model of the document structure",
+        "explanation": "The DOM represents document nodes and relationships and can be accessed or updated through browser APIs."
+      },
+      {
+        "id": "h1.6-q4",
+        "prompt": "Why can the Elements panel differ from View Source?",
+        "options": [
+          "Scripts may have modified the live DOM after the browser parsed the source.",
+          "View Source always shows CSS pixels.",
+          "The DOM cannot contain text."
+        ],
+        "answer": "Scripts may have modified the live DOM after the browser parsed the source.",
+        "explanation": "The live DOM can change after parsing; the original source response remains a separate representation."
+      },
+      {
+        "id": "h1.6-q5",
+        "prompt": "What does querySelector return when no element matches?",
+        "options": [
+          "null",
+          "The whole document as a string",
+          "A new element automatically"
+        ],
+        "answer": "null",
+        "explanation": "querySelector returns the first matching element or null when no match is found."
       }
     ]
   },
