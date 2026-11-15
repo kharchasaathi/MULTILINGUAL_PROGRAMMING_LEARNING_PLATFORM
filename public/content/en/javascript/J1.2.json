@@ -3,10 +3,21 @@
   "courseId": "javascript",
   "moduleId": "J1",
   "topicId": "J1.2",
-  "title": "Static documents and early web scripting context",
+  "title": "From Static Documents to Interactive Web Applications",
   "language": "en",
   "learningObjectives": [
-    "Explain static documents and early web scripting context and describe JavaScript's role in web development."
+    "Describe the early Web as a system of linked documents and explain the limitations of static document-only interaction.",
+    "Explain how browser scripting introduced event-driven behaviour, dynamic updates and client-side computation.",
+    "Distinguish client-side JavaScript from server-side application processing and identify responsibilities that must remain trusted on the server.",
+    "Explain the relationship between HTML content, JavaScript behaviour and the DOM as the live document representation.",
+    "Describe common browser interactions such as menus, form feedback, dynamic search, validation and asynchronous data loading.",
+    "Explain how event-driven applications respond to user actions without requiring a full document navigation for every update.",
+    "Compare a traditional multi-page navigation model with client-side navigation in a single-page application at a conceptual level.",
+    "Explain progressive enhancement and why meaningful HTML content should remain useful when scripting is unavailable or fails.",
+    "Recognize that JavaScript uses browser host APIs and that the same language can run in non-browser environments with different APIs.",
+    "Identify how asynchronous network operations and event-loop scheduling support responsive interfaces.",
+    "Explain why client-side checks are not a security boundary and why server-side validation and authorization remain necessary.",
+    "Evaluate whether an interaction should use a native HTML feature, client-side JavaScript, server processing or a combination."
   ],
   "prerequisites": [
     "F1.1",
@@ -15,13 +26,14 @@
   ],
   "stages": {
     "understand": {
-      "concept": "The early web focused on linked documents that browsers retrieved and displayed. As websites evolved into interactive applications, scripting enabled dynamic responses, client-side checks, menus, and richer user interfaces. Server-side code continued to handle trusted data and processing.",
-      "whyItMatters": "The web's evolution helps explain why JavaScript runs in browsers and why client-side interaction does not replace server responsibilities.",
-      "analogy": "A static document is like a printed page; a scripted page can respond to the reader's actions.",
-      "analogyLimit": "The analogy is simplified; language standards and host runtime APIs have precise technical boundaries."
+      "concept": "The early Web made it possible to publish and navigate linked documents. As sites evolved into applications, users needed more than static navigation: they needed interactive forms, menus, dynamic results, client-side calculations and interfaces that respond to events. JavaScript made these behaviours programmable in the browser. It did not remove the need for servers; trusted data storage, authentication, authorization and business rules still require protected server-side processing.",
+      "whyItMatters": "Understanding the evolution from static documents to interactive applications helps developers choose the right place for each responsibility. Some tasks are best handled by native HTML and normal navigation; others benefit from client-side state and asynchronous updates; sensitive operations must be validated and authorized by a trusted server.",
+      "analogy": "A static document is like a printed information sheet. An interactive application is more like a service desk that can respond to requests, update information and coordinate work while the user remains in the same place.",
+      "analogyLimit": "Modern websites are not simply static or dynamic. A single application can combine server-rendered HTML, client-side interaction, API requests, background work and normal navigation. JavaScript does not make a system secure or remove network latency.",
+      "history": "This lesson focuses on the current use of these ideas in modern web development."
     },
     "explain": {
-      "narrative": "The HTML document provides the initial content; JavaScript changes the message after a user action.",
+      "narrative": "The original Web model connected documents through links. A browser requested a resource and displayed the returned document. That model remains important: links, forms and server responses are still fundamental. As websites became richer, developers added scripting so pages could respond to actions, update parts of the document, validate fields, calculate values and retrieve additional information.\n\nJavaScript runs in a host environment. In a browser, it can use APIs such as the DOM, event listeners, timers and Fetch. The language itself provides values, functions, objects, modules and promises; the browser supplies page-specific capabilities. In a server runtime, JavaScript may instead access server APIs, files or databases through the runtime and application framework.\n\nA browser interaction commonly follows this sequence: HTML provides a meaningful control; JavaScript registers an event handler; the browser dispatches an event when the user acts; the handler updates application state or the DOM; and the browser renders the changed interface. For remote data, the handler may send an asynchronous request and later update the page when a response arrives. A traditional multi-page application can navigate to a new document for each request, while a single-page application may update the current view and use client-side routing. Both models can be valid and both still depend on network and server behaviour.\n\nUse progressive enhancement: begin with meaningful HTML and normal links or forms, then add JavaScript to improve the experience. If a task can be completed reliably with a native browser feature, do not add unnecessary scripting. If scripting fails, the page should provide a clear explanation or fallback where practical.\n\nDo not confuse user-interface validation with security. A user can disable or modify browser code and send requests directly. A server must validate received data, authenticate the caller and authorize each protected operation. JavaScript can make an interface responsive, but it cannot make a privileged operation trustworthy merely by hiding a button or checking a field in the browser.",
       "examples": [
         {
           "id": "j1-2-example",
@@ -30,16 +42,66 @@
           "explanation": "The HTML document provides the initial content; JavaScript changes the message after a user action.",
           "expectedOutput": "A browser page displays or updates text using JavaScript.",
           "runnable": true
+        },
+        {
+          "id": "j1.2-static-to-interactive",
+          "language": "en",
+          "title": "A document becomes interactive through an event",
+          "code": "<p id=\"message\">The page has loaded.</p>\n<button id=\"update\" type=\"button\">Update message</button>\n<script>\n  document.querySelector(\"#update\").addEventListener(\"click\", () => {\n    document.querySelector(\"#message\").textContent = \"The page responded.\";\n  });\n</script>",
+          "explanation": "The document provides content and a native control. JavaScript responds to the click and changes the live DOM without a full navigation.",
+          "expectedOutput": "The message changes after the button is activated.",
+          "runnable": false
+        },
+        {
+          "id": "j1.2-multipage-vs-spa",
+          "language": "en",
+          "title": "Two navigation models",
+          "code": "Multi-page model:\nLink → HTTP request → new document response → browser renders new page\n\nClient-side navigation model:\nLink/action → JavaScript route/state update → view changes\n                         ↘ optional API request",
+          "explanation": "A multi-page site relies on document navigation. A single-page application may intercept navigation and update the current view. Both need correct URLs, accessible navigation, loading/error handling and server support for direct route requests.",
+          "expectedOutput": "You can compare the trade-offs without assuming one model is always better.",
+          "runnable": false
+        },
+        {
+          "id": "j1.2-progressive-enhancement",
+          "language": "en",
+          "title": "Start with a meaningful HTML form",
+          "code": "<form action=\"/search\" method=\"get\">\n  <label for=\"query\">Search articles</label>\n  <input id=\"query\" name=\"q\" type=\"search\" required>\n  <button type=\"submit\">Search</button>\n</form>",
+          "explanation": "The form can submit through normal browser navigation. JavaScript can enhance it with live suggestions or asynchronous results, but the basic search action should have a meaningful fallback where practical.",
+          "expectedOutput": "A usable native search form that can be enhanced with scripting.",
+          "runnable": false
+        },
+        {
+          "id": "j1.2-client-server-boundary",
+          "language": "en",
+          "title": "Client-side behaviour does not replace server trust",
+          "code": "Browser JavaScript:\n- show immediate validation feedback\n- update the interface\n- send a request\n\nTrusted server:\n- authenticate the caller\n- authorize the operation\n- validate submitted data\n- apply business rules\n- protect stored information",
+          "explanation": "Browser code is controlled by the user and can be inspected or modified. Security decisions must be enforced by trusted server-side logic.",
+          "expectedOutput": "A clear separation between user-interface assistance and trusted business/security enforcement.",
+          "runnable": false
+        },
+        {
+          "id": "j1.2-async-interface",
+          "language": "en",
+          "title": "Keep the interface responsive during a request",
+          "code": "async function refreshStatus() {\n  const status = document.querySelector(\"#status\");\n  status.textContent = \"Loading…\";\n  try {\n    const response = await fetch(\"/api/status\");\n    if (!response.ok) throw new Error(`HTTP ${response.status}`);\n    const data = await response.json();\n    status.textContent = data.message;\n  } catch {\n    status.textContent = \"Status is temporarily unavailable.\";\n  }\n}",
+          "explanation": "The interface communicates the pending state, handles unsuccessful responses and displays a useful failure message. Production code may also need cancellation, retry policy and stale-response protection.",
+          "expectedOutput": "A status message that moves from loading to success or failure.",
+          "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Describe a static page and add one interaction that changes the page after a button click.",
-      "independentTask": "Create a short explanation and runnable example that separates core JavaScript language features from browser-specific APIs.",
+      "guidedTask": "Create a meaningful HTML form that works through normal submission. Add JavaScript to enhance it with a loading state and inline result message. Simulate a request failure and show a useful error. Explain which behaviour belongs in the browser and which validation or authorization must be repeated on a server.",
+      "independentTask": "Design a small interactive search or profile interface. Begin with semantic HTML and working navigation or form submission. Add JavaScript for dynamic feedback and asynchronous data loading. Document how the experience behaves if JavaScript fails, how the server validates requests, and how users are informed about loading and errors.",
       "hints": [
-        "Keep Java and JavaScript distinct.",
-        "Identify the runtime before using host APIs.",
-        "Use original examples and explain each line."
+        "Static documents and interactive applications are not mutually exclusive; modern sites combine both.",
+        "Use native links and forms when their built-in navigation behaviour fits the task.",
+        "The DOM and event APIs are browser-provided host capabilities.",
+        "A single-page application still needs server routes and API responses.",
+        "Use asynchronous handling for network requests and show loading, success and failure states.",
+        "Progressive enhancement starts with meaningful HTML before adding scripting.",
+        "Client-side validation improves user experience but does not secure server operations.",
+        "Do not put private credentials in browser JavaScript."
       ]
     }
   },
@@ -71,6 +133,50 @@
         ],
         "answer": "The runtime or host environment",
         "explanation": "Available APIs depend on whether code runs in a browser, server runtime, or another host."
+      },
+      {
+        "id": "j1.2-q3",
+        "prompt": "What did browser scripting add to document-based websites?",
+        "options": [
+          "A replacement for all server processing",
+          "A new HTML file extension",
+          "Automatic database authorization"
+        ],
+        "answer": "Programmable responses to events and dynamic page updates",
+        "explanation": "JavaScript made interactive behaviour and dynamic updates possible in the browser."
+      },
+      {
+        "id": "j1.2-q4",
+        "prompt": "What is progressive enhancement?",
+        "options": [
+          "Require JavaScript before any content can be understood.",
+          "Replace every link with a click handler.",
+          "Hide content until an animation completes."
+        ],
+        "answer": "Start with useful semantic HTML and add scripting to improve the experience.",
+        "explanation": "Progressive enhancement builds on a functional foundation and adds capabilities where available."
+      },
+      {
+        "id": "j1.2-q5",
+        "prompt": "Which responsibility must remain on a trusted server for a protected operation?",
+        "options": [
+          "Changing a button's hover colour",
+          "Showing a local tooltip",
+          "Opening a navigation menu"
+        ],
+        "answer": "Authorization and validation of received data",
+        "explanation": "The server must enforce security decisions because client code can be modified."
+      },
+      {
+        "id": "j1.2-q6",
+        "prompt": "Which statement about multi-page sites and single-page applications is accurate?",
+        "options": [
+          "A single-page application never sends network requests.",
+          "A multi-page site cannot use JavaScript.",
+          "A single-page application automatically provides better accessibility."
+        ],
+        "answer": "Both are valid navigation models and both still depend on network and server behaviour.",
+        "explanation": "Each model has trade-offs; accessibility, URLs, routing and server support still matter."
       }
     ]
   },
