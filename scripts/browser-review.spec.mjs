@@ -29,6 +29,21 @@ test("homepage and lesson dialog have no serious or critical WCAG axe violations
   expect(seriousLesson, JSON.stringify(seriousLesson.map(({ id, impact, description, nodes }) => ({ id, impact, description, count:nodes.length })), null, 2)).toEqual([]);
 });
 
+test("landing-page HTML playground renders real output and its button interaction works", async ({ page }) => {
+  await page.goto(baseURL, { waitUntil: "domcontentloaded" });
+  const frame = page.frameLocator("#previewFrame");
+  await expect(page.locator(".preview-live")).toContainText("READY");
+  await expect(frame.locator("h1")).toHaveText("Hello, CodeSaathi!");
+  await expect(frame.locator("p")).toHaveText("I am learning to build for the web.");
+  await expect(frame.getByRole("button", { name: "Click me" })).toBeVisible();
+  await frame.getByRole("button", { name: "Click me" }).click();
+  await expect(frame.locator("p")).toHaveText("I made this work!");
+  await page.locator("#codeEditor").fill("<h1>Updated preview</h1><p>Second run works.</p>");
+  await page.locator("#runCode").click();
+  await expect(frame.locator("h1")).toHaveText("Updated preview");
+  await expect(frame.locator("p")).toHaveText("Second run works.");
+});
+
 test("keyboard users can open and dismiss the curriculum dialog", async ({ page }) => {
   await page.goto(baseURL, { waitUntil: "domcontentloaded" });
   const navButton = page.locator('[data-course-nav="html"]');
