@@ -67,6 +67,9 @@ test("all 25 added lessons render and their runnable starter code executes in th
         }
         if (lesson.practice.playgroundMode === "css") {
           await expect(preview.locator("style")).toHaveCount(2);
+        }        if (topicId === "J24.9") {
+          await preview.locator("#pad").click();
+          await expect(preview.locator("#pad")).toHaveText("Activated by click or keyboard");
         }
       } else {
         await expect(dialog.locator(".lesson-practice-link")).toHaveText("Open the practice area");
