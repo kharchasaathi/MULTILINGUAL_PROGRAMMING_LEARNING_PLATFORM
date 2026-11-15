@@ -1,0 +1,123 @@
+{
+  "id": "javascript.j24.5.en",
+  "courseId": "javascript",
+  "moduleId": "J24",
+  "topicId": "J24.5",
+  "title": "Proxy, Reflect, and JavaScript metaprogramming",
+  "language": "en",
+  "learningObjectives": [
+    "Explain proxy, reflect, and javascript metaprogramming and the problem it addresses.",
+    "Use the relevant language or browser API with valid syntax.",
+    "Compare the technique with modern alternatives and identify when each is appropriate.",
+    "Handle errors, boundaries, security, and compatibility deliberately.",
+    "Test the implementation and explain its behaviour with evidence."
+  ],
+  "prerequisites": [
+    "J3.1",
+    "J4.1",
+    "J8.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A Proxy wraps a target object and intercepts selected internal operations through traps such as get, set, has, deleteProperty, ownKeys, and apply. Reflect provides methods that correspond to many object operations and helps a trap delegate to the default behaviour. Proxies are useful for validation, observation, access control wrappers, and reactive systems, but they can complicate identity, debugging, performance, and invariants. A trap must obey language invariants—for example, it cannot report arbitrary values for certain non-configurable, non-writable properties. Avoid building a general object framework when ordinary functions and explicit validation are clearer.",
+      "whyItMatters": "Metaprogramming appears in frameworks, state systems, validation libraries, and tooling. Developers need to understand the interception model and its limits before relying on Proxy behaviour.",
+      "analogy": "A Proxy is like a receptionist who observes or routes requests before they reach the actual object.",
+      "analogyLimit": "The receptionist analogy hides JavaScript's exact internal methods, invariants, receiver semantics, and identity behaviour."
+    },
+    "explain": {
+      "narrative": "Create a Proxy that logs property reads and delegates to Reflect.get. Then add a set trap that validates a value and returns a boolean indicating whether the assignment succeeded.",
+      "examples": [
+        {
+          "id": "j24-5-example-1",
+          "language": "javascript",
+          "code": "const user={name:'Asha'}; const observed=new Proxy(user,{get(target,property,receiver){console.log('read',String(property));return Reflect.get(target,property,receiver);}}); console.log(observed.name);",
+          "explanation": "The get trap observes the property read and delegates normal lookup to Reflect.get, preserving receiver semantics.",
+          "expectedOutput": "Console logs 'read name', then 'Asha'.",
+          "runnable": true
+        },
+        {
+          "id": "j24-5-example-2",
+          "language": "javascript",
+          "code": "const settings=new Proxy({volume:5},{set(target,key,value,receiver){if(key==='volume'&&(!Number.isFinite(value)||value<0||value>10))return false;return Reflect.set(target,key,value,receiver);}}); settings.volume=8; console.log(settings.volume);",
+          "explanation": "The set trap validates volume before delegating. In strict mode, an assignment whose trap returns false throws a TypeError; callers should understand that behaviour.",
+          "expectedOutput": "The volume becomes 8; an invalid assignment is rejected.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a Proxy that validates a settings object's volume and observes reads. Delegate default behaviour through Reflect and test valid, invalid, and non-configurable property cases.",
+      "independentTask": "Design a small audit wrapper for a configuration object. Document which operations are intercepted, how errors are surfaced, and why ordinary validation functions may be simpler.",
+      "hints": [
+        "Use Reflect.get and Reflect.set to delegate default behaviour.",
+        "A set trap should return a boolean success value.",
+        "Respect Proxy invariants for non-configurable and non-writable properties."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "javascript",
+    "starterCode": "const user={name:'Asha'}; const observed=new Proxy(user,{get(target,property,receiver){console.log('read',String(property));return Reflect.get(target,property,receiver);}}); console.log(observed.name);",
+    "resetCode": "const user={name:'Asha'}; const observed=new Proxy(user,{get(target,property,receiver){console.log('read',String(property));return Reflect.get(target,property,receiver);}}); console.log(observed.name);"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "j24-5-q1",
+        "prompt": "What does a Proxy allow a program to do?",
+        "options": [
+          "Intercept selected operations on a target object",
+          "Change the JavaScript parser",
+          "Replace the event loop"
+        ],
+        "answer": "Intercept selected operations on a target object",
+        "explanation": "Proxy traps intercept operations performed on a target."
+      },
+      {
+        "id": "j24-5-q2",
+        "prompt": "Which API is commonly used to delegate default object operations inside traps?",
+        "options": [
+          "Reflect",
+          "Math",
+          "JSON"
+        ],
+        "answer": "Reflect",
+        "explanation": "Reflect methods correspond to many object internal operations."
+      },
+      {
+        "id": "j24-5-q3",
+        "prompt": "What should a set trap return?",
+        "options": [
+          "A boolean indicating whether the assignment succeeded",
+          "A CSS selector",
+          "Always a Promise"
+        ],
+        "answer": "A boolean indicating whether the assignment succeeded",
+        "explanation": "The set trap reports success or failure as a boolean."
+      },
+      {
+        "id": "j24-5-q4",
+        "prompt": "What is a Proxy invariant?",
+        "options": [
+          "A language rule the trap must not violate",
+          "A CSS media query",
+          "A network response header"
+        ],
+        "answer": "A language rule the trap must not violate",
+        "explanation": "Proxy invariants preserve object semantics and prevent traps from contradicting certain target properties."
+      },
+      {
+        "id": "j24-5-q5",
+        "prompt": "When should Proxy be avoided?",
+        "options": [
+          "When ordinary functions and explicit validation are clearer",
+          "Whenever an object has a property",
+          "Only in Node.js"
+        ],
+        "answer": "When ordinary functions and explicit validation are clearer",
+        "explanation": "Proxy adds complexity and is best reserved for cases where interception is genuinely useful."
+      }
+    ]
+  },
+  "status": "draft"
+}
