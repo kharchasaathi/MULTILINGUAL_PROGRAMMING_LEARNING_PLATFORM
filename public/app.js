@@ -21,7 +21,7 @@
     try {
       documentInFrame.open();
       const source = editor.value;
-      const isFullDocument = /^\\s*(?:<!doctype\\s+html\\b[^>]*>\\s*)?<html\\b/i.test(source);
+      const isFullDocument = /^\s*(?:<!doctype\s+html\b[^>]*>\s*)?<html\b/i.test(source);
       if (isFullDocument) {
         documentInFrame.write(source);
       } else {
