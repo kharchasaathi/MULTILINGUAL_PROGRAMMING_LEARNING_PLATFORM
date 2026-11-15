@@ -89,3 +89,16 @@ These are the first representative expanded lessons, not a claim that all existi
 - Updated the service-worker cache version to ensure returning clients do not remain pinned to the previous app-shell scripts.
 
 **Scope limitation:** This is a meaningful foundational expansion, not completion of all 554 English topic files or the W3Schools coverage matrix. Remaining course topics still require systematic review and expansion.
+
+
+## First conceptual modules expanded — 2026-11-15
+
+- HTML H1.1–H1.6 are now expanded in English, covering markup, hypertext, standards history, semantic structure, element anatomy and browser parsing/DOM.
+- CSS C1.1–C1.6 are now expanded in English, covering CSS purpose, separation of concerns, standards history, CSS mental models, rule syntax and browser style calculation.
+- JavaScript J1.1–J1.7 are now expanded in English, covering behaviour, static-to-interactive evolution, origins, Java-vs-JavaScript, ECMAScript standardization, runtime environments and HTML/CSS/JS integration.
+- Historical claims for HTML, CSS and JavaScript were checked against standards/history references from W3C, WHATWG, Ecma/TC39 and the Library of Congress. The course text is original and summarizes those milestones rather than copying source wording.
+- Focused structural checks passed for the expanded first-module lessons: JSON parsing, three-stage presence, unique question IDs and answer-to-option integrity.
+- The app now gives an accurate curriculum-load failure message and disables subject navigation if the curriculum index cannot be fetched. The preview status is announced through a polite live region.
+
+### Current content boundary
+This pass has expanded the entire existing Programming Foundations course and the first conceptual module of HTML, CSS and JavaScript, plus previously expanded H2.1, C2.1 and J2.1. The rest of the HTML, CSS and JavaScript topic inventory remains to be reviewed and expanded. No claim is made that all 554 topic files or the full W3Schools coverage matrix are complete.
