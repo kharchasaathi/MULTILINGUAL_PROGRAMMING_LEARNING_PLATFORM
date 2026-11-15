@@ -3,70 +3,175 @@
   "courseId": "html",
   "moduleId": "H2",
   "topicId": "H2.2",
-  "title": "The doctype declaration",
+  "title": "DOCTYPE, the HTML parser, and browser document modes",
   "language": "en",
   "learningObjectives": [
-    "Identify and assemble the parts of a complete HTML document"
+    "Explain what the HTML doctype declaration communicates to an HTML parser and distinguish this document-level declaration from an HTML element, attribute, metadata element, or browser command.",
+    "Write the modern HTML doctype correctly, place it before the html root element, and recognize that the HTML syntax is ASCII case-insensitive while the conventional lowercase form is widely used.",
+    "Describe how the doctype influences the browser's choice of standards mode, limited-quirks mode, or quirks mode, and explain why legacy compatibility behaviour still exists.",
+    "Use document.compatMode in Developer Tools to observe whether a document is in CSS standards mode or quirks mode, while understanding the limits of this diagnostic.",
+    "Diagnose common doctype mistakes, including a missing declaration, a misplaced declaration, and copying obsolete declarations without understanding their compatibility consequences.",
+    "Explain why standards mode improves consistency but does not by itself guarantee valid HTML, accessible content, responsive layout, or identical rendering across browsers.",
+    "Apply the correct doctype when creating a modern HTML page and verify the document structure using browser Developer Tools and an HTML conformance checker."
   ],
   "prerequisites": [
-    "H1.5"
+    "H1.5",
+    "H1.6",
+    "H2.1"
   ],
   "stages": {
     "understand": {
-      "concept": "The <!doctype html> declaration tells the browser to use standards mode. It is not an element and has no closing tag.",
-      "whyItMatters": "It avoids legacy quirks-mode behaviour and makes layout more predictable.",
-      "analogy": "A label describes how to interpret a document, but doctype is a machine-readable declaration.",
-      "analogyLimit": "The analogy is only a memory aid; HTML should not be interpreted literally through it."
+      "concept": "A doctype declaration is a short instruction at the beginning of an HTML document that identifies the document as using the modern HTML syntax and helps the browser select the appropriate document parsing and rendering mode. For modern HTML, write <!doctype html> before the html root element. The declaration is not an HTML element: it has no opening and closing element pair, no attributes to configure, and no visible content on the page. It is part of the document's syntax and is processed before the browser builds the page's normal element tree. The HTML parser uses the doctype and other defined compatibility rules to determine whether the document should be handled in standards mode, limited-quirks mode, or quirks mode.",
+      "whyItMatters": "Browsers preserve older layout behaviour so that websites written decades ago do not suddenly break. That compatibility is useful for old sites but can make layout calculations differ from modern expectations. A modern doctype tells the browser to use standards mode, avoiding many historical quirks and giving developers a more predictable baseline for CSS layout, sizing, and rendering. Including the declaration is therefore a small but essential part of starting a reliable HTML document. It does not replace semantic HTML, validation, accessibility testing, or cross-browser testing.",
+      "analogy": "Think of the doctype as a document-format signal placed before the document's contents. A reader can use the signal to know which set of interpretation rules to apply before reading the rest.",
+      "analogyLimit": "A browser is not choosing an arbitrary theme or switching between separate browser engines. The HTML parsing algorithm defines specific compatibility rules, and the doctype is one input to those rules. The analogy also does not mean that a doctype certifies the document as valid or correct."
     },
     "explain": {
-      "narrative": "The <!doctype html> declaration tells the browser to use standards mode. It is not an element and has no closing tag.",
+      "narrative": "The modern declaration is <!doctype html>. It is intentionally much shorter than the public-identifier declarations used by older HTML versions. In HTML syntax, the keyword spelling is ASCII case-insensitive, so <!DOCTYPE html> and <!doctype html> are both recognized; using the lowercase form consistently is a common style choice. Place the declaration before the html root element. A comment or a byte-order mark may appear before it in circumstances defined by the HTML parsing rules, but do not put ordinary page content or the html element before the doctype. The declaration is not written inside head or body because it is not an element belonging to either section.\n\nBrowsers support three document modes. Standards mode aims to follow modern CSS and HTML behaviour. Limited-quirks mode preserves a small set of historical behaviours for certain legacy document types. Quirks mode emulates selected older browser behaviours for compatibility with documents that predate modern standards practices or have triggering doctypes. The exact compatibility rules are defined by the HTML Standard; developers should not try to select quirks mode as a layout technique.\n\nA missing doctype commonly causes an HTML document to enter quirks mode. A malformed or misplaced declaration may also fail to select the intended mode. Legacy doctypes can have compatibility effects that depend on their exact public and system identifiers. For new work, use the short modern declaration rather than copying an old declaration from an unrelated tutorial.\n\nYou can inspect the active mode in Developer Tools by evaluating document.compatMode. A result of CSS1Compat indicates standards mode (and is also used for limited-quirks mode); BackCompat indicates quirks mode. This property is useful evidence, but it does not distinguish standards mode from limited-quirks mode. It also does not prove that the HTML is conforming or that the page is visually correct. Use an HTML validator and inspect the actual layout when investigating a problem.\n\nStandards mode is a predictable starting point, not a promise that every browser will render every page identically. CSS support, fonts, form controls, device characteristics, user preferences, and browser implementation details can still affect the result. The doctype does not load CSS or JavaScript, set the document language, define character encoding, make a layout responsive, or make a page accessible. Those responsibilities belong to other document features and good development practices.",
       "examples": [
         {
-          "id": "h2.2-example",
+          "id": "h2.2-modern-doctype",
           "language": "en",
-          "code": "<!doctype html>\n<h1>Standards mode page</h1>",
-          "explanation": "The heading appears; the declaration selects standards mode.",
-          "expectedOutput": "The heading appears; the declaration selects standards mode.",
+          "title": "A modern HTML document begins with the doctype",
+          "code": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Standards mode example</title>\n</head>\n<body>\n  <main>\n    <h1>Standards mode</h1>\n    <p>This document uses the modern HTML doctype.</p>\n  </main>\n</body>\n</html>",
+          "explanation": "The doctype appears before the html root element. The browser recognizes the modern HTML declaration and selects standards mode. The html element, head, metadata, and body then form the document structure. The doctype itself does not create a visible heading or paragraph.",
+          "expectedOutput": "The page displays a Standards mode heading and a paragraph. The browser uses standards mode for the document.",
+          "runnable": true
+        },
+        {
+          "id": "h2.2-doctype-case",
+          "language": "en",
+          "title": "HTML doctype spelling is case-insensitive",
+          "code": "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>Case test</title></head>\n<body><p>The declaration is recognized.</p></body>\n</html>",
+          "explanation": "The uppercase spelling is valid in HTML syntax. HTML keywords are ASCII case-insensitive in this context. Teams commonly standardize on <!doctype html> because it is concise and familiar, not because the uppercase spelling selects a different mode.",
+          "expectedOutput": "The paragraph appears, and the document uses standards mode.",
+          "runnable": true
+        },
+        {
+          "id": "h2.2-check-compat-mode",
+          "language": "en",
+          "title": "Inspect the active document mode",
+          "code": "<!doctype html>\n<html lang=\"en\">\n<head><title>Mode inspection</title></head>\n<body>\n  <h1>Inspect the document mode</h1>\n  <p>Open Developer Tools and run document.compatMode in the Console.</p>\n</body>\n</html>",
+          "explanation": "Run document.compatMode in the page's Console. CSS1Compat indicates standards mode or limited-quirks mode; BackCompat indicates quirks mode. The property does not distinguish the first two modes, so it should be treated as a diagnostic clue rather than a complete validation result.",
+          "expectedOutput": "The Console returns CSS1Compat for this modern-doctype document.",
+          "runnable": true
+        },
+        {
+          "id": "h2.2-doctype-is-not-an-element",
+          "language": "en",
+          "title": "The doctype is not inside the html element",
+          "code": "<!doctype html>\n<html lang=\"en\">\n<head><title>Document structure</title></head>\n<body><p>The doctype is outside the root element.</p></body>\n</html>",
+          "explanation": "The doctype belongs before the html root element. It is not placed inside head or body, and it does not have a closing tag. The paragraph is ordinary body content and is rendered on the page.",
+          "expectedOutput": "The page displays the paragraph. The doctype remains a document-level declaration and is not displayed.",
+          "runnable": true
+        },
+        {
+          "id": "h2.2-doctype-not-validation",
+          "language": "en",
+          "title": "A correct doctype does not make all markup valid",
+          "code": "<!doctype html>\n<html lang=\"en\">\n<head><title>Validation example</title></head>\n<body>\n  <p><strong>Important text</p>\n</body>\n</html>",
+          "explanation": "The document has the modern doctype, but the strong element is not explicitly closed before the paragraph ends. Browsers may repair malformed markup during parsing, yet that recovery does not mean the source conforms to HTML requirements. Use a conformance checker and correct the source instead of relying on parser recovery.",
+          "expectedOutput": "The browser will usually display the text, but the source contains a markup-conformance error that should be corrected.",
+          "runnable": true
+        },
+        {
+          "id": "h2.2-corrected-markup",
+          "language": "en",
+          "title": "Correct the markup after adding a doctype",
+          "code": "<!doctype html>\n<html lang=\"en\">\n<head><title>Correct structure</title></head>\n<body>\n  <p><strong>Important text</strong></p>\n</body>\n</html>",
+          "explanation": "The strong element is now closed inside the paragraph. The doctype selects the modern document mode, while correct element nesting makes the markup conform to the intended structure. These are separate responsibilities.",
+          "expectedOutput": "The page displays Important text in bold, with valid element nesting and the modern doctype.",
           "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Put <!doctype html> on the first line of a new document.",
-      "independentTask": "Create your own small page, open it in a browser and inspect the result.",
+      "guidedTask": "Create a new file named doctype-lab.html. On its first line, add <!doctype html>. Below it, build a complete document with html lang=\"en\", head, a meaningful title, and body containing a heading and two paragraphs. Open the file in a browser. In Developer Tools, run document.compatMode and record the returned value. Then temporarily remove the doctype, reload the page, and compare the result. Restore the modern doctype before continuing. Explain why a visual difference may occur and why the mode check is not a substitute for validating the HTML.",
+      "independentTask": "Create two small HTML files in the same project: standards-page.html with the modern doctype, and missing-doctype.html without a doctype. Keep their body markup and CSS identical. Open both pages in the same browser, inspect document.compatMode, and compare a layout that includes a fixed-width element and percentage-based sizing. Record the observed differences without assuming that every browser version will behave identically. Restore the doctype in the second file, validate both sources, and write a short debugging note explaining the cause, evidence, correction, and one thing the doctype does not guarantee.",
       "hints": [
-        "Check that each element is nested under the correct parent."
+        "The modern declaration is exactly <!doctype html>; it is not written as <doctype> or as a meta element.",
+        "Put the declaration before the html root element. Do not place it inside head or body.",
+        "The doctype has no closing tag and does not produce visible page content.",
+        "Use document.compatMode in the Console: CSS1Compat means standards or limited-quirks mode; BackCompat means quirks mode.",
+        "A CSS1Compat result alone cannot distinguish standards mode from limited-quirks mode, and it does not prove that the source is valid.",
+        "When comparing modes, keep the browser, CSS, viewport, and page content the same so that the doctype is the main variable.",
+        "Use a current HTML conformance checker to identify markup errors; browser error recovery can make invalid source appear to work.",
+        "For new projects, use the short modern doctype instead of copying a legacy public-identifier declaration from an old example."
       ]
     }
   },
   "practice": {
     "playgroundMode": "html",
-    "starterCode": "<!doctype html>\n<html lang=\"en\">\n<head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Practice</title></head>\n<body>\n<h1>My first page</h1><p>I am learning HTML.</p>\n</body>\n</html>",
-    "resetCode": "<!doctype html>\n<html lang=\"en\">\n<head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Practice</title></head>\n<body>\n<h1>My first page</h1><p>I am learning HTML.</p>\n</body>\n</html>"
+    "starterCode": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>DOCTYPE practice</title>\n</head>\n<body>\n  <main>\n    <h1>DOCTYPE practice</h1>\n    <p>Open Developer Tools and inspect document.compatMode.</p>\n  </main>\n</body>\n</html>",
+    "resetCode": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>DOCTYPE practice</title>\n</head>\n<body>\n  <main>\n    <h1>DOCTYPE practice</h1>\n    <p>Open Developer Tools and inspect document.compatMode.</p>\n  </main>\n</body>\n</html>"
   },
   "assessment": {
     "questions": [
       {
         "id": "h2.2-q1",
-        "prompt": "Where does the main page content belong?",
+        "prompt": "What is the primary purpose of the modern <!doctype html> declaration in an HTML document?",
         "options": [
-          "body",
-          "head",
-          "doctype"
+          "It tells the browser to use the modern HTML parsing mode and avoid the usual quirks-mode fallback.",
+          "It creates the html root element automatically.",
+          "It loads the document's CSS and JavaScript files."
         ],
-        "answer": "body",
-        "explanation": "The body contains page content."
+        "answer": "It tells the browser to use the modern HTML parsing mode and avoid the usual quirks-mode fallback.",
+        "explanation": "The doctype is a document-level declaration used by the HTML parser when determining the document mode. It does not create elements or load resources."
       },
       {
         "id": "h2.2-q2",
-        "prompt": "What is the root element?",
+        "prompt": "Where should the modern doctype declaration be placed?",
         "options": [
-          "html",
-          "title",
-          "p"
+          "Inside the body, immediately before the first paragraph.",
+          "Before the html root element.",
+          "Inside the head after the title element."
         ],
-        "answer": "html",
-        "explanation": "html is the document root."
+        "answer": "Before the html root element.",
+        "explanation": "The doctype is a document-level declaration and belongs before the html root element, not inside head or body."
+      },
+      {
+        "id": "h2.2-q3",
+        "prompt": "What does document.compatMode returning BackCompat indicate?",
+        "options": [
+          "The document is in quirks mode.",
+          "The document is guaranteed to be valid HTML.",
+          "The browser has disabled JavaScript."
+        ],
+        "answer": "The document is in quirks mode.",
+        "explanation": "BackCompat indicates quirks mode. CSS1Compat indicates standards mode or limited-quirks mode; it does not distinguish those two."
+      },
+      {
+        "id": "h2.2-q4",
+        "prompt": "A page includes <!doctype html> but still contains incorrectly nested elements. Which statement is correct?",
+        "options": [
+          "The doctype automatically repairs every source error and makes the HTML conforming.",
+          "The doctype selects the modern document mode, but the markup must still be corrected and validated.",
+          "The browser will refuse to display any page containing a nesting error."
+        ],
+        "answer": "The doctype selects the modern document mode, but the markup must still be corrected and validated.",
+        "explanation": "Document mode selection and HTML conformance are separate concerns. Browsers may recover from malformed markup, but developers should correct the source."
+      },
+      {
+        "id": "h2.2-q5",
+        "prompt": "Which statement about <!DOCTYPE html> and <!doctype html> is accurate in HTML syntax?",
+        "options": [
+          "Only the uppercase spelling is valid.",
+          "Only the lowercase spelling is valid.",
+          "The keyword spelling is ASCII case-insensitive; the lowercase form is a common style convention."
+        ],
+        "answer": "The keyword spelling is ASCII case-insensitive; the lowercase form is a common style convention.",
+        "explanation": "HTML syntax treats the doctype keyword case-insensitively. Teams often use the lowercase spelling consistently for readability."
+      },
+      {
+        "id": "h2.2-q6",
+        "prompt": "What does a CSS1Compat result from document.compatMode prove?",
+        "options": [
+          "It proves that the document is valid, accessible, and responsive.",
+          "It indicates standards mode or limited-quirks mode, but does not distinguish between them or validate the page.",
+          "It proves that every browser will render the page pixel-for-pixel identically."
+        ],
+        "answer": "It indicates standards mode or limited-quirks mode, but does not distinguish between them or validate the page.",
+        "explanation": "CSS1Compat is a useful mode diagnostic, not a conformance or quality certificate. Validate markup and test the actual page separately."
       }
     ]
   },
