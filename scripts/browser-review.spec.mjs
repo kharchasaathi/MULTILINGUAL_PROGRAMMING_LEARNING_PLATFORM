@@ -10,7 +10,7 @@ const groups = {
 
 test("homepage and lesson dialog have no serious or critical WCAG axe violations", async ({ page }) => {
   await page.goto(baseURL);
-  await expect(page.locator("#courseGrid .course-card")).toHaveCount(3);
+  await expect(page.locator("#courseGrid .course-card")).toHaveCount(4);
   const home = await new AxeBuilder({ page }).withTags(["wcag2a","wcag2aa","wcag21a","wcag21aa"]).analyze();
   const seriousHome = home.violations.filter((item) => ["serious","critical"].includes(item.impact));
   expect(seriousHome, JSON.stringify(seriousHome.map(({ id, impact, description, nodes }) => ({ id, impact, description, count:nodes.length })), null, 2)).toEqual([]);
@@ -41,7 +41,7 @@ test("all 25 added lessons render and their runnable starter code executes in th
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
   await page.goto(baseURL);
-  await expect(page.locator("#courseGrid .course-card")).toHaveCount(3);
+  await expect(page.locator("#courseGrid .course-card")).toHaveCount(4);
 
   for (const [course, topicIds] of Object.entries(groups)) {
     await page.locator(`[data-course-nav="${course}"]`).click();
