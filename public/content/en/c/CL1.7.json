@@ -3,53 +3,53 @@
   "courseId": "c",
   "moduleId": "CL1",
   "topicId": "CL1.7",
-  "title": "Compile, link and run: source, preprocessing, object files, linking and executable",
+  "title": "From C Source to Executable: Preprocessing, Compilation, Assembly and Linking",
   "language": "en",
   "learningObjectives": [
-    "Explain the core ideas behind Compile, link and run: source, preprocessing, object files, linking and executable.",
-    "Identify relevant C syntax, types, standard-library interfaces and constraints.",
-    "Trace a small example and predict its behaviour.",
-    "Recognize boundary cases, common defects and portability risks.",
-    "Apply the concept in a tested C program."
+    "Describe the major stages that transform C source files into an executable program.",
+    "Distinguish preprocessing, compilation, assembly and linking, including the role of headers and object files.",
+    "Explain the difference between a compile-time diagnostic, a linker error and a run-time failure.",
+    "Use compiler commands to build a C program and inspect intermediate outputs when supported.",
+    "Recognize that toolchain stages and options vary by compiler and target platform."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "Compile, link and run: source, preprocessing, object files, linking and executable is an important part of writing correct, maintainable C programs. Learn the exact language rules rather than relying on what one compiler appears to accept. C is a compiled, standardized language: distinguish language guarantees from implementation-defined choices, compiler extensions and behaviour that the standard leaves undefined.",
+      "concept": "A C build transforms source code into a program through several toolchain stages. Preprocessing handles directives such as #include and macros. The compiler translates the preprocessed translation unit. An assembler may produce an object file containing machine code and metadata. The linker combines object files and required libraries, resolves external references and creates an executable or another target artifact. Toolchains may combine or reorganize these stages, but understanding their responsibilities makes build failures easier to diagnose.",
       "whyItMatters": "Understanding Compile, link and run: source, preprocessing, object files, linking and executable helps you reason about program behaviour instead of memorizing syntax. It is useful in exams, debugging and building reliable C applications.",
       "analogy": "Treat the concept as a tool with a precise contract: it has valid inputs, defined operations and observable results.",
       "analogyLimit": "An analogy is only an aid; the C standard and the relevant function specifications determine actual behaviour."
     },
     "explain": {
-      "narrative": "## Concept and mental model\nCompile, link and run: source, preprocessing, object files, linking and executable should be understood in terms of the C abstract machine: objects have types, storage duration and lifetimes; expressions are evaluated according to language rules; and library calls have specified preconditions and results. The compiler translates a translation unit, but a successful compilation does not prove that a program is correct.\n\n## How to reason about this topic\n1. Identify the inputs, objects, types and operations involved.\n2. Check the applicable syntax and semantic constraints.\n3. Determine valid input ranges and boundary cases.\n4. Check every function result and handle failure where the API permits failure.\n5. Compile with warnings enabled and test normal, boundary and invalid cases.\n\n## Correctness and portability\nDo not assume that int has a particular width, that memory addresses are identical across runs, or that undefined behaviour has a predictable result. Use standard headers and documented interfaces. State any platform assumptions explicitly. Prefer small functions, clear names and explicit invariants.\n\n## Worked example 1 — establish a testable baseline\nThe example below demonstrates a small, compilable C program. Adapt the declaration, expression or API call to the exact concept being studied, then change one condition at a time and observe the result.\n\n## Worked example 2 — validate a boundary\nA second useful test is to exercise the smallest valid input, largest valid input, one value outside the valid range and an ordinary middle value. Record the expected result before running the program; this prevents a test from merely confirming an assumption.\n\n## Common mistakes\n- Assuming a successful compile means the result is correct.\n- Ignoring warnings or failing to check a library function's return value.\n- Using a value outside the range permitted by its type or API.\n- Confusing a compiler extension with portable ISO C.\n- Testing only one ordinary input and missing boundary cases.",
+      "narrative": "## 1. Source code is not the executable\n\nA file such as main.c contains C source code. A compiler toolchain transforms it into a target-specific program.\n\n## 2. Preprocessing\n\nThe preprocessor handles directives beginning with #. For example, #include <stdio.h> makes declarations from the standard I/O header available to the translation unit. Macro expansion and conditional compilation also occur here. Preprocessing does not itself produce the final machine-code program.\n\n## 3. Compilation and assembly\n\nThe compiler checks the translation unit against C language rules and translates it for the selected target. A toolchain may produce assembly text as an intermediate output. An assembler converts assembly instructions into an object file.\n\n## 4. Linking\n\nThe linker combines object files and libraries, resolves external references and produces the requested output. If a called function has no matching definition or library implementation, the build may fail during linking rather than during C syntax checking.\n\n## 5. Build and inspect\n\nWith GCC, a common command is: gcc -Wall -Wextra -std=c17 main.c -o app. The -E option requests preprocessing only, -S requests assembly output, and -c requests an object file without linking. Exact options and output conventions can vary by toolchain.\n\n## 6. Diagnose the stage\n\nA preprocessing error may involve a missing header or invalid directive. A compiler diagnostic may identify invalid syntax or a type constraint violation. A linker error may report an unresolved external symbol or duplicate definition. A run-time failure occurs after a program has been built and started.\n\nA successful build proves only that the toolchain produced the requested artifact. It does not prove that the program's logic is correct or safe. Test expected, boundary and invalid inputs.",
       "examples": [
         {
           "id": "cl1.7-ex1",
           "language": "en",
-          "title": "A small C program to compile and inspect",
-          "code": "#include <stdio.h>\n\nint main(void) {\n    int value = 12;\n    printf(\"Value: %d\\\\n\", value);\n    return 0;\n}",
-          "explanation": "The program declares an int object, initializes it, prints it with the matching %d conversion specification and returns a success status.",
-          "runnable": true
+          "title": "Build a single source file",
+          "code": "#include <stdio.h>\n\nint main(void) {\n    puts(\"Build stages are useful to understand.\");\n    return 0;\n}",
+          "explanation": "Save as main.c and build with gcc -Wall -Wextra -std=c17 main.c -o app. The compiler driver coordinates the required toolchain stages.",
+          "runnable": false
         },
         {
           "id": "cl1.7-ex2",
           "language": "en",
-          "title": "Iterating over a fixed array",
-          "code": "#include <stdio.h>\n\nint main(void) {\n    int values[] = { 3, 6, 9, 12 };\n    size_t count = sizeof values / sizeof values[0];\n    for (size_t i = 0; i < count; ++i) {\n        printf(\"%d\\\\n\", values[i]);\n    }\n    return 0;\n}",
-          "explanation": "The array length is derived from its total size divided by the size of one element. The loop visits valid indices from zero through count minus one.",
-          "runnable": true
+          "title": "Inspect separate toolchain outputs",
+          "code": "gcc -E main.c -o main.i\ngcc -S main.i -o main.s\ngcc -c main.s -o main.o\ngcc main.o -o app",
+          "explanation": "This illustrates preprocessing, assembly generation, object-file creation and linking as separate steps. Real compiler drivers may perform additional work, and exact commands can vary by platform.",
+          "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Write a minimal program that demonstrates Compile, link and run: source, preprocessing, object files, linking and executable. Compile it with warnings enabled, explain each declaration and operation, and record its output.",
-      "independentTask": "Create two test cases for Compile, link and run: source, preprocessing, object files, linking and executable: one normal case and one boundary or failure case. State the expected behaviour before running them, then compare the result and explain any difference.",
+      "guidedTask": "Build a small C program with warnings enabled. Use documented compiler options to inspect preprocessed output and, if supported, an assembly file and object file. Record which stage creates each artifact, then link and run the program.",
+      "independentTask": "Create two source files where one defines a function and the other calls it. Compile each to an object file, link them, then temporarily remove the function definition and observe the linker diagnostic. Restore it and test the executable.",
       "hints": [
-        "Read the compiler diagnostic carefully; fix the first meaningful error before chasing later messages.",
-        "Use the exact type and format specifier required by the operation.",
-        "Test zero, negative values where valid, maximum/minimum boundaries and invalid input as appropriate.",
-        "Do not dereference an uninitialized, null or expired pointer.",
-        "Prefer defined, portable behaviour over code that merely appears to work on one machine."
+        "The compiler driver often coordinates several separate tools.",
+        "Preprocessing output is not yet a final executable.",
+        "An object file can contain unresolved external references.",
+        "A linker error is different from a C syntax error.",
+        "A successful link does not prove run-time correctness."
       ]
     }
   },
@@ -62,58 +62,58 @@
     "questions": [
       {
         "id": "cl1.7-q1",
-        "prompt": "Which approach is safest when applying Compile, link and run: source, preprocessing, object files, linking and executable?",
+        "prompt": "Which stage expands directives such as #include and #define?",
         "options": [
-          "Follow the C language rules, validate inputs and check relevant return values.",
-          "Assume every compiler and platform behaves identically.",
-          "Ignore warnings whenever the program produces output."
+          "Preprocessing",
+          "Linking",
+          "Program execution"
         ],
-        "answer": "Follow the C language rules, validate inputs and check relevant return values.",
-        "explanation": "Correct C programming depends on defined behaviour, valid inputs and careful handling of operations that can fail."
+        "answer": "Preprocessing",
+        "explanation": "Preprocessing handles source directives and macro expansion before the main translation stage."
       },
       {
         "id": "cl1.7-q2",
-        "prompt": "Why should boundary cases be tested?",
+        "prompt": "What is a typical object file used for?",
         "options": [
-          "They reveal errors that ordinary inputs may not expose.",
-          "They are unnecessary when one example works.",
-          "They make compiler warnings irrelevant."
+          "It contains compiled code and metadata that can be linked with other objects",
+          "It is always the final executable",
+          "It stores only comments"
         ],
-        "answer": "They reveal errors that ordinary inputs may not expose.",
-        "explanation": "Boundary tests check the edges of valid ranges and important exceptional conditions."
+        "answer": "It contains compiled code and metadata that can be linked with other objects",
+        "explanation": "Object files are inputs to the linker and may contain unresolved external references."
       },
       {
         "id": "cl1.7-q3",
-        "prompt": "What does a successful compilation establish?",
+        "prompt": "An object file refers to a function whose definition is missing. At which stage is this commonly reported?",
         "options": [
-          "The compiler accepted the translation under its selected settings; it does not prove runtime correctness.",
-          "The program is free from all defects.",
-          "The program is portable to every C implementation."
+          "Linking",
+          "Preprocessing",
+          "Comment parsing"
         ],
-        "answer": "The compiler accepted the translation under its selected settings; it does not prove runtime correctness.",
-        "explanation": "Compilation is one validation step. Tests, review and correct reasoning are also required."
+        "answer": "Linking",
+        "explanation": "The linker resolves references between object files and libraries."
       },
       {
         "id": "cl1.7-q4",
-        "prompt": "Which practice improves portability?",
+        "prompt": "What does GCC's -c option commonly request?",
         "options": [
-          "Use standard C features and document unavoidable platform assumptions.",
-          "Depend on undocumented compiler extensions.",
-          "Assume int and pointer sizes are fixed everywhere."
+          "Produce an object file without linking",
+          "Run the program immediately",
+          "Delete the source file"
         ],
-        "answer": "Use standard C features and document unavoidable platform assumptions.",
-        "explanation": "Portable programs avoid assumptions that the C standard does not guarantee."
+        "answer": "Produce an object file without linking",
+        "explanation": "The -c option stops before the linking stage."
       },
       {
         "id": "cl1.7-q5",
-        "prompt": "What should you do when a library operation can fail?",
+        "prompt": "A program builds successfully. What does that prove?",
         "options": [
-          "Check its documented result and handle the failure path.",
-          "Assume it always succeeds.",
-          "Continue using its output without checking."
+          "The toolchain produced the requested build artifact, not that the program is logically correct",
+          "The program has no bugs",
+          "Every possible input is safe"
         ],
-        "answer": "Check its documented result and handle the failure path.",
-        "explanation": "Many standard-library operations report failure through return values or stream indicators."
+        "answer": "The toolchain produced the requested build artifact, not that the program is logically correct",
+        "explanation": "Testing and review are still required after a successful build."
       }
     ]
   },
