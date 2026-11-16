@@ -6,11 +6,11 @@
   "title": "Format Specifiers and Formatted Input and Output",
   "language": "en",
   "learningObjectives": [
-    "Explain the central rules behind format specifiers and formatted input and output in C.",
-    "Identify the relevant types, declarations, operators or library facilities.",
-    "Trace a worked example and explain its result.",
-    "Recognize common mistakes, portability concerns and unsafe assumptions.",
-    "Apply the concept in a small program and test normal and boundary cases."
+    "Match common printf conversion specifications to the promoted argument types they expect.",
+    "Explain why scanf usually receives addresses of destination objects.",
+    "Check formatted-input return values before using converted data.",
+    "Use field width and appropriate length modifiers where required.",
+    "Avoid format-string mismatches and validate text received from users."
   ],
   "prerequisites": [
     "CL1.1",
@@ -18,13 +18,13 @@
   ],
   "stages": {
     "understand": {
-      "concept": "Formatted I/O functions use a format string to convert between textual representations and C values. printf-family functions receive values, while scanf-family functions generally receive pointers to destination objects. The conversion specification must match the argument type and required pointer type; mismatches can cause undefined behaviour.",
+      "concept": "Formatted input/output functions convert between text and C values according to a format string. printf-family functions receive values, with default argument promotions applying to variadic arguments. scanf-family functions generally receive pointers to destination objects. Each conversion specification has precise requirements; a mismatch can cause undefined behavior. Return values report how many conversions succeeded or whether output failed.",
       "whyItMatters": "Input and output are where program data crosses a textual boundary. Correct format strings, return-value checks and input validation prevent corrupted values and misleading output.",
       "analogy": "Think of a type as a contract that describes what kind of value an object can hold and which operations make sense for it.",
       "analogyLimit": "The analogy is only an introduction; C types also determine representation, conversions, alignment and constraints."
     },
     "explain": {
-      "narrative": "Formatted I/O functions use a format string to convert between textual representations and C values. printf-family functions receive values, while scanf-family functions generally receive pointers to destination objects. The conversion specification must match the argument type and required pointer type; mismatches can cause undefined behaviour.\n\nInput and output are where program data crosses a textual boundary. Correct format strings, return-value checks and input validation prevent corrupted values and misleading output.\n\nWhen reviewing code, identify the declared types first, then trace conversions and the exact expression being evaluated. Compile with warnings enabled and test boundary values. Do not rely on assumptions about another compiler or machine.",
+      "narrative": "## 1. Formatted output with printf\n\nInclude `<stdio.h>` to use printf. Common conversions include `%d` for int, `%u` for unsigned int, `%ld` for long, `%zu` for size_t, `%f` for a double argument, `%c` for a character value and `%s` for a null-terminated character array.\n\n## 2. Formatted input with scanf\n\nFor most conversions, scanf expects a pointer to the destination object. Use `&age` when age is an int. For a character array, the array expression supplies a pointer to its first element; set a field width so input cannot overrun the array. Check the return value before using the destination values.\n\n## 3. Length modifiers matter\n\nThe format string must match the actual argument type. For example, `%ld` is for long and `%zu` is for size_t in printf. Do not assume a format that works for int is valid for every integer type.\n\n## 4. Validate input\n\nA successful conversion only means the requested conversion was performed. It does not prove the value is within the application's allowed range. Validate ranges and handle trailing or malformed input according to the program's requirements.\n\n## 5. Keep format strings trusted\n\nUse a fixed format string such as `printf(\"%s\", message)` for user-controlled text. Do not pass untrusted text directly as the format string. Format-string mismatches and unbounded input fields are serious defects.",
       "examples": [
         {
           "id": "cl2.3-ex1",
@@ -45,14 +45,14 @@
       ]
     },
     "practise": {
-      "guidedTask": "Print an int, unsigned int, size_t, double and string with correct conversion specifications. Then read an integer and check the return value before using it.",
-      "independentTask": "Build a robust record-input routine that reads a full line, validates its length and converts numeric fields with an appropriate checked conversion function.",
+      "guidedTask": "Write a small C program that demonstrates the central rules in CL2.3. Compile with warnings enabled, run it with ordinary and boundary values, and explain each result in your own words.",
+      "independentTask": "Create a second example for CL2.3 using different values and names. Include one likely mistake as a separate experiment, observe the compiler diagnostic or behavior, then correct it. Record the rule that explains the correction.",
       "hints": [
-        "printf formats values; scanf usually stores into objects through pointers.",
-        "Use %zu for size_t.",
-        "Check scanf's return value before reading the destination variable.",
-        "Never use untrusted text as a printf format string.",
-        "Prefer line-based input and explicit parsing for robust user input."
+        "Start by identifying the exact type of every object and expression.",
+        "Check the C language rule before assuming a platform-specific result.",
+        "Use compiler warnings as feedback, not as proof of correctness.",
+        "Test normal values and important boundaries.",
+        "Explain why the result follows from the language rules."
       ]
     }
   },
@@ -65,58 +65,58 @@
     "questions": [
       {
         "id": "cl2.3-q1",
-        "prompt": "Which statement is correct about format specifiers and formatted input and output?",
+        "prompt": "Which printf conversion is used for a size_t value?",
         "options": [
-          "It follows C's type and language rules and should be checked with compiler diagnostics.",
-          "C ignores all declared types.",
-          "The browser decides its meaning."
+          "%zu",
+          "%d",
+          "%c"
         ],
-        "answer": "It follows C's type and language rules and should be checked with compiler diagnostics.",
-        "explanation": "C semantics are defined by the language and implementation."
+        "answer": "%zu",
+        "explanation": "The z length modifier is used with u for size_t in printf."
       },
       {
         "id": "cl2.3-q2",
-        "prompt": "What is the safest general practice?",
+        "prompt": "Why does `scanf(\"%d\", &age)` pass `&age`?",
         "options": [
-          "Choose types and operations deliberately, initialize data and validate assumptions.",
-          "Ignore warnings and assume values are valid.",
-          "Use casts to silence every warning."
+          "scanf needs a pointer to the object where it will store the converted integer",
+          "scanf prints the address",
+          "The ampersand converts int to text"
         ],
-        "answer": "Choose types and operations deliberately, initialize data and validate assumptions.",
-        "explanation": "Deliberate types and checks improve correctness."
+        "answer": "scanf needs a pointer to the object where it will store the converted integer",
+        "explanation": "scanf writes the converted value through the supplied pointer."
       },
       {
         "id": "cl2.3-q3",
-        "prompt": "What should you do when a result is unexpected?",
+        "prompt": "What does a scanf return value of 1 indicate for one requested conversion?",
         "options": [
-          "Create a small test case and inspect types, values and conversions.",
-          "Guess the result from the variable name.",
-          "Remove the test."
+          "One input item was successfully converted and assigned",
+          "The input line contained exactly one character",
+          "The value is within every application-specific range"
         ],
-        "answer": "Create a small test case and inspect types, values and conversions.",
-        "explanation": "Small reproducible tests make behaviour easier to reason about."
+        "answer": "One input item was successfully converted and assigned",
+        "explanation": "The return value counts successful assignments; range validation may still be needed."
       },
       {
         "id": "cl2.3-q4",
-        "prompt": "Which statement about portability is accurate?",
+        "prompt": "Which call safely prints a user-provided string as data?",
         "options": [
-          "Some type sizes and ranges depend on the implementation.",
-          "All C implementations use identical type widths.",
-          "Compiler warnings change the C standard."
+          "printf(\"%s\", message);",
+          "printf(message);",
+          "printf(\"%d\", message);"
         ],
-        "answer": "Some type sizes and ranges depend on the implementation.",
-        "explanation": "Use standard guarantees and inspect implementation limits."
+        "answer": "printf(\"%s\", message);",
+        "explanation": "A fixed format string prevents percent sequences in message from being interpreted as directives."
       },
       {
         "id": "cl2.3-q5",
-        "prompt": "Which is a strong learning outcome?",
+        "prompt": "Why should a scanf string conversion have a field width?",
         "options": [
-          "Explain the rule and apply it in a tested C program.",
-          "Memorize one output only.",
-          "Copy code without checking it."
+          "To limit how many characters are stored and protect the destination array",
+          "To make input automatically encrypted",
+          "To force all strings to be empty"
         ],
-        "answer": "Explain the rule and apply it in a tested C program.",
-        "explanation": "Understanding plus testing demonstrates transferable knowledge."
+        "answer": "To limit how many characters are stored and protect the destination array",
+        "explanation": "The width must leave room for the terminating null character."
       }
     ]
   },
