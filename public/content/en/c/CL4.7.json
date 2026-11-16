@@ -6,39 +6,50 @@
   "title": "Standard string functions from string.h",
   "language": "en",
   "learningObjectives": [
-    "Explain the language rule and its constraints.",
-    "Trace the example and predict its output.",
-    "Identify relevant boundary and safety cases.",
-    "Apply the concept in a tested C program."
+    "Use strlen, strcmp, strcpy and strcat with their documented preconditions.",
+    "Explain that strcmp returns a negative, zero or positive result rather than necessarily -1, 0 or 1.",
+    "Ensure destination capacity before copying or concatenating strings.",
+    "Distinguish byte-string operations from character-counting Unicode operations.",
+    "Recognize overlap and termination requirements for string library functions."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "string.h declares functions for null-terminated byte strings and memory blocks. strlen counts characters before the terminator; strcmp compares strings; strcpy and strcat write to destination storage and require sufficient capacity.",
+      "concept": "The string.h header declares functions for null-terminated byte strings and memory blocks. strlen counts bytes before the terminator. strcmp compares two strings lexicographically and returns a value less than, equal to or greater than zero. strcpy and strcat write to destination storage and require sufficient capacity; overlapping source and destination objects are not permitted for these operations.",
       "whyItMatters": "This concept supports correct handling of C data and helps prevent invalid memory access or incorrect program behaviour.",
       "analogy": "Think of the construct as a precisely bounded sequence of storage and operations.",
       "analogyLimit": "The analogy does not replace C's rules for object lifetime, bounds, types or undefined behaviour."
     },
     "explain": {
-      "narrative": "string.h declares functions for null-terminated byte strings and memory blocks. strlen counts characters before the terminator; strcmp compares strings; strcpy and strcat write to destination storage and require sufficient capacity.\n\nAlways check the types, object bounds and preconditions required by the operation. Compile with warnings enabled and test ordinary as well as boundary inputs.",
+      "narrative": "## 1. Include string.h\n\nInclude `<string.h>` for standard string functions. These functions operate on null-terminated byte strings unless their specific contract says otherwise. The source must be a valid string for functions that scan to a terminator.\n\n## 2. strlen and strcmp\n\n`strlen(text)` counts bytes before the null character. `strcmp(a, b)` compares strings and returns a negative value, zero or a positive value. Do not assume the result must be exactly -1, 0 or 1; test its sign.\n\n## 3. strcpy and strcat\n\n`strcpy(destination, source)` copies the source string including its terminator. `strcat(destination, source)` appends the source after the destination's existing terminator. The destination must have enough capacity for all resulting characters and the final null character.\n\n## 4. Overlap and capacity\n\nThe source and destination ranges must not overlap for strcpy and strcat. These functions do not know the destination array's capacity, so the caller must calculate and validate it. Never pass an unterminated array as a string.\n\n## 5. Safer design\n\nTrack destination capacity explicitly, use bounded APIs with a clear truncation policy where available, or build strings using checked lengths. A function name containing 'n' is not automatically safe unless its exact contract is understood.",
       "examples": [
         {
-          "id": "cl47-ex1",
+          "id": "cl4.7-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "Library calls do not prove destination capacity automatically. The programmer must ensure valid source strings, sufficient destination space and compliance with overlap rules.",
-          "explanation": "#include <stdio.h>\n#include <string.h>\nint main(void) {\n char first[24] = \"C language\";\n const char second[] = \" basics\";\n if (sizeof first >= strlen(first) + strlen(second) + 1) {\n  strcat(first, second);\n  puts(first);\n }\n return 0;\n}",
+          "title": "Compare two strings",
+          "code": "#include <stdio.h>\n#include <string.h>\n\nint main(void) {\n    int result = strcmp(\"apple\", \"apricot\");\n    if (result < 0) puts(\"apple comes first\");\n    else if (result > 0) puts(\"apricot comes first\");\n    else puts(\"same string\");\n    return 0;\n}",
+          "explanation": "strcmp returns a negative, zero or positive value. The program tests the sign rather than relying on a specific nonzero number.",
+          "runnable": false
+        },
+        {
+          "id": "cl4.7-ex2",
+          "language": "en",
+          "title": "Copy into a destination with known capacity",
+          "code": "#include <stdio.h>\n#include <string.h>\n\nint main(void) {\n    char destination[16];\n    const char source[] = \"CodeSaathi\";\n    if (sizeof source <= sizeof destination) {\n        strcpy(destination, source);\n        puts(destination);\n    }\n    return 0;\n}",
+          "explanation": "The check includes the source terminator because sizeof source includes it. Production code must apply an equally explicit capacity and overlap policy.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "The capacity check reserves space for both strings and the final null character before strcat appends. The output is C language basics.",
-      "independentTask": "Calculate both string lengths and the required destination capacity before concatenation.",
+      "guidedTask": "Implement a small C program demonstrating CL4.7. Identify the relevant array or string capacity, valid indices, expected results and failure cases before compiling and testing.",
+      "independentTask": "Create a second example for CL4.7 that handles a boundary case explicitly. Add tests for empty input, the smallest valid case, the largest valid case and one invalid or oversized case. Explain how your code prevents invalid access.",
       "hints": [
-        "Compare two input strings using strcmp and explain why equality is tested with == 0.",
-        "strcmp returns zero for equal strings, negative for less-than and positive for greater-than.",
-        "strncpy may leave the destination unterminated when the source fills the limit."
+        "Write down the exact array length and valid index range.",
+        "Include null terminator space when working with C strings.",
+        "Check function preconditions and return values.",
+        "Pass array lengths explicitly when a function needs them.",
+        "Test exact-fit and one-past-boundary cases."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl47-q1",
-        "prompt": "Which statement best matches this lesson?",
+        "id": "cl4.7-q1",
+        "prompt": "What can strcmp return when its strings differ?",
         "options": [
-          "The C rule and constraints explained in this lesson.",
-          "An unrelated HTML element.",
-          "A CSS property."
+          "Any negative or positive value, depending on ordering",
+          "Only -1",
+          "Only 1"
         ],
-        "answer": "The C rule and constraints explained in this lesson.",
-        "explanation": "The correct choice follows the C rule and its constraints."
+        "answer": "Any negative or positive value, depending on ordering",
+        "explanation": "The contract specifies the sign, not a particular magnitude."
       },
       {
-        "id": "cl47-q2",
-        "prompt": "How should a boundary-sensitive operation be checked?",
+        "id": "cl4.7-q2",
+        "prompt": "What must be true before strcpy is called?",
         "options": [
-          "Identify valid bounds and test boundary cases.",
-          "Assume C checks every array bound automatically.",
-          "Ignore compiler warnings."
+          "The destination has enough space for the source including its null terminator",
+          "The destination must be larger than 1 byte only",
+          "The source must be an int array"
         ],
-        "answer": "Identify valid bounds and test boundary cases.",
-        "explanation": "C requires the programmer to respect object bounds and preconditions."
+        "answer": "The destination has enough space for the source including its null terminator",
+        "explanation": "strcpy copies the terminating null character too."
       },
       {
-        "id": "cl47-q3",
-        "prompt": "Why trace the example?",
+        "id": "cl4.7-q3",
+        "prompt": "What does strlen exclude from its count?",
         "options": [
-          "To understand execution order and state changes.",
-          "To replace compilation.",
-          "To avoid checking input."
+          "The terminating null character",
+          "The first visible character",
+          "All ASCII letters"
         ],
-        "answer": "To understand execution order and state changes.",
-        "explanation": "Tracing makes the data flow explicit; compilation and testing remain necessary."
+        "answer": "The terminating null character",
+        "explanation": "strlen counts only the bytes before the terminator."
+      },
+      {
+        "id": "cl4.7-q4",
+        "prompt": "Can strcpy safely copy between overlapping source and destination regions?",
+        "options": [
+          "No",
+          "Yes, always",
+          "Only when the source is shorter"
+        ],
+        "answer": "No",
+        "explanation": "The strcpy contract does not permit overlapping objects."
+      },
+      {
+        "id": "cl4.7-q5",
+        "prompt": "What is the correct way to test whether strcmp reports equality?",
+        "options": [
+          "strcmp(a, b) == 0",
+          "strcmp(a, b) == 1",
+          "strcmp(a, b) < -1"
+        ],
+        "answer": "strcmp(a, b) == 0",
+        "explanation": "A zero result means the strings compare equal."
       }
     ]
   },
