@@ -3,42 +3,59 @@
   "courseId": "c",
   "moduleId": "CL9",
   "topicId": "CL9.1",
-  "title": "C standard library overview and headers",
+  "title": "Date and time functions from time.h",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C rules.",
-    "Trace the example and identify data or control flow.",
-    "Recognize common failure and safety cases.",
-    "Apply the concept in a tested C program."
+    "Explain the roles of time_t, struct tm and struct timespec-like concepts without assuming that time_t is an integer with a fixed epoch representation.",
+    "Obtain calendar time with time(), check its failure sentinel, and distinguish a timestamp from a human-readable date.",
+    "Convert a time value to broken-down local or UTC time using localtime() and gmtime(), including their shared static-storage caveat.",
+    "Format calendar fields with strftime() and interpret its return value as the number of characters written, excluding the terminating null character.",
+    "Compare elapsed time with difftime() and distinguish elapsed-time measurement from calendar scheduling and monotonic timing.",
+    "Write portable, defensive date/time code that checks library results, avoids retaining pointers to overwritten static results, and documents timezone assumptions."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL2.4 Fundamental data types and object sizes",
+    "CL6.1 Defining and calling functions",
+    "CL7.1 File and standard-library basics"
+  ],
   "stages": {
     "understand": {
-      "concept": "The C standard library provides facilities for input/output, strings, memory allocation, mathematics, character handling, time, diagnostics and other common tasks. Headers declare interfaces; the implementation supplies the corresponding library definitions.",
-      "whyItMatters": "Using standard facilities improves portability and reduces the need to write error-prone replacements, provided the program follows their contracts.",
-      "analogy": "Treat each resource and operation as having a clear contract, valid lifetime and failure path.",
-      "analogyLimit": "The analogy does not replace the C standard, compiler or library specifications."
+      "concept": "The C standard library groups calendar-time facilities in <time.h>. A time value such as time_t represents a calendar-time quantity defined by the implementation; it is not safe to assume a universal integer width, epoch, timezone, or textual format. A broken-down calendar value uses struct tm fields such as tm_year (years since 1900), tm_mon (0–11), tm_mday (1–31), tm_hour, tm_min and tm_sec. Formatting turns these fields into text; it does not change the underlying time.",
+      "whyItMatters": "Programs use dates for logs, reports, file names, event records and user-facing timestamps. Confusing UTC with local time, assuming time_t is always a 64-bit integer, or ignoring conversion failures can create incorrect records and portability defects.",
+      "analogy": "A timestamp is like a point on a timeline; a broken-down calendar structure is like the year/month/day/hour labels shown on a wall calendar.",
+      "analogyLimit": "Calendar labels depend on timezone and calendar rules. A time_t representation and its range are implementation-defined, and wall-clock time can change; the analogy does not make it a monotonic stopwatch."
     },
     "explain": {
-      "narrative": "The C standard library provides facilities for input/output, strings, memory allocation, mathematics, character handling, time, diagnostics and other common tasks. Headers declare interfaces; the implementation supplies the corresponding library definitions.\n\nCheck object bounds, lifetimes, arithmetic limits and all relevant return values. Compile with warnings enabled and test both normal and failure paths.",
+      "narrative": "<time.h> separates several jobs. time(&value) obtains the current calendar time and returns (time_t)-1 on failure. localtime(&value) and gmtime(&value) convert a time value into a struct tm, commonly through library-managed static storage; copy the structure immediately if it must be retained. strftime() writes a formatted representation into a caller-owned character array and returns zero when the result does not fit. difftime(later, earlier) returns the difference in seconds as a double and avoids assuming that subtracting two time_t values is portable.\n\nThe standard C calendar-time interface is not a general high-resolution or monotonic timer. For elapsed performance measurements, use a platform facility designed for monotonic clocks and document that dependency. Timezone databases, daylight-saving rules and locale-sensitive formatting are environment concerns; do not hard-code assumptions about them.",
       "examples": [
         {
           "id": "cl91-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\n#include <string.h>\nint main(void) {\n const char message[] = \"Standard C\";\n printf(\"%s has %zu characters\\n\", message, strlen(message));\n return 0;\n}",
-          "explanation": "stdio.h declares printf and string.h declares strlen. The program uses standard library interfaces instead of implementing output and string length manually.",
-          "runnable": false
+          "title": "Format a known calendar value without depending on the machine clock",
+          "code": "#include <stdio.h>\n#include <time.h>\n\nint main(void)\n{\n    struct tm sample = {0};\n    char text[32];\n    size_t written;\n\n    sample.tm_year = 126; /* 2026 - 1900 */\n    sample.tm_mon = 10;   /* November: 0-based */\n    sample.tm_mday = 16;\n    sample.tm_hour = 9;\n    sample.tm_min = 30;\n    sample.tm_sec = 0;\n\n    written = strftime(text, sizeof text, \"%Y-%m-%d %H:%M:%S\", &sample);\n    if (written == 0U) {\n        puts(\"formatted text did not fit\");\n        return 1;\n    }\n    puts(text);\n    return 0;\n}",
+          "explanation": "The structure is initialized to zero before selected fields are assigned. tm_year is measured from 1900 and tm_mon is zero-based. strftime writes into the caller's buffer; its nonzero return confirms that formatted output was produced.",
+          "runnable": true
+        },
+        {
+          "id": "cl91-ex2",
+          "language": "en",
+          "title": "Compare two time values with difftime",
+          "code": "#include <stdio.h>\n#include <time.h>\n\nint main(void)\n{\n    time_t start = (time_t)1000;\n    time_t finish = (time_t)4600;\n    double elapsed = difftime(finish, start);\n\n    printf(\"elapsed seconds: %.0f\\n\", elapsed);\n    return 0;\n}",
+          "explanation": "This example uses two representable time_t values and asks difftime for their difference. It does not assume that time_t is a signed integer that can safely be subtracted directly.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Match each header to a common facility it declares.",
-      "independentTask": "Create a small program that uses stdio.h, string.h and ctype.h, explaining the role of each header.",
+      "guidedTask": "Change the sample calendar fields to represent a different date. Predict tm_year and tm_mon before running, then verify the formatted string. Next, shorten the output buffer and observe how the program handles strftime returning zero.",
+      "independentTask": "Write a small timestamp formatter that calls time(), checks for (time_t)-1, converts to local calendar time, copies the returned struct tm immediately, and checks the result of strftime before printing.",
       "hints": [
-        "A header provides declarations and macros; it is not itself a separately compiled program.",
-        "Include the standard header that declares each library function you use.",
-        "Check the C version and implementation support for facilities you depend on."
+        "Remember that tm_year is an offset from 1900, not the full year.",
+        "Remember that tm_mon ranges from 0 through 11.",
+        "localtime() and gmtime() may use shared static storage; copy the returned structure before another conversion call.",
+        "Check time(), localtime()/gmtime() and strftime() results before dereferencing or printing.",
+        "Use difftime() for differences between time_t values instead of assuming direct subtraction is portable.",
+        "Do not use calendar time as a monotonic performance clock; wall time may jump."
       ]
     }
   },
@@ -51,36 +68,63 @@
     "questions": [
       {
         "id": "cl91-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "Which value does tm_year store?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "The number of years since 1900.",
+          "The full four-digit year.",
+          "The number of years since 1970.",
+          "The number of days in the current year."
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct choice follows the C rule explained above."
+        "answer": "The number of years since 1900.",
+        "explanation": "tm_year is the number of years since 1900; add 1900 to obtain the calendar year."
       },
       {
         "id": "cl91-q2",
-        "prompt": "What is a reliable way to protect correctness?",
+        "prompt": "What is the valid month range for struct tm.tm_mon?",
         "options": [
-          "Validate preconditions, bounds and failure results.",
-          "Assume the operation cannot fail.",
-          "Ignore the type and lifetime rules."
+          "0 through 11, where January is 0.",
+          "1 through 12, where January is 1.",
+          "0 through 12.",
+          "-1 through 10."
         ],
-        "answer": "Validate preconditions, bounds and failure results.",
-        "explanation": "C requires explicit handling of object validity and operation failures."
+        "answer": "0 through 11, where January is 0.",
+        "explanation": "tm_mon is zero-based, so January is 0 and December is 11."
       },
       {
         "id": "cl91-q3",
-        "prompt": "How should the example be checked?",
+        "prompt": "What does strftime return when the formatted result does not fit?",
         "options": [
-          "Compile with warnings and test expected and failure cases.",
-          "Ignore diagnostics and test only once.",
-          "Assume every platform behaves identically."
+          "Zero.",
+          "The required buffer size including the null terminator.",
+          "(size_t)-1 in every implementation.",
+          "A pointer to the first character."
         ],
-        "answer": "Compile with warnings and test expected and failure cases.",
-        "explanation": "Warnings and targeted tests provide evidence for correctness."
+        "answer": "Zero.",
+        "explanation": "A zero return indicates that no complete formatted string was written because the buffer was too small."
+      },
+      {
+        "id": "cl91-q4",
+        "prompt": "Why should a program copy the struct tm returned by localtime before calling another time conversion routine?",
+        "options": [
+          "The returned pointer may refer to shared static storage that a later call can overwrite.",
+          "The pointer always refers to dynamically allocated memory.",
+          "The structure is immutable and cannot be copied.",
+          "The function returns a pointer to the input time_t."
+        ],
+        "answer": "The returned pointer may refer to shared static storage that a later call can overwrite.",
+        "explanation": "The standard conversion functions may use shared static storage, so retaining the pointer across another call is unsafe."
+      },
+      {
+        "id": "cl91-q5",
+        "prompt": "Which function is intended to compute the difference between two time_t values?",
+        "options": [
+          "difftime().",
+          "strftime().",
+          "gmtime().",
+          "asctime()."
+        ],
+        "answer": "difftime().",
+        "explanation": "difftime returns the elapsed difference as a double without requiring assumptions about the representation of time_t."
       }
     ]
   },
