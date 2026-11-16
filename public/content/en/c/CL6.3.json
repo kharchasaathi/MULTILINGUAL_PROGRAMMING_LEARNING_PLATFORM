@@ -6,39 +6,50 @@
   "title": "Pass-by-value and pointer-based updates (C's pass-by-value model)",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C language rules.",
-    "Trace the example and explain data flow.",
-    "Identify common errors and boundary conditions.",
-    "Apply the concept in a small tested program."
+    "Explain that every C argument is passed by value.",
+    "Show why changing a scalar parameter does not change the caller's object.",
+    "Use pointer parameters to modify caller-owned objects deliberately.",
+    "Distinguish modifying a pointed-to object from reassigning a local pointer copy.",
+    "Use pointer-to-pointer parameters when a function must update a caller's pointer."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "C passes arguments by value: the function receives its own parameter object initialized from the argument value. When the value is a pointer, the copied pointer can be used to modify the object it designates, but assigning a new value to the local pointer does not change the caller's pointer.",
+      "concept": "C passes arguments by value: a function receives its own parameter object initialized from the argument value. If the value is a pointer, the copied pointer can access the object it designates. Modifying that object is visible to the caller, but assigning a new value to the local pointer does not change the caller's pointer variable.",
       "whyItMatters": "This distinction prevents confusion about whether a function can modify a caller's variable or redirect a caller-owned pointer.",
       "analogy": "Treat a function or pointer operation as an explicit contract between caller and callee.",
       "analogyLimit": "The analogy does not replace C's formal rules for types, object lifetime, scope and linkage."
     },
     "explain": {
-      "narrative": "C passes arguments by value: the function receives its own parameter object initialized from the argument value. When the value is a pointer, the copied pointer can be used to modify the object it designates, but assigning a new value to the local pointer does not change the caller's pointer.\n\nWhen applying this concept, check declared types, preconditions, object lifetime and all control-flow paths. Compile with warnings enabled and test both typical and boundary inputs.",
+      "narrative": "## 1. Every argument is copied\n\nWhen an int is passed, the function receives a separate int parameter. Assigning to that parameter changes only the local copy.\n\n## 2. Passing an address\n\nWhen a pointer is passed, the function receives a copy of the address. Both pointer values can designate the same caller-owned object, so writing through the parameter changes that object.\n\n## 3. Pointer reassignment\n\nChanging the local pointer parameter to point elsewhere does not update the caller's pointer variable. The parameter itself is still passed by value.\n\n## 4. Update the caller's pointer\n\nTo change the caller's pointer variable, pass its address using a pointer-to-pointer parameter. Define allocation ownership and failure behavior clearly.\n\n## 5. Validate pointer parameters\n\nCheck nullability, object lifetime and access permissions before dereferencing. Use const qualification for read-only access.",
       "examples": [
         {
-          "id": "cl63-ex1",
+          "id": "cl6.3-ex1",
           "language": "en",
-          "title": "Focused C example",
+          "title": "Core example",
           "code": "#include <stdio.h>\nvoid change_copy(int value) { value = 99; }\nvoid change_object(int *value) { if (value) *value = 99; }\nint main(void) {\n int n = 10;\n change_copy(n);\n printf(\"%d\\n\", n);\n change_object(&n);\n printf(\"%d\\n\", n);\n return 0;\n}",
-          "explanation": "The first call changes only its local parameter copy, so n remains ten. The second call receives an address and changes the object n designates, so n becomes 99.",
+          "explanation": "Trace each declaration, call, expression and return. Check types and boundary conditions.",
+          "runnable": false
+        },
+        {
+          "id": "cl6.3-ex2",
+          "language": "en",
+          "title": "Apply the function contract",
+          "code": "#include <stdio.h>\nvoid reset(int *value) { if (value != NULL) *value = 0; }\nint main(void) { int count = 9; reset(&count); printf(\"%d\\n\", count); return 0; }",
+          "explanation": "This second example reinforces the function contract. Compile with warnings and test both valid and boundary inputs.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Predict n after each call and explain which object each function writes.",
-      "independentTask": "Create a function that changes a caller's integer and another that only changes its local copy.",
+      "guidedTask": "Implement a focused C program demonstrating CL6.3. State the function's inputs, output, preconditions and failure behavior before coding.",
+      "independentTask": "Create a second implementation of CL6.3 with a clear interface contract. Add tests for ordinary input, boundary input and a failure or invalid case; explain the result.",
       "hints": [
-        "A pointer argument is still passed by value; the pointed-to object is separately accessible.",
-        "To let a function change a caller's pointer, pass a pointer to that pointer.",
-        "Use names such as input, output or inout to clarify parameter intent."
+        "Write the function prototype before its implementation.",
+        "Trace argument values and return paths explicitly.",
+        "Check pointer validity and object lifetime where relevant.",
+        "Use compiler warnings to catch type mismatches.",
+        "Test boundary cases and failure paths."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl63-q1",
-        "prompt": "Which statement best describes the lesson?",
+        "id": "cl6.3-q1",
+        "prompt": "How does C pass a scalar argument?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "By value",
+          "By reference automatically",
+          "By global storage"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the C rule described above."
+        "answer": "By value",
+        "explanation": "The parameter is initialized with a copy of the argument value."
       },
       {
-        "id": "cl63-q2",
-        "prompt": "What should be checked before relying on this construct?",
+        "id": "cl6.3-q2",
+        "prompt": "Why can a pointer parameter modify the caller's object?",
         "options": [
-          "Its type rules, preconditions and lifetime or range requirements.",
-          "Only whether the code looks short.",
-          "Whether it worked once on another machine."
+          "The copied pointer still designates the caller's object",
+          "The pointer is passed by reference",
+          "The compiler merges all variables"
         ],
-        "answer": "Its type rules, preconditions and lifetime or range requirements.",
-        "explanation": "C correctness depends on the language rules and valid object use."
+        "answer": "The copied pointer still designates the caller's object",
+        "explanation": "Both pointer values refer to the same object."
       },
       {
-        "id": "cl63-q3",
-        "prompt": "What is a sound verification practice?",
+        "id": "cl6.3-q3",
+        "prompt": "Does assigning a new address to a local pointer parameter update the caller's pointer?",
         "options": [
-          "Compile with warnings and test representative and boundary cases.",
-          "Ignore diagnostics.",
-          "Assume one output proves all cases."
+          "No",
+          "Yes, always",
+          "Only when using printf"
         ],
-        "answer": "Compile with warnings and test representative and boundary cases.",
-        "explanation": "Diagnostics and tests provide evidence across relevant cases."
+        "answer": "No",
+        "explanation": "The local pointer parameter is a separate object."
+      },
+      {
+        "id": "cl6.3-q4",
+        "prompt": "What is needed to update the caller's pointer variable?",
+        "options": [
+          "A pointer to that pointer",
+          "A plain int parameter",
+          "A void return type only"
+        ],
+        "answer": "A pointer to that pointer",
+        "explanation": "The function needs the address of the caller's pointer object."
+      },
+      {
+        "id": "cl6.3-q5",
+        "prompt": "What must be checked before dereferencing a pointer parameter?",
+        "options": [
+          "Nullability, validity and object lifetime",
+          "Only the variable name",
+          "The number of source files"
+        ],
+        "answer": "Nullability, validity and object lifetime",
+        "explanation": "Dereferencing requires a valid pointer to a live accessible object."
       }
     ]
   },
