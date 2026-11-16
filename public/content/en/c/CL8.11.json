@@ -6,39 +6,58 @@
   "title": "Allocation-size overflow and defensive allocation patterns (CodeSaathi extension)",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C rules.",
-    "Trace the example and identify data or control flow.",
-    "Recognize common failure and safety cases.",
-    "Apply the concept in a tested C program."
+    "Explain why size_t arithmetic can wrap and why checking a product after multiplication is too late.",
+    "Use SIZE_MAX and division to prove an element-count multiplication is representable.",
+    "Validate multiplication and addition for matrix, flexible-array and header-plus-payload sizes.",
+    "Define a predictable policy for zero-sized requests and allocation failure.",
+    "Use sizeof *pointer and checked helpers to reduce type-size mistakes.",
+    "Test arithmetic boundaries without huge allocations and distinguish representability from memory availability."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL2.6 Integer ranges",
+    "CL4.2 Array bounds",
+    "CL5.5 Pointer arithmetic",
+    "CL8.2 malloc",
+    "CL8.4 realloc"
+  ],
   "stages": {
     "understand": {
-      "concept": "Before allocating count elements of size element_size, the program must ensure the multiplication count * element_size is representable in size_t. If count exceeds SIZE_MAX / element_size, the multiplication would wrap and request too little storage.",
-      "whyItMatters": "An undersized allocation followed by indexing according to the original count can cause a buffer overflow. Defensive allocation validates arithmetic before requesting storage.",
-      "analogy": "Treat each resource and operation as having a clear contract, valid lifetime and failure path.",
-      "analogyLimit": "The analogy does not replace the C standard, compiler or library specifications."
+      "concept": "Allocation functions accept a byte count of type size_t. Before allocating count elements, code often calculates count multiplied by element_size. Since size_t is unsigned, arithmetic can wrap modulo one more than its maximum value. The product can become a much smaller byte count while the program still believes it allocated space for the original element count.",
+      "whyItMatters": "If indexing follows the original count after the byte-size calculation wrapped, writes can exceed the allocated object. malloc may succeed for the undersized request, so checking only for a NULL result does not detect the arithmetic defect.",
+      "analogy": "Treat each function and allocation request as a contract with valid inputs, promised results and defined failure behaviour.",
+      "analogyLimit": "The analogy does not replace C's rules for object lifetime, bounds, arithmetic or library contracts."
     },
     "explain": {
-      "narrative": "Before allocating count elements of size element_size, the program must ensure the multiplication count * element_size is representable in size_t. If count exceeds SIZE_MAX / element_size, the multiplication would wrap and request too little storage.\n\nCheck object bounds, lifetimes, arithmetic limits and all relevant return values. Compile with warnings enabled and test both normal and failure paths.",
+      "narrative": "For nonzero element_size, count greater than SIZE_MAX divided by element_size means the product cannot fit in size_t. Reject before evaluating the product. malloc(0) has implementation-defined allocation behaviour; define a policy such as returning NULL for zero elements. Before header_size plus payload_size, verify payload_size is not greater than SIZE_MAX minus header_size. For a flat matrix, validate rows times columns, then element count times element size. Check each operation before evaluation. A representable request may still fail because memory is unavailable, so check malloc separately. Prefer sizeof *items to repeating the pointed-to type.",
       "examples": [
         {
           "id": "cl811-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdint.h>\n#include <stdint.h>\n#include <stdlib.h>\n#include <stddef.h>\nvoid *allocate_array(size_t count, size_t element_size) {\n if (element_size != 0 && count > SIZE_MAX / element_size) return NULL;\n return malloc(count * element_size);\n}\nint main(void) {\n int *items = allocate_array(10, sizeof *items);\n free(items);\n return 0;\n}",
-          "explanation": "The division check proves that count multiplied by element_size will not exceed SIZE_MAX. The helper then requests the calculated number of bytes.",
-          "runnable": false
+          "title": "Checked allocation for an array",
+          "code": "#include <stddef.h>\n#include <stdint.h>\n#include <stdlib.h>\nvoid *allocate_array(size_t count, size_t element_size)\n{\n    if (count == 0 || element_size == 0) return NULL;\n    if (count > SIZE_MAX / element_size) return NULL;\n    return malloc(count * element_size);\n}\nint main(void) { int *p = allocate_array(8, sizeof *p); if (p == NULL) return 1; p[0] = 42; free(p); return 0; }",
+          "explanation": "The helper defines a zero-size policy and proves the multiplication fits before evaluating it. malloc can still fail, so the caller checks the returned pointer.",
+          "runnable": true
+        },
+        {
+          "id": "cl811-ex2",
+          "language": "en",
+          "title": "Check a flexible-array header and payload",
+          "code": "#include <stddef.h>\n#include <stdint.h>\n#include <stdlib.h>\nstruct packet { size_t length; unsigned char data[]; };\nstruct packet *packet_create(size_t count)\n{\n    size_t payload, total; struct packet *p;\n    if (count > SIZE_MAX / sizeof(unsigned char)) return NULL;\n    payload = count * sizeof(unsigned char);\n    if (payload > SIZE_MAX - sizeof(struct packet)) return NULL;\n    total = sizeof(struct packet) + payload;\n    p = malloc(total); if (p == NULL) return NULL;\n    p->length = count; return p;\n}\nint main(void) { struct packet *p = packet_create(16); if (p == NULL) return 1; free(p); return 0; }",
+          "explanation": "The code checks multiplication before calculating payload, then checks addition before calculating total. Allocation failure is checked separately.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Explain why checking the result after multiplication is too late if the multiplication already wrapped.",
-      "independentTask": "Write an allocation helper for a two-dimensional array and validate both multiplication steps.",
+      "guidedTask": "Explain why SIZE_MAX / sizeof(int) plus one must be rejected before multiplication. Implement a helper that returns a status and safe byte count.",
+      "independentTask": "Explain why SIZE_MAX / sizeof(int) plus one must be rejected before multiplication. Implement a helper that returns a status and safe byte count. Add boundary and failure tests and explain the expected result for each.",
       "hints": [
-        "Include stdint.h for SIZE_MAX where provided by the implementation and use size_t for sizes.",
-        "Handle zero elements according to a documented policy.",
-        "Check additions as well as multiplications when calculating header-plus-payload sizes."
+        "Validate inputs before dereferencing or indexing.",
+        "Check library return values and document failure behaviour.",
+        "Keep output parameters unchanged on failure when promised by the contract.",
+        "Release each acquired resource exactly once.",
+        "Test normal, boundary and failure paths.",
+        "A diagnostic or check proves only what its defined scope covers."
       ]
     }
   },
@@ -51,36 +70,58 @@
     "questions": [
       {
         "id": "cl811-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "Why is checking the product after multiplication unsafe?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "The multiplication may already have wrapped to a smaller size.",
+          "malloc repairs the product.",
+          "size_t multiplication always traps."
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct choice follows the C rule explained above."
+        "answer": "The multiplication may already have wrapped to a smaller size.",
+        "explanation": "Unsigned size arithmetic can wrap; prove the product fits before evaluating it."
       },
       {
         "id": "cl811-q2",
-        "prompt": "What is a reliable way to protect correctness?",
+        "prompt": "For nonzero element_size, which condition detects overflow?",
         "options": [
-          "Validate preconditions, bounds and failure results.",
-          "Assume the operation cannot fail.",
-          "Ignore the type and lifetime rules."
+          "count > SIZE_MAX / element_size",
+          "count < SIZE_MAX / element_size",
+          "count == element_size"
         ],
-        "answer": "Validate preconditions, bounds and failure results.",
-        "explanation": "C requires explicit handling of object validity and operation failures."
+        "answer": "count > SIZE_MAX / element_size",
+        "explanation": "The quotient gives the largest count whose product can fit in size_t."
       },
       {
         "id": "cl811-q3",
-        "prompt": "How should the example be checked?",
+        "prompt": "How should header plus payload be checked?",
         "options": [
-          "Compile with warnings and test expected and failure cases.",
-          "Ignore diagnostics and test only once.",
-          "Assume every platform behaves identically."
+          "Check payload > SIZE_MAX - header before adding.",
+          "Add first and inspect afterward.",
+          "Check only header."
         ],
-        "answer": "Compile with warnings and test expected and failure cases.",
-        "explanation": "Warnings and targeted tests provide evidence for correctness."
+        "answer": "Check payload > SIZE_MAX - header before adding.",
+        "explanation": "SIZE_MAX minus the header is the largest safe additional payload."
+      },
+      {
+        "id": "cl811-q4",
+        "prompt": "What does a successful overflow check guarantee?",
+        "options": [
+          "The byte count is representable, but allocation may still fail.",
+          "The OS will provide memory.",
+          "The pointer remains valid forever."
+        ],
+        "answer": "The byte count is representable, but allocation may still fail.",
+        "explanation": "Arithmetic safety and allocation availability are separate."
+      },
+      {
+        "id": "cl811-q5",
+        "prompt": "Why define a policy for count == 0?",
+        "options": [
+          "To avoid treating malloc(0)'s implementation-dependent result as usable element storage.",
+          "Because size_t cannot represent zero.",
+          "Because free cannot accept allocated pointers."
+        ],
+        "answer": "To avoid treating malloc(0)'s implementation-dependent result as usable element storage.",
+        "explanation": "A documented zero-size policy gives callers predictable semantics."
       }
     ]
   },
