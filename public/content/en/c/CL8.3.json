@@ -6,39 +6,65 @@
   "title": "Accessing allocated memory safely and checking allocation results",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C rules.",
-    "Trace the example and identify data or resource flow.",
-    "Recognize relevant safety and failure cases.",
-    "Apply the concept in a tested C program."
+    "Explain why a successful allocation must be checked for `NULL` before any dereference and design a clear failure path.",
+    "Determine the valid index range of a dynamically allocated array from its element count, and prevent out-of-bounds reads and writes.",
+    "Initialize allocated objects before reading their values and distinguish allocated storage from initialized application data.",
+    "Use pointer and index expressions safely, including checking that an index is less than the number of allocated elements before access.",
+    "Explain how object lifetime, alignment and effective type constrain access to allocated storage.",
+    "Build a small function that receives a pointer and element count, validates an index, and reports success or failure without accessing invalid memory."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL8.1 — Memory regions, allocation concepts and object lifetime",
+    "CL8.2 — malloc and allocated storage",
+    "CL5.3 — Pointer declarations and dereferencing"
+  ],
   "stages": {
     "understand": {
-      "concept": "After a successful allocation, the program may access only the allocated object region and must respect alignment, effective type and lifetime rules. Every element should be initialized before its value is read. Allocation failure must be handled before dereferencing the returned pointer.",
-      "whyItMatters": "A successful allocation gives storage, not automatically initialized application data. Safe access requires both a valid allocation and correct bounds.",
-      "analogy": "Treat each object or stream as a resource with a defined lifetime and explicit rules for access.",
-      "analogyLimit": "The analogy does not replace C's formal object, storage-duration, alignment or library rules."
+      "concept": "A successful allocation gives a program a region of storage, but safe access still depends on a valid pointer, a live allocated object, correct alignment and access within the region's bounds. `malloc` does not initialize values. For an array of `count` elements, valid element indices are `0` through `count - 1` when `count` is greater than zero. The program must check allocation success and initialize each value before reading it.",
+      "whyItMatters": "Out-of-bounds access, dereferencing a null pointer and reading indeterminate values can cause undefined behavior, corrupted data or security vulnerabilities. Explicit checks turn assumptions about memory into conditions the program verifies before access.",
+      "analogy": "Imagine receiving a shelf with a known number of numbered spaces. First confirm that the shelf was actually provided, then use only numbers assigned to real spaces, and place an item in a space before trying to read it.",
+      "analogyLimit": "C does not automatically check pointer bounds or initialize storage. The analogy also cannot express alignment, effective type or the full set of rules governing object access."
     },
     "explain": {
-      "narrative": "After a successful allocation, the program may access only the allocated object region and must respect alignment, effective type and lifetime rules. Every element should be initialized before its value is read. Allocation failure must be handled before dereferencing the returned pointer.\n\nCheck all allocation, I/O and conversion results. Respect object bounds and lifetime, initialize data before reading it, and define who owns and releases each resource.",
+      "narrative": "## 1. Check allocation before access\n\nA call such as `malloc(count * sizeof *items)` may return `NULL`. The program must test the result before using `items[i]`, `*items` or any other dereference. Keep the failure path separate from the success path so no operation accidentally uses an absent allocation.\n\n## 2. Prove the index is within bounds\n\nFor an array containing `count` elements, the valid indices are `0` through `count - 1`, provided `count` is nonzero. The condition `index < count` is the usual check. Do not calculate `count - 1` when `count` may be zero unless the zero case has already been handled. C does not perform automatic bounds checks for pointer subscripting.\n\n## 3. Initialize before reading\n\nThe bytes returned by `malloc` are not initialized. A program should assign a valid value to each element before reading it. For example, allocate three integers, assign all three, and only then calculate their sum. Do not rely on whatever bit pattern happens to be present in the storage.\n\n## 4. Respect object and pointer rules\n\nThe pointer must designate live allocated storage, and the access must remain within the allocated region. The returned storage is suitably aligned for fundamental types, but the program must still access objects using valid types and respect effective-type rules. Pointer arithmetic must remain within the array object or one position past its end; the one-past pointer may be used for comparison or iteration termination but must not be dereferenced.\n\n## 5. Keep the count with the pointer\n\nA pointer alone does not tell a function how many elements may safely be accessed. Pass the element count alongside the pointer, and validate indices at the boundary of the function that performs the access. This makes the access contract explicit and testable.\n\n## 6. Separate input validation from memory validation\n\nIf a count or index comes from user input, validate the input conversion and the allowed range before using it in an allocation or array access. A bounds check cannot repair an allocation-size multiplication that already overflowed; validate the byte-count calculation before allocating as well.",
       "examples": [
         {
           "id": "cl83-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\n#include <stdlib.h>\nint main(void) {\n size_t count = 3;\n int *items = malloc(count * sizeof *items);\n if (items == NULL) {\n  fputs(\"allocation failed\\n\", stderr);\n  return 1;\n }\n for (size_t i=0; i<count; ++i) items[i] = (int)i + 1;\n printf(\"last=%d\\n\", items[count - 1]);\n free(items);\n return 0;\n}",
-          "explanation": "The pointer is checked before use. All three elements are initialized, and count - 1 selects the final valid index because count is nonzero.",
+          "title": "Check an index before reading an allocated array",
+          "code": "#include <stdio.h>\n#include <stdlib.h>\n\nint main(void) {\n    size_t count = 3;\n    int *items = malloc(count * sizeof *items);\n    if (items == NULL) {\n        fputs(\"allocation failed\\n\", stderr);\n        return 1;\n    }\n\n    items[0] = 14;\n    items[1] = 21;\n    items[2] = 28;\n\n    size_t index = 2;\n    if (index < count) {\n        printf(\"items[%zu]=%d\\n\", index, items[index]);\n    } else {\n        fputs(\"index out of range\\n\", stderr);\n    }\n\n    free(items);\n    return 0;\n}",
+          "explanation": "Expected output: `items[2]=28`. The program checks allocation success before any subscript operation, initializes all three elements, and checks `index < count` before reading the selected element. The array is released after its last use.",
+          "runnable": false
+        },
+        {
+          "id": "cl83-ex2",
+          "language": "en",
+          "title": "Make a checked element-access function",
+          "code": "#include <stdio.h>\n#include <stddef.h>\n\nint read_item(const int *items, size_t count, size_t index, int *result) {\n    if (items == NULL || result == NULL || index >= count) {\n        return 0;\n    }\n    *result = items[index];\n    return 1;\n}\n\nint main(void) {\n    int values[] = { 5, 10, 15 };\n    int value;\n\n    if (read_item(values, 3, 1, &value)) {\n        printf(\"value=%d\\n\", value);\n    }\n    if (!read_item(values, 3, 3, &value)) {\n        puts(\"index rejected\");\n    }\n    return 0;\n}",
+          "explanation": "Expected output:\\n`value=10`\\n`index rejected`\\nThe helper receives the pointer and the element count together. It rejects null pointers and any index greater than or equal to the count before reading `items[index]`. The caller owns the array in this example, so the helper neither allocates nor frees it. The array has automatic storage duration and remains alive throughout both calls in `main`.",
           "runnable": false
         }
+      ],
+      "commonMistakes": [
+        "Checking `items` after the first dereference instead of before it.",
+        "Using `index <= count`, which incorrectly accepts the one-past index as an element.",
+        "Assuming that `malloc` initializes every element to zero.",
+        "Reading an element before assigning a valid value to it.",
+        "Using a pointer after the allocation has been freed or resized in a way that invalidates the old pointer.",
+        "Passing a pointer without its element count and then guessing how many elements can be accessed.",
+        "Treating a one-past pointer as if it pointed to a readable or writable element."
       ]
     },
     "practise": {
-      "guidedTask": "What would be wrong if the program read items[2] before initializing it?",
-      "independentTask": "Create a dynamically allocated list and write checks for allocation failure, element initialization and bounds.",
+      "guidedTask": "Allocate an array for four integers. Check for allocation failure, assign a value to every element, then ask for an index and accept it only when it is less than four. Test the first index, the last valid index and the index equal to four.",
+      "independentTask": "Write a reusable `get_value` function that receives a pointer, an element count, an index and an output pointer. It must reject null pointers and invalid indices, leave the output unchanged on failure, and copy the selected value only after all checks pass. Test valid, out-of-range and null-pointer cases.",
       "hints": [
-        "Do not dereference a pointer returned by malloc until you have checked it for NULL.",
-        "The valid index range is zero through count minus one, when count is positive.",
-        "Initialize allocated objects before reading their values."
+        "A null pointer must be rejected before dereferencing.",
+        "For `count` elements, use `index < count`; the one-past index is not an element.",
+        "Handle the zero-element case before calculating `count - 1`.",
+        "Write a defined value to each allocated element before reading it.",
+        "Keep the pointer and its element count together in function interfaces.",
+        "Do not use any pointer to an allocation after that allocation's lifetime has ended."
       ]
     }
   },
@@ -51,36 +77,58 @@
     "questions": [
       {
         "id": "cl83-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "An allocation for four integers succeeds. Which index is the last valid element index?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "3",
+          "4",
+          "5"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the C rule described in the lesson."
+        "answer": "3",
+        "explanation": "For four elements, valid indices are 0, 1, 2 and 3. Index 4 is one past the final element and must not be dereferenced."
       },
       {
         "id": "cl83-q2",
-        "prompt": "Which practice best protects correctness?",
+        "prompt": "Why must a program check `items == NULL` before evaluating `items[0]`?",
         "options": [
-          "Check validity, bounds and operation results before access.",
-          "Assume memory and file operations cannot fail.",
-          "Use data before initialization."
+          "A failed allocation returns a null pointer that does not designate an element.",
+          "The check initializes the first element automatically.",
+          "A null pointer always refers to the first array element."
         ],
-        "answer": "Check validity, bounds and operation results before access.",
-        "explanation": "C programs must explicitly handle resource validity and failure paths."
+        "answer": "A failed allocation returns a null pointer that does not designate an element.",
+        "explanation": "Allocation can fail. A null pointer cannot be used to access an allocated array, so the failure check must occur before any dereference."
       },
       {
         "id": "cl83-q3",
-        "prompt": "How should the example be verified?",
+        "prompt": "What does `malloc` guarantee about the initial values of allocated `int` elements?",
         "options": [
-          "Compile with warnings and test success and failure paths.",
-          "Ignore warnings and test only one happy path.",
-          "Assume the same layout on every platform."
+          "No initialized integer values are guaranteed; the program must store values before reading them.",
+          "Every integer is guaranteed to be zero.",
+          "Every integer is guaranteed to be one."
         ],
-        "answer": "Compile with warnings and test success and failure paths.",
-        "explanation": "Compiler diagnostics and deliberate tests provide evidence for correctness."
+        "answer": "No initialized integer values are guaranteed; the program must store values before reading them.",
+        "explanation": "`malloc` allocates storage but does not initialize its contents. Read only after the program has stored valid values."
+      },
+      {
+        "id": "cl83-q4",
+        "prompt": "Which condition correctly checks whether `index` identifies an element in an array of `count` elements?",
+        "options": [
+          "`index < count`",
+          "`index <= count`",
+          "`index > count`"
+        ],
+        "answer": "`index < count`",
+        "explanation": "The valid index range is zero through count minus one. The condition `index < count` rejects the one-past index."
+      },
+      {
+        "id": "cl83-q5",
+        "prompt": "Why should a function usually receive an element count along with an array pointer?",
+        "options": [
+          "The pointer alone does not communicate how many elements may be accessed.",
+          "The count automatically allocates more memory.",
+          "The count extends the array's lifetime."
+        ],
+        "answer": "The pointer alone does not communicate how many elements may be accessed.",
+        "explanation": "A pointer value does not carry an array length. Passing the count gives the function the information needed to validate indices before access."
       }
     ]
   },
