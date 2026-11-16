@@ -6,39 +6,50 @@
   "title": "Recursion, base cases and recursive progress",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C language rules.",
-    "Trace the example and explain data flow.",
-    "Identify common errors and boundary conditions.",
-    "Apply the concept in a small tested program."
+    "Explain direct and indirect recursion.",
+    "Identify the base case that terminates recursive calls.",
+    "Ensure each recursive step moves toward a base case.",
+    "Trace recursive calls and their return sequence.",
+    "Recognize stack/resource limits and arithmetic overflow risks."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "A recursive function calls itself directly or indirectly. A correct recursive design needs a base case and a recursive step that moves each call toward that base case. Each active call has its own automatic parameters and local objects.",
+      "concept": "A recursive function calls itself directly or indirectly. A correct recursive design has a base case and a recursive step that moves toward that base case. Each active call has its own automatic parameters and local objects. Recursion consumes execution resources, and mathematically correct logic can still overflow its C result type.",
       "whyItMatters": "Recursion can express divide-and-conquer and naturally recursive structures, but missing or unreachable base cases can cause unbounded calls and stack exhaustion.",
       "analogy": "Treat a function or pointer operation as an explicit contract between caller and callee.",
       "analogyLimit": "The analogy does not replace C's formal rules for types, object lifetime, scope and linkage."
     },
     "explain": {
-      "narrative": "A recursive function calls itself directly or indirectly. A correct recursive design needs a base case and a recursive step that moves each call toward that base case. Each active call has its own automatic parameters and local objects.\n\nWhen applying this concept, check declared types, preconditions, object lifetime and all control-flow paths. Compile with warnings enabled and test both typical and boundary inputs.",
+      "narrative": "## 1. Recursive structure\n\nA recursive function solves a problem by handling a simple base case and reducing other cases to a smaller instance of the same problem.\n\n## 2. Base case\n\nThe base case stops further recursive calls. Without a reachable base case, recursion may continue until execution resources are exhausted.\n\n## 3. Progress\n\nEach recursive call must move closer to the base case. For a countdown, the argument should decrease and the base case should handle zero or another defined endpoint.\n\n## 4. Trace the call stack\n\nEach call has its own parameter and automatic local objects. Calls return in reverse order, so tracing both the call sequence and return sequence helps explain the result.\n\n## 5. Resource and range limits\n\nDeep recursion can exhaust stack resources. Integer arithmetic inside recursion can overflow. Define input limits and consider an iterative algorithm when it is simpler or safer.",
       "examples": [
         {
-          "id": "cl66-ex1",
+          "id": "cl6.6-ex1",
           "language": "en",
-          "title": "Focused C example",
+          "title": "Core example",
           "code": "#include <stdio.h>\nunsigned long factorial(unsigned int n) {\n if (n <= 1) return 1;\n return n * factorial(n - 1);\n}\nint main(void) {\n printf(\"%lu\\n\", factorial(5));\n return 0;\n}",
-          "explanation": "factorial(5) calls factorial(4), then 3, 2 and 1. The base case returns one; results are combined while calls return. This example's result type has a limited range, so large inputs can overflow.",
+          "explanation": "Trace each declaration, call, expression and return. Check types and boundary conditions.",
+          "runnable": false
+        },
+        {
+          "id": "cl6.6-ex2",
+          "language": "en",
+          "title": "Apply the function contract",
+          "code": "#include <stdio.h>\nunsigned int sum_to(unsigned int n) { if (n == 0) return 0; return n + sum_to(n - 1); }\nint main(void) { printf(\"%u\\n\", sum_to(5)); return 0; }",
+          "explanation": "This second example reinforces the function contract. Compile with warnings and test both valid and boundary inputs.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Draw the call sequence for factorial(4) and the return sequence.",
-      "independentTask": "Write a recursive sum function. Define the empty-input case and explain how each call reduces the remaining problem.",
+      "guidedTask": "Implement a focused C program demonstrating CL6.6. State the function's inputs, output, preconditions and failure behavior before coding.",
+      "independentTask": "Create a second implementation of CL6.6 with a clear interface contract. Add tests for ordinary input, boundary input and a failure or invalid case; explain the result.",
       "hints": [
-        "A recursive step must make measurable progress toward a base case.",
-        "Recursion depth consumes resources and may be limited by the execution environment.",
-        "Check arithmetic range separately from the correctness of the recursive structure."
+        "Write the function prototype before its implementation.",
+        "Trace argument values and return paths explicitly.",
+        "Check pointer validity and object lifetime where relevant.",
+        "Use compiler warnings to catch type mismatches.",
+        "Test boundary cases and failure paths."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl66-q1",
-        "prompt": "Which statement best describes the lesson?",
+        "id": "cl6.6-q1",
+        "prompt": "What must a recursive function have to terminate normally?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "A reachable base case",
+          "A global variable",
+          "A function pointer"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the C rule described above."
+        "answer": "A reachable base case",
+        "explanation": "The base case stops further recursive calls."
       },
       {
-        "id": "cl66-q2",
-        "prompt": "What should be checked before relying on this construct?",
+        "id": "cl6.6-q2",
+        "prompt": "What should each recursive step do?",
         "options": [
-          "Its type rules, preconditions and lifetime or range requirements.",
-          "Only whether the code looks short.",
-          "Whether it worked once on another machine."
+          "Move toward the base case",
+          "Repeat the same state forever",
+          "Increase memory without limit"
         ],
-        "answer": "Its type rules, preconditions and lifetime or range requirements.",
-        "explanation": "C correctness depends on the language rules and valid object use."
+        "answer": "Move toward the base case",
+        "explanation": "Progress ensures the recursion can reach its stopping condition."
       },
       {
-        "id": "cl66-q3",
-        "prompt": "What is a sound verification practice?",
+        "id": "cl6.6-q3",
+        "prompt": "What happens to automatic local variables in separate recursive calls?",
         "options": [
-          "Compile with warnings and test representative and boundary cases.",
-          "Ignore diagnostics.",
-          "Assume one output proves all cases."
+          "Each active call has its own instances",
+          "All calls share one local instance",
+          "They become static"
         ],
-        "answer": "Compile with warnings and test representative and boundary cases.",
-        "explanation": "Diagnostics and tests provide evidence across relevant cases."
+        "answer": "Each active call has its own instances",
+        "explanation": "Each call has its own activation and automatic objects."
+      },
+      {
+        "id": "cl6.6-q4",
+        "prompt": "What is one risk of very deep recursion?",
+        "options": [
+          "Exhausting stack resources",
+          "Automatic unlimited memory",
+          "Guaranteed faster execution"
+        ],
+        "answer": "Exhausting stack resources",
+        "explanation": "Each active call consumes execution resources."
+      },
+      {
+        "id": "cl6.6-q5",
+        "prompt": "Can recursive integer calculations overflow?",
+        "options": [
+          "Yes",
+          "No, recursion uses arbitrary precision",
+          "Only when using void"
+        ],
+        "answer": "Yes",
+        "explanation": "The arithmetic type still has a finite representable range."
       }
     ]
   },
