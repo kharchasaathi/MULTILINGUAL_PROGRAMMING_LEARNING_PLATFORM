@@ -6,22 +6,22 @@
   "title": "Comparison and logical operators; short-circuit evaluation",
   "language": "en",
   "learningObjectives": [
-    "Explain the core ideas behind Comparison and logical operators; short-circuit evaluation.",
-    "Identify relevant C syntax, types, standard-library interfaces and constraints.",
-    "Trace a small example and predict its behaviour.",
-    "Recognize boundary cases, common defects and portability risks.",
-    "Apply the concept in a tested C program."
+    "Use relational operators to compare arithmetic values.",
+    "Combine conditions with logical AND, OR and NOT.",
+    "Explain short-circuit evaluation for && and ||.",
+    "Use short-circuiting to guard operations that require a prior condition.",
+    "Distinguish logical operators from bitwise operators and avoid chained-comparison mistakes."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "Comparison and logical operators; short-circuit evaluation is an important part of writing correct, maintainable C programs. Learn the exact language rules rather than relying on what one compiler appears to accept. C is a compiled, standardized language: distinguish language guarantees from implementation-defined choices, compiler extensions and behaviour that the standard leaves undefined.",
+      "concept": "Relational operators compare values and produce an int result of 0 or 1. Logical operators &&, || and ! combine or negate conditions and also produce 0 or 1. The && and || operators short-circuit: the right operand is evaluated only when needed. This sequencing can protect an operation, such as dereferencing a pointer only after checking it, when the left condition establishes the required precondition.",
       "whyItMatters": "Understanding Comparison and logical operators; short-circuit evaluation helps you reason about program behaviour instead of memorizing syntax. It is useful in exams, debugging and building reliable C applications.",
       "analogy": "Treat the concept as a tool with a precise contract: it has valid inputs, defined operations and observable results.",
       "analogyLimit": "An analogy is only an aid; the C standard and the relevant function specifications determine actual behaviour."
     },
     "explain": {
-      "narrative": "## Concept and mental model\nComparison and logical operators; short-circuit evaluation should be understood in terms of the C abstract machine: objects have types, storage duration and lifetimes; expressions are evaluated according to language rules; and library calls have specified preconditions and results. The compiler translates a translation unit, but a successful compilation does not prove that a program is correct.\n\n## How to reason about this topic\n1. Identify the inputs, objects, types and operations involved.\n2. Check the applicable syntax and semantic constraints.\n3. Determine valid input ranges and boundary cases.\n4. Check every function result and handle failure where the API permits failure.\n5. Compile with warnings enabled and test normal, boundary and invalid cases.\n\n## Correctness and portability\nDo not assume that int has a particular width, that memory addresses are identical across runs, or that undefined behaviour has a predictable result. Use standard headers and documented interfaces. State any platform assumptions explicitly. Prefer small functions, clear names and explicit invariants.\n\n## Worked example 1 — establish a testable baseline\nThe example below demonstrates a small, compilable C program. Adapt the declaration, expression or API call to the exact concept being studied, then change one condition at a time and observe the result.\n\n## Worked example 2 — validate a boundary\nA second useful test is to exercise the smallest valid input, largest valid input, one value outside the valid range and an ordinary middle value. Record the expected result before running the program; this prevents a test from merely confirming an assumption.\n\n## Common mistakes\n- Assuming a successful compile means the result is correct.\n- Ignoring warnings or failing to check a library function's return value.\n- Using a value outside the range permitted by its type or API.\n- Confusing a compiler extension with portable ISO C.\n- Testing only one ordinary input and missing boundary cases.",
+      "narrative": "## 1. Relational comparisons\n\nC provides `<`, `<=`, `>`, `>=`, `==` and `!=`. They compare values after the applicable conversions and produce an int value of 0 or 1.\n\n## 2. Logical operators\n\n`A && B` is true only when both conditions are true. `A || B` is true when at least one condition is true. `!A` negates the truth value of A. In C, zero is false and nonzero is true.\n\n## 3. Short-circuit evaluation\n\nFor `A && B`, B is evaluated only if A is true. For `A || B`, B is evaluated only if A is false. This is useful for checks such as `ptr != NULL && *ptr > 0`, because the dereference is skipped when ptr is null.\n\n## 4. Logical is not bitwise\n\n`&&` and `||` operate on truth conditions and short-circuit. `&` and `|` operate bit by bit on integer operands and evaluate both operands.\n\n## 5. Avoid chained comparisons\n\nAn expression such as `0 < x < 10` does not test whether x is between zero and ten. It compares `0 < x` first, then compares that 0-or-1 result with 10. Write `x > 0 && x < 10` instead.",
       "examples": [
         {
           "id": "cl3.3-ex1",
@@ -42,14 +42,14 @@
       ]
     },
     "practise": {
-      "guidedTask": "Write a minimal program that demonstrates Comparison and logical operators; short-circuit evaluation. Compile it with warnings enabled, explain each declaration and operation, and record its output.",
-      "independentTask": "Create two test cases for Comparison and logical operators; short-circuit evaluation: one normal case and one boundary or failure case. State the expected behaviour before running them, then compare the result and explain any difference.",
+      "guidedTask": "Write and trace a C program demonstrating CL3.3. Record the condition or expression values at each step, then compile with warnings and test boundary cases.",
+      "independentTask": "Create a second program for CL3.3 with a different input range or control-flow structure. Include a boundary case and one invalid or unexpected case; explain why each result occurs.",
       "hints": [
-        "Read the compiler diagnostic carefully; fix the first meaningful error before chasing later messages.",
-        "Use the exact type and format specifier required by the operation.",
-        "Test zero, negative values where valid, maximum/minimum boundaries and invalid input as appropriate.",
-        "Do not dereference an uninitialized, null or expired pointer.",
-        "Prefer defined, portable behaviour over code that merely appears to work on one machine."
+        "Trace each expression and condition in evaluation order.",
+        "Use braces to make control-flow boundaries explicit.",
+        "Check zero, one and boundary iterations where loops are involved.",
+        "Avoid undefined behavior and unintended side effects.",
+        "Test the behavior rather than relying only on visual inspection."
       ]
     }
   },
@@ -62,58 +62,58 @@
     "questions": [
       {
         "id": "cl3.3-q1",
-        "prompt": "Which approach is safest when applying Comparison and logical operators; short-circuit evaluation?",
+        "prompt": "What value does a relational expression produce in C?",
         "options": [
-          "Follow the C language rules, validate inputs and check relevant return values.",
-          "Assume every compiler and platform behaves identically.",
-          "Ignore warnings whenever the program produces output."
+          "An int value of 0 or 1",
+          "A string",
+          "A pointer"
         ],
-        "answer": "Follow the C language rules, validate inputs and check relevant return values.",
-        "explanation": "Correct C programming depends on defined behaviour, valid inputs and careful handling of operations that can fail."
+        "answer": "An int value of 0 or 1",
+        "explanation": "Relational operators produce an int result representing false or true."
       },
       {
         "id": "cl3.3-q2",
-        "prompt": "Why should boundary cases be tested?",
+        "prompt": "When is the right operand of A && B evaluated?",
         "options": [
-          "They reveal errors that ordinary inputs may not expose.",
-          "They are unnecessary when one example works.",
-          "They make compiler warnings irrelevant."
+          "Only if A is true",
+          "Only if A is false",
+          "Always before A"
         ],
-        "answer": "They reveal errors that ordinary inputs may not expose.",
-        "explanation": "Boundary tests check the edges of valid ranges and important exceptional conditions."
+        "answer": "Only if A is true",
+        "explanation": "Logical AND short-circuits when the left operand is false."
       },
       {
         "id": "cl3.3-q3",
-        "prompt": "What does a successful compilation establish?",
+        "prompt": "Which expression safely checks ptr before dereferencing it?",
         "options": [
-          "The compiler accepted the translation under its selected settings; it does not prove runtime correctness.",
-          "The program is free from all defects.",
-          "The program is portable to every C implementation."
+          "ptr != NULL && *ptr > 0",
+          "*ptr > 0 && ptr != NULL",
+          "ptr == NULL || *ptr > 0"
         ],
-        "answer": "The compiler accepted the translation under its selected settings; it does not prove runtime correctness.",
-        "explanation": "Compilation is one validation step. Tests, review and correct reasoning are also required."
+        "answer": "ptr != NULL && *ptr > 0",
+        "explanation": "The left operand is evaluated first and a null pointer prevents evaluation of the dereference."
       },
       {
         "id": "cl3.3-q4",
-        "prompt": "Which practice improves portability?",
+        "prompt": "What is wrong with `0 < x < 10` as a range test?",
         "options": [
-          "Use standard C features and document unavoidable platform assumptions.",
-          "Depend on undocumented compiler extensions.",
-          "Assume int and pointer sizes are fixed everywhere."
+          "It compares the result of 0 < x with 10 rather than testing both bounds",
+          "It is always a syntax error",
+          "It checks the range twice"
         ],
-        "answer": "Use standard C features and document unavoidable platform assumptions.",
-        "explanation": "Portable programs avoid assumptions that the C standard does not guarantee."
+        "answer": "It compares the result of 0 < x with 10 rather than testing both bounds",
+        "explanation": "Use two relational expressions joined by &&."
       },
       {
         "id": "cl3.3-q5",
-        "prompt": "What should you do when a library operation can fail?",
+        "prompt": "Which pair is logical rather than bitwise?",
         "options": [
-          "Check its documented result and handle the failure path.",
-          "Assume it always succeeds.",
-          "Continue using its output without checking."
+          "&& and ||",
+          "& and |",
+          "^ and ~"
         ],
-        "answer": "Check its documented result and handle the failure path.",
-        "explanation": "Many standard-library operations report failure through return values or stream indicators."
+        "answer": "&& and ||",
+        "explanation": "The doubled operators are logical and short-circuiting."
       }
     ]
   },
