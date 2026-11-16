@@ -3,42 +3,60 @@
   "courseId": "c",
   "moduleId": "CL10",
   "topicId": "CL10.4",
-  "title": "Sorting fundamentals and comparison contracts",
+  "title": "Designing, executing and interpreting test cases",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its constraints.",
-    "Trace the example and reason about its data flow.",
-    "Identify complexity, boundary or safety considerations.",
-    "Apply the concept in a tested C program."
+    "Derive test cases from requirements, function contracts, decision branches and boundary conditions.",
+    "Distinguish normal, boundary, invalid-input, failure-path and regression tests.",
+    "Create expected results independently of the implementation and compare actual results with them.",
+    "Use small deterministic tests to isolate defects and table-driven tests to cover multiple input/output pairs.",
+    "Interpret a failing test as evidence about a specific behaviour without changing the expected result merely to make the test pass.",
+    "Recognize the limits of testing: passing tests increase confidence but do not prove correctness for every possible input."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL3.9",
+    "CL6.1",
+    "CL10.1",
+    "CL10.3"
+  ],
   "stages": {
     "understand": {
-      "concept": "Sorting arranges elements according to a comparison rule. Algorithms differ in time complexity, extra storage, stability and behaviour on nearly sorted input. A comparator must define a consistent ordering for the data.",
-      "whyItMatters": "Sorting enables efficient searching and grouping, but an inconsistent comparison function can make results incorrect or violate library function requirements.",
-      "analogy": "Treat an algorithm or data structure as a set of operations that must preserve a clearly stated contract.",
-      "analogyLimit": "The analogy does not replace formal complexity analysis, C object rules or algorithm preconditions."
+      "concept": "A test case supplies controlled input, performs an operation and checks the observed result against an expected result. A good test suite is derived from the specification and deliberately covers ordinary behaviour, boundaries and failure paths.",
+      "whyItMatters": "Without planned tests, developers tend to check only the example they already expect to work. Systematic tests expose off-by-one errors, incorrect conditions, missing error handling and regressions introduced by later changes.",
+      "analogy": "A quality inspector checks a product against a checklist, including normal operation and stress points. The checklist is written from requirements rather than adjusted after seeing a defect.",
+      "analogyLimit": "Tests can only check the cases and observations they contain. A test suite may miss a defect, and a passing run does not prove that all possible executions are correct."
     },
     "explain": {
-      "narrative": "Sorting arranges elements according to a comparison rule. Algorithms differ in time complexity, extra storage, stability and behaviour on nearly sorted input. A comparator must define a consistent ordering for the data.\n\nBefore implementation, state input constraints, empty-case behaviour, ownership and invariants. Compile with warnings and test representative, boundary and failure cases.",
+      "narrative": "Start with the contract and identify equivalence classes: groups of inputs expected to behave similarly. Select representative values from each group, then add boundary values immediately below, at and above important limits. Include empty and single-element cases where applicable, invalid input and simulated operational failures.\\n\\nFor each test, record a stable ID, purpose, input, expected result and observed result. Derive the expected result independently—by hand calculation, a trusted specification or a separate simple method. Do not copy the program's output into the expected column without checking it.\\n\\nRun tests after each meaningful change. A failing test should be reproducible and small enough to diagnose. After fixing the defect, retain the test as a regression test. Table-driven tests make repeated input/output checks concise. Use compiler warnings, static analysis and sanitizers as complementary tools; none replaces tests or design reasoning.",
       "examples": [
         {
           "id": "cl104-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\n#include <stdlib.h>\nint compare_ints(const void *left, const void *right) {\n int a = *(const int *)left;\n int b = *(const int *)right;\n return (a > b) - (a < b);\n}\nint main(void) {\n int values[] = {8, 2, 5, 1};\n qsort(values, 4, sizeof values[0], compare_ints);\n for (size_t i=0; i<4; ++i) printf(\"%d \", values[i]);\n return 0;\n}",
-          "explanation": "qsort calls the comparator for elements. The expression (a > b) - (a < b) returns a negative, zero or positive result without risking overflow from subtracting a - b.",
+          "title": "A deterministic table-driven test for a maximum function",
+          "code": "#include <stdbool.h>\\n#include <stddef.h>\\n\\nstatic bool find_max(const int values[], size_t count, int *result)\\n{\\n    if (values == NULL || count == 0U || result == NULL) {\\n        return false;\\n    }\\n    int largest = values[0];\\n    for (size_t i = 1; i < count; ++i) {\\n        if (values[i] > largest) {\\n            largest = values[i];\\n        }\\n    }\\n    *result = largest;\\n    return true;\\n}\\n\\nint main(void)\\n{\\n    const int a[] = {4, 9, 2};\\n    const int b[] = {-8, -3, -11};\\n    int result = 0;\\n    if (!find_max(a, 3U, &result) || result != 9) return 1;\\n    if (!find_max(b, 3U, &result) || result != -3) return 2;\\n    if (find_max(a, 0U, &result)) return 3;\\n    if (find_max(a, 3U, NULL)) return 4;\\n    return 0;\\n}",
+          "explanation": "The test program checks positive values, all-negative values, an empty input and a missing output pointer. Each assertion is expressed as a nonzero process exit on failure, so a successful run returns zero. The expected maxima are determined directly from the small arrays.",
+          "runnable": true
+        },
+        {
+          "id": "cl104-ex2",
+          "language": "en",
+          "title": "A test matrix for a bounded conversion requirement",
+          "code": "/* Function contract: accept an integer from 1 through 100.\\n\\n   Case ID     Input       Expected\\n   T-01        1           accept\\n   T-02        100         accept\\n   T-03        0           reject\\n   T-04        101         reject\\n   T-05        -1          reject\\n   T-06        nonnumeric  reject\\n\\n   The matrix is written from the contract, not from observed output. */",
+          "explanation": "The table covers both inclusive boundaries and values just outside them, plus a malformed representation. The same matrix can become a table-driven C test after the conversion function is implemented.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Explain why returning a - b from an int comparator can overflow.",
-      "independentTask": "Sort records by a selected field and define a consistent comparison for equal values.",
+      "guidedTask": "For a function that returns the position of a target in an array, design tests for an empty array, one item, first item, last item, absent item and repeated target. State whether the first or any matching position is required.",
+      "independentTask": "Create a test plan for a function that accepts a percentage from 0 through 100. Include boundaries, just-outside values, malformed input, whitespace and end-of-file. Record test IDs and expected outcomes before implementing the function.",
       "hints": [
-        "qsort does not promise a stable ordering for equal elements.",
-        "The comparator must not violate transitivity or consistency.",
-        "Pass the correct element size and number of elements."
+        "Derive tests from the contract, not only from the code you wrote.",
+        "For an inclusive range, test the lower bound, upper bound and values just outside them.",
+        "Include empty and single-element collections when relevant.",
+        "Calculate expected values independently so the test can detect a faulty implementation.",
+        "Keep a failing test after the bug is fixed; it becomes a regression test.",
+        "Use sanitizers and static analysis as complementary evidence, not as substitutes for a test plan."
       ]
     }
   },
@@ -51,36 +69,63 @@
     "questions": [
       {
         "id": "cl104-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What is the strongest source for expected test results?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "The requirement or contract, interpreted independently of the implementation",
+          "Whatever the program printed",
+          "A value chosen after the test failed",
+          "The first result from an unrelated program"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the concept and constraints described above."
+        "answer": "The requirement or contract, interpreted independently of the implementation",
+        "explanation": "Expected results must come from the specified behaviour so the test can detect implementation mistakes."
       },
       {
         "id": "cl104-q2",
-        "prompt": "What should be checked before relying on this algorithm or structure?",
+        "prompt": "For an inclusive valid range 1 through 100, which values are especially useful boundary tests?",
         "options": [
-          "Its preconditions, invariants, bounds and failure cases.",
-          "Only the name of the data structure.",
-          "Whether one example produced an output."
+          "0, 1, 100 and 101",
+          "Only 50",
+          "Only 1 and 2",
+          "Only 99 and 100"
         ],
-        "answer": "Its preconditions, invariants, bounds and failure cases.",
-        "explanation": "Correctness depends on maintaining the algorithm's contract."
+        "answer": "0, 1, 100 and 101",
+        "explanation": "Testing just outside and exactly at both boundaries checks off-by-one conditions."
       },
       {
         "id": "cl104-q3",
-        "prompt": "Which practice supports reliable implementation?",
+        "prompt": "Why keep a test that exposed a bug after fixing it?",
         "options": [
-          "Test empty, boundary and representative inputs.",
-          "Ignore allocation failures.",
-          "Assume average complexity guarantees every operation's worst case."
+          "It acts as a regression test to detect the same defect returning",
+          "It guarantees the entire program is correct",
+          "It replaces code review",
+          "It prevents future requirements from changing"
         ],
-        "answer": "Test empty, boundary and representative inputs.",
-        "explanation": "Targeted tests expose defects that ordinary examples may miss."
+        "answer": "It acts as a regression test to detect the same defect returning",
+        "explanation": "A retained failing-case test checks that the repaired behaviour remains correct."
+      },
+      {
+        "id": "cl104-q4",
+        "prompt": "What does a passing test suite establish?",
+        "options": [
+          "The tested observations passed; untested behaviour may still contain defects",
+          "The program is mathematically proven correct for all inputs",
+          "The compiler cannot generate a defect",
+          "The program is portable to every C implementation"
+        ],
+        "answer": "The tested observations passed; untested behaviour may still contain defects",
+        "explanation": "Testing provides evidence for covered cases, not universal proof."
+      },
+      {
+        "id": "cl104-q5",
+        "prompt": "Which tool is complementary to a test suite?",
+        "options": [
+          "A sanitizer that can detect certain runtime memory and undefined-behaviour defects",
+          "A formatter that changes expected outputs",
+          "A setting that disables warnings",
+          "A random edit to the source"
+        ],
+        "answer": "A sanitizer that can detect certain runtime memory and undefined-behaviour defects",
+        "explanation": "Sanitizers and static analysis add evidence but do not replace requirements-based tests."
       }
     ]
   },
