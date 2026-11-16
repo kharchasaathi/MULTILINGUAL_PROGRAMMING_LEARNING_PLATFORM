@@ -3,42 +3,60 @@
   "courseId": "c",
   "moduleId": "CL10",
   "topicId": "CL10.3",
-  "title": "Linear search and binary search",
+  "title": "Edge cases, invalid input and error paths",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its constraints.",
-    "Trace the example and reason about its data flow.",
-    "Identify complexity, boundary or safety considerations.",
-    "Apply the concept in a tested C program."
+    "Distinguish valid ordinary input, boundary input, invalid input and operational failure.",
+    "Identify empty, minimum, maximum, duplicate and out-of-range cases relevant to a problem's contract.",
+    "Validate input conversions and check library return values before using produced data.",
+    "Design explicit error paths that avoid continuing with incomplete or invalid state.",
+    "Prevent array-bound violations, arithmetic overflow and invalid pointer use when handling unusual inputs.",
+    "Document and test the program's behaviour for every defined failure and boundary condition."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL3.5",
+    "CL4.10",
+    "CL5.1",
+    "CL6.1"
+  ],
   "stages": {
     "understand": {
-      "concept": "Linear search examines elements until it finds a target or reaches the end. Binary search repeatedly halves the remaining search interval and requires the input to be sorted according to the same ordering used for comparison.",
-      "whyItMatters": "Choosing the correct search algorithm depends on data ordering, update frequency and input size. Binary search is not valid on arbitrary unsorted data.",
-      "analogy": "Treat an algorithm or data structure as a set of operations that must preserve a clearly stated contract.",
-      "analogyLimit": "The analogy does not replace formal complexity analysis, C object rules or algorithm preconditions."
+      "concept": "An edge case is an input or state near a boundary of the problem's rules; invalid input violates those rules. An error path is the deliberate route the program follows when an operation cannot safely continue. Reliable programs define these behaviours instead of hoping unusual cases never occur.",
+      "whyItMatters": "Many serious defects occur at boundaries: empty arrays, zero quantities, maximum values, malformed text, failed file opens or failed allocations. Explicit checks prevent invalid data from reaching code that assumes it is valid.",
+      "analogy": "A building entrance checks tickets and handles cases such as a missing ticket, an expired ticket or a full venue. The normal entrance path is only one of several outcomes that must be planned.",
+      "analogyLimit": "Not every unusual input is invalid. A zero-length collection may be a valid case. The specification decides which values are allowed and what result each case requires."
     },
     "explain": {
-      "narrative": "Linear search examines elements until it finds a target or reaches the end. Binary search repeatedly halves the remaining search interval and requires the input to be sorted according to the same ordering used for comparison.\n\nBefore implementation, state input constraints, empty-case behaviour, ownership and invariants. Compile with warnings and test representative, boundary and failure cases.",
+      "narrative": "Derive edge cases from the contract. For a count, consider zero, one and the largest supported value. For a range, test just below, at and just above each boundary. For text input, consider empty lines, extra characters, malformed numbers and values outside the destination type. For arrays, ensure every index is less than the element count.\\n\\nCheck every operation that can fail. scanf-family functions return the number of successful assignments; fgets returns NULL on failure or end-of-file; fopen can return NULL; malloc can return NULL. Do not read an output variable or dereference a pointer until success has been established. For numeric text, strtol with errno and an end pointer provides more control than assuming a conversion succeeded.\\n\\nMake error handling part of the design. Return a status, preserve a valid prior state, release resources already acquired and avoid printing a success message after a failed operation. Define whether invalid input is rejected, retried or replaced with a default; never choose silently when the requirement does not say.",
       "examples": [
         {
           "id": "cl103-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stddef.h>\nint binary_search(const int a[], size_t n, int target) {\n size_t low = 0, high = n;\n while (low < high) {\n  size_t mid = low + (high - low) / 2;\n  if (a[mid] == target) return (int)mid;\n  if (a[mid] < target) low = mid + 1;\n  else high = mid;\n }\n return -1;\n}",
-          "explanation": "The interval is half-open [low, high). mid is calculated without adding low and high directly. The function returns an index or -1; the conversion to int requires the index to fit int, which a production interface should address.",
+          "title": "Parse an integer line and reject malformed or out-of-range input",
+          "code": "#include <errno.h>\\n#include <limits.h>\\n#include <stdio.h>\\n#include <stdlib.h>\\n\\nint main(void)\\n{\\n    char line[128];\\n    char *end = NULL;\\n    long value;\\n\\n    if (fgets(line, sizeof line, stdin) == NULL) {\\n        fputs(\\\"No input available\\\\n\\\", stderr);\\n        return 1;\\n    }\\n    errno = 0;\\n    value = strtol(line, &end, 10);\\n    if (end == line || errno == ERANGE || value < INT_MIN || value > INT_MAX) {\\n        fputs(\\\"Invalid integer\\\\n\\\", stderr);\\n        return 1;\\n    }\\n    while (*end == ' ' || *end == '\\\\t' || *end == '\\\\n' || *end == '\\\\r') {\\n        ++end;\\n    }\\n    if (*end != '\\\\0') {\\n        fputs(\\\"Unexpected trailing characters\\\\n\\\", stderr);\\n        return 1;\\n    }\\n    printf(\\\"Accepted: %ld\\\\n\\\", value);\\n    return 0;\\n}",
+          "explanation": "The program checks whether a line was read, whether any digits were converted, whether strtol reported range error, whether the value fits int and whether non-whitespace characters remain. A fixed buffer also means an overlong line needs an explicit policy in production; this example rejects trailing content in the captured line.",
+          "runnable": true
+        },
+        {
+          "id": "cl103-ex2",
+          "language": "en",
+          "title": "Treat an empty collection as a defined case",
+          "code": "#include <stdbool.h>\\n#include <stddef.h>\\n\\nbool average(const int values[], size_t count, double *result)\\n{\\n    long long sum = 0;\\n    if (result == NULL || (count > 0U && values == NULL) || count == 0U) {\\n        return false;\\n    }\\n    for (size_t i = 0; i < count; ++i) {\\n        sum += values[i];\\n    }\\n    *result = (double)sum / (double)count;\\n    return true;\\n}",
+          "explanation": "The function explicitly rejects a missing output pointer, a missing input array for a nonempty collection and an empty collection because an average is undefined for zero items. A production contract should also bound count so the long long sum cannot overflow.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Trace low, high and mid for a sorted sample.",
-      "independentTask": "Implement both searches and test empty, one-element, first, last and absent targets. Document sortedness for binary search.",
+      "guidedTask": "For a program that divides one integer by another, list cases for divisor zero, positive and negative values, minimum/maximum inputs and malformed text. Decide which are valid and specify each result.",
+      "independentTask": "Write a robust function that searches an array. Define behaviour for zero elements, a null pointer with a nonzero count, an absent target and a count that cannot be represented by the chosen return type. Add explicit error handling and tests.",
       "hints": [
-        "The input to binary search must be sorted.",
-        "Use low + (high - low) / 2 to avoid a possible addition overflow.",
-        "Choose a return type capable of representing every valid index and the not-found state."
+        "Do not assume an empty collection is invalid; consult the problem definition.",
+        "Check library return values before using output parameters or pointers.",
+        "For strtol, inspect end, errno and the destination type's range.",
+        "Check bounds before indexing; checking after access is too late.",
+        "Do not continue a calculation after a required input or allocation failed.",
+        "Choose and document whether the program rejects, retries or recovers from invalid input."
       ]
     }
   },
@@ -51,36 +69,63 @@
     "questions": [
       {
         "id": "cl103-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "Which statement about an edge case is correct?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "It is a boundary or unusual case whose expected behaviour should be defined",
+          "It is always invalid input",
+          "It can be ignored if the normal example works",
+          "It is necessarily a compiler error"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the concept and constraints described above."
+        "answer": "It is a boundary or unusual case whose expected behaviour should be defined",
+        "explanation": "An edge case may be valid or invalid; its expected behaviour comes from the specification."
       },
       {
         "id": "cl103-q2",
-        "prompt": "What should be checked before relying on this algorithm or structure?",
+        "prompt": "What should be checked after calling strtol?",
         "options": [
-          "Its preconditions, invariants, bounds and failure cases.",
-          "Only the name of the data structure.",
-          "Whether one example produced an output."
+          "The end pointer, errno and whether the value fits the destination type",
+          "Only whether the returned value is nonzero",
+          "Only the first character",
+          "Nothing if the input came from stdin"
         ],
-        "answer": "Its preconditions, invariants, bounds and failure cases.",
-        "explanation": "Correctness depends on maintaining the algorithm's contract."
+        "answer": "The end pointer, errno and whether the value fits the destination type",
+        "explanation": "These checks detect no conversion, range errors and trailing or out-of-range values."
       },
       {
         "id": "cl103-q3",
-        "prompt": "Which practice supports reliable implementation?",
+        "prompt": "What does fopen return when a file cannot be opened?",
         "options": [
-          "Test empty, boundary and representative inputs.",
-          "Ignore allocation failures.",
-          "Assume average complexity guarantees every operation's worst case."
+          "A null pointer",
+          "A valid empty FILE object",
+          "The file size",
+          "EOF as a FILE pointer"
         ],
-        "answer": "Test empty, boundary and representative inputs.",
-        "explanation": "Targeted tests expose defects that ordinary examples may miss."
+        "answer": "A null pointer",
+        "explanation": "fopen reports failure with a null pointer, which must be checked before using the stream."
+      },
+      {
+        "id": "cl103-q4",
+        "prompt": "When is it safe to access values[i] in an array of count elements?",
+        "options": [
+          "After establishing that i is less than count and the array is valid",
+          "Whenever i is nonnegative",
+          "Only after printing i",
+          "After the access has completed"
+        ],
+        "answer": "After establishing that i is less than count and the array is valid",
+        "explanation": "The valid index range is 0 through count - 1, provided the array object contains count elements."
+      },
+      {
+        "id": "cl103-q5",
+        "prompt": "What is a sound error-path design?",
+        "options": [
+          "Report or return failure, preserve valid state and release acquired resources",
+          "Continue using uninitialized output values",
+          "Print success regardless of the operation result",
+          "Ignore every library return value"
+        ],
+        "answer": "Report or return failure, preserve valid state and release acquired resources",
+        "explanation": "A failure path must prevent unsafe continuation and account for resources already acquired."
       }
     ]
   },
