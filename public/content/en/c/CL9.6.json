@@ -40,8 +40,8 @@
           "id": "cl96-ex2",
           "language": "en",
           "title": "Extract a small field after validating the shift position",
-          "code": "#include <limits.h>\n#include <stdio.h>\n\nint main(void)\n{\n    unsigned int word = 0x2DU;\n    unsigned int shift = 2U;\n    unsigned int field_mask = 0x07U;\n    unsigned int field;\n\n    if (shift >= sizeof word * CHAR_BIT) {\n        return 1;\n    }\n    field = (word >> shift) & field_mask;\n    printf(\"field=%u\\n\", field);\n    return 0;\n}",
-          "explanation": "The program checks that the shift count is smaller than the width of the unsigned int object before shifting. The mask then retains only the three selected low-order bits of the shifted value.",
+          "code": "#include <limits.h>\n#include <stdio.h>\n\nint main(void)\n{\n    unsigned int word = 0x2DU;\n    unsigned int shift = 2U;\n    unsigned int field_mask = 0x07U;\n    unsigned int width = 0U;\n    unsigned int probe = UINT_MAX;\n    unsigned int field;\n\n    while (probe != 0U) {\n        ++width;\n        probe >>= 1;\n    }\n    if (shift >= width) {\n        return 1;\n    }\n    field = (word >> shift) & field_mask;\n    printf(\"field=%u\\\\n\", field);\n    return 0;\n}",
+          "explanation": "The loop derives the number of value bits from UINT_MAX, avoiding an assumption that sizeof(unsigned int) * CHAR_BIT equals the number of value bits on implementations with padding bits. The program validates the shift count before shifting, then masks the extracted three-bit field.",
           "runnable": true
         }
       ]
