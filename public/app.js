@@ -127,7 +127,9 @@
 
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("/sw.js").catch(error => {
+      navigator.serviceWorker.register("/sw.js", { updateViaCache: "none" }).then(registration => {
+        registration.update().catch(() => {});
+      }).catch(error => {
         console.warn("CodeSaathi offline support could not be registered:", error);
       });
     });
