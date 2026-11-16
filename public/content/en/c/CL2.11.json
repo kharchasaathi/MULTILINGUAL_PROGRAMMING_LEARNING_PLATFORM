@@ -3,53 +3,53 @@
   "courseId": "c",
   "moduleId": "CL2",
   "topicId": "CL2.11",
-  "title": "Extended integer types and fixed-width integer families",
+  "title": "Extended Integer Types and Fixed-Width Integer Families",
   "language": "en",
   "learningObjectives": [
-    "Explain the core ideas behind Extended integer types and fixed-width integer families.",
-    "Identify relevant C syntax, types, standard-library interfaces and constraints.",
-    "Trace a small example and predict its behaviour.",
-    "Recognize boundary cases, common defects and portability risks.",
-    "Apply the concept in a tested C program."
+    "Distinguish the standard signed and unsigned integer types from optional exact-width typedefs.",
+    "Explain the purpose of int8_t, uint16_t, uint32_t and uint64_t when provided.",
+    "Use least-width, fast-width and maximum-width integer typedef families appropriately.",
+    "Select matching format macros from inttypes.h for fixed-width values.",
+    "Check availability and range requirements instead of assuming every typedef exists."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "Extended integer types and fixed-width integer families is an important part of writing correct, maintainable C programs. Learn the exact language rules rather than relying on what one compiler appears to accept. C is a compiled, standardized language: distinguish language guarantees from implementation-defined choices, compiler extensions and behaviour that the standard leaves undefined.",
+      "concept": "The header stdint.h defines optional exact-width integer typedefs when the implementation can provide types with the requested width and no padding bits. It also provides least-width, fast-width and maximum-width integer families. Exact-width types are useful for binary formats and external interfaces, but they are not guaranteed to exist on every conforming implementation. The inttypes.h header provides portable format macros for printing many of these types.",
       "whyItMatters": "Understanding Extended integer types and fixed-width integer families helps you reason about program behaviour instead of memorizing syntax. It is useful in exams, debugging and building reliable C applications.",
       "analogy": "Treat the concept as a tool with a precise contract: it has valid inputs, defined operations and observable results.",
       "analogyLimit": "An analogy is only an aid; the C standard and the relevant function specifications determine actual behaviour."
     },
     "explain": {
-      "narrative": "## Concept and mental model\nExtended integer types and fixed-width integer families should be understood in terms of the C abstract machine: objects have types, storage duration and lifetimes; expressions are evaluated according to language rules; and library calls have specified preconditions and results. The compiler translates a translation unit, but a successful compilation does not prove that a program is correct.\n\n## How to reason about this topic\n1. Identify the inputs, objects, types and operations involved.\n2. Check the applicable syntax and semantic constraints.\n3. Determine valid input ranges and boundary cases.\n4. Check every function result and handle failure where the API permits failure.\n5. Compile with warnings enabled and test normal, boundary and invalid cases.\n\n## Correctness and portability\nDo not assume that int has a particular width, that memory addresses are identical across runs, or that undefined behaviour has a predictable result. Use standard headers and documented interfaces. State any platform assumptions explicitly. Prefer small functions, clear names and explicit invariants.\n\n## Worked example 1 — establish a testable baseline\nThe example below demonstrates a small, compilable C program. Adapt the declaration, expression or API call to the exact concept being studied, then change one condition at a time and observe the result.\n\n## Worked example 2 — validate a boundary\nA second useful test is to exercise the smallest valid input, largest valid input, one value outside the valid range and an ordinary middle value. Record the expected result before running the program; this prevents a test from merely confirming an assumption.\n\n## Common mistakes\n- Assuming a successful compile means the result is correct.\n- Ignoring warnings or failing to check a library function's return value.\n- Using a value outside the range permitted by its type or API.\n- Confusing a compiler extension with portable ISO C.\n- Testing only one ordinary input and missing boundary cases.",
+      "narrative": "## 1. Why fixed-width types exist\n\nOrdinary types such as int and long have implementation-dependent sizes and ranges. When a protocol, file format or hardware register requires an exact number of value bits, a type such as uint32_t may express that requirement more clearly—if the implementation provides it.\n\n## 2. Exact-width typedefs\n\nThe optional typedefs include int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t and uint64_t. The exact-width typedefs are provided only when the implementation supports the exact width without padding bits. Do not assume that every name is always available.\n\n## 3. Least-width and fast-width families\n\nTypes such as int_least32_t and uint_least32_t provide at least the requested width. Types such as int_fast16_t and uint_fast16_t provide a type intended to be efficient for at least that width. intmax_t and uintmax_t represent the widest supported signed and unsigned integer types.\n\n## 4. Print values portably\n\nUse the macros from inttypes.h rather than guessing a printf format. For example, PRIu32 is the conversion fragment for a uint32_t value when uint32_t is provided. Include the required headers and follow the macro concatenation pattern in the example.\n\n## 5. Choose based on the contract\n\nUse ordinary integer types for ordinary calculations when their range is sufficient. Use exact-width types when an external representation requires an exact width, and check that the implementation supplies the type. Use least-width or fast-width families when the requirement is a minimum width rather than an exact binary layout.",
       "examples": [
         {
           "id": "cl2.11-ex1",
           "language": "en",
-          "title": "A small C program to compile and inspect",
-          "code": "#include <stdio.h>\n\nint main(void) {\n    int value = 12;\n    printf(\"Value: %d\\\\n\", value);\n    return 0;\n}",
-          "explanation": "The program declares an int object, initializes it, prints it with the matching %d conversion specification and returns a success status.",
-          "runnable": true
+          "title": "Print an exact-width unsigned integer",
+          "code": "#include <inttypes.h>\n#include <stdint.h>\n#include <stdio.h>\n\nint main(void) {\n    uint32_t packet_count = 250u;\n    printf(\"Packets: %\" PRIu32 \"\\n\", packet_count);\n    return 0;\n}",
+          "explanation": "If the implementation provides uint32_t, PRIu32 supplies the matching printf conversion. Exact-width typedefs are optional when the implementation cannot provide the required representation.",
+          "runnable": false
         },
         {
           "id": "cl2.11-ex2",
           "language": "en",
-          "title": "Iterating over a fixed array",
-          "code": "#include <stdio.h>\n\nint main(void) {\n    int values[] = { 3, 6, 9, 12 };\n    size_t count = sizeof values / sizeof values[0];\n    for (size_t i = 0; i < count; ++i) {\n        printf(\"%d\\\\n\", values[i]);\n    }\n    return 0;\n}",
-          "explanation": "The array length is derived from its total size divided by the size of one element. The loop visits valid indices from zero through count minus one.",
-          "runnable": true
+          "title": "Use a minimum-width integer type",
+          "code": "#include <stdint.h>\n\nint_least32_t accumulated_total = 0;\nuint_fast16_t quick_counter = 0;",
+          "explanation": "The least-width family guarantees at least the requested width. The fast-width family selects an implementation's preferred efficient type with at least that width. These types are not necessarily exactly 32 or 16 bits.",
+          "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Write a minimal program that demonstrates Extended integer types and fixed-width integer families. Compile it with warnings enabled, explain each declaration and operation, and record its output.",
-      "independentTask": "Create two test cases for Extended integer types and fixed-width integer families: one normal case and one boundary or failure case. State the expected behaviour before running them, then compare the result and explain any difference.",
+      "guidedTask": "Create a short program that demonstrates the type-selection rules in CL2.11. Record the valid data range, type chosen, relevant implementation limits and expected results before compiling and running.",
+      "independentTask": "Design a second example for CL2.11 that crosses a type or representation boundary. Explain what can go wrong, revise the program to handle the boundary, and test the smallest, largest and invalid values.",
       "hints": [
-        "Read the compiler diagnostic carefully; fix the first meaningful error before chasing later messages.",
-        "Use the exact type and format specifier required by the operation.",
-        "Test zero, negative values where valid, maximum/minimum boundaries and invalid input as appropriate.",
-        "Do not dereference an uninitialized, null or expired pointer.",
-        "Prefer defined, portable behaviour over code that merely appears to work on one machine."
+        "Write down the data contract before selecting a type.",
+        "Consider intermediate expressions and implicit conversions.",
+        "Consult the relevant standard header for limits and format macros.",
+        "Do not assume every implementation has the same type sizes.",
+        "Test boundary values and document external representation requirements."
       ]
     }
   },
@@ -62,58 +62,58 @@
     "questions": [
       {
         "id": "cl2.11-q1",
-        "prompt": "Which approach is safest when applying Extended integer types and fixed-width integer families?",
+        "prompt": "When is uint32_t available?",
         "options": [
-          "Follow the C language rules, validate inputs and check relevant return values.",
-          "Assume every compiler and platform behaves identically.",
-          "Ignore warnings whenever the program produces output."
+          "When the implementation can provide an unsigned integer type with exactly 32 value bits and no padding bits",
+          "On every C implementation without exception",
+          "Only when int is exactly 32 bits"
         ],
-        "answer": "Follow the C language rules, validate inputs and check relevant return values.",
-        "explanation": "Correct C programming depends on defined behaviour, valid inputs and careful handling of operations that can fail."
+        "answer": "When the implementation can provide an unsigned integer type with exactly 32 value bits and no padding bits",
+        "explanation": "Exact-width typedefs are optional and depend on implementation capabilities."
       },
       {
         "id": "cl2.11-q2",
-        "prompt": "Why should boundary cases be tested?",
+        "prompt": "What does uint_least32_t guarantee?",
         "options": [
-          "They reveal errors that ordinary inputs may not expose.",
-          "They are unnecessary when one example works.",
-          "They make compiler warnings irrelevant."
+          "An unsigned integer type with at least 32 bits",
+          "Exactly 32 bits on every platform",
+          "A floating-point value with 32 digits"
         ],
-        "answer": "They reveal errors that ordinary inputs may not expose.",
-        "explanation": "Boundary tests check the edges of valid ranges and important exceptional conditions."
+        "answer": "An unsigned integer type with at least 32 bits",
+        "explanation": "The least-width family guarantees at least the requested width."
       },
       {
         "id": "cl2.11-q3",
-        "prompt": "What does a successful compilation establish?",
+        "prompt": "What is the purpose of uint_fast16_t?",
         "options": [
-          "The compiler accepted the translation under its selected settings; it does not prove runtime correctness.",
-          "The program is free from all defects.",
-          "The program is portable to every C implementation."
+          "An unsigned type chosen for efficient operations with at least 16 bits",
+          "An exact 16-bit type on every platform",
+          "A 16-character string"
         ],
-        "answer": "The compiler accepted the translation under its selected settings; it does not prove runtime correctness.",
-        "explanation": "Compilation is one validation step. Tests, review and correct reasoning are also required."
+        "answer": "An unsigned type chosen for efficient operations with at least 16 bits",
+        "explanation": "The fast-width family prioritizes an efficient type meeting the minimum width."
       },
       {
         "id": "cl2.11-q4",
-        "prompt": "Which practice improves portability?",
+        "prompt": "Which header provides PRIu32 when supported?",
         "options": [
-          "Use standard C features and document unavoidable platform assumptions.",
-          "Depend on undocumented compiler extensions.",
-          "Assume int and pointer sizes are fixed everywhere."
+          "inttypes.h",
+          "stdio.h only",
+          "limits.h only"
         ],
-        "answer": "Use standard C features and document unavoidable platform assumptions.",
-        "explanation": "Portable programs avoid assumptions that the C standard does not guarantee."
+        "answer": "inttypes.h",
+        "explanation": "inttypes.h defines portable format macros for fixed-width integer types."
       },
       {
         "id": "cl2.11-q5",
-        "prompt": "What should you do when a library operation can fail?",
+        "prompt": "Why should code avoid assuming uint32_t always exists?",
         "options": [
-          "Check its documented result and handle the failure path.",
-          "Assume it always succeeds.",
-          "Continue using its output without checking."
+          "An implementation may not support an exact 32-bit integer type without padding bits",
+          "The typedef changes at every function call",
+          "It is a reserved keyword"
         ],
-        "answer": "Check its documented result and handle the failure path.",
-        "explanation": "Many standard-library operations report failure through return values or stream indicators."
+        "answer": "An implementation may not support an exact 32-bit integer type without padding bits",
+        "explanation": "Exact-width typedefs are optional in the standard."
       }
     ]
   },
