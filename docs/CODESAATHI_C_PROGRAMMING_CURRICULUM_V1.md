@@ -138,10 +138,10 @@ The course is designed to take a learner from first contact with C through pract
 - [ ] CL9.16 · Supplemental: Version control and reproducible C builds (preserved prior lesson)
 
 ### CL10 — Problem solving and data structures & algorithms
-- [ ] CL10.1 · A systematic C problem-solving workflow
-- [ ] CL10.2 · Building program logic and decomposing problems
-- [ ] CL10.3 · Edge cases, invalid input and error paths
-- [ ] CL10.4 · Designing, executing and interpreting test cases
+- [x] CL10.1 · A systematic C problem-solving workflow
+- [x] CL10.2 · Building program logic and decomposing problems
+- [x] CL10.3 · Edge cases, invalid input and error paths
+- [x] CL10.4 · Designing, executing and interpreting test cases
 - [ ] CL10.5 · Data structures and algorithm analysis introduction
 - [ ] CL10.6 · Searching: linear search and binary search; preconditions
 - [ ] CL10.7 · Sorting fundamentals and common sorting algorithms
