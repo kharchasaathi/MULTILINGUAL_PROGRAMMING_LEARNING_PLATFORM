@@ -1,0 +1,88 @@
+{
+  "id": "c.cl8.3.en",
+  "courseId": "c",
+  "moduleId": "CL8",
+  "topicId": "CL8.3",
+  "title": "Accessing allocated memory safely and checking allocation results",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the concept and its C rules.",
+    "Trace the example and identify data or resource flow.",
+    "Recognize relevant safety and failure cases.",
+    "Apply the concept in a tested C program."
+  ],
+  "prerequisites": [],
+  "stages": {
+    "understand": {
+      "concept": "After a successful allocation, the program may access only the allocated object region and must respect alignment, effective type and lifetime rules. Every element should be initialized before its value is read. Allocation failure must be handled before dereferencing the returned pointer.",
+      "whyItMatters": "A successful allocation gives storage, not automatically initialized application data. Safe access requires both a valid allocation and correct bounds.",
+      "analogy": "Treat each object or stream as a resource with a defined lifetime and explicit rules for access.",
+      "analogyLimit": "The analogy does not replace C's formal object, storage-duration, alignment or library rules."
+    },
+    "explain": {
+      "narrative": "After a successful allocation, the program may access only the allocated object region and must respect alignment, effective type and lifetime rules. Every element should be initialized before its value is read. Allocation failure must be handled before dereferencing the returned pointer.\n\nCheck all allocation, I/O and conversion results. Respect object bounds and lifetime, initialize data before reading it, and define who owns and releases each resource.",
+      "examples": [
+        {
+          "id": "cl83-ex1",
+          "language": "en",
+          "title": "Focused C example",
+          "code": "#include <stdio.h>\n#include <stdlib.h>\nint main(void) {\n size_t count = 3;\n int *items = malloc(count * sizeof *items);\n if (items == NULL) {\n  fputs(\"allocation failed\\n\", stderr);\n  return 1;\n }\n for (size_t i=0; i<count; ++i) items[i] = (int)i + 1;\n printf(\"last=%d\\n\", items[count - 1]);\n free(items);\n return 0;\n}",
+          "explanation": "The pointer is checked before use. All three elements are initialized, and count - 1 selects the final valid index because count is nonzero.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "What would be wrong if the program read items[2] before initializing it?",
+      "independentTask": "Create a dynamically allocated list and write checks for allocation failure, element initialization and bounds.",
+      "hints": [
+        "Do not dereference a pointer returned by malloc until you have checked it for NULL.",
+        "The valid index range is zero through count minus one, when count is positive.",
+        "Initialize allocated objects before reading their values."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "cl83-q1",
+        "prompt": "Which statement best describes this lesson?",
+        "options": [
+          "The C rule and constraints described in this lesson.",
+          "An HTML tag.",
+          "A CSS selector."
+        ],
+        "answer": "The C rule and constraints described in this lesson.",
+        "explanation": "The correct answer follows the C rule described in the lesson."
+      },
+      {
+        "id": "cl83-q2",
+        "prompt": "Which practice best protects correctness?",
+        "options": [
+          "Check validity, bounds and operation results before access.",
+          "Assume memory and file operations cannot fail.",
+          "Use data before initialization."
+        ],
+        "answer": "Check validity, bounds and operation results before access.",
+        "explanation": "C programs must explicitly handle resource validity and failure paths."
+      },
+      {
+        "id": "cl83-q3",
+        "prompt": "How should the example be verified?",
+        "options": [
+          "Compile with warnings and test success and failure paths.",
+          "Ignore warnings and test only one happy path.",
+          "Assume the same layout on every platform."
+        ],
+        "answer": "Compile with warnings and test success and failure paths.",
+        "explanation": "Compiler diagnostics and deliberate tests provide evidence for correctness."
+      }
+    ]
+  },
+  "status": "draft"
+}
