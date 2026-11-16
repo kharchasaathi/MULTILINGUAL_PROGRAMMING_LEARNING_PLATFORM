@@ -6,11 +6,11 @@
   "title": "Type Conversion and Casting",
   "language": "en",
   "learningObjectives": [
-    "Explain the central rules behind type conversion and casting in C.",
-    "Identify the relevant types, declarations, operators or library facilities.",
-    "Trace a worked example and explain its result.",
-    "Recognize common mistakes, portability concerns and unsafe assumptions.",
-    "Apply the concept in a small program and test normal and boundary cases."
+    "Distinguish implicit conversions from explicit casts.",
+    "Explain integer promotions and the usual arithmetic conversions at a basic level.",
+    "Predict truncation when a floating value is converted to an integer type.",
+    "Recognize information loss and range problems in narrowing conversions.",
+    "Use explicit conversions only when their effects and valid ranges are understood."
   ],
   "prerequisites": [
     "CL1.1",
@@ -18,13 +18,13 @@
   ],
   "stages": {
     "understand": {
-      "concept": "C converts values through implicit conversions and explicit casts. Integer promotions and the usual arithmetic conversions determine the types used in many expressions. Converting a value to a type that cannot represent it may lose information or produce an implementation-defined or otherwise constrained result depending on the conversion category.",
+      "concept": "C performs implicit conversions in assignments, arithmetic expressions, function calls and other contexts. An explicit cast requests a conversion to a specified type. Integer promotions and the usual arithmetic conversions determine the types used in many expressions. Conversions can change precision, signedness or range; an explicit cast does not make an otherwise unrepresentable value safe.",
       "whyItMatters": "Conversion rules affect calculations, comparisons, function arguments and stored values. Explicitly understanding the resulting type prevents subtle truncation, signedness and precision defects.",
       "analogy": "Think of a type as a contract that describes what kind of value an object can hold and which operations make sense for it.",
       "analogyLimit": "The analogy is only an introduction; C types also determine representation, conversions, alignment and constraints."
     },
     "explain": {
-      "narrative": "C converts values through implicit conversions and explicit casts. Integer promotions and the usual arithmetic conversions determine the types used in many expressions. Converting a value to a type that cannot represent it may lose information or produce an implementation-defined or otherwise constrained result depending on the conversion category.\n\nConversion rules affect calculations, comparisons, function arguments and stored values. Explicitly understanding the resulting type prevents subtle truncation, signedness and precision defects.\n\nWhen reviewing code, identify the declared types first, then trace conversions and the exact expression being evaluated. Compile with warnings enabled and test boundary values. Do not rely on assumptions about another compiler or machine.",
+      "narrative": "## 1. Implicit conversion\n\nWhen values of different arithmetic types are combined, C applies integer promotions and the usual arithmetic conversions. Assignment can also convert the right-hand value to the destination type. These rules affect both the intermediate calculation and the stored result.\n\n## 2. Explicit casts\n\nA cast such as `(double)count` converts count to double before the surrounding operation. This is useful when integer division would otherwise discard the fractional part. A cast should explain intent, not hide a type mismatch.\n\n## 3. Integer division and truncation\n\nIf both operands of `/` are integers, the result is integer division. Converting the result afterward does not restore a discarded fraction. Convert an operand before division when a floating result is intended.\n\n## 4. Narrowing conversions\n\nConverting a wider or floating type to a narrower type can lose information. A floating-to-integer conversion discards the fractional part toward zero when the resulting integer is representable. Check range before converting values that may be out of range.\n\n## 5. Follow the types through an expression\n\nFor every expression, identify operand types, promotions, common type and final destination type. Compiler warnings are useful, especially for signedness and narrowing conversions.",
       "examples": [
         {
           "id": "cl2.8-ex1",
@@ -45,14 +45,14 @@
       ]
     },
     "practise": {
-      "guidedTask": "Compare integer division with floating-point division. Add explicit casts where needed and explain exactly when the conversion occurs.",
-      "independentTask": "Review a calculation that mixes signed, unsigned and floating types. Rewrite it with clear intermediate variables and range checks.",
+      "guidedTask": "Write a small C program that demonstrates the central rules in CL2.8. Compile with warnings enabled, run it with ordinary and boundary values, and explain each result in your own words.",
+      "independentTask": "Create a second example for CL2.8 using different values and names. Include one likely mistake as a separate experiment, observe the compiler diagnostic or behavior, then correct it. Record the rule that explains the correction.",
       "hints": [
-        "Integer division discards the fractional part.",
-        "A cast changes the type of an expression; it does not validate the value.",
-        "Understand integer promotions and usual arithmetic conversions.",
-        "Check range before converting untrusted values.",
-        "Avoid casts that merely silence useful compiler warnings."
+        "Start by identifying the exact type of every object and expression.",
+        "Check the C language rule before assuming a platform-specific result.",
+        "Use compiler warnings as feedback, not as proof of correctness.",
+        "Test normal values and important boundaries.",
+        "Explain why the result follows from the language rules."
       ]
     }
   },
@@ -65,58 +65,58 @@
     "questions": [
       {
         "id": "cl2.8-q1",
-        "prompt": "Which statement is correct about type conversion and casting?",
+        "prompt": "What is the result of `5 / 2` when both operands are int?",
         "options": [
-          "It follows C's type and language rules and should be checked with compiler diagnostics.",
-          "C ignores all declared types.",
-          "The browser decides its meaning."
+          "2",
+          "2.5",
+          "2.0"
         ],
-        "answer": "It follows C's type and language rules and should be checked with compiler diagnostics.",
-        "explanation": "C semantics are defined by the language and implementation."
+        "answer": "2",
+        "explanation": "Integer division discards the fractional part."
       },
       {
         "id": "cl2.8-q2",
-        "prompt": "What is the safest general practice?",
+        "prompt": "Which expression performs floating-point division?",
         "options": [
-          "Choose types and operations deliberately, initialize data and validate assumptions.",
-          "Ignore warnings and assume values are valid.",
-          "Use casts to silence every warning."
+          "(double)5 / 2",
+          "5 / 2",
+          "(int)5 / (int)2"
         ],
-        "answer": "Choose types and operations deliberately, initialize data and validate assumptions.",
-        "explanation": "Deliberate types and checks improve correctness."
+        "answer": "(double)5 / 2",
+        "explanation": "Casting an operand before division makes the arithmetic floating point."
       },
       {
         "id": "cl2.8-q3",
-        "prompt": "What should you do when a result is unexpected?",
+        "prompt": "What does `(int)9.8` produce when the value is representable?",
         "options": [
-          "Create a small test case and inspect types, values and conversions.",
-          "Guess the result from the variable name.",
-          "Remove the test."
+          "9",
+          "10",
+          "9.8"
         ],
-        "answer": "Create a small test case and inspect types, values and conversions.",
-        "explanation": "Small reproducible tests make behaviour easier to reason about."
+        "answer": "9",
+        "explanation": "Conversion from floating point to integer discards the fractional part toward zero."
       },
       {
         "id": "cl2.8-q4",
-        "prompt": "Which statement about portability is accurate?",
+        "prompt": "Does an explicit cast guarantee that a value is representable in the destination type?",
         "options": [
-          "Some type sizes and ranges depend on the implementation.",
-          "All C implementations use identical type widths.",
-          "Compiler warnings change the C standard."
+          "No; range and information loss still need to be considered",
+          "Yes, every cast is safe",
+          "Only casts to int are safe"
         ],
-        "answer": "Some type sizes and ranges depend on the implementation.",
-        "explanation": "Use standard guarantees and inspect implementation limits."
+        "answer": "No; range and information loss still need to be considered",
+        "explanation": "A cast requests a conversion but does not validate the source value."
       },
       {
         "id": "cl2.8-q5",
-        "prompt": "Which is a strong learning outcome?",
+        "prompt": "Why can assigning a large unsigned value to a smaller integer type be dangerous?",
         "options": [
-          "Explain the rule and apply it in a tested C program.",
-          "Memorize one output only.",
-          "Copy code without checking it."
+          "The destination may not represent the original value",
+          "The assignment always allocates memory",
+          "The compiler converts it to a string"
         ],
-        "answer": "Explain the rule and apply it in a tested C program.",
-        "explanation": "Understanding plus testing demonstrates transferable knowledge."
+        "answer": "The destination may not represent the original value",
+        "explanation": "Narrowing conversions can lose information or have implementation-specific consequences."
       }
     ]
   },
