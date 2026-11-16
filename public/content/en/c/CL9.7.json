@@ -6,39 +6,56 @@
   "title": "Fixed-width integer types and format macros from stdint.h/inttypes.h",
   "language": "en",
   "learningObjectives": [
-    "Explain the topic and its C rules.",
-    "Trace the example and explain its data or control flow.",
-    "Identify edge cases and resource-management requirements.",
-    "Apply the concept in a tested C program."
+    "Distinguish exact-width, minimum-width and fastest-width integer typedefs and identify optional versus guaranteed types.",
+    "Choose integer types based on protocol, storage, range and performance requirements instead of assuming int has a fixed size.",
+    "Use inttypes.h macros such as PRId32, PRIuLEAST32 and SCNdLEAST32 with matching argument types.",
+    "Explain integer promotions and risks of mixing signed and unsigned values.",
+    "Use limits and compile-time checks to document genuine representation assumptions.",
+    "Build portable examples that print, parse and validate integer values."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL2.6 Integer types and ranges",
+    "CL4.4 Formatted I/O",
+    "CL9.1 Standard library headers"
+  ],
   "stages": {
     "understand": {
-      "concept": "stdint.h provides optional exact-width and minimum-width integer types such as int32_t and uint_least16_t where supported. inttypes.h provides format macros such as PRId32 for printing fixed-width types portably.",
-      "whyItMatters": "Using the correct type and matching format macro avoids assumptions about the width of int, long or long long across platforms.",
-      "analogy": "Treat each algorithm or resource as a contract whose invariants must remain true after every operation.",
-      "analogyLimit": "The analogy does not replace C's formal rules for pointers, object lifetime, complexity or library contracts."
+      "concept": "stdint.h defines integer typedefs with specified width properties. Exact-width types such as int32_t and uint64_t are optional: they exist only when a suitable exact-width type is available. Minimum-width types such as int_least32_t express a required minimum range. Fastest-width types such as int_fast32_t express a minimum width while allowing an implementation-preferred efficient type. inttypes.h supplies matching format and scanning macros.",
+      "whyItMatters": "int is not guaranteed to be 32 bits, and a typedef's underlying type can differ across implementations. Matching format specifiers prevents variadic argument mismatches and portability defects in protocols and numeric processing.",
+      "analogy": "A portable C interface is a contract between source code and the implementation.",
+      "analogyLimit": "The analogy does not replace the exact C standard and implementation guarantees."
     },
     "explain": {
-      "narrative": "stdint.h provides optional exact-width and minimum-width integer types such as int32_t and uint_least16_t where supported. inttypes.h provides format macros such as PRId32 for printing fixed-width types portably.\n\nState preconditions, invariants, empty and full cases, ownership and failure behaviour before implementation. Compile with warnings and test normal, boundary and failure paths.",
+      "narrative": "Choose exact-width types when an external representation truly requires that width and the type exists. Choose least-width types when a minimum range is enough. Use ordinary int when no fixed representation is needed. Include inttypes.h and write formats such as \"%\" PRId32; the macro expands to the correct conversion fragment. The same principle applies to SCN macros and pointer arguments. Small integer types may undergo integer promotions. Mixing signed and unsigned operands can convert a negative value to a large unsigned value. Validate ranges before narrowing conversions. Use limit macros and _Static_assert when a genuine representation requirement must be enforced.",
       "examples": [
         {
           "id": "cl97-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\n#include <stdint.h>\n#include <inttypes.h>\nint main(void) {\n int32_t code = 1200;\n printf(\"code=%\" PRId32 \"\\n\", code);\n return 0;\n}",
-          "explanation": "PRId32 expands to the appropriate format fragment for int32_t on the implementation. The format string joins it with the surrounding literal text.",
-          "runnable": false
+          "title": "Print minimum-width integers portably",
+          "code": "#include <inttypes.h>\n#include <stdint.h>\n#include <stdio.h>\nint main(void)\n{\n    int_least32_t temperature = -12;\n    uint_least32_t device_id = 42000U;\n    printf(\"temperature=%\" PRIdLEAST32 \"\\n\", temperature);\n    printf(\"device_id=%\" PRIuLEAST32 \"\\n\", device_id);\n    return 0;\n}",
+          "explanation": "Minimum-width types express required ranges without assuming the underlying type. Matching inttypes macros provide the correct printf conversion.",
+          "runnable": true
+        },
+        {
+          "id": "cl97-ex2",
+          "language": "en",
+          "title": "Read an integer with the matching scan macro",
+          "code": "#include <inttypes.h>\n#include <stdint.h>\n#include <stdio.h>\nint main(void)\n{\n    int_least32_t value = 0;\n    if (scanf(\"%\" SCNdLEAST32, &value) != 1) {\n        fputs(\"Invalid integer input\\n\", stderr);\n        return 1;\n    }\n    printf(\"value=%\" PRIdLEAST32 \"\\n\", value);\n    return 0;\n}",
+          "explanation": "SCNdLEAST32 matches the pointer type supplied to scanf. The return count is checked before the value is used. Production input may use strtoimax for stricter trailing-text and range policies.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Explain why %d is not the universal format for every fixed-width integer typedef.",
-      "independentTask": "Print signed and unsigned fixed-width values using the corresponding inttypes.h macros.",
+      "guidedTask": "Print signed and unsigned minimum-width values using matching macros, then explain why exact-width typedefs are optional.",
+      "independentTask": "Design a record field for a binary protocol. State whether exact-width support is mandatory, validate the value before conversion and use the correct format macro for diagnostics.",
       "hints": [
-        "Exact-width typedefs are optional when an implementation lacks the exact representation.",
-        "Use the format macro that matches the actual argument type.",
-        "Do not assume a typedef's underlying type from its name."
+        "Check bounds before accessing array elements.",
+        "Validate external text before conversion or use.",
+        "Use the matching standard-library interface and type.",
+        "Document preconditions and failure behaviour.",
+        "Test normal, boundary and invalid-input cases.",
+        "Record implementation-specific assumptions instead of guessing."
       ]
     }
   },
@@ -51,36 +68,58 @@
     "questions": [
       {
         "id": "cl97-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "Which statement about int32_t is correct?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "It is optional and exists only when an implementation supports an exact 32-bit signed integer type without padding bits.",
+          "It is guaranteed on every conforming C implementation.",
+          "It always aliases int."
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the topic and constraints described above."
+        "answer": "It is optional and exists only when an implementation supports an exact 32-bit signed integer type without padding bits.",
+        "explanation": "Exact-width typedefs are optional; minimum-width typedefs serve programs that need at least a specified range."
       },
       {
         "id": "cl97-q2",
-        "prompt": "What should be verified before relying on the implementation?",
+        "prompt": "Why use PRId32 with an int32_t argument?",
         "options": [
-          "Preconditions, invariants, bounds and failure cases.",
-          "Only the name of the algorithm.",
-          "Whether one input produced a result."
+          "The macro provides the printf conversion fragment matching the implementation's int32_t underlying type.",
+          "It converts the integer to a string before printf.",
+          "It forces int32_t to be 32 bits."
         ],
-        "answer": "Preconditions, invariants, bounds and failure cases.",
-        "explanation": "Correctness depends on maintaining the data structure or algorithm contract."
+        "answer": "The macro provides the printf conversion fragment matching the implementation's int32_t underlying type.",
+        "explanation": "The matching macro avoids assuming a particular underlying type for a variadic argument."
       },
       {
         "id": "cl97-q3",
-        "prompt": "Which test strategy is most useful?",
+        "prompt": "What does int_least32_t promise?",
         "options": [
-          "Test empty, boundary and representative operation sequences.",
-          "Ignore allocation failures.",
-          "Assume one successful example proves all cases."
+          "A signed integer type with at least the required 32-bit value range.",
+          "An object exactly four bytes on every platform.",
+          "The fastest possible integer type."
         ],
-        "answer": "Test empty, boundary and representative operation sequences.",
-        "explanation": "Targeted tests expose defects ordinary examples can miss."
+        "answer": "A signed integer type with at least the required 32-bit value range.",
+        "explanation": "Least-width types guarantee a minimum range while allowing a wider underlying representation."
+      },
+      {
+        "id": "cl97-q4",
+        "prompt": "Which header defines PRI and SCN format macro families?",
+        "options": [
+          "inttypes.h",
+          "stdio.h only",
+          "stdlib.h"
+        ],
+        "answer": "inttypes.h",
+        "explanation": "inttypes.h provides portable formatted I/O macros for integer typedef families."
+      },
+      {
+        "id": "cl97-q5",
+        "prompt": "What risk arises when a negative signed value is compared with an unsigned value?",
+        "options": [
+          "The signed value may be converted to unsigned, producing a large value.",
+          "The unsigned value always becomes negative.",
+          "The comparison is automatically rejected."
+        ],
+        "answer": "The signed value may be converted to unsigned, producing a large value.",
+        "explanation": "Usual arithmetic conversions can convert a negative signed operand to unsigned, changing the comparison result."
       }
     ]
   },
