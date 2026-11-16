@@ -6,39 +6,50 @@
   "title": "Nested structures and arrays of structures",
   "language": "en",
   "learningObjectives": [
-    "Explain the C concept and its rules.",
-    "Trace the example and describe data flow.",
-    "Identify relevant failure and boundary cases.",
-    "Apply the concept in a tested C program."
+    "Define a structure member whose type is another structure.",
+    "Access nested members with chained dot operators.",
+    "Declare and initialize arrays of structure objects.",
+    "Traverse structure arrays using a valid element count.",
+    "Validate array bounds and nested member values."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "A structure member may itself be a structure, and an array may contain multiple structure objects. Member access can therefore be chained with dot operators and array subscripting.",
+      "concept": "A structure may contain another structure as a member, and an array may contain multiple structure objects. Access can combine array subscripting and member selection, such as records[i].date.year. The array's element count and every index remain the caller's responsibility; C does not automatically check these bounds.",
       "whyItMatters": "Nested structures represent related entities without flattening every field into one large record. Arrays of structures support collections of records with consistent layout.",
       "analogy": "Treat the operation as a clearly specified contract between the program and its data.",
       "analogyLimit": "The analogy does not replace C's type, lifetime, I/O and object representation rules."
     },
     "explain": {
-      "narrative": "A structure member may itself be a structure, and an array may contain multiple structure objects. Member access can therefore be chained with dot operators and array subscripting.\n\nCheck all return values, object lifetimes, types and preconditions. Enable compiler warnings and test expected as well as failure paths.",
+      "narrative": "## 1. Nested structure types\n\nDefine a small structure for a reusable concept, such as Date, then use it as a member of another structure such as Ticket.\n\n## 2. Chained member access\n\nUse repeated dot operators to access nested members: `ticket.opened.year`. Each step selects a member from the preceding structure object.\n\n## 3. Arrays of structures\n\nAn array of structures stores multiple objects of the same structure type contiguously as array elements. Initialize elements with nested initializer lists or assign members individually.\n\n## 4. Traverse safely\n\nPass or calculate the array element count and use indices from zero through count minus one. Avoid reading one past the final element.\n\n## 5. Validate records\n\nCheck input values before accepting a record. A valid array index does not guarantee that the member values satisfy application rules.",
       "examples": [
         {
-          "id": "cl75-ex1",
+          "id": "cl7.5-ex1",
           "language": "en",
-          "title": "Focused C example",
+          "title": "Core concept",
           "code": "#include <stdio.h>\nstruct Date { int day, month, year; };\nstruct Ticket { int id; struct Date opened; };\nint main(void) {\n struct Ticket tickets[2] = {{10,{2,11,2026}}, {11,{5,11,2026}}};\n for (size_t i=0; i<2; ++i)\n  printf(\"%d: %02d-%02d-%d\\n\", tickets[i].id, tickets[i].opened.day, tickets[i].opened.month, tickets[i].opened.year);\n return 0;\n}",
-          "explanation": "tickets is an array of two Ticket structures. Each Ticket contains an embedded Date structure, accessed through tickets[i].opened.",
+          "explanation": "Trace the operations and check the relevant C standard library contracts and failure cases.",
+          "runnable": false
+        },
+        {
+          "id": "cl7.5-ex2",
+          "language": "en",
+          "title": "Apply the concept safely",
+          "code": "#include <stdio.h>\nstruct Coordinate { int row, column; };\nstruct Cell { char symbol; struct Coordinate position; };\nint main(void) { struct Cell board[2] = {{'X',{0,1}}, {'O',{1,0}}}; for (size_t i=0; i<2; ++i) printf(\"%c at %d,%d\\n\", board[i].symbol, board[i].position.row, board[i].position.column); return 0; }",
+          "explanation": "This example reinforces the topic with explicit validation or resource handling. Compile with warnings and test failure paths.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Trace the access path to the month of the second ticket.",
-      "independentTask": "Create an array of five student records, each containing a nested date structure, and print a selected field.",
+      "guidedTask": "Create a small C program demonstrating Nested structures and arrays of structures. Write down its preconditions, expected result and failure handling before implementation.",
+      "independentTask": "Extend the example for Nested structures and arrays of structures to handle a boundary case and an error case. Explain the relevant C rule and add a test for each path.",
       "hints": [
-        "Use braces that reflect the nested aggregate structure when initializing.",
-        "An embedded structure member is part of the containing object; it is not a separately allocated pointer.",
-        "Validate values such as dates when the application requires semantic correctness."
+        "Read the declaration and function contract carefully.",
+        "Check all library return values before using results.",
+        "Keep object bounds, lifetime and resource ownership explicit.",
+        "Do not assume implementation-specific memory or file representations are portable.",
+        "Test both success and failure paths."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl75-q1",
-        "prompt": "Which statement best describes the lesson?",
+        "id": "cl7.5-q1",
+        "prompt": "How can a nested structure member be accessed?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "With chained dot operators",
+          "Only with pointer arithmetic",
+          "By converting it to void"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the C rule described in the lesson."
+        "answer": "With chained dot operators",
+        "explanation": "Each dot selects a member from the preceding structure."
       },
       {
-        "id": "cl75-q2",
-        "prompt": "What should be verified before using this feature?",
+        "id": "cl7.5-q2",
+        "prompt": "What does records[i].date.year access?",
         "options": [
-          "Types, preconditions, object validity and relevant return values.",
-          "Only the source file name.",
-          "Whether a single run appeared successful."
+          "The year member in the date of element i",
+          "The array's total byte size",
+          "The i-th year in every record"
         ],
-        "answer": "Types, preconditions, object validity and relevant return values.",
-        "explanation": "C correctness depends on valid objects, correct types and checked operations."
+        "answer": "The year member in the date of element i",
+        "explanation": "The expression first selects an array element, then nested members."
       },
       {
-        "id": "cl75-q3",
-        "prompt": "Which practice improves reliability?",
+        "id": "cl7.5-q3",
+        "prompt": "What must be known to traverse a structure array safely?",
         "options": [
-          "Compile with warnings and test normal and failure paths.",
-          "Ignore I/O and compiler diagnostics.",
-          "Assume all environments behave identically."
+          "The number of elements",
+          "Only the first member's value",
+          "The structure tag length"
         ],
-        "answer": "Compile with warnings and test normal and failure paths.",
-        "explanation": "Diagnostics and tests provide evidence for program behaviour."
+        "answer": "The number of elements",
+        "explanation": "The program must keep every subscript within the array bounds."
+      },
+      {
+        "id": "cl7.5-q4",
+        "prompt": "Does C automatically check array bounds?",
+        "options": [
+          "No",
+          "Yes, for all arrays",
+          "Only for arrays of structures"
+        ],
+        "answer": "No",
+        "explanation": "C does not require automatic runtime bounds checking."
+      },
+      {
+        "id": "cl7.5-q5",
+        "prompt": "Does a valid array index guarantee valid application data?",
+        "options": [
+          "No; member values may still violate application rules",
+          "Yes, every member is automatically validated",
+          "Only if the array is global"
+        ],
+        "answer": "No; member values may still violate application rules",
+        "explanation": "Memory bounds and domain validation are separate concerns."
       }
     ]
   },
