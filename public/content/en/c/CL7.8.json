@@ -6,39 +6,50 @@
   "title": "typedef and readable type names",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C rules.",
-    "Trace the example and identify data or resource flow.",
-    "Recognize relevant safety and failure cases.",
-    "Apply the concept in a tested C program."
+    "Use typedef to introduce an alias for an existing type.",
+    "Explain that a typedef alias does not create a distinct type.",
+    "Create aliases for structures and function pointer types.",
+    "Read complex declarators that include typedef names.",
+    "Choose aliases that improve interface clarity without hiding important type information."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "typedef introduces an alias for an existing type; it does not create a distinct new type. It can make complex declarations, structure names and function pointer types easier to read.",
+      "concept": "typedef introduces an alias for an existing type; it does not create a distinct type. It can make structure declarations and complex function pointer types easier to read. Aliases should improve clarity rather than conceal pointer ownership, mutability or other important properties of an interface.",
       "whyItMatters": "Readable aliases can simplify interfaces, but excessive or misleading aliases may hide important type information.",
       "analogy": "Treat each object or stream as a resource with a defined lifetime and explicit rules for access.",
       "analogyLimit": "The analogy does not replace C's formal object, storage-duration, alignment or library rules."
     },
     "explain": {
-      "narrative": "typedef introduces an alias for an existing type; it does not create a distinct new type. It can make complex declarations, structure names and function pointer types easier to read.\n\nCheck all allocation, I/O and conversion results. Respect object bounds and lifetime, initialize data before reading it, and define who owns and releases each resource.",
+      "narrative": "## 1. Create an alias\n\nA typedef declaration gives an existing type another name. For example, `typedef unsigned long ItemCount;` allows ItemCount to be used as a type name.\n\n## 2. Structure aliases\n\nA typedef can combine a structure declaration with a shorter alias. The alias refers to the same structure type; it does not create a new incompatible type.\n\n## 3. Function pointer aliases\n\nA typedef can name a function pointer type, making callback parameters easier to read. The underlying function signature remains important and should be documented.\n\n## 4. Understand the declaration\n\nRead the typedef declaration carefully to determine whether the alias denotes a pointer, array-related type or function pointer. The alias does not change the underlying declarator rules.\n\n## 5. Use aliases responsibly\n\nPrefer aliases for domain concepts and genuinely complex types. Avoid hiding whether a parameter is a pointer or whether a function takes ownership.",
       "examples": [
         {
-          "id": "cl78-ex1",
+          "id": "cl7.8-ex1",
           "language": "en",
-          "title": "Focused C example",
+          "title": "Core concept",
           "code": "#include <stdio.h>\ntypedef unsigned long ItemCount;\ntypedef struct { int x; int y; } Point;\nint main(void) {\n ItemCount count = 12;\n Point origin = {0, 0};\n printf(\"%lu (%d,%d)\\n\", count, origin.x, origin.y);\n return 0;\n}",
-          "explanation": "ItemCount is an alias for unsigned long. Point is an alias for the anonymous structure type. The aliases improve readability but do not create new incompatible types.",
+          "explanation": "Trace the operations and check the relevant C standard library contracts and failure cases.",
+          "runnable": false
+        },
+        {
+          "id": "cl7.8-ex2",
+          "language": "en",
+          "title": "Apply the concept safely",
+          "code": "#include <stdio.h>\ntypedef int (*Compare)(int, int);\nint ascending(int a, int b) { return a < b; }\nint main(void) { Compare compare = ascending; printf(\"%d\\n\", compare(2, 5)); return 0; }",
+          "explanation": "This example reinforces the topic with explicit validation or resource handling. Compile with warnings and test failure paths.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Identify which names are aliases and what types they represent.",
-      "independentTask": "Define aliases for a structure and a callback pointer. Explain how the aliases affect readability and type checking.",
+      "guidedTask": "Create a small C program demonstrating typedef and readable type names. Write down its preconditions, expected result and failure handling before implementation.",
+      "independentTask": "Extend the example for typedef and readable type names to handle a boundary case and an error case. Explain the relevant C rule and add a test for each path.",
       "hints": [
-        "typedef does not make two otherwise compatible types distinct.",
-        "Use aliases to clarify domain meaning or reduce genuinely complex declarations.",
-        "Keep the underlying type visible in documentation when width or signedness matters."
+        "Read the declaration and function contract carefully.",
+        "Check all library return values before using results.",
+        "Keep object bounds, lifetime and resource ownership explicit.",
+        "Do not assume implementation-specific memory or file representations are portable.",
+        "Test both success and failure paths."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl78-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "id": "cl7.8-q1",
+        "prompt": "What does typedef do?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "Introduces an alias for an existing type",
+          "Creates a new incompatible type in every case",
+          "Allocates a new object"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the C rule described in the lesson."
+        "answer": "Introduces an alias for an existing type",
+        "explanation": "A typedef name denotes the same underlying type."
       },
       {
-        "id": "cl78-q2",
-        "prompt": "Which practice best protects correctness?",
+        "id": "cl7.8-q2",
+        "prompt": "Does a typedef alias create a distinct type?",
         "options": [
-          "Check validity, bounds and operation results before access.",
-          "Assume memory and file operations cannot fail.",
-          "Use data before initialization."
+          "No",
+          "Yes, always",
+          "Only for unsigned types"
         ],
-        "answer": "Check validity, bounds and operation results before access.",
-        "explanation": "C programs must explicitly handle resource validity and failure paths."
+        "answer": "No",
+        "explanation": "typedef creates an alias, not a new type."
       },
       {
-        "id": "cl78-q3",
-        "prompt": "How should the example be verified?",
+        "id": "cl7.8-q3",
+        "prompt": "Can typedef name a function pointer type?",
         "options": [
-          "Compile with warnings and test success and failure paths.",
-          "Ignore warnings and test only one happy path.",
-          "Assume the same layout on every platform."
+          "Yes",
+          "No",
+          "Only in function bodies"
         ],
-        "answer": "Compile with warnings and test success and failure paths.",
-        "explanation": "Compiler diagnostics and deliberate tests provide evidence for correctness."
+        "answer": "Yes",
+        "explanation": "Function pointer declarators can be given typedef names."
+      },
+      {
+        "id": "cl7.8-q4",
+        "prompt": "Why should aliases not hide pointer ownership?",
+        "options": [
+          "Readers need to understand whether storage is borrowed or owned",
+          "Aliases change runtime allocation",
+          "Pointers cannot be typedef'd"
+        ],
+        "answer": "Readers need to understand whether storage is borrowed or owned",
+        "explanation": "Interface clarity requires visible ownership and mutability contracts."
+      },
+      {
+        "id": "cl7.8-q5",
+        "prompt": "What does a typedef for a structure change?",
+        "options": [
+          "The name used to refer to the same structure type",
+          "The structure's memory layout automatically",
+          "The number of structure members"
+        ],
+        "answer": "The name used to refer to the same structure type",
+        "explanation": "The alias does not change the structure type's representation."
       }
     ]
   },
