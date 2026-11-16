@@ -1,0 +1,114 @@
+name: CodeSaathi Deployment Health Management
+
+on:
+  workflow_run:
+    workflows: ["Deploy CodeSaathi to Firebase Hosting"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  health-report:
+    name: Generate project health report
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout deployed commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Inspect deployment, curriculum and PWA
+        env:
+          DEPLOY_RESULT: ${{ github.event.workflow_run.conclusion || 'manual-run' }}
+          DEPLOY_URL: ${{ github.event.workflow_run.html_url || '' }}
+          COMMIT_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const cp = require('child_process');
+          const rows = [];
+          const add = (area, check, status, detail) => rows.push({area,check,status,detail:String(detail).replace(/\|/g,'/').replace(/\n/g,' ')});
+          const has = p => fs.existsSync(p);
+          const json = p => JSON.parse(fs.readFileSync(p,'utf8'));
+
+          add('Deployment','Firebase Hosting workflow',process.env.DEPLOY_RESULT === 'success' ? 'PASS' : 'FAIL',process.env.DEPLOY_RESULT + ' ' + process.env.DEPLOY_URL);
+          for (const f of ['firebase.json','.firebaserc','public/index.html','public/app.js','public/sw.js','public/js/lessons/curriculum-loader.js']) add('Required files',f,has(f)?'PASS':'FAIL',has(f)?'Found':'Missing');
+          for (const f of ['public/app.js','public/sw.js','public/js/i18n.js','public/js/lessons/curriculum-loader.js','public/js/lessons/lesson-template.js']) {
+            if (!has(f)) continue;
+            try { cp.execFileSync('node',['--check',f]); add('JavaScript',f,'PASS','Syntax valid'); }
+            catch(e) { add('JavaScript',f,'FAIL',e.stderr || e.message); }
+          }
+
+          try {
+            const index = json('public/content/curriculum-index.json');
+            const topics = (index.topics || []).filter(t => t.courseId === 'c');
+            const modules = {};
+            let missing = 0, invalid = 0, drafts = 0;
+            const missingList = [], invalidList = [];
+            for (const t of topics) {
+              modules[t.moduleId] = (modules[t.moduleId] || 0) + 1;
+              const p = t.languages && t.languages.en;
+              const file = p && path.join('public',p.replace(/^\//,''));
+              if (!file || !has(file)) { missing++; missingList.push(t.topicId); continue; }
+              try {
+                const lesson = json(file);
+                if (lesson.topicId !== t.topicId || !lesson.title || !lesson.stages?.understand || !lesson.stages?.explain || !lesson.stages?.practise) { invalid++; invalidList.push(t.topicId); }
+                if (lesson.status === 'draft') drafts++;
+              } catch(e) { invalid++; invalidList.push(t.topicId + ': ' + e.message); }
+            }
+            add('C curriculum','Indexed topic count',topics.length === 149 ? 'PASS':'WARN',topics.length + ' (current expected baseline 149)');
+            add('C curriculum','Module coverage',Object.keys(modules).length === 14 ? 'PASS':'WARN',JSON.stringify(modules));
+            add('C lesson files','English files present',missing === 0 ? 'PASS':'FAIL',missing + ' missing: ' + missingList.join(', '));
+            add('C lesson files','JSON and minimum lesson structure',invalid === 0 ? 'PASS':'FAIL',invalid + ' invalid: ' + invalidList.join(', ') + '; draft lessons: ' + drafts);
+          } catch(e) { add('C curriculum','Index parse','FAIL',e.message); }
+
+          try {
+            const cfg = json('firebase.json');
+            add('Firebase config','Hosting public directory',cfg.hosting?.public === 'public'?'PASS':'FAIL',cfg.hosting?.public);
+            const rule = (cfg.hosting?.headers || []).find(h=>h.source==='**/*.json');
+            const cc = rule?.headers?.find(h=>h.key.toLowerCase()==='cache-control')?.value || '';
+            add('Firebase config','JSON cache policy',cc.includes('no-store')?'PASS':'WARN',cc || 'No explicit JSON cache policy');
+          } catch(e) { add('Firebase config','Parse','FAIL',e.message); }
+
+          const sw = has('public/sw.js') ? fs.readFileSync('public/sw.js','utf8') : '';
+          add('PWA cache','Version',sw.match(/codesaathi-v\d+/)?.[0]?'PASS':'WARN',sw.match(/codesaathi-v\d+/)?.[0] || 'Not found');
+          add('PWA cache','Curriculum index network-first',sw.includes('/content/curriculum-index.json')?'PASS':'FAIL',sw.includes('/content/curriculum-index.json')?'Listed in app shell':'Not listed');
+
+          const fail = rows.filter(r=>r.status==='FAIL');
+          const warn = rows.filter(r=>r.status==='WARN');
+          const out = [
+            '# CodeSaathi Deployment & Project Health',
+            '',
+            '- Commit: ' + process.env.COMMIT_SHA,
+            '- Firebase deploy result: **' + process.env.DEPLOY_RESULT + '**',
+            '- Checks: ' + rows.length + ' | PASS: ' + rows.filter(r=>r.status==='PASS').length + ' | WARN: ' + warn.length + ' | FAIL: ' + fail.length,
+            '',
+            '| Area | Check | Status | Details |',
+            '|---|---|---|---|',
+            ...rows.map(r=>'| '+r.area+' | '+r.check+' | **'+r.status+'** | '+r.detail+' |'),
+            '',
+            '## Attention required',
+            ...(fail.length ? fail.map(r=>'- **'+r.area+' / '+r.check+':** '+r.detail) : ['- No repository-level failing checks.']),
+            '',
+            '## Verification boundary',
+            '- This report checks the repository snapshot and the Firebase workflow result.',
+            '- It does not claim the live website serves these files. Live HTTP, browser rendering and device checks must be performed separately.'
+          ].join('\n');
+          fs.mkdirSync('health-report',{recursive:true});
+          fs.writeFileSync('health-report/deployment-health.md',out+'\n');
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,out+'\n');
+          console.log(out);
+          NODE
+
+      - name: Upload health report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codesaathi-deployment-health-${{ github.run_number }}
+          path: health-report/deployment-health.md
+          if-no-files-found: warn
+          retention-days: 30
