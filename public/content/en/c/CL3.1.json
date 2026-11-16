@@ -6,22 +6,22 @@
   "title": "Arithmetic operators, integer division and remainder",
   "language": "en",
   "learningObjectives": [
-    "Explain the core ideas behind Arithmetic operators, integer division and remainder.",
-    "Identify relevant C syntax, types, standard-library interfaces and constraints.",
-    "Trace a small example and predict its behaviour.",
-    "Recognize boundary cases, common defects and portability risks.",
-    "Apply the concept in a tested C program."
+    "Use arithmetic operators +, -, *, / and % with appropriate operand types.",
+    "Distinguish integer division from floating-point division.",
+    "Explain the sign and range constraints of the remainder operator.",
+    "Prevent signed overflow and division by zero.",
+    "Trace arithmetic expressions and test boundary values."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "Arithmetic operators, integer division and remainder is an important part of writing correct, maintainable C programs. Learn the exact language rules rather than relying on what one compiler appears to accept. C is a compiled, standardized language: distinguish language guarantees from implementation-defined choices, compiler extensions and behaviour that the standard leaves undefined.",
+      "concept": "C arithmetic expressions use operators such as +, -, *, / and %. The result type depends on the operand types and the usual arithmetic conversions. When both operands of division are integers, the fractional part is discarded toward zero. The remainder operator % requires integer operands, and division or remainder by zero is undefined behavior. Signed overflow is also undefined behavior.",
       "whyItMatters": "Understanding Arithmetic operators, integer division and remainder helps you reason about program behaviour instead of memorizing syntax. It is useful in exams, debugging and building reliable C applications.",
       "analogy": "Treat the concept as a tool with a precise contract: it has valid inputs, defined operations and observable results.",
       "analogyLimit": "An analogy is only an aid; the C standard and the relevant function specifications determine actual behaviour."
     },
     "explain": {
-      "narrative": "## Concept and mental model\nArithmetic operators, integer division and remainder should be understood in terms of the C abstract machine: objects have types, storage duration and lifetimes; expressions are evaluated according to language rules; and library calls have specified preconditions and results. The compiler translates a translation unit, but a successful compilation does not prove that a program is correct.\n\n## How to reason about this topic\n1. Identify the inputs, objects, types and operations involved.\n2. Check the applicable syntax and semantic constraints.\n3. Determine valid input ranges and boundary cases.\n4. Check every function result and handle failure where the API permits failure.\n5. Compile with warnings enabled and test normal, boundary and invalid cases.\n\n## Correctness and portability\nDo not assume that int has a particular width, that memory addresses are identical across runs, or that undefined behaviour has a predictable result. Use standard headers and documented interfaces. State any platform assumptions explicitly. Prefer small functions, clear names and explicit invariants.\n\n## Worked example 1 — establish a testable baseline\nThe example below demonstrates a small, compilable C program. Adapt the declaration, expression or API call to the exact concept being studied, then change one condition at a time and observe the result.\n\n## Worked example 2 — validate a boundary\nA second useful test is to exercise the smallest valid input, largest valid input, one value outside the valid range and an ordinary middle value. Record the expected result before running the program; this prevents a test from merely confirming an assumption.\n\n## Common mistakes\n- Assuming a successful compile means the result is correct.\n- Ignoring warnings or failing to check a library function's return value.\n- Using a value outside the range permitted by its type or API.\n- Confusing a compiler extension with portable ISO C.\n- Testing only one ordinary input and missing boundary cases.",
+      "narrative": "## 1. Arithmetic operators\n\nC provides addition `+`, subtraction `-`, multiplication `*`, division `/` and remainder `%`. Parentheses can make grouping explicit. The type of the operands determines whether arithmetic is integer or floating point.\n\n## 2. Integer and floating division\n\nWith `7 / 2`, both operands are int, so the result is 3. With `7.0 / 2.0`, the result is 3.5. Casting the result after integer division cannot restore the discarded fraction; convert an operand before division when needed.\n\n## 3. Remainder\n\nFor integer operands, `a % b` gives the remainder after division. The divisor must not be zero. The sign of a nonzero remainder follows the dividend's sign under C's truncation-toward-zero division rule. `%` is not a floating-point remainder operator.\n\n## 4. Protect the operation\n\nCheck the divisor before `/` or `%`. Check bounds before signed addition, subtraction or multiplication because signed overflow is undefined. Unsigned arithmetic wraps modulo its range, but accidental wraparound can still be a defect.\n\n## 5. Trace types and values\n\nWrite down the operand types, intermediate result and destination type. Test zero, negative values where allowed, and values near the type limits.",
       "examples": [
         {
           "id": "cl3.1-ex1",
@@ -42,14 +42,14 @@
       ]
     },
     "practise": {
-      "guidedTask": "Write a minimal program that demonstrates Arithmetic operators, integer division and remainder. Compile it with warnings enabled, explain each declaration and operation, and record its output.",
-      "independentTask": "Create two test cases for Arithmetic operators, integer division and remainder: one normal case and one boundary or failure case. State the expected behaviour before running them, then compare the result and explain any difference.",
+      "guidedTask": "Write and trace a C program demonstrating CL3.1. Record the condition or expression values at each step, then compile with warnings and test boundary cases.",
+      "independentTask": "Create a second program for CL3.1 with a different input range or control-flow structure. Include a boundary case and one invalid or unexpected case; explain why each result occurs.",
       "hints": [
-        "Read the compiler diagnostic carefully; fix the first meaningful error before chasing later messages.",
-        "Use the exact type and format specifier required by the operation.",
-        "Test zero, negative values where valid, maximum/minimum boundaries and invalid input as appropriate.",
-        "Do not dereference an uninitialized, null or expired pointer.",
-        "Prefer defined, portable behaviour over code that merely appears to work on one machine."
+        "Trace each expression and condition in evaluation order.",
+        "Use braces to make control-flow boundaries explicit.",
+        "Check zero, one and boundary iterations where loops are involved.",
+        "Avoid undefined behavior and unintended side effects.",
+        "Test the behavior rather than relying only on visual inspection."
       ]
     }
   },
@@ -62,58 +62,58 @@
     "questions": [
       {
         "id": "cl3.1-q1",
-        "prompt": "Which approach is safest when applying Arithmetic operators, integer division and remainder?",
+        "prompt": "What is the result of `7 / 2` when both operands are int?",
         "options": [
-          "Follow the C language rules, validate inputs and check relevant return values.",
-          "Assume every compiler and platform behaves identically.",
-          "Ignore warnings whenever the program produces output."
+          "3",
+          "3.5",
+          "4"
         ],
-        "answer": "Follow the C language rules, validate inputs and check relevant return values.",
-        "explanation": "Correct C programming depends on defined behaviour, valid inputs and careful handling of operations that can fail."
+        "answer": "3",
+        "explanation": "Integer division discards the fractional part toward zero."
       },
       {
         "id": "cl3.1-q2",
-        "prompt": "Why should boundary cases be tested?",
+        "prompt": "Which expression produces a floating-point quotient?",
         "options": [
-          "They reveal errors that ordinary inputs may not expose.",
-          "They are unnecessary when one example works.",
-          "They make compiler warnings irrelevant."
+          "7.0 / 2.0",
+          "7 / 2",
+          "(int)7 / (int)2"
         ],
-        "answer": "They reveal errors that ordinary inputs may not expose.",
-        "explanation": "Boundary tests check the edges of valid ranges and important exceptional conditions."
+        "answer": "7.0 / 2.0",
+        "explanation": "At least one floating operand causes the arithmetic conversion to floating point."
       },
       {
         "id": "cl3.1-q3",
-        "prompt": "What does a successful compilation establish?",
+        "prompt": "What must be checked before evaluating `a % b`?",
         "options": [
-          "The compiler accepted the translation under its selected settings; it does not prove runtime correctness.",
-          "The program is free from all defects.",
-          "The program is portable to every C implementation."
+          "That b is not zero",
+          "That a is positive",
+          "That both values are strings"
         ],
-        "answer": "The compiler accepted the translation under its selected settings; it does not prove runtime correctness.",
-        "explanation": "Compilation is one validation step. Tests, review and correct reasoning are also required."
+        "answer": "That b is not zero",
+        "explanation": "Remainder with a zero divisor is undefined behavior."
       },
       {
         "id": "cl3.1-q4",
-        "prompt": "Which practice improves portability?",
+        "prompt": "What does `17 % 5` produce?",
         "options": [
-          "Use standard C features and document unavoidable platform assumptions.",
-          "Depend on undocumented compiler extensions.",
-          "Assume int and pointer sizes are fixed everywhere."
+          "2",
+          "3",
+          "3.4"
         ],
-        "answer": "Use standard C features and document unavoidable platform assumptions.",
-        "explanation": "Portable programs avoid assumptions that the C standard does not guarantee."
+        "answer": "2",
+        "explanation": "Seventeen divided by five leaves a remainder of two."
       },
       {
         "id": "cl3.1-q5",
-        "prompt": "What should you do when a library operation can fail?",
+        "prompt": "What happens on signed integer overflow?",
         "options": [
-          "Check its documented result and handle the failure path.",
-          "Assume it always succeeds.",
-          "Continue using its output without checking."
+          "Undefined behavior",
+          "Guaranteed wraparound",
+          "The value always becomes zero"
         ],
-        "answer": "Check its documented result and handle the failure path.",
-        "explanation": "Many standard-library operations report failure through return values or stream indicators."
+        "answer": "Undefined behavior",
+        "explanation": "C does not define signed overflow as wrapping."
       }
     ]
   },
