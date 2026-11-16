@@ -3,42 +3,59 @@
   "courseId": "c",
   "moduleId": "CL9",
   "topicId": "CL9.6",
-  "title": "Version control and reproducible C builds",
+  "title": "Bitwise operators, masks, shifts and bit manipulation",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its constraints.",
-    "Trace the example and reason about its data flow.",
-    "Identify complexity, boundary or safety considerations.",
-    "Apply the concept in a tested C program."
+    "Distinguish bitwise AND, OR, XOR and complement from the logical operators &&, || and !.",
+    "Use unsigned integer types and bit masks to test, set, clear and toggle individual flags.",
+    "Explain integer promotions and why bitwise operations on narrow integer types may be performed after promotion to int or unsigned int.",
+    "Use left and right shifts only with valid shift counts and operands whose behaviour is well-defined for the intended operation.",
+    "Avoid assumptions about signed right shift, negative left operands, shift counts greater than or equal to the promoted operand width, and signed overflow.",
+    "Write portable flag and field-extraction code with explicit unsigned constants, parentheses and documented bit positions."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL2.6 Integer types, ranges and signedness",
+    "CL3.1 Arithmetic and remainder",
+    "CL3.4 Operator precedence"
+  ],
   "stages": {
     "understand": {
-      "concept": "Version control records source changes and supports review, rollback and collaboration. A reproducible build documents compiler version, flags, dependencies and source inputs so another environment can rebuild the program consistently.",
-      "whyItMatters": "Reliable C engineering requires knowing exactly which source and toolchain produced a binary. Version history also makes risky changes easier to inspect and revert.",
-      "analogy": "Treat an algorithm or data structure as a set of operations that must preserve a clearly stated contract.",
-      "analogyLimit": "The analogy does not replace formal complexity analysis, C object rules or algorithm preconditions."
+      "concept": "Bitwise operators work on the value representation of integer operands after the language's integer promotions. AND (`&`) keeps bits set in both operands, OR (`|`) sets bits present in either operand, XOR (`^`) toggles differing bits, and complement (`~`) inverts every bit of the promoted operand. Shift operators move bits left or right by a count.",
+      "whyItMatters": "Bit masks are used in hardware registers, file formats, protocol flags, permissions, compact state and low-level algorithms. Incorrect signed arithmetic or invalid shift counts can produce implementation-defined behaviour or undefined behaviour.",
+      "analogy": "A bit mask is like a row of switches: a mask selects which switches to inspect or change.",
+      "analogyLimit": "C operators act on integer values after promotions, not on a visual row of independent physical switches. Type width, signedness and shift rules matter."
     },
     "explain": {
-      "narrative": "Version control records source changes and supports review, rollback and collaboration. A reproducible build documents compiler version, flags, dependencies and source inputs so another environment can rebuild the program consistently.\n\nBefore implementation, state input constraints, empty-case behaviour, ownership and invariants. Compile with warnings and test representative, boundary and failure cases.",
+      "narrative": "Use unsigned integer types for bit manipulation when you intend a logical bit pattern. To test a flag, evaluate `(flags & MASK) != 0U`. To set, use `flags |= MASK`; to clear, use `flags &= ~MASK`; to toggle, use `flags ^= MASK`. Parenthesize these expressions because bitwise operators have different precedence from comparisons and logical operators.\n\nThe right operand of a shift must be nonnegative and less than the width in bits of the promoted left operand. Left-shifting an unsigned value is reduced modulo one more than the maximum representable value; left-shifting a negative signed value or producing an unrepresentable signed result is undefined. Right shift of a negative signed value is implementation-defined. Integer promotions can change the operand type before the shift, so use explicit unsigned types and validate shift counts. Do not assume that an unsigned type is exactly 32 bits unless you have selected a type with the required width.",
       "examples": [
         {
           "id": "cl96-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "/* Example Makefile fragment:\nCC ?= cc\nCFLAGS ?= -std=c17 -Wall -Wextra -Wpedantic\napp: main.c math_ops.c\n\t$(CC) $(CFLAGS) main.c math_ops.c -o app\n*/\n#include <stdio.h>\nint main(void) { puts(\"Build inputs should be documented\"); return 0; }",
-          "explanation": "The Makefile records a compiler variable, flags and source dependencies. A real project should also document generated files and external library requirements.",
-          "runnable": false
+          "title": "Set, test, clear and toggle independent flags",
+          "code": "#include <stdio.h>\n\n#define FLAG_READ  0x01U\n#define FLAG_WRITE 0x02U\n#define FLAG_EXEC  0x04U\n\nint main(void)\n{\n    unsigned int flags = 0U;\n    flags |= FLAG_READ | FLAG_WRITE;\n    printf(\"write=%s\\n\", (flags & FLAG_WRITE) != 0U ? \"yes\" : \"no\");\n    flags &= ~FLAG_WRITE;\n    flags ^= FLAG_EXEC;\n    printf(\"read=%u exec=%u\\n\",\n           (flags & FLAG_READ) != 0U,\n           (flags & FLAG_EXEC) != 0U);\n    return 0;\n}",
+          "explanation": "The flags are unsigned bit masks. OR sets bits, AND tests or clears selected bits, and XOR toggles a bit. The comparison converts the masked value to a clear Boolean-like result for printing.",
+          "runnable": true
+        },
+        {
+          "id": "cl96-ex2",
+          "language": "en",
+          "title": "Extract a small field after validating the shift position",
+          "code": "#include <limits.h>\n#include <stdio.h>\n\nint main(void)\n{\n    unsigned int word = 0x2DU;\n    unsigned int shift = 2U;\n    unsigned int field_mask = 0x07U;\n    unsigned int field;\n\n    if (shift >= sizeof word * CHAR_BIT) {\n        return 1;\n    }\n    field = (word >> shift) & field_mask;\n    printf(\"field=%u\\n\", field);\n    return 0;\n}",
+          "explanation": "The program checks that the shift count is smaller than the width of the unsigned int object before shifting. The mask then retains only the three selected low-order bits of the shifted value.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Identify the inputs that affect the build output.",
-      "independentTask": "Create a small repository with a Makefile, README build instructions and a test command.",
+      "guidedTask": "Draw the low four bits of flags after each operation in the first example. Change the order of `&`, `==` and `!=` without parentheses and observe why explicit grouping improves correctness.",
+      "independentTask": "Define four independent unsigned flags and implement test, set, clear and toggle operations. Add a field extraction function that rejects a shift count outside the width of its operand type.",
       "hints": [
-        "Commit source and build configuration, not generated secrets or machine-specific temporary files.",
-        "Record compiler and dependency versions when reproducibility matters.",
-        "Review diffs before committing and test the committed revision."
+        "Use `&` for bitwise AND and `&&` for logical AND; they are not interchangeable.",
+        "Use unsigned operands for masks and bit-pattern operations where possible.",
+        "Set with `|=`, clear with `&= ~mask`, and toggle with `^= mask`.",
+        "Check the shift count against the width of the promoted left operand before shifting.",
+        "Do not left-shift a negative signed value or assume right shift of a negative signed value is portable.",
+        "Parenthesize mask tests before comparing them; operator precedence is easy to misread."
       ]
     }
   },
@@ -51,36 +68,63 @@
     "questions": [
       {
         "id": "cl96-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "Which expression tests whether FLAG is set in flags?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "(flags & FLAG) != 0U",
+          "(flags && FLAG) == 1",
+          "flags | FLAG == 0",
+          "flags ^ FLAG == 0U"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the concept and constraints described above."
+        "answer": "(flags & FLAG) != 0U",
+        "explanation": "Bitwise AND isolates the bits present in both flags and FLAG; comparing the result with zero tests whether any selected bit is set."
       },
       {
         "id": "cl96-q2",
-        "prompt": "What should be checked before relying on this algorithm or structure?",
+        "prompt": "Which operation sets selected bits without changing other set bits?",
         "options": [
-          "Its preconditions, invariants, bounds and failure cases.",
-          "Only the name of the data structure.",
-          "Whether one example produced an output."
+          "flags |= mask;",
+          "flags &= mask;",
+          "flags ^= ~mask;",
+          "flags = !mask;"
         ],
-        "answer": "Its preconditions, invariants, bounds and failure cases.",
-        "explanation": "Correctness depends on maintaining the algorithm's contract."
+        "answer": "flags |= mask;",
+        "explanation": "Bitwise OR sets every bit present in mask while preserving other bits already set in flags."
       },
       {
         "id": "cl96-q3",
-        "prompt": "Which practice supports reliable implementation?",
+        "prompt": "How do you clear the bits selected by mask?",
         "options": [
-          "Test empty, boundary and representative inputs.",
-          "Ignore allocation failures.",
-          "Assume average complexity guarantees every operation's worst case."
+          "flags &= ~mask;",
+          "flags |= mask;",
+          "flags ^= mask;",
+          "flags = mask && flags;"
         ],
-        "answer": "Test empty, boundary and representative inputs.",
-        "explanation": "Targeted tests expose defects that ordinary examples may miss."
+        "answer": "flags &= ~mask;",
+        "explanation": "Complementing the mask selects all bits outside the mask, and AND clears only the mask's selected bits."
+      },
+      {
+        "id": "cl96-q4",
+        "prompt": "What must be true of a shift count?",
+        "options": [
+          "It must be nonnegative and less than the width of the promoted left operand.",
+          "It may be any integer value.",
+          "It must always equal the width of the operand.",
+          "It must be negative for right shifts."
+        ],
+        "answer": "It must be nonnegative and less than the width of the promoted left operand.",
+        "explanation": "A shift count outside the valid range is undefined behaviour; the left operand is promoted before the shift."
+      },
+      {
+        "id": "cl96-q5",
+        "prompt": "Which statement about right-shifting a negative signed integer is correct in C?",
+        "options": [
+          "Its result is implementation-defined.",
+          "It is guaranteed to fill with zero bits.",
+          "It is always a syntax error.",
+          "It always produces zero."
+        ],
+        "answer": "Its result is implementation-defined.",
+        "explanation": "The C language specifies right shift of a negative signed value as implementation-defined, so portable code should avoid relying on one result."
       }
     ]
   },
