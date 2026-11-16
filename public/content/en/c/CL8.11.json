@@ -1,0 +1,88 @@
+{
+  "id": "c.cl8.11.en",
+  "courseId": "c",
+  "moduleId": "CL8",
+  "topicId": "CL8.11",
+  "title": "Allocation-size overflow and defensive allocation patterns (CodeSaathi extension)",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the concept and its C rules.",
+    "Trace the example and identify data or control flow.",
+    "Recognize common failure and safety cases.",
+    "Apply the concept in a tested C program."
+  ],
+  "prerequisites": [],
+  "stages": {
+    "understand": {
+      "concept": "Before allocating count elements of size element_size, the program must ensure the multiplication count * element_size is representable in size_t. If count exceeds SIZE_MAX / element_size, the multiplication would wrap and request too little storage.",
+      "whyItMatters": "An undersized allocation followed by indexing according to the original count can cause a buffer overflow. Defensive allocation validates arithmetic before requesting storage.",
+      "analogy": "Treat each resource and operation as having a clear contract, valid lifetime and failure path.",
+      "analogyLimit": "The analogy does not replace the C standard, compiler or library specifications."
+    },
+    "explain": {
+      "narrative": "Before allocating count elements of size element_size, the program must ensure the multiplication count * element_size is representable in size_t. If count exceeds SIZE_MAX / element_size, the multiplication would wrap and request too little storage.\n\nCheck object bounds, lifetimes, arithmetic limits and all relevant return values. Compile with warnings enabled and test both normal and failure paths.",
+      "examples": [
+        {
+          "id": "cl811-ex1",
+          "language": "en",
+          "title": "Focused C example",
+          "code": "#include <stdint.h>\n#include <stdint.h>\n#include <stdlib.h>\n#include <stddef.h>\nvoid *allocate_array(size_t count, size_t element_size) {\n if (element_size != 0 && count > SIZE_MAX / element_size) return NULL;\n return malloc(count * element_size);\n}\nint main(void) {\n int *items = allocate_array(10, sizeof *items);\n free(items);\n return 0;\n}",
+          "explanation": "The division check proves that count multiplied by element_size will not exceed SIZE_MAX. The helper then requests the calculated number of bytes.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Explain why checking the result after multiplication is too late if the multiplication already wrapped.",
+      "independentTask": "Write an allocation helper for a two-dimensional array and validate both multiplication steps.",
+      "hints": [
+        "Include stdint.h for SIZE_MAX where provided by the implementation and use size_t for sizes.",
+        "Handle zero elements according to a documented policy.",
+        "Check additions as well as multiplications when calculating header-plus-payload sizes."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "cl811-q1",
+        "prompt": "Which statement best describes this lesson?",
+        "options": [
+          "The C rule and constraints described in this lesson.",
+          "An HTML tag.",
+          "A CSS selector."
+        ],
+        "answer": "The C rule and constraints described in this lesson.",
+        "explanation": "The correct choice follows the C rule explained above."
+      },
+      {
+        "id": "cl811-q2",
+        "prompt": "What is a reliable way to protect correctness?",
+        "options": [
+          "Validate preconditions, bounds and failure results.",
+          "Assume the operation cannot fail.",
+          "Ignore the type and lifetime rules."
+        ],
+        "answer": "Validate preconditions, bounds and failure results.",
+        "explanation": "C requires explicit handling of object validity and operation failures."
+      },
+      {
+        "id": "cl811-q3",
+        "prompt": "How should the example be checked?",
+        "options": [
+          "Compile with warnings and test expected and failure cases.",
+          "Ignore diagnostics and test only once.",
+          "Assume every platform behaves identically."
+        ],
+        "answer": "Compile with warnings and test expected and failure cases.",
+        "explanation": "Warnings and targeted tests provide evidence for correctness."
+      }
+    ]
+  },
+  "status": "draft"
+}
