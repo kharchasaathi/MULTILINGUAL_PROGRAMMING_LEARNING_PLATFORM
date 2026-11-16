@@ -6,39 +6,64 @@
   "title": "malloc and allocated storage",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C rules.",
-    "Trace the example and identify data or resource flow.",
-    "Recognize relevant safety and failure cases.",
-    "Apply the concept in a tested C program."
+    "Explain the purpose and function contract of `malloc`, including its `size_t` byte-count argument, `void *` result and null-pointer failure result.",
+    "Calculate the number of bytes required for one object or an array by using `sizeof` and the pointed-to type rather than hard-coded platform-dependent sizes.",
+    "Check the returned pointer before accessing allocated storage and explain why the bytes returned by `malloc` are not automatically initialized.",
+    "Use allocated storage for a scalar object and a runtime-sized array, initialize each element before reading it, and release each allocation exactly once.",
+    "Distinguish `malloc` from zero-initializing allocation and explain why a successful allocation does not guarantee that the requested number of bytes is available for every possible request.",
+    "Recognize the need to validate element counts and allocation-size calculations before requesting storage."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL8.1 — Memory regions, allocation concepts and object lifetime",
+    "CL5.3 — Pointer declarations and dereferencing"
+  ],
   "stages": {
     "understand": {
-      "concept": "malloc requests a block of allocated storage of the specified number of bytes and returns a pointer suitably aligned for objects with fundamental alignment requirements. The contents are indeterminate. If allocation fails, malloc returns a null pointer.",
-      "whyItMatters": "Dynamic allocation supports data whose size is decided at runtime, but every allocation must be checked and its size calculation must be correct.",
-      "analogy": "Treat each object or stream as a resource with a defined lifetime and explicit rules for access.",
-      "analogyLimit": "The analogy does not replace C's formal object, storage-duration, alignment or library rules."
+      "concept": "`malloc` is a standard library function declared in `<stdlib.h>`. It requests a block of allocated storage containing the requested number of bytes and returns a pointer to the beginning of that storage. The result is suitably aligned for object types with fundamental alignment requirements. If the request cannot be satisfied, it returns a null pointer. The allocated bytes have indeterminate values; `malloc` does not initialize them.",
+      "whyItMatters": "Programs often need arrays or objects whose size is known only while the program is running. `malloc` makes that possible, but the program must calculate the byte count correctly, check for failure, initialize values before reading them and define who will call `free`.",
+      "analogy": "Imagine requesting a work surface large enough for a certain number of items. The request gives you space, not completed or pre-filled items; you must check that the space was provided and place valid items there yourself.",
+      "analogyLimit": "Allocated storage is governed by C's alignment, object, effective-type and lifetime rules. It is not a promise about a particular physical heap, and the analogy does not imply that `malloc` initializes the bytes."
     },
     "explain": {
-      "narrative": "malloc requests a block of allocated storage of the specified number of bytes and returns a pointer suitably aligned for objects with fundamental alignment requirements. The contents are indeterminate. If allocation fails, malloc returns a null pointer.\n\nCheck all allocation, I/O and conversion results. Respect object bounds and lifetime, initialize data before reading it, and define who owns and releases each resource.",
+      "narrative": "## 1. Function declaration and result\n\nInclude `<stdlib.h>` before using `malloc`:\n\n```c\nvoid *malloc(size_t size);\n```\n\nThe argument is a number of **bytes**, represented by `size_t`. On success, the function returns a pointer to the allocated block. A `void *` can be converted to a pointer to an object type in C without an explicit cast. If the allocation fails, the result is a null pointer. Always test it before dereferencing.\n\n## 2. Calculate sizes with `sizeof`\n\nFor one object, prefer `malloc(sizeof *pointer)` after declaring the pointer. For an array of `count` elements, use `malloc(count * sizeof *pointer)`. This keeps the requested element size connected to the pointer's pointed-to type and avoids assuming that an `int` or another type has a fixed number of bytes on every implementation.\n\nThe multiplication must be representable in `size_t`. When `count` comes from input or another untrusted source, validate the count and check for multiplication overflow before calculating the allocation size. CL8.11 develops that defensive pattern in detail.\n\n## 3. The returned bytes are not initialized values\n\n`malloc` does not set the allocated bytes to zero. Do not read an allocated `int`, structure member or array element before a valid value has been stored in it. Indeterminate values are not safe default values. If zero-initialized storage is specifically required, `calloc` is a separate library function; it is not what `malloc` does.\n\n## 4. Alignment and object access\n\nThe returned pointer is suitably aligned for objects with fundamental alignment requirements. The program must still use an appropriate object type and obey C's object representation and effective-type rules when storing and accessing data. Allocated storage is not permission to access arbitrary types or go beyond the requested region.\n\n## 5. A complete allocation lifecycle\n\nA reliable pattern is: determine and validate the required count, calculate the byte size safely, call `malloc`, check for `NULL`, initialize the objects, use only valid elements, then call `free` exactly once when ownership ends. If allocation fails, do not use the returned pointer as if it referred to an object.",
       "examples": [
         {
           "id": "cl82-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\n#include <stdlib.h>\nint main(void) {\n size_t count = 5;\n int *values = malloc(count * sizeof *values);\n if (values == NULL) return 1;\n for (size_t i=0; i<count; ++i) values[i] = (int)(i * 10);\n for (size_t i=0; i<count; ++i) printf(\"%d \", values[i]);\n putchar('\\n');\n free(values);\n return 0;\n}",
-          "explanation": "The program allocates enough bytes for five int objects, checks for failure, initializes each element before reading it and frees the allocation exactly once.",
+          "title": "Allocate and initialize one integer",
+          "code": "#include <stdio.h>\n#include <stdlib.h>\n\nint main(void) {\n    int *score = malloc(sizeof *score);\n    if (score == NULL) {\n        fputs(\"could not allocate score\\n\", stderr);\n        return 1;\n    }\n\n    *score = 86;\n    printf(\"score=%d\\n\", *score);\n\n    free(score);\n    return 0;\n}",
+          "explanation": "Expected output: `score=86`. `sizeof *score` requests enough bytes for the pointed-to `int`, without hard-coding its size. The null check happens before dereferencing. The program writes a defined value before reading it and then releases the allocation.",
+          "runnable": false
+        },
+        {
+          "id": "cl82-ex2",
+          "language": "en",
+          "title": "Allocate a runtime-sized array",
+          "code": "#include <stdio.h>\n#include <stdlib.h>\n\nint main(void) {\n    size_t count = 4;\n    int *values = malloc(count * sizeof *values);\n    if (values == NULL) {\n        fputs(\"could not allocate array\\n\", stderr);\n        return 1;\n    }\n\n    for (size_t i = 0; i < count; ++i) {\n        values[i] = (int)(i + 1) * 10;\n    }\n\n    for (size_t i = 0; i < count; ++i) {\n        printf(\"%d%c\", values[i], i + 1 == count ? '\\\\n' : ' ');\n    }\n\n    free(values);\n    return 0;\n}",
+          "explanation": "Expected output: `10 20 30 40`. The `count * sizeof *values` expression requests storage for four `int` elements. Both loops use indices from zero through `count - 1`. Every element is initialized before it is printed, and the allocation is released after the final use. This example uses a small trusted count; production code must validate externally supplied counts and guard the multiplication against overflow.",
           "runnable": false
         }
+      ],
+      "commonMistakes": [
+        "Calling `malloc` without including `<stdlib.h>` or without using the correct function declaration.",
+        "Assuming the argument to `malloc` is a count of elements rather than a count of bytes.",
+        "Writing `malloc(5)` when five integers are needed, instead of calculating `5 * sizeof *pointer`.",
+        "Dereferencing the returned pointer before checking whether it is `NULL`.",
+        "Assuming that `malloc` returns zero-filled integers or structures.",
+        "Reading an element before storing a valid value in it, or accessing an index outside the allocated array.",
+        "Assigning a new allocation over the only pointer to an earlier allocation and losing the ability to free the earlier block."
       ]
     },
     "practise": {
-      "guidedTask": "Calculate the requested allocation size for five and fifty int values.",
-      "independentTask": "Allocate an array based on a validated runtime count. Explain how the program handles zero and excessive counts.",
+      "guidedTask": "Declare a pointer to `double`, request storage for one `double` using `sizeof`, check for allocation failure, store `12.5`, print it with an appropriate format, and release the allocation. Explain why the request does not use a hard-coded byte count.",
+      "independentTask": "Ask the user for a positive number of readings, validate the input and an upper limit, allocate an array of that many `double` values, read and validate each value, calculate the average, and free the array on every path after a successful allocation. Include a clear policy for invalid input and allocation failure.",
       "hints": [
-        "Use sizeof *pointer to keep allocation size consistent with the pointed-to type.",
-        "malloc does not initialize the allocated bytes.",
-        "Check count multiplication for overflow before allocating when count can be untrusted."
+        "Include `<stdlib.h>` for the declaration of `malloc` and `free`.",
+        "Use `sizeof *pointer` so the requested size follows the pointed-to type.",
+        "`malloc` takes a byte count and returns `NULL` if the request fails.",
+        "Initialize every element before reading its value.",
+        "Check that `count * sizeof *pointer` cannot overflow `size_t` when the count is variable.",
+        "Keep the allocation's owning pointer available until the corresponding `free`."
       ]
     }
   },
@@ -51,36 +76,58 @@
     "questions": [
       {
         "id": "cl82-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What unit does the `size` argument of `malloc` represent?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "Bytes",
+          "Number of array elements",
+          "Bits"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the C rule described in the lesson."
+        "answer": "Bytes",
+        "explanation": "The function accepts a `size_t` byte count. To allocate an array, the program normally multiplies the element count by the size of one element."
       },
       {
         "id": "cl82-q2",
-        "prompt": "Which practice best protects correctness?",
+        "prompt": "Which expression is the most maintainable way to allocate storage for `count` objects pointed to by `values`?",
         "options": [
-          "Check validity, bounds and operation results before access.",
-          "Assume memory and file operations cannot fail.",
-          "Use data before initialization."
+          "`malloc(count * sizeof *values)`",
+          "`malloc(count)` for every element type",
+          "`malloc(4)` because an integer is always four bytes"
         ],
-        "answer": "Check validity, bounds and operation results before access.",
-        "explanation": "C programs must explicitly handle resource validity and failure paths."
+        "answer": "`malloc(count * sizeof *values)`",
+        "explanation": "`sizeof *values` is the size of one pointed-to element on the current implementation. The multiplication requests enough bytes for `count` elements, provided the multiplication is checked for overflow when necessary."
       },
       {
         "id": "cl82-q3",
-        "prompt": "How should the example be verified?",
+        "prompt": "What is the state of the bytes returned by `malloc`?",
         "options": [
-          "Compile with warnings and test success and failure paths.",
-          "Ignore warnings and test only one happy path.",
-          "Assume the same layout on every platform."
+          "They are not initialized by `malloc`; their values are indeterminate.",
+          "They are always all zero.",
+          "They contain a copy of the last object allocated."
         ],
-        "answer": "Compile with warnings and test success and failure paths.",
-        "explanation": "Compiler diagnostics and deliberate tests provide evidence for correctness."
+        "answer": "They are not initialized by `malloc`; their values are indeterminate.",
+        "explanation": "`malloc` provides storage, not initialized application values. Store valid values before reading the allocated objects."
+      },
+      {
+        "id": "cl82-q4",
+        "prompt": "What must a program do before dereferencing the result of `malloc`?",
+        "options": [
+          "Check whether the result is `NULL`.",
+          "Call `free` first.",
+          "Convert the pointer to an integer."
+        ],
+        "answer": "Check whether the result is `NULL`.",
+        "explanation": "Allocation can fail. A null pointer does not designate an allocated object and must not be dereferenced."
+      },
+      {
+        "id": "cl82-q5",
+        "prompt": "Why is `sizeof *values` generally preferable to writing a numeric byte count for an array allocation?",
+        "options": [
+          "It derives the element size from the pointed-to type on the current implementation.",
+          "It guarantees that allocation can never fail.",
+          "It automatically initializes every element."
+        ],
+        "answer": "It derives the element size from the pointed-to type on the current implementation.",
+        "explanation": "The `sizeof` operator accounts for the implementation's actual object size and keeps the allocation expression consistent if the pointed-to type changes."
       }
     ]
   },
