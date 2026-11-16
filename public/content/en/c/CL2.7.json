@@ -6,11 +6,11 @@
   "title": "Floating-Point Values and Decimal Precision",
   "language": "en",
   "learningObjectives": [
-    "Explain the central rules behind floating-point values and decimal precision in C.",
-    "Identify the relevant types, declarations, operators or library facilities.",
-    "Trace a worked example and explain its result.",
-    "Recognize common mistakes, portability concerns and unsafe assumptions.",
-    "Apply the concept in a small program and test normal and boundary cases."
+    "Distinguish float, double and long double floating types.",
+    "Explain why many decimal fractions cannot be represented exactly in binary floating point.",
+    "Use suitable printf precision to inspect floating-point values.",
+    "Compare calculated floating-point values using a justified tolerance when appropriate.",
+    "Recognize range, precision, rounding and non-finite-value considerations."
   ],
   "prerequisites": [
     "CL1.1",
@@ -18,13 +18,13 @@
   ],
   "stages": {
     "understand": {
-      "concept": "C provides float, double and long double floating types. Many decimal fractions cannot be represented exactly in binary floating point, so calculations may contain rounding error. The precision and range of each type are implementation characteristics. Floating-point values should not generally be compared for exact equality after calculations.",
+      "concept": "C provides float, double and long double floating types. Many decimal fractions have no finite binary representation, so stored values are approximations and arithmetic can introduce rounding error. Precision and range depend on the implementation. Exact equality is often inappropriate after floating-point calculations; the comparison method should reflect the scale and error tolerance of the problem.",
       "whyItMatters": "Understanding precision is important for measurements, scientific calculations and money-like values. A program must choose an appropriate representation and comparison strategy rather than assuming decimal fractions are exact.",
       "analogy": "Think of a type as a contract that describes what kind of value an object can hold and which operations make sense for it.",
       "analogyLimit": "The analogy is only an introduction; C types also determine representation, conversions, alignment and constraints."
     },
     "explain": {
-      "narrative": "C provides float, double and long double floating types. Many decimal fractions cannot be represented exactly in binary floating point, so calculations may contain rounding error. The precision and range of each type are implementation characteristics. Floating-point values should not generally be compared for exact equality after calculations.\n\nUnderstanding precision is important for measurements, scientific calculations and money-like values. A program must choose an appropriate representation and comparison strategy rather than assuming decimal fractions are exact.\n\nWhen reviewing code, identify the declared types first, then trace conversions and the exact expression being evaluated. Compile with warnings enabled and test boundary values. Do not rely on assumptions about another compiler or machine.",
+      "narrative": "## 1. Floating-point type choices\n\nfloat, double and long double provide floating-point representations with different ranges and precision characteristics. double is commonly used for general calculations. The actual characteristics are described by `<float.h>`.\n\n## 2. Decimal values are often approximations\n\nA value such as 0.1 cannot be represented exactly with a finite binary fraction. Therefore `0.1 + 0.2` may not have exactly the same stored value as the literal 0.3. Printing more digits can reveal the approximation.\n\n## 3. Display precision\n\nprintf uses `%f`, `%e` or `%g` for floating-point output. A precision such as `%.2f` controls the number of digits after the decimal point for `%f`; it changes the displayed representation, not the stored value.\n\n## 4. Compare with a tolerance\n\nFor many numerical tasks, compare the absolute difference against a tolerance selected for the problem's scale and required accuracy. A single arbitrary epsilon is not correct for every application. Some problems require exact decimal arithmetic or integer-scaled units instead.\n\n## 5. Handle special values and ranges\n\nFloating-point calculations can produce very large values, infinities or NaNs depending on the operation and implementation. Check domain constraints and use facilities from `<math.h>` when appropriate. Do not assume floating point is suitable for exact financial accounting.",
       "examples": [
         {
           "id": "cl2.7-ex1",
@@ -45,14 +45,14 @@
       ]
     },
     "practise": {
-      "guidedTask": "Calculate several decimal fractions and print them with different precisions. Compare the displayed values with the underlying approximation.",
-      "independentTask": "Implement a tolerance-based comparison for measured floating-point values. For financial totals, compare the trade-offs of integer minor units and decimal arithmetic requirements.",
+      "guidedTask": "Write a small C program that demonstrates the central rules in CL2.7. Compile with warnings enabled, run it with ordinary and boundary values, and explain each result in your own words.",
+      "independentTask": "Create a second example for CL2.7 using different values and names. Include one likely mistake as a separate experiment, observe the compiler diagnostic or behavior, then correct it. Record the rule that explains the correction.",
       "hints": [
-        "Binary floating point cannot exactly represent every decimal fraction.",
-        "Display precision and stored precision are different.",
-        "Use tolerances appropriate to the scale of the problem.",
-        "Check for non-finite values when inputs may produce them.",
-        "Do not use binary floating point for exact monetary accounting without a deliberate representation strategy."
+        "Start by identifying the exact type of every object and expression.",
+        "Check the C language rule before assuming a platform-specific result.",
+        "Use compiler warnings as feedback, not as proof of correctness.",
+        "Test normal values and important boundaries.",
+        "Explain why the result follows from the language rules."
       ]
     }
   },
@@ -65,58 +65,58 @@
     "questions": [
       {
         "id": "cl2.7-q1",
-        "prompt": "Which statement is correct about floating-point values and decimal precision?",
+        "prompt": "Why may 0.1 + 0.2 not compare exactly equal to 0.3?",
         "options": [
-          "It follows C's type and language rules and should be checked with compiler diagnostics.",
-          "C ignores all declared types.",
-          "The browser decides its meaning."
+          "The decimal fractions may be approximated in binary floating-point representation",
+          "The plus operator always loses one digit",
+          "double stores only integers"
         ],
-        "answer": "It follows C's type and language rules and should be checked with compiler diagnostics.",
-        "explanation": "C semantics are defined by the language and implementation."
+        "answer": "The decimal fractions may be approximated in binary floating-point representation",
+        "explanation": "Many decimal fractions do not have finite binary representations."
       },
       {
         "id": "cl2.7-q2",
-        "prompt": "What is the safest general practice?",
+        "prompt": "What does `printf(\"%.2f\", value)` control?",
         "options": [
-          "Choose types and operations deliberately, initialize data and validate assumptions.",
-          "Ignore warnings and assume values are valid.",
-          "Use casts to silence every warning."
+          "The displayed number of digits after the decimal point",
+          "The number of bytes used by value",
+          "The precision stored permanently in value"
         ],
-        "answer": "Choose types and operations deliberately, initialize data and validate assumptions.",
-        "explanation": "Deliberate types and checks improve correctness."
+        "answer": "The displayed number of digits after the decimal point",
+        "explanation": "The format precision affects output formatting, not the object's stored precision."
       },
       {
         "id": "cl2.7-q3",
-        "prompt": "What should you do when a result is unexpected?",
+        "prompt": "Which type is commonly chosen for general floating-point calculations?",
         "options": [
-          "Create a small test case and inspect types, values and conversions.",
-          "Guess the result from the variable name.",
-          "Remove the test."
+          "double",
+          "char",
+          "unsigned short"
         ],
-        "answer": "Create a small test case and inspect types, values and conversions.",
-        "explanation": "Small reproducible tests make behaviour easier to reason about."
+        "answer": "double",
+        "explanation": "double is a common general-purpose floating-point type."
       },
       {
         "id": "cl2.7-q4",
-        "prompt": "Which statement about portability is accurate?",
+        "prompt": "How should calculated floating-point values often be compared?",
         "options": [
-          "Some type sizes and ranges depend on the implementation.",
-          "All C implementations use identical type widths.",
-          "Compiler warnings change the C standard."
+          "Using a tolerance appropriate to the problem's scale and accuracy",
+          "Always using exact equality",
+          "By converting both to char"
         ],
-        "answer": "Some type sizes and ranges depend on the implementation.",
-        "explanation": "Use standard guarantees and inspect implementation limits."
+        "answer": "Using a tolerance appropriate to the problem's scale and accuracy",
+        "explanation": "A justified tolerance accounts for rounding and application requirements."
       },
       {
         "id": "cl2.7-q5",
-        "prompt": "Which is a strong learning outcome?",
+        "prompt": "Is binary floating point always appropriate for exact currency calculations?",
         "options": [
-          "Explain the rule and apply it in a tested C program.",
-          "Memorize one output only.",
-          "Copy code without checking it."
+          "No; exact decimal or integer-scaled representations may be more suitable",
+          "Yes, every decimal fraction is exact",
+          "Only if the variable is named money"
         ],
-        "answer": "Explain the rule and apply it in a tested C program.",
-        "explanation": "Understanding plus testing demonstrates transferable knowledge."
+        "answer": "No; exact decimal or integer-scaled representations may be more suitable",
+        "explanation": "Binary floating point cannot represent many decimal fractions exactly."
       }
     ]
   },
