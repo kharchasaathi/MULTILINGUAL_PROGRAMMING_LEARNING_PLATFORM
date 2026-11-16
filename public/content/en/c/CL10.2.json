@@ -3,42 +3,60 @@
   "courseId": "c",
   "moduleId": "CL10",
   "topicId": "CL10.2",
-  "title": "Time complexity and space complexity fundamentals",
+  "title": "Building program logic and decomposing problems",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its constraints.",
-    "Trace the example and reason about its data flow.",
-    "Identify complexity, boundary or safety considerations.",
-    "Apply the concept in a tested C program."
+    "Break a multi-step problem into smaller functions with one clear responsibility and documented interfaces.",
+    "Represent decisions, repetition and sequence using language-independent pseudocode before translating them into C control structures.",
+    "Define parameters, return values, preconditions and postconditions for each function.",
+    "Use local variables and explicit data flow to avoid hidden dependencies and unnecessary global state.",
+    "Trace values across function calls and explain how each component contributes to the overall result.",
+    "Combine and test decomposed functions while preserving shared invariants and handling errors at clear boundaries."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL3.5",
+    "CL3.9",
+    "CL6.1",
+    "CL6.10"
+  ],
   "stages": {
     "understand": {
-      "concept": "Time complexity describes how an algorithm's work grows with input size; space complexity describes how its memory use grows. Big-O notation expresses an asymptotic upper-bound classification and commonly helps compare growth rates.",
-      "whyItMatters": "Complexity analysis helps choose algorithms that remain practical as input sizes increase, but real performance also depends on constants, memory access, compiler and hardware.",
-      "analogy": "Treat an algorithm or data structure as a set of operations that must preserve a clearly stated contract.",
-      "analogyLimit": "The analogy does not replace formal complexity analysis, C object rules or algorithm preconditions."
+      "concept": "Problem decomposition divides a large task into smaller parts that can be understood, implemented and tested independently. Program logic describes the order and conditions of those operations. In C, functions provide a practical boundary for many of these responsibilities.",
+      "whyItMatters": "A single large main function is difficult to reason about and test. Small functions reduce cognitive load, clarify interfaces and make it easier to reuse correct behaviour without duplicating code.",
+      "analogy": "A shop order can be divided into checking the order, calculating the bill, recording payment and printing a receipt. Each step has a defined input and result, but all steps must agree on the same order details.",
+      "analogyLimit": "Too many tiny functions or poorly chosen interfaces can make a program harder to follow. Decomposition is useful only when the boundaries reflect meaningful responsibilities and data flow."
     },
     "explain": {
-      "narrative": "Time complexity describes how an algorithm's work grows with input size; space complexity describes how its memory use grows. Big-O notation expresses an asymptotic upper-bound classification and commonly helps compare growth rates.\n\nBefore implementation, state input constraints, empty-case behaviour, ownership and invariants. Compile with warnings and test representative, boundary and failure cases.",
+      "narrative": "Begin with the complete task, then identify the major transformations from input to output. Ask which operations can be named, explained and tested independently. Give each function a focused responsibility. A function contract should state what its parameters mean, what it returns, what it modifies and which preconditions must hold.\\n\\nUse sequence for steps that happen in order, selection for alternatives and iteration for repeated work. Keep intermediate values explicit. Prefer passing required data through parameters and return values over relying on hidden global variables. If several functions must update the same object, make ownership and mutation rules clear.\\n\\nDesign from the outside inward: define the top-level flow, then refine each step. Implement and test leaf functions first where practical, then integrate them. When a function becomes difficult to describe in one sentence, inspect whether it has multiple responsibilities.",
       "examples": [
         {
           "id": "cl102-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stddef.h>\nint contains(const int values[], size_t count, int target) {\n for (size_t i=0; i<count; ++i)\n  if (values[i] == target) return 1;\n return 0;\n}",
-          "explanation": "In the worst case, contains examines every element, so its time grows linearly with count: O(n). It uses a fixed amount of additional storage, O(1).",
+          "title": "Separate calculation from presentation",
+          "code": "#include <stdio.h>\\n\\nint calculate_total(int unit_price, int quantity)\\n{\\n    return unit_price * quantity;\\n}\\n\\nint main(void)\\n{\\n    const int price = 25;\\n    const int quantity = 4;\\n    const int total = calculate_total(price, quantity);\\n    printf(\\\"Total: %d\\\\n\\\", total);\\n    return 0;\\n}",
+          "explanation": "calculate_total owns the arithmetic; main owns the example inputs and display. For a production billing program, the contract must constrain price and quantity so multiplication cannot overflow int, and may use a wider checked type.",
+          "runnable": true
+        },
+        {
+          "id": "cl102-ex2",
+          "language": "en",
+          "title": "Describe a multi-function flow before implementation",
+          "code": "/* High-level flow for a daily sales report:\\n   1. read_records(...)       -> validated records and count\\n   2. calculate_summary(...)  -> totals and item counts\\n   3. format_report(...)      -> presentation text\\n   4. write_report(...)       -> output status\\n\\n   Each step receives the data it needs explicitly.\\n   A failed step returns an error to the caller; later steps\\n   do not run with incomplete data. */",
+          "explanation": "This design makes data flow and failure boundaries visible. Each function can be tested with controlled inputs. It also prevents report formatting from being mixed with record parsing and arithmetic.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Count the maximum comparisons for arrays of lengths 5 and 100.",
-      "independentTask": "Compare linear search and binary search, stating the preconditions for binary search and the time/space trade-offs.",
+      "guidedTask": "Take a task that reads three numbers and reports the largest. Decompose it into input, comparison and output responsibilities. Identify which values each function needs and what each function returns.",
+      "independentTask": "Design a small inventory update workflow. Create a top-level pseudocode sequence and at least three function contracts. Include what happens if an item is missing or a quantity is invalid.",
       "hints": [
-        "State whether you are discussing best, average or worst case.",
-        "Binary search requires the input to be sorted under the comparison being used.",
-        "Big-O describes growth, not an exact runtime in seconds."
+        "Name each function with a verb that describes its responsibility.",
+        "Keep input/output formatting separate from calculations when possible.",
+        "Write down parameter meaning and return meaning, not just parameter types.",
+        "Pass required data explicitly instead of depending on unrelated global variables.",
+        "Use early error returns when continuing would operate on incomplete data.",
+        "Test each function independently before testing the complete workflow."
       ]
     }
   },
@@ -51,36 +69,63 @@
     "questions": [
       {
         "id": "cl102-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What is the main purpose of decomposing a program?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "To separate a large task into understandable responsibilities",
+          "To create as many functions as possible",
+          "To avoid all parameters",
+          "To move every variable to global scope"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the concept and constraints described above."
+        "answer": "To separate a large task into understandable responsibilities",
+        "explanation": "Good decomposition reduces complexity by giving components clear, cohesive responsibilities."
       },
       {
         "id": "cl102-q2",
-        "prompt": "What should be checked before relying on this algorithm or structure?",
+        "prompt": "Which function boundary is usually easiest to understand?",
         "options": [
-          "Its preconditions, invariants, bounds and failure cases.",
-          "Only the name of the data structure.",
-          "Whether one example produced an output."
+          "A function with one clear responsibility and a documented contract",
+          "A function that reads input, calculates, writes files and prints output",
+          "A function whose behaviour depends on hidden global state",
+          "A function with no defined inputs or outputs"
         ],
-        "answer": "Its preconditions, invariants, bounds and failure cases.",
-        "explanation": "Correctness depends on maintaining the algorithm's contract."
+        "answer": "A function with one clear responsibility and a documented contract",
+        "explanation": "A cohesive function has a focused purpose and explicit data flow."
       },
       {
         "id": "cl102-q3",
-        "prompt": "Which practice supports reliable implementation?",
+        "prompt": "Which control structure represents repeating an operation while a condition holds?",
         "options": [
-          "Test empty, boundary and representative inputs.",
-          "Ignore allocation failures.",
-          "Assume average complexity guarantees every operation's worst case."
+          "Iteration",
+          "Selection",
+          "A function prototype",
+          "A preprocessor directive"
         ],
-        "answer": "Test empty, boundary and representative inputs.",
-        "explanation": "Targeted tests expose defects that ordinary examples may miss."
+        "answer": "Iteration",
+        "explanation": "Loops express repetition; if/switch express selection."
+      },
+      {
+        "id": "cl102-q4",
+        "prompt": "Why pass required values through parameters?",
+        "options": [
+          "It makes data dependencies explicit and supports independent testing",
+          "It guarantees no runtime errors",
+          "It removes the need for types",
+          "It makes every function recursive"
+        ],
+        "answer": "It makes data dependencies explicit and supports independent testing",
+        "explanation": "Explicit parameters make a function's dependencies visible to callers and reviewers."
+      },
+      {
+        "id": "cl102-q5",
+        "prompt": "A function is difficult to summarize because it validates input, calculates totals and prints a report. What is a useful next step?",
+        "options": [
+          "Consider splitting it into cohesive functions with explicit interfaces",
+          "Add more global variables",
+          "Remove all error handling",
+          "Make the function recursive"
+        ],
+        "answer": "Consider splitting it into cohesive functions with explicit interfaces",
+        "explanation": "Several unrelated responsibilities often indicate a useful decomposition boundary."
       }
     ]
   },
