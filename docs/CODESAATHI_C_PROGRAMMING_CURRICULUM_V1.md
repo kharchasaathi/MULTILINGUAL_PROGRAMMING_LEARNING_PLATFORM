@@ -126,10 +126,10 @@ The course is designed to take a learner from first contact with C through pract
 - [ ] CL9.4 · Header files, declarations, include guards and organizing source files
 - [ ] CL9.5 · Storage classes and storage-duration concepts
 - [ ] CL9.6 · Bitwise operators, masks, shifts and bit manipulation
-- [ ] CL9.7 · Fixed-width integer types and format macros from `stdint.h`/`inttypes.h`
-- [ ] CL9.8 · Command-line arguments: `argc` and `argv`
-- [ ] CL9.9 · Environment access and process termination utilities (CodeSaathi extension)
-- [ ] CL9.10 · Build commands, compiler flags, warnings and language-standard selection (CodeSaathi extension)
+- [x] CL9.7 · Fixed-width integer types and format macros from `stdint.h`/`inttypes.h`
+- [x] CL9.8 · Command-line arguments: `argc` and `argv`
+- [x] CL9.9 · Environment access and process termination utilities (CodeSaathi extension)
+- [x] CL9.10 · Build commands, compiler flags, warnings and language-standard selection (CodeSaathi extension)
 
 ### CL10 — Problem solving and data structures & algorithms
 - [ ] CL10.1 · A systematic C problem-solving workflow
