@@ -6,39 +6,50 @@
   "title": "Memory addresses and the address-of operator",
   "language": "en",
   "learningObjectives": [
-    "Explain the language rule and its constraints.",
-    "Trace the example and predict its behaviour.",
-    "Identify boundary and safety cases.",
-    "Apply the concept in a tested C program."
+    "Use the unary & operator to obtain the address of an eligible object.",
+    "Declare pointer variables with a type that matches the object they designate.",
+    "Print object pointer values using %p after conversion to void *.",
+    "Explain why numeric address values are not portable identifiers.",
+    "Distinguish an object's value from the address at which it is stored."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "An object's address identifies its location in the program's memory model. The unary address-of operator & produces a pointer to an object or function when the operand permits it. The %p conversion specifier prints a pointer value after conversion to void *.",
+      "concept": "The unary address-of operator & produces a pointer to an object or function when its operand permits it. A pointer's type describes the kind of object or function it can designate. The %p conversion specifier prints a pointer value after conversion to void *. The exact numeric representation of an address is implementation-dependent and should not be treated as a portable property of an object.",
       "whyItMatters": "This knowledge helps reason about C data representation, object bounds and valid memory access.",
       "analogy": "Think of memory objects as labelled storage and pointers as typed references to that storage.",
       "analogyLimit": "The analogy does not replace C's formal pointer, lifetime and object-access rules."
     },
     "explain": {
-      "narrative": "An object's address identifies its location in the program's memory model. The unary address-of operator & produces a pointer to an object or function when the operand permits it. The %p conversion specifier prints a pointer value after conversion to void *.\n\nCheck the declared types, object lifetime, valid bounds and function preconditions before using the construct. Enable compiler warnings and test edge cases.",
+      "narrative": "## 1. Obtain an object's address\n\nIf `int score = 90;`, the expression `&score` has type `int *`. It is the address of the object, not the value stored in the object.\n\n## 2. Match pointer types\n\nA pointer to int is declared `int *p`. It can point to an int object with a suitable lifetime. Pointer types help the compiler check how the pointed-to object is accessed.\n\n## 3. Print a pointer\n\nUse `%p` with a corresponding `void *` argument, commonly `(void *)p`. The printed representation is implementation-defined. Do not parse it as a stable ID or assume it is the same between program runs.\n\n## 4. Address and lifetime\n\nTaking an address does not extend an object's lifetime. A pointer to a local automatic object becomes invalid after that object ceases to exist. Never return or retain such a pointer beyond the object's lifetime.\n\n## 5. Use addresses for indirection\n\nPointers let functions access caller-owned objects and let programs traverse arrays and manage dynamic storage. The pointer must have the correct type and designate a live object before it is dereferenced.",
       "examples": [
         {
-          "id": "cl52-ex1",
+          "id": "cl5.2-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "Addresses connect objects to pointers and explain how functions can access caller-owned objects through pointer parameters. The exact numeric address is not a portable program property.",
-          "explanation": "#include <stdio.h>\nint main(void) {\n int count = 42;\n int *address = &count;\n printf(\"value=%d\\n\", count);\n printf(\"address=%p\\n\", (void *)address);\n return 0;\n}",
+          "title": "Take and print an object's address",
+          "code": "#include <stdio.h>\n\nint main(void) {\n    int score = 90;\n    int *score_address = &score;\n    printf(\"value=%d\\n\", score);\n    printf(\"address=%p\\n\", (void *)score_address);\n    return 0;\n}",
+          "explanation": "The address-of operator produces an int pointer. The %p conversion receives a void pointer. The displayed representation is not portable.",
+          "runnable": false
+        },
+        {
+          "id": "cl5.2-ex2",
+          "language": "en",
+          "title": "Use an address to update an object",
+          "code": "#include <stdio.h>\n\nint main(void) {\n    int level = 2;\n    int *p = &level;\n    *p = 3;\n    printf(\"%d\\n\", level);\n    return 0;\n}",
+          "explanation": "The pointer designates level. Dereferencing it accesses the same object, so the assignment changes level.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "address stores the address of count. The address printed by %p is implementation-dependent and may change between runs; the program should not rely on a particular value.",
-      "independentTask": "Identify the type of count, &count and address.",
+      "guidedTask": "Write a C program demonstrating CL5.2. State the relevant input, pointer or conversion contract, then compile and trace the normal and failure paths.",
+      "independentTask": "Create a second example for CL5.2 that exercises a boundary or invalid state. Add checks, document the ownership or input rules, and explain why unsafe behavior is avoided.",
       "hints": [
-        "Write a program that obtains an object's address and explains why the printed value should not be hard-coded or compared across executions.",
-        "Use %p with an argument converted to void *.",
-        "An address is useful only while the pointed-to object is alive and accessible."
+        "Read the declared types carefully, including every pointer and qualifier level.",
+        "Check return values and validate inputs before use.",
+        "Keep object lifetime and ownership explicit.",
+        "Avoid dereferencing invalid or out-of-range pointers.",
+        "Test both success and failure paths."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl52-q1",
-        "prompt": "Which statement best matches this lesson?",
+        "id": "cl5.2-q1",
+        "prompt": "What is the type of &score when score is an int object?",
         "options": [
-          "The C rule and constraints explained in this lesson.",
-          "An unrelated HTML element.",
-          "A CSS property."
+          "int *",
+          "int",
+          "void"
         ],
-        "answer": "The C rule and constraints explained in this lesson.",
-        "explanation": "The correct choice follows the C rule and its constraints."
+        "answer": "int *",
+        "explanation": "The address of an int object is a pointer to int."
       },
       {
-        "id": "cl52-q2",
-        "prompt": "What is the safest way to handle the relevant boundary or validity condition?",
+        "id": "cl5.2-q2",
+        "prompt": "Which printf conversion is used for a pointer?",
         "options": [
-          "Check the documented preconditions and bounds before access.",
-          "Assume C automatically checks every pointer and array access.",
-          "Ignore the result if one run appears successful."
+          "%p",
+          "%d",
+          "%s"
         ],
-        "answer": "Check the documented preconditions and bounds before access.",
-        "explanation": "C programs must explicitly respect object bounds, pointer validity and conversion results."
+        "answer": "%p",
+        "explanation": "The %p conversion specifier is used for pointer values."
       },
       {
-        "id": "cl52-q3",
-        "prompt": "Why should the example be traced?",
+        "id": "cl5.2-q3",
+        "prompt": "Why is a pointer commonly cast to void * for printf %p?",
         "options": [
-          "To understand execution order and object state.",
-          "To replace compilation and tests.",
-          "To avoid checking inputs."
+          "The %p conversion expects a void * argument",
+          "It converts the address to an integer",
+          "It allocates a new object"
         ],
-        "answer": "To understand execution order and object state.",
-        "explanation": "Tracing complements compilation, warnings and testing."
+        "answer": "The %p conversion expects a void * argument",
+        "explanation": "The variadic argument must have the type required by the conversion specification."
+      },
+      {
+        "id": "cl5.2-q4",
+        "prompt": "Does taking an object's address extend its lifetime?",
+        "options": [
+          "No",
+          "Yes, until the pointer is freed",
+          "Only for local variables"
+        ],
+        "answer": "No",
+        "explanation": "The object's lifetime is independent of whether a pointer stores its address."
+      },
+      {
+        "id": "cl5.2-q5",
+        "prompt": "Is a printed pointer address a portable object identifier?",
+        "options": [
+          "No; its representation and value are not a stable portable identifier",
+          "Yes, it is the same on every run",
+          "Only when printed in hexadecimal"
+        ],
+        "answer": "No; its representation and value are not a stable portable identifier",
+        "explanation": "C does not guarantee a stable numeric address across runs or implementations."
       }
     ]
   },
