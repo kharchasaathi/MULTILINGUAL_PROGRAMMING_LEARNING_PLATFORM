@@ -6,50 +6,50 @@
   "title": "Array size, indexing, traversal and bounds",
   "language": "en",
   "learningObjectives": [
-    "Explain the core ideas behind Array size, indexing, traversal and bounds.",
-    "Identify relevant C syntax, types, standard-library interfaces and constraints.",
-    "Trace a small example and predict its behaviour.",
-    "Recognize boundary cases, common defects and portability risks.",
-    "Apply the concept in a tested C program."
+    "Calculate an array's element count using sizeof when the array object is in scope.",
+    "Explain zero-based indexing and valid index ranges.",
+    "Traverse arrays using loops without reading or writing beyond bounds.",
+    "Pass array lengths explicitly to functions that receive array parameters.",
+    "Recognize why sizeof on an array parameter does not reveal the caller's array length."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "Array size, indexing, traversal and bounds is an important part of writing correct, maintainable C programs. Learn the exact language rules rather than relying on what one compiler appears to accept. C is a compiled, standardized language: distinguish language guarantees from implementation-defined choices, compiler extensions and behaviour that the standard leaves undefined.",
+      "concept": "For an array containing N elements, valid indices are from 0 through N-1. The sizeof operator can calculate the total size of an actual array object, and dividing by the size of one element gives its element count. When an array is passed to a function, the parameter is adjusted to a pointer, so sizeof inside that function reports the pointer size, not the caller's array size. C does not perform automatic bounds checking.",
       "whyItMatters": "Understanding Array size, indexing, traversal and bounds helps you reason about program behaviour instead of memorizing syntax. It is useful in exams, debugging and building reliable C applications.",
       "analogy": "Treat the concept as a tool with a precise contract: it has valid inputs, defined operations and observable results.",
       "analogyLimit": "An analogy is only an aid; the C standard and the relevant function specifications determine actual behaviour."
     },
     "explain": {
-      "narrative": "## Concept and mental model\nArray size, indexing, traversal and bounds should be understood in terms of the C abstract machine: objects have types, storage duration and lifetimes; expressions are evaluated according to language rules; and library calls have specified preconditions and results. The compiler translates a translation unit, but a successful compilation does not prove that a program is correct.\n\n## How to reason about this topic\n1. Identify the inputs, objects, types and operations involved.\n2. Check the applicable syntax and semantic constraints.\n3. Determine valid input ranges and boundary cases.\n4. Check every function result and handle failure where the API permits failure.\n5. Compile with warnings enabled and test normal, boundary and invalid cases.\n\n## Correctness and portability\nDo not assume that int has a particular width, that memory addresses are identical across runs, or that undefined behaviour has a predictable result. Use standard headers and documented interfaces. State any platform assumptions explicitly. Prefer small functions, clear names and explicit invariants.\n\n## Worked example 1 — establish a testable baseline\nThe example below demonstrates a small, compilable C program. Adapt the declaration, expression or API call to the exact concept being studied, then change one condition at a time and observe the result.\n\n## Worked example 2 — validate a boundary\nA second useful test is to exercise the smallest valid input, largest valid input, one value outside the valid range and an ordinary middle value. Record the expected result before running the program; this prevents a test from merely confirming an assumption.\n\n## Common mistakes\n- Assuming a successful compile means the result is correct.\n- Ignoring warnings or failing to check a library function's return value.\n- Using a value outside the range permitted by its type or API.\n- Confusing a compiler extension with portable ISO C.\n- Testing only one ordinary input and missing boundary cases.",
+      "narrative": "## 1. Array length in the declaring scope\n\nFor an actual array `int data[6]`, `sizeof data` gives the total array size in bytes. `sizeof data[0]` gives the size of one element. Their quotient gives the element count while data is still an array object.\n\n## 2. Valid indices\n\nIf an array has N elements, the valid indices are 0 to N-1. The expression `data[N]` is one past the last element and must not be dereferenced. Even forming or using invalid subscripts can lead to undefined behavior depending on the expression.\n\n## 3. Traverse safely\n\nA common loop uses `i < count`, not `i <= count`. Keep the count and index types compatible, and avoid decrementing an unsigned index below zero.\n\n## 4. Function parameters\n\nA function parameter written as `int data[]` is adjusted to `int *data`. The function does not know the original array length from that parameter. Pass the element count separately and use it to validate every index.\n\n## 5. One-past pointer\n\nC permits forming a pointer one past the final array element for iteration and comparison, but it must not be dereferenced. This is the basis of the common `[begin, end)` traversal pattern.",
       "examples": [
         {
           "id": "cl4.2-ex1",
           "language": "en",
-          "title": "A small C program to compile and inspect",
-          "code": "#include <stdio.h>\n\nint main(void) {\n    int value = 12;\n    printf(\"Value: %d\\\\n\", value);\n    return 0;\n}",
-          "explanation": "The program declares an int object, initializes it, prints it with the matching %d conversion specification and returns a success status.",
-          "runnable": true
+          "title": "Calculate count and traverse",
+          "code": "#include <stdio.h>\n\nint main(void) {\n    int data[] = { 5, 10, 15, 20 };\n    size_t count = sizeof data / sizeof data[0];\n    for (size_t i = 0; i < count; ++i) {\n        printf(\"index %zu: %d\\n\", i, data[i]);\n    }\n    return 0;\n}",
+          "explanation": "The loop stops when i equals count, so it never accesses data[count].",
+          "runnable": false
         },
         {
           "id": "cl4.2-ex2",
           "language": "en",
-          "title": "Iterating over a fixed array",
-          "code": "#include <stdio.h>\n\nint main(void) {\n    int values[] = { 3, 6, 9, 12 };\n    size_t count = sizeof values / sizeof values[0];\n    for (size_t i = 0; i < count; ++i) {\n        printf(\"%d\\\\n\", values[i]);\n    }\n    return 0;\n}",
-          "explanation": "The array length is derived from its total size divided by the size of one element. The loop visits valid indices from zero through count minus one.",
-          "runnable": true
+          "title": "Pass an array length explicitly",
+          "code": "#include <stddef.h>\n#include <stdio.h>\n\nvoid print_values(const int values[], size_t count) {\n    for (size_t i = 0; i < count; ++i) {\n        printf(\"%d\\n\", values[i]);\n    }\n}\n\nint main(void) {\n    int values[] = { 2, 4, 6 };\n    print_values(values, sizeof values / sizeof values[0]);\n    return 0;\n}",
+          "explanation": "The function receives a pointer and a separate element count. It cannot recover the original array length with sizeof values.",
+          "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Write a minimal program that demonstrates Array size, indexing, traversal and bounds. Compile it with warnings enabled, explain each declaration and operation, and record its output.",
-      "independentTask": "Create two test cases for Array size, indexing, traversal and bounds: one normal case and one boundary or failure case. State the expected behaviour before running them, then compare the result and explain any difference.",
+      "guidedTask": "Implement a small C program demonstrating CL4.2. Identify the relevant array or string capacity, valid indices, expected results and failure cases before compiling and testing.",
+      "independentTask": "Create a second example for CL4.2 that handles a boundary case explicitly. Add tests for empty input, the smallest valid case, the largest valid case and one invalid or oversized case. Explain how your code prevents invalid access.",
       "hints": [
-        "Read the compiler diagnostic carefully; fix the first meaningful error before chasing later messages.",
-        "Use the exact type and format specifier required by the operation.",
-        "Test zero, negative values where valid, maximum/minimum boundaries and invalid input as appropriate.",
-        "Do not dereference an uninitialized, null or expired pointer.",
-        "Prefer defined, portable behaviour over code that merely appears to work on one machine."
+        "Write down the exact array length and valid index range.",
+        "Include null terminator space when working with C strings.",
+        "Check function preconditions and return values.",
+        "Pass array lengths explicitly when a function needs them.",
+        "Test exact-fit and one-past-boundary cases."
       ]
     }
   },
@@ -62,58 +62,58 @@
     "questions": [
       {
         "id": "cl4.2-q1",
-        "prompt": "Which approach is safest when applying Array size, indexing, traversal and bounds?",
+        "prompt": "For an array with 5 elements, what is its last valid index?",
         "options": [
-          "Follow the C language rules, validate inputs and check relevant return values.",
-          "Assume every compiler and platform behaves identically.",
-          "Ignore warnings whenever the program produces output."
+          "4",
+          "5",
+          "6"
         ],
-        "answer": "Follow the C language rules, validate inputs and check relevant return values.",
-        "explanation": "Correct C programming depends on defined behaviour, valid inputs and careful handling of operations that can fail."
+        "answer": "4",
+        "explanation": "The valid indices are 0 through N-1."
       },
       {
         "id": "cl4.2-q2",
-        "prompt": "Why should boundary cases be tested?",
+        "prompt": "Why does sizeof on an array parameter not give the caller's array size?",
         "options": [
-          "They reveal errors that ordinary inputs may not expose.",
-          "They are unnecessary when one example works.",
-          "They make compiler warnings irrelevant."
+          "The parameter is adjusted to a pointer",
+          "sizeof is disabled inside functions",
+          "Arrays cannot be passed to functions"
         ],
-        "answer": "They reveal errors that ordinary inputs may not expose.",
-        "explanation": "Boundary tests check the edges of valid ranges and important exceptional conditions."
+        "answer": "The parameter is adjusted to a pointer",
+        "explanation": "Array parameters are adjusted to pointer types."
       },
       {
         "id": "cl4.2-q3",
-        "prompt": "What does a successful compilation establish?",
+        "prompt": "Which loop condition safely visits N elements from index zero?",
         "options": [
-          "The compiler accepted the translation under its selected settings; it does not prove runtime correctness.",
-          "The program is free from all defects.",
-          "The program is portable to every C implementation."
+          "i < N",
+          "i <= N",
+          "i != N + 1"
         ],
-        "answer": "The compiler accepted the translation under its selected settings; it does not prove runtime correctness.",
-        "explanation": "Compilation is one validation step. Tests, review and correct reasoning are also required."
+        "answer": "i < N",
+        "explanation": "The condition excludes the one-past index N."
       },
       {
         "id": "cl4.2-q4",
-        "prompt": "Which practice improves portability?",
+        "prompt": "What is a one-past pointer allowed to do?",
         "options": [
-          "Use standard C features and document unavoidable platform assumptions.",
-          "Depend on undocumented compiler extensions.",
-          "Assume int and pointer sizes are fixed everywhere."
+          "Be formed and used for permitted comparisons, but not dereferenced",
+          "Be dereferenced to read the next object",
+          "Be used as a new array element"
         ],
-        "answer": "Use standard C features and document unavoidable platform assumptions.",
-        "explanation": "Portable programs avoid assumptions that the C standard does not guarantee."
+        "answer": "Be formed and used for permitted comparisons, but not dereferenced",
+        "explanation": "C permits a one-past pointer as an iteration endpoint, not as an accessible element."
       },
       {
         "id": "cl4.2-q5",
-        "prompt": "What should you do when a library operation can fail?",
+        "prompt": "What should a function receive when it needs to traverse a caller's array?",
         "options": [
-          "Check its documented result and handle the failure path.",
-          "Assume it always succeeds.",
-          "Continue using its output without checking."
+          "A pointer to the elements and the element count",
+          "Only the first element value",
+          "Only sizeof of the pointer"
         ],
-        "answer": "Check its documented result and handle the failure path.",
-        "explanation": "Many standard-library operations report failure through return values or stream indicators."
+        "answer": "A pointer to the elements and the element count",
+        "explanation": "The function needs a separate length because the parameter does not retain the array bound."
       }
     ]
   },
