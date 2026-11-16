@@ -6,39 +6,50 @@
   "title": "Creating and opening files; file modes and fopen",
   "language": "en",
   "learningObjectives": [
-    "Explain the C concept and its rules.",
-    "Trace the example and describe data flow.",
-    "Identify relevant failure and boundary cases.",
-    "Apply the concept in a tested C program."
+    "Choose r, w, a and update modes according to the required operation.",
+    "Explain when w truncates an existing file and when a appends.",
+    "Check fopen for a NULL result before using a stream.",
+    "Distinguish text and binary modes where the implementation supports a difference.",
+    "Close every successfully opened stream and check close errors."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "fopen opens a file stream using a path and mode string. Modes such as r, w and a select reading, truncating/creating for writing, or appending; adding b requests binary mode where relevant. fopen returns a FILE pointer or NULL on failure.",
+      "concept": "fopen associates a FILE stream with a path and mode. The mode determines whether the program reads, writes, appends, or combines reading and writing. A failed open returns NULL. Opening with w can destroy existing file contents, so the mode is a data-safety decision, not just syntax.",
       "whyItMatters": "File operations interact with the environment and can fail because of missing paths, permissions, resource limits or storage errors. Every open must be checked and every successfully opened stream must be closed.",
       "analogy": "Treat the operation as a clearly specified contract between the program and its data.",
       "analogyLimit": "The analogy does not replace C's type, lifetime, I/O and object representation rules."
     },
     "explain": {
-      "narrative": "fopen opens a file stream using a path and mode string. Modes such as r, w and a select reading, truncating/creating for writing, or appending; adding b requests binary mode where relevant. fopen returns a FILE pointer or NULL on failure.\n\nCheck all return values, object lifetimes, types and preconditions. Enable compiler warnings and test expected as well as failure paths.",
+      "narrative": "## 1. Opening a stream\n\n`fopen(path, mode)` attempts to open the named file and returns a FILE pointer on success. Always check for NULL before calling stream functions.\n\n## 2. Common modes\n\n`r` opens an existing file for reading. `w` creates or truncates a file for writing. `a` creates if needed and writes at the end. Adding `+` enables both reading and writing, subject to positioning rules.\n\n## 3. Update modes\n\nModes such as `r+`, `w+` and `a+` combine reading and writing with different creation and truncation behavior. When switching between input and output on an update stream, follow the required positioning or flushing rules.\n\n## 4. Text and binary\n\nAdding `b` requests binary mode. On systems that distinguish text and binary streams, the representations can differ. Use binary mode for byte-oriented data where required.\n\n## 5. Close and report errors\n\nCall fclose once for every successfully opened stream. It can report delayed write errors, so check its return value.",
       "examples": [
         {
-          "id": "cl71-ex1",
+          "id": "cl7.1-ex1",
           "language": "en",
-          "title": "Focused C example",
+          "title": "Core concept",
           "code": "#include <stdio.h>\nint main(void) {\n FILE *file = fopen(\"notes.txt\", \"w\");\n if (file == NULL) {\n  perror(\"notes.txt\");\n  return 1;\n }\n fputs(\"C file practice\\n\", file);\n if (fclose(file) == EOF) return 1;\n return 0;\n}",
-          "explanation": "The w mode creates the file or truncates an existing file. The program checks fopen before using the stream and checks fclose for a possible write/close error.",
+          "explanation": "Trace the operations and check the relevant C standard library contracts and failure cases.",
+          "runnable": false
+        },
+        {
+          "id": "cl7.1-ex2",
+          "language": "en",
+          "title": "Apply the concept safely",
+          "code": "#include <stdio.h>\nint main(void) { FILE *f = fopen(\"append.txt\", \"a\"); if (f == NULL) return 1; if (fputs(\"new entry\\n\", f) == EOF) { fclose(f); return 1; } return fclose(f) == EOF; }",
+          "explanation": "This example reinforces the topic with explicit validation or resource handling. Compile with warnings and test failure paths.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Compare r, w, a, r+, w+ and a+ modes.",
-      "independentTask": "Write a program that opens a file in append mode, reports errors and closes the stream on every successful-open path.",
+      "guidedTask": "Create a small C program demonstrating File creation, opening and fopen modes. Write down its preconditions, expected result and failure handling before implementation.",
+      "independentTask": "Extend the example for File creation, opening and fopen modes to handle a boundary case and an error case. Explain the relevant C rule and add a test for each path.",
       "hints": [
-        "Use a path appropriate to the program's working directory and platform.",
-        "Do not assume a relative path is relative to the source file; it is normally relative to the process working directory.",
-        "Check fclose because buffered output errors may be reported when closing."
+        "Read the declaration and function contract carefully.",
+        "Check all library return values before using results.",
+        "Keep object bounds, lifetime and resource ownership explicit.",
+        "Do not assume implementation-specific memory or file representations are portable.",
+        "Test both success and failure paths."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl71-q1",
-        "prompt": "Which statement best describes the lesson?",
+        "id": "cl7.1-q1",
+        "prompt": "Which mode opens an existing file for reading without truncating it?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "r",
+          "w",
+          "a"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the C rule described in the lesson."
+        "answer": "r",
+        "explanation": "The r mode requires an existing file and opens it for reading."
       },
       {
-        "id": "cl71-q2",
-        "prompt": "What should be verified before using this feature?",
+        "id": "cl7.1-q2",
+        "prompt": "What can fopen with mode w do to an existing file?",
         "options": [
-          "Types, preconditions, object validity and relevant return values.",
-          "Only the source file name.",
-          "Whether a single run appeared successful."
+          "Truncate its previous contents",
+          "Append after the old contents",
+          "Open it read-only"
         ],
-        "answer": "Types, preconditions, object validity and relevant return values.",
-        "explanation": "C correctness depends on valid objects, correct types and checked operations."
+        "answer": "Truncate its previous contents",
+        "explanation": "The w mode creates or truncates a file for writing."
       },
       {
-        "id": "cl71-q3",
-        "prompt": "Which practice improves reliability?",
+        "id": "cl7.1-q3",
+        "prompt": "What does fopen return when it cannot open the requested stream?",
         "options": [
-          "Compile with warnings and test normal and failure paths.",
-          "Ignore I/O and compiler diagnostics.",
-          "Assume all environments behave identically."
+          "NULL",
+          "EOF",
+          "A pointer to an empty file"
         ],
-        "answer": "Compile with warnings and test normal and failure paths.",
-        "explanation": "Diagnostics and tests provide evidence for program behaviour."
+        "answer": "NULL",
+        "explanation": "A failed fopen call returns a null pointer."
+      },
+      {
+        "id": "cl7.1-q4",
+        "prompt": "What does adding b to a mode request?",
+        "options": [
+          "Binary stream mode",
+          "Buffered-only mode",
+          "Backup mode"
+        ],
+        "answer": "Binary stream mode",
+        "explanation": "The b character requests binary mode where the implementation distinguishes it."
+      },
+      {
+        "id": "cl7.1-q5",
+        "prompt": "Why check fclose?",
+        "options": [
+          "It can report delayed output errors",
+          "It always returns the file size",
+          "It reopens the stream"
+        ],
+        "answer": "It can report delayed output errors",
+        "explanation": "Buffered output can fail when the stream is closed."
       }
     ]
   },
