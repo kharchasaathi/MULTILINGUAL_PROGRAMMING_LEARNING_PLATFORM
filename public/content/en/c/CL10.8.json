@@ -3,42 +3,60 @@
   "courseId": "c",
   "moduleId": "CL10",
   "topicId": "CL10.8",
-  "title": "C DSA implementation safety: bounds, ownership and invariants",
+  "title": "Stacks: representation, push, pop, peek and overflow/underflow",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its constraints.",
-    "Trace the example and reason about its data flow.",
-    "Identify complexity, boundary or safety considerations.",
-    "Apply the concept in a tested C program."
+    "Explain the last-in, first-out (LIFO) rule and identify the top element of a stack.",
+    "Represent a bounded stack using a C array and a count or top index with a documented invariant.",
+    "Implement push, pop, peek and is_empty operations with explicit success/failure results.",
+    "Prevent overflow before writing and underflow before reading or removing an element.",
+    "Compare fixed-capacity array stacks with dynamically allocated or linked implementations.",
+    "Test stack behaviour on empty, one-item, full and repeated push/pop sequences."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL4.1",
+    "CL5.3",
+    "CL6.1",
+    "CL10.5"
+  ],
   "stages": {
     "understand": {
-      "concept": "Data structures rely on invariants such as valid array bounds, correct list links, unique ownership and consistent tree ordering. Every operation must preserve those invariants on both success and failure paths.",
-      "whyItMatters": "A data structure that works for ordinary inputs may still fail on empty, full, malformed or allocation-failure cases. Invariants provide a systematic way to reason about correctness.",
-      "analogy": "Treat an algorithm or data structure as a set of operations that must preserve a clearly stated contract.",
-      "analogyLimit": "The analogy does not replace formal complexity analysis, C object rules or algorithm preconditions."
+      "concept": "A stack is an abstract data type that follows last-in, first-out (LIFO): the most recently pushed item is the first one popped. Its basic operations are push, pop and peek. A bounded array implementation stores elements in an array and tracks how many are currently present.",
+      "whyItMatters": "Stacks are used in expression evaluation, undo history, parsing, depth-first traversal and function-call management. Their simple interface is useful only when empty and full conditions are handled correctly.",
+      "analogy": "A stack of trays: a new tray is placed on top, and the top tray is the first one removed.",
+      "analogyLimit": "A software stack may have a fixed capacity or dynamic allocation and is not necessarily the same as the machine call stack. The tray analogy does not model memory allocation or error reporting."
     },
     "explain": {
-      "narrative": "Data structures rely on invariants such as valid array bounds, correct list links, unique ownership and consistent tree ordering. Every operation must preserve those invariants on both success and failure paths.\n\nBefore implementation, state input constraints, empty-case behaviour, ownership and invariants. Compile with warnings and test representative, boundary and failure cases.",
+      "narrative": "For an array stack, store the number of elements in count. The invariant is 0 <= count <= capacity; when count is nonzero, the top item is data[count - 1]. Push first checks count < capacity, writes data[count], then increments count. Pop first checks count > 0, optionally copies data[count - 1] to the caller, then decrements count. Peek reads data[count - 1] without changing count.\\n\\nUse size_t for capacity and count. Return a status such as bool to distinguish success from full or empty; do not use a valid data value as an error sentinel unless the interface explicitly reserves it. Check pointer arguments before dereferencing them. A fixed-capacity stack does not allocate memory, but callers must decide what to do when it is full.\\n\\nA linked stack can grow by allocating nodes, but each push can fail and every successful allocation needs a matching release. The LIFO interface stays the same while the representation changes. Test empty pop/peek, exactly-full push, one-more-than-capacity push and interleaved operations.",
       "examples": [
         {
           "id": "cl108-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stddef.h>\nint push(int data[], size_t capacity, size_t *count, int value) {\n if (data == NULL || count == NULL || *count >= capacity) return 0;\n data[*count] = value;\n ++*count;\n return 1;\n}",
-          "explanation": "The function checks pointers and capacity before writing. It increments count only after the new value has been stored, preserving the invariant count <= capacity.",
+          "title": "A bounded array stack with safe operations",
+          "code": "#include <stdbool.h>\\n#include <stddef.h>\\n\\n#define STACK_CAPACITY 4U\\n\\ntypedef struct {\\n    int items[STACK_CAPACITY];\\n    size_t count;\\n} Stack;\\n\\nstatic bool push(Stack *stack, int value)\\n{\\n    if (stack == NULL || stack->count >= STACK_CAPACITY) return false;\\n    stack->items[stack->count] = value;\\n    ++stack->count;\\n    return true;\\n}\\n\\nstatic bool pop(Stack *stack, int *out)\\n{\\n    if (stack == NULL || out == NULL || stack->count == 0U) return false;\\n    --stack->count;\\n    *out = stack->items[stack->count];\\n    return true;\\n}\\n\\nint main(void)\\n{\\n    Stack stack = {{0}, 0U};\\n    int value = 0;\\n    if (!push(&stack, 10) || !push(&stack, 20)) return 1;\\n    if (!pop(&stack, &value) || value != 20) return 2;\\n    return 0;\\n}",
+          "explanation": "count records the number of stored values. Push checks capacity before writing; pop checks nonempty state before decrementing and reading the former top. A failed operation leaves the stack unchanged.",
+          "runnable": true
+        },
+        {
+          "id": "cl108-ex2",
+          "language": "en",
+          "title": "Peek reads without removing the top item",
+          "code": "#include <stdbool.h>\\n#include <stddef.h>\\n\\nstatic bool peek(const int items[], size_t count, int *out)\\n{\\n    if (items == NULL || out == NULL || count == 0U) return false;\\n    *out = items[count - 1U];\\n    return true;\\n}\\n\\n/* Contract: items points to at least count integers;\\n   count is the current number of stack elements. */",
+          "explanation": "Peek uses count - 1 only after checking count is nonzero. It copies the top value to the output and does not modify the stack. The caller remains responsible for providing an array that actually contains count elements.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "State the invariant before and after a successful and failed push.",
-      "independentTask": "Review a linked-list insertion function and document its pointer invariants and failure cleanup.",
+      "guidedTask": "Start with an empty stack. Trace push(4), push(9), peek, pop, pop and pop again. Record count and the top value after every operation, including the final underflow.",
+      "independentTask": "Implement a fixed-capacity stack of integers with push, pop, peek and is_empty. Test full and empty cases, null output pointers and verify that failed operations do not change the stack.",
       "hints": [
-        "Write invariants in terms that can be checked before and after every operation.",
-        "Test empty, full and one-past-capacity cases.",
-        "Use sanitizers and assertions during development where appropriate."
+        "With count elements, the top index is count - 1 only when count > 0.",
+        "Check capacity before writing to the array.",
+        "Check nonempty state before reading or decrementing the top.",
+        "A failed push or pop should leave the stack state unchanged.",
+        "Use a separate status result rather than reserving an ordinary integer as an error marker.",
+        "A dynamically allocated stack also needs a clear ownership and cleanup policy."
       ]
     }
   },
@@ -51,36 +69,63 @@
     "questions": [
       {
         "id": "cl108-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What does LIFO mean?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "Last in, first out",
+          "Last in, first available",
+          "Lowest index, first out",
+          "Linear input, fixed output"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the concept and constraints described above."
+        "answer": "Last in, first out",
+        "explanation": "The newest item is at the top and is removed first."
       },
       {
         "id": "cl108-q2",
-        "prompt": "What should be checked before relying on this algorithm or structure?",
+        "prompt": "For a stack represented by an array and count, where is the top item when count is greater than zero?",
         "options": [
-          "Its preconditions, invariants, bounds and failure cases.",
-          "Only the name of the data structure.",
-          "Whether one example produced an output."
+          "items[count - 1]",
+          "items[count]",
+          "items[0] always",
+          "items[capacity]"
         ],
-        "answer": "Its preconditions, invariants, bounds and failure cases.",
-        "explanation": "Correctness depends on maintaining the algorithm's contract."
+        "answer": "items[count - 1]",
+        "explanation": "The occupied indices are 0 through count - 1."
       },
       {
         "id": "cl108-q3",
-        "prompt": "Which practice supports reliable implementation?",
+        "prompt": "What must push check before writing to a bounded stack?",
         "options": [
-          "Test empty, boundary and representative inputs.",
-          "Ignore allocation failures.",
-          "Assume average complexity guarantees every operation's worst case."
+          "That count is less than capacity",
+          "That count is already equal to capacity",
+          "That the stack is empty only",
+          "That the new value is nonzero"
         ],
-        "answer": "Test empty, boundary and representative inputs.",
-        "explanation": "Targeted tests expose defects that ordinary examples may miss."
+        "answer": "That count is less than capacity",
+        "explanation": "Writing when count equals capacity would access one past the valid array range."
+      },
+      {
+        "id": "cl108-q4",
+        "prompt": "What is stack underflow?",
+        "options": [
+          "Attempting to remove or inspect an item when the stack is empty",
+          "Attempting to push when the stack is full",
+          "Sorting a stack",
+          "Allocating a node successfully"
+        ],
+        "answer": "Attempting to remove or inspect an item when the stack is empty",
+        "explanation": "Pop and peek require at least one stored element."
+      },
+      {
+        "id": "cl108-q5",
+        "prompt": "What should happen when a push fails because the stack is full?",
+        "options": [
+          "The stack remains unchanged and the caller receives a failure indication",
+          "The program writes beyond the array",
+          "The oldest element is silently overwritten",
+          "The count is incremented anyway"
+        ],
+        "answer": "The stack remains unchanged and the caller receives a failure indication",
+        "explanation": "A clear failure result and unchanged state preserve the stack invariant."
       }
     ]
   },
