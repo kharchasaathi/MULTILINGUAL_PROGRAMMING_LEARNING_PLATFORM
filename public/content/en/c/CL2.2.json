@@ -6,11 +6,11 @@
   "title": "Identifiers, Naming and Scope Basics",
   "language": "en",
   "learningObjectives": [
-    "Explain the central rules behind identifiers, naming and scope basics in C.",
-    "Identify the relevant types, declarations, operators or library facilities.",
-    "Trace a worked example and explain its result.",
-    "Recognize common mistakes, portability concerns and unsafe assumptions.",
-    "Apply the concept in a small program and test normal and boundary cases."
+    "Apply C identifier rules to valid object, function and type names.",
+    "Explain that C identifiers are case-sensitive and cannot be reserved keywords.",
+    "Distinguish block scope, file scope and function prototype scope at an introductory level.",
+    "Trace whether a name is visible at a particular point in nested blocks.",
+    "Use descriptive names while avoiding collisions and misleading abbreviations."
   ],
   "prerequisites": [
     "CL1.1",
@@ -18,13 +18,13 @@
   ],
   "stages": {
     "understand": {
-      "concept": "An identifier is a name used for a program entity such as an object, function, structure tag or typedef name. C identifiers are case-sensitive and must follow lexical rules. Scope determines where a name can be used; linkage determines whether declarations in different scopes or translation units refer to the same entity.",
+      "concept": "An identifier names a program entity, such as an object, function, structure tag or typedef name. C identifiers are case-sensitive and must follow lexical rules; keywords cannot be used as ordinary identifiers. Scope determines the region of source code in which a declaration's identifier is visible. Scope is distinct from an object's lifetime and from linkage between translation units.",
       "whyItMatters": "Good names make code easier to review, while correct scope prevents accidental access and name collisions. Understanding scope is also essential when a program grows into multiple source files.",
       "analogy": "Think of a type as a contract that describes what kind of value an object can hold and which operations make sense for it.",
       "analogyLimit": "The analogy is only an introduction; C types also determine representation, conversions, alignment and constraints."
     },
     "explain": {
-      "narrative": "An identifier is a name used for a program entity such as an object, function, structure tag or typedef name. C identifiers are case-sensitive and must follow lexical rules. Scope determines where a name can be used; linkage determines whether declarations in different scopes or translation units refer to the same entity.\n\nGood names make code easier to review, while correct scope prevents accidental access and name collisions. Understanding scope is also essential when a program grows into multiple source files.\n\nWhen reviewing code, identify the declared types first, then trace conversions and the exact expression being evaluated. Compile with warnings enabled and test boundary values. Do not rely on assumptions about another compiler or machine.",
+      "narrative": "## 1. Identifier spelling\n\nIdentifiers use letters, digits and underscores, but a digit cannot be the first character. C is case-sensitive: `total`, `Total` and `TOTAL` are different identifiers. Do not use reserved keywords such as `int`, `return` or `while` as names.\n\n## 2. Naming for clarity\n\nPrefer names that describe purpose and units, such as `item_count`, `elapsed_seconds` or `account_balance`. Consistent naming makes code easier to review. Avoid names that differ only by capitalization or are easily confused with standard-library names.\n\n## 3. Scope\n\nA block-scope name is visible from its declaration point to the end of its enclosing block, subject to nested scopes. A file-scope declaration appears outside function bodies and is visible from its declaration point to the end of the translation unit. Function prototype scope applies to parameter names in a function prototype.\n\n## 4. Nested blocks and shadowing\n\nAn inner block can declare a name that hides an outer declaration with the same spelling. Although legal in many cases, unnecessary shadowing can make it difficult to know which object an expression refers to. Choose distinct names when both values matter.\n\n## 5. Scope is not lifetime\n\nScope describes name visibility. Lifetime describes how long an object exists. Linkage describes whether declarations in different scopes or translation units refer to the same entity. These concepts are related but not interchangeable.",
       "examples": [
         {
           "id": "cl2.2-ex1",
@@ -45,14 +45,14 @@
       ]
     },
     "practise": {
-      "guidedTask": "Write a function with a parameter, a local variable and an inner block variable. Mark the scope of each identifier and compile after moving one use outside its scope.",
-      "independentTask": "Refactor a program with unclear one-letter names into meaningful identifiers. Introduce a deliberate shadowing example and explain why it can make code harder to read.",
+      "guidedTask": "Write a small C program that demonstrates the central rules in CL2.2. Compile with warnings enabled, run it with ordinary and boundary values, and explain each result in your own words.",
+      "independentTask": "Create a second example for CL2.2 using different values and names. Include one likely mistake as a separate experiment, observe the compiler diagnostic or behavior, then correct it. Record the rule that explains the correction.",
       "hints": [
-        "C identifiers are case-sensitive.",
-        "A block can introduce a nested scope.",
-        "Scope and object lifetime are related but not identical concepts.",
-        "Avoid unnecessary shadowing.",
-        "Use consistent snake_case names for ordinary C objects and functions."
+        "Start by identifying the exact type of every object and expression.",
+        "Check the C language rule before assuming a platform-specific result.",
+        "Use compiler warnings as feedback, not as proof of correctness.",
+        "Test normal values and important boundaries.",
+        "Explain why the result follows from the language rules."
       ]
     }
   },
@@ -65,58 +65,58 @@
     "questions": [
       {
         "id": "cl2.2-q1",
-        "prompt": "Which statement is correct about identifiers, naming and scope basics?",
+        "prompt": "Which pair represents two different C identifiers?",
         "options": [
-          "It follows C's type and language rules and should be checked with compiler diagnostics.",
-          "C ignores all declared types.",
-          "The browser decides its meaning."
+          "count and Count",
+          "count and count",
+          "_value and _value"
         ],
-        "answer": "It follows C's type and language rules and should be checked with compiler diagnostics.",
-        "explanation": "C semantics are defined by the language and implementation."
+        "answer": "count and Count",
+        "explanation": "C identifiers are case-sensitive."
       },
       {
         "id": "cl2.2-q2",
-        "prompt": "What is the safest general practice?",
+        "prompt": "Which is not a valid ordinary identifier?",
         "options": [
-          "Choose types and operations deliberately, initialize data and validate assumptions.",
-          "Ignore warnings and assume values are valid.",
-          "Use casts to silence every warning."
+          "return",
+          "return_value",
+          "value2"
         ],
-        "answer": "Choose types and operations deliberately, initialize data and validate assumptions.",
-        "explanation": "Deliberate types and checks improve correctness."
+        "answer": "return",
+        "explanation": "return is a C keyword and cannot be used as an ordinary identifier."
       },
       {
         "id": "cl2.2-q3",
-        "prompt": "What should you do when a result is unexpected?",
+        "prompt": "Where is a block-scope variable generally visible?",
         "options": [
-          "Create a small test case and inspect types, values and conversions.",
-          "Guess the result from the variable name.",
-          "Remove the test."
+          "From its declaration point to the end of its enclosing block",
+          "Throughout every file in the project",
+          "Only inside comments"
         ],
-        "answer": "Create a small test case and inspect types, values and conversions.",
-        "explanation": "Small reproducible tests make behaviour easier to reason about."
+        "answer": "From its declaration point to the end of its enclosing block",
+        "explanation": "Block scope is limited to the block that contains the declaration."
       },
       {
         "id": "cl2.2-q4",
-        "prompt": "Which statement about portability is accurate?",
+        "prompt": "What is shadowing?",
         "options": [
-          "Some type sizes and ranges depend on the implementation.",
-          "All C implementations use identical type widths.",
-          "Compiler warnings change the C standard."
+          "An inner declaration hides an outer declaration with the same name",
+          "A compiler deletes a variable",
+          "A variable changes its data type automatically"
         ],
-        "answer": "Some type sizes and ranges depend on the implementation.",
-        "explanation": "Use standard guarantees and inspect implementation limits."
+        "answer": "An inner declaration hides an outer declaration with the same name",
+        "explanation": "The inner identifier takes precedence in its scope."
       },
       {
         "id": "cl2.2-q5",
-        "prompt": "Which is a strong learning outcome?",
+        "prompt": "Which statement correctly distinguishes scope and lifetime?",
         "options": [
-          "Explain the rule and apply it in a tested C program.",
-          "Memorize one output only.",
-          "Copy code without checking it."
+          "Scope controls name visibility; lifetime controls how long an object exists",
+          "They mean exactly the same thing",
+          "Lifetime controls indentation only"
         ],
-        "answer": "Explain the rule and apply it in a tested C program.",
-        "explanation": "Understanding plus testing demonstrates transferable knowledge."
+        "answer": "Scope controls name visibility; lifetime controls how long an object exists",
+        "explanation": "They are separate language concepts and should not be confused."
       }
     ]
   },
