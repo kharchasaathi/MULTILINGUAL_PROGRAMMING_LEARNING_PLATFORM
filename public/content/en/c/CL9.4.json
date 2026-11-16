@@ -3,42 +3,59 @@
   "courseId": "c",
   "moduleId": "CL9",
   "topicId": "CL9.4",
-  "title": "Compiler warnings, language standards and portability flags",
+  "title": "Header files, declarations, include guards and organizing source files",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its constraints.",
-    "Trace the example and reason about its data flow.",
-    "Identify complexity, boundary or safety considerations.",
-    "Apply the concept in a tested C program."
+    "Distinguish a header's declarations and interface contract from source-file definitions and implementation details.",
+    "Create a conventional include guard that prevents repeated processing of the same header within one translation unit.",
+    "Explain why include guards do not prevent duplicate external definitions across separate translation units.",
+    "Place function prototypes, shared types and necessary macros in headers while keeping ordinary function and object definitions in one source file.",
+    "Use #include with quoted and angle-bracket forms appropriately and understand that inclusion is preprocessing rather than runtime loading.",
+    "Build a small multi-file C program and diagnose missing declarations, mismatched prototypes, duplicate definitions and unresolved external symbols."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL6.1 Defining and calling functions",
+    "CL6.5 Function declarations and prototypes",
+    "CL1.7 Compile, link and run"
+  ],
   "stages": {
     "understand": {
-      "concept": "C compilers support language standard modes and diagnostic options. Flags such as -std=c17, -Wall, -Wextra and -Wpedantic request a selected language version and additional diagnostics on many GCC- and Clang-like toolchains.",
-      "whyItMatters": "Explicit build settings make behaviour more reproducible and reveal suspicious code before runtime. Compiler flags differ by toolchain and should be documented rather than assumed universal.",
-      "analogy": "Treat an algorithm or data structure as a set of operations that must preserve a clearly stated contract.",
-      "analogyLimit": "The analogy does not replace formal complexity analysis, C object rules or algorithm preconditions."
+      "concept": "A C program may be divided into translation units, usually one source file after preprocessing. Header files commonly declare interfaces shared across those units. An include directive inserts the header's contents into the including source during preprocessing; it does not dynamically load a module at runtime.",
+      "whyItMatters": "A clear header/source boundary makes larger C programs easier to compile, test and maintain. Incorrect header contents can cause duplicate definitions, inconsistent declarations and linker errors.",
+      "analogy": "A header is like a service contract: it tells other files which operations and types are available, while a source file provides the implementation.",
+      "analogyLimit": "A header is not a separately linked module and an include guard is not a linker mechanism. The preprocessor handles each translation unit independently."
     },
     "explain": {
-      "narrative": "C compilers support language standard modes and diagnostic options. Flags such as -std=c17, -Wall, -Wextra and -Wpedantic request a selected language version and additional diagnostics on many GCC- and Clang-like toolchains.\n\nBefore implementation, state input constraints, empty-case behaviour, ownership and invariants. Compile with warnings and test representative, boundary and failure cases.",
+      "narrative": "A typical header contains declarations such as function prototypes, typedefs, enum and struct declarations, and carefully chosen macros. A corresponding .c file contains function definitions. Use an include guard such as `#ifndef PROJECT_GEOMETRY_H`, `#define PROJECT_GEOMETRY_H`, and `#endif`. Choose a distinctive macro name to avoid collisions.\n\nDo not place ordinary external function definitions or externally linked object definitions in a header included by multiple source files; that can create multiple definitions at link time. A `static inline` function in a header is a different design with internal linkage and should be used intentionally. `#include \"project.h\"` typically searches the including file's directory and configured include paths before system paths; `#include <stdio.h>` requests a standard or implementation-provided header search. Exact search paths are toolchain configuration.",
       "examples": [
         {
           "id": "cl94-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "/* Example build command for GCC/Clang-like compilers:\n   cc -std=c17 -Wall -Wextra -Wpedantic -Wconversion main.c -o app\n*/\n#include <stdio.h>\nint main(void) { puts(\"Build with documented flags\"); return 0; }",
-          "explanation": "The command selects C17 and enables several warning groups. The exact available flags and diagnostics depend on the compiler version.",
+          "title": "A guarded header and one implementation file",
+          "code": "/* geometry.h */\n#ifndef CODESAATHI_GEOMETRY_H\n#define CODESAATHI_GEOMETRY_H\n\ndouble rectangle_area(double width, double height);\n\n#endif\n\n/* geometry.c */\n#include \"geometry.h\"\n\ndouble rectangle_area(double width, double height)\n{\n    return width * height;\n}\n\n/* main.c */\n#include <stdio.h>\n#include \"geometry.h\"\n\nint main(void)\n{\n    printf(\"area=%.2f\\n\", rectangle_area(3.0, 4.0));\n    return 0;\n}",
+          "explanation": "The header declares the function once per translation unit. geometry.c owns the external definition, and main.c includes the interface before calling it. Build the files together, for example: cc -std=c11 -Wall -Wextra -Wpedantic main.c geometry.c -o app. The combined listing is illustrative and should be split into the three named files.",
+          "runnable": false
+        },
+        {
+          "id": "cl94-ex2",
+          "language": "en",
+          "title": "Use a header for a shared type and function prototype",
+          "code": "/* counter.h */\n#ifndef CODESAATHI_COUNTER_H\n#define CODESAATHI_COUNTER_H\n\ntypedef struct {\n    unsigned int value;\n} Counter;\n\nvoid counter_increment(Counter *counter);\n\n#endif\n\n/* counter.c */\n#include \"counter.h\"\n\nvoid counter_increment(Counter *counter)\n{\n    if (counter != NULL) {\n        ++counter->value;\n    }\n}",
+          "explanation": "The header defines a shared type and declares the operation. The implementation includes its own header so the compiler checks that the function definition agrees with the public prototype. A complete project should include stddef.h or another suitable declaration for NULL, or use an explicit null-pointer comparison with an included standard header; this snippet needs #include <stddef.h> before compiling as a standalone translation unit.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Explain the purpose of the language standard flag and warning flags.",
-      "independentTask": "Build the same small program with and without warnings. Record the differences and resolve each meaningful warning.",
+      "guidedTask": "Split the first example into geometry.h, geometry.c and main.c. Compile and link all three source/header inputs as shown. Then remove the prototype from the header and observe the compiler diagnostic; next duplicate the function definition in a second .c file and inspect the linker error.",
+      "independentTask": "Design a two-module C program with a public header, one implementation file and a main file. Use an include guard, place each external definition in exactly one source file, and document the compile/link command.",
       "hints": [
-        "A warning is diagnostic evidence, not proof that the program is wrong or correct.",
-        "Use the same documented compiler options in local and automated builds.",
-        "Avoid compiler-specific extensions when portability is a requirement."
+        "An include guard prevents repeated inclusion inside one translation unit; it does not coordinate different translation units.",
+        "Keep ordinary external function definitions in one .c file, not in a widely included header.",
+        "Include the public header from its implementation file so declarations and definitions are checked together.",
+        "A declaration tells the compiler about an entity; a definition provides the entity's implementation or storage.",
+        "A missing declaration is usually a compile-time issue; an unresolved external symbol is commonly a link-time issue.",
+        "Use distinctive guard names and include only the headers needed by the public interface."
       ]
     }
   },
@@ -51,36 +68,63 @@
     "questions": [
       {
         "id": "cl94-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What is the primary role of a conventional header file?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "To expose declarations and shared interface information to translation units.",
+          "To execute code when the program starts.",
+          "To store the final executable machine code.",
+          "To replace the linker."
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the concept and constraints described above."
+        "answer": "To expose declarations and shared interface information to translation units.",
+        "explanation": "Headers communicate declarations, types and other interface material to source files that include them."
       },
       {
         "id": "cl94-q2",
-        "prompt": "What should be checked before relying on this algorithm or structure?",
+        "prompt": "What does an include guard prevent?",
         "options": [
-          "Its preconditions, invariants, bounds and failure cases.",
-          "Only the name of the data structure.",
-          "Whether one example produced an output."
+          "Repeated processing of the same guarded header within one translation unit.",
+          "All duplicate definitions across every source file in a program.",
+          "All linker errors.",
+          "Runtime loading of a header."
         ],
-        "answer": "Its preconditions, invariants, bounds and failure cases.",
-        "explanation": "Correctness depends on maintaining the algorithm's contract."
+        "answer": "Repeated processing of the same guarded header within one translation unit.",
+        "explanation": "The guard macro is tracked during preprocessing of one translation unit; separate source files are preprocessed independently."
       },
       {
         "id": "cl94-q3",
-        "prompt": "Which practice supports reliable implementation?",
+        "prompt": "Where should an ordinary externally linked function definition normally appear?",
         "options": [
-          "Test empty, boundary and representative inputs.",
-          "Ignore allocation failures.",
-          "Assume average complexity guarantees every operation's worst case."
+          "In one implementation source file (.c).",
+          "In every header that declares it.",
+          "In every source file that calls it.",
+          "Only in the Makefile."
         ],
-        "answer": "Test empty, boundary and representative inputs.",
-        "explanation": "Targeted tests expose defects that ordinary examples may miss."
+        "answer": "In one implementation source file (.c).",
+        "explanation": "A single source file should own an ordinary external definition so the linker sees one definition for that entity."
+      },
+      {
+        "id": "cl94-q4",
+        "prompt": "When is #include processed?",
+        "options": [
+          "During preprocessing, by inserting the header contents into the translation unit.",
+          "At runtime when the function is called.",
+          "During program termination.",
+          "Only by the linker after object files are created."
+        ],
+        "answer": "During preprocessing, by inserting the header contents into the translation unit.",
+        "explanation": "The preprocessor expands the include directive before normal compilation; it is not a runtime loading feature."
+      },
+      {
+        "id": "cl94-q5",
+        "prompt": "Which command illustrates compiling and linking two implementation files together?",
+        "options": [
+          "cc -std=c11 main.c geometry.c -o app",
+          "cc main.c -o app while geometry.c is never compiled or linked",
+          "run geometry.h",
+          "linker main.c geometry.h at runtime"
+        ],
+        "answer": "cc -std=c11 main.c geometry.c -o app",
+        "explanation": "Both implementation source files must be compiled and linked into the final executable."
       }
     ]
   },
