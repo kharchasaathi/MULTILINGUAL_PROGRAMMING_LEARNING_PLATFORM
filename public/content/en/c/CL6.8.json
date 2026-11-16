@@ -6,39 +6,50 @@
   "title": "Inline functions and compiler considerations",
   "language": "en",
   "learningObjectives": [
-    "Explain the C concept and its rules.",
-    "Trace the example and describe data flow.",
-    "Identify relevant failure and boundary cases.",
-    "Apply the concept in a tested C program."
+    "Explain the meaning of the inline function specifier in C.",
+    "Recognize that inline does not guarantee call-site substitution.",
+    "Use static inline functions in headers where appropriate.",
+    "Understand external linkage and definition constraints for inline functions.",
+    "Measure performance rather than assuming inline is faster."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "The inline function specifier is a request concerning function definition and linkage rules; it does not guarantee that a compiler substitutes the function body at every call. The compiler may choose an implementation strategy based on optimization and target constraints.",
+      "concept": "The inline function specifier is a language and linkage feature, not a command that forces a compiler to substitute a function body at every call. The compiler chooses its implementation strategy. C inline definitions also have linkage rules, so `static inline` is commonly used for small header-defined helper functions.",
       "whyItMatters": "Understanding inline avoids treating it as a performance command. Correctness must not depend on whether a call is expanded inline.",
       "analogy": "Treat the operation as a clearly specified contract between the program and its data.",
       "analogyLimit": "The analogy does not replace C's type, lifetime, I/O and object representation rules."
     },
     "explain": {
-      "narrative": "The inline function specifier is a request concerning function definition and linkage rules; it does not guarantee that a compiler substitutes the function body at every call. The compiler may choose an implementation strategy based on optimization and target constraints.\n\nCheck all return values, object lifetimes, types and preconditions. Enable compiler warnings and test expected as well as failure paths.",
+      "narrative": "## 1. What inline means\n\nThe inline specifier indicates that a function definition is suitable for inline substitution. It does not require the compiler to substitute the body at a call site.\n\n## 2. Compiler decisions\n\nThe compiler may inline a call, keep it as a normal call, or optimize the code in another way. Optimization depends on visibility, optimization settings and target constraints.\n\n## 3. static inline helpers\n\nA small `static inline` function in a header has internal linkage in each translation unit that includes it. This is a common pattern for short helper functions with clear behavior.\n\n## 4. External inline rules\n\nExternal-linkage inline definitions have additional C language rules governing external definitions. Avoid placing casual `inline` definitions in headers without understanding the selected C standard's linkage model.\n\n## 5. Performance evidence\n\nInlining can reduce call overhead but may increase code size. Profile or benchmark realistic workloads rather than assuming that inline always improves performance.",
       "examples": [
         {
-          "id": "cl68-ex1",
+          "id": "cl6.8-ex1",
           "language": "en",
-          "title": "Focused C example",
+          "title": "Core example",
           "code": "static inline int square(int x) { return x * x; }\n#include <stdio.h>\nint main(void) {\n printf(\"%d\\n\", square(7));\n return 0;\n}",
-          "explanation": "The function is defined in the translation unit and may be eligible for inlining, but the compiler is free to generate a normal call. static gives the function internal linkage.",
+          "explanation": "Trace each declaration, call, expression and return. Check types and boundary conditions.",
+          "runnable": false
+        },
+        {
+          "id": "cl6.8-ex2",
+          "language": "en",
+          "title": "Apply the function contract",
+          "code": "#include <stdio.h>\nstatic inline int clamp_low(int x) { return x < 0 ? 0 : x; }\nint main(void) { printf(\"%d\\n\", clamp_low(-4)); return 0; }",
+          "explanation": "This second example reinforces the function contract. Compile with warnings and test both valid and boundary inputs.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Explain why inline does not promise a faster program.",
-      "independentTask": "Compare optimized and unoptimized compiler output for a small function; report observations without assuming one result is universal.",
+      "guidedTask": "Implement a focused C program demonstrating CL6.8. State the function's inputs, output, preconditions and failure behavior before coding.",
+      "independentTask": "Create a second implementation of CL6.8 with a clear interface contract. Add tests for ordinary input, boundary input and a failure or invalid case; explain the result.",
       "hints": [
-        "inline is not a substitute for profiling.",
-        "C inline definitions have language linkage rules; use a consistent header pattern.",
-        "Avoid defining external-linkage inline functions inconsistently across translation units."
+        "Write the function prototype before its implementation.",
+        "Trace argument values and return paths explicitly.",
+        "Check pointer validity and object lifetime where relevant.",
+        "Use compiler warnings to catch type mismatches.",
+        "Test boundary cases and failure paths."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl68-q1",
-        "prompt": "Which statement best describes the lesson?",
+        "id": "cl6.8-q1",
+        "prompt": "Does inline force the compiler to substitute a function body at every call?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "No",
+          "Yes, by definition",
+          "Only when the function returns int"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the C rule described in the lesson."
+        "answer": "No",
+        "explanation": "The compiler retains discretion over implementation."
       },
       {
-        "id": "cl68-q2",
-        "prompt": "What should be verified before using this feature?",
+        "id": "cl6.8-q2",
+        "prompt": "What is a common use of static inline in a header?",
         "options": [
-          "Types, preconditions, object validity and relevant return values.",
-          "Only the source file name.",
-          "Whether a single run appeared successful."
+          "Small helper functions with internal linkage per translation unit",
+          "Dynamic memory allocation",
+          "Declaring global mutable state"
         ],
-        "answer": "Types, preconditions, object validity and relevant return values.",
-        "explanation": "C correctness depends on valid objects, correct types and checked operations."
+        "answer": "Small helper functions with internal linkage per translation unit",
+        "explanation": "static inline is a common header helper pattern."
       },
       {
-        "id": "cl68-q3",
-        "prompt": "Which practice improves reliability?",
+        "id": "cl6.8-q3",
+        "prompt": "Can inlining increase code size?",
         "options": [
-          "Compile with warnings and test normal and failure paths.",
-          "Ignore I/O and compiler diagnostics.",
-          "Assume all environments behave identically."
+          "Yes",
+          "No, it always reduces size",
+          "Only for recursive functions"
         ],
-        "answer": "Compile with warnings and test normal and failure paths.",
-        "explanation": "Diagnostics and tests provide evidence for program behaviour."
+        "answer": "Yes",
+        "explanation": "Inlining can duplicate function bodies at call sites."
+      },
+      {
+        "id": "cl6.8-q4",
+        "prompt": "What should guide performance decisions about inline?",
+        "options": [
+          "Measurement and profiling",
+          "Assuming inline is always faster",
+          "The function's name length"
+        ],
+        "answer": "Measurement and profiling",
+        "explanation": "Performance should be assessed on representative workloads."
+      },
+      {
+        "id": "cl6.8-q5",
+        "prompt": "Why should external inline definitions be handled carefully?",
+        "options": [
+          "C has specific linkage and external definition rules",
+          "Inline disables the linker",
+          "Every header must define every external function"
+        ],
+        "answer": "C has specific linkage and external definition rules",
+        "explanation": "The language defines constraints for external-linkage inline functions."
       }
     ]
   },
