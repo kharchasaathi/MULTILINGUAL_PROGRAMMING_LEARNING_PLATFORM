@@ -41,7 +41,7 @@ jobs:
           const path = require('path');
           const cp = require('child_process');
           const rows = [];
-          const add = (area, check, status, detail) => rows.push({area,check,status,detail:String(detail ?? '').replace(/\\|/g,'/').replace(/[\\r\\n]+/g,' ').slice(0,500)});
+          const add = (area, check, status, detail) => rows.push({area,check,status,detail:String(detail ?? '').split('|').join('/').replace(/[\r\n]+/g,' ').slice(0,500)});
           const exists = p => fs.existsSync(p);
           const readJson = p => JSON.parse(fs.readFileSync(p,'utf8'));
           const base = process.env.SITE_URL.replace(/\\/$/,'');
@@ -179,7 +179,7 @@ jobs:
             '- Totals: '+rows.length+' checks | PASS '+counts.PASS+' | FAIL '+counts.FAIL+' | WARN '+counts.WARN+' | INFO '+counts.INFO+' | BLOCKED '+counts.BLOCKED,
             '',
             '| Area | Check | Result | Evidence / detail |','|---|---|---|---|',
-            ...rows.map(x=>'| '+x.area+' | '+x.check+' | **'+x.status+'** | '+x.detail.replace(/\\|/g,'/')+' |'),
+            ...rows.map(x=>'| '+x.area+' | '+x.check+' | **'+x.status+'** | '+x.detail.split('|').join('/')+' |'),
             '',
             '## Failures requiring attention',
             ...(fails.length?fails.map(x=>'- **'+x.area+' / '+x.check+'** — '+x.detail):['- No failed checks detected.']),
