@@ -6,39 +6,50 @@
   "title": "Safe string input, capacity, truncation and termination",
   "language": "en",
   "learningObjectives": [
-    "Explain the language rule and its constraints.",
-    "Trace the example and predict its behaviour.",
-    "Identify boundary and safety cases.",
-    "Apply the concept in a tested C program."
+    "Use fgets with a buffer size to read bounded lines from a stream.",
+    "Explain how fgets stores a terminating null character and may retain a newline.",
+    "Check fgets return values before using the destination buffer.",
+    "Detect and handle input lines that exceed the available buffer capacity.",
+    "Avoid unsafe unbounded input and define a clear policy for truncation and invalid input."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "Input routines must respect destination capacity and establish a valid terminator. fgets reads at most size minus one characters, then adds a null terminator when it succeeds; a newline may remain in the buffer.",
+      "concept": "Input routines must respect destination capacity and establish a valid terminator. fgets reads at most size minus one characters from a stream and, when it succeeds, stores a terminating null character. It retains a newline if one is read. A bounded read still requires a policy for detecting overlong lines, handling input failure and discarding or processing remaining characters.",
       "whyItMatters": "This knowledge helps reason about C data representation, object bounds and valid memory access.",
       "analogy": "Think of memory objects as labelled storage and pointers as typed references to that storage.",
       "analogyLimit": "The analogy does not replace C's formal pointer, lifetime and object-access rules."
     },
     "explain": {
-      "narrative": "Input routines must respect destination capacity and establish a valid terminator. fgets reads at most size minus one characters, then adds a null terminator when it succeeds; a newline may remain in the buffer.\n\nCheck the declared types, object lifetime, valid bounds and function preconditions before using the construct. Enable compiler warnings and test edge cases.",
+      "narrative": "## 1. Why input capacity matters\n\nA character buffer has a fixed capacity. An input operation must never write more characters than the buffer can hold, including space for the null terminator. Unbounded input can overwrite adjacent memory and create serious vulnerabilities.\n\n## 2. Read with fgets\n\n`fgets(buffer, sizeof buffer, stdin)` reads at most one less than the buffer capacity, then appends a null character when it succeeds. If a newline is read before the limit, that newline is stored in the buffer.\n\n## 3. Check the result\n\nfgets returns the buffer pointer on success and a null pointer on failure or end-of-file before any characters are read. Do not inspect the destination as a newly read string unless the call succeeded.\n\n## 4. Detect truncation\n\nIf the buffer does not contain a newline and the stream has not reached end-of-file, the line may be longer than the available space. Decide whether to reject the line, process it in chunks or discard the remainder before reading the next logical input line.\n\n## 5. Validate content separately\n\nA bounded read prevents writing beyond the supplied buffer when used correctly, but it does not validate the content. Check required fields, numeric ranges, encoding assumptions and trailing characters according to the application's input contract.",
       "examples": [
         {
-          "id": "cl410-ex1",
+          "id": "cl4.10-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "Unbounded input can overwrite adjacent memory. Bounded input still needs a policy for detecting and handling an overlong line and for clearing the remainder of that line.",
-          "explanation": "#include <stdio.h>\n#include <string.h>\nint main(void) {\n char name[32];\n if (fgets(name, sizeof name, stdin) != NULL) {\n  name[strcspn(name, \"\\n\")] = '\\0';\n  printf(\"Hello, %s\\n\", name);\n }\n return 0;\n}",
+          "title": "Read and check a line",
+          "code": "#include <stdio.h>\n#include <string.h>\n\nint main(void) {\n    char line[32];\n    if (fgets(line, sizeof line, stdin) == NULL) {\n        puts(\"No input line was read\");\n        return 1;\n    }\n    printf(\"Received %zu bytes\\n\", strlen(line));\n    return 0;\n}",
+          "explanation": "The call limits the number of bytes stored and the return value is checked before strlen is used.",
+          "runnable": false
+        },
+        {
+          "id": "cl4.10-ex2",
+          "language": "en",
+          "title": "Detect a missing newline",
+          "code": "#include <stdio.h>\n#include <string.h>\n\nint main(void) {\n    char line[8];\n    if (fgets(line, sizeof line, stdin) == NULL) return 1;\n    if (strchr(line, '\\\\n') == NULL && !feof(stdin))\n        puts(\"The line may be longer than the buffer\");\n    return 0;\n}",
+          "explanation": "A missing newline can indicate truncation, though a final line at end-of-file may legitimately have no newline. A production reader should define how to consume the remaining input.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "fgets receives the buffer capacity, reads at most 31 input characters and terminates the result. strcspn finds the first newline so it can be replaced with the null terminator.",
-      "independentTask": "Explain why sizeof name is passed instead of a guessed large number.",
+      "guidedTask": "Implement a small C program demonstrating CL4.10. Identify the relevant array or string capacity, valid indices, expected results and failure cases before compiling and testing.",
+      "independentTask": "Create a second example for CL4.10 that handles a boundary case explicitly. Add tests for empty input, the smallest valid case, the largest valid case and one invalid or oversized case. Explain how your code prevents invalid access.",
       "hints": [
-        "Read a line with a defined maximum length. Detect whether the input was truncated and handle the remaining characters deliberately.",
-        "fgets returns NULL on an input failure or when end-of-file occurs before any character is read.",
-        "A line that fills the buffer without a newline may be longer than the accepted limit."
+        "Write down the exact array length and valid index range.",
+        "Include null terminator space when working with C strings.",
+        "Check function preconditions and return values.",
+        "Pass array lengths explicitly when a function needs them.",
+        "Test exact-fit and one-past-boundary cases."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl410-q1",
-        "prompt": "Which statement best matches this lesson?",
+        "id": "cl4.10-q1",
+        "prompt": "How many input characters can fgets store in a buffer of size n, excluding the terminator?",
         "options": [
-          "The C rule and constraints explained in this lesson.",
-          "An unrelated HTML element.",
-          "A CSS property."
+          "At most n - 1",
+          "Exactly n",
+          "At most n + 1"
         ],
-        "answer": "The C rule and constraints explained in this lesson.",
-        "explanation": "The correct choice follows the C rule and its constraints."
+        "answer": "At most n - 1",
+        "explanation": "One element is reserved for the terminating null character."
       },
       {
-        "id": "cl410-q2",
-        "prompt": "What is the safest way to handle the relevant boundary or validity condition?",
+        "id": "cl4.10-q2",
+        "prompt": "What does fgets do with a newline it reads?",
         "options": [
-          "Check the documented preconditions and bounds before access.",
-          "Assume C automatically checks every pointer and array access.",
-          "Ignore the result if one run appears successful."
+          "It stores the newline in the buffer",
+          "It always removes the newline",
+          "It converts the newline to a null byte"
         ],
-        "answer": "Check the documented preconditions and bounds before access.",
-        "explanation": "C programs must explicitly respect object bounds, pointer validity and conversion results."
+        "answer": "It stores the newline in the buffer",
+        "explanation": "fgets retains a newline when it is read before the size limit."
       },
       {
-        "id": "cl410-q3",
-        "prompt": "Why should the example be traced?",
+        "id": "cl4.10-q3",
+        "prompt": "What should be checked before using a buffer after fgets?",
         "options": [
-          "To understand execution order and object state.",
-          "To replace compilation and tests.",
-          "To avoid checking inputs."
+          "Whether fgets returned a non-null pointer",
+          "Whether the buffer address is even",
+          "Whether the line contains a digit"
         ],
-        "answer": "To understand execution order and object state.",
-        "explanation": "Tracing complements compilation, warnings and testing."
+        "answer": "Whether fgets returned a non-null pointer",
+        "explanation": "The return value indicates whether a line was read successfully."
+      },
+      {
+        "id": "cl4.10-q4",
+        "prompt": "What can a missing newline in the buffer indicate?",
+        "options": [
+          "The input line may have been longer than the available buffer",
+          "The string is always invalid",
+          "The compiler inserted an extra terminator"
+        ],
+        "answer": "The input line may have been longer than the available buffer",
+        "explanation": "The buffer may have filled before the line ending was read."
+      },
+      {
+        "id": "cl4.10-q5",
+        "prompt": "Does bounded input automatically validate the meaning of the text?",
+        "options": [
+          "No; the application must still validate format and allowed values",
+          "Yes, it guarantees all input is valid",
+          "Only for numeric input"
+        ],
+        "answer": "No; the application must still validate format and allowed values",
+        "explanation": "Capacity safety and semantic validation are separate responsibilities."
       }
     ]
   },
