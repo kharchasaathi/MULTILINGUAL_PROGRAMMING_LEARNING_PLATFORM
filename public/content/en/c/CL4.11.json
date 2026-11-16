@@ -3,42 +3,53 @@
   "courseId": "c",
   "moduleId": "CL4",
   "topicId": "CL4.11",
-  "title": "String and array boundary errors; avoiding buffer overflows (CodeSaathi extension)",
+  "title": "Array and String Boundary Errors; Preventing Buffer Overflows",
   "language": "en",
   "learningObjectives": [
-    "Explain the language rule and its constraints.",
-    "Trace the example and predict its behaviour.",
-    "Identify boundary and safety cases.",
-    "Apply the concept in a tested C program."
+    "Identify out-of-bounds reads and writes in array and string code.",
+    "Explain how off-by-one errors and missing null terminators cause memory defects.",
+    "Calculate required buffer capacity including terminator space.",
+    "Use checked length calculations before copying or appending data.",
+    "Apply boundary-focused tests and compiler diagnostics to reduce memory-safety risks."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "A buffer overflow occurs when a program reads or writes outside the intended bounds of an array or buffer. Common causes include incorrect length calculations, missing terminators, off-by-one loops and unsafe input handling.",
+      "concept": "An out-of-bounds access reads or writes outside the valid elements of an array object. Common causes include incorrect length calculations, off-by-one loops, missing null terminators and unbounded input. Such accesses have undefined behavior in C and can cause crashes, data corruption or security vulnerabilities. Prevention requires explicit capacity accounting, valid indices and careful API contracts.",
       "whyItMatters": "This knowledge helps reason about C data representation, object bounds and valid memory access.",
       "analogy": "Think of memory objects as labelled storage and pointers as typed references to that storage.",
       "analogyLimit": "The analogy does not replace C's formal pointer, lifetime and object-access rules."
     },
     "explain": {
-      "narrative": "A buffer overflow occurs when a program reads or writes outside the intended bounds of an array or buffer. Common causes include incorrect length calculations, missing terminators, off-by-one loops and unsafe input handling.\n\nCheck the declared types, object lifetime, valid bounds and function preconditions before using the construct. Enable compiler warnings and test edge cases.",
+      "narrative": "## 1. Array bounds\n\nFor an array with N elements, only indices 0 through N-1 designate elements. An index equal to N is one past the last element and cannot be dereferenced. C does not automatically check array bounds at run time.\n\n## 2. String capacity\n\nA string with L data bytes requires at least L+1 char elements to include the terminating null character. When appending, calculate the existing length, incoming length and terminator space without overflowing the size calculation.\n\n## 3. Validate before writing\n\nBefore copying or appending, prove that the destination has enough capacity. Do not rely on strcpy or strcat to discover the destination size; they do not receive that information. Reject, truncate or dynamically allocate according to an explicit policy.\n\n## 4. Read safely\n\nUse bounded input such as fgets and check its result. Detect overlong lines and handle the remaining input. A bounded read does not remove the need to validate the content.\n\n## 5. Test boundaries and diagnose\n\nTest empty input, the largest accepted input, one byte too many, exact-fit capacity and missing terminators. Compile with strong warnings and, where available, use address and undefined-behavior sanitizers during testing. Tools support prevention but do not replace correct bounds reasoning.",
       "examples": [
         {
-          "id": "cl411-ex1",
+          "id": "cl4.11-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "Out-of-bounds access is undefined behaviour in C and can cause crashes, data corruption or security vulnerabilities. Correctness requires validating lengths before every write and read.",
-          "explanation": "#include <stdio.h>\n#include <string.h>\nint main(void) {\n char destination[8];\n const char source[] = \"C safe\";\n size_t needed = strlen(source) + 1;\n if (needed <= sizeof destination) {\n  memcpy(destination, source, needed);\n  puts(destination);\n }\n return 0;\n}",
+          "title": "Check capacity before copying",
+          "code": "#include <stdio.h>\n#include <string.h>\n\nint main(void) {\n    const char source[] = \"C arrays\";\n    char destination[16];\n    size_t needed = sizeof source;\n    if (needed <= sizeof destination) {\n        memcpy(destination, source, needed);\n        puts(destination);\n    } else {\n        puts(\"Destination is too small\");\n    }\n    return 0;\n}",
+          "explanation": "sizeof source includes its null terminator. The capacity check therefore includes the complete string representation.",
+          "runnable": false
+        },
+        {
+          "id": "cl4.11-ex2",
+          "language": "en",
+          "title": "Validate an index before access",
+          "code": "#include <stddef.h>\n#include <stdio.h>\n\nint get_value(const int values[], size_t count, size_t index, int *out) {\n    if (values == NULL || out == NULL || index >= count) return 0;\n    *out = values[index];\n    return 1;\n}\n\nint main(void) {\n    int data[] = { 4, 8, 12 };\n    int result;\n    if (get_value(data, 3, 2, &result)) printf(\"%d\\n\", result);\n    return 0;\n}",
+          "explanation": "The index is checked against count before subscripting. The function also validates pointers before dereferencing them.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "The required size includes the null terminator. The copy occurs only after checking that the destination has enough bytes.",
-      "independentTask": "Calculate needed for source values of lengths zero, seven and eight.",
+      "guidedTask": "Implement a small C program that checks array indices and string destination capacity before access or copying. Test exact-fit, empty and oversized cases.",
+      "independentTask": "Review a program with an off-by-one loop and an unsafe string copy. Identify the exact invalid access, calculate the required capacity, fix the defects and add boundary tests.",
       "hints": [
-        "Review a string-copy routine and add checks for source validity, destination capacity and termination.",
-        "Use size_t for object sizes and lengths.",
-        "Check addition for overflow when sizes come from untrusted or very large values."
+        "Write down the exact array length and valid index range.",
+        "Include null terminator space when working with C strings.",
+        "Check function preconditions and return values.",
+        "Pass array lengths explicitly when a function needs them.",
+        "Test exact-fit and one-past-boundary cases."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl411-q1",
-        "prompt": "Which statement best matches this lesson?",
+        "id": "cl4.11-q1",
+        "prompt": "For a string with 10 data characters, how many char elements are needed?",
         "options": [
-          "The C rule and constraints explained in this lesson.",
-          "An unrelated HTML element.",
-          "A CSS property."
+          "At least 11",
+          "Exactly 10",
+          "At least 12 in every case"
         ],
-        "answer": "The C rule and constraints explained in this lesson.",
-        "explanation": "The correct choice follows the C rule and its constraints."
+        "answer": "At least 11",
+        "explanation": "The array needs ten data elements plus one null terminator."
       },
       {
-        "id": "cl411-q2",
-        "prompt": "What is the safest way to handle the relevant boundary or validity condition?",
+        "id": "cl4.11-q2",
+        "prompt": "What is an out-of-bounds array access in C?",
         "options": [
-          "Check the documented preconditions and bounds before access.",
-          "Assume C automatically checks every pointer and array access.",
-          "Ignore the result if one run appears successful."
+          "Reading or writing outside the valid elements of the array",
+          "Reading the first array element",
+          "Using sizeof on an array"
         ],
-        "answer": "Check the documented preconditions and bounds before access.",
-        "explanation": "C programs must explicitly respect object bounds, pointer validity and conversion results."
+        "answer": "Reading or writing outside the valid elements of the array",
+        "explanation": "An array access must designate an element within the object's bounds."
       },
       {
-        "id": "cl411-q3",
-        "prompt": "Why should the example be traced?",
+        "id": "cl4.11-q3",
+        "prompt": "Why are strcpy and strcat risky when capacity is unknown?",
         "options": [
-          "To understand execution order and object state.",
-          "To replace compilation and tests.",
-          "To avoid checking inputs."
+          "They do not know the destination array's capacity",
+          "They automatically allocate memory",
+          "They always append a terminator twice"
         ],
-        "answer": "To understand execution order and object state.",
-        "explanation": "Tracing complements compilation, warnings and testing."
+        "answer": "They do not know the destination array's capacity",
+        "explanation": "The caller must ensure sufficient destination storage."
+      },
+      {
+        "id": "cl4.11-q4",
+        "prompt": "Which test is especially useful for a bounded input buffer?",
+        "options": [
+          "Input exactly at capacity and one byte beyond the accepted limit",
+          "Only a typical short input",
+          "Only an empty source file"
+        ],
+        "answer": "Input exactly at capacity and one byte beyond the accepted limit",
+        "explanation": "Boundary tests reveal truncation and capacity-handling defects."
+      },
+      {
+        "id": "cl4.11-q5",
+        "prompt": "What does an address sanitizer help detect during testing?",
+        "options": [
+          "Some invalid memory accesses such as out-of-bounds operations",
+          "Every possible logical error",
+          "All portability problems"
+        ],
+        "answer": "Some invalid memory accesses such as out-of-bounds operations",
+        "explanation": "Sanitizers detect classes of runtime memory errors but cannot prove all code correct."
       }
     ]
   },
