@@ -112,9 +112,9 @@ The course is designed to take a learner from first contact with C through pract
 - [ ] CL8.4 · `realloc`, resizing and preserving the original allocation on failure
 - [ ] CL8.5 · `free`, ownership and release discipline
 - [ ] CL8.6 · Dynamic arrays, structures and nested allocations
-- [ ] CL8.7 · Common memory mistakes: leaks, double-free, use-after-free and invalid free
-- [ ] CL8.8 · Compiler errors, warnings, link errors and runtime failures
-- [ ] CL8.9 · Debugging with breakpoints, watch expressions and diagnostics
+- [x] CL8.7 · Common memory mistakes: leaks, double-free, use-after-free and invalid free
+- [x] CL8.8 · Compiler errors, warnings, link errors and runtime failures
+- [x] CL8.9 · Debugging with breakpoints, watch expressions and diagnostics
 - [ ] CL8.10 · `NULL`, error handling and input validation
 - [ ] CL8.11 · Allocation-size overflow and defensive allocation patterns (CodeSaathi extension)
 - [ ] CL8.12 · Sanitizers, static analysis and memory-checking workflow (CodeSaathi extension)
