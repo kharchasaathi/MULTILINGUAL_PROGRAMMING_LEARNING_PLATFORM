@@ -27,6 +27,118 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
+      - name: Collect upstream deployment failure evidence
+        if: github.event_name == 'workflow_run'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          UPSTREAM_RUN_ID: ${{ github.event.workflow_run.id }}
+          UPSTREAM_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          REPOSITORY: ${{ github.repository }}
+          GITHUB_API_URL: ${{ github.api_url }}
+        run: |
+          mkdir -p health-report
+          node <<'NODE'
+          const fs = require('fs');
+          const base = process.env.GITHUB_API_URL;
+          const repo = process.env.REPOSITORY;
+          const runId = process.env.UPSTREAM_RUN_ID;
+          const headers = {
+            authorization: 'Bearer ' + process.env.GH_TOKEN,
+            accept: 'application/vnd.github+json',
+            'x-github-api-version': '2022-11-28'
+          };
+          const evidence = {
+            collectedAt: new Date().toISOString(),
+            upstreamRunId: runId,
+            headSha: process.env.UPSTREAM_HEAD_SHA,
+            classification: 'UNCLASSIFIED',
+            confidence: 'low',
+            jobs: [],
+            annotations: [],
+            collectionErrors: []
+          };
+          async function getJson(url) {
+            const response = await fetch(url, { headers, signal: AbortSignal.timeout(15000) });
+            if (!response.ok) throw new Error('HTTP ' + response.status + ' for ' + url);
+            return response.json();
+          }
+          try {
+            const data = await getJson(base + '/repos/' + repo + '/actions/runs/' + runId + '/jobs?per_page=100');
+            evidence.jobs = (data.jobs || []).map(job => ({
+              id: job.id,
+              name: job.name,
+              status: job.status,
+              conclusion: job.conclusion,
+              startedAt: job.started_at,
+              completedAt: job.completed_at,
+              runnerId: job.runner_id,
+              runnerName: job.runner_name,
+              runnerGroupName: job.runner_group_name,
+              labels: job.labels || [],
+              steps: (job.steps || []).map(step => ({
+                name: step.name,
+                status: step.status,
+                conclusion: step.conclusion,
+                number: step.number,
+                startedAt: step.started_at,
+                completedAt: step.completed_at
+              }))
+            }));
+            const failedJobs = evidence.jobs.filter(job => job.conclusion === 'failure');
+            const failedSteps = failedJobs.flatMap(job => job.steps.filter(step => step.conclusion === 'failure').map(step => ({job: job.name, ...step})));
+            if (failedSteps.length) {
+              evidence.classification = 'STEP_FAILURE';
+              evidence.confidence = 'high';
+              evidence.failedSteps = failedSteps;
+            } else if (failedJobs.some(job => job.runnerId === 0 && job.steps.length === 0)) {
+              evidence.classification = 'RUNNER_STARTUP_OR_PLATFORM_FAILURE';
+              evidence.confidence = 'medium';
+              evidence.note = 'GitHub reports runner_id=0 and no executed steps. This suggests a failure before normal job execution; it does not identify the platform-side cause.';
+            } else if (failedJobs.some(job => job.steps.length > 0)) {
+              evidence.classification = 'JOB_LEVEL_FAILURE_UNCLASSIFIED';
+              evidence.confidence = 'low';
+            } else if (failedJobs.length) {
+              evidence.classification = 'JOB_METADATA_INCOMPLETE';
+              evidence.confidence = 'low';
+            } else {
+              evidence.classification = 'NO_FAILED_JOB_RECORDED';
+              evidence.confidence = 'medium';
+            }
+            try {
+              const checks = await getJson(base + '/repos/' + repo + '/commits/' + process.env.UPSTREAM_HEAD_SHA + '/check-runs?per_page=100');
+              const matching = (checks.check_runs || []).filter(check => failedJobs.some(job => job.id === check.id) || check.conclusion === 'failure');
+              for (const check of matching) {
+                try {
+                  const annotations = await getJson(base + '/repos/' + repo + '/check-runs/' + check.id + '/annotations?per_page=100');
+                  evidence.annotations.push({checkRunId: check.id, name: check.name, annotations});
+                } catch (error) {
+                  evidence.collectionErrors.push('Annotations for check ' + check.id + ': ' + error.message);
+                }
+              }
+            } catch (error) {
+              evidence.collectionErrors.push('Check-run lookup: ' + error.message);
+            }
+          } catch (error) {
+            evidence.collectionErrors.push('Workflow job lookup: ' + error.message);
+            evidence.classification = 'EVIDENCE_COLLECTION_FAILED';
+            evidence.confidence = 'none';
+          }
+          fs.writeFileSync('health-report/upstream-deployment-evidence.json', JSON.stringify(evidence, null, 2) + '\\n');
+          const summary = [
+            '## Upstream deployment failure evidence',
+            '- Run: ' + runId,
+            '- Classification: **' + evidence.classification + '** (' + evidence.confidence + ' confidence)',
+            '- Failed jobs: ' + evidence.jobs.filter(job => job.conclusion === 'failure').length,
+            '- Failed steps identified: ' + (evidence.failedSteps || []).length,
+            '- Collection errors: ' + evidence.collectionErrors.length,
+            '- Detailed evidence: health-report/upstream-deployment-evidence.json',
+            '',
+            'Classification is evidence-based. Runner/platform causes remain suspected unless GitHub supplies a concrete runner error.'
+          ].join('\\n');
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary + '\\n');
+          console.log(summary);
+          NODE
+
       - name: Run complete health inspection
         env:
           DEPLOY_RESULT: ${{ github.event.workflow_run.conclusion || 'not-triggered' }}
