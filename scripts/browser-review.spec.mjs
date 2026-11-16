@@ -6,12 +6,13 @@ test.use({ serviceWorkers: "block" });
 const groups = {
   html: ["H16.1","H16.2","H16.3","H16.4","H16.5","H16.6","H16.7","H16.8","H16.9","H16.10"],
   css: ["C22.1","C22.2","C22.3","C22.4","C22.5","C22.6"],
-  javascript: ["J24.1","J24.2","J24.3","J24.4","J24.5","J24.6","J24.7","J24.8","J24.9"]
+  javascript: ["J24.1","J24.2","J24.3","J24.4","J24.5","J24.6","J24.7","J24.8","J24.9"],
+  c: ["CL1.1","CL1.2","CL1.3","CL1.4","CL1.5","CL1.6","CL2.1","CL2.2","CL2.3","CL2.4","CL2.5","CL2.6","CL2.7","CL2.8","CL2.9","CL2.10"]
 };
 
 test("homepage and lesson dialog have no serious or critical WCAG axe violations", async ({ page }) => {
   await page.goto(baseURL, { waitUntil: "domcontentloaded" });
-  await expect(page.locator("#courseGrid .course-card")).toHaveCount(4);
+  await expect(page.locator("#courseGrid .course-card")).toHaveCount(5);
   const home = await new AxeBuilder({ page }).withTags(["wcag2a","wcag2aa","wcag21a","wcag21aa"]).analyze();
   const seriousHome = home.violations.filter((item) => ["serious","critical"].includes(item.impact));
   expect(seriousHome, JSON.stringify(seriousHome.map(({ id, impact, description, nodes }) => ({ id, impact, description, count:nodes.length })), null, 2)).toEqual([]);
@@ -88,10 +89,10 @@ test("all 25 lessons render in the UI and all runnable starter programs execute 
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
   await page.goto(baseURL, { waitUntil: "domcontentloaded" });
-  await expect(page.locator("#courseGrid .course-card")).toHaveCount(4);
+  await expect(page.locator("#courseGrid .course-card")).toHaveCount(5);
 
   // Exercise the shared lesson renderer and modal with one real lesson per subject.
-  for (const [course, topicId] of [["html","H16.1"],["css","C22.1"],["javascript","J24.1"]]) {
+  for (const [course, topicId] of [["html","H16.1"],["css","C22.1"],["javascript","J24.1"],["c","CL1.1"]]) {
     await page.locator(`[data-course-nav="${course}"]`).click();
     const dialog = page.locator("#lessonDialog");
     await expect(dialog).toBeVisible();
