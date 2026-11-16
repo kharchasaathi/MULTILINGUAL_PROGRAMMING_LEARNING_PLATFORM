@@ -6,39 +6,50 @@
   "title": "Null pointers, null pointer constants and safe checks",
   "language": "en",
   "learningObjectives": [
-    "Explain the language rule and its constraints.",
-    "Trace the example and predict its behaviour.",
-    "Identify boundary and safety cases.",
-    "Apply the concept in a tested C program."
+    "Explain what a null pointer represents in C.",
+    "Use NULL or an appropriate null pointer constant to initialize pointer objects.",
+    "Compare pointers with NULL before dereferencing when null is an allowed state.",
+    "Distinguish a null pointer value from an all-bits-zero object representation.",
+    "Recognize that a non-null pointer is not automatically valid or safe to dereference."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "A null pointer value is guaranteed to compare unequal to a pointer to any object or function. The macro NULL expands to an implementation-defined null pointer constant. A pointer can be checked against NULL before dereferencing when null is an allowed state.",
+      "concept": "A null pointer value is guaranteed to compare unequal to a pointer to any object or function. The macro NULL expands to an implementation-defined null pointer constant. A null pointer can be checked before dereferencing when null is an allowed state. The language does not require a null pointer to have an all-bits-zero representation, and non-nullness alone does not prove that a pointer is valid.",
       "whyItMatters": "This knowledge helps reason about C data representation, object bounds and valid memory access.",
       "analogy": "Think of memory objects as labelled storage and pointers as typed references to that storage.",
       "analogyLimit": "The analogy does not replace C's formal pointer, lifetime and object-access rules."
     },
     "explain": {
-      "narrative": "A null pointer value is guaranteed to compare unequal to a pointer to any object or function. The macro NULL expands to an implementation-defined null pointer constant. A pointer can be checked against NULL before dereferencing when null is an allowed state.\n\nCheck the declared types, object lifetime, valid bounds and function preconditions before using the construct. Enable compiler warnings and test edge cases.",
+      "narrative": "## 1. Meaning of null\n\nA null pointer represents the absence of a pointer to an object or function. It is a special pointer value, not an object located at a universally fixed numeric address.\n\n## 2. Initialize and compare\n\nUse `NULL` or another appropriate null pointer constant to initialize a pointer. Compare a pointer with NULL to check whether it currently has no target. The pointer must not be dereferenced while null.\n\n## 3. Representation is not the same as value\n\nC guarantees the behavior of null pointer values, but it does not require every implementation to represent them as all bits zero. Do not use memset or integer assumptions as a substitute for proper pointer initialization.\n\n## 4. A non-null pointer may still be invalid\n\nA pointer can be non-null but dangling, out of bounds, misaligned or otherwise invalid. A null check only handles one possible invalid state; it does not establish object lifetime or bounds.\n\n## 5. Establish pointer contracts\n\nDocument whether a function accepts NULL, whether it may return NULL, and which object the pointer may designate. Validate all required preconditions before dereferencing.",
       "examples": [
         {
-          "id": "cl57-ex1",
+          "id": "cl5.7-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "Null represents the absence of a valid target. Checking it prevents one common invalid dereference, but it does not prove that a non-null pointer is valid or that its object is still alive.",
-          "explanation": "#include <stdio.h>\nint main(void) {\n int value = 7;\n int *ptr = &value;\n if (ptr != NULL) printf(\"%d\\n\", *ptr);\n return 0;\n}",
+          "title": "Check a nullable pointer",
+          "code": "#include <stdio.h>\n\nint main(void) {\n    int *value = NULL;\n    if (value == NULL) {\n        puts(\"No value is available\");\n    }\n    return 0;\n}",
+          "explanation": "The pointer is initialized to a null pointer value and checked before any dereference.",
+          "runnable": false
+        },
+        {
+          "id": "cl5.7-ex2",
+          "language": "en",
+          "title": "Check before dereferencing",
+          "code": "#include <stdio.h>\n\nvoid print_value(const int *value) {\n    if (value == NULL) {\n        puts(\"No value\");\n        return;\n    }\n    printf(\"%d\\n\", *value);\n}\n\nint main(void) {\n    int score = 91;\n    print_value(&score);\n    print_value(NULL);\n    return 0;\n}",
+          "explanation": "The function defines how it handles a null argument. A non-null pointer must still designate a valid live int object.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "The pointer is initialized to the address of value, then checked before dereferencing. If ptr were NULL, the body would be skipped.",
-      "independentTask": "Explain why a NULL check does not detect every dangling pointer.",
+      "guidedTask": "Write a C program demonstrating CL5.7. State the relevant input, pointer or conversion contract, then compile and trace the normal and failure paths.",
+      "independentTask": "Create a second example for CL5.7 that exercises a boundary or invalid state. Add checks, document the ownership or input rules, and explain why unsafe behavior is avoided.",
       "hints": [
-        "Write a function that accepts an optional int pointer and safely handles the NULL case.",
-        "Use NULL for pointer values; use 0 or '\\0' only according to the context and intended type.",
-        "A non-null pointer can still be invalid or dangling."
+        "Read the declared types carefully, including every pointer and qualifier level.",
+        "Check return values and validate inputs before use.",
+        "Keep object lifetime and ownership explicit.",
+        "Avoid dereferencing invalid or out-of-range pointers.",
+        "Test both success and failure paths."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl57-q1",
-        "prompt": "Which statement best matches this lesson?",
+        "id": "cl5.7-q1",
+        "prompt": "What does a null pointer represent?",
         "options": [
-          "The C rule and constraints explained in this lesson.",
-          "An unrelated HTML element.",
-          "A CSS property."
+          "A pointer value that designates no object or function",
+          "A pointer to the integer zero object",
+          "A guaranteed address with all bits zero"
         ],
-        "answer": "The C rule and constraints explained in this lesson.",
-        "explanation": "The correct choice follows the C rule and its constraints."
+        "answer": "A pointer value that designates no object or function",
+        "explanation": "Null is a special pointer value that designates no target."
       },
       {
-        "id": "cl57-q2",
-        "prompt": "What is the safest way to handle the relevant boundary or validity condition?",
+        "id": "cl5.7-q2",
+        "prompt": "What is NULL?",
         "options": [
-          "Check the documented preconditions and bounds before access.",
-          "Assume C automatically checks every pointer and array access.",
-          "Ignore the result if one run appears successful."
+          "A macro that expands to an implementation-defined null pointer constant",
+          "A keyword that allocates memory",
+          "A pointer to the first array element"
         ],
-        "answer": "Check the documented preconditions and bounds before access.",
-        "explanation": "C programs must explicitly respect object bounds, pointer validity and conversion results."
+        "answer": "A macro that expands to an implementation-defined null pointer constant",
+        "explanation": "NULL is provided by standard headers as a null pointer constant."
       },
       {
-        "id": "cl57-q3",
-        "prompt": "Why should the example be traced?",
+        "id": "cl5.7-q3",
+        "prompt": "Must a null pointer have an all-bits-zero representation?",
         "options": [
-          "To understand execution order and object state.",
-          "To replace compilation and tests.",
-          "To avoid checking inputs."
+          "No",
+          "Yes on every C implementation",
+          "Only for int pointers"
         ],
-        "answer": "To understand execution order and object state.",
-        "explanation": "Tracing complements compilation, warnings and testing."
+        "answer": "No",
+        "explanation": "The C standard specifies null pointer behavior, not a universal bit representation."
+      },
+      {
+        "id": "cl5.7-q4",
+        "prompt": "Does a non-null pointer guarantee safe dereferencing?",
+        "options": [
+          "No; it may be dangling or out of bounds",
+          "Yes, every non-null pointer is valid",
+          "Only if printed with %p"
+        ],
+        "answer": "No; it may be dangling or out of bounds",
+        "explanation": "Pointer validity also depends on object lifetime, bounds and alignment."
+      },
+      {
+        "id": "cl5.7-q5",
+        "prompt": "What must a program do before dereferencing a pointer that may be null?",
+        "options": [
+          "Check it and establish the other pointer validity requirements",
+          "Convert it to int",
+          "Print it first"
+        ],
+        "answer": "Check it and establish the other pointer validity requirements",
+        "explanation": "A null check handles the null case, but the target must also be valid."
       }
     ]
   },
