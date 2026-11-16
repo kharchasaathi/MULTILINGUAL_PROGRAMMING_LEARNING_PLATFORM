@@ -1,0 +1,88 @@
+{
+  "id": "c.cl8.6.en",
+  "courseId": "c",
+  "moduleId": "CL8",
+  "topicId": "CL8.6",
+  "title": "Dynamic arrays, structures and nested allocations",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the concept and its C rules.",
+    "Trace the example and identify data or control flow.",
+    "Recognize common failure and safety cases.",
+    "Apply the concept in a tested C program."
+  ],
+  "prerequisites": [],
+  "stages": {
+    "understand": {
+      "concept": "Dynamic allocation can create arrays and structures whose storage size is decided at runtime. A structure may contain pointers to separately allocated resources; those nested allocations require their own ownership and cleanup plan.",
+      "whyItMatters": "Dynamic data structures are flexible but increase the number of allocation failures and cleanup paths a program must handle.",
+      "analogy": "Treat each resource and operation as having a clear contract, valid lifetime and failure path.",
+      "analogyLimit": "The analogy does not replace the C standard, compiler or library specifications."
+    },
+    "explain": {
+      "narrative": "Dynamic allocation can create arrays and structures whose storage size is decided at runtime. A structure may contain pointers to separately allocated resources; those nested allocations require their own ownership and cleanup plan.\n\nCheck object bounds, lifetimes, arithmetic limits and all relevant return values. Compile with warnings enabled and test both normal and failure paths.",
+      "examples": [
+        {
+          "id": "cl86-ex1",
+          "language": "en",
+          "title": "Focused C example",
+          "code": "#include <stdio.h>\n#include <stdlib.h>\nstruct Buffer { size_t length; int *data; };\nint main(void) {\n struct Buffer b = {0, NULL};\n b.length = 3;\n b.data = malloc(b.length * sizeof *b.data);\n if (b.data == NULL) return 1;\n for (size_t i=0; i<b.length; ++i) b.data[i] = (int)i;\n printf(\"%d\\n\", b.data[2]);\n free(b.data);\n return 0;\n}",
+          "explanation": "The structure stores a length and a pointer to a separately allocated array. Releasing the structure's data allocation is necessary; freeing a structure object alone would not release nested allocations automatically.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Identify every allocated object and its matching release.",
+      "independentTask": "Create a dynamically allocated structure containing a dynamically allocated string. Handle partial allocation failure and release all acquired resources.",
+      "hints": [
+        "Initialize pointer members to NULL before attempting allocation.",
+        "When a later allocation fails, release any earlier allocations already acquired.",
+        "Document whether a function returns a shallow copy or transfers ownership."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "cl86-q1",
+        "prompt": "Which statement best describes this lesson?",
+        "options": [
+          "The C rule and constraints described in this lesson.",
+          "An HTML tag.",
+          "A CSS selector."
+        ],
+        "answer": "The C rule and constraints described in this lesson.",
+        "explanation": "The correct choice follows the C rule explained above."
+      },
+      {
+        "id": "cl86-q2",
+        "prompt": "What is a reliable way to protect correctness?",
+        "options": [
+          "Validate preconditions, bounds and failure results.",
+          "Assume the operation cannot fail.",
+          "Ignore the type and lifetime rules."
+        ],
+        "answer": "Validate preconditions, bounds and failure results.",
+        "explanation": "C requires explicit handling of object validity and operation failures."
+      },
+      {
+        "id": "cl86-q3",
+        "prompt": "How should the example be checked?",
+        "options": [
+          "Compile with warnings and test expected and failure cases.",
+          "Ignore diagnostics and test only once.",
+          "Assume every platform behaves identically."
+        ],
+        "answer": "Compile with warnings and test expected and failure cases.",
+        "explanation": "Warnings and targeted tests provide evidence for correctness."
+      }
+    ]
+  },
+  "status": "draft"
+}
