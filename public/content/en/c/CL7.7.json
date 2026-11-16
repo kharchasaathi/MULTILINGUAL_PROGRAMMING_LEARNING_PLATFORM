@@ -1,0 +1,88 @@
+{
+  "id": "c.cl7.7.en",
+  "courseId": "c",
+  "moduleId": "CL7",
+  "topicId": "CL7.7",
+  "title": "Unions and shared storage",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the concept and its C rules.",
+    "Trace the example and identify data or resource flow.",
+    "Recognize relevant safety and failure cases.",
+    "Apply the concept in a tested C program."
+  ],
+  "prerequisites": [],
+  "stages": {
+    "understand": {
+      "concept": "A union is a type whose members share the same storage region. Its size is sufficient for its largest member, with alignment requirements. At a given time, a program generally interprets the stored representation through the member most recently written, subject to C's specific rules.",
+      "whyItMatters": "Unions can represent variant data compactly, but reading an inactive member requires careful attention to the language rules and representation assumptions.",
+      "analogy": "Treat each object or stream as a resource with a defined lifetime and explicit rules for access.",
+      "analogyLimit": "The analogy does not replace C's formal object, storage-duration, alignment or library rules."
+    },
+    "explain": {
+      "narrative": "A union is a type whose members share the same storage region. Its size is sufficient for its largest member, with alignment requirements. At a given time, a program generally interprets the stored representation through the member most recently written, subject to C's specific rules.\n\nCheck all allocation, I/O and conversion results. Respect object bounds and lifetime, initialize data before reading it, and define who owns and releases each resource.",
+      "examples": [
+        {
+          "id": "cl77-ex1",
+          "language": "en",
+          "title": "Focused C example",
+          "code": "#include <stdio.h>\nunion Number { int whole; float decimal; };\nint main(void) {\n union Number value;\n value.whole = 25;\n printf(\"%d\\n\", value.whole);\n return 0;\n}",
+          "explanation": "The union has storage shared by whole and decimal. The example writes and reads whole; it does not assume that the same bytes form a portable float value.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Explain why the two members do not occupy separate storage within one union object.",
+      "independentTask": "Create a tagged union with an enum indicating which member is active. Write code that reads only the selected member.",
+      "hints": [
+        "A union's size may exceed the size of its largest member because of alignment and padding.",
+        "Use a separate tag when the program needs to track which variant is active.",
+        "Do not assume arbitrary type-punning through a union is portable across every implementation."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "cl77-q1",
+        "prompt": "Which statement best describes this lesson?",
+        "options": [
+          "The C rule and constraints described in this lesson.",
+          "An HTML tag.",
+          "A CSS selector."
+        ],
+        "answer": "The C rule and constraints described in this lesson.",
+        "explanation": "The correct answer follows the C rule described in the lesson."
+      },
+      {
+        "id": "cl77-q2",
+        "prompt": "Which practice best protects correctness?",
+        "options": [
+          "Check validity, bounds and operation results before access.",
+          "Assume memory and file operations cannot fail.",
+          "Use data before initialization."
+        ],
+        "answer": "Check validity, bounds and operation results before access.",
+        "explanation": "C programs must explicitly handle resource validity and failure paths."
+      },
+      {
+        "id": "cl77-q3",
+        "prompt": "How should the example be verified?",
+        "options": [
+          "Compile with warnings and test success and failure paths.",
+          "Ignore warnings and test only one happy path.",
+          "Assume the same layout on every platform."
+        ],
+        "answer": "Compile with warnings and test success and failure paths.",
+        "explanation": "Compiler diagnostics and deliberate tests provide evidence for correctness."
+      }
+    ]
+  },
+  "status": "draft"
+}
