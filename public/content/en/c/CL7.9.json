@@ -1,0 +1,88 @@
+{
+  "id": "c.cl7.9.en",
+  "courseId": "c",
+  "moduleId": "CL7",
+  "topicId": "CL7.9",
+  "title": "Structure padding, alignment and object representation",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the concept and its C rules.",
+    "Trace the example and identify data or resource flow.",
+    "Recognize relevant safety and failure cases.",
+    "Apply the concept in a tested C program."
+  ],
+  "prerequisites": [],
+  "stages": {
+    "understand": {
+      "concept": "Implementations may insert padding between structure members and at the end of a structure to satisfy alignment requirements. sizeof(struct) includes such padding. The byte representation of a structure is not automatically a portable file or network format.",
+      "whyItMatters": "Assuming a fixed structure layout can break binary compatibility across compilers, architectures and build options. Portable serialization should encode fields explicitly.",
+      "analogy": "Treat each object or stream as a resource with a defined lifetime and explicit rules for access.",
+      "analogyLimit": "The analogy does not replace C's formal object, storage-duration, alignment or library rules."
+    },
+    "explain": {
+      "narrative": "Implementations may insert padding between structure members and at the end of a structure to satisfy alignment requirements. sizeof(struct) includes such padding. The byte representation of a structure is not automatically a portable file or network format.\n\nCheck all allocation, I/O and conversion results. Respect object bounds and lifetime, initialize data before reading it, and define who owns and releases each resource.",
+      "examples": [
+        {
+          "id": "cl79-ex1",
+          "language": "en",
+          "title": "Focused C example",
+          "code": "#include <stdio.h>\nstruct Record { char flag; int value; };\nint main(void) {\n printf(\"size=%zu\\n\", sizeof(struct Record));\n printf(\"offset(value)=%zu\\n\", offsetof(struct Record, value));\n return 0;\n}",
+          "explanation": "offsetof is declared in stddef.h, which should be included for this example. The offset and total size depend on the implementation's layout and alignment rules.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Predict why sizeof(struct Record) may exceed sizeof(char) + sizeof(int).",
+      "independentTask": "Inspect sizeof and offsetof for several structures on your compiler and explain why the results are not universal.",
+      "hints": [
+        "Use offsetof from stddef.h rather than guessing member offsets.",
+        "Padding bytes may contain unspecified values; do not compare structures with memcmp as a general equality test.",
+        "Serialize fields with a defined byte order and format rather than writing raw structure bytes for portable interchange."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "cl79-q1",
+        "prompt": "Which statement best describes this lesson?",
+        "options": [
+          "The C rule and constraints described in this lesson.",
+          "An HTML tag.",
+          "A CSS selector."
+        ],
+        "answer": "The C rule and constraints described in this lesson.",
+        "explanation": "The correct answer follows the C rule described in the lesson."
+      },
+      {
+        "id": "cl79-q2",
+        "prompt": "Which practice best protects correctness?",
+        "options": [
+          "Check validity, bounds and operation results before access.",
+          "Assume memory and file operations cannot fail.",
+          "Use data before initialization."
+        ],
+        "answer": "Check validity, bounds and operation results before access.",
+        "explanation": "C programs must explicitly handle resource validity and failure paths."
+      },
+      {
+        "id": "cl79-q3",
+        "prompt": "How should the example be verified?",
+        "options": [
+          "Compile with warnings and test success and failure paths.",
+          "Ignore warnings and test only one happy path.",
+          "Assume the same layout on every platform."
+        ],
+        "answer": "Compile with warnings and test success and failure paths.",
+        "explanation": "Compiler diagnostics and deliberate tests provide evidence for correctness."
+      }
+    ]
+  },
+  "status": "draft"
+}
