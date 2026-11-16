@@ -1,0 +1,88 @@
+{
+  "id": "c.cl8.7.en",
+  "courseId": "c",
+  "moduleId": "CL8",
+  "topicId": "CL8.7",
+  "title": "Common memory mistakes: leaks, double-free, use-after-free and invalid free",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the concept and its C rules.",
+    "Trace the example and identify data or control flow.",
+    "Recognize common failure and safety cases.",
+    "Apply the concept in a tested C program."
+  ],
+  "prerequisites": [],
+  "stages": {
+    "understand": {
+      "concept": "A memory leak occurs when allocated storage becomes unreachable without being released. Double-free releases the same allocation more than once. Use-after-free accesses an object after its lifetime ends. Invalid free passes a pointer that was not returned by a compatible allocation function or has already been released.",
+      "whyItMatters": "These defects can cause crashes, data corruption and security vulnerabilities. They often arise when ownership is unclear or error paths skip cleanup.",
+      "analogy": "Treat each resource and operation as having a clear contract, valid lifetime and failure path.",
+      "analogyLimit": "The analogy does not replace the C standard, compiler or library specifications."
+    },
+    "explain": {
+      "narrative": "A memory leak occurs when allocated storage becomes unreachable without being released. Double-free releases the same allocation more than once. Use-after-free accesses an object after its lifetime ends. Invalid free passes a pointer that was not returned by a compatible allocation function or has already been released.\n\nCheck object bounds, lifetimes, arithmetic limits and all relevant return values. Compile with warnings enabled and test both normal and failure paths.",
+      "examples": [
+        {
+          "id": "cl87-ex1",
+          "language": "en",
+          "title": "Focused C example",
+          "code": "#include <stdlib.h>\nint main(void) {\n int *data = malloc(3 * sizeof *data);\n if (data == NULL) return 1;\n data[0] = 1; data[1] = 2; data[2] = 3;\n free(data);\n data = NULL;\n return 0;\n}",
+          "explanation": "The example follows one allocation with one release and clears the local owner pointer. It avoids accessing the object after free and avoids freeing the same pointer twice.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "For each named defect, describe the incorrect operation and its consequence.",
+      "independentTask": "Review a function with several early returns and ensure every successful allocation is released exactly once.",
+      "hints": [
+        "Use one clear owner for each allocation whenever possible.",
+        "After free, do not use any alias to the released object.",
+        "Use sanitizers or memory-checking tools where available, but still reason about ownership."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "cl87-q1",
+        "prompt": "Which statement best describes this lesson?",
+        "options": [
+          "The C rule and constraints described in this lesson.",
+          "An HTML tag.",
+          "A CSS selector."
+        ],
+        "answer": "The C rule and constraints described in this lesson.",
+        "explanation": "The correct choice follows the C rule explained above."
+      },
+      {
+        "id": "cl87-q2",
+        "prompt": "What is a reliable way to protect correctness?",
+        "options": [
+          "Validate preconditions, bounds and failure results.",
+          "Assume the operation cannot fail.",
+          "Ignore the type and lifetime rules."
+        ],
+        "answer": "Validate preconditions, bounds and failure results.",
+        "explanation": "C requires explicit handling of object validity and operation failures."
+      },
+      {
+        "id": "cl87-q3",
+        "prompt": "How should the example be checked?",
+        "options": [
+          "Compile with warnings and test expected and failure cases.",
+          "Ignore diagnostics and test only once.",
+          "Assume every platform behaves identically."
+        ],
+        "answer": "Compile with warnings and test expected and failure cases.",
+        "explanation": "Warnings and targeted tests provide evidence for correctness."
+      }
+    ]
+  },
+  "status": "draft"
+}
