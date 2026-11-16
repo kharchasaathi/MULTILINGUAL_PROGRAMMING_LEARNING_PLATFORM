@@ -115,9 +115,9 @@ The course is designed to take a learner from first contact with C through pract
 - [x] CL8.7 · Common memory mistakes: leaks, double-free, use-after-free and invalid free
 - [x] CL8.8 · Compiler errors, warnings, link errors and runtime failures
 - [x] CL8.9 · Debugging with breakpoints, watch expressions and diagnostics
-- [ ] CL8.10 · `NULL`, error handling and input validation
-- [ ] CL8.11 · Allocation-size overflow and defensive allocation patterns (CodeSaathi extension)
-- [ ] CL8.12 · Sanitizers, static analysis and memory-checking workflow (CodeSaathi extension)
+- [x] CL8.10 · `NULL`, error handling and input validation
+- [x] CL8.11 · Allocation-size overflow and defensive allocation patterns (CodeSaathi extension)
+- [x] CL8.12 · Sanitizers, static analysis and memory-checking workflow (CodeSaathi extension)
 
 ### CL9 — C standard library, preprocessor and additional tools
 - [ ] CL9.1 · Date and time functions from `time.h`
