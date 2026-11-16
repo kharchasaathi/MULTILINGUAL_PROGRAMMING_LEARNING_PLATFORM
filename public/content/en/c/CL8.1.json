@@ -6,39 +6,62 @@
   "title": "Memory regions, allocation concepts and object lifetime",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C rules.",
-    "Trace the example and identify data or resource flow.",
-    "Recognize relevant safety and failure cases.",
-    "Apply the concept in a tested C program."
+    "Distinguish an object's lifetime (when it exists and may be accessed) from its storage duration category (how long its storage is reserved), and explain why neither guarantees a particular physical memory region.",
+    "Identify automatic, static, thread and allocated storage duration in small C programs, including the scope and lifetime of local variables and static local objects.",
+    "Explain how an object's lifetime affects pointer validity, and recognize why returning the address of an automatic local object creates a dangling pointer.",
+    "Describe how allocated storage begins and ends through allocation and deallocation, and identify the program's responsibility for managing that lifetime.",
+    "Trace a program that combines automatic, static and allocated objects, predicting which pointers remain valid at each point.",
+    "Choose an appropriate lifetime strategy for temporary calculations, persistent program state and data whose size or lifetime is determined at runtime."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL5.3 — Pointer declarations and dereferencing",
+    "CL6.4 — Scope, lifetime and storage duration"
+  ],
   "stages": {
     "understand": {
-      "concept": "C objects have storage duration categories including automatic, static, thread and allocated storage duration. The language specifies object lifetime and storage duration, not a universal physical stack/heap layout. Dynamically allocated storage is managed through allocation functions.",
-      "whyItMatters": "Understanding lifetime helps determine when pointers remain valid and who is responsible for releasing allocated storage.",
-      "analogy": "Treat each object or stream as a resource with a defined lifetime and explicit rules for access.",
-      "analogyLimit": "The analogy does not replace C's formal object, storage-duration, alignment or library rules."
+      "concept": "Every C object has a lifetime: the interval during program execution when the object exists and can be accessed according to the language rules. C also classifies objects by storage duration. The main categories are automatic, static, thread and allocated storage duration. These are language concepts; they do not promise that an object physically resides in a particular stack, data segment or heap region on every implementation.",
+      "whyItMatters": "A pointer is useful only while the object it designates is alive and the access is otherwise valid. Understanding lifetime helps prevent dangling pointers, use-after-lifetime bugs and leaks, and helps decide who must release dynamically allocated storage.",
+      "analogy": "Think of an object as a library book with a borrowing period. A valid reference lets you locate the book only while the library still holds that particular book for you. A dynamically allocated object is like a book checked out under your responsibility until you return it.",
+      "analogyLimit": "C does not enforce ownership like a library system, and pointers do not automatically become invalid-looking when an object's lifetime ends. A pointer value can remain in a variable even though using it to access the former object is no longer valid. The analogy also says nothing about physical memory layout."
     },
     "explain": {
-      "narrative": "C objects have storage duration categories including automatic, static, thread and allocated storage duration. The language specifies object lifetime and storage duration, not a universal physical stack/heap layout. Dynamically allocated storage is managed through allocation functions.\n\nCheck all allocation, I/O and conversion results. Respect object bounds and lifetime, initialize data before reading it, and define who owns and releases each resource.",
+      "narrative": "## 1. Lifetime and storage duration are related, but not identical terms\n\nAn object's **lifetime** is the period during which the object exists. Its **storage duration** describes the storage-duration category that determines the object's lifetime. Scope is different again: scope controls where an identifier can be used in source code. A name can go out of scope while the object it once named continues to exist, as happens with a static local object.\n\nC does not require every automatic object to be placed on a physical stack or every allocated object to be placed in a physical heap. Those are common implementation techniques, not portable language guarantees.\n\n## 2. The four storage-duration categories\n\n- **Automatic:** Common for block-scope local objects without `static` or `extern`. Their lifetime is associated with execution of the relevant block. A new execution of the block can create a new instance.\n- **Static:** Objects with static storage duration exist for the entire execution of the program. File-scope objects and block-scope objects declared `static` are common examples. A static local keeps its value between function calls even though its name is visible only inside that function.\n- **Thread:** A thread-storage-duration object exists for the lifetime of the thread that owns it. C11 introduced `_Thread_local`; support and exact use depend on the selected C implementation and standard version.\n- **Allocated:** Storage obtained from an allocation function such as `malloc` exists from successful allocation until it is deallocated by `free` or a successful resizing operation changes the allocation. The program must manage this lifetime explicitly.\n\n## 3. Scope does not extend an object's lifetime\n\nA pointer does not keep an automatic object alive. Returning the address of a non-static local variable from a function leaves the caller with a pointer to an object whose lifetime has ended. Dereferencing that pointer is undefined behavior. Returning the address of a static local object is different: that object continues to exist until program termination, although shared mutable static state may create design and concurrency concerns.\n\n## 4. Allocated storage has an explicit owner\n\nAfter a successful allocation, the program must keep track of the pointer needed to access and eventually release the storage. Losing the last usable pointer without freeing the allocation can cause a memory leak. Calling `free` ends the allocated object's lifetime; every pointer that referred to that allocation must thereafter be treated as invalid for access.\n\n## 5. Trace the lifetime, not an imagined memory map\n\nWhen reviewing code, ask: when does the object begin to exist, which expressions may access it, when does its lifetime end, and which part of the program is responsible for cleanup? These questions are more portable and useful than assuming a fixed physical stack/heap diagram.",
       "examples": [
         {
           "id": "cl81-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdlib.h>\nint main(void) {\n int automatic_value = 5;\n static int persistent_value = 7;\n int *allocated_value = malloc(sizeof *allocated_value);\n if (allocated_value == NULL) return 1;\n *allocated_value = 9;\n int result = automatic_value + persistent_value + *allocated_value;\n free(allocated_value);\n return result == 21 ? 0 : 1;\n}",
-          "explanation": "The automatic object exists during its block execution, the static object has static storage duration, and the allocated object remains until released. The program frees the allocated storage before returning.",
+          "title": "A static local object survives function returns",
+          "code": "#include <stdio.h>\n\nint next_ticket(void) {\n    static int ticket = 100;\n    ++ticket;\n    return ticket;\n}\n\nint main(void) {\n    int first = next_ticket();\n    int second = next_ticket();\n    printf(\"%d %d\\n\", first, second);\n    return 0;\n}",
+          "explanation": "Expected output: `101 102`. The identifier `ticket` is scoped to `next_ticket`, but the object has static storage duration. Its value is retained between calls and the object remains alive for the whole program execution. `first` and `second` are separate automatic objects in `main`.",
+          "runnable": false
+        },
+        {
+          "id": "cl81-ex2",
+          "language": "en",
+          "title": "An allocated object outlives the block that holds its pointer",
+          "code": "#include <stdio.h>\n#include <stdlib.h>\n\nint main(void) {\n    int local_value = 7;\n    int *allocated_value = malloc(sizeof *allocated_value);\n    if (allocated_value == NULL) {\n        fputs(\"allocation failed\\n\", stderr);\n        return 1;\n    }\n\n    *allocated_value = 35;\n    printf(\"local=%d allocated=%d total=%d\\n\",\n           local_value, *allocated_value, local_value + *allocated_value);\n\n    free(allocated_value);\n    allocated_value = NULL;\n    return 0;\n}",
+          "explanation": "Expected output: `local=7 allocated=35 total=42`. `local_value` has automatic storage duration and is associated with the execution of the block. The allocated object remains alive until `free` releases it. Setting the local pointer to `NULL` after freeing is a useful defensive convention for that pointer variable; it does not change the lifetime of the already-released object.",
           "runnable": false
         }
+      ],
+      "commonMistakes": [
+        "Confusing scope with lifetime: an identifier becoming unavailable does not always mean its object has ceased to exist.",
+        "Returning the address of an ordinary automatic local variable and then dereferencing it in the caller.",
+        "Assuming that the C language guarantees a physical stack for automatic objects or a physical heap for allocated objects.",
+        "Assuming that copying a pointer also copies or extends the pointed-to object's lifetime.",
+        "Forgetting that `free` ends the allocated object's lifetime even if other pointer variables still contain the old address."
       ]
     },
     "practise": {
-      "guidedTask": "Classify each object by storage duration and identify when it ceases to be valid.",
-      "independentTask": "Draw a lifetime timeline for a local variable, a static local and an allocated object returned from a function.",
+      "guidedTask": "For each declaration below, identify the storage duration, the scope of its name and when the object ceases to exist: (1) `int count;` inside a function block, (2) `static int calls;` inside a function, (3) a file-scope `int total;`, and (4) an object obtained from `malloc`. Then draw a timeline showing when each object may be accessed.",
+      "independentTask": "Write two functions: one that returns a pointer to a static local integer and one that allocates an integer and returns the pointer to the caller. In `main`, call both functions, explain why each pointer is valid at the time of use, and release the allocated object exactly once. Do not return a pointer to an ordinary local variable.",
       "hints": [
-        "Do not equate C storage-duration categories with a guaranteed physical memory layout.",
-        "Allocated storage must be released according to a clear ownership rule.",
-        "A pointer does not extend the lifetime of an automatic object."
+        "Scope answers where a name is visible; lifetime answers when the object exists.",
+        "A block-scope `static` object keeps its value between calls even though its identifier remains local to the function.",
+        "A pointer does not extend the lifetime of an automatic object.",
+        "Allocated storage remains available until it is released or successfully replaced by a resizing operation.",
+        "Do not rely on a particular physical stack or heap layout when explaining C storage duration.",
+        "After `free`, do not read or write through any pointer to the released allocation."
       ]
     }
   },
@@ -51,36 +74,58 @@
     "questions": [
       {
         "id": "cl81-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "A function declares `static int calls = 0;` inside its body. Which statement is correct?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "The object has static storage duration, but its name has block scope.",
+          "The object has automatic storage duration because it is inside a function.",
+          "The object is recreated and reset on every function call."
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the C rule described in the lesson."
+        "answer": "The object has static storage duration, but its name has block scope.",
+        "explanation": "The `static` storage-class specifier gives the block-scope object static storage duration. Its identifier is still visible only in the function block, and its stored value persists between calls."
       },
       {
         "id": "cl81-q2",
-        "prompt": "Which practice best protects correctness?",
+        "prompt": "What is the central problem with returning the address of an ordinary local variable from a function?",
         "options": [
-          "Check validity, bounds and operation results before access.",
-          "Assume memory and file operations cannot fail.",
-          "Use data before initialization."
+          "The local object's lifetime ends when the function's block execution ends.",
+          "C automatically moves the local object into allocated storage.",
+          "The returned pointer automatically frees the object."
         ],
-        "answer": "Check validity, bounds and operation results before access.",
-        "explanation": "C programs must explicitly handle resource validity and failure paths."
+        "answer": "The local object's lifetime ends when the function's block execution ends.",
+        "explanation": "The pointer does not extend the lifetime of an automatic object. Using the returned pointer to access that former object has undefined behavior."
       },
       {
         "id": "cl81-q3",
-        "prompt": "How should the example be verified?",
+        "prompt": "Which statement about C's storage-duration categories is portable?",
         "options": [
-          "Compile with warnings and test success and failure paths.",
-          "Ignore warnings and test only one happy path.",
-          "Assume the same layout on every platform."
+          "Automatic objects must always occupy a hardware stack.",
+          "Allocated objects must always occupy a hardware heap.",
+          "Storage duration is a language concept and does not mandate a particular physical memory region."
         ],
-        "answer": "Compile with warnings and test success and failure paths.",
-        "explanation": "Compiler diagnostics and deliberate tests provide evidence for correctness."
+        "answer": "Storage duration is a language concept and does not mandate a particular physical memory region.",
+        "explanation": "Stack and heap are common implementation terms, but the C language defines object lifetime and storage duration rather than a universal physical memory map."
+      },
+      {
+        "id": "cl81-q4",
+        "prompt": "When does the lifetime of storage successfully obtained from `malloc` end?",
+        "options": [
+          "When the pointer variable goes out of scope, in every case.",
+          "When the allocation is released with `free` or its lifetime is otherwise ended by a successful resizing operation.",
+          "At the end of the statement containing `malloc`."
+        ],
+        "answer": "When the allocation is released with `free` or its lifetime is otherwise ended by a successful resizing operation.",
+        "explanation": "The allocated object is not tied to the scope of the pointer variable. It remains allocated until explicitly released or changed by a successful allocation-resizing operation."
+      },
+      {
+        "id": "cl81-q5",
+        "prompt": "A pointer variable is copied into another pointer variable. What happens to the pointed-to object's lifetime?",
+        "options": [
+          "The lifetime is extended because there are now two pointers.",
+          "A second independent object is created.",
+          "The object's lifetime is unchanged; both pointers refer to the same object."
+        ],
+        "answer": "The object's lifetime is unchanged; both pointers refer to the same object.",
+        "explanation": "Copying a pointer copies an address value, not the object. It neither duplicates the object nor extends its lifetime."
       }
     ]
   },
