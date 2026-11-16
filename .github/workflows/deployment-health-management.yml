@@ -44,7 +44,7 @@ jobs:
           const add = (area, check, status, detail) => rows.push({area,check,status,detail:String(detail ?? '').split('|').join('/').replace(/[\r\n]+/g,' ').slice(0,500)});
           const exists = p => fs.existsSync(p);
           const readJson = p => JSON.parse(fs.readFileSync(p,'utf8'));
-          const base = process.env.SITE_URL.replace(/\\/$/,'');
+          const base = process.env.SITE_URL.endsWith('/') ? process.env.SITE_URL.slice(0,-1) : process.env.SITE_URL;
           const timeout = 15000;
 
           async function request(url) {
@@ -90,7 +90,7 @@ jobs:
             const missingIds=[],invalidIds=[];
             for(const topic of cTopics){
               const p=topic.languages?.en;
-              const file=p&&path.join('public',p.replace(/^\\//,''));
+              const file=p&&path.join('public',p.startsWith('/')?p.slice(1):p);
               if(!file||!exists(file)){missing++;missingIds.push(topic.topicId);continue;}
               try{
                 const lesson=readJson(file);
@@ -112,7 +112,7 @@ jobs:
             add('Firebase config','JSON cache policy',cc.includes('no-store')?'PASS':'WARN',cc||'No explicit JSON cache header');
           }catch(e){add('Firebase config','Parse','FAIL',e.message);}
           const sw=exists('public/sw.js')?fs.readFileSync('public/sw.js','utf8'):'';
-          add('PWA','Service worker cache version',/codesaathi-v\\d+/.test(sw)?'PASS':'FAIL',(sw.match(/codesaathi-v\\d+/)||[])[0]||'Missing cache version');
+          add('PWA','Service worker cache version',/codesaathi-v[0-9]+/.test(sw)?'PASS':'FAIL',(sw.match(/codesaathi-v[0-9]+/)||[])[0]||'Missing cache version');
           add('PWA','Curriculum index in network-first app shell',sw.includes('/content/curriculum-index.json')?'PASS':'FAIL',sw.includes('/content/curriculum-index.json')?'Index is listed':'Index is not listed');
           const loader=exists('public/js/lessons/curriculum-loader.js')?fs.readFileSync('public/js/lessons/curriculum-loader.js','utf8'):'';
           add('Frontend contract','Curriculum fetch cache policy',loader.includes('cache: "no-cache"')?'PASS':'WARN','Loader index fetch should bypass browser HTTP cache');
