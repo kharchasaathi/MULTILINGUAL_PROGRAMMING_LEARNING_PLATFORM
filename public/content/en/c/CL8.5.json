@@ -1,0 +1,88 @@
+{
+  "id": "c.cl8.5.en",
+  "courseId": "c",
+  "moduleId": "CL8",
+  "topicId": "CL8.5",
+  "title": "free, ownership and release discipline",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the concept and its C rules.",
+    "Trace the example and identify data or control flow.",
+    "Recognize common failure and safety cases.",
+    "Apply the concept in a tested C program."
+  ],
+  "prerequisites": [],
+  "stages": {
+    "understand": {
+      "concept": "free releases storage previously obtained from an allocation function. After release, the allocated object no longer exists and every pointer to it becomes invalid. Ownership rules identify which part of a program is responsible for releasing each allocation.",
+      "whyItMatters": "Clear ownership prevents leaks, double-free errors and use-after-free defects, especially when objects are passed between functions.",
+      "analogy": "Treat each resource and operation as having a clear contract, valid lifetime and failure path.",
+      "analogyLimit": "The analogy does not replace the C standard, compiler or library specifications."
+    },
+    "explain": {
+      "narrative": "free releases storage previously obtained from an allocation function. After release, the allocated object no longer exists and every pointer to it becomes invalid. Ownership rules identify which part of a program is responsible for releasing each allocation.\n\nCheck object bounds, lifetimes, arithmetic limits and all relevant return values. Compile with warnings enabled and test both normal and failure paths.",
+      "examples": [
+        {
+          "id": "cl85-ex1",
+          "language": "en",
+          "title": "Focused C example",
+          "code": "#include <stdlib.h>\n#include <stdio.h>\nint main(void) {\n int *value = malloc(sizeof *value);\n if (value == NULL) return 1;\n *value = 42;\n printf(\"%d\\n\", *value);\n free(value);\n value = NULL;\n return 0;\n}",
+          "explanation": "The program owns the allocated object, uses it while valid, releases it once and clears its local pointer to reduce accidental reuse.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Draw the ownership timeline from malloc through free.",
+      "independentTask": "Design a function that creates an object and document whether the caller or callee owns the returned allocation.",
+      "hints": [
+        "free accepts NULL safely, but it must not be passed an invalid or already-freed pointer.",
+        "Every successful allocation should have a clear release path.",
+        "Setting one pointer to NULL does not clear other aliases to the same allocation."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "cl85-q1",
+        "prompt": "Which statement best describes this lesson?",
+        "options": [
+          "The C rule and constraints described in this lesson.",
+          "An HTML tag.",
+          "A CSS selector."
+        ],
+        "answer": "The C rule and constraints described in this lesson.",
+        "explanation": "The correct choice follows the C rule explained above."
+      },
+      {
+        "id": "cl85-q2",
+        "prompt": "What is a reliable way to protect correctness?",
+        "options": [
+          "Validate preconditions, bounds and failure results.",
+          "Assume the operation cannot fail.",
+          "Ignore the type and lifetime rules."
+        ],
+        "answer": "Validate preconditions, bounds and failure results.",
+        "explanation": "C requires explicit handling of object validity and operation failures."
+      },
+      {
+        "id": "cl85-q3",
+        "prompt": "How should the example be checked?",
+        "options": [
+          "Compile with warnings and test expected and failure cases.",
+          "Ignore diagnostics and test only once.",
+          "Assume every platform behaves identically."
+        ],
+        "answer": "Compile with warnings and test expected and failure cases.",
+        "explanation": "Warnings and targeted tests provide evidence for correctness."
+      }
+    ]
+  },
+  "status": "draft"
+}
