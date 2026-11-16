@@ -6,39 +6,84 @@
   "title": "Trees: terminology, representations and traversals",
   "language": "en",
   "learningObjectives": [
-    "Explain the topic and its C rules.",
-    "Trace the example and explain its data or control flow.",
-    "Identify edge cases and resource-management requirements.",
-    "Apply the concept in a tested C program."
+    "Define a tree and use the terms root, parent, child, sibling, leaf, edge, subtree, depth and height accurately.",
+    "Distinguish a binary tree from a binary search tree and describe the maximum of two children per node rule.",
+    "Compare linked-node and array representations, including when array indexing is efficient and when sparse shapes waste space.",
+    "Trace preorder, inorder, postorder and level-order traversals and predict their visit sequences.",
+    "Implement recursive traversal of a dynamically allocated binary tree while checking allocation results and respecting node ownership.",
+    "Analyse traversal time and auxiliary space, and test empty, single-node, skewed, complete and malformed-input boundaries."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL5.3",
+    "CL6.1",
+    "CL8.1",
+    "CL10.10"
+  ],
   "stages": {
     "understand": {
-      "concept": "A tree consists of nodes connected by parent-child relationships. Common terms include root, leaf, parent, child, depth and height. Binary trees can be represented with linked nodes or arrays for suitable shapes; traversals include preorder, inorder and postorder.",
-      "whyItMatters": "Tree representations and traversal order determine how hierarchical data is stored and processed.",
-      "analogy": "Treat each algorithm or resource as a contract whose invariants must remain true after every operation.",
-      "analogyLimit": "The analogy does not replace C's formal rules for pointers, object lifetime, complexity or library contracts."
+      "concept": "A tree is a connected hierarchical structure made of nodes and edges. One node is designated as the root. Every other node has exactly one parent in a rooted tree, and a node may have zero or more children. A binary tree limits each node to at most two children, conventionally called left and right. A binary search tree (BST) is a more specific binary tree whose keys obey an ordering rule; not every binary tree is a BST.",
+      "whyItMatters": "Trees model file-system folders, organisation charts, expression syntax and decision paths. They also introduce recursive problem solving: a subtree is itself a tree. In C, a linked tree makes pointer ownership and dynamic allocation visible, while an array representation can be compact for complete or nearly complete trees.",
+      "analogy": "Imagine a family tree diagram. The top person is the root; the next generation contains children; a person with no children is a leaf. A subtree is one person's branch together with all descendants.",
+      "analogyLimit": "A data-structure tree is defined by its links and invariants, not by real-world family rules. A C program can accidentally create a cycle, share a child between parents or leave a pointer dangling; those structures violate the assumptions used by ordinary tree traversals.",
+      "keyTerms": [
+        {
+          "term": "Root",
+          "definition": "The unique starting node of a non-empty rooted tree; it has no parent."
+        },
+        {
+          "term": "Parent / child",
+          "definition": "A parent has a direct link to a child. A child has one direct parent in a conventional rooted tree."
+        },
+        {
+          "term": "Leaf",
+          "definition": "A node with no children."
+        },
+        {
+          "term": "Depth",
+          "definition": "The number of edges from the root to a node. The root has depth zero."
+        },
+        {
+          "term": "Height",
+          "definition": "The number of edges on the longest downward path from a node to a leaf. A leaf has height zero; an empty tree is often assigned height -1 by convention."
+        },
+        {
+          "term": "Subtree",
+          "definition": "A node together with all descendants reachable below it."
+        }
+      ],
+      "history": "Hierarchical tree structures became important in mathematical graph theory and later in computing for representing directories, search structures, syntax and decisions. The names root, branch and leaf come from the visual convention of drawing the root at the top and branches below it. These are metaphors; the actual structure is a set of nodes connected by edges."
     },
     "explain": {
-      "narrative": "A tree consists of nodes connected by parent-child relationships. Common terms include root, leaf, parent, child, depth and height. Binary trees can be represented with linked nodes or arrays for suitable shapes; traversals include preorder, inorder and postorder.\n\nState preconditions, invariants, empty and full cases, ownership and failure behaviour before implementation. Compile with warnings and test normal, boundary and failure paths.",
+      "narrative": "A linked binary-tree node commonly contains a key and two child pointers:\n\n`struct Node { int key; struct Node *left; struct Node *right; };`\n\nA missing child is represented by NULL. For a non-empty tree, keep one pointer to the root. The root pointer owns the complete structure only if the program's ownership policy says that each allocated node belongs to exactly one parent link and no node is shared or cyclic.\n\nFour common traversals differ only in when they visit the current node. Preorder is node-left-right; inorder is left-node-right; postorder is left-right-node. Level-order visits nodes breadth-first, usually with a queue. In a binary search tree, inorder traversal produces keys in nondecreasing order only when the BST ordering invariant is maintained.\n\nFor a linked representation, traversal recursively follows child pointers and stops at NULL. Each node is visited once, so time is O(n). Recursive call-stack space is O(h), where h is the tree height; a skewed tree can have h = n - 1. For a complete binary tree stored in an array with zero-based indices, the left child of i is 2*i+1 and the right child is 2*i+2, provided those indices are within the stored element count. This representation is efficient for complete shapes but wastes slots for sparse or highly skewed shapes.\n\nThe examples below deliberately use different representations. Example 1 dynamically allocates a linked tree, checks every allocation, traverses it in three depth-first orders and frees every node. Example 2 stores a complete tree in an array and demonstrates child-index calculations and level-order output without allocating nodes.",
       "examples": [
         {
           "id": "cl1011-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "struct Node { int key; struct Node *left, *right; };\nvoid inorder(const struct Node *node, void (*visit)(int)) {\n if (node == NULL) return;\n inorder(node->left, visit);\n visit(node->key);\n inorder(node->right, visit);\n}",
-          "explanation": "Inorder traversal visits the left subtree, current node and right subtree. The callback receives each key; the function assumes the tree is valid and acyclic.",
-          "runnable": false
+          "title": "Build a linked binary tree and run depth-first traversals",
+          "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node {\n    int key;\n    struct Node *left;\n    struct Node *right;\n};\n\nstatic struct Node *make_node(int key)\n{\n    struct Node *node = malloc(sizeof *node);\n    if (node == NULL) {\n        return NULL;\n    }\n    node->key = key;\n    node->left = NULL;\n    node->right = NULL;\n    return node;\n}\n\nstatic void preorder(const struct Node *node)\n{\n    if (node == NULL) return;\n    printf(\"%d \", node->key);\n    preorder(node->left);\n    preorder(node->right);\n}\n\nstatic void inorder(const struct Node *node)\n{\n    if (node == NULL) return;\n    inorder(node->left);\n    printf(\"%d \", node->key);\n    inorder(node->right);\n}\n\nstatic void postorder(const struct Node *node)\n{\n    if (node == NULL) return;\n    postorder(node->left);\n    postorder(node->right);\n    printf(\"%d \", node->key);\n}\n\nstatic void destroy_tree(struct Node *node)\n{\n    if (node == NULL) return;\n    destroy_tree(node->left);\n    destroy_tree(node->right);\n    free(node);\n}\n\nint main(void)\n{\n    struct Node *root = make_node(8);\n    if (root == NULL) return 1;\n\n    root->left = make_node(3);\n    if (root->left == NULL) {\n        destroy_tree(root);\n        return 1;\n    }\n\n    root->right = make_node(10);\n    if (root->right == NULL) {\n        destroy_tree(root);\n        return 1;\n    }\n\n    root->left->left = make_node(1);\n    if (root->left->left == NULL) {\n        destroy_tree(root);\n        return 1;\n    }\n\n    root->left->right = make_node(6);\n    if (root->left->right == NULL) {\n        destroy_tree(root);\n        return 1;\n    }\n\n    printf(\"Preorder: \");\n    preorder(root);\n    printf(\"\\nInorder: \");\n    inorder(root);\n    printf(\"\\nPostorder: \");\n    postorder(root);\n    putchar('\\n');\n\n    destroy_tree(root);\n    return 0;\n}",
+          "explanation": "The structure stores one integer and two child pointers; NULL means that child is absent. make_node allocates exactly one node, checks malloc before dereferencing the result, and initializes both links. Each traversal has the same base case: a NULL pointer represents an empty subtree and contributes no output. preorder prints before visiting children, inorder prints between the left and right calls, and postorder prints after both calls. main links five independently allocated nodes into a tree and checks every allocation. If any allocation fails, destroy_tree releases every node already reachable from root. destroy_tree frees children before their parent, so it never needs to read a child pointer after freeing its node. The expected sequences are preorder `8 3 1 6 10`, inorder `1 3 6 8 10`, and postorder `1 6 3 10 8`. This tree happens to satisfy the BST ordering rule, which is why its inorder output is sorted; the traversal itself does not sort data.",
+          "runnable": true
+        },
+        {
+          "id": "cl1011-ex2",
+          "language": "en",
+          "title": "Represent a complete binary tree in an array",
+          "code": "#include <stddef.h>\n#include <stdio.h>\n\nstatic void print_children(const int values[], size_t count, size_t index)\n{\n    if (index >= count) {\n        return;\n    }\n\n    printf(\"Node %d\", values[index]);\n\n    if (index <= (count - 1U) / 2U) {\n        size_t left = 2U * index + 1U;\n        size_t right = left + 1U;\n\n        if (left < count) {\n            printf(\", left child %d\", values[left]);\n        }\n        if (right < count) {\n            printf(\", right child %d\", values[right]);\n        }\n    }\n    putchar('\\n');\n}\n\nint main(void)\n{\n    const int values[] = {8, 3, 10, 1, 6, 9, 14};\n    const size_t count = sizeof values / sizeof values[0];\n\n    puts(\"Level-order traversal:\");\n    for (size_t i = 0U; i < count; ++i) {\n        printf(\"%d \", values[i]);\n    }\n    putchar('\\n');\n\n    puts(\"Parent and child relationships:\");\n    for (size_t i = 0U; i < count; ++i) {\n        print_children(values, count, i);\n    }\n\n    return 0;\n}",
+          "explanation": "The array stores the complete tree one level at a time, so iterating from index zero upward is also level-order traversal. With zero-based indexing, a node at index i has its left child at 2*i+1 and right child at 2*i+2. The function first rejects an out-of-range index. Its parent-index condition avoids calculating child positions for leaf positions; for this small fixed array, the arithmetic remains within size_t. Each child index is still checked against count before the array is read. The array has seven values, so it represents three full levels. Unlike the linked example, it needs no malloc or free. An array is less suitable when many positions are absent because unused gaps still consume storage.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Trace preorder, inorder and postorder on a three-node tree.",
-      "independentTask": "Implement all three traversals and test an empty tree, a single node and an unbalanced tree.",
+      "guidedTask": "Draw this tree with 8 at the root; 3 and 10 as its children; 1 and 6 as the children of 3; and 9 and 14 as the children of 10. Write the preorder, inorder, postorder and level-order sequences. Then trace the recursive calls and mark exactly when each key is printed.",
+      "independentTask": "Write a C program that builds a binary tree with at least seven nodes, implements preorder, inorder and postorder traversals, counts the nodes and leaves, and computes the height using a clearly stated empty-tree convention. Check every allocation, handle a partially built tree safely, and free all nodes. Test an empty tree, a single node, a complete tree and a left-skewed tree. Then explain why recursive stack use depends on height rather than only node count.",
       "hints": [
-        "Recursive traversal uses call-stack space proportional to tree height.",
-        "A malformed cyclic pointer structure can make traversal fail to terminate.",
-        "Define ownership and cleanup for every dynamically allocated node."
+        "Start every recursive traversal with a NULL base case; NULL represents an empty subtree.",
+        "Remember the visit positions: preorder is before both child calls, inorder is between them, and postorder is after them.",
+        "A binary tree permits at most two children, but a binary search tree additionally requires an ordering invariant.",
+        "For zero-based array storage, calculate child indices as 2*i+1 and 2*i+2, then check each index against the element count.",
+        "A linked tree's traversal time is O(n), while recursive call-stack space is O(h); a skewed tree can make h close to n.",
+        "Give every allocated node one clear owner. If construction fails, destroy the partial tree; free children before their parent."
       ]
     }
   },
@@ -51,36 +96,63 @@
     "questions": [
       {
         "id": "cl1011-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "In a non-empty rooted tree, which node has no parent?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "The root",
+          "Every leaf",
+          "Every internal node",
+          "The deepest node only"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the topic and constraints described above."
+        "answer": "The root",
+        "explanation": "The root is the unique starting node of a rooted tree. All other nodes have one parent."
       },
       {
         "id": "cl1011-q2",
-        "prompt": "What should be verified before relying on the implementation?",
+        "prompt": "What makes a binary search tree more specific than an ordinary binary tree?",
         "options": [
-          "Preconditions, invariants, bounds and failure cases.",
-          "Only the name of the algorithm.",
-          "Whether one input produced a result."
+          "Its keys obey a defined ordering rule",
+          "It must contain exactly two children per node",
+          "It can contain only positive integers",
+          "It must be stored in an array"
         ],
-        "answer": "Preconditions, invariants, bounds and failure cases.",
-        "explanation": "Correctness depends on maintaining the data structure or algorithm contract."
+        "answer": "Its keys obey a defined ordering rule",
+        "explanation": "A binary tree only limits each node to at most two children. A BST additionally maintains an ordering invariant between keys in left and right subtrees."
       },
       {
         "id": "cl1011-q3",
-        "prompt": "Which test strategy is most useful?",
+        "prompt": "Which visit order defines inorder traversal?",
         "options": [
-          "Test empty, boundary and representative operation sequences.",
-          "Ignore allocation failures.",
-          "Assume one successful example proves all cases."
+          "Left subtree, node, right subtree",
+          "Node, left subtree, right subtree",
+          "Left subtree, right subtree, node",
+          "Node, right subtree, left subtree"
         ],
-        "answer": "Test empty, boundary and representative operation sequences.",
-        "explanation": "Targeted tests expose defects ordinary examples can miss."
+        "answer": "Left subtree, node, right subtree",
+        "explanation": "Inorder visits the left subtree first, then the current node, then the right subtree."
+      },
+      {
+        "id": "cl1011-q4",
+        "prompt": "For a zero-based array representation of a complete binary tree, what is the right-child index of node i?",
+        "options": [
+          "2*i+2",
+          "2*i+1",
+          "i/2",
+          "i+2"
+        ],
+        "answer": "2*i+2",
+        "explanation": "With zero-based indexing, the left child is at 2*i+1 and the right child is at 2*i+2. Each computed index must still be checked against the array length."
+      },
+      {
+        "id": "cl1011-q5",
+        "prompt": "What is the auxiliary call-stack space of a recursive depth-first traversal of a tree with n nodes and height h?",
+        "options": [
+          "O(h)",
+          "O(1) in every tree",
+          "O(n squared)",
+          "O(log n) for every tree"
+        ],
+        "answer": "O(h)",
+        "explanation": "The deepest chain of active recursive calls follows the tree height. A balanced tree has logarithmic height, but a skewed tree can have height proportional to n."
       }
     ]
   },
