@@ -3,42 +3,59 @@
   "courseId": "c",
   "moduleId": "CL9",
   "topicId": "CL9.3",
-  "title": "Separate compilation, object files, linking and build commands",
+  "title": "Macros, object-like/function-like macros and conditional compilation",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C rules.",
-    "Trace the example and identify data or control flow.",
-    "Recognize common failure and safety cases.",
-    "Apply the concept in a tested C program."
+    "Explain that preprocessing handles directives before the compiler parses the resulting translation unit.",
+    "Define and use object-like macros for symbolic constants and configuration switches while distinguishing them from typed const objects and enum constants.",
+    "Write function-like macros with fully parenthesized parameters and replacement expressions to avoid precedence errors.",
+    "Recognize repeated evaluation, side effects and type-checking limitations in function-like macros.",
+    "Use #if, #ifdef, #ifndef, #elif and #else to include or exclude source text based on preprocessing conditions.",
+    "Apply stringizing and token-pasting only when they solve a clear preprocessing problem, and inspect preprocessed output when diagnosing macro expansion."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL1.3 C program structure and preprocessing",
+    "CL2.8 Type conversion and casts",
+    "CL3.4 Operator precedence and expression grouping"
+  ],
   "stages": {
     "understand": {
-      "concept": "A multi-file C program is commonly translated as separate translation units. The compiler produces object files, and the linker combines them with required libraries to create the final program. Declarations coordinate interfaces across files while definitions provide implementations.",
-      "whyItMatters": "Separate compilation allows teams to organize larger programs and rebuild only changed components, but mismatched declarations and duplicate definitions can cause link or correctness errors.",
-      "analogy": "Treat each resource and operation as having a clear contract, valid lifetime and failure path.",
-      "analogyLimit": "The analogy does not replace the C standard, compiler or library specifications."
+      "concept": "The C preprocessor processes directives such as #include, #define and conditional-compilation blocks before the compiler performs the language's normal parsing and semantic analysis. A macro is token substitution, not a typed function. Object-like macros replace an identifier; function-like macros substitute arguments into a replacement token sequence.",
+      "whyItMatters": "Macros support header guards, configuration, conditional compilation and carefully designed abstractions. But they can create surprising precedence, repeated evaluation and debugging problems because their expansion happens before normal C type checking.",
+      "analogy": "A macro resembles a text template that is expanded before the final document is reviewed.",
+      "analogyLimit": "Unlike a C function, a macro does not create a function call boundary, has no parameter types, and may evaluate an argument more than once. Text-template intuition alone is not enough to reason about tokenization."
     },
     "explain": {
-      "narrative": "A multi-file C program is commonly translated as separate translation units. The compiler produces object files, and the linker combines them with required libraries to create the final program. Declarations coordinate interfaces across files while definitions provide implementations.\n\nCheck object bounds, lifetimes, arithmetic limits and all relevant return values. Compile with warnings enabled and test both normal and failure paths.",
+      "narrative": "A directive begins with # at the start of a preprocessing directive. `#define LIMIT 100` defines an object-like macro. A function-like macro requires the opening parenthesis immediately after the macro name: `#define SQUARE(x) ((x) * (x))`. Parenthesize each parameter occurrence and the whole replacement expression, but remember that this does not prevent repeated evaluation: SQUARE(i++) is unsafe because i++ appears twice. Prefer an inline function when ordinary typed evaluation is suitable.\n\nConditional compilation selects source text before C compilation. `#if` expressions are integer constant expressions after macro replacement; `#ifdef NAME` tests whether a macro exists. Use `#undef` deliberately, keep macro names distinctive, and do not attempt to create runtime branches with preprocessor directives. The `#` and `##` operators perform stringizing and token pasting within function-like macro replacement lists.",
       "examples": [
         {
           "id": "cl93-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "/* main.c */\n#include <stdio.h>\nint add(int, int);\nint main(void) { printf(\"%d\\n\", add(2, 3)); return 0; }\n/* add.c */\nint add(int a, int b) { return a + b; }\n/* Example build: cc -std=c17 -Wall -Wextra -Wpedantic main.c add.c -o app */",
-          "explanation": "The compiler processes both source files and the linker resolves the call to add. The declaration in main.c must agree with the definition in add.c; a shared header is preferable in a maintained project.",
-          "runnable": false
+          "title": "A precedence-safe macro and a safer inline alternative",
+          "code": "#include <stdio.h>\n\n#define SQUARE(x) ((x) * (x))\n\nstatic int square_int(int value)\n{\n    return value * value;\n}\n\nint main(void)\n{\n    int a = 3;\n    printf(\"macro=%d function=%d\\n\", SQUARE(a + 1), square_int(a + 1));\n    return 0;\n}",
+          "explanation": "The macro parameter and replacement expression are parenthesized, so SQUARE(a + 1) expands as ((a + 1) * (a + 1)). The inline function has one typed parameter evaluation and is safer when an argument may have side effects.",
+          "runnable": true
+        },
+        {
+          "id": "cl93-ex2",
+          "language": "en",
+          "title": "Select a build-time feature with conditional compilation",
+          "code": "#include <stdio.h>\n\n#define APP_DIAGNOSTICS 1\n\nint main(void)\n{\n#if APP_DIAGNOSTICS\n    puts(\"diagnostics enabled at compile time\");\n#else\n    puts(\"diagnostics disabled at compile time\");\n#endif\n    return 0;\n}",
+          "explanation": "The preprocessor chooses one branch before compilation. Changing APP_DIAGNOSTICS changes which source text reaches the compiler; this is not a runtime if statement.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Identify which file contains the call and which contains the definition.",
-      "independentTask": "Create a two-file project with a shared header and a reproducible build command.",
+      "guidedTask": "Expand SQUARE(a + 1) by hand and compare it with an intentionally unparenthesized macro. Then replace the macro call with square_int and explain the difference for an expression such as i++.",
+      "independentTask": "Create a header configuration macro that conditionally enables diagnostics. Add one function-like macro with safe parentheses, then document one argument expression that must not be passed because it would be evaluated more than once.",
       "hints": [
-        "A translation unit is the source after preprocessing, not simply an arbitrary folder.",
-        "Use consistent prototypes from a shared header to prevent declaration drift.",
-        "Keep build flags and source lists documented and repeatable."
+        "The preprocessor performs token substitution before C parsing and type checking.",
+        "Use parentheses around every parameter occurrence and around the entire replacement expression.",
+        "Parentheses do not prevent repeated argument evaluation or side effects.",
+        "Prefer a function or inline function when you need type checking and single evaluation.",
+        "Use #ifdef to test whether a macro is defined; use #if when testing its numeric value.",
+        "Inspect compiler preprocessed output when an expansion is confusing; keep macros small and narrowly scoped."
       ]
     }
   },
@@ -51,36 +68,63 @@
     "questions": [
       {
         "id": "cl93-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "When does macro replacement normally occur?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "During preprocessing, before the compiler parses the resulting translation unit.",
+          "At runtime on every function call.",
+          "Only after linking.",
+          "After the program exits."
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct choice follows the C rule explained above."
+        "answer": "During preprocessing, before the compiler parses the resulting translation unit.",
+        "explanation": "Macro directives are processed before the compiler parses and type-checks the expanded C source."
       },
       {
         "id": "cl93-q2",
-        "prompt": "What is a reliable way to protect correctness?",
+        "prompt": "Which macro definition correctly groups both the argument and result?",
         "options": [
-          "Validate preconditions, bounds and failure results.",
-          "Assume the operation cannot fail.",
-          "Ignore the type and lifetime rules."
+          "#define SQUARE(x) ((x) * (x))",
+          "#define SQUARE(x) x * x",
+          "#define SQUARE(x) (x * x +)",
+          "#define SQUARE x*x"
         ],
-        "answer": "Validate preconditions, bounds and failure results.",
-        "explanation": "C requires explicit handling of object validity and operation failures."
+        "answer": "#define SQUARE(x) ((x) * (x))",
+        "explanation": "Parenthesizing each parameter and the full expression protects grouping when the macro is substituted into larger expressions."
       },
       {
         "id": "cl93-q3",
-        "prompt": "How should the example be checked?",
+        "prompt": "Why is `SQUARE(i++)` unsafe for the macro shown in the lesson?",
         "options": [
-          "Compile with warnings and test expected and failure cases.",
-          "Ignore diagnostics and test only once.",
-          "Assume every platform behaves identically."
+          "The argument expression appears twice and can be evaluated more than once.",
+          "The preprocessor always rejects increment operators.",
+          "Macros cannot accept variables.",
+          "The multiplication operator is not allowed in macros."
         ],
-        "answer": "Compile with warnings and test expected and failure cases.",
-        "explanation": "Warnings and targeted tests provide evidence for correctness."
+        "answer": "The argument expression appears twice and can be evaluated more than once.",
+        "explanation": "The replacement contains two occurrences of x, so i++ can be evaluated twice and create an unsequenced modification problem."
+      },
+      {
+        "id": "cl93-q4",
+        "prompt": "What does #ifdef FEATURE test?",
+        "options": [
+          "Whether FEATURE is defined as a macro.",
+          "Whether FEATURE is nonzero at runtime.",
+          "Whether a function named FEATURE exists.",
+          "Whether a header file is installed."
+        ],
+        "answer": "Whether FEATURE is defined as a macro.",
+        "explanation": "ifdef checks macro definition state during preprocessing, not a runtime value."
+      },
+      {
+        "id": "cl93-q5",
+        "prompt": "When is an ordinary function usually preferable to a function-like macro?",
+        "options": [
+          "When typed parameters and single evaluation are important.",
+          "When the replacement must run before compilation.",
+          "When a directive must choose source text at build time.",
+          "When stringizing a token is required."
+        ],
+        "answer": "When typed parameters and single evaluation are important.",
+        "explanation": "A function provides typed parameters and evaluates each argument expression once as part of the call."
       }
     ]
   },
