@@ -6,22 +6,22 @@
   "title": "while and do-while loops",
   "language": "en",
   "learningObjectives": [
-    "Explain the core ideas behind while and do-while loops.",
-    "Identify relevant C syntax, types, standard-library interfaces and constraints.",
-    "Trace a small example and predict its behaviour.",
-    "Recognize boundary cases, common defects and portability risks.",
-    "Apply the concept in a tested C program."
+    "Write while loops that repeat while a condition remains true.",
+    "Explain how do-while differs by checking its condition after the loop body.",
+    "Trace loop initialization, condition testing, body execution and updates.",
+    "Prevent infinite loops and off-by-one errors by maintaining loop progress.",
+    "Use input-validation loops where the body must execute at least once."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "while and do-while loops is an important part of writing correct, maintainable C programs. Learn the exact language rules rather than relying on what one compiler appears to accept. C is a compiled, standardized language: distinguish language guarantees from implementation-defined choices, compiler extensions and behaviour that the standard leaves undefined.",
+      "concept": "A while loop tests its condition before each iteration, so its body may execute zero times. A do-while loop executes its body first and tests the condition afterward, so its body executes at least once. Correct loops require a condition that eventually becomes false or a deliberate exit path, and the loop's state must make progress toward termination.",
       "whyItMatters": "Understanding while and do-while loops helps you reason about program behaviour instead of memorizing syntax. It is useful in exams, debugging and building reliable C applications.",
       "analogy": "Treat the concept as a tool with a precise contract: it has valid inputs, defined operations and observable results.",
       "analogyLimit": "An analogy is only an aid; the C standard and the relevant function specifications determine actual behaviour."
     },
     "explain": {
-      "narrative": "## Concept and mental model\nwhile and do-while loops should be understood in terms of the C abstract machine: objects have types, storage duration and lifetimes; expressions are evaluated according to language rules; and library calls have specified preconditions and results. The compiler translates a translation unit, but a successful compilation does not prove that a program is correct.\n\n## How to reason about this topic\n1. Identify the inputs, objects, types and operations involved.\n2. Check the applicable syntax and semantic constraints.\n3. Determine valid input ranges and boundary cases.\n4. Check every function result and handle failure where the API permits failure.\n5. Compile with warnings enabled and test normal, boundary and invalid cases.\n\n## Correctness and portability\nDo not assume that int has a particular width, that memory addresses are identical across runs, or that undefined behaviour has a predictable result. Use standard headers and documented interfaces. State any platform assumptions explicitly. Prefer small functions, clear names and explicit invariants.\n\n## Worked example 1 — establish a testable baseline\nThe example below demonstrates a small, compilable C program. Adapt the declaration, expression or API call to the exact concept being studied, then change one condition at a time and observe the result.\n\n## Worked example 2 — validate a boundary\nA second useful test is to exercise the smallest valid input, largest valid input, one value outside the valid range and an ordinary middle value. Record the expected result before running the program; this prevents a test from merely confirming an assumption.\n\n## Common mistakes\n- Assuming a successful compile means the result is correct.\n- Ignoring warnings or failing to check a library function's return value.\n- Using a value outside the range permitted by its type or API.\n- Confusing a compiler extension with portable ISO C.\n- Testing only one ordinary input and missing boundary cases.",
+      "narrative": "## 1. while loop\n\nA while loop evaluates its condition before each iteration. If the condition is false initially, the body is skipped. Update the loop state inside the body so that the condition can eventually become false.\n\n## 2. do-while loop\n\nA do-while loop executes its body and then evaluates the condition. It is useful when an action must happen at least once, such as displaying a menu before asking whether to repeat. The syntax ends with a semicolon after the while condition.\n\n## 3. Loop progress\n\nIdentify the loop's initialization, condition and update. If no state used by the condition changes, the loop may never terminate. Avoid updates that can overflow or move away from the termination condition.\n\n## 4. Boundary conditions\n\nCheck zero iterations, one iteration and the final intended iteration. Off-by-one errors often come from using `<` where `<=` is needed, or vice versa.\n\n## 5. Input validation\n\nA do-while loop can ask for input at least once and repeat until a valid response is received. Always handle end-of-file or input failure so that invalid input does not create an endless loop.",
       "examples": [
         {
           "id": "cl3.8-ex1",
@@ -42,14 +42,14 @@
       ]
     },
     "practise": {
-      "guidedTask": "Write a minimal program that demonstrates while and do-while loops. Compile it with warnings enabled, explain each declaration and operation, and record its output.",
-      "independentTask": "Create two test cases for while and do-while loops: one normal case and one boundary or failure case. State the expected behaviour before running them, then compare the result and explain any difference.",
+      "guidedTask": "Write and trace a C program demonstrating CL3.8. Record the condition or expression values at each step, then compile with warnings and test boundary cases.",
+      "independentTask": "Create a second program for CL3.8 with a different input range or control-flow structure. Include a boundary case and one invalid or unexpected case; explain why each result occurs.",
       "hints": [
-        "Read the compiler diagnostic carefully; fix the first meaningful error before chasing later messages.",
-        "Use the exact type and format specifier required by the operation.",
-        "Test zero, negative values where valid, maximum/minimum boundaries and invalid input as appropriate.",
-        "Do not dereference an uninitialized, null or expired pointer.",
-        "Prefer defined, portable behaviour over code that merely appears to work on one machine."
+        "Trace each expression and condition in evaluation order.",
+        "Use braces to make control-flow boundaries explicit.",
+        "Check zero, one and boundary iterations where loops are involved.",
+        "Avoid undefined behavior and unintended side effects.",
+        "Test the behavior rather than relying only on visual inspection."
       ]
     }
   },
@@ -62,58 +62,58 @@
     "questions": [
       {
         "id": "cl3.8-q1",
-        "prompt": "Which approach is safest when applying while and do-while loops?",
+        "prompt": "When can a while loop execute zero times?",
         "options": [
-          "Follow the C language rules, validate inputs and check relevant return values.",
-          "Assume every compiler and platform behaves identically.",
-          "Ignore warnings whenever the program produces output."
+          "When its condition is false before the first iteration",
+          "Never",
+          "Only when it contains break"
         ],
-        "answer": "Follow the C language rules, validate inputs and check relevant return values.",
-        "explanation": "Correct C programming depends on defined behaviour, valid inputs and careful handling of operations that can fail."
+        "answer": "When its condition is false before the first iteration",
+        "explanation": "while checks its condition before entering the body."
       },
       {
         "id": "cl3.8-q2",
-        "prompt": "Why should boundary cases be tested?",
+        "prompt": "How does do-while differ from while?",
         "options": [
-          "They reveal errors that ordinary inputs may not expose.",
-          "They are unnecessary when one example works.",
-          "They make compiler warnings irrelevant."
+          "It executes the body before checking the condition",
+          "It never checks a condition",
+          "It always executes exactly twice"
         ],
-        "answer": "They reveal errors that ordinary inputs may not expose.",
-        "explanation": "Boundary tests check the edges of valid ranges and important exceptional conditions."
+        "answer": "It executes the body before checking the condition",
+        "explanation": "A do-while loop guarantees at least one body execution."
       },
       {
         "id": "cl3.8-q3",
-        "prompt": "What does a successful compilation establish?",
+        "prompt": "What is a common cause of an infinite loop?",
         "options": [
-          "The compiler accepted the translation under its selected settings; it does not prove runtime correctness.",
-          "The program is free from all defects.",
-          "The program is portable to every C implementation."
+          "The loop state never changes in a way that makes the condition false",
+          "The body contains a printf call",
+          "The loop uses braces"
         ],
-        "answer": "The compiler accepted the translation under its selected settings; it does not prove runtime correctness.",
-        "explanation": "Compilation is one validation step. Tests, review and correct reasoning are also required."
+        "answer": "The loop state never changes in a way that makes the condition false",
+        "explanation": "A loop needs a valid progress or exit mechanism."
       },
       {
         "id": "cl3.8-q4",
-        "prompt": "Which practice improves portability?",
+        "prompt": "What punctuation follows the while condition in do-while syntax?",
         "options": [
-          "Use standard C features and document unavoidable platform assumptions.",
-          "Depend on undocumented compiler extensions.",
-          "Assume int and pointer sizes are fixed everywhere."
+          "A semicolon",
+          "A colon",
+          "A comma"
         ],
-        "answer": "Use standard C features and document unavoidable platform assumptions.",
-        "explanation": "Portable programs avoid assumptions that the C standard does not guarantee."
+        "answer": "A semicolon",
+        "explanation": "The do-while statement ends with a semicolon."
       },
       {
         "id": "cl3.8-q5",
-        "prompt": "What should you do when a library operation can fail?",
+        "prompt": "Which cases are useful when testing a counted loop?",
         "options": [
-          "Check its documented result and handle the failure path.",
-          "Assume it always succeeds.",
-          "Continue using its output without checking."
+          "Zero, one and the final intended iteration",
+          "Only a very large number",
+          "Only the middle iteration"
         ],
-        "answer": "Check its documented result and handle the failure path.",
-        "explanation": "Many standard-library operations report failure through return values or stream indicators."
+        "answer": "Zero, one and the final intended iteration",
+        "explanation": "Boundary testing helps reveal off-by-one and termination defects."
       }
     ]
   },
