@@ -6,39 +6,50 @@
   "title": "Reading files, EOF and stream error indicators",
   "language": "en",
   "learningObjectives": [
-    "Explain the C concept and its rules.",
-    "Trace the example and describe data flow.",
-    "Identify relevant failure and boundary cases.",
-    "Apply the concept in a tested C program."
+    "Use fgetc with an int variable so every byte value and EOF are distinguishable.",
+    "Explain why EOF is detected after a read attempt.",
+    "Distinguish end-of-file from an input error using feof and ferror.",
+    "Check formatted and line-based input return values.",
+    "Close streams and handle read and close failures."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "Input functions such as fgetc return an int so they can represent every unsigned-char value plus the distinct EOF indicator. feof reports whether end-of-file has been encountered; ferror reports whether a stream error occurred. EOF is usually detected after a read attempt fails to produce another character.",
+      "concept": "fgetc returns int so it can represent every value of an unsigned char plus the distinct EOF indicator. EOF is reported when a read cannot produce another character; feof and ferror then distinguish end-of-file from a stream error. Storing fgetc's result in char can lose this distinction.",
       "whyItMatters": "Correct read loops distinguish normal end-of-file from an I/O error and avoid storing EOF in a char before checking it.",
       "analogy": "Treat the operation as a clearly specified contract between the program and its data.",
       "analogyLimit": "The analogy does not replace C's type, lifetime, I/O and object representation rules."
     },
     "explain": {
-      "narrative": "Input functions such as fgetc return an int so they can represent every unsigned-char value plus the distinct EOF indicator. feof reports whether end-of-file has been encountered; ferror reports whether a stream error occurred. EOF is usually detected after a read attempt fails to produce another character.\n\nCheck all return values, object lifetimes, types and preconditions. Enable compiler warnings and test expected as well as failure paths.",
+      "narrative": "## 1. Read one character\n\nUse `int ch = fgetc(file)`. The int type can represent all possible unsigned-char values and EOF. Do not store the result in char before checking EOF.\n\n## 2. Read until EOF\n\nAttempt the read in the loop condition. EOF is discovered by the failed read attempt, not by predicting the end before reading.\n\n## 3. Distinguish conditions\n\nAfter the loop, use ferror to detect a stream error. If no error occurred, feof indicates that end-of-file was encountered. Do not treat every EOF result as proof of a normal end.\n\n## 4. Other input functions\n\nfgets reads at most one less than the buffer capacity and adds a terminator when successful. fscanf returns the number of successful assignments; check that count before using converted values.\n\n## 5. Close the stream\n\nCheck fclose as well. Reading and closing can both report errors, and every successfully opened stream must be closed.",
       "examples": [
         {
-          "id": "cl73-ex1",
+          "id": "cl7.3-ex1",
           "language": "en",
-          "title": "Focused C example",
+          "title": "Core concept",
           "code": "#include <stdio.h>\nint main(void) {\n FILE *file = fopen(\"notes.txt\", \"r\");\n if (file == NULL) return 1;\n int ch;\n while ((ch = fgetc(file)) != EOF) putchar(ch);\n if (ferror(file)) { fclose(file); return 1; }\n if (fclose(file) == EOF) return 1;\n return 0;\n}",
-          "explanation": "fgetc stores its result in int so EOF remains distinguishable from byte values. After the loop, ferror checks whether the read stopped because of an error.",
+          "explanation": "Trace the operations and check the relevant C standard library contracts and failure cases.",
+          "runnable": false
+        },
+        {
+          "id": "cl7.3-ex2",
+          "language": "en",
+          "title": "Apply the concept safely",
+          "code": "#include <stdio.h>\nint main(void) { FILE *f = fopen(\"input.txt\", \"r\"); if (!f) return 1; char line[80]; while (fgets(line, sizeof line, f)) fputs(line, stdout); int failed = ferror(f); if (fclose(f) == EOF) failed = 1; return failed ? 1 : 0; }",
+          "explanation": "This example reinforces the topic with explicit validation or resource handling. Compile with warnings and test failure paths.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Why is int used for ch instead of char?",
-      "independentTask": "Read a text file character by character and report separately whether reading ended normally or failed.",
+      "guidedTask": "Create a small C program demonstrating Reading files, EOF and stream error indicators. Write down its preconditions, expected result and failure handling before implementation.",
+      "independentTask": "Extend the example for Reading files, EOF and stream error indicators to handle a boundary case and an error case. Explain the relevant C rule and add a test for each path.",
       "hints": [
-        "Check the read result first; then inspect ferror or feof when needed.",
-        "EOF is a macro value, not a character stored in the file.",
-        "Always close a stream after successful opening, including error paths."
+        "Read the declaration and function contract carefully.",
+        "Check all library return values before using results.",
+        "Keep object bounds, lifetime and resource ownership explicit.",
+        "Do not assume implementation-specific memory or file representations are portable.",
+        "Test both success and failure paths."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl73-q1",
-        "prompt": "Which statement best describes the lesson?",
+        "id": "cl7.3-q1",
+        "prompt": "Why does fgetc return int rather than char?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "To represent all byte values and EOF distinctly",
+          "To return the file size",
+          "To store two characters"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the C rule described in the lesson."
+        "answer": "To represent all byte values and EOF distinctly",
+        "explanation": "The int result can represent every unsigned-char value plus EOF."
       },
       {
-        "id": "cl73-q2",
-        "prompt": "What should be verified before using this feature?",
+        "id": "cl7.3-q2",
+        "prompt": "When is EOF normally detected?",
         "options": [
-          "Types, preconditions, object validity and relevant return values.",
-          "Only the source file name.",
-          "Whether a single run appeared successful."
+          "After a read attempt cannot produce another character",
+          "Before the first read",
+          "When feof is called before reading"
         ],
-        "answer": "Types, preconditions, object validity and relevant return values.",
-        "explanation": "C correctness depends on valid objects, correct types and checked operations."
+        "answer": "After a read attempt cannot produce another character",
+        "explanation": "The read function reports EOF when it cannot return another character."
       },
       {
-        "id": "cl73-q3",
-        "prompt": "Which practice improves reliability?",
+        "id": "cl7.3-q3",
+        "prompt": "Which function reports a stream read error?",
         "options": [
-          "Compile with warnings and test normal and failure paths.",
-          "Ignore I/O and compiler diagnostics.",
-          "Assume all environments behave identically."
+          "ferror",
+          "feof",
+          "fopen"
         ],
-        "answer": "Compile with warnings and test normal and failure paths.",
-        "explanation": "Diagnostics and tests provide evidence for program behaviour."
+        "answer": "ferror",
+        "explanation": "ferror tests the stream error indicator."
+      },
+      {
+        "id": "cl7.3-q4",
+        "prompt": "What does feof indicate?",
+        "options": [
+          "The end-of-file indicator has been set",
+          "The file is empty before reading",
+          "The stream is writable"
+        ],
+        "answer": "The end-of-file indicator has been set",
+        "explanation": "feof becomes true after an input operation encounters end-of-file."
+      },
+      {
+        "id": "cl7.3-q5",
+        "prompt": "Why check fscanf's return value?",
+        "options": [
+          "To know how many assignments succeeded before using values",
+          "To find the file's encoding",
+          "To close the stream automatically"
+        ],
+        "answer": "To know how many assignments succeeded before using values",
+        "explanation": "Only successfully assigned objects should be used as converted input."
       }
     ]
   },
