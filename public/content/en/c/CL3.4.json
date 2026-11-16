@@ -6,22 +6,22 @@
   "title": "Operator precedence, associativity and expression grouping",
   "language": "en",
   "learningObjectives": [
-    "Explain the core ideas behind Operator precedence, associativity and expression grouping.",
-    "Identify relevant C syntax, types, standard-library interfaces and constraints.",
-    "Trace a small example and predict its behaviour.",
-    "Recognize boundary cases, common defects and portability risks.",
-    "Apply the concept in a tested C program."
+    "Explain how operator precedence determines grouping in an expression.",
+    "Explain how associativity groups operators of the same precedence.",
+    "Use parentheses to make intended evaluation explicit.",
+    "Distinguish expression grouping from the order in which operands are evaluated.",
+    "Avoid relying on unspecified or unsequenced side-effect order."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "Operator precedence, associativity and expression grouping is an important part of writing correct, maintainable C programs. Learn the exact language rules rather than relying on what one compiler appears to accept. C is a compiled, standardized language: distinguish language guarantees from implementation-defined choices, compiler extensions and behaviour that the standard leaves undefined.",
+      "concept": "Operator precedence and associativity determine how tokens in an expression are grouped by the C grammar. They do not, by themselves, specify the order in which operands are evaluated. Parentheses can clarify or change grouping, but they do not automatically impose an evaluation order on every subexpression. Expressions with unsequenced conflicting side effects can have undefined behavior.",
       "whyItMatters": "Understanding Operator precedence, associativity and expression grouping helps you reason about program behaviour instead of memorizing syntax. It is useful in exams, debugging and building reliable C applications.",
       "analogy": "Treat the concept as a tool with a precise contract: it has valid inputs, defined operations and observable results.",
       "analogyLimit": "An analogy is only an aid; the C standard and the relevant function specifications determine actual behaviour."
     },
     "explain": {
-      "narrative": "## Concept and mental model\nOperator precedence, associativity and expression grouping should be understood in terms of the C abstract machine: objects have types, storage duration and lifetimes; expressions are evaluated according to language rules; and library calls have specified preconditions and results. The compiler translates a translation unit, but a successful compilation does not prove that a program is correct.\n\n## How to reason about this topic\n1. Identify the inputs, objects, types and operations involved.\n2. Check the applicable syntax and semantic constraints.\n3. Determine valid input ranges and boundary cases.\n4. Check every function result and handle failure where the API permits failure.\n5. Compile with warnings enabled and test normal, boundary and invalid cases.\n\n## Correctness and portability\nDo not assume that int has a particular width, that memory addresses are identical across runs, or that undefined behaviour has a predictable result. Use standard headers and documented interfaces. State any platform assumptions explicitly. Prefer small functions, clear names and explicit invariants.\n\n## Worked example 1 — establish a testable baseline\nThe example below demonstrates a small, compilable C program. Adapt the declaration, expression or API call to the exact concept being studied, then change one condition at a time and observe the result.\n\n## Worked example 2 — validate a boundary\nA second useful test is to exercise the smallest valid input, largest valid input, one value outside the valid range and an ordinary middle value. Record the expected result before running the program; this prevents a test from merely confirming an assumption.\n\n## Common mistakes\n- Assuming a successful compile means the result is correct.\n- Ignoring warnings or failing to check a library function's return value.\n- Using a value outside the range permitted by its type or API.\n- Confusing a compiler extension with portable ISO C.\n- Testing only one ordinary input and missing boundary cases.",
+      "narrative": "## 1. Precedence\n\nPrecedence determines which operators bind more tightly. For example, multiplication has higher precedence than addition, so `2 + 3 * 4` groups as `2 + (3 * 4)`.\n\n## 2. Associativity\n\nWhen operators of the same precedence appear together, associativity determines grouping. Most arithmetic binary operators group left to right, while assignment operators group right to left. This is a grammar rule, not a promise about execution order of every operand.\n\n## 3. Parentheses communicate intent\n\nWrite `(a + b) * c` when the addition must be grouped before multiplication. Parentheses reduce ambiguity for readers and prevent mistakes when the default precedence is not obvious.\n\n## 4. Grouping is not evaluation order\n\nThe expression `f() + g()` does not generally specify whether f or g is called first. Do not confuse precedence with sequencing. Avoid expressions that modify the same scalar object in unsequenced ways, because they can have undefined behavior.\n\n## 5. Prefer clear expressions\n\nBreak complicated calculations into named intermediate variables. Use parentheses when they make the intended grouping visible, and consult a precedence table when needed.",
       "examples": [
         {
           "id": "cl3.4-ex1",
@@ -42,14 +42,14 @@
       ]
     },
     "practise": {
-      "guidedTask": "Write a minimal program that demonstrates Operator precedence, associativity and expression grouping. Compile it with warnings enabled, explain each declaration and operation, and record its output.",
-      "independentTask": "Create two test cases for Operator precedence, associativity and expression grouping: one normal case and one boundary or failure case. State the expected behaviour before running them, then compare the result and explain any difference.",
+      "guidedTask": "Write and trace a C program demonstrating CL3.4. Record the condition or expression values at each step, then compile with warnings and test boundary cases.",
+      "independentTask": "Create a second program for CL3.4 with a different input range or control-flow structure. Include a boundary case and one invalid or unexpected case; explain why each result occurs.",
       "hints": [
-        "Read the compiler diagnostic carefully; fix the first meaningful error before chasing later messages.",
-        "Use the exact type and format specifier required by the operation.",
-        "Test zero, negative values where valid, maximum/minimum boundaries and invalid input as appropriate.",
-        "Do not dereference an uninitialized, null or expired pointer.",
-        "Prefer defined, portable behaviour over code that merely appears to work on one machine."
+        "Trace each expression and condition in evaluation order.",
+        "Use braces to make control-flow boundaries explicit.",
+        "Check zero, one and boundary iterations where loops are involved.",
+        "Avoid undefined behavior and unintended side effects.",
+        "Test the behavior rather than relying only on visual inspection."
       ]
     }
   },
@@ -62,58 +62,58 @@
     "questions": [
       {
         "id": "cl3.4-q1",
-        "prompt": "Which approach is safest when applying Operator precedence, associativity and expression grouping?",
+        "prompt": "How is `2 + 3 * 4` grouped?",
         "options": [
-          "Follow the C language rules, validate inputs and check relevant return values.",
-          "Assume every compiler and platform behaves identically.",
-          "Ignore warnings whenever the program produces output."
+          "2 + (3 * 4)",
+          "(2 + 3) * 4",
+          "(2 * 3) + 4"
         ],
-        "answer": "Follow the C language rules, validate inputs and check relevant return values.",
-        "explanation": "Correct C programming depends on defined behaviour, valid inputs and careful handling of operations that can fail."
+        "answer": "2 + (3 * 4)",
+        "explanation": "Multiplication has higher precedence than addition."
       },
       {
         "id": "cl3.4-q2",
-        "prompt": "Why should boundary cases be tested?",
+        "prompt": "Which operator family groups right to left?",
         "options": [
-          "They reveal errors that ordinary inputs may not expose.",
-          "They are unnecessary when one example works.",
-          "They make compiler warnings irrelevant."
+          "Assignment operators",
+          "Multiplication operators",
+          "Relational operators"
         ],
-        "answer": "They reveal errors that ordinary inputs may not expose.",
-        "explanation": "Boundary tests check the edges of valid ranges and important exceptional conditions."
+        "answer": "Assignment operators",
+        "explanation": "Assignment operators are right-associative."
       },
       {
         "id": "cl3.4-q3",
-        "prompt": "What does a successful compilation establish?",
+        "prompt": "Do precedence rules determine the order of evaluating f() and g() in `f() + g()`?",
         "options": [
-          "The compiler accepted the translation under its selected settings; it does not prove runtime correctness.",
-          "The program is free from all defects.",
-          "The program is portable to every C implementation."
+          "No",
+          "Yes, always f() first",
+          "Yes, always g() first"
         ],
-        "answer": "The compiler accepted the translation under its selected settings; it does not prove runtime correctness.",
-        "explanation": "Compilation is one validation step. Tests, review and correct reasoning are also required."
+        "answer": "No",
+        "explanation": "Precedence determines grouping, not general operand evaluation order."
       },
       {
         "id": "cl3.4-q4",
-        "prompt": "Which practice improves portability?",
+        "prompt": "What is the main benefit of parentheses in complex expressions?",
         "options": [
-          "Use standard C features and document unavoidable platform assumptions.",
-          "Depend on undocumented compiler extensions.",
-          "Assume int and pointer sizes are fixed everywhere."
+          "They make intended grouping explicit",
+          "They force every function call to run first",
+          "They disable type conversions"
         ],
-        "answer": "Use standard C features and document unavoidable platform assumptions.",
-        "explanation": "Portable programs avoid assumptions that the C standard does not guarantee."
+        "answer": "They make intended grouping explicit",
+        "explanation": "Parentheses clarify or change expression grouping."
       },
       {
         "id": "cl3.4-q5",
-        "prompt": "What should you do when a library operation can fail?",
+        "prompt": "Why avoid multiple unsequenced modifications of the same scalar object?",
         "options": [
-          "Check its documented result and handle the failure path.",
-          "Assume it always succeeds.",
-          "Continue using its output without checking."
+          "They can produce undefined behavior",
+          "They always run in reverse order",
+          "They are converted into comments"
         ],
-        "answer": "Check its documented result and handle the failure path.",
-        "explanation": "Many standard-library operations report failure through return values or stream indicators."
+        "answer": "They can produce undefined behavior",
+        "explanation": "C imposes sequencing requirements; conflicting unsequenced side effects can be undefined."
       }
     ]
   },
