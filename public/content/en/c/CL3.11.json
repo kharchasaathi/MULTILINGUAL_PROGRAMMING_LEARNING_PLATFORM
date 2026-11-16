@@ -3,53 +3,53 @@
   "courseId": "c",
   "moduleId": "CL3",
   "topicId": "CL3.11",
-  "title": "Common control-flow errors, unreachable code and termination reasoning (CodeSaathi extension)",
+  "title": "Control-Flow Defects, Unreachable Code and Loop Termination",
   "language": "en",
   "learningObjectives": [
-    "Explain the core ideas behind Common control-flow errors, unreachable code and termination reasoning (CodeSaathi extension).",
-    "Identify relevant C syntax, types, standard-library interfaces and constraints.",
-    "Trace a small example and predict its behaviour.",
-    "Recognize boundary cases, common defects and portability risks.",
-    "Apply the concept in a tested C program."
+    "Identify common control-flow defects such as missing branches, accidental fall-through and incorrect loop conditions.",
+    "Explain how unreachable statements differ from code that is merely unlikely to execute.",
+    "Use loop invariants and progress measures to reason about termination.",
+    "Recognize how break, continue, return and error paths affect cleanup and program state.",
+    "Test control flow with branch coverage, boundary cases and explicit expected outcomes."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "Common control-flow errors, unreachable code and termination reasoning (CodeSaathi extension) is an important part of writing correct, maintainable C programs. Learn the exact language rules rather than relying on what one compiler appears to accept. C is a compiled, standardized language: distinguish language guarantees from implementation-defined choices, compiler extensions and behaviour that the standard leaves undefined.",
+      "concept": "Control flow describes the order in which statements execute. Defects arise when branches are incomplete, conditions are incorrect, loop state fails to progress, or a control-transfer statement skips required work. Unreachable code cannot be executed along the program's control-flow paths, while code that is difficult to reach may still be reachable. Termination reasoning asks whether every intended execution eventually reaches an exit under stated assumptions.",
       "whyItMatters": "Understanding Common control-flow errors, unreachable code and termination reasoning (CodeSaathi extension) helps you reason about program behaviour instead of memorizing syntax. It is useful in exams, debugging and building reliable C applications.",
       "analogy": "Treat the concept as a tool with a precise contract: it has valid inputs, defined operations and observable results.",
       "analogyLimit": "An analogy is only an aid; the C standard and the relevant function specifications determine actual behaviour."
     },
     "explain": {
-      "narrative": "## Concept and mental model\nCommon control-flow errors, unreachable code and termination reasoning (CodeSaathi extension) should be understood in terms of the C abstract machine: objects have types, storage duration and lifetimes; expressions are evaluated according to language rules; and library calls have specified preconditions and results. The compiler translates a translation unit, but a successful compilation does not prove that a program is correct.\n\n## How to reason about this topic\n1. Identify the inputs, objects, types and operations involved.\n2. Check the applicable syntax and semantic constraints.\n3. Determine valid input ranges and boundary cases.\n4. Check every function result and handle failure where the API permits failure.\n5. Compile with warnings enabled and test normal, boundary and invalid cases.\n\n## Correctness and portability\nDo not assume that int has a particular width, that memory addresses are identical across runs, or that undefined behaviour has a predictable result. Use standard headers and documented interfaces. State any platform assumptions explicitly. Prefer small functions, clear names and explicit invariants.\n\n## Worked example 1 — establish a testable baseline\nThe example below demonstrates a small, compilable C program. Adapt the declaration, expression or API call to the exact concept being studied, then change one condition at a time and observe the result.\n\n## Worked example 2 — validate a boundary\nA second useful test is to exercise the smallest valid input, largest valid input, one value outside the valid range and an ordinary middle value. Record the expected result before running the program; this prevents a test from merely confirming an assumption.\n\n## Common mistakes\n- Assuming a successful compile means the result is correct.\n- Ignoring warnings or failing to check a library function's return value.\n- Using a value outside the range permitted by its type or API.\n- Confusing a compiler extension with portable ISO C.\n- Testing only one ordinary input and missing boundary cases.",
+      "narrative": "## 1. Common decision defects\n\nAn if/else chain can omit an important case, order overlapping conditions incorrectly, or contain an else attached to a different if than intended. Use braces and test every branch, including invalid input.\n\n## 2. Unreachable versus unlikely code\n\nA statement after an unconditional return in the same block is unreachable. By contrast, a branch guarded by a rare condition may be reachable even if ordinary tests never take it. Do not label code unreachable merely because it was not observed during one test.\n\n## 3. Loop termination\n\nFor each loop, identify its invariant, termination condition and progress measure. A progress measure should move toward a state that makes the condition false. Check whether arithmetic overflow, input failure or a skipped update can prevent progress.\n\n## 4. Control transfers and cleanup\n\nbreak exits the nearest loop or switch; continue advances the current loop; return exits the function. Before using these statements, identify which updates, file closes, memory releases or other cleanup actions might be skipped. Structure cleanup paths deliberately.\n\n## 5. Testing control flow\n\nCreate tests for every branch, loop zero/one/many iterations, boundary values, early exits and failure paths. Assertions and branch coverage can help reveal missing cases, but tests do not prove all paths correct. Review the control-flow logic and its assumptions.",
       "examples": [
         {
           "id": "cl3.11-ex1",
           "language": "en",
-          "title": "A small C program to compile and inspect",
-          "code": "#include <stdio.h>\n\nint main(void) {\n    int value = 12;\n    printf(\"Value: %d\\\\n\", value);\n    return 0;\n}",
-          "explanation": "The program declares an int object, initializes it, prints it with the matching %d conversion specification and returns a success status.",
-          "runnable": true
+          "title": "A loop with a clear progress measure",
+          "code": "#include <stdio.h>\n\nint main(void) {\n    int remaining = 3;\n    while (remaining > 0) {\n        printf(\"%d\\n\", remaining);\n        --remaining;\n    }\n    return 0;\n}",
+          "explanation": "The progress measure is remaining. Each iteration decreases it by one, so the condition eventually becomes false for the initial value shown.",
+          "runnable": false
         },
         {
           "id": "cl3.11-ex2",
           "language": "en",
-          "title": "Iterating over a fixed array",
-          "code": "#include <stdio.h>\n\nint main(void) {\n    int values[] = { 3, 6, 9, 12 };\n    size_t count = sizeof values / sizeof values[0];\n    for (size_t i = 0; i < count; ++i) {\n        printf(\"%d\\\\n\", values[i]);\n    }\n    return 0;\n}",
-          "explanation": "The array length is derived from its total size divided by the size of one element. The loop visits valid indices from zero through count minus one.",
-          "runnable": true
+          "title": "Avoid skipping required progress",
+          "code": "int index = 0;\nwhile (index < 5) {\n    if (index == 2) {\n        ++index;\n        continue;\n    }\n    /* process index */\n    ++index;\n}",
+          "explanation": "The continue branch updates index before skipping the rest of the iteration. Without that update, the loop would repeatedly encounter index == 2 and never progress.",
+          "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Write a minimal program that demonstrates Common control-flow errors, unreachable code and termination reasoning (CodeSaathi extension). Compile it with warnings enabled, explain each declaration and operation, and record its output.",
-      "independentTask": "Create two test cases for Common control-flow errors, unreachable code and termination reasoning (CodeSaathi extension): one normal case and one boundary or failure case. State the expected behaviour before running them, then compare the result and explain any difference.",
+      "guidedTask": "Draw a simple control-flow trace for a loop with normal completion, an early break and an input-failure path. Mark every update and cleanup operation, then verify each path against the code.",
+      "independentTask": "Review a short program containing nested if statements and a loop. Identify unreachable statements, missing branches, possible non-termination and skipped cleanup. Rewrite only the defective control flow and add tests for each identified path.",
       "hints": [
-        "Read the compiler diagnostic carefully; fix the first meaningful error before chasing later messages.",
-        "Use the exact type and format specifier required by the operation.",
-        "Test zero, negative values where valid, maximum/minimum boundaries and invalid input as appropriate.",
-        "Do not dereference an uninitialized, null or expired pointer.",
-        "Prefer defined, portable behaviour over code that merely appears to work on one machine."
+        "Distinguish unreachable code from code that tests have not yet reached.",
+        "Identify the state that changes on every loop iteration.",
+        "Trace every break, continue and return to its target.",
+        "Check that all resource cleanup paths are handled.",
+        "Test boundary and failure paths as well as the normal path."
       ]
     }
   },
@@ -62,58 +62,58 @@
     "questions": [
       {
         "id": "cl3.11-q1",
-        "prompt": "Which approach is safest when applying Common control-flow errors, unreachable code and termination reasoning (CodeSaathi extension)?",
+        "prompt": "What is a useful way to reason about loop termination?",
         "options": [
-          "Follow the C language rules, validate inputs and check relevant return values.",
-          "Assume every compiler and platform behaves identically.",
-          "Ignore warnings whenever the program produces output."
+          "Identify a progress measure that moves toward making the condition false",
+          "Assume every loop runs a fixed number of times",
+          "Remove the loop condition"
         ],
-        "answer": "Follow the C language rules, validate inputs and check relevant return values.",
-        "explanation": "Correct C programming depends on defined behaviour, valid inputs and careful handling of operations that can fail."
+        "answer": "Identify a progress measure that moves toward making the condition false",
+        "explanation": "A progress measure helps show why a loop eventually terminates under stated assumptions."
       },
       {
         "id": "cl3.11-q2",
-        "prompt": "Why should boundary cases be tested?",
+        "prompt": "Which statement is unreachable?",
         "options": [
-          "They reveal errors that ordinary inputs may not expose.",
-          "They are unnecessary when one example works.",
-          "They make compiler warnings irrelevant."
+          "A statement after an unconditional return in the same block",
+          "A branch guarded by a rare condition",
+          "A statement inside a loop"
         ],
-        "answer": "They reveal errors that ordinary inputs may not expose.",
-        "explanation": "Boundary tests check the edges of valid ranges and important exceptional conditions."
+        "answer": "A statement after an unconditional return in the same block",
+        "explanation": "Execution has already left the function before reaching that statement."
       },
       {
         "id": "cl3.11-q3",
-        "prompt": "What does a successful compilation establish?",
+        "prompt": "Why can continue cause an infinite loop?",
         "options": [
-          "The compiler accepted the translation under its selected settings; it does not prove runtime correctness.",
-          "The program is free from all defects.",
-          "The program is portable to every C implementation."
+          "It may skip an update required to make the loop condition false",
+          "It always exits the program",
+          "It resets every variable to zero"
         ],
-        "answer": "The compiler accepted the translation under its selected settings; it does not prove runtime correctness.",
-        "explanation": "Compilation is one validation step. Tests, review and correct reasoning are also required."
+        "answer": "It may skip an update required to make the loop condition false",
+        "explanation": "The skipped update may be the loop's only progress step."
       },
       {
         "id": "cl3.11-q4",
-        "prompt": "Which practice improves portability?",
+        "prompt": "What should be checked when adding an early return?",
         "options": [
-          "Use standard C features and document unavoidable platform assumptions.",
-          "Depend on undocumented compiler extensions.",
-          "Assume int and pointer sizes are fixed everywhere."
+          "Whether required cleanup and state updates still occur on that path",
+          "Only the indentation",
+          "Whether the function name is uppercase"
         ],
-        "answer": "Use standard C features and document unavoidable platform assumptions.",
-        "explanation": "Portable programs avoid assumptions that the C standard does not guarantee."
+        "answer": "Whether required cleanup and state updates still occur on that path",
+        "explanation": "Early exits can bypass resource release or other required work."
       },
       {
         "id": "cl3.11-q5",
-        "prompt": "What should you do when a library operation can fail?",
+        "prompt": "What does branch coverage help reveal?",
         "options": [
-          "Check its documented result and handle the failure path.",
-          "Assume it always succeeds.",
-          "Continue using its output without checking."
+          "Branches that tests have not executed",
+          "All possible undefined behavior automatically",
+          "Every possible input for every program"
         ],
-        "answer": "Check its documented result and handle the failure path.",
-        "explanation": "Many standard-library operations report failure through return values or stream indicators."
+        "answer": "Branches that tests have not executed",
+        "explanation": "Coverage identifies untested branches but does not prove correctness."
       }
     ]
   },
