@@ -6,39 +6,124 @@
   "title": "Testing data structures: invariants, boundary cases and randomized tests (CodeSaathi extension)",
   "language": "en",
   "learningObjectives": [
-    "Explain the topic and its C rules.",
-    "Trace the example and explain its data or control flow.",
-    "Identify edge cases and resource-management requirements.",
-    "Apply the concept in a tested C program."
+    "Define a data-structure invariant and identify the preconditions, postconditions and state changes for each public operation.",
+    "Design boundary tests for empty, one-element, full-capacity, wrap-around, duplicate, missing-key and repeated-operation cases.",
+    "Build a reference model and compare the implementation's observable results and state after each operation.",
+    "Create deterministic randomized tests using a recorded seed so failures can be reproduced and reduced to a smaller failing sequence.",
+    "Use assertions and explicit test checks appropriately, understand the effect of NDEBUG, and distinguish test diagnostics from production input validation.",
+    "Test memory ownership, allocation failures, cleanup and error paths using suitable instrumentation, compiler warnings, sanitizers and static analysis."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL5.3",
+    "CL6.1",
+    "CL7.1",
+    "CL8.1",
+    "CL10.9",
+    "CL10.10",
+    "CL10.11",
+    "CL10.12",
+    "CL10.13",
+    "CL10.14"
+  ],
   "stages": {
     "understand": {
-      "concept": "Data-structure tests should verify operation results and invariants after every change. Boundary cases include empty, one-element, full-capacity and repeated insert/delete sequences. Randomized tests can explore many operation sequences when paired with a reference model and reproducible seed.",
-      "whyItMatters": "State-based testing reveals defects that isolated function examples may miss, especially in circular buffers, linked lists and resizing structures.",
-      "analogy": "Treat each algorithm or resource as a contract whose invariants must remain true after every operation.",
-      "analogyLimit": "The analogy does not replace C's formal rules for pointers, object lifetime, complexity or library contracts."
+      "concept": "Testing a data structure means checking more than whether one example returns the expected value. Every operation has a contract: preconditions describe valid inputs and states; postconditions describe the expected result; invariants describe conditions that must remain true before and after every successful operation. For a stack with capacity C, a key invariant is 0 <= count <= C. For a circular queue, head and tail must be valid indices, count must not exceed capacity, and the logical FIFO order must be preserved. Tests should cover ordinary operations, boundaries, error paths and long sequences.",
+      "whyItMatters": "Many data-structure bugs appear only after a particular sequence: fill, remove two items, wrap around, fill again, then remove in order. A function may pass a simple test while the overall structure becomes corrupted after repeated use. Invariant checks and reference-model comparisons expose these defects early.",
+      "analogy": "A lift is not adequately tested by pressing the ground-floor button once. Tests should check empty and full passenger capacity, repeated trips, door and floor-state rules, and whether each trip preserves the safety conditions.",
+      "analogyLimit": "A real program's invariants are exact logical conditions, not just a checklist. Tests can provide evidence of correctness but cannot prove every possible execution unless combined with formal reasoning or exhaustive analysis over a finite state space.",
+      "keyTerms": [
+        {
+          "term": "Invariant",
+          "definition": "A condition that must hold for every valid observable state, such as a queue count staying between zero and its capacity."
+        },
+        {
+          "term": "Precondition",
+          "definition": "A condition that must be true before an operation is called, such as a valid output pointer."
+        },
+        {
+          "term": "Postcondition",
+          "definition": "A condition that must be true after an operation completes successfully."
+        },
+        {
+          "term": "Boundary test",
+          "definition": "A test at an edge of the valid range, such as empty, one item, full capacity or an out-of-range index."
+        },
+        {
+          "term": "Reference model",
+          "definition": "A simpler, independently implemented representation used to predict expected results for the structure under test."
+        },
+        {
+          "term": "Randomized test",
+          "definition": "A test that generates varied inputs or operation sequences, ideally with a fixed, recorded seed for reproducibility."
+        },
+        {
+          "term": "Property-based test",
+          "definition": "A test that checks general properties across many generated inputs instead of checking only a few fixed examples."
+        },
+        {
+          "term": "Test oracle",
+          "definition": "The mechanism that decides whether an observed result is correct, such as a reference model or a known invariant."
+        }
+      ],
+      "testPlan": [
+        {
+          "category": "Empty state",
+          "checks": "Pop/dequeue, lookup and removal on an empty structure; verify failure is reported and state remains unchanged."
+        },
+        {
+          "category": "Single element",
+          "checks": "Insert one item, read or remove it, then verify the structure returns to empty."
+        },
+        {
+          "category": "Capacity boundary",
+          "checks": "Fill exactly to capacity, verify one more insertion fails safely, then remove one and insert again."
+        },
+        {
+          "category": "Sequence behaviour",
+          "checks": "Repeat alternating insert/remove operations; verify ordering, count and links after every step."
+        },
+        {
+          "category": "Invalid or missing data",
+          "checks": "Test absent keys, invalid indices, duplicate keys and null pointers where the API defines their behaviour."
+        },
+        {
+          "category": "Resource failures",
+          "checks": "Exercise allocation failure and cleanup paths using an injectable allocator or controlled test hook; use sanitizers and leak checks where supported."
+        }
+      ],
+      "history": "Assertions and systematic test cases became common tools as software systems grew more complex. Randomized and property-based testing extend fixed examples by exploring many combinations of operations. Modern testing practice often combines deterministic unit tests, generated sequences, reference models, fuzzing, static analysis and runtime sanitizers."
     },
     "explain": {
-      "narrative": "Data-structure tests should verify operation results and invariants after every change. Boundary cases include empty, one-element, full-capacity and repeated insert/delete sequences. Randomized tests can explore many operation sequences when paired with a reference model and reproducible seed.\n\nState preconditions, invariants, empty and full cases, ownership and failure behaviour before implementation. Compile with warnings and test normal, boundary and failure paths.",
+      "narrative": "Begin with the contract. For every operation, write down valid inputs, success behaviour, failure behaviour and the invariant that must remain true. A fixed-capacity stack might require count <= capacity; push succeeds only when there is room; pop succeeds only when the stack is nonempty. A failed operation should not silently corrupt the structure. Tests should check both the return value and the state after the call.\n\nBoundary tests target empty, one-item and full states, as well as the transition immediately before and after each boundary. For circular queues, test wrap-around: enqueue several values, dequeue some, enqueue more until the tail wraps to index zero, then verify the remaining values still come out in FIFO order. For linked structures, test head, tail, single-node removal, missing values and cleanup of the entire list.\n\nA reference model provides an independent test oracle. For example, test a circular queue against a simple array-based FIFO model. Generate an operation, apply it to both structures, compare success/failure and returned values, and verify the implementation's invariants. If a mismatch occurs, print the seed and operation number. A fixed seed makes the failure reproducible; reducing the failing sequence to the shortest sequence that still fails makes debugging easier.\n\nAssertions are useful for internal test expectations, but they are not a substitute for checking untrusted input. Defining NDEBUG disables the standard assert macro, so essential test checks should remain active in the test harness. Production functions must still validate their inputs and report errors. For allocation-sensitive structures, test allocation failure with an injectable allocator or test hook, verify that partially created objects are cleaned up, and run static analysis and sanitizers when available.\n\nThe first example tests a bounded stack at empty, one-item and full-capacity boundaries and checks that rejected operations do not mutate state. The second example runs a reproducible pseudo-random sequence against a circular queue and a simpler reference queue. It compares every operation and validates queue invariants after each step. The pseudo-random generator is deterministic for a given seed; it is for test sequence generation, not cryptography.",
       "examples": [
         {
           "id": "cl1015-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <assert.h>\n#include <stddef.h>\nstruct Stack { int data[3]; size_t count; };\nint push(struct Stack *s, int value) {\n if (s == NULL || s->count == 3) return 0;\n s->data[s->count++] = value; return 1;\n}\nint main(void) {\n struct Stack s = {{0}, 0};\n assert(push(&s, 7));\n assert(s.count == 1 && s.data[0] == 7);\n return 0;\n}",
-          "explanation": "The assertion checks the stack invariant after a successful push. A full test suite should also check rejected pushes, pop behaviour and that count never exceeds capacity.",
-          "runnable": false
+          "title": "Test stack invariants and boundary conditions",
+          "code": "#include <stdbool.h>\n#include <stddef.h>\n#include <stdio.h>\n\n#define STACK_CAPACITY 3U\n\nstruct Stack {\n    int items[STACK_CAPACITY];\n    size_t count;\n};\n\nstatic bool stack_invariant(const struct Stack *stack)\n{\n    return stack != NULL && stack->count <= STACK_CAPACITY;\n}\n\nstatic bool stack_push(struct Stack *stack, int value)\n{\n    if (!stack_invariant(stack) || stack->count == STACK_CAPACITY) {\n        return false;\n    }\n    stack->items[stack->count] = value;\n    ++stack->count;\n    return true;\n}\n\nstatic bool stack_pop(struct Stack *stack, int *value)\n{\n    if (!stack_invariant(stack) || value == NULL || stack->count == 0U) {\n        return false;\n    }\n    --stack->count;\n    *value = stack->items[stack->count];\n    return true;\n}\n\nstatic bool check(bool condition, const char *message)\n{\n    if (!condition) {\n        printf(\"TEST FAILED: %s\\n\", message);\n        return false;\n    }\n    return true;\n}\n\nint main(void)\n{\n    struct Stack stack = {{0}, 0U};\n    int value = 0;\n\n    if (!check(stack_invariant(&stack), \"initial invariant\")) return 1;\n    if (!check(!stack_pop(&stack, &value), \"pop empty stack\")) return 1;\n    if (!check(stack.count == 0U, \"empty pop leaves count unchanged\")) return 1;\n\n    if (!check(stack_push(&stack, 10), \"push first item\")) return 1;\n    if (!check(stack_invariant(&stack) && stack.count == 1U,\n               \"invariant after first push\")) return 1;\n    if (!check(stack_push(&stack, 20), \"push second item\")) return 1;\n    if (!check(stack_push(&stack, 30), \"push third item\")) return 1;\n    if (!check(stack.count == STACK_CAPACITY, \"stack reaches capacity\")) return 1;\n\n    if (!check(!stack_push(&stack, 40), \"reject push when full\")) return 1;\n    if (!check(stack.count == STACK_CAPACITY, \"failed push preserves count\")) return 1;\n\n    if (!check(stack_pop(&stack, &value) && value == 30,\n               \"pop follows LIFO order\")) return 1;\n    if (!check(stack_invariant(&stack), \"invariant after pop\")) return 1;\n    if (!check(stack_push(&stack, 40), \"push after freeing one slot\")) return 1;\n\n    if (!check(stack_pop(&stack, &value) && value == 40,\n               \"new top is removed first\")) return 1;\n    if (!check(stack_pop(&stack, &value) && value == 20,\n               \"second LIFO value\")) return 1;\n    if (!check(stack_pop(&stack, &value) && value == 10,\n               \"last LIFO value\")) return 1;\n    if (!check(!stack_pop(&stack, &value), \"reject pop after becoming empty\")) return 1;\n    if (!check(stack_invariant(&stack) && stack.count == 0U,\n               \"final empty invariant\")) return 1;\n\n    puts(\"All stack boundary and invariant tests passed.\");\n    return 0;\n}",
+          "explanation": "The invariant helper checks that the stack pointer is valid and count never exceeds capacity. push rejects a full stack before writing; pop rejects an empty stack or null output pointer before changing count. The test checks empty, one-item, full-capacity, rejected-push, removal, reuse of a freed slot and final empty state. It also checks LIFO ordering and verifies that a failed push does not change the count. The custom check function remains active even if the build defines NDEBUG, unlike assert. This fixed-capacity example needs no dynamic allocation or cleanup.",
+          "runnable": true
+        },
+        {
+          "id": "cl1015-ex2",
+          "language": "en",
+          "title": "Reproducible randomized testing against a reference queue",
+          "code": "#include <stdbool.h>\n#include <stddef.h>\n#include <stdint.h>\n#include <stdio.h>\n\n#define CAPACITY 16U\n#define TEST_OPERATIONS 10000U\n\nstruct Queue {\n    int data[CAPACITY];\n    size_t head;\n    size_t tail;\n    size_t count;\n};\n\nstruct ReferenceQueue {\n    int data[CAPACITY];\n    size_t count;\n};\n\nstatic uint32_t next_random(uint32_t *state)\n{\n    uint32_t x = *state;\n    x ^= x << 13;\n    x ^= x >> 17;\n    x ^= x << 5;\n    *state = x;\n    return x;\n}\n\nstatic bool queue_valid(const struct Queue *queue)\n{\n    return queue != NULL &&\n           queue->head < CAPACITY &&\n           queue->tail < CAPACITY &&\n           queue->count <= CAPACITY;\n}\n\nstatic bool enqueue(struct Queue *queue, int value)\n{\n    if (!queue_valid(queue) || queue->count == CAPACITY) return false;\n\n    queue->data[queue->tail] = value;\n    queue->tail = (queue->tail + 1U) % CAPACITY;\n    ++queue->count;\n    return true;\n}\n\nstatic bool dequeue(struct Queue *queue, int *value)\n{\n    if (!queue_valid(queue) || value == NULL || queue->count == 0U) {\n        return false;\n    }\n\n    *value = queue->data[queue->head];\n    queue->head = (queue->head + 1U) % CAPACITY;\n    --queue->count;\n    return true;\n}\n\nstatic bool reference_enqueue(struct ReferenceQueue *queue, int value)\n{\n    if (queue->count == CAPACITY) return false;\n    queue->data[queue->count] = value;\n    ++queue->count;\n    return true;\n}\n\nstatic bool reference_dequeue(struct ReferenceQueue *queue, int *value)\n{\n    if (queue->count == 0U) return false;\n\n    *value = queue->data[0];\n    for (size_t i = 1U; i < queue->count; ++i) {\n        queue->data[i - 1U] = queue->data[i];\n    }\n    --queue->count;\n    return true;\n}\n\nint main(void)\n{\n    const uint32_t initial_seed = UINT32_C(0x13579BDF);\n    uint32_t random_state = initial_seed;\n    struct Queue actual = {{0}, 0U, 0U, 0U};\n    struct ReferenceQueue expected = {{0}, 0U};\n    size_t completed = 0U;\n\n    for (size_t operation = 0U; operation < TEST_OPERATIONS; ++operation) {\n        uint32_t choice = next_random(&random_state);\n        bool do_enqueue = (choice & 1U) != 0U;\n\n        if (do_enqueue) {\n            int value = (int)(next_random(&random_state) % UINT32_C(2001))\n                        - 1000;\n            bool actual_result = enqueue(&actual, value);\n            bool expected_result = reference_enqueue(&expected, value);\n\n            if (actual_result != expected_result) {\n                printf(\"Mismatch at operation %zu (seed %u): enqueue\\n\",\n                       operation, (unsigned int)initial_seed);\n                return 1;\n            }\n        } else {\n            int actual_value = 0;\n            int expected_value = 0;\n            bool actual_result = dequeue(&actual, &actual_value);\n            bool expected_result = reference_dequeue(&expected, &expected_value);\n\n            if (actual_result != expected_result ||\n                (actual_result && actual_value != expected_value)) {\n                printf(\"Mismatch at operation %zu (seed %u): dequeue\\n\",\n                       operation, (unsigned int)initial_seed);\n                return 1;\n            }\n        }\n\n        if (!queue_valid(&actual) || actual.count != expected.count) {\n            printf(\"Invariant mismatch at operation %zu (seed %u)\\n\",\n                   operation, (unsigned int)initial_seed);\n            return 1;\n        }\n        ++completed;\n    }\n\n    printf(\"Passed %zu deterministic operations (seed %u).\\n\",\n           completed, (unsigned int)initial_seed);\n    return 0;\n}",
+          "explanation": "The tested implementation is a circular queue with O(1) enqueue and dequeue. The reference model is deliberately simpler: it stores items from index zero and shifts remaining values on removal. After every generated operation, the test compares success/failure, compares dequeued values, checks that the circular queue's head and tail remain valid, and checks that both counts match. The fixed seed makes the operation sequence reproducible. The generator uses unsigned 32-bit arithmetic, whose wraparound is defined by C, and maps values into the range -1000 through 1000. This is a deterministic randomized test, not a proof that every sequence is correct. When a failure occurs, preserve the seed and operation number, then reduce the sequence to a minimal reproducer. The reference model is intentionally not optimised; its purpose is to provide a simple independent oracle.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "State the stack invariant before and after push and pop.",
-      "independentTask": "Generate deterministic operation sequences and compare the structure with a simple reference array or model.",
+      "guidedTask": "For the stack in Example 1, write down the invariant before and after each push and pop. Add tests for a null stack pointer, a null output pointer, pushing exactly to capacity, one additional rejected push, and reusing a slot after a pop. Confirm that every failed operation leaves the state unchanged.",
+      "independentTask": "Build a test harness for a linked list or hash table. Define its invariants, write a simple reference model using an array, and generate at least 5,000 deterministic operations. After each operation compare observable results and check invariants. Record the seed and first failing operation. Add tests for empty state, one element, duplicates, missing keys, repeated insert/delete, allocation failure (using an injectable allocator or controlled test hook) and complete cleanup. Run strict GCC and Clang builds, static analysis and sanitizers available in your environment.",
       "hints": [
-        "Use a fixed random seed when reproducing a failing randomized test.",
-        "Assertions can be disabled with NDEBUG; do not rely on them as user-input validation.",
-        "Test operation sequences, not only individual calls."
+        "Write down the invariant and operation contract before writing test cases; otherwise it is unclear what a correct state means.",
+        "For a bounded structure, test capacity - 1, capacity and capacity + 1 transitions, including the failed operation's effect on state.",
+        "Test sequences such as fill, remove, wrap around, refill and drain; isolated calls may miss state-transition bugs.",
+        "A reference model should be simpler and independently implemented; compare return values, output values and state after every generated operation.",
+        "Use a fixed nonzero random seed and print it with the failing operation index so the sequence can be reproduced.",
+        "Do not rely on assert for essential test checks when NDEBUG may be defined; separately test allocation failures, ownership and cleanup."
       ]
     }
   },
@@ -51,36 +136,63 @@
     "questions": [
       {
         "id": "cl1015-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What is a data-structure invariant?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "A condition that must remain true in every valid state",
+          "A comment describing the function name",
+          "A value that changes randomly on every operation",
+          "A compiler option"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the topic and constraints described above."
+        "answer": "A condition that must remain true in every valid state",
+        "explanation": "An invariant expresses a property that every valid state must satisfy, such as count never exceeding capacity."
       },
       {
         "id": "cl1015-q2",
-        "prompt": "What should be verified before relying on the implementation?",
+        "prompt": "Which set of tests best covers a bounded stack's capacity boundary?",
         "options": [
-          "Preconditions, invariants, bounds and failure cases.",
-          "Only the name of the algorithm.",
-          "Whether one input produced a result."
+          "Test empty, one item, exactly full, one rejected extra push and reuse after a pop",
+          "Test only one successful push",
+          "Test only the largest integer value",
+          "Run the program once without checking its state"
         ],
-        "answer": "Preconditions, invariants, bounds and failure cases.",
-        "explanation": "Correctness depends on maintaining the data structure or algorithm contract."
+        "answer": "Test empty, one item, exactly full, one rejected extra push and reuse after a pop",
+        "explanation": "These tests exercise the transitions around empty and full states and check that a rejected operation does not corrupt state."
       },
       {
         "id": "cl1015-q3",
-        "prompt": "Which test strategy is most useful?",
+        "prompt": "Why compare a data structure with a reference model during randomized testing?",
         "options": [
-          "Test empty, boundary and representative operation sequences.",
-          "Ignore allocation failures.",
-          "Assume one successful example proves all cases."
+          "The reference model provides expected results for generated operation sequences",
+          "It makes the random generator cryptographically secure",
+          "It guarantees that no bug can exist",
+          "It removes the need to check invariants"
         ],
-        "answer": "Test empty, boundary and representative operation sequences.",
-        "explanation": "Targeted tests expose defects ordinary examples can miss."
+        "answer": "The reference model provides expected results for generated operation sequences",
+        "explanation": "A simpler model acts as a test oracle, allowing the test to detect mismatches after each generated operation."
+      },
+      {
+        "id": "cl1015-q4",
+        "prompt": "What is the benefit of recording a fixed random seed?",
+        "options": [
+          "It makes the generated test sequence reproducible",
+          "It makes every test input identical across all possible seeds",
+          "It prevents integer overflow in all C programs",
+          "It proves the implementation is correct"
+        ],
+        "answer": "It makes the generated test sequence reproducible",
+        "explanation": "The same seed allows the same pseudo-random sequence to be generated again, helping reproduce failures."
+      },
+      {
+        "id": "cl1015-q5",
+        "prompt": "Why should essential test checks not rely only on the standard assert macro?",
+        "options": [
+          "Defining NDEBUG disables assert checks",
+          "assert always allocates memory",
+          "assert changes the data structure's capacity",
+          "assert can only test strings"
+        ],
+        "answer": "Defining NDEBUG disables assert checks",
+        "explanation": "When NDEBUG is defined before including assert.h, assert expressions are removed. A test harness should keep essential checks active independently."
       }
     ]
   },
