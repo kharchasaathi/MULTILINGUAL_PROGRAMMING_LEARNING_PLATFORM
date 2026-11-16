@@ -6,39 +6,50 @@
   "title": "Unions and shared storage",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C rules.",
-    "Trace the example and identify data or resource flow.",
-    "Recognize relevant safety and failure cases.",
-    "Apply the concept in a tested C program."
+    "Define a union whose members share storage.",
+    "Explain how union size and alignment relate to its members.",
+    "Track which member was most recently stored.",
+    "Avoid reading inactive members as if they held independently stored values.",
+    "Use a tagged union when an object can represent several alternative variants."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "A union is a type whose members share the same storage region. Its size is sufficient for its largest member, with alignment requirements. At a given time, a program generally interprets the stored representation through the member most recently written, subject to C's specific rules.",
+      "concept": "A union's members overlap in the same storage region. Its size is sufficient for its largest member and its alignment meets the union's requirements. A union is useful for representing one of several alternatives, but the program must track which alternative is currently meaningful. Reading a different member is subject to specific C representation rules and is not a general-purpose conversion.",
       "whyItMatters": "Unions can represent variant data compactly, but reading an inactive member requires careful attention to the language rules and representation assumptions.",
       "analogy": "Treat each object or stream as a resource with a defined lifetime and explicit rules for access.",
       "analogyLimit": "The analogy does not replace C's formal object, storage-duration, alignment or library rules."
     },
     "explain": {
-      "narrative": "A union is a type whose members share the same storage region. Its size is sufficient for its largest member, with alignment requirements. At a given time, a program generally interprets the stored representation through the member most recently written, subject to C's specific rules.\n\nCheck all allocation, I/O and conversion results. Respect object bounds and lifetime, initialize data before reading it, and define who owns and releases each resource.",
+      "narrative": "## 1. Shared storage\n\nA union declares multiple members that begin at the same storage location. The union is large enough for its largest member, including required alignment.\n\n## 2. Store a member\n\nAssign a value to the member that represents the current alternative. The same bytes are used by all members, so storing another member changes the active representation.\n\n## 3. Track the active alternative\n\nA tagged union pairs a union with an enum or other discriminator. The discriminator records which member the program should read.\n\n## 4. Avoid type-punning assumptions\n\nReading a different member is not a portable numeric conversion. C has limited rules for inspecting object representations, but code should not assume that arbitrary union member reinterpretation is equivalent to casting.\n\n## 5. Validate the tag\n\nBefore reading a union member, verify that the discriminator identifies that member. Keep tag and union updates together so they cannot disagree.",
       "examples": [
         {
-          "id": "cl77-ex1",
+          "id": "cl7.7-ex1",
           "language": "en",
-          "title": "Focused C example",
+          "title": "Core concept",
           "code": "#include <stdio.h>\nunion Number { int whole; float decimal; };\nint main(void) {\n union Number value;\n value.whole = 25;\n printf(\"%d\\n\", value.whole);\n return 0;\n}",
-          "explanation": "The union has storage shared by whole and decimal. The example writes and reads whole; it does not assume that the same bytes form a portable float value.",
+          "explanation": "Trace the operations and check the relevant C standard library contracts and failure cases.",
+          "runnable": false
+        },
+        {
+          "id": "cl7.7-ex2",
+          "language": "en",
+          "title": "Apply the concept safely",
+          "code": "#include <stdio.h>\nenum Kind { KIND_INTEGER, KIND_REAL };\nstruct Value { enum Kind kind; union { int integer; double real; } data; };\nint main(void) { struct Value v = {.kind=KIND_REAL, .data.real=3.5}; if (v.kind == KIND_REAL) printf(\"%.1f\\n\", v.data.real); return 0; }",
+          "explanation": "This example reinforces the topic with explicit validation or resource handling. Compile with warnings and test failure paths.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Explain why the two members do not occupy separate storage within one union object.",
-      "independentTask": "Create a tagged union with an enum indicating which member is active. Write code that reads only the selected member.",
+      "guidedTask": "Create a small C program demonstrating Unions and shared storage. Write down its preconditions, expected result and failure handling before implementation.",
+      "independentTask": "Extend the example for Unions and shared storage to handle a boundary case and an error case. Explain the relevant C rule and add a test for each path.",
       "hints": [
-        "A union's size may exceed the size of its largest member because of alignment and padding.",
-        "Use a separate tag when the program needs to track which variant is active.",
-        "Do not assume arbitrary type-punning through a union is portable across every implementation."
+        "Read the declaration and function contract carefully.",
+        "Check all library return values before using results.",
+        "Keep object bounds, lifetime and resource ownership explicit.",
+        "Do not assume implementation-specific memory or file representations are portable.",
+        "Test both success and failure paths."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl77-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "id": "cl7.7-q1",
+        "prompt": "Where are union members stored?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "In overlapping shared storage",
+          "In separate independent allocations",
+          "Always in a linked list"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the C rule described in the lesson."
+        "answer": "In overlapping shared storage",
+        "explanation": "Union members share the same storage region."
       },
       {
-        "id": "cl77-q2",
-        "prompt": "Which practice best protects correctness?",
+        "id": "cl7.7-q2",
+        "prompt": "What should a tagged union store alongside the union?",
         "options": [
-          "Check validity, bounds and operation results before access.",
-          "Assume memory and file operations cannot fail.",
-          "Use data before initialization."
+          "A discriminator identifying the active alternative",
+          "A file descriptor",
+          "A pointer to main"
         ],
-        "answer": "Check validity, bounds and operation results before access.",
-        "explanation": "C programs must explicitly handle resource validity and failure paths."
+        "answer": "A discriminator identifying the active alternative",
+        "explanation": "The tag records which member the program should interpret."
       },
       {
-        "id": "cl77-q3",
-        "prompt": "How should the example be verified?",
+        "id": "cl7.7-q3",
+        "prompt": "Does reading another union member perform a general numeric conversion?",
         "options": [
-          "Compile with warnings and test success and failure paths.",
-          "Ignore warnings and test only one happy path.",
-          "Assume the same layout on every platform."
+          "No",
+          "Yes, always",
+          "Only for floating-point values"
         ],
-        "answer": "Compile with warnings and test success and failure paths.",
-        "explanation": "Compiler diagnostics and deliberate tests provide evidence for correctness."
+        "answer": "No",
+        "explanation": "Union member reinterpretation is not a general conversion mechanism."
+      },
+      {
+        "id": "cl7.7-q4",
+        "prompt": "Why is a union large enough for its largest member?",
+        "options": [
+          "Its storage must accommodate every member alternative",
+          "It stores every member simultaneously",
+          "It always adds one byte per member"
+        ],
+        "answer": "Its storage must accommodate every member alternative",
+        "explanation": "The union's size and alignment must support its members."
+      },
+      {
+        "id": "cl7.7-q5",
+        "prompt": "What should be checked before reading a tagged union member?",
+        "options": [
+          "That the discriminator identifies that member",
+          "That the union address is printed",
+          "That every member was assigned"
+        ],
+        "answer": "That the discriminator identifies that member",
+        "explanation": "The tag and stored alternative must remain consistent."
       }
     ]
   },
