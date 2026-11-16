@@ -3,42 +3,70 @@
   "courseId": "c",
   "moduleId": "CL8",
   "topicId": "CL8.7",
-  "title": "Common memory mistakes: leaks, double-free, use-after-free and invalid free",
+  "title": "Memory leaks, double-free, use-after-free and invalid free",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C rules.",
-    "Trace the example and identify data or control flow.",
-    "Recognize common failure and safety cases.",
-    "Apply the concept in a tested C program."
+    "Distinguish a memory leak from a use-after-free, double-free and invalid-free defect by tracing which allocation is owned, reachable and still alive.",
+    "Explain why losing the last owning pointer leaks an allocation even though the operating system may reclaim process memory when the process exits.",
+    "Identify why accessing an object after `free` ends its lifetime is undefined behavior, even when the old address still appears unchanged.",
+    "Recognize invalid release operations such as freeing a stack object, an interior pointer, an already-freed pointer or memory owned by another component.",
+    "Design a single-owner cleanup strategy that handles normal completion, partial initialization and early-return error paths.",
+    "Use compiler diagnostics, AddressSanitizer, UndefinedBehaviorSanitizer and leak-detection tools where supported to investigate defects without treating a clean run as proof of correctness."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL8.1 — Memory regions, allocation and lifetime",
+    "CL8.2 — malloc and allocated storage",
+    "CL8.4 — realloc and pointer replacement",
+    "CL8.5 — free and ownership discipline",
+    "CL8.6 — Dynamic arrays and nested allocations"
+  ],
   "stages": {
     "understand": {
-      "concept": "A memory leak occurs when allocated storage becomes unreachable without being released. Double-free releases the same allocation more than once. Use-after-free accesses an object after its lifetime ends. Invalid free passes a pointer that was not returned by a compatible allocation function or has already been released.",
-      "whyItMatters": "These defects can cause crashes, data corruption and security vulnerabilities. They often arise when ownership is unclear or error paths skip cleanup.",
-      "analogy": "Treat each resource and operation as having a clear contract, valid lifetime and failure path.",
-      "analogyLimit": "The analogy does not replace the C standard, compiler or library specifications."
+      "concept": "A memory leak occurs when a program no longer has a usable way to release an allocation it still owns. A double-free attempts to release one allocation more than once. A use-after-free accesses an object after its allocated lifetime has ended. An invalid free passes an argument that is not `NULL` or a valid, currently allocated pointer returned by a compatible allocation function. These are distinct defects, although unclear ownership can cause several of them together.",
+      "whyItMatters": "Memory-management defects can cause resource exhaustion, crashes, corrupted program state and security vulnerabilities. They may remain hidden during ordinary testing because allocator layout, timing and input data affect whether a defect becomes visible. A program that appears to work once is not evidence that an invalid memory operation is safe.",
+      "analogy": "Think of an allocated block as a rented storage unit. A leak is losing the contract details while still being responsible for the unit. A double-free is trying to return the same unit twice. A use-after-free is entering the unit after the rental has ended. An invalid free is trying to return a unit that was never rented by you.",
+      "analogyLimit": "C does not keep a rental ledger, automatically clear copied pointer values or enforce ownership. The analogy helps classify mistakes, but the C object-lifetime and allocation-function rules determine what the program may do."
     },
     "explain": {
-      "narrative": "A memory leak occurs when allocated storage becomes unreachable without being released. Double-free releases the same allocation more than once. Use-after-free accesses an object after its lifetime ends. Invalid free passes a pointer that was not returned by a compatible allocation function or has already been released.\n\nCheck object bounds, lifetimes, arithmetic limits and all relevant return values. Compile with warnings enabled and test both normal and failure paths.",
+      "narrative": "## 1. Four different defect classes\n\n**Memory leak:** an allocation remains reserved, but the program loses the last owning pointer or otherwise fails to release it. For example, assigning a new allocation to the only pointer that owns an older allocation without first releasing or transferring the old allocation loses the ability to free it. Repeated leaks in a long-running service can gradually exhaust memory.\n\n**Double-free:** the same allocation is passed to `free` more than once. The first valid `free` ends the allocation's lifetime. A later attempt using a stale pointer has undefined behavior. `free(NULL)` is safe, but that rule does not make a stale non-null pointer safe.\n\n**Use-after-free:** a program reads or writes through a pointer after the pointed-to allocated object has been released. The pointer variable may still contain an address-looking value; that does not mean a live object remains there. The allocator may reuse the storage for another object.\n\n**Invalid free:** examples include `free(&local)` for an automatic local object, `free(array + 1)` for an interior pointer, freeing a pointer that was not returned by a compatible allocation function, or freeing an allocation that has already been released. The valid release argument is `NULL` or the appropriate live allocation pointer.\n\n## 2. Follow ownership, not just pointer values\n\nA pointer value is not an ownership system. Copying an owning pointer creates another pointer value, not another independent allocation. Decide which component owns the allocation, whether other components only borrow it, and exactly where ownership is transferred or released. A useful review question is: “For every successful allocation, which single cleanup path is responsible for releasing it?”\n\n## 3. Make partial construction safe\n\nInitialize owned pointer members to `NULL` immediately after creating an object. If a later allocation fails, release only the resources that were successfully acquired. A cleanup helper can call `free` on each initialized member because `free(NULL)` is harmless. Do not let an error return bypass cleanup for resources already acquired.\n\n## 4. Avoid stale aliases\n\nAfter release, do not dereference, modify or otherwise use aliases as though they still designate a live object. Setting one owner variable to `NULL` can reduce accidental reuse through that variable, but it does not change copies held elsewhere. A strong design limits aliases and documents borrowed-pointer lifetimes.\n\n## 5. Diagnose without relying on symptoms\n\nCompile with useful warnings and, on supported toolchains, use AddressSanitizer to detect many out-of-bounds and use-after-free errors, UndefinedBehaviorSanitizer for selected undefined operations, and leak detection where available. Tools detect classes of defects on executed paths; they cannot prove that every path is correct. Review ownership and test failure paths as well.\n\n## 6. Process exit is not a cleanup design\n\nAn operating system commonly reclaims a process's address space when the process terminates, but that does not make leaks acceptable. Programs may run for hours, serve many requests, load plugins or hold resources beyond ordinary heap memory. Explicit ownership and cleanup are required during the program's lifetime.",
       "examples": [
         {
           "id": "cl87-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdlib.h>\nint main(void) {\n int *data = malloc(3 * sizeof *data);\n if (data == NULL) return 1;\n data[0] = 1; data[1] = 2; data[2] = 3;\n free(data);\n data = NULL;\n return 0;\n}",
-          "explanation": "The example follows one allocation with one release and clears the local owner pointer. It avoids accessing the object after free and avoids freeing the same pointer twice.",
+          "title": "Release every acquired resource on success and partial failure",
+          "code": "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\nstruct Record {\n    char *name;\n    int *scores;\n};\n\nstatic void destroy_record(struct Record *record) {\n    if (record == NULL) return;\n    free(record->scores);\n    free(record->name);\n    free(record);\n}\n\nint main(void) {\n    struct Record *record = malloc(sizeof *record);\n    if (record == NULL) {\n        fputs(\"record allocation failed\\n\", stderr);\n        return 1;\n    }\n    record->name = NULL;\n    record->scores = NULL;\n\n    record->name = malloc(sizeof \"Asha\");\n    if (record->name == NULL) {\n        destroy_record(record);\n        return 1;\n    }\n    memcpy(record->name, \"Asha\", sizeof \"Asha\");\n\n    record->scores = malloc(2 * sizeof *record->scores);\n    if (record->scores == NULL) {\n        destroy_record(record);\n        return 1;\n    }\n    record->scores[0] = 82;\n    record->scores[1] = 91;\n\n    printf(\"%s: %d, %d\\n\", record->name,\n           record->scores[0], record->scores[1]);\n    destroy_record(record);\n    return 0;\n}",
+          "explanation": "Expected output: `Asha: 82, 91`. There are three separate allocations: the outer structure, its name string and its scores array. Each owned pointer is initialized before a later operation can fail. The same cleanup function works after partial construction and after full use. It releases nested allocations before releasing the outer structure. The example illustrates leak prevention and a clear single-owner rule without deliberately executing undefined behavior.",
+          "runnable": false
+        },
+        {
+          "id": "cl87-ex2",
+          "language": "en",
+          "title": "Compare a stale pointer with a valid post-release state",
+          "code": "#include <stdio.h>\n#include <stdlib.h>\n\nint main(void) {\n    int *owner = malloc(sizeof *owner);\n    if (owner == NULL) {\n        fputs(\"allocation failed\\n\", stderr);\n        return 1;\n    }\n\n    *owner = 42;\n    printf(\"before release: %d\\n\", *owner);\n\n    free(owner);\n    owner = NULL;\n\n    if (owner == NULL) {\n        puts(\"owner no longer refers to an allocation\");\n    }\n    return 0;\n}",
+          "explanation": "Expected output:\\n`before release: 42`\\n`owner no longer refers to an allocation`\\nThe allocation is accessed only before `free`. The owning pointer is set to `NULL` immediately afterward, and the program checks that state rather than dereferencing the released object. This does not clear other aliases; the design deliberately keeps ownership local and avoids creating one.",
           "runnable": false
         }
+      ],
+      "commonMistakes": [
+        "Treating a memory leak and a use-after-free as the same defect; one loses the ability to release an allocation, while the other accesses an object after its lifetime ends.",
+        "Assuming that a pointer remains valid because its printed address has not changed after `free`.",
+        "Assuming that setting one pointer to `NULL` automatically clears aliases copied into other variables or structures.",
+        "Calling `free` on an automatic variable, an interior pointer, an arbitrary address or an allocation already released.",
+        "Returning from an error path without releasing allocations successfully acquired earlier in the function.",
+        "Freeing borrowed memory even though the current function does not own it.",
+        "Relying only on a sanitizer run; unexecuted paths and defects outside a tool's detection scope may remain."
       ]
     },
     "practise": {
-      "guidedTask": "For each named defect, describe the incorrect operation and its consequence.",
-      "independentTask": "Review a function with several early returns and ensure every successful allocation is released exactly once.",
+      "guidedTask": "Review a function that allocates a structure, then allocates two pointer members. Draw the ownership state after each allocation. For each possible failure point, identify which resources exist and write the exact cleanup actions. Confirm that every successful allocation is released exactly once.",
+      "independentTask": "Create a small dynamic record list whose records own separately allocated names. Add records, handle failure while creating a later record, remove one record and destroy the full list. Document owner and borrower responsibilities, then test normal completion and partial-failure paths with compiler warnings and available sanitizers.",
       "hints": [
-        "Use one clear owner for each allocation whenever possible.",
-        "After free, do not use any alias to the released object.",
-        "Use sanitizers or memory-checking tools where available, but still reason about ownership."
+        "Make an allocation inventory: record each allocation site and its one release responsibility.",
+        "Initialize every owned pointer to `NULL` before a later operation can fail.",
+        "Do not confuse a stale pointer value with a live object.",
+        "Release nested resources before freeing the object that stores their owning pointers.",
+        "Keep borrowed pointers from being passed to `free` by components that do not own them.",
+        "Use sanitizers on executed paths, then review unexecuted failure paths manually."
       ]
     }
   },
@@ -51,36 +79,58 @@
     "questions": [
       {
         "id": "cl87-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "A function overwrites its only owning pointer with a second successful `malloc` result without releasing or transferring the first allocation. Which defect occurs?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "A memory leak, because the first allocation is no longer reachable through its owner.",
+          "A double-free, because two allocations were created.",
+          "A use-after-free, because the first allocation was automatically released."
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct choice follows the C rule explained above."
+        "answer": "A memory leak, because the first allocation is no longer reachable through its owner.",
+        "explanation": "The first allocation remains allocated, but the only pointer that could release it has been overwritten. No `free` occurred, so this is a leak rather than a double-free or use-after-free."
       },
       {
         "id": "cl87-q2",
-        "prompt": "What is a reliable way to protect correctness?",
+        "prompt": "Why is dereferencing a pointer after its allocation has been passed to `free` invalid even if the address appears unchanged?",
         "options": [
-          "Validate preconditions, bounds and failure results.",
-          "Assume the operation cannot fail.",
-          "Ignore the type and lifetime rules."
+          "The allocated object's lifetime has ended; the old address does not make the object live.",
+          "The pointer automatically becomes a pointer to a new object at the same address.",
+          "The compiler guarantees that the memory is immediately filled with zero."
         ],
-        "answer": "Validate preconditions, bounds and failure results.",
-        "explanation": "C requires explicit handling of object validity and operation failures."
+        "answer": "The allocated object's lifetime has ended; the old address does not make the object live.",
+        "explanation": "After a valid `free`, the allocated object no longer exists. The storage may be reused, and accessing it through the stale pointer has undefined behavior."
       },
       {
         "id": "cl87-q3",
-        "prompt": "How should the example be checked?",
+        "prompt": "Which argument is an invalid use of `free`?",
         "options": [
-          "Compile with warnings and test expected and failure cases.",
-          "Ignore diagnostics and test only once.",
-          "Assume every platform behaves identically."
+          "`free(array + 1)` when `array` is the start of a live allocated array.",
+          "`free(array)` when `array` is the live pointer returned by `malloc`.",
+          "`free(NULL)`. "
         ],
-        "answer": "Compile with warnings and test expected and failure cases.",
-        "explanation": "Warnings and targeted tests provide evidence for correctness."
+        "answer": "`free(array + 1)` when `array` is the start of a live allocated array.",
+        "explanation": "`array + 1` points to an interior element, not the allocation's start pointer. `free` accepts `NULL` or the valid pointer returned by the allocation function."
+      },
+      {
+        "id": "cl87-q4",
+        "prompt": "A structure owns a name allocation and a scores allocation. The scores allocation fails. What should its cleanup path do?",
+        "options": [
+          "Release the name allocation and the outer structure, while safely handling the scores pointer as `NULL`.",
+          "Return immediately and leave the name allocation for a later process to find.",
+          "Call `free` twice on the name to compensate for the failed scores allocation."
+        ],
+        "answer": "Release the name allocation and the outer structure, while safely handling the scores pointer as `NULL`.",
+        "explanation": "The earlier name allocation succeeded and remains the structure's responsibility. Initializing the scores pointer to `NULL` allows a common cleanup routine to free both members safely before releasing the outer structure."
+      },
+      {
+        "id": "cl87-q5",
+        "prompt": "What does a successful AddressSanitizer test establish?",
+        "options": [
+          "It provides evidence about the executed paths, but it does not prove that all possible paths are defect-free.",
+          "It proves that the program has no memory defects for every possible input.",
+          "It replaces the need to reason about pointer ownership."
+        ],
+        "answer": "It provides evidence about the executed paths, but it does not prove that all possible paths are defect-free.",
+        "explanation": "Dynamic tools detect supported defect classes when the relevant code paths execute. They do not prove correctness for untested inputs or replace ownership and lifetime analysis."
       }
     ]
   },
