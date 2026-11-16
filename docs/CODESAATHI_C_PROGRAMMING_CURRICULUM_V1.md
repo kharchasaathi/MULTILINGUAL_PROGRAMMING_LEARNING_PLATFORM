@@ -147,7 +147,11 @@ Each lesson must include: learning objectives; a detailed conceptual explanation
 
 ## C execution environment
 
-The existing CodeSaathi browser playground runs HTML/CSS/JavaScript in an isolated browser iframe. It does **not** compile native C. C examples must not be shown as runnable in that playground. A safe C playground requires a separate compiler runtime (preferably isolated server-side compilation with strict resource limits and no secrets); until that exists, C lessons use compiler-based practice instructions and non-runnable code examples.
+CodeSaathi now has a dedicated C Compiler page at `/c-compiler.html`, linked from the main navigation and the C curriculum. It embeds the open-source cpp-forge browser compiler, based on Clang/LLD compiled to WebAssembly. Compilation and program execution happen in the browser; C source is not sent to a CodeSaathi compilation server. The first use may download approximately 23 MB of compiler assets, which the browser can cache.
+
+The existing HTML/CSS/JavaScript playground remains separate and must never execute C source. C lessons must continue to declare `playgroundMode: "none"` for that web playground; the dedicated compiler is a separate tool. The embedded compiler runs WASI/WebAssembly programs, not native host executables: unrestricted filesystem access, networking and operating-system facilities are unavailable. The compiler interface is currently hosted by the upstream open-source project rather than self-hosted by CodeSaathi.
+
+Pending release gates: verify iframe embedding on the deployed Firebase Hosting origin, Android/mobile layout, stdin, compiler diagnostics, execution timeout/worker termination, cache behaviour, and browser compatibility. Review whether to vendor and self-host a pinned upstream release before production launch. Never enter secrets in learner programs.
 
 ## Reference and depth checklist
 
