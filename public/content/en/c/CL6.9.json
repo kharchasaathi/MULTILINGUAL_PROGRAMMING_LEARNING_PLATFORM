@@ -6,39 +6,50 @@
   "title": "Function pointers, callbacks and callback parameters",
   "language": "en",
   "learningObjectives": [
-    "Explain the C concept and its rules.",
-    "Trace the example and describe data flow.",
-    "Identify relevant failure and boundary cases.",
-    "Apply the concept in a tested C program."
+    "Declare a function pointer with a compatible function type.",
+    "Call a function through a function pointer.",
+    "Pass a callback to another function as an argument.",
+    "Explain type compatibility for function pointer assignments and calls.",
+    "Validate optional callbacks before invoking them."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "A function pointer stores a pointer to a function with a compatible function type. It can be called through the pointer and passed to another function as a callback. The pointed-to function's parameter and return types must match the pointer type.",
+      "concept": "A function pointer stores a pointer to a function with a compatible function type. It can be called through the pointer or passed to another function as a callback. The pointed-to function's parameter and return types must be compatible. An optional callback can be represented by a null function pointer and must be checked before invocation.",
       "whyItMatters": "Callbacks let a function delegate a decision or operation to caller-supplied behaviour, supporting reusable sorting, event handling and strategy selection.",
       "analogy": "Treat the operation as a clearly specified contract between the program and its data.",
       "analogyLimit": "The analogy does not replace C's type, lifetime, I/O and object representation rules."
     },
     "explain": {
-      "narrative": "A function pointer stores a pointer to a function with a compatible function type. It can be called through the pointer and passed to another function as a callback. The pointed-to function's parameter and return types must match the pointer type.\n\nCheck all return values, object lifetimes, types and preconditions. Enable compiler warnings and test expected as well as failure paths.",
+      "narrative": "## 1. Function pointer type\n\nA declaration such as `int (*operation)(int, int)` describes a pointer to a function that accepts two int arguments and returns int. Parentheses around `*operation` are essential.\n\n## 2. Call through a pointer\n\nIf operation points to a compatible function, `operation(2, 3)` calls that function. The function designator and function pointer are usable in call syntax.\n\n## 3. Callback parameters\n\nA function can accept a function pointer and invoke it to delegate part of its work. This is a callback pattern used by sorting, event handling and reusable algorithms.\n\n## 4. Type compatibility\n\nThe function's return and parameter types must match the pointer's function type according to C compatibility rules. Do not cast incompatible function pointers to suppress diagnostics.\n\n## 5. Optional callbacks\n\nIf a callback may be absent, check that the function pointer is not a null pointer before calling it. Document whether null is allowed.",
       "examples": [
         {
-          "id": "cl69-ex1",
+          "id": "cl6.9-ex1",
           "language": "en",
-          "title": "Focused C example",
+          "title": "Core example",
           "code": "#include <stdio.h>\nint add(int a, int b) { return a + b; }\nint calculate(int x, int y, int (*operation)(int, int)) {\n return operation(x, y);\n}\nint main(void) {\n printf(\"%d\\n\", calculate(4, 5, add));\n return 0;\n}",
-          "explanation": "operation is a pointer to a function accepting two int values and returning int. calculate invokes the supplied function without needing to know its implementation.",
+          "explanation": "Trace each declaration, call, expression and return. Check types and boundary conditions.",
+          "runnable": false
+        },
+        {
+          "id": "cl6.9-ex2",
+          "language": "en",
+          "title": "Apply the function contract",
+          "code": "#include <stdio.h>\nint multiply(int a, int b) { return a * b; }\nint apply(int a, int b, int (*fn)(int,int)) { return fn(a,b); }\nint main(void) { printf(\"%d\\n\", apply(3,4,multiply)); return 0; }",
+          "explanation": "This second example reinforces the function contract. Compile with warnings and test both valid and boundary inputs.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Write the function-pointer type in words and trace the callback call.",
-      "independentTask": "Implement a function that accepts a comparison callback and uses it to select the larger of two integers.",
+      "guidedTask": "Implement a focused C program demonstrating CL6.9. State the function's inputs, output, preconditions and failure behavior before coding.",
+      "independentTask": "Create a second implementation of CL6.9 with a clear interface contract. Add tests for ordinary input, boundary input and a failure or invalid case; explain the result.",
       "hints": [
-        "Function pointer compatibility depends on the full function type.",
-        "Do not cast incompatible function pointers to silence diagnostics.",
-        "Use typedef to make complex callback signatures easier to read."
+        "Write the function prototype before its implementation.",
+        "Trace argument values and return paths explicitly.",
+        "Check pointer validity and object lifetime where relevant.",
+        "Use compiler warnings to catch type mismatches.",
+        "Test boundary cases and failure paths."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl69-q1",
-        "prompt": "Which statement best describes the lesson?",
+        "id": "cl6.9-q1",
+        "prompt": "What does `int (*op)(int, int)` declare?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "A pointer to a function taking two ints and returning int",
+          "A function returning an int pointer",
+          "An array of two function pointers"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the C rule described in the lesson."
+        "answer": "A pointer to a function taking two ints and returning int",
+        "explanation": "Parentheses make op a pointer, and the following parameter list describes its function type."
       },
       {
-        "id": "cl69-q2",
-        "prompt": "What should be verified before using this feature?",
+        "id": "cl6.9-q2",
+        "prompt": "What is a callback?",
         "options": [
-          "Types, preconditions, object validity and relevant return values.",
-          "Only the source file name.",
-          "Whether a single run appeared successful."
+          "A function passed to another function to be invoked there",
+          "A function that always calls main",
+          "A global integer"
         ],
-        "answer": "Types, preconditions, object validity and relevant return values.",
-        "explanation": "C correctness depends on valid objects, correct types and checked operations."
+        "answer": "A function passed to another function to be invoked there",
+        "explanation": "Callbacks allow a caller to supply behavior."
       },
       {
-        "id": "cl69-q3",
-        "prompt": "Which practice improves reliability?",
+        "id": "cl6.9-q3",
+        "prompt": "What must match for a function pointer assignment?",
         "options": [
-          "Compile with warnings and test normal and failure paths.",
-          "Ignore I/O and compiler diagnostics.",
-          "Assume all environments behave identically."
+          "A compatible function type",
+          "Only the function name",
+          "The source file length"
         ],
-        "answer": "Compile with warnings and test normal and failure paths.",
-        "explanation": "Diagnostics and tests provide evidence for program behaviour."
+        "answer": "A compatible function type",
+        "explanation": "The function pointer's type must be compatible with the function designator."
+      },
+      {
+        "id": "cl6.9-q4",
+        "prompt": "What should be done before invoking an optional callback?",
+        "options": [
+          "Check that the function pointer is not null",
+          "Cast it to an integer",
+          "Call it twice"
+        ],
+        "answer": "Check that the function pointer is not null",
+        "explanation": "A null function pointer cannot be called."
+      },
+      {
+        "id": "cl6.9-q5",
+        "prompt": "Why avoid casting incompatible function pointers?",
+        "options": [
+          "Calling through an incompatible function type can cause undefined behavior",
+          "C automatically changes the function's parameter types",
+          "It makes the function static"
+        ],
+        "answer": "Calling through an incompatible function type can cause undefined behavior",
+        "explanation": "Function pointer compatibility is a language requirement."
       }
     ]
   },
