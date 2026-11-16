@@ -1,0 +1,88 @@
+{
+  "id": "c.cl6.3.en",
+  "courseId": "c",
+  "moduleId": "CL6",
+  "topicId": "CL6.3",
+  "title": "Pass-by-value and pointer-based updates (C's pass-by-value model)",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the concept and its C language rules.",
+    "Trace the example and explain data flow.",
+    "Identify common errors and boundary conditions.",
+    "Apply the concept in a small tested program."
+  ],
+  "prerequisites": [],
+  "stages": {
+    "understand": {
+      "concept": "C passes arguments by value: the function receives its own parameter object initialized from the argument value. When the value is a pointer, the copied pointer can be used to modify the object it designates, but assigning a new value to the local pointer does not change the caller's pointer.",
+      "whyItMatters": "This distinction prevents confusion about whether a function can modify a caller's variable or redirect a caller-owned pointer.",
+      "analogy": "Treat a function or pointer operation as an explicit contract between caller and callee.",
+      "analogyLimit": "The analogy does not replace C's formal rules for types, object lifetime, scope and linkage."
+    },
+    "explain": {
+      "narrative": "C passes arguments by value: the function receives its own parameter object initialized from the argument value. When the value is a pointer, the copied pointer can be used to modify the object it designates, but assigning a new value to the local pointer does not change the caller's pointer.\n\nWhen applying this concept, check declared types, preconditions, object lifetime and all control-flow paths. Compile with warnings enabled and test both typical and boundary inputs.",
+      "examples": [
+        {
+          "id": "cl63-ex1",
+          "language": "en",
+          "title": "Focused C example",
+          "code": "#include <stdio.h>\nvoid change_copy(int value) { value = 99; }\nvoid change_object(int *value) { if (value) *value = 99; }\nint main(void) {\n int n = 10;\n change_copy(n);\n printf(\"%d\\n\", n);\n change_object(&n);\n printf(\"%d\\n\", n);\n return 0;\n}",
+          "explanation": "The first call changes only its local parameter copy, so n remains ten. The second call receives an address and changes the object n designates, so n becomes 99.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Predict n after each call and explain which object each function writes.",
+      "independentTask": "Create a function that changes a caller's integer and another that only changes its local copy.",
+      "hints": [
+        "A pointer argument is still passed by value; the pointed-to object is separately accessible.",
+        "To let a function change a caller's pointer, pass a pointer to that pointer.",
+        "Use names such as input, output or inout to clarify parameter intent."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "cl63-q1",
+        "prompt": "Which statement best describes the lesson?",
+        "options": [
+          "The C rule and constraints described in this lesson.",
+          "An HTML tag.",
+          "A CSS selector."
+        ],
+        "answer": "The C rule and constraints described in this lesson.",
+        "explanation": "The correct answer follows the C rule described above."
+      },
+      {
+        "id": "cl63-q2",
+        "prompt": "What should be checked before relying on this construct?",
+        "options": [
+          "Its type rules, preconditions and lifetime or range requirements.",
+          "Only whether the code looks short.",
+          "Whether it worked once on another machine."
+        ],
+        "answer": "Its type rules, preconditions and lifetime or range requirements.",
+        "explanation": "C correctness depends on the language rules and valid object use."
+      },
+      {
+        "id": "cl63-q3",
+        "prompt": "What is a sound verification practice?",
+        "options": [
+          "Compile with warnings and test representative and boundary cases.",
+          "Ignore diagnostics.",
+          "Assume one output proves all cases."
+        ],
+        "answer": "Compile with warnings and test representative and boundary cases.",
+        "explanation": "Diagnostics and tests provide evidence across relevant cases."
+      }
+    ]
+  },
+  "status": "draft"
+}
