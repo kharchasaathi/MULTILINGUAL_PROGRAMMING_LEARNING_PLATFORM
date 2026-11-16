@@ -6,11 +6,11 @@
   "title": "Variables, Declarations and Initialization",
   "language": "en",
   "learningObjectives": [
-    "Explain the central rules behind variables, declarations and initialization in C.",
-    "Identify the relevant types, declarations, operators or library facilities.",
-    "Trace a worked example and explain its result.",
-    "Recognize common mistakes, portability concerns and unsafe assumptions.",
-    "Apply the concept in a small program and test normal and boundary cases."
+    "Define a C object and distinguish its declaration, definition and initialization.",
+    "Declare variables using appropriate fundamental types and valid identifiers.",
+    "Explain the difference between initialization at definition and a later assignment.",
+    "Identify why an uninitialized automatic local object must not be read.",
+    "Choose initial values and variable types that match a program's data requirements."
   ],
   "prerequisites": [
     "CL1.1",
@@ -18,13 +18,13 @@
   ],
   "stages": {
     "understand": {
-      "concept": "A variable is an object with a type, a name, a storage duration and a lifetime. A declaration introduces an identifier and describes its type; a definition may also reserve storage. Initialization supplies an initial value when an object is created. C does not automatically initialize every local automatic object, so reading an uninitialized value can produce undefined behaviour.",
+      "concept": "A variable is an object identified by a name and described by a type. A declaration introduces the identifier and its type; a definition of an object generally causes storage to be reserved. Initialization gives an object its initial value as part of its definition. Assignment is a later operation that stores a new value. Objects with automatic storage duration that are not initialized do not receive a predictable default value; reading an indeterminate value can cause undefined behavior.",
       "whyItMatters": "Types determine which values an object can represent and which operations are valid. Choose a type that matches the domain and initialize objects before reading them.",
       "analogy": "Think of a type as a contract that describes what kind of value an object can hold and which operations make sense for it.",
       "analogyLimit": "The analogy is only an introduction; C types also determine representation, conversions, alignment and constraints."
     },
     "explain": {
-      "narrative": "A variable is an object with a type, a name, a storage duration and a lifetime. A declaration introduces an identifier and describes its type; a definition may also reserve storage. Initialization supplies an initial value when an object is created. C does not automatically initialize every local automatic object, so reading an uninitialized value can produce undefined behaviour.\n\nTypes determine which values an object can represent and which operations are valid. Choose a type that matches the domain and initialize objects before reading them.\n\nWhen reviewing code, identify the declared types first, then trace conversions and the exact expression being evaluated. Compile with warnings enabled and test boundary values. Do not rely on assumptions about another compiler or machine.",
+      "narrative": "## 1. Declare and initialize variables\n\nA declaration such as `int score;` introduces an object named score with type int. A definition such as `int score = 0;` also initializes it. The initializer is evaluated when the object is created.\n\n## 2. Choose a meaningful type\n\nUse int for ordinary whole-number counts when its range is sufficient, double for many fractional calculations, and char for character-sized values. Later lessons examine ranges and representation in detail. A variable's type determines the values it can represent and the operations that apply to it.\n\n## 3. Initialization is not assignment\n\n`int level = 1;` initializes level. `level = 2;` later assigns a new value. A declaration without an initializer is not equivalent to initializing the object to zero.\n\n## 4. Scope and lifetime preview\n\nA local variable declared inside a function or block is normally available only within its scope. Its lifetime depends on its storage duration. Do not use an object outside its lifetime, and initialize an automatic local object before reading it.\n\n## 5. Read and update values\n\nUse a clear name and update an object only when the program's logic requires it. Keep declarations close to their first meaningful use where practical. Compiler warnings can identify some mistakes, but they do not replace reasoning about initialization and valid values.",
       "examples": [
         {
           "id": "cl2.1-ex1",
@@ -45,14 +45,14 @@
       ]
     },
     "practise": {
-      "guidedTask": "Create a program with variables for product count, unit price and subtotal. Initialize every object, calculate the subtotal and print it with matching format specifiers.",
-      "independentTask": "Model a small order with quantity, price, tax rate and final amount. Choose appropriate types, document units and test zero, negative and boundary inputs.",
+      "guidedTask": "Write a small C program that demonstrates the central rules in CL2.1. Compile with warnings enabled, run it with ordinary and boundary values, and explain each result in your own words.",
+      "independentTask": "Create a second example for CL2.1 using different values and names. Include one likely mistake as a separate experiment, observe the compiler diagnostic or behavior, then correct it. Record the rule that explains the correction.",
       "hints": [
-        "Do not read an uninitialized automatic object.",
-        "A declaration and an initialization are related but not identical.",
-        "Use descriptive names and consistent units.",
-        "Select a type based on range and required precision.",
-        "Enable warnings and inspect conversion diagnostics."
+        "Start by identifying the exact type of every object and expression.",
+        "Check the C language rule before assuming a platform-specific result.",
+        "Use compiler warnings as feedback, not as proof of correctness.",
+        "Test normal values and important boundaries.",
+        "Explain why the result follows from the language rules."
       ]
     }
   },
@@ -65,58 +65,58 @@
     "questions": [
       {
         "id": "cl2.1-q1",
-        "prompt": "Which statement is correct about variables, declarations and initialization?",
+        "prompt": "What does `int score = 0;` do?",
         "options": [
-          "It follows C's type and language rules and should be checked with compiler diagnostics.",
-          "C ignores all declared types.",
-          "The browser decides its meaning."
+          "Defines an int object and initializes it to zero",
+          "Declares a function named score",
+          "Creates an array of zero characters"
         ],
-        "answer": "It follows C's type and language rules and should be checked with compiler diagnostics.",
-        "explanation": "C semantics are defined by the language and implementation."
+        "answer": "Defines an int object and initializes it to zero",
+        "explanation": "The declaration defines an object and its initializer supplies the initial value."
       },
       {
         "id": "cl2.1-q2",
-        "prompt": "What is the safest general practice?",
+        "prompt": "How is initialization different from assignment?",
         "options": [
-          "Choose types and operations deliberately, initialize data and validate assumptions.",
-          "Ignore warnings and assume values are valid.",
-          "Use casts to silence every warning."
+          "Initialization supplies the initial value when an object is defined; assignment stores a later value",
+          "They are always identical operations",
+          "Assignment is only allowed in a header file"
         ],
-        "answer": "Choose types and operations deliberately, initialize data and validate assumptions.",
-        "explanation": "Deliberate types and checks improve correctness."
+        "answer": "Initialization supplies the initial value when an object is defined; assignment stores a later value",
+        "explanation": "Initialization is part of object creation; assignment is an expression performed after an object exists."
       },
       {
         "id": "cl2.1-q3",
-        "prompt": "What should you do when a result is unexpected?",
+        "prompt": "What is unsafe about reading an uninitialized automatic local variable?",
         "options": [
-          "Create a small test case and inspect types, values and conversions.",
-          "Guess the result from the variable name.",
-          "Remove the test."
+          "Its value is indeterminate and using it can cause undefined behavior",
+          "It always contains zero",
+          "It always contains the previous function's result"
         ],
-        "answer": "Create a small test case and inspect types, values and conversions.",
-        "explanation": "Small reproducible tests make behaviour easier to reason about."
+        "answer": "Its value is indeterminate and using it can cause undefined behavior",
+        "explanation": "Automatic local objects are not implicitly initialized to zero."
       },
       {
         "id": "cl2.1-q4",
-        "prompt": "Which statement about portability is accurate?",
+        "prompt": "Which declaration initializes a floating-point object?",
         "options": [
-          "Some type sizes and ranges depend on the implementation.",
-          "All C implementations use identical type widths.",
-          "Compiler warnings change the C standard."
+          "double rate = 2.5;",
+          "double rate; then assume it is 2.5",
+          "int rate = 2.5;"
         ],
-        "answer": "Some type sizes and ranges depend on the implementation.",
-        "explanation": "Use standard guarantees and inspect implementation limits."
+        "answer": "double rate = 2.5;",
+        "explanation": "The initializer 2.5 has a floating type and initializes a double object."
       },
       {
         "id": "cl2.1-q5",
-        "prompt": "Which is a strong learning outcome?",
+        "prompt": "What should guide the choice of a variable's type?",
         "options": [
-          "Explain the rule and apply it in a tested C program.",
-          "Memorize one output only.",
-          "Copy code without checking it."
+          "The kind and range of values the program needs to represent",
+          "The length of the variable name",
+          "The color of the editor"
         ],
-        "answer": "Explain the rule and apply it in a tested C program.",
-        "explanation": "Understanding plus testing demonstrates transferable knowledge."
+        "answer": "The kind and range of values the program needs to represent",
+        "explanation": "Type selection should reflect domain, range, precision and interface requirements."
       }
     ]
   },
