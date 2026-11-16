@@ -62,7 +62,9 @@ assert.ok(!loader.includes("questions.slice(1)"), "legacy duplicate static asses
 assert.ok(renderer.includes("lesson-example"), "renderer must render worked examples");
 assert.ok(renderer.includes("lesson-answer-option"), "renderer must render selectable assessment options");
 assert.ok(renderer.includes("lesson-question-feedback"), "renderer must show assessment feedback");
-assert.ok(serviceWorker.includes('const CACHE_NAME = "codesaathi-v6";'), "service worker cache must be bumped for the updated lesson UI");
+assert.ok(serviceWorker.includes('const CACHE_NAME = "codesaathi-v8";'), "service worker cache must use the current app-shell version");
+assert.ok(serviceWorker.includes("const NETWORK_FIRST = new Set(APP_SHELL);"), "app shell must prefer fresh network responses");
+assert.ok(serviceWorker.includes('fetch(event.request, { cache: "no-store" })'), "app shell requests must bypass the browser HTTP cache");
 const app = await readFile(join(root, "public/app.js"), "utf8");
 const html = await readFile(join(root, "public/index.html"), "utf8");
 assert.ok(html.includes('sandbox="allow-scripts"'), "playground iframe must remain sandboxed without same-origin access");
