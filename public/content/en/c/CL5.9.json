@@ -1,0 +1,88 @@
+{
+  "id": "c.cl5.9.en",
+  "courseId": "c",
+  "moduleId": "CL5",
+  "topicId": "CL5.9",
+  "title": "Pointer lifetime, dangling pointers and object validity (CodeSaathi extension)",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the concept and its C language rules.",
+    "Trace the example and explain data flow.",
+    "Identify common errors and boundary conditions.",
+    "Apply the concept in a small tested program."
+  ],
+  "prerequisites": [],
+  "stages": {
+    "understand": {
+      "concept": "An object's lifetime is the period during which storage is reserved for it and its value may be accessed according to the language rules. A pointer becomes dangling when the object it designated no longer exists or its storage has been released.",
+      "whyItMatters": "A pointer can be non-null and still be invalid. Lifetime mistakes cause use-after-scope, use-after-free and subtle memory corruption.",
+      "analogy": "Treat a function or pointer operation as an explicit contract between caller and callee.",
+      "analogyLimit": "The analogy does not replace C's formal rules for types, object lifetime, scope and linkage."
+    },
+    "explain": {
+      "narrative": "An object's lifetime is the period during which storage is reserved for it and its value may be accessed according to the language rules. A pointer becomes dangling when the object it designated no longer exists or its storage has been released.\n\nWhen applying this concept, check declared types, preconditions, object lifetime and all control-flow paths. Compile with warnings enabled and test both typical and boundary inputs.",
+      "examples": [
+        {
+          "id": "cl59-ex1",
+          "language": "en",
+          "title": "Focused C example",
+          "code": "#include <stdlib.h>\nint *make_value(void) {\n int *p = malloc(sizeof *p);\n if (p != NULL) *p = 42;\n return p;\n}\nint main(void) {\n int *value = make_value();\n if (value == NULL) return 1;\n int result = *value;\n free(value);\n value = NULL;\n return result == 42 ? 0 : 1;\n}",
+          "explanation": "The function returns dynamically allocated storage whose lifetime continues after the function returns. The caller uses it and releases it exactly once. Returning the address of a local automatic variable would be invalid.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Explain why returning the address of a local int is unsafe.",
+      "independentTask": "Create an allocation-owning function and document which caller must release the returned object.",
+      "hints": [
+        "A pointer's validity depends on the pointed-to object's lifetime, not merely on whether the pointer is NULL.",
+        "After free, do not read or write through any pointer to the released allocation.",
+        "Set a pointer to NULL after release when doing so helps prevent accidental reuse of that variable."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "cl59-q1",
+        "prompt": "Which statement best describes the lesson?",
+        "options": [
+          "The C rule and constraints described in this lesson.",
+          "An HTML tag.",
+          "A CSS selector."
+        ],
+        "answer": "The C rule and constraints described in this lesson.",
+        "explanation": "The correct answer follows the C rule described above."
+      },
+      {
+        "id": "cl59-q2",
+        "prompt": "What should be checked before relying on this construct?",
+        "options": [
+          "Its type rules, preconditions and lifetime or range requirements.",
+          "Only whether the code looks short.",
+          "Whether it worked once on another machine."
+        ],
+        "answer": "Its type rules, preconditions and lifetime or range requirements.",
+        "explanation": "C correctness depends on the language rules and valid object use."
+      },
+      {
+        "id": "cl59-q3",
+        "prompt": "What is a sound verification practice?",
+        "options": [
+          "Compile with warnings and test representative and boundary cases.",
+          "Ignore diagnostics.",
+          "Assume one output proves all cases."
+        ],
+        "answer": "Compile with warnings and test representative and boundary cases.",
+        "explanation": "Diagnostics and tests provide evidence across relevant cases."
+      }
+    ]
+  },
+  "status": "draft"
+}
