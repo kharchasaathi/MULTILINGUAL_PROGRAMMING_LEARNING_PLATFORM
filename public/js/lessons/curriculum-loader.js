@@ -75,6 +75,15 @@
     const courseHeading = text("h2", "", meta[0] + " curriculum");
     container.append(courseHeading);
     container.append(text("p", "", meta[2]));
+    if (courseId === "c") {
+      const compilerLink = text("a", "c-compiler-launch", "Open the dedicated C Compiler ↗");
+      compilerLink.href = "/c-compiler.html";
+      compilerLink.target = "_blank";
+      compilerLink.rel = "noopener noreferrer";
+      compilerLink.setAttribute("aria-label", "Open CodeSaathi C Compiler in a new tab");
+      container.append(compilerLink);
+      container.append(text("p", "c-compiler-note", "Compile and run C examples in a separate browser-based Clang environment. The first visit downloads the compiler toolchain."));
+    }
     const completed = readProgress();
     const modules = new Map();
     topics.forEach(topic => {
