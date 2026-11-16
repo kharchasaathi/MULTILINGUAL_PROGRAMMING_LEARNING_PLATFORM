@@ -6,50 +6,50 @@
   "title": "Array processing patterns: aggregate, search, count and transform",
   "language": "en",
   "learningObjectives": [
-    "Explain the core ideas behind Array processing patterns: aggregate, search, count and transform.",
-    "Identify relevant C syntax, types, standard-library interfaces and constraints.",
-    "Trace a small example and predict its behaviour.",
-    "Recognize boundary cases, common defects and portability risks.",
-    "Apply the concept in a tested C program."
+    "Use loops to calculate sums and other aggregates from array elements.",
+    "Search arrays with linear search and report whether a value was found.",
+    "Count elements that satisfy a condition.",
+    "Transform array elements while preserving or deliberately changing the original data.",
+    "Handle empty arrays and aggregate overflow according to the problem's requirements."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "Array processing patterns: aggregate, search, count and transform is an important part of writing correct, maintainable C programs. Learn the exact language rules rather than relying on what one compiler appears to accept. C is a compiled, standardized language: distinguish language guarantees from implementation-defined choices, compiler extensions and behaviour that the standard leaves undefined.",
+      "concept": "Array processing is commonly expressed as a traversal over a known number of elements. An aggregate such as a sum combines values; a search looks for a target; a count records how many elements satisfy a predicate; and a transform derives new values. Correct algorithms define the empty-array behavior, valid bounds, result range and whether the original array is modified.",
       "whyItMatters": "Understanding Array processing patterns: aggregate, search, count and transform helps you reason about program behaviour instead of memorizing syntax. It is useful in exams, debugging and building reliable C applications.",
       "analogy": "Treat the concept as a tool with a precise contract: it has valid inputs, defined operations and observable results.",
       "analogyLimit": "An analogy is only an aid; the C standard and the relevant function specifications determine actual behaviour."
     },
     "explain": {
-      "narrative": "## Concept and mental model\nArray processing patterns: aggregate, search, count and transform should be understood in terms of the C abstract machine: objects have types, storage duration and lifetimes; expressions are evaluated according to language rules; and library calls have specified preconditions and results. The compiler translates a translation unit, but a successful compilation does not prove that a program is correct.\n\n## How to reason about this topic\n1. Identify the inputs, objects, types and operations involved.\n2. Check the applicable syntax and semantic constraints.\n3. Determine valid input ranges and boundary cases.\n4. Check every function result and handle failure where the API permits failure.\n5. Compile with warnings enabled and test normal, boundary and invalid cases.\n\n## Correctness and portability\nDo not assume that int has a particular width, that memory addresses are identical across runs, or that undefined behaviour has a predictable result. Use standard headers and documented interfaces. State any platform assumptions explicitly. Prefer small functions, clear names and explicit invariants.\n\n## Worked example 1 — establish a testable baseline\nThe example below demonstrates a small, compilable C program. Adapt the declaration, expression or API call to the exact concept being studied, then change one condition at a time and observe the result.\n\n## Worked example 2 — validate a boundary\nA second useful test is to exercise the smallest valid input, largest valid input, one value outside the valid range and an ordinary middle value. Record the expected result before running the program; this prevents a test from merely confirming an assumption.\n\n## Common mistakes\n- Assuming a successful compile means the result is correct.\n- Ignoring warnings or failing to check a library function's return value.\n- Using a value outside the range permitted by its type or API.\n- Confusing a compiler extension with portable ISO C.\n- Testing only one ordinary input and missing boundary cases.",
+      "narrative": "## 1. Aggregate values\n\nA sum or minimum is calculated by visiting each element and updating an accumulator. Initialize the accumulator deliberately. Choose a type that can represent every intermediate result, not merely the final expected value.\n\n## 2. Search\n\nLinear search checks elements in order until the target is found or the array ends. A useful result convention is to return a found/not-found status and, when found, provide the index separately. Do not use a valid index value as an ambiguous not-found marker without documenting the convention.\n\n## 3. Count matching elements\n\nA count loop increments when an element meets a condition. Ensure the counter can represent the maximum possible number of elements.\n\n## 4. Transform data\n\nA transform may update each element in place or write results to a second array. In-place changes save storage but destroy the original values. A separate destination is useful when the original data must be preserved.\n\n## 5. Empty arrays and overflow\n\nFor an empty range, a sum can be defined as zero, while a search returns not found. Define these cases explicitly. Check that accumulators cannot overflow, and never access element zero when the count is zero.",
       "examples": [
         {
           "id": "cl4.3-ex1",
           "language": "en",
-          "title": "A small C program to compile and inspect",
-          "code": "#include <stdio.h>\n\nint main(void) {\n    int value = 12;\n    printf(\"Value: %d\\\\n\", value);\n    return 0;\n}",
-          "explanation": "The program declares an int object, initializes it, prints it with the matching %d conversion specification and returns a success status.",
-          "runnable": true
+          "title": "Sum and count even values",
+          "code": "#include <stdio.h>\n\nint main(void) {\n    int values[] = { 3, 8, 5, 10 };\n    size_t count = sizeof values / sizeof values[0];\n    long sum = 0;\n    size_t even_count = 0;\n    for (size_t i = 0; i < count; ++i) {\n        sum += values[i];\n        if (values[i] % 2 == 0) ++even_count;\n    }\n    printf(\"sum=%ld even=%zu\\n\", sum, even_count);\n    return 0;\n}",
+          "explanation": "The same traversal computes two aggregates. The chosen sum type must be sufficient for the maximum possible input and array length.",
+          "runnable": false
         },
         {
           "id": "cl4.3-ex2",
           "language": "en",
-          "title": "Iterating over a fixed array",
-          "code": "#include <stdio.h>\n\nint main(void) {\n    int values[] = { 3, 6, 9, 12 };\n    size_t count = sizeof values / sizeof values[0];\n    for (size_t i = 0; i < count; ++i) {\n        printf(\"%d\\\\n\", values[i]);\n    }\n    return 0;\n}",
-          "explanation": "The array length is derived from its total size divided by the size of one element. The loop visits valid indices from zero through count minus one.",
-          "runnable": true
+          "title": "Linear search",
+          "code": "#include <stddef.h>\n\nsize_t find_value(const int values[], size_t count, int target) {\n    for (size_t i = 0; i < count; ++i) {\n        if (values[i] == target) return i;\n    }\n    return count; /* not found sentinel, documented by this API */\n}",
+          "explanation": "This API uses count as a not-found sentinel because valid indices are strictly less than count. Callers must follow that documented convention.",
+          "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Write a minimal program that demonstrates Array processing patterns: aggregate, search, count and transform. Compile it with warnings enabled, explain each declaration and operation, and record its output.",
-      "independentTask": "Create two test cases for Array processing patterns: aggregate, search, count and transform: one normal case and one boundary or failure case. State the expected behaviour before running them, then compare the result and explain any difference.",
+      "guidedTask": "Implement a small C program demonstrating CL4.3. Identify the relevant array or string capacity, valid indices, expected results and failure cases before compiling and testing.",
+      "independentTask": "Create a second example for CL4.3 that handles a boundary case explicitly. Add tests for empty input, the smallest valid case, the largest valid case and one invalid or oversized case. Explain how your code prevents invalid access.",
       "hints": [
-        "Read the compiler diagnostic carefully; fix the first meaningful error before chasing later messages.",
-        "Use the exact type and format specifier required by the operation.",
-        "Test zero, negative values where valid, maximum/minimum boundaries and invalid input as appropriate.",
-        "Do not dereference an uninitialized, null or expired pointer.",
-        "Prefer defined, portable behaviour over code that merely appears to work on one machine."
+        "Write down the exact array length and valid index range.",
+        "Include null terminator space when working with C strings.",
+        "Check function preconditions and return values.",
+        "Pass array lengths explicitly when a function needs them.",
+        "Test exact-fit and one-past-boundary cases."
       ]
     }
   },
@@ -62,58 +62,58 @@
     "questions": [
       {
         "id": "cl4.3-q1",
-        "prompt": "Which approach is safest when applying Array processing patterns: aggregate, search, count and transform?",
+        "prompt": "What does an aggregate operation such as sum do?",
         "options": [
-          "Follow the C language rules, validate inputs and check relevant return values.",
-          "Assume every compiler and platform behaves identically.",
-          "Ignore warnings whenever the program produces output."
+          "Combines values from multiple elements into a result",
+          "Sorts the array automatically",
+          "Changes every element into a string"
         ],
-        "answer": "Follow the C language rules, validate inputs and check relevant return values.",
-        "explanation": "Correct C programming depends on defined behaviour, valid inputs and careful handling of operations that can fail."
+        "answer": "Combines values from multiple elements into a result",
+        "explanation": "An aggregate reduces a sequence of values to a summary result."
       },
       {
         "id": "cl4.3-q2",
-        "prompt": "Why should boundary cases be tested?",
+        "prompt": "What is the worst-case number of comparisons in linear search over N elements?",
         "options": [
-          "They reveal errors that ordinary inputs may not expose.",
-          "They are unnecessary when one example works.",
-          "They make compiler warnings irrelevant."
+          "N",
+          "1",
+          "N squared"
         ],
-        "answer": "They reveal errors that ordinary inputs may not expose.",
-        "explanation": "Boundary tests check the edges of valid ranges and important exceptional conditions."
+        "answer": "N",
+        "explanation": "If the target is absent or last, each element may be checked."
       },
       {
         "id": "cl4.3-q3",
-        "prompt": "What does a successful compilation establish?",
+        "prompt": "What should be defined for an empty array before computing an aggregate?",
         "options": [
-          "The compiler accepted the translation under its selected settings; it does not prove runtime correctness.",
-          "The program is free from all defects.",
-          "The program is portable to every C implementation."
+          "The intended empty-input result and whether any access is skipped",
+          "The name of the compiler",
+          "The editor theme"
         ],
-        "answer": "The compiler accepted the translation under its selected settings; it does not prove runtime correctness.",
-        "explanation": "Compilation is one validation step. Tests, review and correct reasoning are also required."
+        "answer": "The intended empty-input result and whether any access is skipped",
+        "explanation": "Algorithms should explicitly define behavior for an empty range."
       },
       {
         "id": "cl4.3-q4",
-        "prompt": "Which practice improves portability?",
+        "prompt": "What is an in-place transform?",
         "options": [
-          "Use standard C features and document unavoidable platform assumptions.",
-          "Depend on undocumented compiler extensions.",
-          "Assume int and pointer sizes are fixed everywhere."
+          "A transform that updates the original array elements",
+          "A transform that always allocates a second array",
+          "A transform that sorts the source file"
         ],
-        "answer": "Use standard C features and document unavoidable platform assumptions.",
-        "explanation": "Portable programs avoid assumptions that the C standard does not guarantee."
+        "answer": "A transform that updates the original array elements",
+        "explanation": "In-place processing modifies the original storage."
       },
       {
         "id": "cl4.3-q5",
-        "prompt": "What should you do when a library operation can fail?",
+        "prompt": "Why must the accumulator type be chosen carefully?",
         "options": [
-          "Check its documented result and handle the failure path.",
-          "Assume it always succeeds.",
-          "Continue using its output without checking."
+          "Intermediate sums may exceed the range even when individual elements fit",
+          "The compiler chooses it from the array name",
+          "All sums are automatically arbitrary precision"
         ],
-        "answer": "Check its documented result and handle the failure path.",
-        "explanation": "Many standard-library operations report failure through return values or stream indicators."
+        "answer": "Intermediate sums may exceed the range even when individual elements fit",
+        "explanation": "Every intermediate result must be representable."
       }
     ]
   },
