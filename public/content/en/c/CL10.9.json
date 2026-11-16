@@ -6,39 +6,58 @@
   "title": "Queues: enqueue, dequeue, front/rear and circular queues",
   "language": "en",
   "learningObjectives": [
-    "Explain the topic and its C rules.",
-    "Trace the example and explain its data or control flow.",
-    "Identify edge cases and resource-management requirements.",
-    "Apply the concept in a tested C program."
+    "Explain FIFO ordering and distinguish enqueue, dequeue, peek and rear operations.",
+    "Represent a bounded circular queue with an array, front index and element count.",
+    "Calculate the rear insertion index with modular arithmetic and explain wrap-around.",
+    "Implement enqueue, dequeue and peek with explicit success or failure results.",
+    "Handle empty, full, wrap-around and nonzero-capacity constraints safely.",
+    "Compare circular queues with shifting queues and identify practical queue applications."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL4.1",
+    "CL5.3",
+    "CL6.1",
+    "CL10.5",
+    "CL10.8"
+  ],
   "stages": {
     "understand": {
-      "concept": "A queue follows first-in, first-out order. A circular array queue reuses freed positions by wrapping indices around the capacity. A count or carefully managed front/rear state distinguishes empty and full conditions.",
-      "whyItMatters": "Queues support scheduling, buffering and breadth-first traversal. Circular storage avoids shifting every element after a dequeue.",
-      "analogy": "Treat each algorithm or resource as a contract whose invariants must remain true after every operation.",
-      "analogyLimit": "The analogy does not replace C's formal rules for pointers, object lifetime, complexity or library contracts."
+      "concept": "A queue is an abstract data type that normally follows first-in, first-out (FIFO): the first value inserted is the first value removed. Enqueue adds at the rear; dequeue removes from the front; peek reads the front without removing it. A circular array queue treats the array as a ring, wrapping an index to zero when it reaches the end.",
+      "whyItMatters": "Queues model waiting lines, print jobs, network buffers and breadth-first search. A circular queue reuses slots released by dequeue instead of shifting every remaining element.",
+      "analogy": "Imagine a boarding line: a new passenger joins at the back and the next passenger boards from the front. A circular buffer reuses a fixed set of positions after earlier items leave.",
+      "analogyLimit": "The analogy does not explain index arithmetic, fixed capacity, memory representation or failure reporting. A program must distinguish a full queue from an empty one."
     },
     "explain": {
-      "narrative": "A queue follows first-in, first-out order. A circular array queue reuses freed positions by wrapping indices around the capacity. A count or carefully managed front/rear state distinguishes empty and full conditions.\n\nState preconditions, invariants, empty and full cases, ownership and failure behaviour before implementation. Compile with warnings and test normal, boundary and failure paths.",
+      "narrative": "Use three pieces of state: data[capacity], front and count. Maintain the invariant 0 <= count <= capacity and 0 <= front < capacity. The next rear insertion position is (front + count) % capacity. Enqueue checks count < capacity before writing, stores the value at that position, then increments count. Dequeue checks count > 0 before reading, copies data[front] to the caller, advances front with (front + 1) % capacity, then decrements count. Peek reads data[front] without changing state.\n\nA count field distinguishes empty and full states even when circular indices coincide. Modulo is safe only when capacity is nonzero. In this example capacity is a compile-time constant. If capacity is supplied at runtime, reject zero before any modulo operation and ensure the backing array really has that many elements.\n\nA failed enqueue or dequeue must not partially modify the queue. Return bool to report success and use an output pointer for a dequeued value; do not reserve an ordinary integer such as -1 as an error marker because it may be valid data. Queue operations take O(1) time and the fixed array uses O(capacity) storage.",
       "examples": [
         {
           "id": "cl109-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stddef.h>\n#define CAP 4\nstruct Queue { int data[CAP]; size_t front, count; };\nint enqueue(struct Queue *q, int value) {\n if (q == NULL || q->count == CAP) return 0;\n size_t rear = (q->front + q->count) % CAP;\n q->data[rear] = value; ++q->count; return 1;\n}",
-          "explanation": "rear is calculated modulo capacity so it wraps to the beginning. The count field distinguishes full from empty even when front and rear indices coincide.",
-          "runnable": false
+          "title": "Circular queue with safe enqueue, dequeue and peek",
+          "code": "#include <stdbool.h>\n#include <stddef.h>\n#include <stdio.h>\n#define CAPACITY 4U\n\ntypedef struct { int items[CAPACITY]; size_t front; size_t count; } Queue;\n\nstatic bool enqueue(Queue *q, int value)\n{\n    if (q == NULL || q->count >= CAPACITY) return false;\n    size_t rear = (q->front + q->count) % CAPACITY;\n    q->items[rear] = value;\n    ++q->count;\n    return true;\n}\n\nstatic bool dequeue(Queue *q, int *out)\n{\n    if (q == NULL || out == NULL || q->count == 0U) return false;\n    *out = q->items[q->front];\n    q->front = (q->front + 1U) % CAPACITY;\n    --q->count;\n    return true;\n}\n\nstatic bool peek(const Queue *q, int *out)\n{\n    if (q == NULL || out == NULL || q->count == 0U) return false;\n    *out = q->items[q->front];\n    return true;\n}\n\nint main(void)\n{\n    Queue q = {{0}, 0U, 0U};\n    int value = 0;\n    if (!enqueue(&q, 10) || !enqueue(&q, 20) || !enqueue(&q, 30)) return 1;\n    if (!dequeue(&q, &value) || value != 10) return 2;\n    if (!enqueue(&q, 40) || !enqueue(&q, 50)) return 3;\n    if (enqueue(&q, 60)) return 4;\n    if (!peek(&q, &value) || value != 20) return 5;\n    while (dequeue(&q, &value)) printf(\"%d \", value);\n    putchar('\\n');\n    return 0;\n}",
+          "explanation": "The queue stores 10, 20 and 30. Removing 10 advances front. Adding 40 and 50 reuses freed positions, demonstrating wrap-around. Another enqueue fails because the queue is full. The remaining dequeue order is 20, 30, 40, 50, confirming FIFO behaviour.",
+          "runnable": true
+        },
+        {
+          "id": "cl109-ex2",
+          "language": "en",
+          "title": "Calculate the next rear index",
+          "code": "#include <stddef.h>\n#include <stdio.h>\nint main(void)\n{\n    const size_t capacity = 5U;\n    const size_t front = 3U;\n    const size_t count = 4U;\n    size_t rear = (front + count) % capacity;\n    printf(\"next rear index = %zu\\n\", rear);\n    return 0;\n}",
+          "explanation": "(3 + 4) % 5 equals 2, so the next insertion uses index 2. Modulo wraps the position into the valid array range. This calculation assumes capacity is nonzero and the queue invariant is valid.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Trace front and count through enqueue and dequeue operations.",
-      "independentTask": "Implement dequeue and peek, then test empty, full and wrap-around cases.",
+      "guidedTask": "For a queue of capacity 4, perform enqueue(7), enqueue(8), enqueue(9), dequeue(), enqueue(10), enqueue(11), peek() and dequeue(). After each operation record front, count, logical queue contents and next rear index. Then attempt one more enqueue and explain why it fails.",
+      "independentTask": "Implement a circular queue of characters with enqueue, dequeue, peek and is_empty. Test empty, exactly full, one extra enqueue, repeated wrap-around, FIFO order and null output pointers. Verify that failed operations leave the queue unchanged.",
       "hints": [
-        "Never apply modulo by a zero capacity.",
-        "Update count only after a successful queue operation.",
-        "Document whether the queue stores values or owns pointers to separately allocated objects."
+        "The logical rear insertion index is (front + count) % capacity.",
+        "Check full before writing and empty before reading.",
+        "Advance front with (front + 1) % capacity after a successful dequeue.",
+        "Update count only after the operation has safely completed.",
+        "A count field distinguishes full and empty states even when indices coincide.",
+        "Never use modulo with zero capacity; validate runtime capacity first."
       ]
     }
   },
@@ -51,36 +70,63 @@
     "questions": [
       {
         "id": "cl109-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "Which ordering rule does a normal queue follow?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "First in, first out",
+          "Last in, first out",
+          "Smallest value first",
+          "Random order"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the topic and constraints described above."
+        "answer": "First in, first out",
+        "explanation": "FIFO means the earliest inserted item is the first item removed."
       },
       {
         "id": "cl109-q2",
-        "prompt": "What should be verified before relying on the implementation?",
+        "prompt": "Which expression gives the next rear insertion index?",
         "options": [
-          "Preconditions, invariants, bounds and failure cases.",
-          "Only the name of the algorithm.",
-          "Whether one input produced a result."
+          "(front + count) % capacity",
+          "front - count",
+          "count * capacity",
+          "front / count"
         ],
-        "answer": "Preconditions, invariants, bounds and failure cases.",
-        "explanation": "Correctness depends on maintaining the data structure or algorithm contract."
+        "answer": "(front + count) % capacity",
+        "explanation": "Adding count to front locates the next logical free position; modulo capacity wraps it into the array range."
       },
       {
         "id": "cl109-q3",
-        "prompt": "Which test strategy is most useful?",
+        "prompt": "What should enqueue do when count equals capacity?",
         "options": [
-          "Test empty, boundary and representative operation sequences.",
-          "Ignore allocation failures.",
-          "Assume one successful example proves all cases."
+          "Return failure without changing the queue",
+          "Overwrite the front item",
+          "Increment count anyway",
+          "Discard an item"
         ],
-        "answer": "Test empty, boundary and representative operation sequences.",
-        "explanation": "Targeted tests expose defects ordinary examples can miss."
+        "answer": "Return failure without changing the queue",
+        "explanation": "A bounded queue is full at count == capacity and must not overwrite or write beyond its logical capacity."
+      },
+      {
+        "id": "cl109-q4",
+        "prompt": "What should dequeue do when the queue is empty?",
+        "options": [
+          "Report failure without reading",
+          "Read items[front] anyway",
+          "Decrement count below zero",
+          "Return an arbitrary value"
+        ],
+        "answer": "Report failure without reading",
+        "explanation": "Checking count before reading prevents access to an item that is not present."
+      },
+      {
+        "id": "cl109-q5",
+        "prompt": "Why is a circular queue more efficient than shifting after each dequeue?",
+        "options": [
+          "It advances indices and reuses freed slots in O(1) time",
+          "It sorts values automatically",
+          "It allocates a new array each time",
+          "It removes full and empty checks"
+        ],
+        "answer": "It advances indices and reuses freed slots in O(1) time",
+        "explanation": "Circular indexing avoids moving the remaining elements while preserving FIFO order."
       }
     ]
   },
