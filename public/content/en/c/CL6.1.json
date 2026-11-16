@@ -6,39 +6,50 @@
   "title": "Defining, calling and returning from functions",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C language rules.",
-    "Trace the example and explain data flow.",
-    "Identify common errors and boundary conditions.",
-    "Apply the concept in a small tested program."
+    "Explain the parts of a function definition: return type, name, parameters and body.",
+    "Trace a function call from argument evaluation through its return.",
+    "Use return statements that match the function's return type.",
+    "Distinguish a function declaration from a function definition.",
+    "Use small functions to separate responsibilities and test behavior."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "A function definition specifies a function's return type, name, parameter list and body. A function call evaluates arguments, transfers control to the function and uses the returned value when the function completes with a return expression.",
+      "concept": "A function definition specifies a return type, name, parameter list and body. A call transfers control to the function after argument evaluation. When the function returns, control resumes at the call site; a returned expression supplies the call's value. A function should have a clear contract for inputs, outputs and side effects.",
       "whyItMatters": "Functions divide a program into named operations, reduce repetition and make behaviour easier to test independently.",
       "analogy": "Treat a function or pointer operation as an explicit contract between caller and callee.",
       "analogyLimit": "The analogy does not replace C's formal rules for types, object lifetime, scope and linkage."
     },
     "explain": {
-      "narrative": "A function definition specifies a function's return type, name, parameter list and body. A function call evaluates arguments, transfers control to the function and uses the returned value when the function completes with a return expression.\n\nWhen applying this concept, check declared types, preconditions, object lifetime and all control-flow paths. Compile with warnings enabled and test both typical and boundary inputs.",
+      "narrative": "## 1. Function structure\n\nA function definition has a return type, identifier, parameter list and compound statement. For example, `int maximum(int a, int b)` accepts two int parameters and returns an int.\n\n## 2. Calling a function\n\nA call supplies argument expressions corresponding to the parameters. The arguments initialize the function's parameter objects, and the function body executes. The caller can use the returned value in an expression or store it in an object.\n\n## 3. Return behavior\n\nA return statement ends the current function call. A non-void function must return a value of a compatible type on every path where its value is used. A void function returns without a value.\n\n## 4. Declarations and definitions\n\nA declaration tells the compiler a function's type before a call. A definition also supplies the function body. A function should be declared before it is called in modern C.\n\n## 5. Design small functions\n\nGive each function a focused responsibility, meaningful parameter names and a documented contract. Test normal values and boundary cases independently.",
       "examples": [
         {
-          "id": "cl61-ex1",
+          "id": "cl6.1-ex1",
           "language": "en",
-          "title": "Focused C example",
+          "title": "Core example",
           "code": "#include <stdio.h>\nint maximum(int a, int b) {\n return a > b ? a : b;\n}\nint main(void) {\n int result = maximum(12, 9);\n printf(\"%d\\n\", result);\n return 0;\n}",
-          "explanation": "maximum receives two int arguments and returns one int. main stores that returned value and prints it. The function's local parameters cease to exist when the call returns.",
+          "explanation": "Trace each declaration, call, expression and return. Check types and boundary conditions.",
+          "runnable": false
+        },
+        {
+          "id": "cl6.1-ex2",
+          "language": "en",
+          "title": "Apply the function contract",
+          "code": "#include <stdio.h>\nint is_even(int value) { return value % 2 == 0; }\nint main(void) { printf(\"%s\\n\", is_even(8) ? \"even\" : \"odd\"); return 0; }",
+          "explanation": "This second example reinforces the function contract. Compile with warnings and test both valid and boundary inputs.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Trace the argument values, function body and returned result.",
-      "independentTask": "Write functions for minimum, maximum and absolute difference. Test equal and negative inputs.",
+      "guidedTask": "Implement a focused C program demonstrating CL6.1. State the function's inputs, output, preconditions and failure behavior before coding.",
+      "independentTask": "Create a second implementation of CL6.1 with a clear interface contract. Add tests for ordinary input, boundary input and a failure or invalid case; explain the result.",
       "hints": [
-        "A non-void function should return a value compatible with its declared return type on every required path.",
-        "A function call expression has a type determined by the function's return type.",
-        "Keep each function focused on one clear responsibility."
+        "Write the function prototype before its implementation.",
+        "Trace argument values and return paths explicitly.",
+        "Check pointer validity and object lifetime where relevant.",
+        "Use compiler warnings to catch type mismatches.",
+        "Test boundary cases and failure paths."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl61-q1",
-        "prompt": "Which statement best describes the lesson?",
+        "id": "cl6.1-q1",
+        "prompt": "What does a function definition provide?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "The function's body and its type",
+          "Only a call site",
+          "Only a variable name"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the C rule described above."
+        "answer": "The function's body and its type",
+        "explanation": "A definition includes the function body as well as its declarator."
       },
       {
-        "id": "cl61-q2",
-        "prompt": "What should be checked before relying on this construct?",
+        "id": "cl6.1-q2",
+        "prompt": "What happens when a function call returns?",
         "options": [
-          "Its type rules, preconditions and lifetime or range requirements.",
-          "Only whether the code looks short.",
-          "Whether it worked once on another machine."
+          "Control resumes at the call site",
+          "The entire program must stop",
+          "All local variables become global"
         ],
-        "answer": "Its type rules, preconditions and lifetime or range requirements.",
-        "explanation": "C correctness depends on the language rules and valid object use."
+        "answer": "Control resumes at the call site",
+        "explanation": "A completed call returns control to its caller."
       },
       {
-        "id": "cl61-q3",
-        "prompt": "What is a sound verification practice?",
+        "id": "cl6.1-q3",
+        "prompt": "What does a non-void function return when used as an expression?",
         "options": [
-          "Compile with warnings and test representative and boundary cases.",
-          "Ignore diagnostics.",
-          "Assume one output proves all cases."
+          "A value of its declared return type",
+          "A new function",
+          "A header file"
         ],
-        "answer": "Compile with warnings and test representative and boundary cases.",
-        "explanation": "Diagnostics and tests provide evidence across relevant cases."
+        "answer": "A value of its declared return type",
+        "explanation": "The return expression supplies the call's value."
+      },
+      {
+        "id": "cl6.1-q4",
+        "prompt": "What is the difference between a declaration and a definition?",
+        "options": [
+          "A definition supplies the function body",
+          "A declaration always allocates memory",
+          "They are always identical"
+        ],
+        "answer": "A definition supplies the function body",
+        "explanation": "A declaration introduces the function type; a definition also provides its implementation."
+      },
+      {
+        "id": "cl6.1-q5",
+        "prompt": "Why should functions have focused responsibilities?",
+        "options": [
+          "They are easier to understand, test and reuse",
+          "They eliminate all runtime errors",
+          "They make every program shorter"
+        ],
+        "answer": "They are easier to understand, test and reuse",
+        "explanation": "A focused function has a clearer contract and is easier to verify."
       }
     ]
   },
