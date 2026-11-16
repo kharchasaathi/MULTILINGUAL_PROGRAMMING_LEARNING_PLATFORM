@@ -6,22 +6,22 @@
   "title": "break and continue",
   "language": "en",
   "learningObjectives": [
-    "Explain the core ideas behind break and continue.",
-    "Identify relevant C syntax, types, standard-library interfaces and constraints.",
-    "Trace a small example and predict its behaviour.",
-    "Recognize boundary cases, common defects and portability risks.",
-    "Apply the concept in a tested C program."
+    "Explain how break exits the nearest enclosing loop or switch.",
+    "Explain how continue skips the rest of the current loop iteration.",
+    "Distinguish the effect of break and continue in while, do-while and for loops.",
+    "Use control-transfer statements without bypassing required cleanup or state updates.",
+    "Trace nested loops to identify which construct a break or continue affects."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "break and continue is an important part of writing correct, maintainable C programs. Learn the exact language rules rather than relying on what one compiler appears to accept. C is a compiled, standardized language: distinguish language guarantees from implementation-defined choices, compiler extensions and behaviour that the standard leaves undefined.",
+      "concept": "The break statement terminates the nearest enclosing iteration or switch statement. The continue statement skips the remainder of the current iteration and proceeds to the next loop cycle; in a for loop, the iteration expression runs before the next condition test. In nested loops, these statements affect only the nearest enclosing loop or switch as specified by the language.",
       "whyItMatters": "Understanding break and continue helps you reason about program behaviour instead of memorizing syntax. It is useful in exams, debugging and building reliable C applications.",
       "analogy": "Treat the concept as a tool with a precise contract: it has valid inputs, defined operations and observable results.",
       "analogyLimit": "An analogy is only an aid; the C standard and the relevant function specifications determine actual behaviour."
     },
     "explain": {
-      "narrative": "## Concept and mental model\nbreak and continue should be understood in terms of the C abstract machine: objects have types, storage duration and lifetimes; expressions are evaluated according to language rules; and library calls have specified preconditions and results. The compiler translates a translation unit, but a successful compilation does not prove that a program is correct.\n\n## How to reason about this topic\n1. Identify the inputs, objects, types and operations involved.\n2. Check the applicable syntax and semantic constraints.\n3. Determine valid input ranges and boundary cases.\n4. Check every function result and handle failure where the API permits failure.\n5. Compile with warnings enabled and test normal, boundary and invalid cases.\n\n## Correctness and portability\nDo not assume that int has a particular width, that memory addresses are identical across runs, or that undefined behaviour has a predictable result. Use standard headers and documented interfaces. State any platform assumptions explicitly. Prefer small functions, clear names and explicit invariants.\n\n## Worked example 1 — establish a testable baseline\nThe example below demonstrates a small, compilable C program. Adapt the declaration, expression or API call to the exact concept being studied, then change one condition at a time and observe the result.\n\n## Worked example 2 — validate a boundary\nA second useful test is to exercise the smallest valid input, largest valid input, one value outside the valid range and an ordinary middle value. Record the expected result before running the program; this prevents a test from merely confirming an assumption.\n\n## Common mistakes\n- Assuming a successful compile means the result is correct.\n- Ignoring warnings or failing to check a library function's return value.\n- Using a value outside the range permitted by its type or API.\n- Confusing a compiler extension with portable ISO C.\n- Testing only one ordinary input and missing boundary cases.",
+      "narrative": "## 1. break\n\nA break statement immediately exits the nearest enclosing while, do-while, for or switch statement. Execution continues after that construct. It is useful when a search finds its target or a menu selection requests exit.\n\n## 2. continue\n\nA continue statement skips the remaining statements in the current iteration. The loop then proceeds according to its kind: a for loop evaluates its iteration expression before checking the condition again; a while or do-while proceeds to its condition check.\n\n## 3. Nested loops\n\nInside nested loops, break and continue affect the innermost enclosing loop. They do not automatically exit every surrounding loop. Use a clearly designed flag, helper function or other explicit structure when an outer loop must also stop.\n\n## 4. Avoid skipped essential work\n\nA continue placed before a required update in a while loop can accidentally prevent progress and create an infinite loop. Make sure resource cleanup and state updates are not bypassed.\n\n## 5. Prefer clear control flow\n\nUse break and continue when they simplify the loop. If many control transfers make the code difficult to follow, restructure the loop or extract a function.",
       "examples": [
         {
           "id": "cl3.10-ex1",
@@ -42,14 +42,14 @@
       ]
     },
     "practise": {
-      "guidedTask": "Write a minimal program that demonstrates break and continue. Compile it with warnings enabled, explain each declaration and operation, and record its output.",
-      "independentTask": "Create two test cases for break and continue: one normal case and one boundary or failure case. State the expected behaviour before running them, then compare the result and explain any difference.",
+      "guidedTask": "Write and trace a C program demonstrating CL3.10. Record the condition or expression values at each step, then compile with warnings and test boundary cases.",
+      "independentTask": "Create a second program for CL3.10 with a different input range or control-flow structure. Include a boundary case and one invalid or unexpected case; explain why each result occurs.",
       "hints": [
-        "Read the compiler diagnostic carefully; fix the first meaningful error before chasing later messages.",
-        "Use the exact type and format specifier required by the operation.",
-        "Test zero, negative values where valid, maximum/minimum boundaries and invalid input as appropriate.",
-        "Do not dereference an uninitialized, null or expired pointer.",
-        "Prefer defined, portable behaviour over code that merely appears to work on one machine."
+        "Trace each expression and condition in evaluation order.",
+        "Use braces to make control-flow boundaries explicit.",
+        "Check zero, one and boundary iterations where loops are involved.",
+        "Avoid undefined behavior and unintended side effects.",
+        "Test the behavior rather than relying only on visual inspection."
       ]
     }
   },
@@ -62,58 +62,58 @@
     "questions": [
       {
         "id": "cl3.10-q1",
-        "prompt": "Which approach is safest when applying break and continue?",
+        "prompt": "What does break do inside a loop?",
         "options": [
-          "Follow the C language rules, validate inputs and check relevant return values.",
-          "Assume every compiler and platform behaves identically.",
-          "Ignore warnings whenever the program produces output."
+          "Exits the nearest enclosing loop",
+          "Skips only the current iteration",
+          "Restarts the whole program"
         ],
-        "answer": "Follow the C language rules, validate inputs and check relevant return values.",
-        "explanation": "Correct C programming depends on defined behaviour, valid inputs and careful handling of operations that can fail."
+        "answer": "Exits the nearest enclosing loop",
+        "explanation": "break terminates the nearest enclosing iteration or switch statement."
       },
       {
         "id": "cl3.10-q2",
-        "prompt": "Why should boundary cases be tested?",
+        "prompt": "What does continue do?",
         "options": [
-          "They reveal errors that ordinary inputs may not expose.",
-          "They are unnecessary when one example works.",
-          "They make compiler warnings irrelevant."
+          "Skips the rest of the current iteration and proceeds to the next loop cycle",
+          "Exits every nested loop",
+          "Terminates the function"
         ],
-        "answer": "They reveal errors that ordinary inputs may not expose.",
-        "explanation": "Boundary tests check the edges of valid ranges and important exceptional conditions."
+        "answer": "Skips the rest of the current iteration and proceeds to the next loop cycle",
+        "explanation": "continue does not terminate the loop."
       },
       {
         "id": "cl3.10-q3",
-        "prompt": "What does a successful compilation establish?",
+        "prompt": "In a for loop, what happens after continue?",
         "options": [
-          "The compiler accepted the translation under its selected settings; it does not prove runtime correctness.",
-          "The program is free from all defects.",
-          "The program is portable to every C implementation."
+          "The iteration expression runs, then the condition is checked",
+          "The loop exits immediately",
+          "Initialization runs again"
         ],
-        "answer": "The compiler accepted the translation under its selected settings; it does not prove runtime correctness.",
-        "explanation": "Compilation is one validation step. Tests, review and correct reasoning are also required."
+        "answer": "The iteration expression runs, then the condition is checked",
+        "explanation": "The for-loop continuation sequence includes the iteration expression."
       },
       {
         "id": "cl3.10-q4",
-        "prompt": "Which practice improves portability?",
+        "prompt": "In nested loops, which loop does break exit?",
         "options": [
-          "Use standard C features and document unavoidable platform assumptions.",
-          "Depend on undocumented compiler extensions.",
-          "Assume int and pointer sizes are fixed everywhere."
+          "The nearest enclosing loop",
+          "Every loop in the function",
+          "Only the outermost loop"
         ],
-        "answer": "Use standard C features and document unavoidable platform assumptions.",
-        "explanation": "Portable programs avoid assumptions that the C standard does not guarantee."
+        "answer": "The nearest enclosing loop",
+        "explanation": "break affects the innermost enclosing loop or switch."
       },
       {
         "id": "cl3.10-q5",
-        "prompt": "What should you do when a library operation can fail?",
+        "prompt": "How can continue accidentally create an infinite while loop?",
         "options": [
-          "Check its documented result and handle the failure path.",
-          "Assume it always succeeds.",
-          "Continue using its output without checking."
+          "It can skip the statement that updates the loop condition's state",
+          "It always changes the condition to true",
+          "It exits the function"
         ],
-        "answer": "Check its documented result and handle the failure path.",
-        "explanation": "Many standard-library operations report failure through return values or stream indicators."
+        "answer": "It can skip the statement that updates the loop condition's state",
+        "explanation": "If progress is placed after continue, that update may never execute."
       }
     ]
   },
