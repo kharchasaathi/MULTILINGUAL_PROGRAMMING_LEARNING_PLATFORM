@@ -50,7 +50,7 @@
     "Could not load this lesson":"ఈ పాఠాన్ని లోడ్ చేయలేకపోయాము",
     "The authored curriculum could not be loaded. The original course preview remains available.":"పాఠ్య ప్రణాళికను లోడ్ చేయలేకపోయాము. అసలు కోర్సు ప్రివ్యూ అందుబాటులో ఉంటుంది.",
     "Load this lesson's starter code in the playground":"ఈ పాఠం ప్రారంభ Codeను Playgroundలో తెరవండి",
-    "Programming Foundations":"ప్రోగ్రామింగ్ పునాదులు","CORE CONCEPTS":"ప్రధాన భావనలు",
+    "Programming Foundations":"ప్రోగ్రామింగ్ పునాదులు","C Programming":"C ప్రోగ్రామింగ్","SYSTEMS PROGRAMMING":"సిస్టమ్స్ ప్రోగ్రామింగ్","Learn C syntax, memory, functions, files and data structures.":"C సింటాక్స్, మెమరీ, ఫంక్షన్లు, ఫైళ్లు, డేటా నిర్మాణాలను నేర్చుకోండి.","CORE CONCEPTS":"ప్రధాన భావనలు",
     "Understand computers, programs and problem-solving before writing code.":"Code రాయడానికి ముందు కంప్యూటర్లు, ప్రోగ్రామ్‌లు, సమస్యల పరిష్కారం గురించి తెలుసుకోండి.",
     "Build meaningful, accessible document structure for the web.":"Web కోసం అర్థవంతమైన, అందరికీ అందుబాటులో ఉండే పేజీ నిర్మాణాన్ని రూపొందించండి.",
     "Control layout, typography, colour and responsive design.":"Layout, Typography, రంగులు, Responsive Designను నియంత్రించడం నేర్చుకోండి.",
