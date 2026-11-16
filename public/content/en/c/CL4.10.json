@@ -1,0 +1,88 @@
+{
+  "id": "c.cl4.10.en",
+  "courseId": "c",
+  "moduleId": "CL4",
+  "topicId": "CL4.10",
+  "title": "Safe string input, capacity, truncation and termination",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the language rule and its constraints.",
+    "Trace the example and predict its behaviour.",
+    "Identify boundary and safety cases.",
+    "Apply the concept in a tested C program."
+  ],
+  "prerequisites": [],
+  "stages": {
+    "understand": {
+      "concept": "Input routines must respect destination capacity and establish a valid terminator. fgets reads at most size minus one characters, then adds a null terminator when it succeeds; a newline may remain in the buffer.",
+      "whyItMatters": "This knowledge helps reason about C data representation, object bounds and valid memory access.",
+      "analogy": "Think of memory objects as labelled storage and pointers as typed references to that storage.",
+      "analogyLimit": "The analogy does not replace C's formal pointer, lifetime and object-access rules."
+    },
+    "explain": {
+      "narrative": "Input routines must respect destination capacity and establish a valid terminator. fgets reads at most size minus one characters, then adds a null terminator when it succeeds; a newline may remain in the buffer.\n\nCheck the declared types, object lifetime, valid bounds and function preconditions before using the construct. Enable compiler warnings and test edge cases.",
+      "examples": [
+        {
+          "id": "cl410-ex1",
+          "language": "en",
+          "title": "Focused C example",
+          "code": "Unbounded input can overwrite adjacent memory. Bounded input still needs a policy for detecting and handling an overlong line and for clearing the remainder of that line.",
+          "explanation": "#include <stdio.h>\n#include <string.h>\nint main(void) {\n char name[32];\n if (fgets(name, sizeof name, stdin) != NULL) {\n  name[strcspn(name, \"\\n\")] = '\\0';\n  printf(\"Hello, %s\\n\", name);\n }\n return 0;\n}",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "fgets receives the buffer capacity, reads at most 31 input characters and terminates the result. strcspn finds the first newline so it can be replaced with the null terminator.",
+      "independentTask": "Explain why sizeof name is passed instead of a guessed large number.",
+      "hints": [
+        "Read a line with a defined maximum length. Detect whether the input was truncated and handle the remaining characters deliberately.",
+        "fgets returns NULL on an input failure or when end-of-file occurs before any character is read.",
+        "A line that fills the buffer without a newline may be longer than the accepted limit."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "cl410-q1",
+        "prompt": "Which statement best matches this lesson?",
+        "options": [
+          "The C rule and constraints explained in this lesson.",
+          "An unrelated HTML element.",
+          "A CSS property."
+        ],
+        "answer": "The C rule and constraints explained in this lesson.",
+        "explanation": "The correct choice follows the C rule and its constraints."
+      },
+      {
+        "id": "cl410-q2",
+        "prompt": "What is the safest way to handle the relevant boundary or validity condition?",
+        "options": [
+          "Check the documented preconditions and bounds before access.",
+          "Assume C automatically checks every pointer and array access.",
+          "Ignore the result if one run appears successful."
+        ],
+        "answer": "Check the documented preconditions and bounds before access.",
+        "explanation": "C programs must explicitly respect object bounds, pointer validity and conversion results."
+      },
+      {
+        "id": "cl410-q3",
+        "prompt": "Why should the example be traced?",
+        "options": [
+          "To understand execution order and object state.",
+          "To replace compilation and tests.",
+          "To avoid checking inputs."
+        ],
+        "answer": "To understand execution order and object state.",
+        "explanation": "Tracing complements compilation, warnings and testing."
+      }
+    ]
+  },
+  "status": "draft"
+}
