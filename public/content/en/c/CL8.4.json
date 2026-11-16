@@ -1,0 +1,88 @@
+{
+  "id": "c.cl8.4.en",
+  "courseId": "c",
+  "moduleId": "CL8",
+  "topicId": "CL8.4",
+  "title": "realloc, resizing and preserving the original allocation on failure",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the concept and its C rules.",
+    "Trace the example and identify data or resource flow.",
+    "Recognize relevant safety and failure cases.",
+    "Apply the concept in a tested C program."
+  ],
+  "prerequisites": [],
+  "stages": {
+    "understand": {
+      "concept": "realloc attempts to resize an allocated block while preserving the contents up to the smaller of the old and new sizes. On failure for a nonzero requested size, it returns NULL and the original allocation remains valid. Assigning directly to the only owning pointer can lose that allocation.",
+      "whyItMatters": "Safe resizing needs a temporary pointer so failure does not overwrite the original owner. The program must also define behaviour for zero requested size according to the C version and library contract it targets.",
+      "analogy": "Treat each object or stream as a resource with a defined lifetime and explicit rules for access.",
+      "analogyLimit": "The analogy does not replace C's formal object, storage-duration, alignment or library rules."
+    },
+    "explain": {
+      "narrative": "realloc attempts to resize an allocated block while preserving the contents up to the smaller of the old and new sizes. On failure for a nonzero requested size, it returns NULL and the original allocation remains valid. Assigning directly to the only owning pointer can lose that allocation.\n\nCheck all allocation, I/O and conversion results. Respect object bounds and lifetime, initialize data before reading it, and define who owns and releases each resource.",
+      "examples": [
+        {
+          "id": "cl84-ex1",
+          "language": "en",
+          "title": "Focused C example",
+          "code": "#include <stdio.h>\n#include <stdlib.h>\nint main(void) {\n size_t old_count = 2, new_count = 4;\n int *items = malloc(old_count * sizeof *items);\n if (items == NULL) return 1;\n items[0] = 10; items[1] = 20;\n int *grown = realloc(items, new_count * sizeof *items);\n if (grown == NULL) { free(items); return 1; }\n items = grown;\n items[2] = 30; items[3] = 40;\n printf(\"%d %d\\n\", items[0], items[3]);\n free(items);\n return 0;\n}",
+          "explanation": "grown receives the result. If realloc fails, items still owns the original block and can be freed. If it succeeds, the returned pointer becomes the new owner and is assigned back to items.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Explain why assigning realloc directly to items is dangerous on failure.",
+      "independentTask": "Write a resize helper that checks multiplication overflow, preserves the old pointer on failure and updates the count only after success.",
+      "hints": [
+        "After successful realloc, use the returned pointer; the old pointer may no longer be valid.",
+        "Do not access newly added bytes before initializing them.",
+        "Define an explicit policy for a requested size of zero."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "cl84-q1",
+        "prompt": "Which statement best describes this lesson?",
+        "options": [
+          "The C rule and constraints described in this lesson.",
+          "An HTML tag.",
+          "A CSS selector."
+        ],
+        "answer": "The C rule and constraints described in this lesson.",
+        "explanation": "The correct answer follows the C rule described in the lesson."
+      },
+      {
+        "id": "cl84-q2",
+        "prompt": "Which practice best protects correctness?",
+        "options": [
+          "Check validity, bounds and operation results before access.",
+          "Assume memory and file operations cannot fail.",
+          "Use data before initialization."
+        ],
+        "answer": "Check validity, bounds and operation results before access.",
+        "explanation": "C programs must explicitly handle resource validity and failure paths."
+      },
+      {
+        "id": "cl84-q3",
+        "prompt": "How should the example be verified?",
+        "options": [
+          "Compile with warnings and test success and failure paths.",
+          "Ignore warnings and test only one happy path.",
+          "Assume the same layout on every platform."
+        ],
+        "answer": "Compile with warnings and test success and failure paths.",
+        "explanation": "Compiler diagnostics and deliberate tests provide evidence for correctness."
+      }
+    ]
+  },
+  "status": "draft"
+}
