@@ -3,42 +3,59 @@
   "courseId": "c",
   "moduleId": "CL9",
   "topicId": "CL9.5",
-  "title": "Debugging and sanitizing tools: address, undefined behaviour and memory diagnostics",
+  "title": "Storage classes and storage-duration concepts",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its constraints.",
-    "Trace the example and reason about its data flow.",
-    "Identify complexity, boundary or safety considerations.",
-    "Apply the concept in a tested C program."
+    "Distinguish scope, storage duration and linkage as separate properties of C identifiers and objects.",
+    "Explain automatic storage duration for ordinary block-scope objects and the lifetime of their values.",
+    "Use static storage duration for a local object that retains its value between function calls.",
+    "Explain file-scope static linkage and extern declarations without confusing linkage with storage duration.",
+    "Recognize register as a historical storage-class specifier whose address-of restrictions and optimization meaning do not guarantee a CPU register.",
+    "Describe C11 thread storage duration with _Thread_local at a conceptual level and select storage classes based on lifetime and visibility requirements."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL2.1 Variables and declarations",
+    "CL2.2 Identifiers and scope",
+    "CL6.4 Scope, lifetime, storage duration and linkage"
+  ],
   "stages": {
     "understand": {
-      "concept": "Debug and sanitizer builds can detect classes of defects such as out-of-bounds access, use-after-free, invalid shifts and some undefined behaviour. Common options include address and undefined-behaviour sanitizers on supported compiler/runtime combinations.",
-      "whyItMatters": "Dynamic diagnostics catch defects on executed paths; they cannot prove that every path is correct or replace careful reasoning and testing.",
-      "analogy": "Treat an algorithm or data structure as a set of operations that must preserve a clearly stated contract.",
-      "analogyLimit": "The analogy does not replace formal complexity analysis, C object rules or algorithm preconditions."
+      "concept": "Storage-class specifiers participate in how identifiers and objects are declared, but three ideas must remain distinct: scope describes where an identifier can be used; storage duration describes an object's lifetime; linkage describes whether declarations in different scopes or translation units refer to the same entity. The keywords auto, register, static and extern have specific declaration rules; C11 also provides _Thread_local.",
+      "whyItMatters": "Many difficult C bugs come from returning pointers to expired automatic objects, unintentionally exposing file-scope names, or assuming that static means globally visible. Understanding these properties helps design safe interfaces and correct object lifetimes.",
+      "analogy": "Scope is where a name is visible, storage duration is how long the object exists, and linkage is whether separate declarations refer to the same entity.",
+      "analogyLimit": "These are independent language properties, not interchangeable labels. A static object can have block scope and internal or no linkage depending on its declaration context."
     },
     "explain": {
-      "narrative": "Debug and sanitizer builds can detect classes of defects such as out-of-bounds access, use-after-free, invalid shifts and some undefined behaviour. Common options include address and undefined-behaviour sanitizers on supported compiler/runtime combinations.\n\nBefore implementation, state input constraints, empty-case behaviour, ownership and invariants. Compile with warnings and test representative, boundary and failure cases.",
+      "narrative": "A block-scope object declared without static normally has automatic storage duration: its lifetime is tied to execution of the block. A block-scope `static` object has static storage duration and retains its value for the entire program execution, even though its identifier is visible only within that block. A file-scope object declared `static` has internal linkage, limiting the name to its translation unit. An `extern` declaration usually refers to an entity defined elsewhere and does not itself create a new object definition when it is only a declaration.\n\n`register` is a request-like storage-class specifier from older C practice; modern compilers choose registers independently, and register objects cannot have their address taken with unary `&` under the language rules. C11 `_Thread_local` gives an object thread storage duration; it is distinct from static storage duration and requires careful initialization/linkage rules. Do not infer storage duration solely from the keyword: read the complete declaration context.",
       "examples": [
         {
           "id": "cl95-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "/* Example GCC/Clang-like command:\n   cc -g -O1 -fsanitize=address,undefined -fno-omit-frame-pointer main.c -o app\n*/\n#include <stdio.h>\nint main(void) { int values[2] = {1, 2}; printf(\"%d\\n\", values[1]); return 0; }",
-          "explanation": "The command requests debug information and runtime instrumentation where supported. The program itself performs a valid access; a deliberately invalid test can be used to observe a diagnostic in a controlled environment.",
-          "runnable": false
+          "title": "An automatic local object versus a persistent static local",
+          "code": "#include <stdio.h>\n\nstatic unsigned int next_id(void)\n{\n    static unsigned int next = 1U;\n    return next++;\n}\n\nint main(void)\n{\n    unsigned int first = next_id();\n    unsigned int second = next_id();\n    printf(\"first=%u second=%u\\n\", first, second);\n    return 0;\n}",
+          "explanation": "The `first` and `second` objects have automatic storage duration within main. The `next` object has static storage duration and retains its updated value between calls. The function itself has internal linkage because it is declared static at file scope.",
+          "runnable": true
+        },
+        {
+          "id": "cl95-ex2",
+          "language": "en",
+          "title": "Limit a helper object name to one translation unit",
+          "code": "#include <stdio.h>\n\nstatic int internal_limit = 8;\n\nint public_limit(void)\n{\n    return internal_limit;\n}\n\nint main(void)\n{\n    printf(\"limit=%d\\n\", public_limit());\n    return 0;\n}",
+          "explanation": "The file-scope static object has internal linkage, so another translation unit cannot refer to that identifier by an ordinary external declaration. The function public_limit has external linkage and exposes a controlled interface.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Distinguish a compiler warning from a runtime sanitizer report.",
-      "independentTask": "Run a small test suite under sanitizers and document which executed paths were covered.",
+      "guidedTask": "Trace the value of `next` across three calls. Then move `static` from the local variable to the function declaration and explain how that changes linkage rather than the local object's storage duration.",
+      "independentTask": "Create a two-file example where one file owns a file-scope static helper and exports one public function. Add a block-scope static counter and explain scope, storage duration and linkage separately for every declared object and function.",
       "hints": [
-        "Sanitizer availability and behaviour depend on compiler, operating system and runtime support.",
-        "A clean sanitizer run does not prove absence of all undefined behaviour.",
-        "Keep test cases deterministic and reproducible."
+        "Scope answers where an identifier can be used; storage duration answers how long an object exists.",
+        "An ordinary block local usually has automatic storage duration and is not safe to return by pointer after the block ends.",
+        "A block-scope static local retains its value between calls but its name remains local to the block.",
+        "A file-scope static declaration gives the name internal linkage within that translation unit.",
+        "extern is a declaration specifier and does not automatically mean the object has automatic or dynamic storage duration.",
+        "register does not guarantee a hardware register; do not use it as a performance promise."
       ]
     }
   },
@@ -51,36 +68,63 @@
     "questions": [
       {
         "id": "cl95-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What does storage duration describe?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "The lifetime of an object during program execution.",
+          "The region of source code where a name is visible.",
+          "Whether two declarations refer to the same entity.",
+          "The number of bytes in an executable."
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the concept and constraints described above."
+        "answer": "The lifetime of an object during program execution.",
+        "explanation": "Storage duration specifies the object's lifetime, not name visibility or cross-file identity."
       },
       {
         "id": "cl95-q2",
-        "prompt": "What should be checked before relying on this algorithm or structure?",
+        "prompt": "What is true of a block-scope static local object?",
         "options": [
-          "Its preconditions, invariants, bounds and failure cases.",
-          "Only the name of the data structure.",
-          "Whether one example produced an output."
+          "It retains its value between calls and has static storage duration.",
+          "It is recreated with a new lifetime on every call.",
+          "Its name becomes visible in every source file.",
+          "It is dynamically allocated."
         ],
-        "answer": "Its preconditions, invariants, bounds and failure cases.",
-        "explanation": "Correctness depends on maintaining the algorithm's contract."
+        "answer": "It retains its value between calls and has static storage duration.",
+        "explanation": "A block-scope static local is initialized once and persists for the program's execution while its identifier remains block-scoped."
       },
       {
         "id": "cl95-q3",
-        "prompt": "Which practice supports reliable implementation?",
+        "prompt": "What does file-scope static generally give an object or function name?",
         "options": [
-          "Test empty, boundary and representative inputs.",
-          "Ignore allocation failures.",
-          "Assume average complexity guarantees every operation's worst case."
+          "Internal linkage within that translation unit.",
+          "External linkage across the entire program.",
+          "Automatic storage duration.",
+          "Thread storage duration."
         ],
-        "answer": "Test empty, boundary and representative inputs.",
-        "explanation": "Targeted tests expose defects that ordinary examples may miss."
+        "answer": "Internal linkage within that translation unit.",
+        "explanation": "At file scope, static gives internal linkage, restricting the identifier to the translation unit."
+      },
+      {
+        "id": "cl95-q4",
+        "prompt": "Which statement about register is correct?",
+        "options": [
+          "It does not guarantee placement in a CPU register, and the address of a register object cannot be taken.",
+          "It always forces a CPU register allocation.",
+          "It gives every object static storage duration.",
+          "It makes a variable visible in all translation units."
+        ],
+        "answer": "It does not guarantee placement in a CPU register, and the address of a register object cannot be taken.",
+        "explanation": "The register specifier is not a hardware-register guarantee and imposes a language restriction on taking the object's address."
+      },
+      {
+        "id": "cl95-q5",
+        "prompt": "Which three concepts should be analyzed separately?",
+        "options": [
+          "Scope, storage duration and linkage.",
+          "Compiler, linker and loader.",
+          "Header, source and executable.",
+          "Signedness, precision and endianness."
+        ],
+        "answer": "Scope, storage duration and linkage.",
+        "explanation": "Scope, storage duration and linkage answer different questions and must not be conflated."
       }
     ]
   },
