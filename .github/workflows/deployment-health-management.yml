@@ -1,114 +1,206 @@
-name: CodeSaathi Deployment Health Management
+name: CodeSaathi Project Health Management
 
 on:
   workflow_run:
     workflows: ["Deploy CodeSaathi to Firebase Hosting"]
     types: [completed]
   workflow_dispatch:
+  schedule:
+    - cron: "17 */6 * * *"
 
 permissions:
   contents: read
   actions: read
 
+concurrency:
+  group: codesaathi-health-management
+  cancel-in-progress: false
+
 jobs:
   health-report:
-    name: Generate project health report
+    name: Repository, deployment and live-site diagnostics
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - name: Checkout deployed commit
+      - name: Select project snapshot
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
-      - name: Inspect deployment, curriculum and PWA
+      - name: Run complete health inspection
         env:
-          DEPLOY_RESULT: ${{ github.event.workflow_run.conclusion || 'manual-run' }}
+          DEPLOY_RESULT: ${{ github.event.workflow_run.conclusion || 'not-triggered' }}
           DEPLOY_URL: ${{ github.event.workflow_run.html_url || '' }}
           COMMIT_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+          EVENT_NAME: ${{ github.event_name }}
+          SITE_URL: https://multilingual-learning-52e24.web.app
+          FIREBASE_PROJECT: multilingual-learning-52e24
         run: |
           node <<'NODE'
           const fs = require('fs');
           const path = require('path');
           const cp = require('child_process');
           const rows = [];
-          const add = (area, check, status, detail) => rows.push({area,check,status,detail:String(detail).replace(/\|/g,'/').replace(/\n/g,' ')});
-          const has = p => fs.existsSync(p);
-          const json = p => JSON.parse(fs.readFileSync(p,'utf8'));
+          const add = (area, check, status, detail) => rows.push({area,check,status,detail:String(detail ?? '').replace(/\\|/g,'/').replace(/[\\r\\n]+/g,' ').slice(0,500)});
+          const exists = p => fs.existsSync(p);
+          const readJson = p => JSON.parse(fs.readFileSync(p,'utf8'));
+          const base = process.env.SITE_URL.replace(/\\/$/,'');
+          const timeout = 15000;
 
-          add('Deployment','Firebase Hosting workflow',process.env.DEPLOY_RESULT === 'success' ? 'PASS' : 'FAIL',process.env.DEPLOY_RESULT + ' ' + process.env.DEPLOY_URL);
-          for (const f of ['firebase.json','.firebaserc','public/index.html','public/app.js','public/sw.js','public/js/lessons/curriculum-loader.js']) add('Required files',f,has(f)?'PASS':'FAIL',has(f)?'Found':'Missing');
-          for (const f of ['public/app.js','public/sw.js','public/js/i18n.js','public/js/lessons/curriculum-loader.js','public/js/lessons/lesson-template.js']) {
-            if (!has(f)) continue;
-            try { cp.execFileSync('node',['--check',f]); add('JavaScript',f,'PASS','Syntax valid'); }
-            catch(e) { add('JavaScript',f,'FAIL',e.stderr || e.message); }
+          async function request(url) {
+            const response = await fetch(url, {redirect:'follow', signal:AbortSignal.timeout(timeout), headers:{'user-agent':'CodeSaathi-HealthMonitor/1.0','cache-control':'no-cache'}});
+            return response;
+          }
+          async function pool(items, limit, fn) {
+            let cursor=0;
+            const workers=Array.from({length:Math.min(limit,items.length)},async()=>{
+              while(true){const i=cursor++;if(i>=items.length)return;await fn(items[i],i);}
+            });
+            await Promise.all(workers);
           }
 
-          try {
-            const index = json('public/content/curriculum-index.json');
-            const topics = (index.topics || []).filter(t => t.courseId === 'c');
-            const modules = {};
-            let missing = 0, invalid = 0, drafts = 0;
-            const missingList = [], invalidList = [];
-            for (const t of topics) {
-              modules[t.moduleId] = (modules[t.moduleId] || 0) + 1;
-              const p = t.languages && t.languages.en;
-              const file = p && path.join('public',p.replace(/^\//,''));
-              if (!file || !has(file)) { missing++; missingList.push(t.topicId); continue; }
-              try {
-                const lesson = json(file);
-                if (lesson.topicId !== t.topicId || !lesson.title || !lesson.stages?.understand || !lesson.stages?.explain || !lesson.stages?.practise) { invalid++; invalidList.push(t.topicId); }
-                if (lesson.status === 'draft') drafts++;
-              } catch(e) { invalid++; invalidList.push(t.topicId + ': ' + e.message); }
+          // 1. Source snapshot and structural integrity
+          add('Run context','Trigger', 'INFO', process.env.EVENT_NAME);
+          add('Run context','Commit', 'INFO', process.env.COMMIT_SHA);
+          add('Firebase deployment','Latest deployment workflow', process.env.DEPLOY_RESULT==='success'?'PASS':process.env.DEPLOY_RESULT==='not-triggered'?'INFO':'FAIL', process.env.DEPLOY_RESULT+' '+process.env.DEPLOY_URL);
+          for(const f of ['firebase.json','.firebaserc','public/index.html','public/styles.css','public/app.js','public/sw.js','public/js/i18n.js','public/js/lessons/lesson-template.js','public/js/lessons/curriculum-loader.js','public/content/curriculum-index.json']){
+            add('Repository files',f,exists(f)?'PASS':'FAIL',exists(f)?'Present':'Missing');
+          }
+          for(const f of ['public/app.js','public/sw.js','public/js/i18n.js','public/js/lessons/lesson-template.js','public/js/lessons/curriculum-loader.js']){
+            if(!exists(f))continue;
+            try{cp.execFileSync('node',['--check',f],{stdio:'pipe'});add('JavaScript syntax',f,'PASS','Node syntax check passed');}
+            catch(e){add('JavaScript syntax',f,'FAIL',(e.stderr||e.message).toString());}
+          }
+
+          let index=null, cTopics=[];
+          try{
+            index=readJson('public/content/curriculum-index.json');
+            if(index.version!==1||!Array.isArray(index.topics)||!Array.isArray(index.courses))throw new Error('Unsupported curriculum index contract');
+            cTopics=index.topics.filter(t=>t.courseId==='c');
+            add('Curriculum index','JSON and contract','PASS','version='+index.version+'; total='+index.topics.length+'; courses='+index.courses.join(', '));
+            add('C curriculum','Topic count','INFO',cTopics.length+' indexed topics; modules='+new Set(cTopics.map(t=>t.moduleId)).size);
+            const ids=new Set();let duplicates=0;
+            for(const t of index.topics){if(!t.topicId||ids.has(t.topicId))duplicates++;ids.add(t.topicId);}
+            add('Curriculum index','Unique topic IDs',duplicates===0?'PASS':'FAIL',duplicates+' duplicate or empty IDs');
+          }catch(e){add('Curriculum index','Parse and contract','FAIL',e.message);}
+
+          // 2. All indexed English C lesson files and their minimum contracts
+          if(index){
+            let missing=0,invalid=0,drafts=0;
+            const missingIds=[],invalidIds=[];
+            for(const topic of cTopics){
+              const p=topic.languages?.en;
+              const file=p&&path.join('public',p.replace(/^\\//,''));
+              if(!file||!exists(file)){missing++;missingIds.push(topic.topicId);continue;}
+              try{
+                const lesson=readJson(file);
+                if(lesson.topicId!==topic.topicId||!lesson.title||!lesson.stages?.understand||!lesson.stages?.explain||!lesson.stages?.practise){invalid++;invalidIds.push(topic.topicId);}
+                if(lesson.status==='draft')drafts++;
+              }catch(e){invalid++;invalidIds.push(topic.topicId+': '+e.message);}
             }
-            add('C curriculum','Indexed topic count',topics.length === 149 ? 'PASS':'WARN',topics.length + ' (current expected baseline 149)');
-            add('C curriculum','Module coverage',Object.keys(modules).length === 14 ? 'PASS':'WARN',JSON.stringify(modules));
-            add('C lesson files','English files present',missing === 0 ? 'PASS':'FAIL',missing + ' missing: ' + missingList.join(', '));
-            add('C lesson files','JSON and minimum lesson structure',invalid === 0 ? 'PASS':'FAIL',invalid + ' invalid: ' + invalidList.join(', ') + '; draft lessons: ' + drafts);
-          } catch(e) { add('C curriculum','Index parse','FAIL',e.message); }
+            add('C lesson source','English lesson files',missing===0?'PASS':'FAIL',missing+' missing; '+missingIds.slice(0,30).join(', '));
+            add('C lesson source','Lesson content contract',invalid===0?'PASS':'FAIL',invalid+' invalid; '+invalidIds.slice(0,30).join(', '));
+            add('C lesson source','Editorial status','INFO',drafts+' draft lessons of '+cTopics.length+'; drafts are not automatically learner-ready');
+          }
 
-          try {
-            const cfg = json('firebase.json');
-            add('Firebase config','Hosting public directory',cfg.hosting?.public === 'public'?'PASS':'FAIL',cfg.hosting?.public);
-            const rule = (cfg.hosting?.headers || []).find(h=>h.source==='**/*.json');
-            const cc = rule?.headers?.find(h=>h.key.toLowerCase()==='cache-control')?.value || '';
-            add('Firebase config','JSON cache policy',cc.includes('no-store')?'PASS':'WARN',cc || 'No explicit JSON cache policy');
-          } catch(e) { add('Firebase config','Parse','FAIL',e.message); }
+          // 3. Hosting config, cache headers and PWA shell
+          try{
+            const cfg=readJson('firebase.json');
+            add('Firebase config','Hosting root',cfg.hosting?.public==='public'?'PASS':'FAIL','public='+cfg.hosting?.public);
+            const rule=(cfg.hosting?.headers||[]).find(h=>h.source==='**/*.json');
+            const cc=rule?.headers?.find(h=>h.key.toLowerCase()==='cache-control')?.value||'';
+            add('Firebase config','JSON cache policy',cc.includes('no-store')?'PASS':'WARN',cc||'No explicit JSON cache header');
+          }catch(e){add('Firebase config','Parse','FAIL',e.message);}
+          const sw=exists('public/sw.js')?fs.readFileSync('public/sw.js','utf8'):'';
+          add('PWA','Service worker cache version',/codesaathi-v\\d+/.test(sw)?'PASS':'FAIL',(sw.match(/codesaathi-v\\d+/)||[])[0]||'Missing cache version');
+          add('PWA','Curriculum index in network-first app shell',sw.includes('/content/curriculum-index.json')?'PASS':'FAIL',sw.includes('/content/curriculum-index.json')?'Index is listed':'Index is not listed');
+          const loader=exists('public/js/lessons/curriculum-loader.js')?fs.readFileSync('public/js/lessons/curriculum-loader.js','utf8'):'';
+          add('Frontend contract','Curriculum fetch cache policy',loader.includes('cache: "no-cache"')?'PASS':'WARN','Loader index fetch should bypass browser HTTP cache');
+          const html=exists('public/index.html')?fs.readFileSync('public/index.html','utf8'):'';
+          for(const f of ['/js/i18n.js','/js/lessons/lesson-template.js','/js/lessons/curriculum-loader.js','/app.js']){
+            add('Frontend contract','Script reference '+f,html.includes(f)?'PASS':'FAIL',html.includes(f)?'Referenced':'Missing from index.html');
+          }
 
-          const sw = has('public/sw.js') ? fs.readFileSync('public/sw.js','utf8') : '';
-          add('PWA cache','Version',sw.match(/codesaathi-v\d+/)?.[0]?'PASS':'WARN',sw.match(/codesaathi-v\d+/)?.[0] || 'Not found');
-          add('PWA cache','Curriculum index network-first',sw.includes('/content/curriculum-index.json')?'PASS':'FAIL',sw.includes('/content/curriculum-index.json')?'Listed in app shell':'Not listed');
+          // 4. Live Firebase Hosting HTTP checks
+          const liveIndexUrl=base+'/content/curriculum-index.json';
+          let liveIndex=null;
+          try{
+            const r=await request(base+'/');
+            const body=await r.text();
+            add('Live Hosting','Homepage HTTP',r.status===200?'PASS':'FAIL','HTTP '+r.status+'; content-type='+r.headers.get('content-type'));
+            add('Live Hosting','Homepage contains app shell',body.includes('courseGrid')&&body.includes('curriculum-loader.js')?'PASS':'FAIL','Checks course grid and curriculum loader reference');
+            add('Live Hosting','Homepage cache headers','INFO',r.headers.get('cache-control')||'Cache-Control absent');
+          }catch(e){add('Live Hosting','Homepage request','FAIL',e.name+': '+e.message);}
+          try{
+            const r=await request(liveIndexUrl);
+            const raw=await r.text();
+            add('Live curriculum','Index HTTP',r.status===200?'PASS':'FAIL','HTTP '+r.status+'; content-type='+r.headers.get('content-type')+'; cache-control='+r.headers.get('cache-control'));
+            if(r.ok){
+              liveIndex=JSON.parse(raw);
+              const liveC=(liveIndex.topics||[]).filter(t=>t.courseId==='c');
+              add('Live curriculum','Live index contract',liveIndex.version===1&&Array.isArray(liveIndex.topics)?'PASS':'FAIL','version='+liveIndex.version+'; total='+liveIndex.topics?.length+'; C topics='+liveC.length);
+              if(index)add('Live curriculum','Repository/live C topic parity',liveC.length===cTopics.length?'PASS':'FAIL','repository='+cTopics.length+'; live='+liveC.length);
+            }
+          }catch(e){add('Live curriculum','Index fetch/parse','FAIL',e.name+': '+e.message);}
 
-          const fail = rows.filter(r=>r.status==='FAIL');
-          const warn = rows.filter(r=>r.status==='WARN');
-          const out = [
-            '# CodeSaathi Deployment & Project Health',
+          // 5. Live app assets, service worker and sampled + exhaustive C lesson URLs
+          for(const p of ['/app.js','/sw.js','/js/lessons/curriculum-loader.js','/js/lessons/lesson-template.js','/c-compiler.html']){
+            try{const r=await request(base+p);const body=await r.text();add('Live assets',p,r.status===200?'PASS':'FAIL','HTTP '+r.status+'; bytes='+Buffer.byteLength(body));}
+            catch(e){add('Live assets',p,'FAIL',e.name+': '+e.message);}
+          }
+          if(liveIndex){
+            const liveC=(liveIndex.topics||[]).filter(t=>t.courseId==='c');
+            let ok=0,fail=0;const bad=[];
+            await pool(liveC,12,async t=>{
+              const p=t.languages?.en;
+              if(!p){fail++;bad.push(t.topicId+': no English path');return;}
+              try{
+                const r=await request(base+p);
+                if(!r.ok)throw new Error('HTTP '+r.status);
+                const lesson=await r.json();
+                if(lesson.topicId!==t.topicId||!lesson.stages?.understand||!lesson.stages?.explain||!lesson.stages?.practise)throw new Error('lesson contract mismatch');
+                ok++;
+              }catch(e){fail++;bad.push(t.topicId+': '+e.message);}
+            });
+            add('Live C lessons','Every indexed English lesson URL',fail===0?'PASS':'FAIL',ok+' OK; '+fail+' failed; '+bad.slice(0,30).join('; '));
+          }else add('Live C lessons','Lesson URL sweep','BLOCKED','Live curriculum index unavailable');
+
+          // 6. Consolidated report and durable artifact
+          const counts={PASS:rows.filter(x=>x.status==='PASS').length,INFO:rows.filter(x=>x.status==='INFO').length,WARN:rows.filter(x=>x.status==='WARN').length,FAIL:rows.filter(x=>x.status==='FAIL').length,BLOCKED:rows.filter(x=>x.status==='BLOCKED').length};
+          const fails=rows.filter(x=>x.status==='FAIL');
+          const out=[
+            '# CodeSaathi Project Health Report','',
+            '- Generated: '+new Date().toISOString(),
+            '- Event: '+process.env.EVENT_NAME,
+            '- Commit: '+process.env.COMMIT_SHA,
+            '- Firebase project: '+process.env.FIREBASE_PROJECT,
+            '- Live site: '+base,
+            '- Deployment workflow: '+process.env.DEPLOY_RESULT+' '+process.env.DEPLOY_URL,
+            '- Totals: '+rows.length+' checks | PASS '+counts.PASS+' | FAIL '+counts.FAIL+' | WARN '+counts.WARN+' | INFO '+counts.INFO+' | BLOCKED '+counts.BLOCKED,
             '',
-            '- Commit: ' + process.env.COMMIT_SHA,
-            '- Firebase deploy result: **' + process.env.DEPLOY_RESULT + '**',
-            '- Checks: ' + rows.length + ' | PASS: ' + rows.filter(r=>r.status==='PASS').length + ' | WARN: ' + warn.length + ' | FAIL: ' + fail.length,
+            '| Area | Check | Result | Evidence / detail |','|---|---|---|---|',
+            ...rows.map(x=>'| '+x.area+' | '+x.check+' | **'+x.status+'** | '+x.detail.replace(/\\|/g,'/')+' |'),
             '',
-            '| Area | Check | Status | Details |',
-            '|---|---|---|---|',
-            ...rows.map(r=>'| '+r.area+' | '+r.check+' | **'+r.status+'** | '+r.detail+' |'),
+            '## Failures requiring attention',
+            ...(fails.length?fails.map(x=>'- **'+x.area}+' / '+x.check+'** — '+x.detail):['- No failed checks detected.']),
             '',
-            '## Attention required',
-            ...(fail.length ? fail.map(r=>'- **'+r.area+' / '+r.check+':** '+r.detail) : ['- No repository-level failing checks.']),
-            '',
-            '## Verification boundary',
-            '- This report checks the repository snapshot and the Firebase workflow result.',
-            '- It does not claim the live website serves these files. Live HTTP, browser rendering and device checks must be performed separately.'
-          ].join('\n');
+            '## Interpretation and limits',
+            '- The live lesson sweep requests every English C lesson URL referenced by the live curriculum index and validates the response contract.',
+            '- HTTP checks cannot prove visual correctness, browser-console cleanliness, accessibility, keyboard operation, or real-device behaviour. Those require browser/device automation and manual acceptance testing.',
+            '- A green report means these defined checks passed; it is not a certification of all course content or translation quality.'
+          ].join('\\n');
           fs.mkdirSync('health-report',{recursive:true});
-          fs.writeFileSync('health-report/deployment-health.md',out+'\n');
-          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,out+'\n');
+          fs.writeFileSync('health-report/deployment-health.md',out+'\\n');
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,out+'\\n');
+          fs.writeFileSync('health-report/checks.json',JSON.stringify({generatedAt:new Date().toISOString(),commit:process.env.COMMIT_SHA,counts,checks:rows},null,2)+'\\n');
           console.log(out);
           NODE
 
-      - name: Upload health report
+      - name: Upload diagnostic reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: codesaathi-deployment-health-${{ github.run_number }}
-          path: health-report/deployment-health.md
+          name: codesaathi-health-report-${{ github.run_number }}-${{ github.run_attempt }}
+          path: health-report/
           if-no-files-found: warn
-          retention-days: 30
+          retention-days: 90
