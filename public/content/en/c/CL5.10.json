@@ -6,39 +6,50 @@
   "title": "const with pointers: pointer-to-const and const-pointer (CodeSaathi extension)",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C language rules.",
-    "Trace the example and explain data flow.",
-    "Identify common errors and boundary conditions.",
-    "Apply the concept in a small tested program."
+    "Distinguish pointer to const data from const pointer.",
+    "Explain which object or pointer value each const placement protects.",
+    "Use const int * for read-only access through a pointer.",
+    "Use int *const when the pointer must keep the same target after initialization.",
+    "Combine pointer and pointed-to qualifiers when both restrictions are required."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "const qualifies the type of an object or the type accessed through a pointer. A pointer to const int prevents modification through that pointer; a const pointer prevents changing the pointer value after initialization. Both qualifiers can be combined.",
+      "concept": "The const qualifier can apply to the pointed-to type or to the pointer object itself. `const int *p` is a modifiable pointer to const-qualified int data; the data cannot be modified through p. `int *const p` is a const pointer to modifiable int data; the pointer cannot be reassigned after initialization. `const int *const p` combines both restrictions.",
       "whyItMatters": "Reading declarations from the identifier outward helps distinguish whether the pointed-to value, the pointer itself or both are restricted.",
       "analogy": "Treat a function or pointer operation as an explicit contract between caller and callee.",
       "analogyLimit": "The analogy does not replace C's formal rules for types, object lifetime, scope and linkage."
     },
     "explain": {
-      "narrative": "const qualifies the type of an object or the type accessed through a pointer. A pointer to const int prevents modification through that pointer; a const pointer prevents changing the pointer value after initialization. Both qualifiers can be combined.\n\nWhen applying this concept, check declared types, preconditions, object lifetime and all control-flow paths. Compile with warnings enabled and test both typical and boundary inputs.",
+      "narrative": "## 1. Pointer to const data\n\n`const int *p` means p can be assigned another compatible address, but the int object cannot be modified through *p. The original object may still be modifiable through another non-const access path if it was not itself defined const.\n\n## 2. Const pointer\n\n`int *const p = &value` means p must be initialized and cannot later be assigned a different address. The pointed-to int remains modifiable through *p if the object itself is not const.\n\n## 3. Both restrictions\n\n`const int *const p = &value` prevents both reassignment of p and modification of the int through p. Read declarations from the identifier outward to understand which part is qualified.\n\n## 4. Function interfaces\n\nUse `const T *` for a function parameter when the function needs to read an object but should not modify it through that pointer. This documents the access contract and lets the compiler diagnose accidental writes through that parameter.\n\n## 5. const is not ownership\n\nConst qualification does not extend object lifetime, make a pointer non-null or guarantee that no other alias can modify the object. Continue to validate pointer lifetime and ownership independently.",
       "examples": [
         {
-          "id": "cl510-ex1",
+          "id": "cl5.10-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\nint main(void) {\n int score = 80;\n const int *read_only = &score;\n int *const fixed_address = &score;\n printf(\"%d\\n\", *read_only);\n *fixed_address = 85;\n printf(\"%d\\n\", score);\n return 0;\n}",
-          "explanation": "read_only may be redirected but cannot modify score through that pointer. fixed_address cannot be redirected after initialization, but it can modify score because its pointed-to type is int.",
+          "title": "Pointer to const data",
+          "code": "#include <stdio.h>\n\nint main(void) {\n    int score = 80;\n    const int *read_only = &score;\n    printf(\"%d\\n\", *read_only);\n    score = 85;\n    printf(\"%d\\n\", *read_only);\n    return 0;\n}",
+          "explanation": "The pointer can refer to score, but modification through *read_only is not permitted. The original non-const object can be modified through score.",
+          "runnable": false
+        },
+        {
+          "id": "cl5.10-ex2",
+          "language": "en",
+          "title": "Const pointer to modifiable data",
+          "code": "#include <stdio.h>\n\nint main(void) {\n    int score = 80;\n    int *const fixed_address = &score;\n    *fixed_address = 85;\n    printf(\"%d\\n\", score);\n    return 0;\n}",
+          "explanation": "The pointer cannot be reassigned, but it can modify the int object it designates.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "For each declaration, state whether the pointer can move and whether the object can be modified through it.",
-      "independentTask": "Write a function that receives a read-only array using a pointer-to-const parameter.",
+      "guidedTask": "Write a C program demonstrating CL5.10. State the relevant input, pointer or conversion contract, then compile and trace the normal and failure paths.",
+      "independentTask": "Create a second example for CL5.10 that exercises a boundary or invalid state. Add checks, document the ownership or input rules, and explain why unsafe behavior is avoided.",
       "hints": [
-        "const int *p and int const *p both mean pointer to const int.",
-        "const on a pointer parameter does not make the caller's separate pointer variable const.",
-        "Do not cast away const and modify an object that was originally defined as const."
+        "Read the declared types carefully, including every pointer and qualifier level.",
+        "Check return values and validate inputs before use.",
+        "Keep object lifetime and ownership explicit.",
+        "Avoid dereferencing invalid or out-of-range pointers.",
+        "Test both success and failure paths."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl510-q1",
-        "prompt": "Which statement best describes the lesson?",
+        "id": "cl5.10-q1",
+        "prompt": "What does const int *p mean?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "p may change its address, but data cannot be modified through *p",
+          "p cannot change its address and data is writable",
+          "p is a pointer to a constant address"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the C rule described above."
+        "answer": "p may change its address, but data cannot be modified through *p",
+        "explanation": "The pointed-to int type is const-qualified."
       },
       {
-        "id": "cl510-q2",
-        "prompt": "What should be checked before relying on this construct?",
+        "id": "cl5.10-q2",
+        "prompt": "What does int *const p mean?",
         "options": [
-          "Its type rules, preconditions and lifetime or range requirements.",
-          "Only whether the code looks short.",
-          "Whether it worked once on another machine."
+          "The pointer cannot be reassigned, but the pointed-to int may be modified",
+          "The pointer can be reassigned but data is const",
+          "Both pointer and data are const"
         ],
-        "answer": "Its type rules, preconditions and lifetime or range requirements.",
-        "explanation": "C correctness depends on the language rules and valid object use."
+        "answer": "The pointer cannot be reassigned, but the pointed-to int may be modified",
+        "explanation": "The pointer object itself is const-qualified."
       },
       {
-        "id": "cl510-q3",
-        "prompt": "What is a sound verification practice?",
+        "id": "cl5.10-q3",
+        "prompt": "Which declaration combines both restrictions?",
         "options": [
-          "Compile with warnings and test representative and boundary cases.",
-          "Ignore diagnostics.",
-          "Assume one output proves all cases."
+          "const int *const p",
+          "int **const p",
+          "int *p const"
         ],
-        "answer": "Compile with warnings and test representative and boundary cases.",
-        "explanation": "Diagnostics and tests provide evidence across relevant cases."
+        "answer": "const int *const p",
+        "explanation": "Both the pointed-to type and the pointer object are const-qualified."
+      },
+      {
+        "id": "cl5.10-q4",
+        "prompt": "Why use const int * as a function parameter?",
+        "options": [
+          "To communicate that the function will not modify the int through that pointer",
+          "To make the pointer non-null",
+          "To extend the object's lifetime"
+        ],
+        "answer": "To communicate that the function will not modify the int through that pointer",
+        "explanation": "The qualifier documents and enforces the read-only access path."
+      },
+      {
+        "id": "cl5.10-q5",
+        "prompt": "Does const guarantee that no other pointer can modify the same object?",
+        "options": [
+          "No",
+          "Yes, all aliases become const automatically",
+          "Only for global objects"
+        ],
+        "answer": "No",
+        "explanation": "const applies to a particular type/access path and does not establish global immutability."
       }
     ]
   },
