@@ -6,39 +6,50 @@
   "title": "String literals, escape sequences and special characters",
   "language": "en",
   "learningObjectives": [
-    "Explain the language rule and its constraints.",
-    "Trace the example and predict its output.",
-    "Identify relevant boundary and safety cases.",
-    "Apply the concept in a tested C program."
+    "Distinguish string literals from character constants and character arrays.",
+    "Explain common escape sequences used in string literals.",
+    "Recognize that a string literal includes a terminating null character.",
+    "Avoid modifying string literals through a pointer.",
+    "Use adjacent string literal concatenation and escaped quotes correctly."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "String literals use double quotes and include a terminating null character. Escape sequences represent characters such as newline, tab, quotes and backslashes.",
+      "concept": "A string literal is written with double quotes and represents an array of char elements including a terminating null character. Escape sequences represent special characters such as newline, tab, quote and backslash. In C, attempting to modify a string literal has undefined behavior, so use a writable character array when text must be changed.",
       "whyItMatters": "This concept supports correct handling of C data and helps prevent invalid memory access or incorrect program behaviour.",
       "analogy": "Think of the construct as a precisely bounded sequence of storage and operations.",
       "analogyLimit": "The analogy does not replace C's rules for object lifetime, bounds, types or undefined behaviour."
     },
     "explain": {
-      "narrative": "String literals use double quotes and include a terminating null character. Escape sequences represent characters such as newline, tab, quotes and backslashes.\n\nAlways check the types, object bounds and preconditions required by the operation. Compile with warnings enabled and test ordinary as well as boundary inputs.",
+      "narrative": "## 1. String literal syntax\n\nA string literal uses double quotes, for example `\"Hello\"`. Its array includes a terminating null character. A character constant such as `'A'` is a different language construct and has type int in C.\n\n## 2. Escape sequences\n\nCommon escapes include `\\n` for newline, `\\t` for horizontal tab, `\\\\` for backslash, `\\\"` for a double quote and `\\'` for a single quote. The escape is interpreted by the compiler as part of the literal.\n\n## 3. Literal storage and modification\n\nA string literal should not be modified. A pointer such as `const char *message = \"Hello\";` communicates read-only use. If the program must edit the characters, initialize a writable array such as `char message[] = \"Hello\";`.\n\n## 4. Adjacent literal concatenation\n\nTwo string literals separated only by whitespace are concatenated during translation. This can make long messages easier to format across source lines. The resulting literal still has a terminating null character.\n\n## 5. Newline is not the same as two characters\n\nThe escape `\\n` represents a newline character. The two source characters backslash and n are represented by `\\\\n` in a string literal. Be precise about whether the program needs a newline or the visible escape spelling.",
       "examples": [
         {
-          "id": "cl46-ex1",
+          "id": "cl4.6-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "Escape sequences change the actual characters represented in the string; they are not merely visual decoration in source code.",
-          "explanation": "#include <stdio.h>\nint main(void) {\n printf(\"Name:\\tAda\\nQuote: \\\"hello\\\"\\n\");\n return 0;\n}",
+          "title": "Escape characters in a message",
+          "code": "#include <stdio.h>\n\nint main(void) {\n    puts(\"Name:\\tAda\\nLanguage:\\tC\");\n    puts(\"She said, \\\"Hello!\\\"\");\n    return 0;\n}",
+          "explanation": "The tab and newline escapes are interpreted as control characters, and escaped quotes appear inside the output.",
+          "runnable": false
+        },
+        {
+          "id": "cl4.6-ex2",
+          "language": "en",
+          "title": "Use a writable array for edits",
+          "code": "#include <stdio.h>\n\nint main(void) {\n    char word[] = \"cat\";\n    word[0] = 'b';\n    puts(word);\n    return 0;\n}",
+          "explanation": "The array is writable storage initialized from a string literal. Modifying a literal through a pointer would be undefined behavior.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "The tab escape separates the label from Ada, newline starts a new output line, and escaped quotes appear as quote characters.",
-      "independentTask": "Identify each escape sequence and predict the number of output lines.",
+      "guidedTask": "Implement a small C program demonstrating CL4.6. Identify the relevant array or string capacity, valid indices, expected results and failure cases before compiling and testing.",
+      "independentTask": "Create a second example for CL4.6 that handles a boundary case explicitly. Add tests for empty input, the smallest valid case, the largest valid case and one invalid or oversized case. Explain how your code prevents invalid access.",
       "hints": [
-        "Print a two-line receipt with a tab-separated item and a quoted message.",
-        "Adjacent string literals are concatenated during translation.",
-        "The character constant '\\0' is a null character; the string literal \"\\0\" also has its own final terminator."
+        "Write down the exact array length and valid index range.",
+        "Include null terminator space when working with C strings.",
+        "Check function preconditions and return values.",
+        "Pass array lengths explicitly when a function needs them.",
+        "Test exact-fit and one-past-boundary cases."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl46-q1",
-        "prompt": "Which statement best matches this lesson?",
+        "id": "cl4.6-q1",
+        "prompt": "Which delimiter is used for a C string literal?",
         "options": [
-          "The C rule and constraints explained in this lesson.",
-          "An unrelated HTML element.",
-          "A CSS property."
+          "Double quotes",
+          "Single quotes",
+          "Square brackets"
         ],
-        "answer": "The C rule and constraints explained in this lesson.",
-        "explanation": "The correct choice follows the C rule and its constraints."
+        "answer": "Double quotes",
+        "explanation": "String literals use double quotation marks."
       },
       {
-        "id": "cl46-q2",
-        "prompt": "How should a boundary-sensitive operation be checked?",
+        "id": "cl4.6-q2",
+        "prompt": "Which escape sequence represents a tab?",
         "options": [
-          "Identify valid bounds and test boundary cases.",
-          "Assume C checks every array bound automatically.",
-          "Ignore compiler warnings."
+          "\\t",
+          "\\n",
+          "\\\\"
         ],
-        "answer": "Identify valid bounds and test boundary cases.",
-        "explanation": "C requires the programmer to respect object bounds and preconditions."
+        "answer": "\\t",
+        "explanation": "Backslash t represents a horizontal tab."
       },
       {
-        "id": "cl46-q3",
-        "prompt": "Why trace the example?",
+        "id": "cl4.6-q3",
+        "prompt": "What happens if a program attempts to modify a string literal?",
         "options": [
-          "To understand execution order and state changes.",
-          "To replace compilation.",
-          "To avoid checking input."
+          "The behavior is undefined",
+          "The literal is always copied automatically",
+          "The compiler changes it to an int"
         ],
-        "answer": "To understand execution order and state changes.",
-        "explanation": "Tracing makes the data flow explicit; compilation and testing remain necessary."
+        "answer": "The behavior is undefined",
+        "explanation": "C does not permit modifying a string literal."
+      },
+      {
+        "id": "cl4.6-q4",
+        "prompt": "Which declaration provides writable character storage initialized with text?",
+        "options": [
+          "char text[] = \"hello\";",
+          "const char *text = \"hello\";",
+          "char *text = \"hello\"; then modify literal"
+        ],
+        "answer": "char text[] = \"hello\";",
+        "explanation": "The array contains its own modifiable elements."
+      },
+      {
+        "id": "cl4.6-q5",
+        "prompt": "What does `\"one\" \"two\"` represent after translation?",
+        "options": [
+          "One concatenated string literal",
+          "Two separate statements",
+          "A syntax error in every C version"
+        ],
+        "answer": "One concatenated string literal",
+        "explanation": "Adjacent string literal tokens are concatenated during translation."
       }
     ]
   },
