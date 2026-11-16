@@ -6,39 +6,50 @@
   "title": "Arrays of strings and arrays of character pointers",
   "language": "en",
   "learningObjectives": [
-    "Explain the language rule and its constraints.",
-    "Trace the example and predict its behaviour.",
-    "Identify boundary and safety cases.",
-    "Apply the concept in a tested C program."
+    "Declare arrays of character arrays for fixed-capacity writable strings.",
+    "Declare arrays of char pointers and understand that they store addresses.",
+    "Explain the lifetime and mutability differences between string literals and writable arrays.",
+    "Use const char pointers when referring to read-only string literals.",
+    "Choose a representation based on ownership, capacity and whether each string must be modified."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "An array of character arrays stores multiple strings in separate fixed-size rows, while an array of char pointers stores addresses of character sequences. These representations have different storage and mutability properties.",
+      "concept": "An array of character arrays stores multiple strings in separate fixed-size rows, while an array of char pointers stores pointer values that refer to character sequences elsewhere. The rows in a character matrix provide writable storage for each string, whereas pointers may refer to string literals or other objects with different lifetimes and mutability. These representations have different memory layouts and ownership requirements.",
       "whyItMatters": "This knowledge helps reason about C data representation, object bounds and valid memory access.",
       "analogy": "Think of memory objects as labelled storage and pointers as typed references to that storage.",
       "analogyLimit": "The analogy does not replace C's formal pointer, lifetime and object-access rules."
     },
     "explain": {
-      "narrative": "An array of character arrays stores multiple strings in separate fixed-size rows, while an array of char pointers stores addresses of character sequences. These representations have different storage and mutability properties.\n\nCheck the declared types, object lifetime, valid bounds and function preconditions before using the construct. Enable compiler warnings and test edge cases.",
+      "narrative": "## 1. Array of character arrays\n\n`char names[3][12]` reserves three rows, each with capacity for up to eleven non-null characters plus a terminator. Each row is writable and has storage within the containing array.\n\n## 2. Array of pointers\n\n`const char *names[] = { \"Ada\", \"Grace\", \"Linus\" };` creates an array of pointers. Each pointer refers to a string literal. The pointer elements can be changed, but the pointed-to literal must not be modified.\n\n## 3. Storage and lifetime\n\nA character matrix stores the character bytes inside the matrix object. An array of pointers stores addresses; the pointed-to data may live elsewhere. Ensure every pointer remains valid for as long as it is used.\n\n## 4. Mutability\n\nUse `char names[][12]` when each row needs writable character storage. Use `const char *` when referring to read-only text. Do not discard const qualification and then attempt to modify a string literal.\n\n## 5. Select intentionally\n\nA matrix has a fixed row capacity and may waste space when strings vary greatly in length. A pointer array is flexible but requires clear ownership, lifetime and capacity rules for every pointed-to string.",
       "examples": [
         {
-          "id": "cl49-ex1",
+          "id": "cl4.9-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "Choose the representation based on whether each string needs independent writable storage or can refer to existing character data.",
-          "explanation": "#include <stdio.h>\nint main(void) {\n char names[3][12] = {\"Mira\", \"Noah\", \"Asha\"};\n for (size_t i=0; i<3; ++i) puts(names[i]);\n return 0;\n}",
+          "title": "Writable array of strings",
+          "code": "#include <stdio.h>\n\nint main(void) {\n    char names[2][12] = {\"Ada\", \"Grace\"};\n    names[0][0] = 'E';\n    puts(names[0]);\n    puts(names[1]);\n    return 0;\n}",
+          "explanation": "Each row has its own fixed writable storage and room for a terminator.",
+          "runnable": false
+        },
+        {
+          "id": "cl4.9-ex2",
+          "language": "en",
+          "title": "Array of pointers to read-only literals",
+          "code": "#include <stdio.h>\n\nint main(void) {\n    const char *languages[] = {\"C\", \"C++\", \"Python\"};\n    for (size_t i = 0; i < 3; ++i) puts(languages[i]);\n    return 0;\n}",
+          "explanation": "The array stores three pointer values. Each points to a string literal that should be treated as read-only.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Each row has capacity for twelve characters. The array owns storage for all three rows; each row is a null-terminated string.",
-      "independentTask": "Draw the three rows and identify unused capacity in each row.",
+      "guidedTask": "Implement a small C program demonstrating CL4.9. Identify the relevant array or string capacity, valid indices, expected results and failure cases before compiling and testing.",
+      "independentTask": "Create a second example for CL4.9 that handles a boundary case explicitly. Add tests for empty input, the smallest valid case, the largest valid case and one invalid or oversized case. Explain how your code prevents invalid access.",
       "hints": [
-        "Store and print four short labels. Explain the difference between a two-dimensional char array and an array of char pointers.",
-        "A char * pointer does not automatically allocate memory for the characters it points to.",
-        "String literals should be treated as non-modifiable; use writable arrays when editing characters."
+        "Write down the exact array length and valid index range.",
+        "Include null terminator space when working with C strings.",
+        "Check function preconditions and return values.",
+        "Pass array lengths explicitly when a function needs them.",
+        "Test exact-fit and one-past-boundary cases."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl49-q1",
-        "prompt": "Which statement best matches this lesson?",
+        "id": "cl4.9-q1",
+        "prompt": "What does `char names[3][12]` allocate?",
         "options": [
-          "The C rule and constraints explained in this lesson.",
-          "An unrelated HTML element.",
-          "A CSS property."
+          "Three rows, each with 12 char elements",
+          "Three char pointers only",
+          "One string of 36 pointers"
         ],
-        "answer": "The C rule and constraints explained in this lesson.",
-        "explanation": "The correct choice follows the C rule and its constraints."
+        "answer": "Three rows, each with 12 char elements",
+        "explanation": "It is an array of three arrays, each containing twelve char elements."
       },
       {
-        "id": "cl49-q2",
-        "prompt": "What is the safest way to handle the relevant boundary or validity condition?",
+        "id": "cl4.9-q2",
+        "prompt": "What does an array of char pointers store?",
         "options": [
-          "Check the documented preconditions and bounds before access.",
-          "Assume C automatically checks every pointer and array access.",
-          "Ignore the result if one run appears successful."
+          "Pointer values that refer to character sequences",
+          "All string bytes inline in one fixed matrix",
+          "Only integer character codes"
         ],
-        "answer": "Check the documented preconditions and bounds before access.",
-        "explanation": "C programs must explicitly respect object bounds, pointer validity and conversion results."
+        "answer": "Pointer values that refer to character sequences",
+        "explanation": "Each array element is a pointer."
       },
       {
-        "id": "cl49-q3",
-        "prompt": "Why should the example be traced?",
+        "id": "cl4.9-q3",
+        "prompt": "Why use const char * for string literals?",
         "options": [
-          "To understand execution order and object state.",
-          "To replace compilation and tests.",
-          "To avoid checking inputs."
+          "To express that the pointed-to literal must not be modified",
+          "To make the pointer itself impossible to change",
+          "To allocate a writable copy automatically"
         ],
-        "answer": "To understand execution order and object state.",
-        "explanation": "Tracing complements compilation, warnings and testing."
+        "answer": "To express that the pointed-to literal must not be modified",
+        "explanation": "The pointed-to data is read-only through this pointer type."
+      },
+      {
+        "id": "cl4.9-q4",
+        "prompt": "Which representation provides writable fixed-capacity rows?",
+        "options": [
+          "An array of character arrays",
+          "An array of pointers to string literals",
+          "A single const char pointer"
+        ],
+        "answer": "An array of character arrays",
+        "explanation": "Each row is part of the array object and can be modified."
+      },
+      {
+        "id": "cl4.9-q5",
+        "prompt": "What must be considered when using an array of pointers?",
+        "options": [
+          "The lifetime, validity and mutability of each pointed-to string",
+          "Only the number of pointer variables",
+          "The editor's line width"
+        ],
+        "answer": "The lifetime, validity and mutability of each pointed-to string",
+        "explanation": "The pointers do not own or guarantee the lifetime of their target data."
       }
     ]
   },
