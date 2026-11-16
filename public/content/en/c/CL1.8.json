@@ -3,53 +3,53 @@
   "courseId": "c",
   "moduleId": "CL1",
   "topicId": "CL1.8",
-  "title": "Hosted and freestanding implementations; target environment and portability (CodeSaathi extension)",
+  "title": "Hosted and Freestanding C Implementations and Portability",
   "language": "en",
   "learningObjectives": [
-    "Explain the core ideas behind Hosted and freestanding implementations; target environment and portability (CodeSaathi extension).",
-    "Identify relevant C syntax, types, standard-library interfaces and constraints.",
-    "Trace a small example and predict its behaviour.",
-    "Recognize boundary cases, common defects and portability risks.",
-    "Apply the concept in a tested C program."
+    "Distinguish hosted and freestanding C implementation environments at a high level.",
+    "Explain why hosted programs commonly use main and standard library facilities while freestanding environments may provide different startup and library support.",
+    "Identify platform assumptions involving compiler, target architecture, operating system, ABI and available libraries.",
+    "Separate ISO C guarantees from implementation-defined behavior, unspecified behavior and compiler extensions.",
+    "Write portable code by using standard interfaces, documenting assumptions and testing on the intended target."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "Hosted and freestanding implementations; target environment and portability (CodeSaathi extension) is an important part of writing correct, maintainable C programs. Learn the exact language rules rather than relying on what one compiler appears to accept. C is a compiled, standardized language: distinguish language guarantees from implementation-defined choices, compiler extensions and behaviour that the standard leaves undefined.",
+      "concept": "C can be implemented in different execution environments. A hosted implementation provides the facilities required for a hosted environment, including conventional program startup that calls main and a specified set of standard library facilities. A freestanding implementation is intended for environments where a complete hosted environment may not exist, such as some embedded or kernel development contexts; startup and available library facilities differ. Portability depends on distinguishing what ISO C guarantees from implementation choices and target-specific facilities.",
       "whyItMatters": "Understanding Hosted and freestanding implementations; target environment and portability (CodeSaathi extension) helps you reason about program behaviour instead of memorizing syntax. It is useful in exams, debugging and building reliable C applications.",
       "analogy": "Treat the concept as a tool with a precise contract: it has valid inputs, defined operations and observable results.",
       "analogyLimit": "An analogy is only an aid; the C standard and the relevant function specifications determine actual behaviour."
     },
     "explain": {
-      "narrative": "## Concept and mental model\nHosted and freestanding implementations; target environment and portability (CodeSaathi extension) should be understood in terms of the C abstract machine: objects have types, storage duration and lifetimes; expressions are evaluated according to language rules; and library calls have specified preconditions and results. The compiler translates a translation unit, but a successful compilation does not prove that a program is correct.\n\n## How to reason about this topic\n1. Identify the inputs, objects, types and operations involved.\n2. Check the applicable syntax and semantic constraints.\n3. Determine valid input ranges and boundary cases.\n4. Check every function result and handle failure where the API permits failure.\n5. Compile with warnings enabled and test normal, boundary and invalid cases.\n\n## Correctness and portability\nDo not assume that int has a particular width, that memory addresses are identical across runs, or that undefined behaviour has a predictable result. Use standard headers and documented interfaces. State any platform assumptions explicitly. Prefer small functions, clear names and explicit invariants.\n\n## Worked example 1 — establish a testable baseline\nThe example below demonstrates a small, compilable C program. Adapt the declaration, expression or API call to the exact concept being studied, then change one condition at a time and observe the result.\n\n## Worked example 2 — validate a boundary\nA second useful test is to exercise the smallest valid input, largest valid input, one value outside the valid range and an ordinary middle value. Record the expected result before running the program; this prevents a test from merely confirming an assumption.\n\n## Common mistakes\n- Assuming a successful compile means the result is correct.\n- Ignoring warnings or failing to check a library function's return value.\n- Using a value outside the range permitted by its type or API.\n- Confusing a compiler extension with portable ISO C.\n- Testing only one ordinary input and missing boundary cases.",
+      "narrative": "## 1. Hosted environments\n\nA hosted C environment is the common model for desktop and server applications. The implementation provides hosted startup and required standard library facilities. A typical hosted program defines int main(void) or another permitted form of main, and the runtime environment calls it to begin program execution.\n\n## 2. Freestanding environments\n\nA freestanding environment may be used where there is no conventional operating-system process model or hosted runtime. Examples include some embedded systems, firmware and operating-system components. Startup code, entry point and available library facilities can differ from a hosted application. Do not assume every hosted library service is available.\n\n## 3. Target environment matters\n\nA compiler targets a combination of processor architecture, operating environment and application binary interface (ABI). The target affects executable format, calling conventions, available system services and sometimes the sizes or representations of C types. A program built for one target is not automatically executable on another.\n\n## 4. Portable C and implementation choices\n\nC standardizes language rules, but some properties are implementation-defined or unspecified. The exact width of many integer types is not universally fixed. Use sizeof, limits from limits.h and fixed-width integer types from stdint.h when their requirements fit the task. Avoid undefined behavior and undocumented compiler extensions.\n\n## 5. Choose the right assumptions\n\nRecord the compiler and version, target architecture, operating environment, language standard mode and required libraries. Compile and test on the actual target or a representative toolchain. Cross-compilation can build for a different target, but it does not replace target-device testing.",
       "examples": [
         {
           "id": "cl1.8-ex1",
           "language": "en",
-          "title": "A small C program to compile and inspect",
-          "code": "#include <stdio.h>\n\nint main(void) {\n    int value = 12;\n    printf(\"Value: %d\\\\n\", value);\n    return 0;\n}",
-          "explanation": "The program declares an int object, initializes it, prints it with the matching %d conversion specification and returns a success status.",
-          "runnable": true
+          "title": "Inspect properties of the current implementation",
+          "code": "#include <stdio.h>\n#include <limits.h>\n\nint main(void) {\n    printf(\"sizeof(int): %zu bytes\\n\", sizeof(int));\n    printf(\"INT_MAX: %d\\n\", INT_MAX);\n    return 0;\n}",
+          "explanation": "This hosted example reports properties of the implementation used to build and run it. The values should not be assumed identical on every C implementation.",
+          "runnable": false
         },
         {
           "id": "cl1.8-ex2",
           "language": "en",
-          "title": "Iterating over a fixed array",
-          "code": "#include <stdio.h>\n\nint main(void) {\n    int values[] = { 3, 6, 9, 12 };\n    size_t count = sizeof values / sizeof values[0];\n    for (size_t i = 0; i < count; ++i) {\n        printf(\"%d\\\\n\", values[i]);\n    }\n    return 0;\n}",
-          "explanation": "The array length is derived from its total size divided by the size of one element. The loop visits valid indices from zero through count minus one.",
-          "runnable": true
+          "title": "Use a fixed-width integer type when appropriate",
+          "code": "#include <stdint.h>\n#include <inttypes.h>\n#include <stdio.h>\n\nint main(void) {\n    uint32_t packet_count = 250u;\n    printf(\"Packets: %\" PRIu32 \"\\n\", packet_count);\n    return 0;\n}",
+          "explanation": "When the implementation provides uint32_t, the matching PRIu32 macro supplies the correct printf format. Exact-width typedefs are optional when an implementation cannot support the exact width.",
+          "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Write a minimal program that demonstrates Hosted and freestanding implementations; target environment and portability (CodeSaathi extension). Compile it with warnings enabled, explain each declaration and operation, and record its output.",
-      "independentTask": "Create two test cases for Hosted and freestanding implementations; target environment and portability (CodeSaathi extension): one normal case and one boundary or failure case. State the expected behaviour before running them, then compare the result and explain any difference.",
+      "guidedTask": "Record whether your development environment is hosted or freestanding. Identify its compiler, target architecture, operating environment and available libraries. Build a small program using facilities supported by that environment.",
+      "independentTask": "Compare the assumptions made by a desktop C program and a small embedded target. Identify which assumptions concern ISO C and which depend on the platform. Document the target and test using its supported toolchain.",
       "hints": [
-        "Read the compiler diagnostic carefully; fix the first meaningful error before chasing later messages.",
-        "Use the exact type and format specifier required by the operation.",
-        "Test zero, negative values where valid, maximum/minimum boundaries and invalid input as appropriate.",
-        "Do not dereference an uninitialized, null or expired pointer.",
-        "Prefer defined, portable behaviour over code that merely appears to work on one machine."
+        "Hosted and freestanding describe execution environments, not skill levels.",
+        "The availability of standard library facilities differs by environment.",
+        "A target includes more than the source language.",
+        "Implementation-defined choices should be documented by the implementation.",
+        "Test on the actual supported target whenever possible."
       ]
     }
   },
@@ -62,58 +62,58 @@
     "questions": [
       {
         "id": "cl1.8-q1",
-        "prompt": "Which approach is safest when applying Hosted and freestanding implementations; target environment and portability (CodeSaathi extension)?",
+        "prompt": "Which statement best describes a hosted C environment?",
         "options": [
-          "Follow the C language rules, validate inputs and check relevant return values.",
-          "Assume every compiler and platform behaves identically.",
-          "Ignore warnings whenever the program produces output."
+          "It provides hosted startup and required standard library facilities",
+          "It never supports main",
+          "It cannot use standard input/output"
         ],
-        "answer": "Follow the C language rules, validate inputs and check relevant return values.",
-        "explanation": "Correct C programming depends on defined behaviour, valid inputs and careful handling of operations that can fail."
+        "answer": "It provides hosted startup and required standard library facilities",
+        "explanation": "Hosted implementations support the conventional hosted program model and required library facilities."
       },
       {
         "id": "cl1.8-q2",
-        "prompt": "Why should boundary cases be tested?",
+        "prompt": "Where might a freestanding C implementation be used?",
         "options": [
-          "They reveal errors that ordinary inputs may not expose.",
-          "They are unnecessary when one example works.",
-          "They make compiler warnings irrelevant."
+          "In some embedded or kernel environments",
+          "Only in a web browser",
+          "Only in spreadsheet formulas"
         ],
-        "answer": "They reveal errors that ordinary inputs may not expose.",
-        "explanation": "Boundary tests check the edges of valid ranges and important exceptional conditions."
+        "answer": "In some embedded or kernel environments",
+        "explanation": "Freestanding implementations support environments that may not provide a complete hosted runtime."
       },
       {
         "id": "cl1.8-q3",
-        "prompt": "What does a successful compilation establish?",
+        "prompt": "Why is a program built for one target not automatically runnable on another?",
         "options": [
-          "The compiler accepted the translation under its selected settings; it does not prove runtime correctness.",
-          "The program is free from all defects.",
-          "The program is portable to every C implementation."
+          "Targets can differ in processor architecture, executable format, ABI and system services",
+          "C source files always contain different spelling",
+          "All targets use identical hardware"
         ],
-        "answer": "The compiler accepted the translation under its selected settings; it does not prove runtime correctness.",
-        "explanation": "Compilation is one validation step. Tests, review and correct reasoning are also required."
+        "answer": "Targets can differ in processor architecture, executable format, ABI and system services",
+        "explanation": "A binary is built for a specific target environment and its conventions."
       },
       {
         "id": "cl1.8-q4",
-        "prompt": "Which practice improves portability?",
+        "prompt": "What is implementation-defined behavior?",
         "options": [
-          "Use standard C features and document unavoidable platform assumptions.",
-          "Depend on undocumented compiler extensions.",
-          "Assume int and pointer sizes are fixed everywhere."
+          "Behavior for which the C implementation chooses and documents a permitted choice",
+          "Behavior that is always a bug",
+          "Behavior that every compiler must make identical"
         ],
-        "answer": "Use standard C features and document unavoidable platform assumptions.",
-        "explanation": "Portable programs avoid assumptions that the C standard does not guarantee."
+        "answer": "Behavior for which the C implementation chooses and documents a permitted choice",
+        "explanation": "The implementation must document its choice for implementation-defined behavior."
       },
       {
         "id": "cl1.8-q5",
-        "prompt": "What should you do when a library operation can fail?",
+        "prompt": "Which practice best supports portability?",
         "options": [
-          "Check its documented result and handle the failure path.",
-          "Assume it always succeeds.",
-          "Continue using its output without checking."
+          "Use standard interfaces, document target assumptions and test on the intended platform",
+          "Assume int is always 32 bits",
+          "Depend on undocumented compiler extensions"
         ],
-        "answer": "Check its documented result and handle the failure path.",
-        "explanation": "Many standard-library operations report failure through return values or stream indicators."
+        "answer": "Use standard interfaces, document target assumptions and test on the intended platform",
+        "explanation": "Portable programs avoid unnecessary assumptions and verify behavior on supported targets."
       }
     ]
   },
