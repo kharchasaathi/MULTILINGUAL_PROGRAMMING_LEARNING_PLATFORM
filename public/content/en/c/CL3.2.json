@@ -6,22 +6,22 @@
   "title": "Assignment and compound assignment",
   "language": "en",
   "learningObjectives": [
-    "Explain the core ideas behind Assignment and compound assignment.",
-    "Identify relevant C syntax, types, standard-library interfaces and constraints.",
-    "Trace a small example and predict its behaviour.",
-    "Recognize boundary cases, common defects and portability risks.",
-    "Apply the concept in a tested C program."
+    "Use simple and compound assignment operators to update modifiable objects.",
+    "Explain how compound assignment combines an operation with storing the result.",
+    "Distinguish assignment from equality comparison.",
+    "Recognize that compound assignment evaluates its left operand only once.",
+    "Check conversions and overflow when assigning expression results."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "Assignment and compound assignment is an important part of writing correct, maintainable C programs. Learn the exact language rules rather than relying on what one compiler appears to accept. C is a compiled, standardized language: distinguish language guarantees from implementation-defined choices, compiler extensions and behaviour that the standard leaves undefined.",
+      "concept": "Assignment stores a converted value in a modifiable object. The simple assignment operator is =, while compound forms include +=, -=, *=, /= and %=. Compound assignment such as `x += y` is similar to `x = x + y`, except that the left operand is evaluated only once and the conversion rules are those of compound assignment. Assignment is distinct from equality comparison, which uses ==.",
       "whyItMatters": "Understanding Assignment and compound assignment helps you reason about program behaviour instead of memorizing syntax. It is useful in exams, debugging and building reliable C applications.",
       "analogy": "Treat the concept as a tool with a precise contract: it has valid inputs, defined operations and observable results.",
       "analogyLimit": "An analogy is only an aid; the C standard and the relevant function specifications determine actual behaviour."
     },
     "explain": {
-      "narrative": "## Concept and mental model\nAssignment and compound assignment should be understood in terms of the C abstract machine: objects have types, storage duration and lifetimes; expressions are evaluated according to language rules; and library calls have specified preconditions and results. The compiler translates a translation unit, but a successful compilation does not prove that a program is correct.\n\n## How to reason about this topic\n1. Identify the inputs, objects, types and operations involved.\n2. Check the applicable syntax and semantic constraints.\n3. Determine valid input ranges and boundary cases.\n4. Check every function result and handle failure where the API permits failure.\n5. Compile with warnings enabled and test normal, boundary and invalid cases.\n\n## Correctness and portability\nDo not assume that int has a particular width, that memory addresses are identical across runs, or that undefined behaviour has a predictable result. Use standard headers and documented interfaces. State any platform assumptions explicitly. Prefer small functions, clear names and explicit invariants.\n\n## Worked example 1 — establish a testable baseline\nThe example below demonstrates a small, compilable C program. Adapt the declaration, expression or API call to the exact concept being studied, then change one condition at a time and observe the result.\n\n## Worked example 2 — validate a boundary\nA second useful test is to exercise the smallest valid input, largest valid input, one value outside the valid range and an ordinary middle value. Record the expected result before running the program; this prevents a test from merely confirming an assumption.\n\n## Common mistakes\n- Assuming a successful compile means the result is correct.\n- Ignoring warnings or failing to check a library function's return value.\n- Using a value outside the range permitted by its type or API.\n- Confusing a compiler extension with portable ISO C.\n- Testing only one ordinary input and missing boundary cases.",
+      "narrative": "## 1. Simple assignment\n\nThe expression `score = 10` stores the converted value 10 in score. The left operand must designate a modifiable object. Assignment is an expression and its value is the value stored, subject to the language rules.\n\n## 2. Compound assignment\n\nOperators such as `+=`, `-=`, `*=`, `/=` and `%=` combine an arithmetic operation with assignment. For example, `total += item` adds item to total and stores the result back in total.\n\n## 3. Left operand is evaluated once\n\nCompound assignment is not merely textual substitution. The left operand is evaluated only once. This matters when the left operand contains indexing or another expression with side effects.\n\n## 4. Assignment is not comparison\n\n`=` assigns a value. `==` compares two values and produces 0 or 1. Accidentally using = in a condition can change program state and cause a logic error.\n\n## 5. Check the resulting value\n\nAssignment converts the right-hand result to the destination type. Narrowing conversions can lose information, and signed arithmetic can overflow before the assignment occurs. Validate ranges and use warnings.",
       "examples": [
         {
           "id": "cl3.2-ex1",
@@ -42,14 +42,14 @@
       ]
     },
     "practise": {
-      "guidedTask": "Write a minimal program that demonstrates Assignment and compound assignment. Compile it with warnings enabled, explain each declaration and operation, and record its output.",
-      "independentTask": "Create two test cases for Assignment and compound assignment: one normal case and one boundary or failure case. State the expected behaviour before running them, then compare the result and explain any difference.",
+      "guidedTask": "Write and trace a C program demonstrating CL3.2. Record the condition or expression values at each step, then compile with warnings and test boundary cases.",
+      "independentTask": "Create a second program for CL3.2 with a different input range or control-flow structure. Include a boundary case and one invalid or unexpected case; explain why each result occurs.",
       "hints": [
-        "Read the compiler diagnostic carefully; fix the first meaningful error before chasing later messages.",
-        "Use the exact type and format specifier required by the operation.",
-        "Test zero, negative values where valid, maximum/minimum boundaries and invalid input as appropriate.",
-        "Do not dereference an uninitialized, null or expired pointer.",
-        "Prefer defined, portable behaviour over code that merely appears to work on one machine."
+        "Trace each expression and condition in evaluation order.",
+        "Use braces to make control-flow boundaries explicit.",
+        "Check zero, one and boundary iterations where loops are involved.",
+        "Avoid undefined behavior and unintended side effects.",
+        "Test the behavior rather than relying only on visual inspection."
       ]
     }
   },
@@ -62,58 +62,58 @@
     "questions": [
       {
         "id": "cl3.2-q1",
-        "prompt": "Which approach is safest when applying Assignment and compound assignment?",
+        "prompt": "Which operator compares two values for equality?",
         "options": [
-          "Follow the C language rules, validate inputs and check relevant return values.",
-          "Assume every compiler and platform behaves identically.",
-          "Ignore warnings whenever the program produces output."
+          "==",
+          "=",
+          "+="
         ],
-        "answer": "Follow the C language rules, validate inputs and check relevant return values.",
-        "explanation": "Correct C programming depends on defined behaviour, valid inputs and careful handling of operations that can fail."
+        "answer": "==",
+        "explanation": "The equality operator is ==; = performs assignment."
       },
       {
         "id": "cl3.2-q2",
-        "prompt": "Why should boundary cases be tested?",
+        "prompt": "What does `count += 3` do?",
         "options": [
-          "They reveal errors that ordinary inputs may not expose.",
-          "They are unnecessary when one example works.",
-          "They make compiler warnings irrelevant."
+          "Adds 3 to count and stores the result",
+          "Compares count with 3",
+          "Declares a new count variable"
         ],
-        "answer": "They reveal errors that ordinary inputs may not expose.",
-        "explanation": "Boundary tests check the edges of valid ranges and important exceptional conditions."
+        "answer": "Adds 3 to count and stores the result",
+        "explanation": "Compound assignment performs the operation and stores the converted result."
       },
       {
         "id": "cl3.2-q3",
-        "prompt": "What does a successful compilation establish?",
+        "prompt": "How many times is the left operand evaluated by compound assignment?",
         "options": [
-          "The compiler accepted the translation under its selected settings; it does not prove runtime correctness.",
-          "The program is free from all defects.",
-          "The program is portable to every C implementation."
+          "Once",
+          "Twice in every case",
+          "It is never evaluated"
         ],
-        "answer": "The compiler accepted the translation under its selected settings; it does not prove runtime correctness.",
-        "explanation": "Compilation is one validation step. Tests, review and correct reasoning are also required."
+        "answer": "Once",
+        "explanation": "The compound assignment operator evaluates its left operand only once."
       },
       {
         "id": "cl3.2-q4",
-        "prompt": "Which practice improves portability?",
+        "prompt": "Which expression is an assignment?",
         "options": [
-          "Use standard C features and document unavoidable platform assumptions.",
-          "Depend on undocumented compiler extensions.",
-          "Assume int and pointer sizes are fixed everywhere."
+          "total = 12",
+          "total == 12",
+          "total >= 12"
         ],
-        "answer": "Use standard C features and document unavoidable platform assumptions.",
-        "explanation": "Portable programs avoid assumptions that the C standard does not guarantee."
+        "answer": "total = 12",
+        "explanation": "The single equals sign is the assignment operator."
       },
       {
         "id": "cl3.2-q5",
-        "prompt": "What should you do when a library operation can fail?",
+        "prompt": "Can assignment to a narrow type lose information?",
         "options": [
-          "Check its documented result and handle the failure path.",
-          "Assume it always succeeds.",
-          "Continue using its output without checking."
+          "Yes, conversion to the destination type can lose information",
+          "No, assignment always preserves every bit",
+          "Only when the variable is global"
         ],
-        "answer": "Check its documented result and handle the failure path.",
-        "explanation": "Many standard-library operations report failure through return values or stream indicators."
+        "answer": "Yes, conversion to the destination type can lose information",
+        "explanation": "The right-hand value is converted to the destination type."
       }
     ]
   },
