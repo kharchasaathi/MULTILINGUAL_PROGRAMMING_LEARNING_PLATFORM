@@ -26,14 +26,14 @@
       "analogyLimit": "A computer's pseudo-random algorithm is not a physical source of entropy. The analogy does not imply unpredictability, statistical quality or cryptographic security."
     },
     "explain": {
-      "narrative": "Call srand() once near program startup when a varying sequence is desired. A time-based seed is a simple demonstration, not a guarantee of strong entropy; time() may have coarse resolution and can fail. Re-seeding before every rand() call is a common mistake because multiple calls can receive the same seed and restart the same sequence.\n\nrand() % bound is easy to read but may be biased unless the number of possible rand() results is an exact multiple of bound. Rejection sampling can remove this range-mapping bias when rand() is treated as uniform over its documented output range, but it cannot improve the generator's underlying statistical or security quality. RAND_MAX is an int constant; widen before adding one to avoid signed overflow concerns. Never use rand() for cryptographic secrets.",
+      "narrative": "Call srand() once near program startup. A fixed seed is useful for repeatable tests and demonstrations on the same implementation. A varying seed is platform-dependent: time() may have coarse resolution or fail, and converting time_t to unsigned int is not a universal source of entropy. Re-seeding before every rand() call is a common mistake because multiple calls can receive the same seed and restart the same sequence.\n\nrand() % bound is easy to read but may be biased unless the number of possible rand() results is an exact multiple of bound. Rejection sampling can remove this range-mapping bias when rand() is treated as uniform over its documented output range, but it cannot improve the generator's underlying statistical or security quality. RAND_MAX is an int constant; widen before adding one to avoid signed overflow concerns. Never use rand() for cryptographic secrets.",
       "examples": [
         {
           "id": "cl92-ex1",
           "language": "en",
           "title": "Seed once and keep a result inside a small interval",
-          "code": "#include <stdio.h>\n#include <stdlib.h>\n#include <time.h>\n\nint main(void)\n{\n    time_t seed_time = time(NULL);\n    unsigned int seed = seed_time == (time_t)-1 ? 1U : (unsigned int)seed_time;\n    srand(seed);\n\n    for (int i = 0; i < 5; ++i) {\n        int draw = rand();\n        printf(\"raw=%d range_demo=%d\\n\", draw, draw % 100);\n    }\n    return 0;\n}",
-          "explanation": "srand is called once before drawing values. The modulo operation demonstrates a simple range mapping but may be biased; it is suitable only as a teaching example, not a statistically rigorous or security-sensitive solution.",
+          "code": "#include <stdio.h>\n#include <stdlib.h>\n\nint main(void)\n{\n    srand(2026U); /* fixed seed: repeatable sequence on this implementation */\n\n    for (int i = 0; i < 5; ++i) {\n        int draw = rand();\n        printf(\"raw=%d range_demo=%d\\n\", draw, draw % 100);\n    }\n    return 0;\n}",
+          "explanation": "srand is called once before drawing values. A fixed seed makes the sequence repeatable on the same implementation, which is useful for learning and tests. The modulo operation demonstrates simple range mapping but may be biased; it is not statistically rigorous or security-sensitive.",
           "runnable": true
         },
         {
