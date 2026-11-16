@@ -120,12 +120,12 @@ The course is designed to take a learner from first contact with C through pract
 - [x] CL8.12 · Sanitizers, static analysis and memory-checking workflow (CodeSaathi extension)
 
 ### CL9 — C standard library, preprocessor and additional tools
-- [ ] CL9.1 · Date and time functions from `time.h`
-- [ ] CL9.2 · Pseudo-random numbers, seeding and limitations of `rand`
-- [ ] CL9.3 · Macros, object-like/function-like macros and conditional compilation
-- [ ] CL9.4 · Header files, declarations, include guards and organizing source files
-- [ ] CL9.5 · Storage classes and storage-duration concepts
-- [ ] CL9.6 · Bitwise operators, masks, shifts and bit manipulation
+- [x] CL9.1 · Date and time functions from `time.h`
+- [x] CL9.2 · Pseudo-random numbers, seeding and limitations of `rand`
+- [x] CL9.3 · Macros, object-like/function-like macros and conditional compilation
+- [x] CL9.4 · Header files, declarations, include guards and organizing source files
+- [x] CL9.5 · Storage classes and storage-duration concepts
+- [x] CL9.6 · Bitwise operators, masks, shifts and bit manipulation
 - [x] CL9.7 · Fixed-width integer types and format macros from `stdint.h`/`inttypes.h`
 - [x] CL9.8 · Command-line arguments: `argc` and `argv`
 - [x] CL9.9 · Environment access and process termination utilities (CodeSaathi extension)
