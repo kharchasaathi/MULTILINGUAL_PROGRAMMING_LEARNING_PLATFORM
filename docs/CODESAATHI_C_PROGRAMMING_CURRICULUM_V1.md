@@ -130,6 +130,12 @@ The course is designed to take a learner from first contact with C through pract
 - [x] CL9.8 · Command-line arguments: `argc` and `argv`
 - [x] CL9.9 · Environment access and process termination utilities (CodeSaathi extension)
 - [x] CL9.10 · Build commands, compiler flags, warnings and language-standard selection (CodeSaathi extension)
+- [ ] CL9.11 · Supplemental: C standard library overview and headers (preserved prior lesson)
+- [ ] CL9.12 · Supplemental: Preprocessor directives, macros and conditional compilation (preserved prior lesson)
+- [ ] CL9.13 · Supplemental: Separate compilation, object files, linking and build commands (preserved prior lesson)
+- [ ] CL9.14 · Supplemental: Compiler warnings, language standards and portability flags (preserved prior lesson)
+- [ ] CL9.15 · Supplemental: Debugging and sanitizing tools (preserved prior lesson)
+- [ ] CL9.16 · Supplemental: Version control and reproducible C builds (preserved prior lesson)
 
 ### CL10 — Problem solving and data structures & algorithms
 - [ ] CL10.1 · A systematic C problem-solving workflow
@@ -269,8 +275,8 @@ A lesson may be marked ready only after:
 - [ ] Telugu and other supported language files are translated and reviewed.
 - [ ] Compiler production release gates are passed.
 
-At the time of this roadmap update, the C curriculum index contains 16 English topic entries. This is not full course coverage. The roadmap above is the target coverage map; it does not claim that the additional topics have already been authored, indexed, translated, tested or deployed.
+At the time of this roadmap update, the C curriculum index contains 155 English topic entries: the 148 canonical roadmap IDs plus seven supplemental entries (CL11.8 and CL9.11–CL9.16). The six canonical CL9.1–CL9.6 lessons have been realigned to this roadmap; the six earlier lesson contents are preserved under supplemental IDs. This index count is not proof of full course coverage, technical review, translation, testing or deployment.
 
 ## 8. Change control
 
-Preserve the existing course ID `c`, module/topic ID prefixes `CL1`–`CL14`, repository architecture and compiler separation. Add lessons in batches, validate each batch, then update the curriculum index and progress tracker. Do not mark planned topics complete merely to make the roadmap appear finished.
+Preserve the existing course ID `c`, module/topic ID prefixes `CL1`–`CL14`, repository architecture and compiler separation. Keep canonical roadmap topics at their canonical IDs. When previously authored content does not match a canonical topic, preserve it under a clearly labelled supplemental ID, update its internal lesson/example/assessment IDs and index path, and never overwrite or discard it. Add lessons in batches, validate each batch, then update the curriculum index and progress tracker. Do not mark planned topics complete merely to make the roadmap appear finished.
