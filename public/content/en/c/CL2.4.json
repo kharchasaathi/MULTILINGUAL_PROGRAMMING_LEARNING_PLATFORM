@@ -6,11 +6,11 @@
   "title": "Fundamental Data Types and Type Sizes",
   "language": "en",
   "learningObjectives": [
-    "Explain the central rules behind fundamental data types and type sizes in C.",
-    "Identify the relevant types, declarations, operators or library facilities.",
-    "Trace a worked example and explain its result.",
-    "Recognize common mistakes, portability concerns and unsafe assumptions.",
-    "Apply the concept in a small program and test normal and boundary cases."
+    "Identify C character, integer and floating types and their broad purposes.",
+    "Use sizeof to inspect the size of a type or object on the current implementation.",
+    "Explain that sizeof reports bytes and that a byte is CHAR_BIT bits.",
+    "Use limits.h to inspect implementation-provided minimum and maximum values.",
+    "Avoid assuming that type sizes are identical across platforms."
   ],
   "prerequisites": [
     "CL1.1",
@@ -18,13 +18,13 @@
   ],
   "stages": {
     "understand": {
-      "concept": "C provides character types, signed and unsigned integer types, and floating types. The exact width of several types is implementation-defined, subject to minimum range requirements. sizeof reports an object's or type's size in bytes for the current implementation; a byte is CHAR_BIT bits and is not guaranteed to be eight bits on every conforming implementation.",
+      "concept": "C provides character types, signed and unsigned integer types, and floating types. The exact sizes and ranges of many types depend on the implementation, subject to standard minimum requirements. The sizeof operator reports a size in bytes for the current implementation. A byte contains CHAR_BIT bits and is not guaranteed by the C language to contain exactly eight bits on every implementation.",
       "whyItMatters": "Portable code must not assume that int is always 32 bits or that long has the same width on every platform. Use the language guarantees, sizeof, limits headers and fixed-width types when an exact width is required.",
       "analogy": "Think of a type as a contract that describes what kind of value an object can hold and which operations make sense for it.",
       "analogyLimit": "The analogy is only an introduction; C types also determine representation, conversions, alignment and constraints."
     },
     "explain": {
-      "narrative": "C provides character types, signed and unsigned integer types, and floating types. The exact width of several types is implementation-defined, subject to minimum range requirements. sizeof reports an object's or type's size in bytes for the current implementation; a byte is CHAR_BIT bits and is not guaranteed to be eight bits on every conforming implementation.\n\nPortable code must not assume that int is always 32 bits or that long has the same width on every platform. Use the language guarantees, sizeof, limits headers and fixed-width types when an exact width is required.\n\nWhen reviewing code, identify the declared types first, then trace conversions and the exact expression being evaluated. Compile with warnings enabled and test boundary values. Do not rely on assumptions about another compiler or machine.",
+      "narrative": "## 1. Fundamental type families\n\nThe integer family includes char, short, int, long and long long, with signed and unsigned variants where permitted. The floating family includes float, double and long double. The type `_Bool` represents Boolean values. Each type has rules about range, precision and conversions.\n\n## 2. Inspect sizes with sizeof\n\nThe expression `sizeof(int)` reports the number of bytes used by int on the current implementation. The result type is size_t, so `%zu` is the appropriate printf conversion for displaying it.\n\n## 3. A byte is not universally eight bits\n\n`sizeof` counts C bytes. The macro CHAR_BIT from `<limits.h>` tells you how many bits are in one byte for the implementation. Most modern systems use eight-bit bytes, but portable code should not silently assume this when the distinction matters.\n\n## 4. Inspect ranges\n\n`<limits.h>` provides macros such as INT_MIN and INT_MAX. Floating-point characteristics are available from `<float.h>`. These headers describe the implementation actually compiling the program.\n\n## 5. Choose based on requirements\n\nDo not select a type solely because it has a familiar size on your computer. Consider the required range, precision, interface and portability needs. Use fixed-width integer types only when their exact-width guarantees are needed and the implementation provides them.",
       "examples": [
         {
           "id": "cl2.4-ex1",
@@ -45,14 +45,14 @@
       ]
     },
     "practise": {
-      "guidedTask": "Compile a program that reports sizeof for the fundamental types and prints integer limits from limits.h. Record the compiler and target.",
-      "independentTask": "Compare the output on two compiler targets if available. Explain which results are guaranteed by the C standard and which are implementation-dependent.",
+      "guidedTask": "Write a small C program that demonstrates the central rules in CL2.4. Compile with warnings enabled, run it with ordinary and boundary values, and explain each result in your own words.",
+      "independentTask": "Create a second example for CL2.4 using different values and names. Include one likely mistake as a separate experiment, observe the compiler diagnostic or behavior, then correct it. Record the rule that explains the correction.",
       "hints": [
-        "sizeof reports a size in bytes, not a universal bit width.",
-        "Use limits.h macros to inspect integer ranges.",
-        "Do not assume int is always 32 bits.",
-        "Use fixed-width types from stdint.h when exact widths are required and available.",
-        "Use %zu to print sizeof results."
+        "Start by identifying the exact type of every object and expression.",
+        "Check the C language rule before assuming a platform-specific result.",
+        "Use compiler warnings as feedback, not as proof of correctness.",
+        "Test normal values and important boundaries.",
+        "Explain why the result follows from the language rules."
       ]
     }
   },
@@ -65,58 +65,58 @@
     "questions": [
       {
         "id": "cl2.4-q1",
-        "prompt": "Which statement is correct about fundamental data types and type sizes?",
+        "prompt": "What does sizeof(int) report?",
         "options": [
-          "It follows C's type and language rules and should be checked with compiler diagnostics.",
-          "C ignores all declared types.",
-          "The browser decides its meaning."
+          "The size of int in C bytes on the current implementation",
+          "The number of decimal digits in an int value",
+          "The amount of RAM installed in the computer"
         ],
-        "answer": "It follows C's type and language rules and should be checked with compiler diagnostics.",
-        "explanation": "C semantics are defined by the language and implementation."
+        "answer": "The size of int in C bytes on the current implementation",
+        "explanation": "sizeof reports the size in bytes for the implementation."
       },
       {
         "id": "cl2.4-q2",
-        "prompt": "What is the safest general practice?",
+        "prompt": "Which header defines CHAR_BIT and INT_MAX?",
         "options": [
-          "Choose types and operations deliberately, initialize data and validate assumptions.",
-          "Ignore warnings and assume values are valid.",
-          "Use casts to silence every warning."
+          "limits.h",
+          "stdio.h",
+          "string.h"
         ],
-        "answer": "Choose types and operations deliberately, initialize data and validate assumptions.",
-        "explanation": "Deliberate types and checks improve correctness."
+        "answer": "limits.h",
+        "explanation": "The limits.h header provides integer range limits and CHAR_BIT."
       },
       {
         "id": "cl2.4-q3",
-        "prompt": "What should you do when a result is unexpected?",
+        "prompt": "What is the type of the result of sizeof?",
         "options": [
-          "Create a small test case and inspect types, values and conversions.",
-          "Guess the result from the variable name.",
-          "Remove the test."
+          "size_t",
+          "float",
+          "char *"
         ],
-        "answer": "Create a small test case and inspect types, values and conversions.",
-        "explanation": "Small reproducible tests make behaviour easier to reason about."
+        "answer": "size_t",
+        "explanation": "The sizeof operator yields a value of type size_t."
       },
       {
         "id": "cl2.4-q4",
-        "prompt": "Which statement about portability is accurate?",
+        "prompt": "Which statement about int size is portable?",
         "options": [
-          "Some type sizes and ranges depend on the implementation.",
-          "All C implementations use identical type widths.",
-          "Compiler warnings change the C standard."
+          "Its exact size can vary by implementation within the standard's requirements",
+          "It is always exactly 32 bits",
+          "It is always one byte"
         ],
-        "answer": "Some type sizes and ranges depend on the implementation.",
-        "explanation": "Use standard guarantees and inspect implementation limits."
+        "answer": "Its exact size can vary by implementation within the standard's requirements",
+        "explanation": "C specifies minimum ranges but does not require int to be exactly 32 bits."
       },
       {
         "id": "cl2.4-q5",
-        "prompt": "Which is a strong learning outcome?",
+        "prompt": "How many bits are in a C byte on every conforming implementation?",
         "options": [
-          "Explain the rule and apply it in a tested C program.",
-          "Memorize one output only.",
-          "Copy code without checking it."
+          "At least CHAR_BIT bits as reported by the implementation; it is not universally fixed at eight",
+          "Always exactly eight",
+          "Always exactly sixteen"
         ],
-        "answer": "Explain the rule and apply it in a tested C program.",
-        "explanation": "Understanding plus testing demonstrates transferable knowledge."
+        "answer": "At least CHAR_BIT bits as reported by the implementation; it is not universally fixed at eight",
+        "explanation": "CHAR_BIT reports the number of bits in a byte for the current implementation."
       }
     ]
   },
