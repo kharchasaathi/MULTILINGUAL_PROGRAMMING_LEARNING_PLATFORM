@@ -1,0 +1,88 @@
+{
+  "id": "c.cl7.12.en",
+  "courseId": "c",
+  "moduleId": "CL7",
+  "topicId": "CL7.12",
+  "title": "File errors, safe closing, buffering and portable text/binary modes (CodeSaathi extension)",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the concept and its C rules.",
+    "Trace the example and identify data or resource flow.",
+    "Recognize relevant safety and failure cases.",
+    "Apply the concept in a tested C program."
+  ],
+  "prerequisites": [],
+  "stages": {
+    "understand": {
+      "concept": "C streams may buffer output. Errors can occur during writes, flushes or close. fflush requests buffered output be delivered to the host environment; fclose closes the stream and can report delayed errors. Text and binary modes may differ on some systems.",
+      "whyItMatters": "Reliable file handling checks both the operation that writes data and the operation that finalizes the stream. Portable programs must choose text or binary mode intentionally.",
+      "analogy": "Treat each object or stream as a resource with a defined lifetime and explicit rules for access.",
+      "analogyLimit": "The analogy does not replace C's formal object, storage-duration, alignment or library rules."
+    },
+    "explain": {
+      "narrative": "C streams may buffer output. Errors can occur during writes, flushes or close. fflush requests buffered output be delivered to the host environment; fclose closes the stream and can report delayed errors. Text and binary modes may differ on some systems.\n\nCheck all allocation, I/O and conversion results. Respect object bounds and lifetime, initialize data before reading it, and define who owns and releases each resource.",
+      "examples": [
+        {
+          "id": "cl712-ex1",
+          "language": "en",
+          "title": "Focused C example",
+          "code": "#include <stdio.h>\nint main(void) {\n FILE *file = fopen(\"log.txt\", \"a\");\n if (file == NULL) return 1;\n int ok = fputs(\"saved\\n\", file) >= 0;\n if (fflush(file) == EOF) ok = 0;\n if (fclose(file) == EOF) ok = 0;\n return ok ? 0 : 1;\n}",
+          "explanation": "The program checks the append open, write, flush and close. A successful write call alone does not guarantee that later flushing and closing will succeed.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Identify which calls may reveal a delayed output error.",
+      "independentTask": "Write a helper that appends a line to a file and reports failures without leaking an open stream.",
+      "hints": [
+        "fclose invalidates the FILE pointer even if it reports an error; do not use the stream afterward.",
+        "Binary mode is important when the program needs byte-preserving file behaviour on systems that distinguish text and binary streams.",
+        "A successful close is not necessarily a guarantee of physical-media durability."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "cl712-q1",
+        "prompt": "Which statement best describes this lesson?",
+        "options": [
+          "The C rule and constraints described in this lesson.",
+          "An HTML tag.",
+          "A CSS selector."
+        ],
+        "answer": "The C rule and constraints described in this lesson.",
+        "explanation": "The correct answer follows the C rule described in the lesson."
+      },
+      {
+        "id": "cl712-q2",
+        "prompt": "Which practice best protects correctness?",
+        "options": [
+          "Check validity, bounds and operation results before access.",
+          "Assume memory and file operations cannot fail.",
+          "Use data before initialization."
+        ],
+        "answer": "Check validity, bounds and operation results before access.",
+        "explanation": "C programs must explicitly handle resource validity and failure paths."
+      },
+      {
+        "id": "cl712-q3",
+        "prompt": "How should the example be verified?",
+        "options": [
+          "Compile with warnings and test success and failure paths.",
+          "Ignore warnings and test only one happy path.",
+          "Assume the same layout on every platform."
+        ],
+        "answer": "Compile with warnings and test success and failure paths.",
+        "explanation": "Compiler diagnostics and deliberate tests provide evidence for correctness."
+      }
+    ]
+  },
+  "status": "draft"
+}
