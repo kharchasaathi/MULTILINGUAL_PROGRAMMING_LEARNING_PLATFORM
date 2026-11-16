@@ -142,10 +142,10 @@ The course is designed to take a learner from first contact with C through pract
 - [x] CL10.2 · Building program logic and decomposing problems
 - [x] CL10.3 · Edge cases, invalid input and error paths
 - [x] CL10.4 · Designing, executing and interpreting test cases
-- [ ] CL10.5 · Data structures and algorithm analysis introduction
-- [ ] CL10.6 · Searching: linear search and binary search; preconditions
-- [ ] CL10.7 · Sorting fundamentals and common sorting algorithms
-- [ ] CL10.8 · Stacks: representation, push, pop, peek and overflow/underflow
+- [x] CL10.5 · Data structures and algorithm analysis introduction
+- [x] CL10.6 · Searching: linear search and binary search; preconditions
+- [x] CL10.7 · Sorting fundamentals and common sorting algorithms
+- [x] CL10.8 · Stacks: representation, push, pop, peek and overflow/underflow
 - [ ] CL10.9 · Queues: enqueue, dequeue, front/rear and circular queues
 - [ ] CL10.10 · Linked lists: nodes, traversal, insertion and deletion
 - [ ] CL10.11 · Trees: terminology, representations and traversals
