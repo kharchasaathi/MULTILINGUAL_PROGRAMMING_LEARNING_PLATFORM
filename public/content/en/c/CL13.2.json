@@ -6,39 +6,61 @@
   "title": "Chapter exercises with progressive difficulty",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept or reference contract.",
-    "Trace the example and justify its behaviour.",
-    "Identify relevant assumptions and edge cases.",
-    "Apply the skill in a documented exercise."
+    "Translate a chapter concept into a precise problem statement with inputs, outputs, constraints, preconditions and error behaviour.",
+    "Solve focused beginner exercises using correct C syntax, types, expressions, selection and iteration.",
+    "Extend a working solution with functions, arrays and strings while preserving clear interfaces and invariants.",
+    "Design intermediate and advanced exercises that combine concepts without hiding the core learning objective.",
+    "Test normal, boundary, empty, malformed and invalid cases, and explain what each test demonstrates.",
+    "Evaluate a solution using correctness, safety, readability, portability and a transparent rubric rather than output alone."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL1.3",
+    "CL2.6",
+    "CL3.9",
+    "CL4.2",
+    "CL5.3",
+    "CL6.5",
+    "CL8.8",
+    "CL10.4"
+  ],
   "stages": {
     "understand": {
-      "concept": "Progressive exercises begin with focused recall or tracing, then move to small modifications, independent implementation, edge-case handling and integrated problems. Each task should specify inputs, outputs, constraints and expected behaviour.",
-      "whyItMatters": "A difficulty progression builds confidence while ensuring that learners move beyond copying examples to independent problem solving.",
-      "analogy": "Treat a reference or learning task as a contract that states what is expected and how success is checked.",
-      "analogyLimit": "The analogy does not replace the exact C standard or library specification."
+      "concept": "A chapter exercise is a deliberately bounded problem that asks a learner to apply concepts from a defined part of the C course. Progressive difficulty means that later tasks demand more independent reasoning and combine more ideas; it does not mean that the requirements become vague or that the code merely becomes longer. Every exercise should state its input, expected output, constraints, preconditions, invalid-input policy and completion criteria.\n\nA useful progression has five levels. **Level 1 — Recall and trace:** identify a type, operator rule or control-flow path and explain a short, fully defined fragment. **Level 2 — Modify:** change one small part of a working program, such as adding a condition or handling an empty array. **Level 3 — Implement:** write a function that satisfies a clear contract and test it independently. **Level 4 — Combine:** connect functions, arrays, strings, structures or files while keeping ownership and error handling explicit. **Level 5 — Extend and justify:** handle adversarial or boundary inputs, compare design choices, document limitations and defend the solution.\n\nThe difficulty should rise along identifiable dimensions: number of concepts, amount of design work, edge-case complexity, data size, resource management and independence from scaffolding. Introduce one major new demand at a time. A task that suddenly requires dynamic allocation, file formats, sorting and interactive input may measure several unfamiliar skills at once and obscure what the learner has actually mastered.\n\nFor every task, write a contract before writing code. Specify input format and limits; output format; whether empty input is allowed; how malformed input is handled; whether data may be modified; who owns allocated memory; and what happens when an operation fails. State the C version and platform assumptions when relevant. Avoid relying on undefined behaviour or on properties such as sizeof(int) == 4 unless they are explicitly part of the task's stated target.\n\nA sample case illustrates the contract but is not a complete test suite. Include ordinary cases, smallest and largest allowed cases, boundary values, duplicate values, empty collections where allowed, and invalid input where the contract defines a response. A learner should explain why each test matters. A correct program is not simply one that prints the sample output: it must satisfy the whole contract within its stated constraints.",
+      "whyItMatters": "A staged exercise path helps learners move from recognition to independent problem solving without confusing complexity with mastery. Explicit contracts and test cases also teach habits that prevent common C defects such as out-of-bounds access, unchecked conversions, integer overflow, unclear ownership and ignored I/O errors.",
+      "analogy": "Think of progressive exercises as a staircase: each step reuses skills from earlier steps and adds a manageable new demand.",
+      "analogyLimit": "The staircase is a planning metaphor, not a guarantee that every learner progresses at the same speed. Learners may need to revisit earlier skills, and real C problems do not always have a single linear difficulty level."
     },
     "explain": {
-      "narrative": "Progressive exercises begin with focused recall or tracing, then move to small modifications, independent implementation, edge-case handling and integrated problems. Each task should specify inputs, outputs, constraints and expected behaviour.\n\nUse authoritative declarations and documentation, state assumptions explicitly and verify behaviour with focused examples. Where the implementation or C version matters, record it.",
+      "narrative": "## 1. Build a progression around one chapter outcome\n\nChoose the chapter outcome first. For an arrays chapter, a sensible sequence might be: trace an indexed loop; modify it to count matching values; implement a reusable counting function; combine counting with minimum/maximum analysis; then test empty and boundary cases under a stated contract. Keep the same underlying data model while the reasoning demands increase. This makes progress visible and reduces unrelated cognitive load.\n\n## 2. Write a complete exercise contract\n\nA strong prompt answers these questions:\n\n- **Input:** where does data come from, what is its format, and what are the permitted sizes and values?\n- **Output:** what exact result or message is required, including formatting where it matters?\n- **Preconditions:** must a pointer be non-null, must an array contain a minimum number of elements, or must input be sorted?\n- **Constraints:** what time, memory, language-version or library restrictions apply?\n- **Failure policy:** how should malformed input, allocation failure, I/O failure or an invalid operation be reported?\n- **Ownership:** if dynamic memory is used, who allocates it and who releases it?\n\nDo not make learners guess hidden assumptions. If the task permits an empty array, define the result for minimum or maximum; if it does not, state and enforce the non-empty precondition. If input is read with fgets, account for a line that is longer than the buffer. If numeric text is converted, check the conversion end pointer and range before using the value.\n\n## 3. A five-level exercise ladder\n\n**Level 1 — Understand and trace.** Ask learners to identify a type, trace a loop, calculate a well-defined expression or explain a function's return value. Require a short reason, not only a number.\n\n**Level 2 — Modify a known solution.** Add a condition, change a traversal direction, count a second category or handle a stated boundary. Ask learners to explain which invariant remains unchanged.\n\n**Level 3 — Implement a function.** Provide a function contract and ask for a reusable implementation. Separate input/output logic from the core algorithm so it can be tested with several cases.\n\n**Level 4 — Integrate concepts.** Combine two or three already taught concepts—for example, structures plus arrays and sorting, or strings plus input validation and functions. Keep the interface and data ownership explicit.\n\n**Level 5 — Extend, test and justify.** Add malformed input, resource-failure handling, larger data, portability analysis or an alternative design. Require a test table and a short explanation of trade-offs.\n\n## 4. Worked example: a contract for array analysis\n\nThe first example below accepts a fixed array and computes its count, minimum, maximum and total. Its contract requires at least one element. The function does not allocate memory or retain the array pointer. The caller supplies the valid element count. The sample values are deliberately small enough that the `long long` total is representable; a generalized exercise should state numeric bounds or add checked accumulation.\n\nA beginner exercise can trace the loop. A modification exercise can count even values. An implementation exercise can add a function that returns the range. An advanced extension can define behaviour for zero elements and add a checked sum policy rather than reading `values[0]` unconditionally.\n\n## 5. Worked example: a safe character-counting task\n\nThe second example reads one line and counts ASCII alphabetic characters. It passes the input to `isalpha` only after converting the `char` value to `unsigned char`, as required for every value other than EOF. It deliberately counts bytes/characters in the current C locale; it is not a Unicode or UTF-8 text analyzer. A natural extension is to count digits and whitespace, then to detect and report a truncated line.\n\n## 6. Design tests before declaring an exercise complete\n\nFor each contract, prepare a compact test table containing the case, input, expected result and reason. Include at least one ordinary case and the important boundaries. For parsers, test empty text, leading/trailing whitespace, malformed characters, trailing junk and out-of-range values. For arrays, test the smallest permitted count, repeated values, negative values if allowed, and the maximum count. For file tasks, test missing files, malformed records and write failures where they can be simulated safely.\n\nA compiler warning or sanitizer report is useful evidence, but neither replaces reasoning about the C standard and the full input domain. A program can compile and pass a small test while still violating its contract on an untested path.\n\n## 7. Use a transparent marking rubric\n\nA practical 10-point rubric is: 4 points for functional correctness against the stated contract; 2 for boundary and invalid-input handling; 1 for memory/resource safety; 1 for clear decomposition and readable names; 1 for portability and standards-aware reasoning; and 1 for meaningful tests and explanation. Adjust the weights to the chapter outcome, but publish them before learners submit. Do not award full credit merely for matching one sample output.",
       "examples": [
         {
           "id": "cl132-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stddef.h>\nint count_even(const int values[], size_t count) {\n int result = 0;\n for (size_t i=0; i<count; ++i)\n  if (values[i] % 2 == 0) ++result;\n return result;\n}",
-          "explanation": "A beginner task may trace this function; an intermediate task may handle empty input and NULL policy; an advanced task may generalize the predicate through a callback.",
-          "runnable": false
+          "title": "Analyse a non-empty integer array using a clear function contract",
+          "code": "#include <stdio.h>\n#include <stddef.h>\n\nstruct Summary {\n    int minimum;\n    int maximum;\n    long long total;\n};\n\nint summarize(const int values[], size_t count, struct Summary *out)\n{\n    size_t i;\n\n    if (values == NULL || out == NULL || count == 0U) {\n        return 0;\n    }\n\n    out->minimum = values[0];\n    out->maximum = values[0];\n    out->total = 0;\n\n    for (i = 0U; i < count; ++i) {\n        if (values[i] < out->minimum) {\n            out->minimum = values[i];\n        }\n        if (values[i] > out->maximum) {\n            out->maximum = values[i];\n        }\n        out->total += (long long)values[i];\n    }\n    return 1;\n}\n\nint main(void)\n{\n    const int values[] = { 8, -2, 5, 11, 0 };\n    const size_t count = sizeof values / sizeof values[0];\n    struct Summary result;\n\n    if (!summarize(values, count, &result)) {\n        puts(\"invalid input\");\n        return 1;\n    }\n\n    printf(\"count=%zu min=%d max=%d total=%lld\\n\",\n           count, result.minimum, result.maximum, result.total);\n    return 0;\n}\n",
+          "explanation": "The function rejects null pointers and an empty array before reading values[0]. It initializes the extrema from the first valid element, then visits exactly indices 0 through count - 1. The total uses long long; for a general-purpose version, the contract must bound the number and magnitude of elements or the implementation must check for signed overflow before addition. Expected output: count=5 min=-2 max=11 total=22. A Level 1 task traces the loop; Level 2 adds an even-value count; Level 3 writes a separate range function; Level 4 stores several summaries in an array of structures; Level 5 defines and tests an overflow policy.",
+          "runnable": true
+        },
+        {
+          "id": "cl132-ex2",
+          "language": "en",
+          "title": "Read a line and count alphabetic characters safely",
+          "code": "#include <ctype.h>\n#include <stdio.h>\n\nint main(void)\n{\n    char line[128];\n    size_t letters = 0U;\n    size_t i;\n\n    if (fgets(line, sizeof line, stdin) == NULL) {\n        fputs(\"input error or end of file\\n\", stderr);\n        return 1;\n    }\n\n    for (i = 0U; line[i] != '\\0'; ++i) {\n        if (isalpha((unsigned char)line[i]) != 0) {\n            ++letters;\n        }\n    }\n\n    printf(\"alphabetic-bytes=%zu\\n\", letters);\n    return 0;\n}\n",
+          "explanation": "The loop stops at the terminating null character and never reads beyond the stored string. Converting each possibly negative plain-char value to unsigned char makes the ctype argument valid. With input `C language 101!`, expected output is `alphabetic-bytes=9`. The program handles one line only and does not claim to count Unicode letters; a more advanced exercise should detect a line that does not fit in the buffer and define how it is handled.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Create three exercises for the same function at increasing difficulty.",
-      "independentTask": "Design a chapter exercise set with explicit constraints, sample cases, hints and a rubric.",
+      "guidedTask": "Use Example 1 as the starting point. First, trace each update to minimum, maximum and total. Next, add an evenCount field and update it in the same traversal. Then write a test table for five elements, one element, repeated values and a negative-only array. Finally, change the function contract to permit count == 0 and redesign the result so that no uninitialized minimum or maximum is read.",
+      "independentTask": "Create a chapter exercise pack with five levels for one completed C module. Include one trace task, one modification task, one function-implementation task, one multi-concept integration task and one extension task. For every task, provide a complete input/output contract, constraints, preconditions, failure policy, at least three meaningful tests, graduated hints and a published marking rubric. Include a reference solution or evaluation criteria, but keep the learner-facing prompt separate from the solution.",
       "hints": [
-        "Progression should increase reasoning demands, not merely code length.",
-        "Include boundary and invalid-input cases.",
-        "Provide hints that guide reasoning without giving away the complete solution."
+        "Write the learning outcome and contract before drafting the task statement.",
+        "Increase one major difficulty dimension at a time; reuse earlier concepts deliberately.",
+        "State whether empty input, null pointers, duplicates and invalid values are permitted.",
+        "Separate the algorithm from input/output code so that functions can be tested directly.",
+        "For numeric input, check conversion success, trailing characters and range before using the value.",
+        "Test boundaries and explain why each case is important; one sample run is not proof of correctness."
       ]
     }
   },
@@ -51,36 +73,63 @@
     "questions": [
       {
         "id": "cl132-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What makes a set of chapter exercises genuinely progressive?",
         "options": [
-          "The learning or C language principle described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "Each level adds a clearly identified reasoning or design demand while reusing earlier skills.",
+          "Every later task simply contains more lines of code.",
+          "The task requirements become less specific at higher levels.",
+          "All tasks use unrelated topics so that no earlier skill is reused."
         ],
-        "answer": "The learning or C language principle described in this lesson.",
-        "explanation": "The correct choice follows the concept or reference contract described above."
+        "answer": "Each level adds a clearly identified reasoning or design demand while reusing earlier skills.",
+        "explanation": "Progression should increase conceptual integration, independence, edge-case reasoning or design responsibility in a controlled way. Code length alone is not a measure of difficulty."
       },
       {
         "id": "cl132-q2",
-        "prompt": "What should be checked before applying the concept?",
+        "prompt": "A function calculates the minimum value of an array. Which contract detail is essential if the implementation initializes the minimum from values[0]?",
         "options": [
-          "Its exact requirements, assumptions and edge cases.",
-          "Only the function or topic name.",
-          "Whether an unrelated example compiles."
+          "The array must contain at least one element, and the pointer must refer to that valid element.",
+          "The array must always contain exactly four elements.",
+          "The array must be sorted in ascending order.",
+          "The caller must allocate the array with malloc."
         ],
-        "answer": "Its exact requirements, assumptions and edge cases.",
-        "explanation": "Reliable use depends on understanding the actual contract."
+        "answer": "The array must contain at least one element, and the pointer must refer to that valid element.",
+        "explanation": "Reading values[0] requires a non-empty valid array. The contract must state this precondition or the function must explicitly handle an empty array before accessing the first element."
       },
       {
         "id": "cl132-q3",
-        "prompt": "Which practice best demonstrates understanding?",
+        "prompt": "When passing a possibly negative plain-char value to isalpha, what is the correct approach (except when the value is EOF)?",
         "options": [
-          "Explain the reasoning and test representative and boundary cases.",
-          "Memorize an output without explanation.",
-          "Ignore invalid input."
+          "Convert it to unsigned char before calling isalpha.",
+          "Pass it directly because every char value is valid for ctype.",
+          "Convert it to int and assume the result is non-negative.",
+          "Call isalpha only after changing the locale to the C locale."
         ],
-        "answer": "Explain the reasoning and test representative and boundary cases.",
-        "explanation": "Reasoning and targeted tests demonstrate transferable understanding."
+        "answer": "Convert it to unsigned char before calling isalpha.",
+        "explanation": "The ctype functions require an argument equal to EOF or representable as unsigned char. Casting a possibly negative plain char to unsigned char satisfies that argument-domain requirement."
+      },
+      {
+        "id": "cl132-q4",
+        "prompt": "Which test set best checks a function that counts matching elements in an array?",
+        "options": [
+          "A normal array, the smallest permitted array, repeated values and a boundary or empty case if allowed.",
+          "Only the sample array shown in the lesson.",
+          "Only a very large random array with no expected result.",
+          "Several arrays that all contain the same positive value."
+        ],
+        "answer": "A normal array, the smallest permitted array, repeated values and a boundary or empty case if allowed.",
+        "explanation": "A useful test set targets distinct behaviours and boundary conditions. Expected results should be known, and empty input should be tested only if the contract permits it."
+      },
+      {
+        "id": "cl132-q5",
+        "prompt": "A learner's solution matches the sample output but fails on malformed input that the exercise contract says must be rejected. How should it be assessed?",
+        "options": [
+          "It is incomplete because it does not satisfy the full contract.",
+          "It is correct because sample output is the only objective measure.",
+          "It should receive full credit if it compiles without warnings.",
+          "The malformed-input requirement should be ignored after submission."
+        ],
+        "answer": "It is incomplete because it does not satisfy the full contract.",
+        "explanation": "Correctness is measured against all stated requirements, including invalid-input and failure behaviour. Compilation and one successful sample run are not sufficient evidence."
       }
     ]
   },
