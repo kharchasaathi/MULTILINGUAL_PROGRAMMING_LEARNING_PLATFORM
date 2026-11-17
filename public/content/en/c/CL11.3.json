@@ -6,39 +6,61 @@
   "title": "Project 3: student record manager",
   "language": "en",
   "learningObjectives": [
-    "Explain the topic and its C rules.",
-    "Trace the example and identify its purpose.",
-    "Identify important validation and failure cases.",
-    "Apply the concept in a tested program or reference exercise."
+    "Define a Student structure that groups an ID, a bounded name and marks into one record.",
+    "Explain how an array of structures and a separate count represent a bounded collection.",
+    "Implement add and search operations while enforcing positive, unique student IDs.",
+    "Update a record and delete it safely by shifting later array elements.",
+    "Validate line-based input, integer IDs, names and finite marks before changing stored data.",
+    "Test normal operations, duplicate IDs, missing records, invalid values and full capacity."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL2.1",
+    "CL3.1",
+    "CL4.1",
+    "CL5.1",
+    "CL5.3",
+    "CL6.1",
+    "CL11.1",
+    "CL11.2"
+  ],
   "stages": {
     "understand": {
-      "concept": "A student record manager stores multiple records, supports adding and listing records, validates fields and may persist records in a file. The project should define limits for names, IDs and record counts.",
-      "whyItMatters": "This project integrates structures, arrays, functions, input handling and file I/O into a realistic record-oriented program.",
-      "analogy": "Treat the project or language feature as a set of components with explicit interfaces and responsibilities.",
-      "analogyLimit": "The analogy does not replace C's formal language, library and resource-management rules."
+      "concept": "A student record manager keeps related fields together in a structure. This version uses struct Student with a positive integer ID, a fixed-size character array for the name and a double for marks. An array stores up to 100 records; a separate size_t count tells the program how many array elements are currently active. The project is intentionally in-memory: records disappear when the program exits. File persistence is handled in a later project.",
+      "whyItMatters": "Record-oriented programs are common in schools, shops and offices. This project combines structures, arrays, functions, searching, validation and menu-driven control flow without hiding the data model behind a library.",
+      "analogy": "Think of each structure as one paper student card and the array as a bounded stack of cards. The count identifies how many cards are currently in use.",
+      "analogyLimit": "C does not automatically check array capacity or string length. The program must enforce those limits before writing to an element or copying text."
     },
     "explain": {
-      "narrative": "A student record manager stores multiple records, supports adding and listing records, validates fields and may persist records in a file. The project should define limits for names, IDs and record counts.\n\nFor a complete implementation, define input constraints, ownership, error handling and test cases before coding. Compile with warnings and verify normal, boundary and failure behaviour.",
+      "narrative": "Start by defining the record layout, then decide the collection limit and the meaning of count. Only elements from index 0 through count - 1 are active. Never read an unused array element. Before adding, reject a full collection, invalid fields and an ID already present. A linear search is appropriate for this small unsorted collection; it returns count as a not-found sentinel because count is outside the active index range.\\n\\nFor an update, locate the record first and validate the replacement value before changing it. For deletion, shift each later active record one position to the left, then decrement count. The old final slot is no longer active and must not be included in listings.\\n\\nUse fgets for complete lines, then parse numbers with strtol or strtod. Check conversion errors, trailing non-whitespace characters and domain limits. A name may contain spaces, must not be empty, and must fit in its destination array including the terminating null character. Reject overlong input rather than silently storing a truncated name.\\n\\nThis example stores marks from 0 through 100 and IDs from 1 through INT_MAX. It does not write files or claim that the data survives a restart. A later file-based project can add persistence after the in-memory operations are reliable.",
       "examples": [
         {
           "id": "cl113-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\nstruct Student { int id; char name[32]; };\nint main(void) {\n struct Student s = {101, \"Asha\"};\n printf(\"%d %s\\n\", s.id, s.name);\n return 0;\n}",
-          "explanation": "The structure groups an identifier and a fixed-capacity name. The example demonstrates one record; a complete manager needs collection management and input validation.",
-          "runnable": false
+          "title": "Testable record operations: add, find, update and delete",
+          "code": "#include <assert.h>\n#include <stddef.h>\n#include <stdio.h>\n#include <string.h>\n\n#define MAX_STUDENTS 3\n#define NAME_SIZE 64\n\nstruct Student {\n    int id;\n    char name[NAME_SIZE];\n    double marks;\n};\n\nenum Result { OK, DUPLICATE_ID, FULL, NOT_FOUND, INVALID };\n\nstatic int valid_student(const struct Student *s) {\n    return s != NULL && s->id > 0 && s->name[0] != '\\0'\n        && strlen(s->name) < NAME_SIZE\n        && s->marks >= 0.0 && s->marks <= 100.0;\n}\n\nstatic size_t find_student(const struct Student students[], size_t count, int id) {\n    size_t i;\n    for (i = 0; i < count; ++i) {\n        if (students[i].id == id) return i;\n    }\n    return count;\n}\n\nstatic enum Result add_student(struct Student students[], size_t *count,\n                               const struct Student *student) {\n    size_t i;\n    if (students == NULL || count == NULL || student == NULL\n        || *count > MAX_STUDENTS || !valid_student(student)) return INVALID;\n    if (*count == MAX_STUDENTS) return FULL;\n    for (i = 0; i < *count; ++i) {\n        if (students[i].id == student->id) return DUPLICATE_ID;\n    }\n    students[*count] = *student;\n    ++(*count);\n    return OK;\n}\n\nstatic enum Result update_marks(struct Student students[], size_t count,\n                                int id, double marks) {\n    size_t index;\n    if (students == NULL || marks < 0.0 || marks > 100.0) return INVALID;\n    index = find_student(students, count, id);\n    if (index == count) return NOT_FOUND;\n    students[index].marks = marks;\n    return OK;\n}\n\nstatic enum Result delete_student(struct Student students[], size_t *count, int id) {\n    size_t index;\n    size_t i;\n    if (students == NULL || count == NULL || *count > MAX_STUDENTS) return INVALID;\n    index = find_student(students, *count, id);\n    if (index == *count) return NOT_FOUND;\n    for (i = index; i + 1U < *count; ++i) students[i] = students[i + 1U];\n    --(*count);\n    return OK;\n}\n\nint main(void) {\n    struct Student students[MAX_STUDENTS] = { {0, \"\", 0.0} };\n    const struct Student a = { 101, \"Asha Rao\", 91.5 };\n    const struct Student duplicate = { 101, \"Duplicate\", 70.0 };\n    const struct Student b = { 102, \"Ravi Kumar\", 82.0 };\n    const struct Student c = { 103, \"Mina Das\", 76.0 };\n    const struct Student d = { 104, \"Full Check\", 88.0 };\n    size_t count = 0U;\n\n    assert(add_student(students, &count, &a) == OK);\n    assert(add_student(students, &count, &duplicate) == DUPLICATE_ID);\n    assert(add_student(students, &count, &b) == OK);\n    assert(add_student(students, &count, &c) == OK);\n    assert(add_student(students, &count, &d) == FULL);\n    assert(find_student(students, count, 102) == 1U);\n    assert(find_student(students, count, 999) == count);\n    assert(update_marks(students, count, 102, 95.0) == OK);\n    assert(students[1].marks == 95.0);\n    assert(update_marks(students, count, 102, 101.0) == INVALID);\n    assert(delete_student(students, &count, 101) == OK);\n    assert(count == 2U && students[0].id == 102);\n    assert(delete_student(students, &count, 999) == NOT_FOUND);\n    puts(\"All student record tests passed.\");\n    return 0;\n}",
+          "explanation": "The first program isolates collection operations from user input. Assertions verify successful additions, duplicate rejection, capacity limits, search results, a valid update, an invalid mark and deletion by shifting. The small capacity of three makes the full-storage boundary easy to test.",
+          "runnable": true
+        },
+        {
+          "id": "cl113-ex2",
+          "language": "en",
+          "title": "Complete menu-driven student record manager",
+          "code": "#include <ctype.h>\n#include <errno.h>\n#include <math.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n#define MAX_STUDENTS 100\n#define NAME_SIZE 64\n#define LINE_SIZE 128\n\nstruct Student {\n    int id;\n    char name[NAME_SIZE];\n    double marks;\n};\n\nenum ReadResult { READ_OK, READ_END, READ_INVALID };\n\nstatic enum ReadResult read_line(const char *prompt, char *buffer, size_t size) {\n    size_t length;\n    int ch;\n    if (prompt != NULL) fputs(prompt, stdout);\n    if (fgets(buffer, (int)size, stdin) == NULL) return READ_END;\n    length = strlen(buffer);\n    if (length > 0U && buffer[length - 1U] == '\\n') {\n        buffer[length - 1U] = '\\0';\n        return READ_OK;\n    }\n    ch = getchar();\n    if (ch == '\\n' || ch == EOF) return READ_OK;\n    while (ch != '\\n' && ch != EOF) ch = getchar();\n    return READ_INVALID;\n}\n\nstatic char *trim(char *text) {\n    char *start = text;\n    char *end;\n    while (isspace((unsigned char)*start)) ++start;\n    end = start + strlen(start);\n    while (end > start && isspace((unsigned char)end[-1])) --end;\n    *end = '\\0';\n    return start;\n}\n\nstatic int read_integer(const char *prompt, int *value) {\n    char line[LINE_SIZE];\n    char *end;\n    long parsed;\n    enum ReadResult result = read_line(prompt, line, sizeof line);\n    if (result != READ_OK) return result == READ_END ? 0 : -1;\n    errno = 0;\n    {\n        char *start = trim(line);\n        parsed = strtol(start, &end, 10);\n        if (end == start || errno == ERANGE || parsed < 1L || parsed > 2147483647L) return -1;\n    }\n    while (isspace((unsigned char)*end)) ++end;\n    if (*end != '\\0') return -1;\n    *value = (int)parsed;\n    return 1;\n}\n\nstatic int read_marks(const char *prompt, double *value) {\n    char line[LINE_SIZE];\n    char *start;\n    char *end;\n    double parsed;\n    enum ReadResult result = read_line(prompt, line, sizeof line);\n    if (result != READ_OK) return result == READ_END ? 0 : -1;\n    start = trim(line);\n    errno = 0;\n    parsed = strtod(start, &end);\n    if (end == start || errno == ERANGE || !isfinite(parsed)) return -1;\n    while (isspace((unsigned char)*end)) ++end;\n    if (*end != '\\0' || parsed < 0.0 || parsed > 100.0) return -1;\n    *value = parsed;\n    return 1;\n}\n\nstatic int read_name(const char *prompt, char name[NAME_SIZE]) {\n    char line[LINE_SIZE];\n    char *clean;\n    enum ReadResult result = read_line(prompt, line, sizeof line);\n    size_t length;\n    if (result != READ_OK) return result == READ_END ? 0 : -1;\n    clean = trim(line);\n    length = strlen(clean);\n    if (length == 0U || length >= NAME_SIZE) return -1;\n    memcpy(name, clean, length + 1U);\n    return 1;\n}\n\nstatic size_t find_student(const struct Student students[], size_t count, int id) {\n    size_t i;\n    for (i = 0; i < count; ++i) if (students[i].id == id) return i;\n    return count;\n}\n\nstatic void list_students(const struct Student students[], size_t count) {\n    size_t i;\n    if (count == 0U) {\n        puts(\"No student records.\");\n        return;\n    }\n    puts(\"\\nID       NAME                                     MARKS\");\n    for (i = 0; i < count; ++i)\n        printf(\"%-8d %-40s %6.2f\\n\", students[i].id, students[i].name, students[i].marks);\n}\n\nstatic void add_student(struct Student students[], size_t *count) {\n    struct Student item;\n    int status;\n    if (*count >= MAX_STUDENTS) {\n        puts(\"Storage is full.\");\n        return;\n    }\n    status = read_integer(\"Student ID: \", &item.id);\n    if (status != 1) { puts(status == 0 ? \"Input ended.\" : \"Invalid ID.\"); return; }\n    if (find_student(students, *count, item.id) != *count) {\n        puts(\"That ID already exists.\");\n        return;\n    }\n    status = read_name(\"Student name: \", item.name);\n    if (status != 1) { puts(status == 0 ? \"Input ended.\" : \"Invalid name or line too long.\"); return; }\n    status = read_marks(\"Marks (0-100): \", &item.marks);\n    if (status != 1) { puts(status == 0 ? \"Input ended.\" : \"Invalid marks.\"); return; }\n    students[*count] = item;\n    ++(*count);\n    puts(\"Student added.\");\n}\n\nstatic void search_student(const struct Student students[], size_t count) {\n    int id;\n    int status = read_integer(\"ID to find: \", &id);\n    size_t index;\n    if (status != 1) { puts(status == 0 ? \"Input ended.\" : \"Invalid ID.\"); return; }\n    index = find_student(students, count, id);\n    if (index == count) puts(\"Student not found.\");\n    else printf(\"Found: %d | %s | %.2f\\n\", students[index].id,\n                students[index].name, students[index].marks);\n}\n\nstatic void update_student(struct Student students[], size_t count) {\n    int id;\n    int status = read_integer(\"ID to update: \", &id);\n    size_t index;\n    double marks;\n    if (status != 1) { puts(status == 0 ? \"Input ended.\" : \"Invalid ID.\"); return; }\n    index = find_student(students, count, id);\n    if (index == count) { puts(\"Student not found.\"); return; }\n    status = read_marks(\"New marks (0-100): \", &marks);\n    if (status != 1) { puts(status == 0 ? \"Input ended.\" : \"Invalid marks.\"); return; }\n    students[index].marks = marks;\n    puts(\"Marks updated.\");\n}\n\nstatic void delete_student(struct Student students[], size_t *count) {\n    int id;\n    int status = read_integer(\"ID to delete: \", &id);\n    size_t index;\n    size_t i;\n    if (status != 1) { puts(status == 0 ? \"Input ended.\" : \"Invalid ID.\"); return; }\n    index = find_student(students, *count, id);\n    if (index == *count) { puts(\"Student not found.\"); return; }\n    for (i = index; i + 1U < *count; ++i) students[i] = students[i + 1U];\n    --(*count);\n    puts(\"Student deleted.\");\n}\n\nint main(void) {\n    struct Student students[MAX_STUDENTS];\n    size_t count = 0U;\n    char line[LINE_SIZE];\n    int choice;\n    for (;;) {\n        enum ReadResult status;\n        puts(\"\\nSTUDENT RECORD MANAGER\");\n        puts(\"1 Add  2 List  3 Search  4 Update marks  5 Delete  0 Exit\");\n        status = read_line(\"Choose: \", line, sizeof line);\n        if (status != READ_OK) {\n            if (status == READ_END) puts(\"\\nEnd of input. Goodbye.\");\n            else puts(\"Invalid or overlong menu input.\");\n            if (status == READ_END) break;\n            continue;\n        }\n        {\n            char *end;\n            long parsed;\n            char *start = trim(line);\n            errno = 0;\n            parsed = strtol(start, &end, 10);\n            while (isspace((unsigned char)*end)) ++end;\n            if (start == end || *end != '\\0' || errno == ERANGE\n                || parsed < 0L || parsed > 5L) {\n                puts(\"Choose a number from 0 to 5.\");\n                continue;\n            }\n            choice = (int)parsed;\n        }\n        switch (choice) {\n            case 1: add_student(students, &count); break;\n            case 2: list_students(students, count); break;\n            case 3: search_student(students, count); break;\n            case 4: update_student(students, count); break;\n            case 5: delete_student(students, &count); break;\n            case 0: puts(\"Goodbye.\"); return 0;\n            default: break;\n        }\n    }\n    return 0;\n}",
+          "explanation": "The second program provides add, list, search, update and delete menu actions. It accepts names with spaces, checks numeric conversions and field ranges, rejects duplicate IDs and overlong lines, and exits cleanly on EOF. It stores at most 100 records in memory; no file persistence is attempted.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Identify the capacity limit for the name field.",
-      "independentTask": "Build add, list, find and save operations. Test duplicate IDs, full storage and invalid names.",
+      "guidedTask": "Trace the deterministic example. Add the three valid records, identify why the duplicate and fourth record are rejected, update Ravi's marks, then delete Asha. Draw the array before and after deletion and explain why count changes from three to two.",
+      "independentTask": "Extend the interactive manager with a validated option to update a student's name as well as marks. Keep the same fixed capacity and unique-ID rule. Test blank names, names that exceed the buffer, duplicate IDs, marks below 0 or above 100, malformed numeric text, a missing ID, deletion from the first/middle/last position and an empty list. Do not add file storage in this project.",
       "hints": [
-        "Use fgets for bounded line input and define how overlong lines are handled.",
-        "Choose whether records live in a fixed array or dynamically allocated collection.",
-        "Validate uniqueness and required fields before saving."
+        "Use one struct Student definition so every record has the same field layout.",
+        "Keep count separate from the array capacity; only indices smaller than count contain active records.",
+        "Search linearly and return count when an ID is not found.",
+        "Check for duplicate IDs before copying a new structure into the array.",
+        "When deleting, shift only active elements and decrement count exactly once.",
+        "Read a full line with fgets, parse with strtol or strtod, and reject trailing text, overflow and out-of-range values."
       ]
     }
   },
@@ -51,36 +73,58 @@
     "questions": [
       {
         "id": "cl113-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What does count represent in the fixed-size student array?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "The number of active records stored in the array.",
+          "The maximum number of bytes in a name.",
+          "The ID of the last student."
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the topic and constraints described above."
+        "answer": "The number of active records stored in the array.",
+        "explanation": "The capacity is the array's fixed maximum; count tracks how many elements are currently active."
       },
       {
         "id": "cl113-q2",
-        "prompt": "What is essential for a reliable implementation?",
+        "prompt": "Why should the program check for an existing ID before adding a record?",
         "options": [
-          "Define the interface, validate inputs and handle failures.",
-          "Assume every input is valid.",
-          "Ignore resource ownership."
+          "To enforce the rule that each student ID is unique.",
+          "To make the array grow automatically.",
+          "To sort all names alphabetically."
         ],
-        "answer": "Define the interface, validate inputs and handle failures.",
-        "explanation": "Reliable C programs make assumptions and failure behaviour explicit."
+        "answer": "To enforce the rule that each student ID is unique.",
+        "explanation": "A duplicate check prevents two records from representing the same student identifier."
       },
       {
         "id": "cl113-q3",
-        "prompt": "How should the work be verified?",
+        "prompt": "If find_student returns count, what does that mean?",
         "options": [
-          "Compile with warnings and test representative and boundary cases.",
-          "Only check whether the source file exists.",
-          "Assume a single successful run proves correctness."
+          "The requested ID was not found in the active records.",
+          "The array is guaranteed to be full.",
+          "The student is stored at index count."
         ],
-        "answer": "Compile with warnings and test representative and boundary cases.",
-        "explanation": "Compilation and targeted tests provide evidence of correctness."
+        "answer": "The requested ID was not found in the active records.",
+        "explanation": "Valid active indices range from zero to count minus one, so count is a safe not-found sentinel."
+      },
+      {
+        "id": "cl113-q4",
+        "prompt": "What must happen after deleting a record from the middle of the array?",
+        "options": [
+          "Shift later active records left and decrement count.",
+          "Increase count and leave a gap.",
+          "Clear the entire array and restart."
+        ],
+        "answer": "Shift later active records left and decrement count.",
+        "explanation": "Shifting preserves a contiguous active range, and decrementing count removes the former final element from that range."
+      },
+      {
+        "id": "cl113-q5",
+        "prompt": "Which input strategy best protects the name field from overflow?",
+        "options": [
+          "Read a bounded line, check its length and copy only when it fits.",
+          "Use gets and assume the user enters a short name.",
+          "Copy input without checking its length."
+        ],
+        "answer": "Read a bounded line, check its length and copy only when it fits.",
+        "explanation": "Bounded input and an explicit length check protect the destination array and preserve its null terminator."
       }
     ]
   },
