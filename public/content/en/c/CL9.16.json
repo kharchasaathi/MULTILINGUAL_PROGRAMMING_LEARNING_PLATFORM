@@ -6,39 +6,52 @@
   "title": "Version control and reproducible C builds",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its constraints.",
-    "Trace the example and reason about its data flow.",
-    "Identify complexity, boundary or safety considerations.",
-    "Apply the concept in a tested C program."
+    "Explain how version control records source changes and supports review, collaboration and rollback.",
+    "Use a clean working tree, focused staging, meaningful commits and reviewed diffs to make changes traceable.",
+    "Identify build inputs including compiler version, target, language standard, flags, dependencies, generated files and environment.",
+    "Distinguish a repeatable build from a reproducible build and a hermetic build.",
+    "Use documented build commands and controlled dependencies to reduce hidden environmental assumptions.",
+    "Verify the produced artifact and record commit identity, toolchain details, test evidence and relevant hashes."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "Version control records source changes and supports review, rollback and collaboration. A reproducible build documents compiler version, flags, dependencies and source inputs so another environment can rebuild the program consistently.",
-      "whyItMatters": "Reliable C engineering requires knowing exactly which source and toolchain produced a binary. Version history also makes risky changes easier to inspect and revert.",
-      "analogy": "Treat an algorithm or data structure as a set of operations that must preserve a clearly stated contract.",
-      "analogyLimit": "The analogy does not replace formal complexity analysis, C object rules or algorithm preconditions."
+      "concept": "Version control records source changes and supports review, collaboration and recovery. A reproducible C build also records the inputs that turn source into an executable: compiler and linker versions, target platform, C standard, flags, dependencies, generated inputs and build configuration. A repeatable build can be run again under stated conditions; a reproducible build aims for independent builds from the same declared inputs to produce identical artifacts; a hermetic build additionally isolates the process from undeclared host inputs.",
+      "whyItMatters": "A program that builds only on one developer's machine is difficult to maintain and verify. Traceable history and controlled build inputs make defects easier to reproduce, changes easier to review and releases easier to investigate.",
+      "analogy": "Version history is like a lab notebook recording each change; a build manifest is like recording the exact instruments, materials and procedure used in an experiment.",
+      "analogyLimit": "A complete notebook does not guarantee the experiment is correct, and recording a compiler version alone does not control every dependency, timestamp, environment variable or external input."
     },
     "explain": {
-      "narrative": "Version control records source changes and supports review, rollback and collaboration. A reproducible build documents compiler version, flags, dependencies and source inputs so another environment can rebuild the program consistently.\n\nBefore implementation, state input constraints, empty-case behaviour, ownership and invariants. Compile with warnings and test representative, boundary and failure cases.",
+      "narrative": "Use version control to record intentional source and configuration changes. Inspect the working tree and diffs before staging; stage only files that belong to the change; inspect the staged diff; then create a focused commit with a descriptive message. Keep generated binaries, temporary files, secrets and machine-specific configuration out of source history. A .gitignore rule does not remove a file that is already tracked.\\n\\nFor a dependable build, document the compiler, linker, target, language standard, flags, dependency versions, generated inputs and exact build/test commands. Prefer a clean build from a fresh checkout. Avoid undeclared dependence on a developer's home directory, current working directory, locale, network state or untracked generated file.\\n\\nA repeatable build means the documented process can be run again under stated conditions. A reproducible build aims for independent builds from the same declared inputs to create bit-for-bit identical artifacts. A hermetic build further isolates the process from undeclared host inputs. Timestamps, absolute paths, file ordering, random seeds and nondeterministic generators can cause output differences. Compare artifact hashes from independent builds when bit-for-bit reproducibility is required; a hash identifies bytes but does not prove the code is correct or the source is trusted.",
       "examples": [
         {
           "id": "cl916-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "/* Example Makefile fragment:\nCC ?= cc\nCFLAGS ?= -std=c17 -Wall -Wextra -Wpedantic\napp: main.c math_ops.c\n\t$(CC) $(CFLAGS) main.c math_ops.c -o app\n*/\n#include <stdio.h>\nint main(void) { puts(\"Build inputs should be documented\"); return 0; }",
-          "explanation": "The Makefile records a compiler variable, flags and source dependencies. A real project should also document generated files and external library requirements.",
+          "title": "A simple Makefile with explicit compiler settings",
+          "code": "CC = cc\nCFLAGS = -std=c17 -Wall -Wextra -Wpedantic\n\napp: main.c math_ops.c math_ops.h\n\t$(CC) $(CFLAGS) main.c math_ops.c -o app\n\nclean:\n\trm -f app\n\n.PHONY: clean",
+          "explanation": "The Makefile records the compiler command, standard mode, warning policy and source/header inputs. A real project should also document compiler version, target, dependency versions and any generated source inputs.",
           "runnable": false
+        },
+        {
+          "id": "cl916-ex2",
+          "language": "en",
+          "title": "Record explicit build configuration in a C program",
+          "code": "#include <stdio.h>\n\n#ifndef APP_VERSION\n#define APP_VERSION \"dev\"\n#endif\n#ifndef BUILD_PROFILE\n#define BUILD_PROFILE \"debug\"\n#endif\n\nint main(void)\n{\n    printf(\"version=%s\\n\", APP_VERSION);\n    printf(\"profile=%s\\n\", BUILD_PROFILE);\n    return 0;\n}\n\n/* Example:\n   cc -std=c17 -DAPP_VERSION=\\\"1.2.0\\\" \\\n      -DBUILD_PROFILE=\\\"release\\\" main.c -o app\n*/",
+          "explanation": "The build supplies version and profile as explicit inputs rather than embedding the current time or a developer-specific path. Identical program output does not by itself prove identical binary artifacts.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Identify the inputs that affect the build output.",
-      "independentTask": "Create a small repository with a Makefile, README build instructions and a test command.",
+      "guidedTask": "Inspect a small repository's working tree and staged diff. List all inputs needed to build the C program on a clean machine, including compiler, flags, source files, headers and dependencies.",
+      "independentTask": "Create a small multi-file C repository with a Makefile and README. Commit the source and build instructions, build from a clean checkout, record compiler and target details, and compare artifact hashes from two independent builds.",
       "hints": [
-        "Commit source and build configuration, not generated secrets or machine-specific temporary files.",
-        "Record compiler and dependency versions when reproducibility matters.",
-        "Review diffs before committing and test the committed revision."
+        "Inspect both unstaged and staged diffs before committing.",
+        "A .gitignore rule does not untrack a file that is already committed.",
+        "Record compiler, linker, target, standard mode, flags and dependency versions.",
+        "A repeatable process is not automatically a bit-for-bit reproducible build.",
+        "Timestamps, absolute paths and nondeterministic generators can change binary output.",
+        "A hash identifies bytes but does not prove correctness or trusted origin."
       ]
     }
   },
@@ -51,36 +64,63 @@
     "questions": [
       {
         "id": "cl916-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What is the purpose of inspecting the staged diff?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "Verify exactly which changes will enter the next commit",
+          "Compile the program automatically",
+          "Delete every untracked file",
+          "Guarantee the build is reproducible"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the concept and constraints described above."
+        "answer": "Verify exactly which changes will enter the next commit",
+        "explanation": "The staged diff shows the content selected for the next commit."
       },
       {
         "id": "cl916-q2",
-        "prompt": "What should be checked before relying on this algorithm or structure?",
+        "prompt": "What does a reproducible-build goal normally mean?",
         "options": [
-          "Its preconditions, invariants, bounds and failure cases.",
-          "Only the name of the data structure.",
-          "Whether one example produced an output."
+          "Independent builds from the same declared inputs produce bit-for-bit identical artifacts",
+          "Two builds both exit successfully",
+          "The source has the same filename",
+          "The compiler prints no warnings"
         ],
-        "answer": "Its preconditions, invariants, bounds and failure cases.",
-        "explanation": "Correctness depends on maintaining the algorithm's contract."
+        "answer": "Independent builds from the same declared inputs produce bit-for-bit identical artifacts",
+        "explanation": "Reproducibility concerns identical outputs from independent builds using the same declared inputs."
       },
       {
         "id": "cl916-q3",
-        "prompt": "Which practice supports reliable implementation?",
+        "prompt": "Which is an example of an undeclared build input?",
         "options": [
-          "Test empty, boundary and representative inputs.",
-          "Ignore allocation failures.",
-          "Assume average complexity guarantees every operation's worst case."
+          "A generated header present only on one developer's machine",
+          "A tracked source file",
+          "A documented compiler flag",
+          "A pinned dependency version"
         ],
-        "answer": "Test empty, boundary and representative inputs.",
-        "explanation": "Targeted tests expose defects that ordinary examples may miss."
+        "answer": "A generated header present only on one developer's machine",
+        "explanation": "A local untracked file makes the build depend on hidden machine state."
+      },
+      {
+        "id": "cl916-q4",
+        "prompt": "Does a .gitignore entry remove a file already tracked by Git?",
+        "options": [
+          "No, tracked files remain tracked until explicitly removed from the index",
+          "Yes, immediately and from all history",
+          "Only on Windows",
+          "Only after a release build"
+        ],
+        "answer": "No, tracked files remain tracked until explicitly removed from the index",
+        "explanation": "Ignore rules prevent untracked files from being added automatically; they do not untrack committed files."
+      },
+      {
+        "id": "cl916-q5",
+        "prompt": "What does an artifact hash establish?",
+        "options": [
+          "The identity of the bytes that were hashed",
+          "That the program is free of defects",
+          "That the source is authentic without a trusted channel",
+          "That every compiler produces the same binary"
+        ],
+        "answer": "The identity of the bytes that were hashed",
+        "explanation": "A hash can compare artifact bytes, but trust and correctness require separate evidence."
       }
     ]
   },
