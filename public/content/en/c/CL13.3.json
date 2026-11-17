@@ -6,39 +6,61 @@
   "title": "Code challenges with input/output contracts",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its relevant rules.",
-    "Trace the example and justify its behaviour.",
-    "Identify important assumptions and failure cases.",
-    "Apply the concept in a reviewed and tested exercise."
+    "Translate a challenge statement into an exact input grammar, output format, constraints, preconditions and failure policy.",
+    "Distinguish valid input from malformed, incomplete, out-of-range and trailing input, and handle each according to the contract.",
+    "Design algorithms that meet stated correctness and complexity requirements for every permitted input.",
+    "Implement C solutions with safe conversions, bounded storage, checked arithmetic and clear resource ownership.",
+    "Construct sample, boundary, adversarial and invalid-input tests that expose contract violations.",
+    "Explain automated-judge expectations, including standard input/output discipline, exit status, complexity and portability."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL1.7",
+    "CL2.6",
+    "CL3.9",
+    "CL4.2",
+    "CL5.7",
+    "CL8.8",
+    "CL10.4",
+    "CL13.2"
+  ],
   "stages": {
     "understand": {
-      "concept": "A code challenge defines an input format, output format, constraints, required behaviour and evaluation rules. A good solution respects the contract for all permitted inputs, not only the sample case.",
-      "whyItMatters": "Explicit contracts make challenges fair, testable and suitable for automated evaluation.",
-      "analogy": "Treat standards, interfaces and release steps as explicit contracts that make assumptions visible.",
-      "analogyLimit": "The analogy does not replace the C standard, implementation documentation or project-specific requirements."
+      "concept": "A code challenge is a small specification, not merely a programming prompt. Its input/output contract defines exactly what a program receives, what it must produce, which inputs are valid, and how resource or input failures are treated. The solution is correct only when it satisfies that contract for every permitted input—not just the visible sample.\n\nA complete challenge statement has six parts. **Input grammar** defines the number and order of tokens or lines, permitted whitespace, numeric representation and whether extra tokens are forbidden. **Output format** defines exact values, ordering, separators, line endings where relevant and whether explanatory text is prohibited. **Constraints** bound input sizes, value ranges, time and memory. **Preconditions** state required properties such as sorted input or a non-null pointer. **Failure policy** explains how malformed input, out-of-range values or unavailable resources are handled. **Evaluation rules** describe what is tested and any required complexity or language standard.\n\nSeparate valid challenge input from invalid input. If the judge guarantees valid input, the solution may rely on those guarantees—but should still avoid undefined behaviour and respect stated limits. If invalid input is part of the contract, detect it explicitly. Do not silently accept a numeric prefix such as `42xyz` when the grammar requires a complete integer token. Do not assume a conversion succeeded merely because a destination variable received some value. For strtol, check that at least one digit was consumed, inspect errno for ERANGE, verify the result against the destination type's range, and decide whether trailing non-whitespace text is permitted.\n\nArithmetic and indexing constraints matter as much as parsing. Before multiplying a count by an element size, ensure the size calculation cannot overflow. Before adding signed values, establish that the result is representable or use a wider type whose range is guaranteed by the challenge constraints. For an array of n elements, valid indices are 0 through n - 1; an empty-array case must be handled before reading element zero. A complexity requirement such as O(n log n) is part of the contract, not an optional optimization.\n\nAutomated judges commonly provide input through stdin and compare stdout. Diagnostics belong on stderr; extra prompts, debug messages and decorative labels can make an otherwise correct answer fail. Return a nonzero exit status for a locally detected input failure when the challenge defines such a policy. For contest-style problems with guaranteed valid input, follow the stated input assumptions and keep output exact.\n\nA test plan should include the published sample plus independently designed cases: minimum and maximum permitted values, smallest and largest sizes, duplicates, already sorted and reverse-sorted data, negative values where allowed, and malformed input if it is in scope. Each test should have an expected result and a reason. Random testing can broaden coverage, but deterministic regression cases should preserve every discovered defect.",
+      "whyItMatters": "Precise contracts make coding challenges fair and automatically testable. They also train C programmers to validate conversions, protect object bounds, avoid overflow, meet complexity limits and keep standard output machine-readable.",
+      "analogy": "A challenge contract is like a delivery specification: it defines what must arrive, in what format, within which limits and how exceptions are handled.",
+      "analogyLimit": "The analogy cannot decide the algorithm or prove correctness. Those require reasoning about C semantics, data structures, constraints and the full input domain."
     },
     "explain": {
-      "narrative": "A code challenge defines an input format, output format, constraints, required behaviour and evaluation rules. A good solution respects the contract for all permitted inputs, not only the sample case.\n\nState assumptions and constraints, consult the applicable standard or tool documentation, and verify the result with appropriate compiler diagnostics and tests. Separate portable guarantees from implementation-specific behaviour.",
+      "narrative": "## 1. Convert prose into a specification\n\nBefore coding, rewrite the prompt as a compact contract:\n\n- **Input:** exact token/line order, grammar, whitespace rules and value ranges.\n- **Output:** exact representation, ordering, separators and number of lines.\n- **Limits:** maximum n, value range, time complexity and memory complexity.\n- **Preconditions:** properties guaranteed by the problem, such as sorted input.\n- **Invalid input:** whether it can occur and the required response if it does.\n- **Language/runtime:** C version, permitted libraries and any platform assumptions.\n\nIf a statement says “read n integers”, determine whether n itself is bounded, whether negative n is possible, whether fewer than n values can occur, and whether extra tokens are allowed. If the judge guarantees valid input, record that guarantee rather than adding unrelated user-interface behaviour.\n\n## 2. Parse numeric input deliberately\n\nFor robust line-oriented input, fgets keeps a bound on the number of bytes stored. strtol converts a numeric prefix, so inspect endptr to distinguish no conversion from a valid value, skip only the whitespace permitted by the grammar, and reject unexpected trailing characters. Set errno to zero before conversion and check ERANGE. Then compare the long result with INT_MIN and INT_MAX before converting to int. A fixed buffer also requires a policy for overlong lines; a line without a newline may be complete at EOF or may be truncated, so inspect the stream state and remaining input when the contract requires full-line validation.\n\nFor a token-based judge with guaranteed valid input, scanf can be appropriate when every conversion result is checked and the constraints make the destination types safe. Never ignore scanf's return value. Avoid mixing input functions without a clear plan for pending newline characters.\n\n## 3. Match the algorithm to constraints\n\nA correct O(n²) solution can still fail when n is large and the challenge requires an efficient solution. Estimate the number of operations and memory before implementation. For example, checking every pair in an array takes quadratic time; sorting first may reduce a pair-search task to O(n log n), but sorting can change the original order and may require additional storage. Choose the approach that meets both the output contract and complexity limit.\n\n## 4. Worked challenge A: add two bounded integers\n\n**Input:** exactly two lines; each line contains one base-10 signed integer representable as int, with optional surrounding whitespace. No other non-whitespace characters are permitted. **Output:** print their mathematical sum as a decimal long long followed by a newline. **Invalid input:** print `invalid input` to stderr and return a nonzero status. **Constraints:** C11; the sum is computed in long long, which can represent the sum of any two int values.\n\nThe example uses fgets and strtol, checks conversion and range, rejects trailing junk, and keeps prompts off stdout. The contract explicitly states two lines so the parser can reject missing lines and unexpected extra non-whitespace data.\n\n## 5. Worked challenge B: find a pair with a target sum\n\n**Input model:** an array of n integers and a target value are supplied to a function; n may be zero, and the array pointer must be valid whenever n is nonzero. **Output:** return the first pair of indices i and j in lexicographic order (i first, then j) where i < j and the mathematical sum equals target; return 0 if no pair exists, otherwise return 1 and write both indices. **Constraints:** O(n²) time and O(1) auxiliary space. The example uses long long for the pair sum so adding any two int values is representable. The caller owns the array and the function does not retain its pointer.\n\nThis challenge is intentionally quadratic. If a later version requires O(n log n) or O(n) expected time, the algorithm and possibly the storage contract must change. Do not silently replace the stated complexity target.\n\n## 6. Build a judge-oriented test matrix\n\nFor each challenge, keep a table of test input, expected output and purpose. Include smallest legal input, largest allowed boundary, negative and zero values when permitted, duplicates, no-solution cases and multiple-solution cases when tie-breaking is specified. For parsers, include missing tokens, invalid characters, trailing junk, range overflow and extra lines if those are invalid by contract. For algorithms, include cases that distinguish the required tie-breaking rule from another plausible implementation.\n\n## 7. Common judge failures\n\n- Printing prompts or debug messages to stdout.\n- Assuming the sample input defines the complete grammar.\n- Ignoring a conversion return value or accepting trailing junk.\n- Using int for an aggregate whose bound can exceed INT_MAX.\n- Accessing array[0] when the count is zero.\n- Choosing an algorithm that violates the time or memory limit.\n- Depending on unspecified or undefined C behaviour.\n- Failing to define how equal answers, duplicate values or no-solution cases are handled.\n\nA passing sample is evidence for one case only. Review the contract, test boundaries, compile with warnings, and use runtime diagnostics where appropriate.",
       "examples": [
         {
           "id": "cl133-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\nint main(void) {\n int n;\n if (scanf(\"%d\", &n) != 1) return 1;\n if (n < 0) return 1;\n printf(\"%d\\n\", n * 2);\n return 0;\n}",
-          "explanation": "The example reads one integer, validates a simple constraint and prints the required result. A real challenge must state whether multiplication overflow is possible and how invalid input is handled.",
-          "runnable": false
+          "title": "Parse two int values according to a strict line contract",
+          "code": "#include <ctype.h>\n#include <errno.h>\n#include <limits.h>\n#include <stdio.h>\n#include <stdlib.h>\n\nstatic int parse_int_line(const char *line, int *out)\n{\n    char *end;\n    long value;\n\n    errno = 0;\n    value = strtol(line, &end, 10);\n    if (line == end || errno == ERANGE || value < INT_MIN || value > INT_MAX) {\n        return 0;\n    }\n    while (isspace((unsigned char)*end) != 0) {\n        ++end;\n    }\n    if (*end != '\\0') {\n        return 0;\n    }\n    *out = (int)value;\n    return 1;\n}\n\nint main(void)\n{\n    char first_line[128];\n    char second_line[128];\n    char extra_line[128];\n    int first;\n    int second;\n\n    if (fgets(first_line, sizeof first_line, stdin) == NULL ||\n        fgets(second_line, sizeof second_line, stdin) == NULL ||\n        !parse_int_line(first_line, &first) ||\n        !parse_int_line(second_line, &second)) {\n        fputs(\"invalid input\\n\", stderr);\n        return 1;\n    }\n\n    while (fgets(extra_line, sizeof extra_line, stdin) != NULL) {\n        size_t i;\n        for (i = 0U; extra_line[i] != '\\0'; ++i) {\n            if (isspace((unsigned char)extra_line[i]) == 0) {\n                fputs(\"invalid input\\n\", stderr);\n                return 1;\n            }\n        }\n    }\n    if (ferror(stdin) != 0) {\n        fputs(\"input error\\n\", stderr);\n        return 1;\n    }\n\n    printf(\"%lld\\n\", (long long)first + (long long)second);\n    return 0;\n}\n",
+          "explanation": "For input lines `17` and `25`, stdout is `42`. For `17x` or a value outside the int range, the program rejects the input rather than accepting a numeric prefix or performing an unsafe conversion. The sum is evaluated as long long, which is wide enough for the sum of two int values. The stated contract permits surrounding whitespace and blank extra lines but rejects any extra non-whitespace character. This compact example assumes each individual input line fits in the 128-byte buffer; a production parser should detect and reject overlong lines rather than treating a truncated prefix as a complete line.",
+          "runnable": true
+        },
+        {
+          "id": "cl133-ex2",
+          "language": "en",
+          "title": "Find the first index pair whose sum matches the target",
+          "code": "#include <stddef.h>\n#include <stdio.h>\n\nint find_pair_sum(const int values[], size_t count, int target,\n                  size_t *first_index, size_t *second_index)\n{\n    size_t i;\n    size_t j;\n\n    if (first_index == NULL || second_index == NULL ||\n        (count != 0U && values == NULL)) {\n        return 0;\n    }\n\n    for (i = 0U; i < count; ++i) {\n        for (j = i + 1U; j < count; ++j) {\n            if ((long long)values[i] + (long long)values[j] ==\n                (long long)target) {\n                *first_index = i;\n                *second_index = j;\n                return 1;\n            }\n        }\n    }\n    return 0;\n}\n\nint main(void)\n{\n    const int values[] = { 4, 7, 1, 9, 3 };\n    const size_t count = sizeof values / sizeof values[0];\n    size_t first;\n    size_t second;\n\n    if (find_pair_sum(values, count, 10, &first, &second)) {\n        printf(\"%zu %zu\\n\", first, second);\n    } else {\n        puts(\"no pair\");\n    }\n    return 0;\n}\n",
+          "explanation": "The expected output is `0 3`, because values[0] + values[3] equals 13, not 10? No: the first matching pair for target 10 is indices 1 and 4 (7 + 3), so the expected output is `1 4`. The nested loops visit pairs in lexicographic index order and stop at the first match. The sum is promoted to long long before addition, preventing signed int overflow for any pair of int values. The function handles count == 0 without dereferencing values, requires non-null output pointers, uses O(n²) time and O(1) auxiliary space, and leaves the array owned by the caller.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Write a complete input/output contract for a program that sums two integers.",
-      "independentTask": "Create three test cases including a boundary case and an invalid-input case. State which inputs are inside the challenge contract.",
+      "guidedTask": "Write the input/output contract for a challenge that reads n followed by n integers and prints the largest value. Decide whether n == 0 is valid, define the permitted integer range, and state what happens when fewer than n values are supplied. Implement parsing only after the contract is complete. Test one element, repeated values, all-negative values, the largest permitted n and malformed input if invalid input is included.",
+      "independentTask": "Create a complete judge-ready challenge in C. Publish its input grammar, output format, constraints, preconditions, invalid-input policy, C version and required complexity. Provide at least six deterministic tests: ordinary, smallest, largest boundary, duplicate or tie case, no-solution/empty case where applicable, and malformed input if it is in scope. Implement a solution, compile it with strict warnings, compare stdout byte-for-byte with expected output, and explain why the algorithm satisfies the constraints.",
       "hints": [
-        "Do not infer input constraints from sample values alone.",
-        "Use exact output formatting when an automated judge compares output.",
-        "Check arithmetic limits implied by the constraints."
+        "Turn every sentence in the problem statement into an explicit input, output, constraint or guarantee.",
+        "Do not infer maximum sizes or value ranges from the sample; use only stated limits.",
+        "Check every input conversion and reject trailing characters when the grammar forbids them.",
+        "Promote operands before arithmetic when the wider type is needed; promotion after an overflowing operation is too late.",
+        "Handle zero elements before accessing the first array element, and state pointer preconditions clearly.",
+        "Test tie-breaking, duplicates, no-solution cases and complexity limits—not just the sample output."
       ]
     }
   },
@@ -51,36 +73,63 @@
     "questions": [
       {
         "id": "cl133-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "Which parts are essential to a complete code-challenge contract?",
         "options": [
-          "The C or learning principle described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "Input grammar, output format, constraints, preconditions, failure policy and evaluation requirements.",
+          "Only one sample input and its output.",
+          "The preferred variable names and indentation style only.",
+          "A screenshot of a successful run."
         ],
-        "answer": "The C or learning principle described in this lesson.",
-        "explanation": "The correct choice follows the concept and constraints described above."
+        "answer": "Input grammar, output format, constraints, preconditions, failure policy and evaluation requirements.",
+        "explanation": "A challenge must define what is accepted, what is produced, which limits apply and how exceptional cases are treated. Samples illustrate but do not replace the specification."
       },
       {
         "id": "cl133-q2",
-        "prompt": "What should be checked before applying the concept?",
+        "prompt": "A challenge requires exactly one integer token on a line. strtol converts the prefix in `42xyz`. What should a strict parser do?",
         "options": [
-          "The exact rules, assumptions and failure cases.",
-          "Only the file name.",
-          "Whether one unrelated example runs."
+          "Reject the line because non-whitespace trailing characters remain.",
+          "Accept 42 because strtol converted a numeric prefix.",
+          "Treat xyz as another integer automatically.",
+          "Ignore endptr because errno is zero."
         ],
-        "answer": "The exact rules, assumptions and failure cases.",
-        "explanation": "Reliable C engineering depends on understanding the applicable contract."
+        "answer": "Reject the line because non-whitespace trailing characters remain.",
+        "explanation": "strtol may successfully convert a prefix. The parser must inspect endptr and enforce the complete token grammar, including any permitted trailing whitespace."
       },
       {
         "id": "cl133-q3",
-        "prompt": "Which practice provides stronger evidence?",
+        "prompt": "Why should two int operands be converted to long long before adding when the challenge's sum may exceed INT_MAX?",
         "options": [
-          "Use documented standards, diagnostics and targeted tests.",
-          "Assume one compiler's behaviour is universal.",
-          "Ignore warnings and boundary cases."
+          "Because the addition itself must occur in the wider type; casting an already-overflowed int result is too late.",
+          "Because printf always requires long long for every integer.",
+          "Because int addition is always undefined, even when representable.",
+          "Because converting operands changes the input values stored in the array."
         ],
-        "answer": "Use documented standards, diagnostics and targeted tests.",
-        "explanation": "Multiple forms of evidence help distinguish guarantees from assumptions."
+        "answer": "Because the addition itself must occur in the wider type; casting an already-overflowed int result is too late.",
+        "explanation": "The usual arithmetic conversions determine the type in which the addition is performed. Cast an operand before the operation so the computation uses the wider type."
+      },
+      {
+        "id": "cl133-q4",
+        "prompt": "A pair-sum challenge requires the first matching pair in lexicographic index order. Which approach guarantees that order directly?",
+        "options": [
+          "Visit i from low to high and, for each i, visit j from i + 1 upward; return the first match.",
+          "Sort the values and return any pair of equal sum.",
+          "Use a hash table and return whichever pair is found first without defining iteration order.",
+          "Visit indices in an unspecified order."
+        ],
+        "answer": "Visit i from low to high and, for each i, visit j from i + 1 upward; return the first match.",
+        "explanation": "The nested traversal enumerates candidate pairs in the exact required lexicographic order. Other algorithms may be faster but must explicitly preserve or reconstruct the required tie-breaking rule."
+      },
+      {
+        "id": "cl133-q5",
+        "prompt": "Which output practice is safest for an automated judge that compares the required result on stdout?",
+        "options": [
+          "Print only the specified output on stdout and send diagnostics to stderr.",
+          "Print a prompt before every input value.",
+          "Print debug traces between result lines.",
+          "Add explanatory prose after the answer even when not requested."
+        ],
+        "answer": "Print only the specified output on stdout and send diagnostics to stderr.",
+        "explanation": "Unexpected prompts and debug text can cause output comparison failures. Keep stdout limited to the contract and use stderr for diagnostics when appropriate."
       }
     ]
   },
