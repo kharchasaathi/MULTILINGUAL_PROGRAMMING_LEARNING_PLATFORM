@@ -6,39 +6,52 @@
   "title": "Preprocessor directives, macros and conditional compilation",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C rules.",
-    "Trace the example and identify data or control flow.",
-    "Recognize common failure and safety cases.",
-    "Apply the concept in a tested C program."
+    "Explain that preprocessing handles directives before ordinary C translation and identify the role of #include, #define, #if, #ifdef and #endif.",
+    "Distinguish object-like macros from function-like macros and understand that substitution operates on preprocessing tokens.",
+    "Use include guards or an equivalent supported mechanism to prevent repeated header inclusion.",
+    "Parenthesize macro parameters and replacement expressions and avoid arguments with side effects when a macro may evaluate them more than once.",
+    "Use conditional compilation for deliberate configuration while keeping all supported configurations syntactically valid.",
+    "Prefer typed functions, enum constants or const objects when they provide safer semantics than a macro."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "The preprocessor handles directives such as #include, #define, #if, #ifdef and #endif before the compiler processes the resulting translation unit. Object-like and function-like macros perform token substitution and can affect code in ways that ordinary functions do not.",
-      "whyItMatters": "Preprocessor features support configuration and shared constants, but macros lack normal function type checking and may evaluate arguments more than once.",
-      "analogy": "Treat each resource and operation as having a clear contract, valid lifetime and failure path.",
-      "analogyLimit": "The analogy does not replace the C standard, compiler or library specifications."
+      "concept": "The preprocessor processes directives such as #include, #define, #if, #ifdef and #endif before the compiler analyzes the resulting translation unit. Object-like macros replace a name with tokens; function-like macros substitute arguments into a token sequence. Macros are not ordinary functions: they do not provide normal parameter type checking, and an argument may be evaluated more than once.",
+      "whyItMatters": "Macros support include guards, compile-time configuration and conditional code, but careless expansion can change operator precedence, duplicate side effects or create confusing diagnostics. Understanding the preprocessing stage helps explain why the compiler sees different source under different configurations.",
+      "analogy": "A macro is like a text-template substitution performed before the compiler reads the completed program.",
+      "analogyLimit": "The template analogy is limited: preprocessing works on tokens and has detailed rules for stringification, token pasting and rescanning; it is not a general text editor or a type-aware function call."
     },
     "explain": {
-      "narrative": "The preprocessor handles directives such as #include, #define, #if, #ifdef and #endif before the compiler processes the resulting translation unit. Object-like and function-like macros perform token substitution and can affect code in ways that ordinary functions do not.\n\nCheck object bounds, lifetimes, arithmetic limits and all relevant return values. Compile with warnings enabled and test both normal and failure paths.",
+      "narrative": "An object-like macro such as #define LIMIT 100 replaces the macro name with its replacement tokens. A function-like macro such as #define SQUARE(x) ((x) * (x)) substitutes tokens for its parameter. Parentheses protect grouping, but they do not prevent repeated evaluation: SQUARE(i++) is unsafe because the argument can be evaluated more than once. Prefer a function when ordinary evaluation and type checking are needed.\\n\\nA header guard uses #ifndef, #define and #endif to prevent the same header contents from being processed repeatedly in one translation unit. The guard macro should be unique to the header. Conditional compilation can select code using macros defined by the build, but every supported configuration must remain valid C. Use #if for numeric preprocessor expressions and #ifdef when testing whether a macro is defined. The preprocessor does not understand C variable values or runtime conditions.",
       "examples": [
         {
           "id": "cl912-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\n#define SQUARE(x) ((x) * (x))\nint main(void) {\n int value = 5;\n printf(\"%d\\n\", SQUARE(value));\n return 0;\n}",
-          "explanation": "Parentheses protect the macro argument and the full replacement expression from many precedence problems. Even so, passing an expression with side effects can evaluate it more than once.",
-          "runnable": false
+          "title": "Guard a header and declare a shared interface",
+          "code": "/* geometry.h */\n#ifndef CODESAATHI_GEOMETRY_H\n#define CODESAATHI_GEOMETRY_H\n\nint rectangle_area(int width, int height);\n\n#endif /* CODESAATHI_GEOMETRY_H */\n\n/* main.c */\n#include <stdio.h>\n#include \"geometry.h\"\n\nint rectangle_area(int width, int height)\n{\n    return width * height;\n}\n\nint main(void)\n{\n    printf(\"area=%d\\n\", rectangle_area(4, 3));\n    return 0;\n}",
+          "explanation": "The include guard prevents duplicate declarations if the header is included more than once in the same translation unit. This compact teaching example places the function definition in main.c; a multi-file project would put it in a separate source file.",
+          "runnable": true
+        },
+        {
+          "id": "cl912-ex2",
+          "language": "en",
+          "title": "Use a macro without duplicating a side effect",
+          "code": "#include <stdio.h>\n#define SQUARE(value) ((value) * (value))\n\nstatic int square(int value)\n{\n    return value * value;\n}\n\nint main(void)\n{\n    int number = 5;\n    printf(\"macro=%d function=%d\\n\", SQUARE(number), square(number));\n    return 0;\n}",
+          "explanation": "Both forms produce 25 for a side-effect-free argument. The function has an ordinary typed parameter and evaluates its argument once. Do not pass expressions such as number++ to a macro that substitutes its parameter multiple times.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Expand SQUARE(value + 1) mentally and explain the parentheses.",
-      "independentTask": "Create a header guard and a configuration macro. Explain what code is included under each condition.",
+      "guidedTask": "Expand SQUARE(a + b) by hand, then explain why SQUARE(i++) can modify i more than once. Inspect a header guard and identify which directives prevent repeated inclusion.",
+      "independentTask": "Create a header with a unique include guard, one declaration and a configuration macro. Build a small program in two configurations and explain what the preprocessor includes in each.",
       "hints": [
-        "Prefer functions or const objects when they provide safer semantics than macros.",
-        "Macro arguments may be substituted multiple times; avoid side effects in arguments.",
-        "Use unique macro names and parenthesize macro parameters and replacement expressions."
+        "The # in a directive must appear where the preprocessing grammar permits it.",
+        "Macro arguments are token sequences, not typed function parameters.",
+        "Parenthesize each parameter use and the complete replacement expression.",
+        "Avoid side effects in arguments to function-like macros.",
+        "Use unique include-guard names to avoid collisions.",
+        "A compile-time #if is not a runtime if statement."
       ]
     }
   },
@@ -51,36 +64,63 @@
     "questions": [
       {
         "id": "cl912-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "When are preprocessing directives handled?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "Before ordinary C translation of the resulting translation unit",
+          "After the program starts running",
+          "Only after linking",
+          "Only when a function is called"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct choice follows the C rule explained above."
+        "answer": "Before ordinary C translation of the resulting translation unit",
+        "explanation": "The preprocessor handles directives before the compiler analyzes the resulting C translation unit."
       },
       {
         "id": "cl912-q2",
-        "prompt": "What is a reliable way to protect correctness?",
+        "prompt": "What is a major risk of a macro such as SQUARE(x) ((x) * (x))?",
         "options": [
-          "Validate preconditions, bounds and failure results.",
-          "Assume the operation cannot fail.",
-          "Ignore the type and lifetime rules."
+          "An argument with side effects may be evaluated more than once",
+          "It always allocates memory",
+          "It cannot accept integer arguments",
+          "It is executed only at link time"
         ],
-        "answer": "Validate preconditions, bounds and failure results.",
-        "explanation": "C requires explicit handling of object validity and operation failures."
+        "answer": "An argument with side effects may be evaluated more than once",
+        "explanation": "Token substitution can duplicate an argument expression, unlike a normal function parameter evaluation."
       },
       {
         "id": "cl912-q3",
-        "prompt": "How should the example be checked?",
+        "prompt": "What is the purpose of a header guard?",
         "options": [
-          "Compile with warnings and test expected and failure cases.",
-          "Ignore diagnostics and test only once.",
-          "Assume every platform behaves identically."
+          "Prevent repeated processing of a header's contents in one translation unit",
+          "Allocate memory for the header",
+          "Make every function in the header static",
+          "Enable runtime configuration"
         ],
-        "answer": "Compile with warnings and test expected and failure cases.",
-        "explanation": "Warnings and targeted tests provide evidence for correctness."
+        "answer": "Prevent repeated processing of a header's contents in one translation unit",
+        "explanation": "The preprocessor macro guard causes later inclusions to skip the guarded contents."
+      },
+      {
+        "id": "cl912-q4",
+        "prompt": "Which construct tests whether a macro is defined?",
+        "options": [
+          "#ifdef",
+          "#while",
+          "#switch",
+          "#sizeof"
+        ],
+        "answer": "#ifdef",
+        "explanation": "#ifdef checks whether a macro name has been defined."
+      },
+      {
+        "id": "cl912-q5",
+        "prompt": "When is a function usually safer than a function-like macro?",
+        "options": [
+          "When ordinary type checking and single evaluation of arguments are desired",
+          "When token pasting is required",
+          "When selecting a header guard",
+          "When testing a macro definition"
+        ],
+        "answer": "When ordinary type checking and single evaluation of arguments are desired",
+        "explanation": "A function has typed parameters and each argument expression is evaluated as part of the call."
       }
     ]
   },
