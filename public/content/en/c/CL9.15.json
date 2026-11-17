@@ -6,39 +6,52 @@
   "title": "Debugging and sanitizing tools: address, undefined behaviour and memory diagnostics",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its constraints.",
-    "Trace the example and reason about its data flow.",
-    "Identify complexity, boundary or safety considerations.",
-    "Apply the concept in a tested C program."
+    "Distinguish compile-time diagnostics, debugger observations and runtime sanitizer reports.",
+    "Explain the classes of defects commonly detected by address and undefined-behaviour sanitizers on supported toolchains.",
+    "Build a diagnostic executable with debug information and suitable sanitizer instrumentation.",
+    "Interpret a sanitizer report using the first relevant stack trace and the invalid operation it identifies.",
+    "Design tests that execute normal, boundary, invalid and cleanup paths rather than relying on one successful run.",
+    "Explain why a clean sanitizer run is limited to executed paths and does not prove the absence of all defects or undefined behaviour."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "Debug and sanitizer builds can detect classes of defects such as out-of-bounds access, use-after-free, invalid shifts and some undefined behaviour. Common options include address and undefined-behaviour sanitizers on supported compiler/runtime combinations.",
-      "whyItMatters": "Dynamic diagnostics catch defects on executed paths; they cannot prove that every path is correct or replace careful reasoning and testing.",
-      "analogy": "Treat an algorithm or data structure as a set of operations that must preserve a clearly stated contract.",
-      "analogyLimit": "The analogy does not replace formal complexity analysis, C object rules or algorithm preconditions."
+      "concept": "Debuggers and runtime sanitizers help investigate program behaviour. AddressSanitizer can detect many memory errors such as out-of-bounds accesses and use-after-free on supported systems. UndefinedBehaviorSanitizer instruments selected operations that may invoke undefined behaviour, such as certain invalid shifts or signed overflow. These tools report issues on paths that actually execute; they are not formal proofs.",
+      "whyItMatters": "C memory and object-lifetime errors can remain hidden during ordinary testing. Instrumented builds can expose defects earlier, provide stack traces and help developers create focused regression tests. Tool support and runtime behaviour vary by compiler and platform.",
+      "analogy": "A sanitizer is like a test-site alarm that monitors selected hazards while a particular exercise is being performed.",
+      "analogyLimit": "An alarm that stays silent during one exercise does not prove that every possible exercise is safe. Instrumentation covers only selected defect classes and executed paths."
     },
     "explain": {
-      "narrative": "Debug and sanitizer builds can detect classes of defects such as out-of-bounds access, use-after-free, invalid shifts and some undefined behaviour. Common options include address and undefined-behaviour sanitizers on supported compiler/runtime combinations.\n\nBefore implementation, state input constraints, empty-case behaviour, ownership and invariants. Compile with warnings and test representative, boundary and failure cases.",
+      "narrative": "Compile with debug information and the sanitizer options supported by the toolchain. A common GCC/Clang-style development command uses -g, -O1, -fsanitize=address,undefined and -fno-omit-frame-pointer. Run a representative test suite and preserve the complete diagnostic, including the first relevant stack trace. Rebuild and rerun after fixing the root cause.\\n\\nAddressSanitizer and UndefinedBehaviorSanitizer are not interchangeable. They detect different classes of problems and have platform/runtime constraints. A report can point to the invalid access while the original cause occurred earlier, so inspect object lifetime, bounds, ownership and arithmetic. Do not treat a sanitizer report as a substitute for a code review.\\n\\nA clean run means only that no instrumented issue was detected on the paths exercised in that run. It does not cover unexecuted branches, every concurrency issue, every implementation-specific defect or every possible undefined behaviour. Combine tests, compiler diagnostics, static analysis, reasoning and sanitizers.",
       "examples": [
         {
           "id": "cl915-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "/* Example GCC/Clang-like command:\n   cc -g -O1 -fsanitize=address,undefined -fno-omit-frame-pointer main.c -o app\n*/\n#include <stdio.h>\nint main(void) { int values[2] = {1, 2}; printf(\"%d\\n\", values[1]); return 0; }",
-          "explanation": "The command requests debug information and runtime instrumentation where supported. The program itself performs a valid access; a deliberately invalid test can be used to observe a diagnostic in a controlled environment.",
+          "title": "A valid bounds-checked array access",
+          "code": "#include <stddef.h>\n#include <stdio.h>\n\nint main(void)\n{\n    const int values[] = {10, 20, 30};\n    const size_t count = sizeof values / sizeof values[0];\n    const size_t index = 2U;\n\n    if (index >= count) {\n        fputs(\"index out of range\\n\", stderr);\n        return 1;\n    }\n    printf(\"value=%d\\n\", values[index]);\n    return 0;\n}\n\n/* GCC/Clang-like diagnostic build:\n   cc -std=c17 -g -O1 -Wall -Wextra -Wpedantic \\\n      -fsanitize=address,undefined -fno-omit-frame-pointer main.c -o app\n*/",
+          "explanation": "The program checks the index before accessing the array. The commented command requests address and undefined-behaviour instrumentation on supported GCC/Clang-like environments.",
+          "runnable": true
+        },
+        {
+          "id": "cl915-ex2",
+          "language": "en",
+          "title": "Detect and reject signed addition overflow before it occurs",
+          "code": "#include <stdint.h>\n#include <stdio.h>\n#include <stdbool.h>\n\nstatic bool add_checked(int left, int right, int *result)\n{\n    if (result == NULL) return false;\n    if ((right > 0 && left > INT32_MAX - right) ||\n        (right < 0 && left < INT32_MIN - right)) return false;\n    *result = left + right;\n    return true;\n}\n\nint main(void)\n{\n    int answer = 0;\n    if (!add_checked(20, 22, &answer)) return 1;\n    printf(\"sum=%d\\n\", answer);\n    return 0;\n}",
+          "explanation": "The check prevents the signed addition from being evaluated when its result would be outside the int32_t limits, assuming int has the same range as int32_t on the target. For fully portable int bounds, use INT_MAX and INT_MIN from limits.h instead; this example is intentionally a fixed-width teaching case and should be compiled only where int is 32 bits.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Distinguish a compiler warning from a runtime sanitizer report.",
-      "independentTask": "Run a small test suite under sanitizers and document which executed paths were covered.",
+      "guidedTask": "Build a small array program with sanitizer instrumentation. Run tests for the first element, last valid element and rejected out-of-range index. Record which code paths were actually executed.",
+      "independentTask": "Create a test suite for a dynamically allocated array or linked list. Exercise allocation failure handling where practical, empty and single-element cases, boundary indices, repeated cleanup and invalid operations. Run under address and undefined-behaviour sanitizers and document toolchain limitations.",
       "hints": [
-        "Sanitizer availability and behaviour depend on compiler, operating system and runtime support.",
-        "A clean sanitizer run does not prove absence of all undefined behaviour.",
-        "Keep test cases deterministic and reproducible."
+        "Use debug information so stack traces are useful.",
+        "Read the first relevant invalid operation and inspect the object's lifetime and bounds.",
+        "Address and undefined-behaviour sanitizers detect different classes of defects.",
+        "Fix the cause rather than hiding or disabling the diagnostic.",
+        "Add a regression test for every reproduced defect.",
+        "A clean run is limited to the code paths and instrumentation exercised."
       ]
     }
   },
@@ -51,36 +64,63 @@
     "questions": [
       {
         "id": "cl915-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What does AddressSanitizer commonly help detect?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "Out-of-bounds memory accesses and use-after-free errors",
+          "Every logical requirement error",
+          "All race conditions on every platform",
+          "Incorrect user-interface colours"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the concept and constraints described above."
+        "answer": "Out-of-bounds memory accesses and use-after-free errors",
+        "explanation": "AddressSanitizer instruments memory accesses to detect several classes of memory misuse."
       },
       {
         "id": "cl915-q2",
-        "prompt": "What should be checked before relying on this algorithm or structure?",
+        "prompt": "What is a key limitation of runtime sanitizers?",
         "options": [
-          "Its preconditions, invariants, bounds and failure cases.",
-          "Only the name of the data structure.",
-          "Whether one example produced an output."
+          "They only observe instrumented defect classes on executed paths",
+          "They prove every possible path is safe",
+          "They replace code review",
+          "They guarantee portability"
         ],
-        "answer": "Its preconditions, invariants, bounds and failure cases.",
-        "explanation": "Correctness depends on maintaining the algorithm's contract."
+        "answer": "They only observe instrumented defect classes on executed paths",
+        "explanation": "Unexecuted paths and unsupported defect classes are not ruled out by a clean run."
       },
       {
         "id": "cl915-q3",
-        "prompt": "Which practice supports reliable implementation?",
+        "prompt": "Why compile with debug information when diagnosing a sanitizer report?",
         "options": [
-          "Test empty, boundary and representative inputs.",
-          "Ignore allocation failures.",
-          "Assume average complexity guarantees every operation's worst case."
+          "It helps produce useful source locations and stack traces",
+          "It automatically fixes invalid memory accesses",
+          "It removes the need for tests",
+          "It changes every pointer into a safe pointer"
         ],
-        "answer": "Test empty, boundary and representative inputs.",
-        "explanation": "Targeted tests expose defects that ordinary examples may miss."
+        "answer": "It helps produce useful source locations and stack traces",
+        "explanation": "Debug information helps map runtime diagnostics back to source locations."
+      },
+      {
+        "id": "cl915-q4",
+        "prompt": "What should happen after reproducing a sanitizer failure?",
+        "options": [
+          "Identify and fix the root cause, then rerun regression tests",
+          "Delete the failing input",
+          "Disable the sanitizer permanently",
+          "Assume the report is harmless"
+        ],
+        "answer": "Identify and fix the root cause, then rerun regression tests",
+        "explanation": "A fix should address the underlying invalid operation and be verified by rerunning tests."
+      },
+      {
+        "id": "cl915-q5",
+        "prompt": "Does a clean sanitizer run prove absence of undefined behaviour?",
+        "options": [
+          "No, only instrumented operations on executed paths were checked",
+          "Yes, on all possible inputs",
+          "Yes, if the program printed output",
+          "Only for programs with fewer than ten functions"
+        ],
+        "answer": "No, only instrumented operations on executed paths were checked",
+        "explanation": "Sanitizers are valuable evidence but cannot exhaustively prove correctness."
       }
     ]
   },
