@@ -6,39 +6,63 @@
   "title": "time.h: calendar time, broken-down time and formatting",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept or reference contract.",
-    "Trace the example and justify its behaviour.",
-    "Identify relevant assumptions and edge cases.",
-    "Apply the skill in a documented exercise."
+    "Identify the roles of time_t, struct tm and the principal time.h functions time, difftime, localtime, gmtime, mktime and strftime.",
+    "Explain the difference between a calendar-time value and a broken-down local or UTC calendar representation.",
+    "Check failure results from time, localtime, gmtime, mktime and strftime without assuming every conversion succeeds.",
+    "Use mktime to convert local broken-down time to calendar time and explain how its normalization and tm_isdst field work.",
+    "Format dates and times safely with strftime, including the meaning of its buffer-size argument and zero return value.",
+    "Distinguish elapsed-time measurement from civil-clock scheduling and document time-zone, daylight-saving and implementation-range assumptions."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL1.1",
+    "CL1.2",
+    "CL2.1",
+    "CL3.1",
+    "CL4.1",
+    "CL5.1",
+    "CL5.3",
+    "CL6.1",
+    "CL12.1",
+    "CL12.2"
+  ],
   "stages": {
     "understand": {
-      "concept": "time.h provides time-related types and functions such as time, difftime, localtime, gmtime, mktime and strftime. These functions represent calendar time and convert between time representations; availability and range depend on the implementation.",
-      "whyItMatters": "Time handling involves time zones, daylight-saving transitions, representation ranges and formatting rules. Programs should avoid assuming every timestamp or local-time conversion is universally representable.",
-      "analogy": "Treat a reference or learning task as a contract that states what is expected and how success is checked.",
-      "analogyLimit": "The analogy does not replace the exact C standard or library specification."
+      "concept": "The <time.h> header provides types and functions for representing and converting calendar time. time_t represents a calendar-time value; its encoding and range are implementation-defined. struct tm stores broken-down calendar fields such as year, month, day, hour, minute, second, weekday, year day and daylight-saving indicator. time obtains the current calendar time, difftime computes a difference in seconds, localtime converts to local broken-down time, gmtime converts to UTC broken-down time, mktime converts local broken-down time back to calendar time, and strftime formats broken-down time into text.",
+      "whyItMatters": "Time code can fail when it assumes a timestamp has a particular integer representation, treats local civil time as UTC, ignores daylight-saving transitions, or writes formatted output into an undersized buffer. A correct design distinguishes absolute calendar-time values, local calendar fields, formatted text and elapsed durations.",
+      "analogy": "A time_t value is like a point on a timeline, while struct tm is like a calendar page showing year, month, day and clock fields for a chosen time zone. strftime writes a readable label for that calendar page.",
+      "analogyLimit": "The analogy does not define the epoch, time_t representation, leap-second handling, time-zone database, daylight-saving rules or the implementation's supported date range. Those details must be checked for the target C environment."
     },
     "explain": {
-      "narrative": "time.h provides time-related types and functions such as time, difftime, localtime, gmtime, mktime and strftime. These functions represent calendar time and convert between time representations; availability and range depend on the implementation.\n\nUse authoritative declarations and documentation, state assumptions explicitly and verify behaviour with focused examples. Where the implementation or C version matters, record it.",
+      "narrative": "## 1. Calendar time and broken-down time\n\nInclude <time.h> to use the standard time interfaces. `time_t` is the arithmetic type used to represent calendar time, but portable code must not assume it is a particular integer type or that its value is a Unix timestamp. Call `time(NULL)` to request the current calendar time. A return value equal to `(time_t)-1` indicates that the current time is unavailable.\n\nA `struct tm` contains fields including `tm_sec`, `tm_min`, `tm_hour`, `tm_mday`, `tm_mon`, `tm_year`, `tm_wday`, `tm_yday` and `tm_isdst`. Remember the offsets: `tm_mon` is zero-based (January is 0), and `tm_year` counts years since 1900. `tm_isdst` is positive when daylight saving time is in effect, zero when it is not, and negative when the information is unknown or should be determined by the conversion.\n\n## 2. Converting time values\n\n`localtime` converts a calendar-time value to local broken-down time. `gmtime` converts it to UTC broken-down time. Both return a pointer to a `struct tm`, or a null pointer if conversion is not possible. Their returned storage may be shared and overwritten by later time conversion calls; copy the structure before making another call if both results are needed. Where supported by the implementation, reentrant alternatives such as `localtime_s` or `localtime_r` may be available, but they are not universally portable ISO C interfaces.\n\n`mktime` interprets a `struct tm` as local time and converts it to `time_t`. It can normalize out-of-range fields: for example, a day beyond the month's length may roll into the next month. Set `tm_isdst` to a negative value when the implementation should determine whether daylight saving time applies. A return value of `(time_t)-1` signals failure, although portable code should remember that the sentinel can be ambiguous with a valid representable calendar time on some systems.\n\n`difftime(later, earlier)` returns the difference between two calendar-time values in seconds as a `double`. Use it instead of subtracting `time_t` values directly. Wall-clock time can jump because of clock corrections or daylight-saving changes, so it is not a general monotonic stopwatch. For precise monotonic elapsed-time measurement, use a platform-specific monotonic clock when available.\n\n## 3. Formatting with strftime\n\n`strftime(destination, capacity, format, parts)` writes formatted text using the supplied buffer capacity, including space for the terminating null character. It returns the number of characters written, excluding the null terminator. A return value of zero means the result did not fit or that the formatted result was empty; use a sufficiently large buffer and handle zero rather than assuming success. Common specifiers include `%Y` for year, `%m` for month, `%d` for day, `%H` for hour (24-hour clock), `%M` for minute, `%S` for second, `%a` for abbreviated weekday and `%b` for abbreviated month. Locale can affect textual names and some representations.\n\n## 4. Local time, UTC and portability\n\nA `struct tm` produced by `localtime` reflects the process's local time-zone rules; a `struct tm` produced by `gmtime` reflects UTC. Do not label local time as UTC or assume the local offset is fixed throughout the year. Daylight-saving transitions can create missing or repeated local clock times. The C library and host environment determine which time-zone data and range are available. Test failure paths and avoid relying on a particular epoch, time_t width or operating-system extension.",
       "examples": [
         {
           "id": "cl127-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\n#include <time.h>\nint main(void) {\n time_t now = time(NULL);\n if (now == (time_t)-1) return 1;\n struct tm *parts = localtime(&now);\n if (parts == NULL) return 1;\n char text[64];\n if (strftime(text, sizeof text, \"%Y-%m-%d %H:%M:%S\", parts) == 0) return 1;\n puts(text);\n return 0;\n}",
-          "explanation": "time obtains the current calendar time. localtime converts it to local broken-down time, and strftime formats it into a bounded character array. The example checks failure results.",
-          "runnable": false
+          "title": "Display current local time and UTC safely",
+          "code": "#include <stdio.h>\n#include <time.h>\n\nint main(void)\n{\n    time_t now = time(NULL);\n    struct tm local_copy;\n    struct tm utc_copy;\n    struct tm *parts;\n    char local_text[64];\n    char utc_text[64];\n\n    if (now == (time_t)-1) {\n        fputs(\"Current time is unavailable.\\n\", stderr);\n        return 1;\n    }\n\n    parts = localtime(&now);\n    if (parts == NULL) {\n        fputs(\"Local-time conversion failed.\\n\", stderr);\n        return 1;\n    }\n    local_copy = *parts;\n\n    parts = gmtime(&now);\n    if (parts == NULL) {\n        fputs(\"UTC conversion failed.\\n\", stderr);\n        return 1;\n    }\n    utc_copy = *parts;\n\n    if (strftime(local_text, sizeof local_text,\n                 \"%Y-%m-%d %H:%M:%S\", &local_copy) == 0U) {\n        fputs(\"Local-time formatting failed.\\n\", stderr);\n        return 1;\n    }\n    if (strftime(utc_text, sizeof utc_text,\n                 \"%Y-%m-%d %H:%M:%S\", &utc_copy) == 0U) {\n        fputs(\"UTC formatting failed.\\n\", stderr);\n        return 1;\n    }\n\n    printf(\"Local: %s\\nUTC:   %s\\n\", local_text, utc_text);\n    return 0;\n}\n",
+          "explanation": "The program obtains one calendar-time value and converts that same value to local time and UTC. It copies each returned struct tm immediately because localtime and gmtime may use shared static storage. Both strftime calls receive the destination capacity and are checked for a zero result.",
+          "runnable": true
+        },
+        {
+          "id": "cl127-ex2",
+          "language": "en",
+          "title": "Convert local calendar fields and calculate elapsed seconds",
+          "code": "#include <stdio.h>\n#include <time.h>\n\nint main(void)\n{\n    struct tm start_parts = {0};\n    struct tm end_parts = {0};\n    time_t start_time;\n    time_t end_time;\n    double elapsed;\n    char start_text[64];\n    char end_text[64];\n\n    start_parts.tm_year = 2025 - 1900;\n    start_parts.tm_mon = 0;\n    start_parts.tm_mday = 15;\n    start_parts.tm_hour = 12;\n    start_parts.tm_isdst = -1;\n\n    end_parts = start_parts;\n    end_parts.tm_mday = 16;\n\n    start_time = mktime(&start_parts);\n    end_time = mktime(&end_parts);\n    if (start_time == (time_t)-1 || end_time == (time_t)-1) {\n        fputs(\"Calendar-time conversion failed.\\n\", stderr);\n        return 1;\n    }\n\n    elapsed = difftime(end_time, start_time);\n    if (strftime(start_text, sizeof start_text,\n                 \"%Y-%m-%d %H:%M:%S\", &start_parts) == 0U ||\n        strftime(end_text, sizeof end_text,\n                 \"%Y-%m-%d %H:%M:%S\", &end_parts) == 0U) {\n        fputs(\"Date formatting failed.\\n\", stderr);\n        return 1;\n    }\n\n    printf(\"Start local time: %s\\n\", start_text);\n    printf(\"End local time:   %s\\n\", end_text);\n    printf(\"Elapsed seconds:  %.0f\\n\", elapsed);\n    return 0;\n}\n",
+          "explanation": "The example builds two local calendar dates and asks mktime to determine daylight-saving status because tm_isdst is -1. difftime reports the actual elapsed seconds between the resulting calendar-time values. The elapsed duration is not guaranteed to be 86400 seconds: a daylight-saving transition between the two local noons can make it shorter or longer. The chosen dates are illustrative and conversion can still fail on an implementation with a restricted time range.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Explain why the program checks time, localtime and strftime separately.",
-      "independentTask": "Write a program that measures elapsed time with difftime and formats a local calendar time.",
+      "guidedTask": "Run Example 1 and identify which output is local civil time and which is UTC. Explain why the program copies the localtime result before calling gmtime, why time(NULL) is checked, and why each strftime result is checked.",
+      "independentTask": "Write a program that accepts or constructs two local calendar dates, converts each with mktime after setting tm_isdst to -1, and reports the elapsed seconds with difftime. Format both dates with strftime. Explain why the elapsed duration between two local noon times may differ from 86400 seconds across a daylight-saving transition.",
       "hints": [
-        "The pointer returned by localtime may refer to static storage and can be overwritten by later calls; use safer alternatives where available.",
-        "strftime returns zero when the output does not fit or no characters are produced.",
-        "Do not assume local civil time is monotonic for measuring elapsed durations."
+        "Do not assume time_t is a long integer or that its numeric value is a Unix timestamp; use the time.h functions to interpret it.",
+        "Remember that tm_year is years since 1900 and tm_mon is zero-based.",
+        "Set tm_isdst to -1 when mktime should determine daylight-saving status for the supplied local fields.",
+        "Copy a struct tm returned by localtime or gmtime before another conversion call may overwrite shared storage.",
+        "Use difftime to obtain a difference in seconds instead of subtracting time_t values directly.",
+        "Pass the real destination capacity to strftime and treat a zero return as a formatting failure or empty result."
       ]
     }
   },
@@ -51,36 +75,58 @@
     "questions": [
       {
         "id": "cl127-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What does time(NULL) return on success?",
         "options": [
-          "The learning or C language principle described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "A calendar-time value of type time_t",
+          "A formatted date string",
+          "A pointer to struct tm"
         ],
-        "answer": "The learning or C language principle described in this lesson.",
-        "explanation": "The correct choice follows the concept or reference contract described above."
+        "answer": "A calendar-time value of type time_t",
+        "explanation": "time returns the current calendar time as time_t; a value equal to (time_t)-1 indicates failure."
       },
       {
         "id": "cl127-q2",
-        "prompt": "What should be checked before applying the concept?",
+        "prompt": "Which statement correctly describes tm_year and tm_mon?",
         "options": [
-          "Its exact requirements, assumptions and edge cases.",
-          "Only the function or topic name.",
-          "Whether an unrelated example compiles."
+          "tm_year counts from 1900 and tm_mon is zero-based",
+          "tm_year is the full year and tm_mon starts at 1",
+          "Both fields are always one-based"
         ],
-        "answer": "Its exact requirements, assumptions and edge cases.",
-        "explanation": "Reliable use depends on understanding the actual contract."
+        "answer": "tm_year counts from 1900 and tm_mon is zero-based",
+        "explanation": "For example, 2025 is stored as tm_year = 125 and January as tm_mon = 0."
       },
       {
         "id": "cl127-q3",
-        "prompt": "Which practice best demonstrates understanding?",
+        "prompt": "What is the main distinction between localtime and gmtime?",
         "options": [
-          "Explain the reasoning and test representative and boundary cases.",
-          "Memorize an output without explanation.",
-          "Ignore invalid input."
+          "localtime produces local broken-down time; gmtime produces UTC broken-down time",
+          "localtime formats text; gmtime reads text",
+          "Both always produce the same local clock fields"
         ],
-        "answer": "Explain the reasoning and test representative and boundary cases.",
-        "explanation": "Reasoning and targeted tests demonstrate transferable understanding."
+        "answer": "localtime produces local broken-down time; gmtime produces UTC broken-down time",
+        "explanation": "The functions interpret the same calendar-time value using local time-zone rules or UTC, respectively."
+      },
+      {
+        "id": "cl127-q4",
+        "prompt": "Why should difftime be used instead of directly subtracting two time_t values?",
+        "options": [
+          "It returns their difference in seconds as a double without assuming time_t arithmetic representation",
+          "It converts both values to UTC strings",
+          "It guarantees that the system clock is monotonic"
+        ],
+        "answer": "It returns their difference in seconds as a double without assuming time_t arithmetic representation",
+        "explanation": "time_t representation and arithmetic are not portable assumptions; difftime is the standard interface for the difference in seconds."
+      },
+      {
+        "id": "cl127-q5",
+        "prompt": "What does a zero return from strftime indicate?",
+        "options": [
+          "The formatted result did not fit or the result was empty",
+          "The buffer was definitely large enough",
+          "The current time is UTC"
+        ],
+        "answer": "The formatted result did not fit or the result was empty",
+        "explanation": "strftime returns the number of characters written excluding the null terminator, and zero requires the caller to treat the result as unsuccessful or empty."
       }
     ]
   },
