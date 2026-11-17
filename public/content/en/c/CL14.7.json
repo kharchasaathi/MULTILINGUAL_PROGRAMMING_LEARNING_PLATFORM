@@ -6,39 +6,65 @@
   "title": "Compiler warnings as an engineering feedback system",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its relevant rules.",
-    "Trace the example and justify its behaviour.",
-    "Identify important assumptions and failure cases.",
-    "Apply the concept in a reviewed and tested exercise."
+    "Distinguish compiler errors, warnings, notes and other diagnostics, and explain why severity and wording vary by implementation and options.",
+    "Select and interpret useful GCC and Clang warning groups, including the limits of commonly used warning bundles.",
+    "Explain why a warning-free build is useful evidence but is not proof of correctness, safety, portability or absence of defects.",
+    "Investigate a warning by tracing source expressions, types, control flow and intended contracts, then fix the cause or document a justified exception.",
+    "Design a consistent warning policy across translation units, local builds and continuous integration, including a deliberate -Werror and compiler-upgrade strategy.",
+    "Combine compiler warnings with code review, static analysis, tests and sanitizers as complementary engineering feedback."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL1.7",
+    "CL2.6",
+    "CL2.8",
+    "CL3.4",
+    "CL5.3",
+    "CL8.1",
+    "CL12.1",
+    "CL12.8",
+    "CL14.1",
+    "CL14.2",
+    "CL14.3",
+    "CL14.5"
+  ],
   "stages": {
     "understand": {
-      "concept": "Compiler warnings identify suspicious constructs, conversions, unused values and portability concerns. A project can establish a warning policy, treat selected warnings as errors and review changes when compiler versions introduce new diagnostics.",
-      "whyItMatters": "Warnings provide fast feedback before runtime tests. A consistent policy improves code quality but should be tailored to the compiler and project context.",
-      "analogy": "Treat standards, interfaces and release steps as explicit contracts that make assumptions visible.",
-      "analogyLimit": "The analogy does not replace the C standard, implementation documentation or project-specific requirements."
+      "concept": "A compiler diagnostic is feedback produced while a translation unit is processed. An error means the implementation will not accept the program in that compilation mode; a warning reports a construct considered suspicious or worth reviewing; a note often adds context. Exact categories, wording, source locations and whether a diagnostic is emitted depend on compiler, version, language mode, target, enabled options and source context. The C standard requires diagnostics for certain constraint violations, but it does not define a universal warning catalogue or require every implementation to warn about every suspicious construct.\n\nWarnings are an engineering feedback channel, not a correctness certificate. A warning may reveal a real defect such as a narrowing conversion, mismatched format argument, shadowed name or missing prototype. It may also describe an intentional conversion or a tool-specific concern needing contextual review. Conversely, code with no warnings can still contain undefined behaviour, incorrect algorithms, resource leaks, security defects or portability assumptions the selected compiler does not diagnose.\n\nGCC and Clang commonly support `-Wall`, `-Wextra` and `-Wpedantic`; despite their names, these do not enable every possible warning. Additional useful groups can include `-Wconversion`, `-Wsign-conversion`, `-Wshadow`, `-Wformat=2`, `-Wstrict-prototypes`, `-Wmissing-prototypes` and `-Wundef`. Availability, meaning and interactions differ across compiler versions. Check documentation for the exact compiler and version. Do not assume a GCC option has identical semantics in Clang or another compiler.\n\nA typical project might begin with `-std=c11 -Wall -Wextra -Wpedantic` and add targeted groups after reviewing diagnostics. A stricter profile may include conversion, shadowing, format and prototype checks. Apply flags consistently to every project translation unit and relevant build configuration; compiling only the main file with strict flags does not validate other source files. Record compiler identity, version, language mode, target and flags so local and CI builds are comparable.\n\n`-Werror` promotes enabled warnings to errors for that compilation. It can prevent new warnings entering a protected build, but a compiler upgrade can introduce a new warning and break an unchanged build. A project can use it in a pinned CI toolchain, apply it selectively with compiler-supported controls, or establish a reviewed warning baseline. Keep developer feedback understandable and plan toolchain upgrades. Do not solve a failing build by globally disabling warnings or blindly adding suppressions.\n\nRead the primary diagnostic and its notes. Inspect the exact expression, declared types, integer conversions, format string, control-flow path and API contract. Decide whether code is wrong, the interface unclear, or the construct intentional. Prefer source-level corrections: make a range check explicit, use the correct format specifier, add a missing prototype, rename a shadowing variable or document a deliberate conversion. An explicit cast can silence a conversion warning while preserving a bug. If a warning is genuinely unavoidable, use the narrowest compiler-supported suppression, explain why it is safe, and retain a test that protects the assumption.\n\nWarnings are only one layer. Static analysis can explore additional paths; tests check selected expected behaviour; sanitizers detect certain runtime violations in executed paths; code review checks intent and maintainability. None replaces the others.",
+      "whyItMatters": "A warning policy catches some defects while they are still cheap to fix and makes assumptions visible during review. Without a consistent policy, one developer may compile a source file with strict flags while CI or another translation unit silently uses weaker settings. Treating every diagnostic as proof of a bug or suppressing all warnings creates noise instead of engineering value.",
+      "analogy": "Warnings are like review comments from an automated teammate: they can spot suspicious patterns quickly, but a human still has to understand the requirement and decide what change is correct.",
+      "analogyLimit": "A compiler is not a complete program verifier. It reports only diagnostics supported by its implementation, configuration and analysis; a clean build does not prove that the program is correct or secure."
     },
     "explain": {
-      "narrative": "Compiler warnings identify suspicious constructs, conversions, unused values and portability concerns. A project can establish a warning policy, treat selected warnings as errors and review changes when compiler versions introduce new diagnostics.\n\nState assumptions and constraints, consult the applicable standard or tool documentation, and verify the result with appropriate compiler diagnostics and tests. Separate portable guarantees from implementation-specific behaviour.",
+      "narrative": "**1. Read the complete diagnostic.** Start with file, line, column, warning option and primary message. Read follow-up notes; they may identify the declaration or earlier expression that caused the problem. Distinguish a compilation error from a warning and do not infer that all compilers classify the same issue identically.\n\n**2. Understand the selected warning groups.** `-Wall`, `-Wextra` and `-Wpedantic` are useful starting points, not an exhaustive or universal list. Add options such as `-Wconversion`, `-Wsign-conversion`, `-Wshadow`, `-Wformat=2`, `-Wstrict-prototypes`, `-Wmissing-prototypes` and `-Wundef` when supported and appropriate. Consult version-specific GCC or Clang documentation and test the profile against all project translation units.\n\n**3. Fix causes rather than hiding symptoms.** For a narrowing conversion, validate the range and make the conversion explicit only after the check. For a format warning, match the conversion specification to the actual argument type or use a suitable standard format macro. For a missing prototype, put the declaration in the public header and include it in the implementation. For shadowing, choose names that expose distinct roles. An explicit cast can hide a conversion warning without fixing the defect.\n\n**4. Keep policy reproducible.** Put warning flags in the build system or shared compile configuration, not in a developer's private command history. Apply the same policy to every translation unit. Pin or record compiler versions in CI, review diagnostics after upgrades and decide intentionally whether warnings become errors. A baseline can help a legacy project improve incrementally, but new warnings should not accumulate unnoticed.\n\n**5. Make exceptions reviewable.** If a conversion or implementation-specific construct is intentional, document the range, invariant or platform contract that makes it safe. Prefer a narrow suppression with a reason and a test over disabling an entire warning category. Revisit suppressions when code or compiler changes.\n\n**6. Use independent evidence.** A clean warning build does not establish correctness. Combine it with static analysis, boundary tests, code review, and sanitizers such as AddressSanitizer or UndefinedBehaviorSanitizer where available. These tools detect different classes of problems and have different blind spots.",
       "examples": [
         {
           "id": "cl147-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "/* GCC/Clang-like example:\n   cc -Wall -Wextra -Wpedantic -Wconversion -Werror main.c -o app\n*/\n#include <stdio.h>\nint main(void) { int count = 3; printf(\"%d\\n\", count); return 0; }",
-          "explanation": "The command enables several warning groups and treats warnings as errors for this build. Exact diagnostics and option support depend on the compiler.",
-          "runnable": false
+          "title": "Make a conversion contract explicit before converting",
+          "code": "#include <limits.h>\n#include <stdio.h>\n\nstatic int int_from_long(long value, int *result) {\n    if (result == NULL || value < INT_MIN || value > INT_MAX) {\n        return 0;\n    }\n    *result = (int)value;\n    return 1;\n}\n\nint main(void) {\n    int converted = 0;\n    long input = 120L;\n\n    if (!int_from_long(input, &converted)) {\n        puts(\"out of range\");\n        return 1;\n    }\n    printf(\"converted=%d\\n\", converted);\n    return 0;\n}",
+          "explanation": "The conversion is performed only after checking that the long value is representable as int. The helper checks its output pointer and leaves the output unchanged on failure. A conversion warning should prompt investigation of the value range and interface contract; adding a cast without this reasoning could hide a defect. Build with a strict profile such as `cc -std=c11 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Wshadow -Wformat=2 -Werror example.c -o example` where supported.",
+          "runnable": true
+        },
+        {
+          "id": "cl147-ex2",
+          "language": "en",
+          "title": "Use a declared interface and a type-correct format string",
+          "code": "#include <inttypes.h>\n#include <stdint.h>\n#include <stdio.h>\n\nstatic uint32_t add_count(uint32_t left, uint32_t right);\n\nstatic uint32_t add_count(uint32_t left, uint32_t right) {\n    return left + right;\n}\n\nint main(void) {\n    uint32_t total = add_count(UINT32_C(12), UINT32_C(30));\n    printf(\"total=%\" PRIu32 \"\\n\", total);\n    return 0;\n}",
+          "explanation": "The function has a visible prototype before its definition, and PRIu32 from inttypes.h supplies the appropriate printf conversion fragment for uint32_t on the implementation. This avoids assuming uint32_t is always unsigned int. The addition is safe for these sample values; a general accumulation API also needs an overflow policy. Try compiling with `-Wstrict-prototypes -Wmissing-prototypes -Wformat=2` where supported and compare GCC and Clang diagnostics.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Explain the trade-off of using -Werror in a project with multiple compiler versions.",
-      "independentTask": "Create a warning policy and demonstrate how a warning is investigated and resolved rather than blindly suppressed.",
+      "guidedTask": "Compile both examples with GCC and Clang in C11 mode using `-Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Wshadow -Wformat=2 -Werror` where each compiler supports the options. Record compiler versions and results. Create a separate test file with a deliberately narrowing assignment or mismatched printf argument, compile without -Werror, identify the diagnostic, and correct the underlying issue. Do not include the intentionally defective file in the clean lesson examples.",
+      "independentTask": "Write a one-page warning policy for a multi-file C project. Specify the compiler/version matrix, language mode, baseline and additional warning groups, how every translation unit receives the same flags, the CI -Werror strategy, compiler-upgrade review and evidence required for any suppression. Demonstrate one warning investigation from diagnostic to tested correction.",
       "hints": [
-        "Keep warnings visible in continuous integration.",
-        "Document any intentional suppression and its reason.",
-        "Review compiler upgrades for new or changed diagnostics."
+        "Read the warning option name and follow-up notes; do not rely only on the first sentence.",
+        "Check operand types and integer conversion rules before adding a cast.",
+        "A clean -Wall -Wextra build does not mean every useful warning is enabled.",
+        "Verify warning option support and behaviour against the exact GCC or Clang version.",
+        "Keep intentional suppressions narrow, justified and covered by a relevant test.",
+        "Use warnings alongside static analysis, tests, sanitizers and code review; none replaces all the others."
       ]
     }
   },
@@ -51,36 +77,58 @@
     "questions": [
       {
         "id": "cl147-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "Which statement about a warning-free C build is most accurate?",
         "options": [
-          "The C or learning principle described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "It proves the program has no undefined behaviour.",
+          "It is useful evidence under the selected compiler and flags, but it does not prove correctness or security.",
+          "It proves every compiler will accept the program without diagnostics."
         ],
-        "answer": "The C or learning principle described in this lesson.",
-        "explanation": "The correct choice follows the concept and constraints described above."
+        "answer": "It is useful evidence under the selected compiler and flags, but it does not prove correctness or security.",
+        "explanation": "Diagnostics depend on implementation, version, options and analysis limits. Other defects may not be diagnosed."
       },
       {
         "id": "cl147-q2",
-        "prompt": "What should be checked before applying the concept?",
+        "prompt": "What is the best first response to a conversion warning?",
         "options": [
-          "The exact rules, assumptions and failure cases.",
-          "Only the file name.",
-          "Whether one unrelated example runs."
+          "Add an explicit cast immediately.",
+          "Disable all conversion warnings project-wide.",
+          "Inspect source and destination types, value range and intended contract, then correct or justify the conversion."
         ],
-        "answer": "The exact rules, assumptions and failure cases.",
-        "explanation": "Reliable C engineering depends on understanding the applicable contract."
+        "answer": "Inspect source and destination types, value range and intended contract, then correct or justify the conversion.",
+        "explanation": "A cast can hide a real narrowing or signedness defect. The range and contract determine the safe correction."
       },
       {
         "id": "cl147-q3",
-        "prompt": "Which practice provides stronger evidence?",
+        "prompt": "What does -Werror generally do when enabled for a compiler invocation?",
         "options": [
-          "Use documented standards, diagnostics and targeted tests.",
-          "Assume one compiler's behaviour is universal.",
-          "Ignore warnings and boundary cases."
+          "Promotes enabled warnings to errors for that compilation.",
+          "Enables every warning known to the compiler.",
+          "Runs static analysis and sanitizers automatically."
         ],
-        "answer": "Use documented standards, diagnostics and targeted tests.",
-        "explanation": "Multiple forms of evidence help distinguish guarantees from assumptions."
+        "answer": "Promotes enabled warnings to errors for that compilation.",
+        "explanation": "-Werror changes the treatment of warnings that are enabled; it does not enable all warnings or replace other tools."
+      },
+      {
+        "id": "cl147-q4",
+        "prompt": "Why should a project verify warning flags against its exact compiler and version?",
+        "options": [
+          "GCC and Clang guarantee identical warning names and meanings.",
+          "Warning availability, defaults and behaviour can vary across compilers and versions.",
+          "The C standard defines every compiler warning option."
+        ],
+        "answer": "Warning availability, defaults and behaviour can vary across compilers and versions.",
+        "explanation": "Compiler warning options are implementation-specific. A reproducible project documents and tests its toolchain profile."
+      },
+      {
+        "id": "cl147-q5",
+        "prompt": "Which approach is best when a warning represents an intentional, safe implementation-specific conversion?",
+        "options": [
+          "Suppress every warning in the file.",
+          "Use the narrowest justified suppression, document the invariant and retain a relevant test.",
+          "Ignore the diagnostic without recording the decision."
+        ],
+        "answer": "Use the narrowest justified suppression, document the invariant and retain a relevant test.",
+        "explanation": "A narrow, reviewable exception preserves useful diagnostics elsewhere and makes the assumption auditable."
       }
     ]
   },
