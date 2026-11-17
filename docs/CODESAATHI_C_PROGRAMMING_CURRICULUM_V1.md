@@ -155,17 +155,17 @@ The course is designed to take a learner from first contact with C through pract
 - [ ] CL10.15 · Testing data structures: invariants, boundary cases and randomized tests (CodeSaathi extension)
 
 ### CL11 — Practical projects and consolidation
-- [ ] CL11.1 · C console calculator: input, validation, functions and switch
-- [ ] CL11.2 · Student records: structures, arrays and file persistence
-- [ ] CL11.3 · Dynamic inventory manager: allocation, search and update
-- [ ] CL11.4 · Search and sort a dataset: algorithm comparison and test data
-- [ ] CL11.5 · Final command-line data management project: modular source and robust errors
-- [ ] CL11.6 · Project requirements, design, implementation, test plan and README (CodeSaathi extension)
-- [ ] CL11.7 · Project review: portability, memory safety, maintainability and limitations (CodeSaathi extension)
+- [ ] CL11.1 · Project 1: command-line calculator
+- [ ] CL11.2 · Project 2: number guessing game with validated input and game-state rules
+- [ ] CL11.3 · Project 3: student record manager using structures, arrays and validated operations
+- [ ] CL11.4 · Project 4: file-based expense tracker with validated records and totals
+- [ ] CL11.5 · Project 5: contact book using dynamic memory and safe collection operations
+- [ ] CL11.6 · Project 6: inventory manager with structures and file persistence
+- [ ] CL11.7 · Project 7: mini address book with sorting and searching
 
 ### CL12 — C language and standard-library reference
 - [ ] CL12.1 · C keywords, reserved identifiers and language tokens
-- [ ] CL12.2 · `stdio.h`: streams, formatted I/O, character I/O and file operations
+- [ ] CL12.2 · C declarations, declarators and type qualifiers (CodeSaathi extension; standard I/O coverage is taught in CL7 and cross-referenced in CL12.9)
 - [ ] CL12.3 · `stdlib.h`: conversion, allocation, sorting/searching and process utilities
 - [ ] CL12.4 · `string.h`: string and memory functions
 - [ ] CL12.5 · `math.h`: mathematical functions, domains and error considerations
