@@ -6,39 +6,64 @@
   "title": "string.h: string and memory functions",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept or reference contract.",
-    "Trace the example and justify its behaviour.",
-    "Identify relevant assumptions and edge cases.",
-    "Apply the skill in a documented exercise."
+    "Distinguish null-terminated string operations from byte-oriented memory operations declared by <string.h>.",
+    "Explain the preconditions of strlen, strcmp, strcpy, strcat and common character-search functions, including valid termination and destination capacity.",
+    "Use bounded application-level checks before copying or appending text, and preserve the destination null terminator.",
+    "Choose memcpy for non-overlapping regions and memmove when source and destination regions may overlap.",
+    "Explain the byte-wise contracts of memset and memcmp, including why they do not establish semantic equality for arbitrary structures.",
+    "Identify common string and memory defects such as buffer overflow, unterminated arrays, overlapping memcpy calls and incorrect size calculations."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL1.1",
+    "CL1.2",
+    "CL2.1",
+    "CL3.1",
+    "CL4.1",
+    "CL5.1",
+    "CL5.3",
+    "CL6.1",
+    "CL12.1",
+    "CL12.2",
+    "CL12.3"
+  ],
   "stages": {
     "understand": {
-      "concept": "string.h declares functions for null-terminated byte strings, such as strlen, strcmp, strcpy and strcat, and memory operations such as memcpy, memmove, memset and memcmp. String functions rely on valid terminators; memory functions operate on specified byte counts.",
-      "whyItMatters": "Choosing the correct function depends on overlap, capacity, termination and whether the operation is semantic string comparison or raw byte processing.",
-      "analogy": "Treat a reference or learning task as a contract that states what is expected and how success is checked.",
-      "analogyLimit": "The analogy does not replace the exact C standard or library specification."
+      "concept": "The C standard header <string.h> declares functions for two related but different kinds of work. String functions operate on null-terminated character sequences: strlen measures a string, strcmp compares strings, strcpy copies a string, strcat appends one, and functions such as strchr locate characters. Memory functions operate on an explicit number of bytes: memcpy copies non-overlapping regions, memmove permits overlap, memset fills bytes, and memcmp compares bytes. Every function has preconditions involving valid pointers, accessible storage, termination, capacity and overlap.",
+      "whyItMatters": "C does not automatically track the capacity of a character array. A call can compile successfully while writing beyond an object, reading past its end or using an invalid pointer. Knowing whether an API expects a valid string or a byte count—and whether overlap is allowed—is essential for memory safety.",
+      "analogy": "A C string is like a sentence ending at a marked stop symbol, while a memory operation is like handling a precisely measured block of bytes.",
+      "analogyLimit": "The null character is an actual byte value, not external punctuation, and byte operations do not understand text, character boundaries or the meaning of an object."
     },
     "explain": {
-      "narrative": "string.h declares functions for null-terminated byte strings, such as strlen, strcmp, strcpy and strcat, and memory operations such as memcpy, memmove, memset and memcmp. String functions rely on valid terminators; memory functions operate on specified byte counts.\n\nUse authoritative declarations and documentation, state assumptions explicitly and verify behaviour with focused examples. Where the implementation or C version matters, record it.",
+      "narrative": "## 1. Null-terminated strings\n\nA C string is a sequence of non-null characters followed by a `\\0` byte. The array must contain that terminator within its accessible bounds before a string function such as `strlen` or `strcmp` can safely read it. `strlen` counts characters before the terminator; it does not count the terminator itself. It has no capacity argument, so it cannot safely inspect an arbitrary unterminated buffer.\n\n`strcmp(a, b)` compares two strings and returns a negative value, zero or a positive value according to their ordering. Do not assume it returns exactly -1, 0 or 1. It compares character values as unsigned-char values for the ordering defined by the C library; locale-aware human-language collation is a different problem.\n\n`strcpy(destination, source)` copies the source including its terminating null byte. The destination must have enough space, and the source and destination must not overlap. `strcat(destination, source)` finds the end of the destination string and appends the source including its terminator. The destination must already be a valid string and have enough remaining capacity. Neither function receives the destination's capacity, so neither can check it for you. `strncpy` is not a general safe replacement: when the source length reaches the supplied count, it may leave the destination without a null terminator.\n\n## 2. Check capacity before writing\n\nFor an array with `capacity` bytes, first establish that it currently contains a valid string. Let `used = strlen(destination)` and `extra = strlen(source)`. A safe append requires `used < capacity` and `extra < capacity - used`; the subtraction form avoids overflowing `used + extra + 1`. Then copy `extra + 1` bytes so the new terminator is included. The example uses `memmove`, which also permits the source to refer to bytes inside the destination array. The helper's contract still requires both strings to be valid and the destination to have the stated capacity.\n\n## 3. Byte-oriented memory functions\n\n`memcpy(destination, source, count)` copies exactly `count` bytes. The source and destination regions must not overlap. `memmove` copies the same number of bytes but is defined when the regions overlap; it behaves as though the bytes were first copied through a temporary array. Use it for in-place shifts or when overlap is possible.\n\n`memset(destination, value, count)` writes the converted unsigned-char value into each of the first `count` bytes. It is useful for filling a byte buffer with a repeated byte such as zero. It does not assign a typed value to each element: setting a structure to all-zero bytes is not a portable substitute for assigning each member its semantic zero value, and all-bits-zero is not guaranteed to represent every possible null pointer or floating zero representation on every C implementation.\n\n`memcmp(a, b, count)` compares the first `count` bytes as unsigned characters and returns a negative, zero or positive result. It is appropriate for byte sequences whose representation is the intended subject of comparison. It is not a general equality test for structures: padding bytes may differ even when corresponding members compare equal, and object representations can contain implementation-specific details.\n\n## 4. Common rules and review checklist\n\n- Include `<string.h>` for these declarations and use the correct pointer types.\n- Confirm every read and write remains within a live object.\n- Confirm string inputs contain a terminator within their accessible storage.\n- Reserve one extra byte for a string's terminating `\\0`.\n- Use `memcpy` only when the byte regions do not overlap; use `memmove` otherwise.\n- Treat the returned sign of `strcmp` and `memcmp` as meaningful, not an exact numeric value.\n- Do not use string functions on arbitrary binary data or use byte comparison as semantic structure equality.\n\nThe examples are independent C11 programs and should be compiled separately.",
       "examples": [
         {
           "id": "cl124-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\n#include <string.h>\nint main(void) {\n char text[16] = \"C\";\n const char suffix[] = \" language\";\n if (strlen(text) + sizeof suffix <= sizeof text) {\n  memcpy(text + strlen(text), suffix, sizeof suffix);\n  puts(text);\n }\n return 0;\n}",
-          "explanation": "sizeof suffix includes its null terminator. The capacity check reserves space for all bytes copied. memcpy is valid because the source and destination regions do not overlap.",
-          "runnable": false
+          "title": "Capacity-checked string append and comparison",
+          "code": "#include <stdio.h>\n#include <string.h>\n\nstatic int append_text(char *destination, size_t capacity, const char *source)\n{\n    size_t used = strlen(destination);\n    size_t extra = strlen(source);\n\n    if (used >= capacity || extra >= capacity - used) {\n        return 0;\n    }\n    memmove(destination + used, source, extra + 1U);\n    return 1;\n}\n\nint main(void)\n{\n    char message[32] = \"C\";\n    const char suffix[] = \" language\";\n    const char *word = \"C language\";\n\n    if (!append_text(message, sizeof message, suffix)) {\n        fputs(\"Not enough destination space.\\n\", stderr);\n        return 1;\n    }\n\n    printf(\"Message: %s\\n\", message);\n    printf(\"Length: %zu\\n\", strlen(message));\n    printf(\"Comparison: %d\\n\", strcmp(message, word));\n\n    if (!append_text(message, sizeof message, message + 2)) {\n        puts(\"Second append did not fit.\");\n    } else {\n        printf(\"After self-buffer append: %s\\n\", message);\n    }\n    return 0;\n}\n",
+          "explanation": "The helper first measures two valid strings and checks capacity using subtraction, leaving room for the copied terminator. memmove makes the second append valid even though its source points into the destination array. strcmp is tested for equality by checking whether its result is zero; other nonzero values are not assumed to be exactly -1 or 1.",
+          "runnable": true
+        },
+        {
+          "id": "cl124-ex2",
+          "language": "en",
+          "title": "Copy, shift, fill and compare byte arrays",
+          "code": "#include <stdio.h>\n#include <string.h>\n\nint main(void)\n{\n    unsigned char source[] = {1U, 2U, 3U, 4U, 5U};\n    unsigned char buffer[sizeof source];\n    size_t i;\n\n    memcpy(buffer, source, sizeof source);\n    printf(\"Copied bytes equal: %s\\n\",\n           memcmp(buffer, source, sizeof source) == 0 ? \"yes\" : \"no\");\n\n    memmove(buffer + 1U, buffer, sizeof buffer - 1U);\n    printf(\"After overlapping shift:\");\n    for (i = 0U; i < sizeof buffer; ++i) {\n        printf(\" %u\", (unsigned int)buffer[i]);\n    }\n    putchar('\\n');\n\n    memset(buffer, 0, sizeof buffer);\n    printf(\"After memset, first byte: %u\\n\", (unsigned int)buffer[0]);\n    return 0;\n}\n",
+          "explanation": "memcpy copies between separate arrays, which do not overlap. memmove then shifts bytes one position to the right inside the same array, an overlapping operation that memcpy must not be used for. memset fills every byte with the zero byte, and memcmp compares byte sequences rather than typed values.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Compare the contracts of memcpy and memmove.",
-      "independentTask": "Write a safe append helper that checks capacity and preserves null termination.",
+      "guidedTask": "Compile both examples separately. In the first, reduce the destination capacity and observe the append rejection; then explain why the source pointer into the destination requires memmove. In the second, replace memmove with memcpy only as a written thought experiment—do not rely on the result—and identify the violated precondition. Explain why memcmp is suitable for these unsigned-char arrays.",
+      "independentTask": "Implement a function that appends one valid C string to another fixed-size character array. Document the preconditions, check capacity without overflowing the size calculation, preserve the terminator and define how overlapping source storage is handled. Add tests for an empty source, exact-fit append, insufficient capacity and a source substring inside the destination. Then write a separate byte-buffer routine that shifts a range safely.",
       "hints": [
-        "strlen requires a valid null-terminated string.",
-        "memcpy requires non-overlapping regions; use memmove when overlap is possible.",
-        "memcmp compares bytes, not semantic string or structure equality."
+        "strlen is safe only when a null terminator exists within the accessible string object.",
+        "A destination needs room for every copied character plus the final null byte.",
+        "Use capacity - used after proving used is less than capacity to avoid overflowing a sum.",
+        "strcpy and strcat do not know the destination array's capacity; validate it before calling them.",
+        "memcpy requires non-overlapping source and destination ranges; memmove is defined for overlap.",
+        "memcmp compares object representations byte by byte, not the logical fields of an arbitrary structure."
       ]
     }
   },
@@ -51,36 +76,58 @@
     "questions": [
       {
         "id": "cl124-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What must be true before strlen is called on a character array?",
         "options": [
-          "The learning or C language principle described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "A null terminator must occur within the accessible array bounds.",
+          "The array must have been allocated by malloc.",
+          "The array must contain only decimal digits."
         ],
-        "answer": "The learning or C language principle described in this lesson.",
-        "explanation": "The correct choice follows the concept or reference contract described above."
+        "answer": "A null terminator must occur within the accessible array bounds.",
+        "explanation": "strlen reads until it encounters the terminating null byte and has no capacity parameter."
       },
       {
         "id": "cl124-q2",
-        "prompt": "What should be checked before applying the concept?",
+        "prompt": "Why can strcpy overflow its destination?",
         "options": [
-          "Its exact requirements, assumptions and edge cases.",
-          "Only the function or topic name.",
-          "Whether an unrelated example compiles."
+          "It copies the source string and terminator without knowing the destination capacity.",
+          "It always copies the entire destination array.",
+          "It automatically reallocates the destination."
         ],
-        "answer": "Its exact requirements, assumptions and edge cases.",
-        "explanation": "Reliable use depends on understanding the actual contract."
+        "answer": "It copies the source string and terminator without knowing the destination capacity.",
+        "explanation": "The caller must ensure the destination has enough space before using strcpy."
       },
       {
         "id": "cl124-q3",
-        "prompt": "Which practice best demonstrates understanding?",
+        "prompt": "Which function is defined when the source and destination byte ranges overlap?",
         "options": [
-          "Explain the reasoning and test representative and boundary cases.",
-          "Memorize an output without explanation.",
-          "Ignore invalid input."
+          "memmove",
+          "memcpy",
+          "memcmp"
         ],
-        "answer": "Explain the reasoning and test representative and boundary cases.",
-        "explanation": "Reasoning and targeted tests demonstrate transferable understanding."
+        "answer": "memmove",
+        "explanation": "memmove handles overlap as if the bytes were first copied to a temporary non-overlapping array."
+      },
+      {
+        "id": "cl124-q4",
+        "prompt": "What does memcmp compare?",
+        "options": [
+          "The specified number of bytes as unsigned-character values.",
+          "The semantic values of all members in two structures.",
+          "Two null-terminated strings regardless of the count."
+        ],
+        "answer": "The specified number of bytes as unsigned-character values.",
+        "explanation": "memcmp is a byte comparison and does not understand structure members, padding or string termination."
+      },
+      {
+        "id": "cl124-q5",
+        "prompt": "Why is memset(buffer, 0, sizeof buffer) not a universal way to initialize every kind of object?",
+        "options": [
+          "All-bits-zero is not guaranteed to represent every typed zero value, such as every possible null pointer representation.",
+          "memset only works on arrays of char.",
+          "memset always writes one byte beyond the requested count."
+        ],
+        "answer": "All-bits-zero is not guaranteed to represent every typed zero value, such as every possible null pointer representation.",
+        "explanation": "memset writes a repeated byte pattern. Use typed initialization or assignments when semantic member values are required."
       }
     ]
   },
