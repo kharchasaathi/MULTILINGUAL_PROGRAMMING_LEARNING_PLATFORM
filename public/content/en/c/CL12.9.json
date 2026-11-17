@@ -6,39 +6,68 @@
   "title": "Standard headers and their responsibility boundaries (CodeSaathi extension)",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept or reference contract.",
-    "Trace the example and justify its behaviour.",
-    "Identify relevant assumptions and edge cases.",
-    "Apply the skill in a documented exercise."
+    "Explain how standard headers group declarations by library responsibility and why each source file should include the header that declares the facilities it uses.",
+    "Select appropriate headers for stream I/O, general utilities, strings and memory, character handling, mathematics, time, integer types, limits, sizes, assertions and error reporting.",
+    "Distinguish standard C headers from POSIX, operating-system, compiler-specific and third-party headers, and identify portability consequences.",
+    "Recognize that a header provides declarations and macros but does not itself guarantee that runtime preconditions, ownership rules or environmental requirements are satisfied.",
+    "Check optional facilities, implementation-defined limits and C-version availability before relying on a particular type, macro or library feature.",
+    "Organize includes and verify header responsibilities using strict compilation, documentation and focused tests without relying on accidental transitive inclusion."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL1.1",
+    "CL1.2",
+    "CL2.1",
+    "CL3.1",
+    "CL4.1",
+    "CL5.1",
+    "CL6.1",
+    "CL12.1",
+    "CL12.2",
+    "CL12.3",
+    "CL12.4",
+    "CL12.5",
+    "CL12.6",
+    "CL12.7",
+    "CL12.8"
+  ],
   "stages": {
     "understand": {
-      "concept": "Standard headers group declarations by responsibility: stdio.h for streams, stdlib.h for general utilities and allocation, string.h for byte/string operations, math.h for mathematics, ctype.h for character classification, time.h for calendar time and stdint.h for integer types.",
-      "whyItMatters": "Knowing header boundaries makes code easier to navigate and avoids missing declarations or relying on accidental transitive includes.",
-      "analogy": "Treat a reference or learning task as a contract that states what is expected and how success is checked.",
-      "analogyLimit": "The analogy does not replace the exact C standard or library specification."
+      "concept": "A standard C header is the public declaration point for a related set of library facilities. Include the header that declares each name your source file uses: <stdio.h> for streams and formatted I/O; <stdlib.h> for general utilities, conversions, allocation and process functions; <string.h> for byte and null-terminated string operations; <ctype.h> for single-byte character classification and conversion; <math.h> for mathematical functions; <time.h> for calendar and processor time; <stdint.h> and <inttypes.h> for optional exact-width integer types and their formatting/conversion macros; <limits.h> and <float.h> for integer and floating-point limits; <stddef.h> for size_t, ptrdiff_t, NULL and offsetof; <stdbool.h> for the C boolean macros; <errno.h> for error indicators; and <assert.h> for diagnostic assertions.\n\nOther headers serve narrower areas: <stdarg.h> supports variadic functions; <locale.h> controls locale-sensitive library behaviour; <wchar.h> and <wctype.h> cover wide-character facilities; <fenv.h> exposes floating-point environment controls; <signal.h> and <setjmp.h> provide signal and non-local-jump facilities. C11 introduced standard threads and atomics through <threads.h> and <stdatomic.h>, but implementations may not provide every optional facility. Header and feature availability must be checked against the selected C version and implementation.\n\nA standard header is not the same as a POSIX or platform header. Names such as <unistd.h>, <sys/socket.h> and <windows.h> are not ISO C standard headers; they depend on an operating system or platform. Third-party headers depend on separately supplied libraries. A program that includes a non-standard header may be valid for its target environment but is not automatically portable ISO C.",
+      "whyItMatters": "Correct header boundaries make dependencies explicit, prevent undeclared-function and wrong-type mistakes, and help code move between compilers and operating systems. Relying on a different header to include a declaration indirectly is fragile: an implementation may change its internal includes without changing the public contract.",
+      "analogy": "Think of a library as a building with specialist service desks: the header tells your source file which service interface is available, while the compiled library and runtime environment provide the service.",
+      "analogyLimit": "A header is not the implementation itself and does not prove that a call is safe. Types, preconditions, ownership, lifetime, error handling and platform support still come from the facility's full contract."
     },
     "explain": {
-      "narrative": "Standard headers group declarations by responsibility: stdio.h for streams, stdlib.h for general utilities and allocation, string.h for byte/string operations, math.h for mathematics, ctype.h for character classification, time.h for calendar time and stdint.h for integer types.\n\nUse authoritative declarations and documentation, state assumptions explicitly and verify behaviour with focused examples. Where the implementation or C version matters, record it.",
+      "narrative": "## 1. Choose the header by the facility used\n\nUse the declaration's documented header, not a guess based on the function name. `printf`, `fopen` and `fgets` belong to <stdio.h>. `malloc`, `free`, `strtol`, `qsort` and `EXIT_SUCCESS` belong to <stdlib.h>. `memcpy`, `memcmp`, `strlen` and `strchr` belong to <string.h>. `isspace` and `tolower` belong to <ctype.h>. `sqrt` and `isfinite` belong to <math.h>. `time`, `difftime` and `strftime` belong to <time.h>. Include every header needed directly by the translation unit.\n\nSome declarations are related but deliberately separate. `size_t` is declared by <stddef.h> and is also made available by several other standard headers that need it; if your code directly uses `offsetof`, include <stddef.h>. Fixed-width integer typedefs and limit macros are in <stdint.h>, while format macros such as `PRIu32` are in <inttypes.h>. Integer limits such as `INT_MAX` are in <limits.h>; floating-point limits such as `DBL_MAX` are in <float.h>. Do not assume that an exact-width typedef such as `uint32_t` exists on every conforming implementation: exact-width types are provided when the implementation has a suitable type.\n\n## 2. A header is a declaration boundary, not a safety guarantee\n\nIncluding <string.h> makes declarations such as `memcpy` visible; it does not make overlapping source and destination ranges valid for `memcpy`. Including <ctype.h> does not remove the requirement that an argument be EOF or representable as unsigned char. Including <stdlib.h> declares `strtol`, but the caller must still inspect the end pointer, range error and trailing input. The correct header is necessary, not sufficient.\n\nLikewise, <assert.h> provides `assert`, but assertions are intended for program invariants and may be disabled when `NDEBUG` is defined. Do not put required side effects inside an assertion expression. <errno.h> declares the error indicator, but a function's own contract determines when it is meaningful and whether it must be reset before a call.\n\n## 3. Standard, optional, and platform-specific facilities\n\nThe ISO C library is specified by the C language standard. Some facilities are optional or conditional on implementation support. For example, <stdint.h> exact-width types are conditional on the existence of matching integer types, and C11's <threads.h> support is optional. C version selection matters: compile using the language version your project targets and consult that version's standard/library documentation. Later C revisions can change the status or availability of features, so do not treat every header as universally available in every compiler mode.\n\nPOSIX headers and operating-system SDK headers may be appropriate when an application intentionally targets that environment. Keep such dependencies behind a portability layer when the same program must build on multiple platforms. Third-party headers should be documented as project dependencies and distributed under their applicable licences.\n\n## 4. Include discipline\n\nPrefer the standard header spelling with angle brackets, such as `#include <stdio.h>`, for implementation-provided headers. Quoted includes such as `#include \"project_config.h\"` are commonly used for project headers. Include guards or `#pragma once` conventions prevent repeated project-header processing; `#pragma once` is widely supported but is not an ISO C directive. Avoid manually redeclaring standard-library functions or depending on incidental transitive includes. A source file should compile with its own required headers visible.\n\n## 5. Verification checklist\n\nFor every library name, identify its declaring header, C-version requirement, optional-support condition and platform boundary. Compile in the intended language mode with strict warnings. If a feature is unavailable, decide whether to provide a portable alternative or explicitly document the target requirement. Treat compiler acceptance on one machine as evidence for that implementation, not proof of universal availability.",
       "examples": [
         {
           "id": "cl129-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\nint main(void) {\n char *copy = malloc(8);\n if (copy == NULL) return EXIT_FAILURE;\n memcpy(copy, \"Code\", 5);\n puts(copy);\n free(copy);\n return EXIT_SUCCESS;\n}",
-          "explanation": "Each header provides declarations for a distinct responsibility: stdlib.h provides allocation and status macros, string.h provides memcpy, and stdio.h provides puts.",
-          "runnable": false
+          "title": "Use headers for integer types, formats, sizes and limits",
+          "code": "#include <inttypes.h>\n#include <limits.h>\n#include <stddef.h>\n#include <stdint.h>\n#include <stdio.h>\n\nstruct Record {\n    char tag;\n    int value;\n};\n\nint main(void)\n{\n    const size_t record_size = sizeof(struct Record);\n    const size_t value_offset = offsetof(struct Record, value);\n\n#if defined(UINT32_MAX)\n    {\n        const uint32_t count = UINT32_C(42);\n        printf(\"Count: %\" PRIu32 \"\\n\", count);\n    }\n#else\n    puts(\"This implementation has no exact 32-bit unsigned integer type.\");\n#endif\n\n    printf(\"Record size: %zu; value offset: %zu\\n\",\n           record_size, value_offset);\n    printf(\"INT_MAX: %d; SIZE_MAX: %zu\\n\", INT_MAX, (size_t)SIZE_MAX);\n    return 0;\n}\n",
+          "explanation": "<stdint.h> supplies optional exact-width integer types and their limit macros; the preprocessor check makes the example work when uint32_t is not provided. <inttypes.h> supplies PRIu32 so the format matches the actual uint32_t type. <stddef.h> declares offsetof and size_t, <stdio.h> declares printf and puts, and <limits.h> declares INT_MAX. The example shows that each header has a specific responsibility and that optional type availability must be tested rather than assumed.",
+          "runnable": true
+        },
+        {
+          "id": "cl129-ex2",
+          "language": "en",
+          "title": "Parse a command-line integer using the correct utility and error headers",
+          "code": "#include <ctype.h>\n#include <errno.h>\n#include <stdio.h>\n#include <stdlib.h>\n\nint main(int argc, char *argv[])\n{\n    char *end = NULL;\n    long value;\n\n    if (argc != 2) {\n        fprintf(stderr, \"Usage: %s integer\\n\", argv[0]);\n        return EXIT_FAILURE;\n    }\n\n    errno = 0;\n    value = strtol(argv[1], &end, 10);\n    if (end == argv[1] || errno == ERANGE) {\n        fputs(\"Invalid or out-of-range integer.\\n\", stderr);\n        return EXIT_FAILURE;\n    }\n    while (isspace((unsigned char)*end) != 0) {\n        ++end;\n    }\n    if (*end != '\\0') {\n        fputs(\"Unexpected trailing characters.\\n\", stderr);\n        return EXIT_FAILURE;\n    }\n\n    printf(\"Parsed value: %ld\\n\", value);\n    return EXIT_SUCCESS;\n}\n",
+          "explanation": "<stdio.h> provides stream output, <stdlib.h> provides strtol and EXIT_FAILURE/EXIT_SUCCESS, <errno.h> provides errno and ERANGE, and <ctype.h> provides isspace. The ctype argument is converted to unsigned char before classification. The example checks for no digits, range failure and non-whitespace trailing text; using the correct headers does not replace these function-contract checks.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Map each function in the example to its declaring header.",
-      "independentTask": "Review a source file's includes and add the direct standard header for every library facility it uses.",
+      "guidedTask": "Create a table for every identifier used by the two examples. Record the header that declares it and explain why the code includes that header. Then identify which part of the first example is conditional on implementation support.",
+      "independentTask": "Inspect a small C program that uses file I/O, dynamic allocation, string operations and character classification. Remove unrelated includes, add the direct standard headers required by every facility, and mark any POSIX, platform-specific or third-party dependency separately. Compile it in the intended C language mode with strict warnings and document any optional feature assumptions.",
       "hints": [
-        "Include the header that declares a function instead of relying on another header to include it indirectly.",
-        "Avoid unnecessary headers that obscure module dependencies.",
-        "A header supplies declarations; the implementation supplies the library behaviour."
+        "Start with the library facility's documented declaration; do not infer its header from a similar function name.",
+        "Use <inttypes.h> format macros for exact-width integer types instead of assuming a fixed printf conversion specifier.",
+        "An exact-width typedef such as uint32_t is conditional on the implementation having a type of that width.",
+        "A declaration being visible does not prove that its preconditions, pointer lifetime or error-handling requirements are satisfied.",
+        "Separate ISO C headers from POSIX, operating-system SDK and third-party headers when assessing portability.",
+        "Compile in the target C version and verify optional facilities on every supported implementation; avoid relying on transitive includes."
       ]
     }
   },
@@ -51,36 +80,58 @@
     "questions": [
       {
         "id": "cl129-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "Which header declares the strtol function and the EXIT_SUCCESS macro?",
         "options": [
-          "The learning or C language principle described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "<stdlib.h>",
+          "<stdio.h>",
+          "<string.h>"
         ],
-        "answer": "The learning or C language principle described in this lesson.",
-        "explanation": "The correct choice follows the concept or reference contract described above."
+        "answer": "<stdlib.h>",
+        "explanation": "strtol and the standard process status macros are declared or defined by <stdlib.h>."
       },
       {
         "id": "cl129-q2",
-        "prompt": "What should be checked before applying the concept?",
+        "prompt": "Which header provides the PRIu32 format macro for printing a uint32_t value?",
         "options": [
-          "Its exact requirements, assumptions and edge cases.",
-          "Only the function or topic name.",
-          "Whether an unrelated example compiles."
+          "<inttypes.h>",
+          "<limits.h>",
+          "<stddef.h>"
         ],
-        "answer": "Its exact requirements, assumptions and edge cases.",
-        "explanation": "Reliable use depends on understanding the actual contract."
+        "answer": "<inttypes.h>",
+        "explanation": "<inttypes.h> provides format and conversion macros associated with the integer types in <stdint.h>."
       },
       {
         "id": "cl129-q3",
-        "prompt": "Which practice best demonstrates understanding?",
+        "prompt": "Why does portable code check whether UINT32_MAX is defined before using uint32_t?",
         "options": [
-          "Explain the reasoning and test representative and boundary cases.",
-          "Memorize an output without explanation.",
-          "Ignore invalid input."
+          "An exact-width 32-bit integer type is provided only when the implementation has a suitable type",
+          "All integer types are optional in C",
+          "The macro is defined only when printf is available"
         ],
-        "answer": "Explain the reasoning and test representative and boundary cases.",
-        "explanation": "Reasoning and targeted tests demonstrate transferable understanding."
+        "answer": "An exact-width 32-bit integer type is provided only when the implementation has a suitable type",
+        "explanation": "The exact-width typedefs in <stdint.h> are conditional on the implementation's available integer representations."
+      },
+      {
+        "id": "cl129-q4",
+        "prompt": "Which statement about <unistd.h> is correct?",
+        "options": [
+          "It is a POSIX header, not an ISO C standard header",
+          "It is required by every C11 implementation",
+          "It declares all functions from <stdlib.h>"
+        ],
+        "answer": "It is a POSIX header, not an ISO C standard header",
+        "explanation": "<unistd.h> is associated with POSIX environments. Code using it has an environment dependency beyond ISO C."
+      },
+      {
+        "id": "cl129-q5",
+        "prompt": "What is the main reason to include the direct standard header for each library facility used?",
+        "options": [
+          "It makes source dependencies explicit and avoids relying on incidental transitive includes",
+          "It guarantees every library call is free from runtime errors",
+          "It forces the compiler to inline every library function"
+        ],
+        "answer": "It makes source dependencies explicit and avoids relying on incidental transitive includes",
+        "explanation": "The documented header is the supported declaration boundary. It does not by itself guarantee runtime safety or optimization behaviour."
       }
     ]
   },
