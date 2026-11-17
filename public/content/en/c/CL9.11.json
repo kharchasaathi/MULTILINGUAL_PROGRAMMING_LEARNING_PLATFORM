@@ -6,39 +6,52 @@
   "title": "C standard library overview and headers",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C rules.",
-    "Trace the example and identify data or control flow.",
-    "Recognize common failure and safety cases.",
-    "Apply the concept in a tested C program."
+    "Explain that the C standard library provides portable interfaces declared by standard headers and implemented by the hosted or freestanding implementation as applicable.",
+    "Match common headers such as stdio.h, stdlib.h, string.h, math.h, ctype.h, time.h and stdint.h to their principal facilities.",
+    "Distinguish a declaration supplied by a header from the function definition supplied by the library implementation.",
+    "Include the correct header for each library identifier and avoid relying on undeclared functions or accidental transitive includes.",
+    "Check library preconditions, return values, object bounds and lifetime requirements when calling standard functions.",
+    "Identify when a facility is optional, implementation-defined, locale-sensitive or platform-specific rather than assuming universal behaviour."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "The C standard library provides facilities for input/output, strings, memory allocation, mathematics, character handling, time, diagnostics and other common tasks. Headers declare interfaces; the implementation supplies the corresponding library definitions.",
-      "whyItMatters": "Using standard facilities improves portability and reduces the need to write error-prone replacements, provided the program follows their contracts.",
-      "analogy": "Treat each resource and operation as having a clear contract, valid lifetime and failure path.",
-      "analogyLimit": "The analogy does not replace the C standard, compiler or library specifications."
+      "concept": "The C standard library is a collection of specified types, macros and functions that programs can use through standard headers. A header such as <stdio.h> declares interfaces; the implementation provides the corresponding library definitions. Common headers include <stdlib.h> for conversions, allocation and process utilities; <string.h> for byte and string operations; <math.h> for mathematical functions; <ctype.h> for character classification and conversion; <time.h> for calendar time; and <stdint.h> for optional exact-width integer types and related limits.",
+      "whyItMatters": "Using standard interfaces avoids unnecessary reinvention and generally improves portability. However, every function has a contract: required headers, valid arguments, return-value rules, object sizes and lifetime constraints. A familiar function name does not make an invalid call safe.",
+      "analogy": "A standard header is like an interface catalogue: it tells a program which operations and types are available, while the library implementation supplies their behaviour.",
+      "analogyLimit": "Including a header does not guarantee that every optional facility exists on every implementation, nor does it validate arguments or make platform-specific behaviour portable."
     },
     "explain": {
-      "narrative": "The C standard library provides facilities for input/output, strings, memory allocation, mathematics, character handling, time, diagnostics and other common tasks. Headers declare interfaces; the implementation supplies the corresponding library definitions.\n\nCheck object bounds, lifetimes, arithmetic limits and all relevant return values. Compile with warnings enabled and test both normal and failure paths.",
+      "narrative": "A header provides declarations, macros and type definitions needed by the compiler. The implementation supplies the library code, often through the linker and runtime. Include the header that directly declares each identifier you use; do not rely on another header accidentally including it. The standard library is not one giant header, and a header is not generally a separately compiled source file.\\n\\nChoose functions by contract. For example, strlen requires a valid null-terminated string; memcpy requires non-overlapping valid regions; malloc may return a null pointer; strtol reports conversion information through endptr and may set errno; printf format specifiers must match the argument types. Read the relevant function contract and check failure results.\\n\\nHosted C implementations provide the standard library facilities required for hosted programs. Freestanding implementations have a different required subset. Some headers and functions are optional or depend on implementation support. Compiler extensions and operating-system APIs should be identified as such rather than presented as ISO C.",
       "examples": [
         {
           "id": "cl911-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\n#include <string.h>\nint main(void) {\n const char message[] = \"Standard C\";\n printf(\"%s has %zu characters\\n\", message, strlen(message));\n return 0;\n}",
-          "explanation": "stdio.h declares printf and string.h declares strlen. The program uses standard library interfaces instead of implementing output and string length manually.",
-          "runnable": false
+          "title": "Use two standard headers for distinct jobs",
+          "code": "#include <stdio.h>\n#include <string.h>\n\nint main(void)\n{\n    const char message[] = \"Standard C\";\n    printf(\"%s has %zu characters\\n\", message, strlen(message));\n    return 0;\n}",
+          "explanation": "stdio.h declares printf and string.h declares strlen. The array is a valid null-terminated string, so strlen can find its length. Each identifier's declaring header is included directly.",
+          "runnable": true
+        },
+        {
+          "id": "cl911-ex2",
+          "language": "en",
+          "title": "Check a library allocation result before use",
+          "code": "#include <stdio.h>\n#include <stdlib.h>\n\nint main(void)\n{\n    int *value = malloc(sizeof *value);\n    if (value == NULL) {\n        fputs(\"allocation failed\\n\", stderr);\n        return 1;\n    }\n    *value = 42;\n    printf(\"value=%d\\n\", *value);\n    free(value);\n    return 0;\n}",
+          "explanation": "stdlib.h declares malloc and free; stdio.h declares the output functions. The program checks allocation before dereferencing and releases the allocated object exactly once.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Match each header to a common facility it declares.",
-      "independentTask": "Create a small program that uses stdio.h, string.h and ctype.h, explaining the role of each header.",
+      "guidedTask": "For each identifier printf, strlen, malloc, sqrt, isdigit and time, identify its declaring header, one important argument or return-value rule, and one possible failure or portability concern.",
+      "independentTask": "Write a small hosted C program that uses three standard headers for three different purposes. Include direct headers, validate inputs and library results, and explain the contract of every library call.",
       "hints": [
-        "A header provides declarations and macros; it is not itself a separately compiled program.",
-        "Include the standard header that declares each library function you use.",
-        "Check the C version and implementation support for facilities you depend on."
+        "Include the header that directly declares each identifier.",
+        "A declaration is not the same thing as the library's implementation.",
+        "Check whether a function expects a null-terminated string, a byte count or an element count.",
+        "Check allocation and conversion results before using them.",
+        "Do not assume optional facilities or platform APIs are ISO C.",
+        "Read the standard-library contract rather than guessing from a function name."
       ]
     }
   },
@@ -51,36 +64,63 @@
     "questions": [
       {
         "id": "cl911-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "Which header declares printf?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "<stdio.h>",
+          "<string.h>",
+          "<stdlib.h>",
+          "<time.h>"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct choice follows the C rule explained above."
+        "answer": "<stdio.h>",
+        "explanation": "stdio.h declares the standard input/output functions including printf."
       },
       {
         "id": "cl911-q2",
-        "prompt": "What is a reliable way to protect correctness?",
+        "prompt": "Which statement best describes a standard header?",
         "options": [
-          "Validate preconditions, bounds and failure results.",
-          "Assume the operation cannot fail.",
-          "Ignore the type and lifetime rules."
+          "It supplies declarations and macros for interfaces",
+          "It always contains the compiled machine code",
+          "It validates every function argument",
+          "It guarantees all optional extensions exist"
         ],
-        "answer": "Validate preconditions, bounds and failure results.",
-        "explanation": "C requires explicit handling of object validity and operation failures."
+        "answer": "It supplies declarations and macros for interfaces",
+        "explanation": "A header makes declarations visible; the implementation supplies library definitions."
       },
       {
         "id": "cl911-q3",
-        "prompt": "How should the example be checked?",
+        "prompt": "What must be true before calling strlen(s)?",
         "options": [
-          "Compile with warnings and test expected and failure cases.",
-          "Ignore diagnostics and test only once.",
-          "Assume every platform behaves identically."
+          "s points to a valid null-terminated string",
+          "s points to any allocated bytes, even without a terminator",
+          "s must contain only digits",
+          "s must have been allocated by malloc"
         ],
-        "answer": "Compile with warnings and test expected and failure cases.",
-        "explanation": "Warnings and targeted tests provide evidence for correctness."
+        "answer": "s points to a valid null-terminated string",
+        "explanation": "strlen searches for the terminating null character, so the string must be valid and terminated."
+      },
+      {
+        "id": "cl911-q4",
+        "prompt": "Why should malloc's result be checked?",
+        "options": [
+          "It can return a null pointer when allocation fails",
+          "It always returns one byte",
+          "It automatically initializes all bytes to zero",
+          "It frees earlier allocations"
+        ],
+        "answer": "It can return a null pointer when allocation fails",
+        "explanation": "The caller must not dereference a null result and must manage the allocated object's lifetime."
+      },
+      {
+        "id": "cl911-q5",
+        "prompt": "Which practice improves portability?",
+        "options": [
+          "Use standard interfaces and identify platform-specific extensions explicitly",
+          "Assume every compiler supports the same extensions",
+          "Rely on transitive header inclusion",
+          "Ignore implementation-defined limits"
+        ],
+        "answer": "Use standard interfaces and identify platform-specific extensions explicitly",
+        "explanation": "ISO C interfaces are generally more portable than undocumented compiler or operating-system extensions."
       }
     ]
   },
