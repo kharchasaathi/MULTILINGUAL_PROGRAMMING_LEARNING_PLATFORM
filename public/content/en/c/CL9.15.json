@@ -36,9 +36,9 @@
           "id": "cl915-ex2",
           "language": "en",
           "title": "Detect and reject signed addition overflow before it occurs",
-          "code": "#include <stdint.h>\n#include <stdio.h>\n#include <stdbool.h>\n\nstatic bool add_checked(int left, int right, int *result)\n{\n    if (result == NULL) return false;\n    if ((right > 0 && left > INT32_MAX - right) ||\n        (right < 0 && left < INT32_MIN - right)) return false;\n    *result = left + right;\n    return true;\n}\n\nint main(void)\n{\n    int answer = 0;\n    if (!add_checked(20, 22, &answer)) return 1;\n    printf(\"sum=%d\\n\", answer);\n    return 0;\n}",
-          "explanation": "The check prevents the signed addition from being evaluated when its result would be outside the int32_t limits, assuming int has the same range as int32_t on the target. For fully portable int bounds, use INT_MAX and INT_MIN from limits.h instead; this example is intentionally a fixed-width teaching case and should be compiled only where int is 32 bits.",
-          "runnable": false
+          "code": "#include <limits.h>\n#include <stdbool.h>\n#include <stdio.h>\n\nstatic bool add_checked(int left, int right, int *result)\n{\n    if (result == NULL) {\n        return false;\n    }\n    if ((right > 0 && left > INT_MAX - right) ||\n        (right < 0 && left < INT_MIN - right)) {\n        return false;\n    }\n    *result = left + right;\n    return true;\n}\n\nint main(void)\n{\n    int answer = 0;\n    if (!add_checked(20, 22, &answer)) {\n        return 1;\n    }\n    printf(\"sum=%d\\n\", answer);\n    return 0;\n}",
+          "explanation": "The function checks against the implementation's int limits before evaluating the addition. It rejects a null output pointer and leaves the output unchanged on failure. Boundary tests should include INT_MAX plus one and INT_MIN minus one, without performing those overflowing expressions.",
+          "runnable": true
         }
       ]
     },
