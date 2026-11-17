@@ -31,17 +31,17 @@
           "id": "cl81-ex1",
           "language": "en",
           "title": "A static local object survives function returns",
-          "code": "#include <stdio.h>\n\nint next_ticket(void) {\n    static int ticket = 100;\n    ++ticket;\n    return ticket;\n}\n\nint main(void) {\n    int first = next_ticket();\n    int second = next_ticket();\n    printf(\"%d %d\\n\", first, second);\n    return 0;\n}",
-          "explanation": "Expected output: `101 102`. The identifier `ticket` is scoped to `next_ticket`, but the object has static storage duration. Its value is retained between calls and the object remains alive for the whole program execution. `first` and `second` are separate automatic objects in `main`.",
-          "runnable": false
+          "code": "#include <stdio.h>\n\nstatic int next_ticket(void) {\n    static int ticket = 100;\n    ++ticket;\n    return ticket;\n}\n\nint main(void) {\n    int first = next_ticket();\n    int second = next_ticket();\n    printf(\"%d %d\\n\", first, second);\n    return 0;\n}",
+          "explanation": "Expected output: `101 102`. The identifier `ticket` is scoped to `next_ticket`, but the object has static storage duration. Its value is retained between calls and the object remains alive for the whole program execution. `first` and `second` are separate automatic objects in `main`. This complete translation unit can be compiled and run as written.",
+          "runnable": true
         },
         {
           "id": "cl81-ex2",
           "language": "en",
           "title": "An allocated object outlives the block that holds its pointer",
           "code": "#include <stdio.h>\n#include <stdlib.h>\n\nint main(void) {\n    int local_value = 7;\n    int *allocated_value = malloc(sizeof *allocated_value);\n    if (allocated_value == NULL) {\n        fputs(\"allocation failed\\n\", stderr);\n        return 1;\n    }\n\n    *allocated_value = 35;\n    printf(\"local=%d allocated=%d total=%d\\n\",\n           local_value, *allocated_value, local_value + *allocated_value);\n\n    free(allocated_value);\n    allocated_value = NULL;\n    return 0;\n}",
-          "explanation": "Expected output: `local=7 allocated=35 total=42`. `local_value` has automatic storage duration and is associated with the execution of the block. The allocated object remains alive until `free` releases it. Setting the local pointer to `NULL` after freeing is a useful defensive convention for that pointer variable; it does not change the lifetime of the already-released object.",
-          "runnable": false
+          "explanation": "Expected output: `local=7 allocated=35 total=42`. `local_value` has automatic storage duration and is associated with the execution of the block. The allocated object remains alive until `free` releases it. Setting the local pointer to `NULL` after freeing is a useful defensive convention for that pointer variable; it does not change the lifetime of the already-released object. This complete translation unit can be compiled and run as written.",
+          "runnable": true
         }
       ],
       "commonMistakes": [
