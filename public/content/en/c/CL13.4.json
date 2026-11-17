@@ -6,39 +6,62 @@
   "title": "Practice problems combining multiple C concepts",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its relevant rules.",
-    "Trace the example and justify its behaviour.",
-    "Identify important assumptions and failure cases.",
-    "Apply the concept in a reviewed and tested exercise."
+    "Decompose an integrated problem into data, operations, invariants, input constraints and observable results before coding.",
+    "Combine structures, arrays, pointers, functions, loops, conditions and enums while keeping interfaces and responsibilities clear.",
+    "Validate pointers, element counts and record fields at function boundaries, and document object ownership and lifetime.",
+    "Prevent signed arithmetic overflow by checking multiplication and addition before evaluating each operation.",
+    "Design deterministic tests for empty, typical, boundary, invalid and failure cases, and explain the purpose of each test.",
+    "Use compiler warnings, static analysis and runtime sanitizers as complementary evidence without treating them as a proof of correctness."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL2.6",
+    "CL3.9",
+    "CL4.2",
+    "CL5.8",
+    "CL6.10",
+    "CL7.5",
+    "CL8.3",
+    "CL13.2",
+    "CL13.3"
+  ],
   "stages": {
     "understand": {
-      "concept": "Integrated practice requires learners to combine data types, decisions, loops, functions, arrays, pointers, structures or file handling in one solution. The problem should identify which concepts are required and which design choices remain open.",
-      "whyItMatters": "Real programs rarely use one isolated language feature. Integrated problems reveal whether learners can select and combine concepts appropriately.",
-      "analogy": "Treat standards, interfaces and release steps as explicit contracts that make assumptions visible.",
-      "analogyLimit": "The analogy does not replace the C standard, implementation documentation or project-specific requirements."
+      "concept": "An integrated C problem makes several language features cooperate under one specification. A good solution is a small design with a data model, invariants, functions, control flow, resource rules and tests. A stock report, for example, can represent each product with a structure, store products in an array, pass the array through a pointer parameter, traverse it with a loop, validate fields with conditions and calculate totals through helper functions.\\n\\nBegin with a contract: identify the input data and valid ranges, required output, maximum collection size, whether empty input is valid, and the response to invalid arguments or unrepresentable arithmetic. State invariants such as nonnegative quantity and unit price. Check invariants at the boundary where external data enters the program.\\n\\nA structure groups related fields; an array stores same-type records; a pointer parameter gives a function access to caller-owned elements; and a separate count states how many elements may be accessed. A pointer does not carry an array length. Pass the count explicitly and never access an element unless its index is below that count. A null pointer may be acceptable for a zero count, but a nonzero count requires a valid pointer to enough elements.\\n\\nDecompose work into functions with narrow contracts. One function can validate a record, another can calculate a checked subtotal, and another can aggregate subtotals. Prefer a status result plus an output parameter when failure is possible. Define whether the output remains unchanged or receives a safe value on failure. Do not return pointers to local automatic objects. State whether a function allocates, frees, modifies or retains passed storage.\\n\\nSigned overflow is undefined behaviour in C. For nonnegative multiplication, check `a != 0 && b > LLONG_MAX / a` before computing `a * b`. For nonnegative addition, check `value > LLONG_MAX - total` before computing `total + value`. The check must precede the operation; storing an already-overflowed expression in a wider type does not repair it.\\n\\nTest behaviour, not the number of features used. Include empty and nonempty collections, zero values, invalid negative values, null-pointer/count combinations and arithmetic boundaries. Record expected output or expected failure. Strict compiler warnings, static analysis and sanitizers provide useful evidence, but do not replace reasoning about all permitted inputs.",
+      "whyItMatters": "Most useful C programs combine data representation, iteration, functions, validation and arithmetic. Integrated practice develops the ability to design complete solutions and helps prevent out-of-bounds access, overflow and unclear ownership.",
+      "analogy": "Think of an integrated program as a small workshop: structures organise parts, arrays hold the inventory, functions perform named jobs and validation checks each part against its specification.",
+      "analogyLimit": "The analogy does not define pointer validity, object lifetime, integer ranges or C evaluation rules. Those must come from the language rules and explicit program contracts."
     },
     "explain": {
-      "narrative": "Integrated practice requires learners to combine data types, decisions, loops, functions, arrays, pointers, structures or file handling in one solution. The problem should identify which concepts are required and which design choices remain open.\n\nState assumptions and constraints, consult the applicable standard or tool documentation, and verify the result with appropriate compiler diagnostics and tests. Separate portable guarantees from implementation-specific behaviour.",
+      "narrative": "## 1. Convert the prompt into a contract\\n\\nBefore coding, list the data model and field types; collection size and empty-input rules; required operations; valid ranges and invariants; numeric limits; failure policy; ownership; and exact output. Do not introduce dynamic allocation merely because a problem combines many concepts. A fixed-size array is simpler when the maximum count is known. If allocation is needed, specify allocation-size overflow checks, allocation failure, ownership transfer and cleanup on every exit path.\\n\\n## 2. Treat pointer and count as one interface\\n\\nAn array-processing function commonly receives a pointer to its first element and an explicit count. The count cannot safely be inferred from the pointer. Reject a null pointer when count is nonzero, and do not dereference it when count is zero. A `const` pointer-to-structure parameter communicates that the function will not modify the record through that parameter.\\n\\n## 3. Separate validation, calculation and presentation\\n\\nA useful decomposition is: validate one record; calculate its contribution; aggregate contributions; then print or return the result. Keep `printf` out of calculation helpers when callers may reuse the calculation. Return a status for failure and write an output value only after all checks succeed. This makes each function easier to test.\\n\\n## 4. Worked problem A: checked stock-value report\\n\\n**Contract:** process a caller-owned array of `struct Item`. Quantity and unit price are nonnegative `int` values. The count may be zero; a null pointer is valid only for a zero count. Calculate line values and the grand total in `long long`. If a record is invalid or multiplication/addition would exceed `LLONG_MAX`, fail without publishing a partial total. The function never allocates, frees or retains the array.\\n\\nValidate fields, check multiplication, calculate the line value, check addition, and only then update the running total. The example's expected output is `Stock value: 220`.\\n\\n## 5. Worked problem B: student result summary\\n\\n**Contract:** process a caller-owned array of student records. Each record has a non-null display name and a score from 0 through 100. The count may be zero; a null array is valid only for a zero count. Calculate the average using a `long long` sum, count scores of at least 50, and identify the highest score. An empty class is reported separately rather than dividing by zero. The example uses string literals for names and does not allocate or free them. A real input layer must validate names and scores before constructing records.\\n\\n## 6. Test interactions and boundary cases\\n\\nFor the stock report, test zero records with a null pointer, one zero-value item, multiple items, negative quantity, negative price, null pointer with positive count, multiplication limits and aggregate-addition limits. For the student report, test zero records, one student, all failing, all passing, scores 49 and 50, a score above 100, a null name and a null array with positive count. Ordinary values alone do not exercise the most important parts of the contract.\\n\\n## 7. Integrated-solution review\\n\\n- Every array access is bounded by the validated count.\\n- Every nonzero count is paired with a valid pointer to enough elements.\\n- Every input-derived field is validated before use.\\n- Potentially overflowing signed operations are checked before evaluation.\\n- Output parameters have documented success and failure states.\\n- Every allocated object has one clear owner and a matching release path.\\n- Empty input is handled before division or element access.\\n- The intended C standard, compiler diagnostics and runtime tests are recorded.\\n\\nA combined exercise is complete only when its contract, implementation, failure behaviour and tests agree.",
       "examples": [
         {
           "id": "cl134-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stddef.h>\nstruct Sale { int quantity; int unit_price; };\nint total_revenue(const struct Sale sales[], size_t count) {\n int total = 0;\n for (size_t i=0; i<count; ++i) total += sales[i].quantity * sales[i].unit_price;\n return total;\n}",
-          "explanation": "The function combines a structure, array traversal and arithmetic aggregation. A production version must validate nonnegative values and guard multiplication and addition against overflow.",
-          "runnable": false
+          "title": "Checked stock report using structures, arrays, pointers and functions",
+          "code": "#include <limits.h>\n#include <stddef.h>\n#include <stdio.h>\n\nstruct Item {\n    const char *name;\n    int quantity;\n    int unit_price;\n};\n\nstatic int item_value(const struct Item *item, long long *value_out)\n{\n    if (item == NULL || value_out == NULL || item->name == NULL ||\n        item->quantity < 0 || item->unit_price < 0) {\n        return 0;\n    }\n    if (item->quantity != 0 &&\n        (long long)item->unit_price > LLONG_MAX / (long long)item->quantity) {\n        return 0;\n    }\n    *value_out = (long long)item->quantity * (long long)item->unit_price;\n    return 1;\n}\n\nstatic int stock_total(const struct Item items[], size_t count,\n                       long long *total_out)\n{\n    size_t i;\n    long long total = 0;\n    if (total_out == NULL || (count > 0U && items == NULL)) {\n        return 0;\n    }\n    for (i = 0U; i < count; ++i) {\n        long long line_value;\n        if (!item_value(&items[i], &line_value) ||\n            line_value > LLONG_MAX - total) {\n            return 0;\n        }\n        total += line_value;\n    }\n    *total_out = total;\n    return 1;\n}\n\nint main(void)\n{\n    const struct Item items[] = {\n        {\"Notebook\", 3, 40}, {\"Pen\", 5, 10}, {\"Folder\", 2, 25}\n    };\n    long long total;\n    if (!stock_total(items, sizeof items / sizeof items[0], &total)) {\n        fputs(\"cannot calculate stock total\\n\", stderr);\n        return 1;\n    }\n    printf(\"Stock value: %lld\\n\", total);\n    return 0;\n}",
+          "explanation": "`struct Item` groups a name, quantity and unit price. The array in `main` is caller-owned. `stock_total` receives the array and an explicit count, traverses records, and delegates validation and multiplication to `item_value`. Multiplication and accumulation are checked before evaluation. `total_out` is written only after the full calculation succeeds, so failure cannot expose a partial total. Expected output: `Stock value: 220`.",
+          "runnable": true
+        },
+        {
+          "id": "cl134-ex2",
+          "language": "en",
+          "title": "Student summary using records, an enum, pointer traversal and checked aggregation",
+          "code": "#include <limits.h>\n#include <stddef.h>\n#include <stdio.h>\n\nstruct Student {\n    const char *name;\n    int score;\n};\n\nenum SummaryStatus {\n    SUMMARY_INVALID = 0,\n    SUMMARY_EMPTY = 1,\n    SUMMARY_OK = 2\n};\n\nstruct Summary {\n    size_t passed;\n    int highest;\n    long long total;\n};\n\nstatic enum SummaryStatus summarize(const struct Student students[],\n                                    size_t count, struct Summary *out)\n{\n    size_t i;\n    struct Summary result = {0U, 0, 0};\n    if (out == NULL || (count > 0U && students == NULL)) {\n        return SUMMARY_INVALID;\n    }\n    if (count == 0U) {\n        *out = result;\n        return SUMMARY_EMPTY;\n    }\n    for (i = 0U; i < count; ++i) {\n        const struct Student *student = &students[i];\n        if (student->name == NULL || student->score < 0 || student->score > 100) {\n            return SUMMARY_INVALID;\n        }\n        if ((long long)student->score > LLONG_MAX - result.total) {\n            return SUMMARY_INVALID;\n        }\n        result.total += (long long)student->score;\n        if (student->score >= 50) {\n            ++result.passed;\n        }\n        if (i == 0U || student->score > result.highest) {\n            result.highest = student->score;\n        }\n    }\n    *out = result;\n    return SUMMARY_OK;\n}\n\nint main(void)\n{\n    const struct Student students[] = {\n        {\"Asha\", 82}, {\"Ravi\", 47}, {\"Mina\", 65}, {\"Dev\", 50}\n    };\n    const size_t count = sizeof students / sizeof students[0];\n    struct Summary summary;\n    enum SummaryStatus status = summarize(students, count, &summary);\n    if (status == SUMMARY_INVALID) {\n        fputs(\"invalid student data\\n\", stderr);\n        return 1;\n    }\n    if (status == SUMMARY_EMPTY) {\n        puts(\"No student records\");\n        return 0;\n    }\n    printf(\"Average: %.2f\\n\", (double)summary.total / (double)count);\n    printf(\"Passed: %zu\\n\", summary.passed);\n    printf(\"Highest: %d\\n\", summary.highest);\n    return 0;\n}",
+          "explanation": "The `Student` structure groups a name and score. `SummaryStatus` distinguishes invalid, empty and successful outcomes. `summarize` traverses a caller-owned array through a pointer and count, validates every record and builds a local result. It assigns the output structure only after all records pass validation. The count is nonzero before average calculation, avoiding division by zero. Expected output: `Average: 61.00`, `Passed: 3`, `Highest: 82`.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Identify every C concept used in the example.",
-      "independentTask": "Design a small stock report using structures, functions, arrays and input validation. State the numeric limits and error policy.",
+      "guidedTask": "Extend the stock report with a function that counts records with a positive quantity. Give it a pointer and count, reject a null pointer when count is nonzero, and explain whether it needs to modify any record. Test an empty array and a mixture of zero and positive quantities.",
+      "independentTask": "Design a library-loan or order-summary program. Define at least one structure, store records in an array, and write separate validation, calculation and reporting functions. Specify pointer/count rules, numeric limits, output behaviour and ownership. Include empty input, invalid fields, boundary values and arithmetic-failure tests. Avoid dynamic allocation unless it is required.",
       "hints": [
-        "Break a combined task into smaller functions before coding.",
-        "Check overflow in intermediate calculations, not only the final result.",
-        "Write tests for empty, typical and extreme inputs."
+        "Write the data model and invariants before writing the loop; list the valid range for every numeric field.",
+        "Pass an array's element count explicitly with its pointer. A pointer alone does not tell a function how many elements exist.",
+        "Use const-qualified pointer parameters for functions that only inspect caller-owned records.",
+        "Keep validation and calculation in small functions, and document what each return value means.",
+        "Check signed multiplication and addition before performing the operations; do not test for overflow after it has occurred.",
+        "Test zero records, one record, invalid records, null-pointer/count combinations and numeric boundaries, then compile with strict warnings and sanitizers."
       ]
     }
   },
@@ -51,38 +74,59 @@
     "questions": [
       {
         "id": "cl134-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "A function receives `const struct Item items[]` and `size_t count`. Which condition must be rejected before accessing an element?",
         "options": [
-          "The C or learning principle described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "`count > 0` and `items == NULL`",
+          "`count == 0` and `items == NULL`",
+          "`count == 0` and `items` is non-null"
         ],
-        "answer": "The C or learning principle described in this lesson.",
-        "explanation": "The correct choice follows the concept and constraints described above."
+        "answer": "`count > 0` and `items == NULL`",
+        "explanation": "A nonzero count promises accessible elements. A null pointer cannot satisfy that promise; a zero count requires no element access."
       },
       {
         "id": "cl134-q2",
-        "prompt": "What should be checked before applying the concept?",
+        "prompt": "How should a program check whether nonnegative `a * b` fits in `long long`?",
         "options": [
-          "The exact rules, assumptions and failure cases.",
-          "Only the file name.",
-          "Whether one unrelated example runs."
+          "Compute the product and compare afterward",
+          "When `a != 0`, check `b > LLONG_MAX / a` before multiplying",
+          "Store the product in int and cast it afterward"
         ],
-        "answer": "The exact rules, assumptions and failure cases.",
-        "explanation": "Reliable C engineering depends on understanding the applicable contract."
+        "answer": "When `a != 0`, check `b > LLONG_MAX / a` before multiplying",
+        "explanation": "The division bound is checked before multiplication. Checking after signed overflow is too late because the behaviour is undefined."
       },
       {
         "id": "cl134-q3",
-        "prompt": "Which practice provides stronger evidence?",
+        "prompt": "Why should an array-processing function receive an explicit element count?",
         "options": [
-          "Use documented standards, diagnostics and targeted tests.",
-          "Assume one compiler's behaviour is universal.",
-          "Ignore warnings and boundary cases."
+          "A pointer does not encode the number of accessible elements",
+          "The count automatically allocates memory",
+          "The count makes every pointer non-null"
         ],
-        "answer": "Use documented standards, diagnostics and targeted tests.",
-        "explanation": "Multiple forms of evidence help distinguish guarantees from assumptions."
+        "answer": "A pointer does not encode the number of accessible elements",
+        "explanation": "The caller and callee need a shared bound so iteration and indexing remain within the actual array."
+      },
+      {
+        "id": "cl134-q4",
+        "prompt": "A summary function may fail while calculating. Which output strategy gives the clearest contract?",
+        "options": [
+          "Publish a partial total after every iteration",
+          "Build a local result and assign the output parameter only after all checks succeed",
+          "Leave the output parameter's failure state undocumented"
+        ],
+        "answer": "Build a local result and assign the output parameter only after all checks succeed",
+        "explanation": "The caller receives a complete result only on success, and failure cannot be mistaken for a valid partial calculation."
+      },
+      {
+        "id": "cl134-q5",
+        "prompt": "Which test set best exercises an integrated stock-report contract?",
+        "options": [
+          "Only one ordinary record",
+          "Only the largest possible record",
+          "Empty input, ordinary records, invalid fields, pointer/count errors and arithmetic boundaries"
+        ],
+        "answer": "Empty input, ordinary records, invalid fields, pointer/count errors and arithmetic boundaries",
+        "explanation": "This checks interactions between representation, validation, iteration, pointer rules and arithmetic limits."
       }
     ]
-  },
-  "status": "draft"
+  }
 }
