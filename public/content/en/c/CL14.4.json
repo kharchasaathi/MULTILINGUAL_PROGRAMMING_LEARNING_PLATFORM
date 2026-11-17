@@ -6,39 +6,64 @@
   "title": "Effective type, aliasing basics and object representation",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its relevant rules.",
-    "Trace the example and justify its behaviour.",
-    "Identify important assumptions and failure cases.",
-    "Apply the concept in a reviewed and tested exercise."
+    "Explain the difference between an object's declared type, its effective type and its object representation.",
+    "Identify the lvalue types permitted to access an object's stored value under C's aliasing rules.",
+    "Explain why character types may inspect object representation bytes while arbitrary incompatible pointer casts do not make typed access valid.",
+    "Use memcpy to copy object representations safely without violating alignment or effective-type requirements.",
+    "Describe how allocated storage without a declared type acquires an effective type through stores and copying operations.",
+    "Evaluate representation-dependent assumptions, padding bytes, trap representations and the portability limits of byte-level interpretation."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL2.6",
+    "CL2.7",
+    "CL3.9",
+    "CL4.10",
+    "CL6.10",
+    "CL7.12",
+    "CL12.1",
+    "CL12.2",
+    "CL13.4",
+    "CL14.1",
+    "CL14.2"
+  ],
   "stages": {
     "understand": {
-      "concept": "C's effective-type and aliasing rules constrain which lvalue types may be used to access an object's stored value. Character types may inspect object representation byte by byte, but arbitrary pointer casts do not make incompatible typed access valid.",
-      "whyItMatters": "Violating aliasing and effective-type rules can lead to undefined behaviour and surprising optimization effects, even when the memory addresses appear identical.",
-      "analogy": "Treat standards, interfaces and release steps as explicit contracts that make assumptions visible.",
-      "analogyLimit": "The analogy does not replace the C standard, implementation documentation or project-specific requirements."
+      "concept": "C distinguishes an object's **declared type**, its **effective type** and its **object representation**. These ideas are related, but they answer different questions.\n\n**Declared type** is the type associated with an object by its declaration. For example, `int count;` declares an object whose type is int. **Effective type** is especially important for objects that have no declared type, such as storage returned by `malloc`. The effective type determines which lvalue accesses to that stored value are permitted. **Object representation** is the sequence of bytes used to represent a value in an object; it may include padding bits or bytes and is not necessarily a portable external format.\n\n**Aliasing and permitted access.** An object's stored value generally must be accessed through an lvalue type compatible with its effective type. The standard also permits access through qualified versions of compatible types, corresponding signed or unsigned types, certain aggregate or union types containing an allowed member, and a character type. These rules are often called the effective-type or strict-aliasing rules. They allow compilers to make optimisation assumptions; violating them can produce undefined behaviour even when two pointers appear to have the same address.\n\nA cast changes the pointer expression's type; it does not change the object's effective type, alignment, size or representation. For example, converting an `int *` to `float *` and dereferencing it to read the same storage is not a portable way to reinterpret an integer as a float. The access is not made valid merely because the pointer values have the same address or because the hardware permits unaligned loads.\n\n**Character access is special.** An object's representation may be inspected byte by byte through a pointer to a character type, such as `unsigned char *`. This is useful for diagnostics, hashing a carefully specified representation, serialisation work and low-level inspection. It does not mean the bytes form a portable file format. Padding bytes can have unspecified values, object representations differ across implementations, and some bit patterns may be trap representations for particular types. Do not compare whole structures with `memcmp` as a substitute for member-wise equality unless the representation and padding implications are deliberately handled.\n\n**Use memcpy for representation copying.** `memcpy` copies bytes between object representations without accessing the source through an incompatible lvalue type. If a destination object has a suitable type and size, copy into that object and then read it through its own type. This avoids the common aliasing error of pointer-cast type punning. It does not make every copied bit pattern a valid value of the destination type: representation validity, size, alignment and the destination type's requirements still matter.\n\n**Allocated storage and effective type.** Storage returned by `malloc` has no declared type. A store through a non-character lvalue can establish an effective type for that access and subsequent accesses that do not modify the stored value. Copying an object representation into allocated storage with `memcpy` or `memmove` can also give the destination the source object's effective type for the relevant subsequent accesses. The exact rule depends on how the storage is used; do not generalise it to declared objects or arbitrary byte writes.\n\n**Alignment is a separate requirement.** Even where an access type would otherwise be permitted, the address must satisfy that type's alignment requirement. Casting a byte-buffer address to a more strictly aligned pointer and dereferencing it may be invalid. `malloc` provides alignment suitable for ordinary object types, but a subrange inside a byte buffer may not. Use `memcpy` or an appropriately aligned object rather than assuming alignment from an address cast.\n\nThe safe engineering rule is to preserve the actual object type, use character pointers for byte inspection, use `memcpy` for representation transfer, and document any representation-dependent assumptions explicitly.",
+      "whyItMatters": "Aliasing violations and invalid representation assumptions can make optimised builds behave differently from debug builds. Low-level code often handles buffers, binary protocols, files, hardware data and allocated storage; correctness depends on keeping type access, alignment, object lifetime and byte representation separate.",
+      "analogy": "Think of an object as a labelled container: its type label controls the valid way to interpret its stored value, while its bytes are the physical contents. Looking at the bytes through a character pointer is like inspecting the packaging; it does not authorise relabelling the same container and treating it as an unrelated type.",
+      "analogyLimit": "The analogy cannot express all standard exceptions for compatible, signed/unsigned, aggregate and character-type access. Apply the actual C rules rather than relying on the metaphor."
     },
     "explain": {
-      "narrative": "C's effective-type and aliasing rules constrain which lvalue types may be used to access an object's stored value. Character types may inspect object representation byte by byte, but arbitrary pointer casts do not make incompatible typed access valid.\n\nState assumptions and constraints, consult the applicable standard or tool documentation, and verify the result with appropriate compiler diagnostics and tests. Separate portable guarantees from implementation-specific behaviour.",
+      "narrative": "**1. Do not confuse a cast with a conversion of the stored object.** A pointer cast changes the type used by an expression. It does not convert the value, create a new object of the target type, repair alignment or establish a new effective type for an object that already has a declared type. If you need a numeric conversion, use a value conversion such as an explicit arithmetic cast after checking its range. If you need a representation copy, use `memcpy`.\n\n**2. Read bytes through a character type.** The standard permits an object's representation to be inspected through a character-type lvalue. `unsigned char` is commonly used because its values are non-negative and cover every possible byte value. This is appropriate for displaying bytes, but the output is implementation-specific: endianness, integer representation, floating-point format and padding may differ. Never hard-code an observed byte sequence as a universal C guarantee without a separately specified external format.\n\n**3. Copy representations with memcpy.** Copying the bytes of a `float` into a `uint32_t` object with `memcpy` is a valid representation-copy technique only after verifying that the sizes match and that the implementation provides `uint32_t`. The resulting integer describes those bytes; it does not promise IEEE-754, a particular endian order or a portable numeric encoding. If the sizes differ, do not copy a partial representation and pretend it is a complete conversion.\n\n**4. Understand allocated storage.** A pointer returned by `malloc` is suitably aligned for types with fundamental alignment requirements and the storage has no declared type. A typed store or a representation copy can establish effective-type rules for later accesses. In contrast, an existing declared object such as `int value` does not become a float because its address was cast to `float *`.\n\n**5. Treat padding and trap representations carefully.** `sizeof` includes any padding needed for the object representation. Two structures with equal member values may have different padding bytes, so whole-structure `memcmp` can report inequality. Some types may have representations that are not valid values; copying arbitrary external bytes into an object and reading it as that type may be unsafe. Validate external data field by field and decode it according to an explicit byte order and format.\n\n**6. Keep alignment and aliasing as separate checks.** A correctly typed pointer does not make a misaligned address safe, and a well-aligned address does not make an incompatible lvalue access valid. For byte buffers, prefer `memcpy` into a properly declared local object, then perform any required validation or conversion.",
       "examples": [
         {
           "id": "cl144-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\n#include <string.h>\n#include <stdint.h>\nint main(void) {\n float value = 1.0f;\n unsigned char bytes[sizeof value];\n memcpy(bytes, &value, sizeof value);\n printf(\"object bytes copied: %zu\\n\", sizeof bytes);\n return 0;\n}",
-          "explanation": "memcpy copies the object representation into a character array without accessing the float through an incompatible lvalue type. The byte values themselves are representation-dependent.",
-          "runnable": false
+          "title": "Inspect an object's representation through unsigned char",
+          "code": "#include <stdio.h>\n\nint main(void) {\n    unsigned int value = 0x12345678u;\n    const unsigned char *bytes = (const unsigned char *)&value;\n\n    printf(\"object size: %zu bytes\\n\", sizeof value);\n    for (size_t i = 0; i < sizeof value; ++i) {\n        printf(\"byte[%zu] = 0x%02X\\n\", i, (unsigned int)bytes[i]);\n    }\n    return 0;\n}",
+          "explanation": "The object representation may be inspected through a pointer to a character type; unsigned char is used to display each byte as a non-negative value. The loop stays within the object's size. The printed byte order and exact representation are implementation-dependent, so the output is for inspection rather than a portable serialization format. The program does not dereference an incompatible integer or floating-point pointer.",
+          "runnable": true
+        },
+        {
+          "id": "cl144-ex2",
+          "language": "en",
+          "title": "Copy a representation with memcpy instead of pointer type-punning",
+          "code": "#include <stdint.h>\n#include <stdio.h>\n#include <string.h>\n\nint main(void) {\n    float value = 1.0f;\n\n    if (sizeof value != sizeof(uint32_t)) {\n        puts(\"float and uint32_t have different sizes on this implementation\");\n        return 0;\n    }\n\n    uint32_t representation;\n    memcpy(&representation, &value, sizeof representation);\n    printf(\"copied %zu representation bytes\\n\", sizeof representation);\n    printf(\"implementation-specific bits: 0x%08X\\n\", (unsigned int)representation);\n    return 0;\n}",
+          "explanation": "The code first verifies that the source and destination object sizes match. memcpy copies the bytes into a real uint32_t object, which is then read through its declared type. It avoids dereferencing a uint32_t pointer that was merely cast from float *. The numeric bit pattern is implementation-specific: the example does not assume IEEE-754, a particular byte order or that this integer is a portable encoding of 1.0f. The optional uint32_t type is provided only on implementations that support an exact-width 32-bit unsigned integer type.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Explain why memcpy is used instead of casting float * to int * and dereferencing.",
-      "independentTask": "Inspect an object's bytes using unsigned char and document why the representation is implementation-dependent.",
+      "guidedTask": "Change the first example to inspect a `double` object and explain why the output may differ between machines. Then write a second version that copies the double representation into an unsigned-char array using `memcpy`. Explain why both character inspection and memcpy are valid approaches, while dereferencing a cast `uint64_t *` is not a general replacement.",
+      "independentTask": "Create a small binary-record reader for a format you define explicitly. Read bytes into an unsigned-char buffer, validate the input length, decode each field using a documented byte order, and copy into properly typed local objects only when the format's representation matches the target requirements. Include tests for truncated input, invalid field values, different host byte order assumptions and alignment. Document why whole-structure `memcmp`, arbitrary pointer casts and unvalidated external representations are not used.",
       "hints": [
-        "Character types may access an object's representation.",
-        "Do not assume a particular floating-point bit pattern on every C implementation.",
-        "Use memcpy for representation copying when appropriate."
+        "Declared type, effective type and object representation answer three different questions.",
+        "A pointer cast does not convert the stored value or change the declared type of an existing object.",
+        "Use unsigned char to inspect object representation bytes; keep every byte index below sizeof the object.",
+        "Use memcpy to transfer bytes into an object of the intended type instead of dereferencing an incompatible pointer.",
+        "Allocated storage from malloc has no declared type; its effective-type rules depend on how values are stored or copied into it.",
+        "Do not assume padding bytes, endianness, floating-point representation or arbitrary external bit patterns are portable."
       ]
     }
   },
@@ -51,36 +76,63 @@
     "questions": [
       {
         "id": "cl144-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What does a pointer cast from int * to float * do to an existing int object?",
         "options": [
-          "The C or learning principle described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "It converts the stored integer value to float.",
+          "It changes the object's declared type to float.",
+          "It changes the pointer expression's type but does not change the object's declared type or stored representation.",
+          "It guarantees that dereferencing the new pointer is valid."
         ],
-        "answer": "The C or learning principle described in this lesson.",
-        "explanation": "The correct choice follows the concept and constraints described above."
+        "answer": "It changes the pointer expression's type but does not change the object's declared type or stored representation.",
+        "explanation": "A cast changes the type used by the pointer expression. It does not create a float object, convert the stored value, establish a new effective type for a declared int object or guarantee alignment."
       },
       {
         "id": "cl144-q2",
-        "prompt": "What should be checked before applying the concept?",
+        "prompt": "Which access is specifically permitted for inspecting an object's representation byte by byte?",
         "options": [
-          "The exact rules, assumptions and failure cases.",
-          "Only the file name.",
-          "Whether one unrelated example runs."
+          "Dereference any unrelated integer pointer.",
+          "Access the bytes through a character-type lvalue such as unsigned char.",
+          "Cast the object address to void ** and read it.",
+          "Read every object through a float pointer."
         ],
-        "answer": "The exact rules, assumptions and failure cases.",
-        "explanation": "Reliable C engineering depends on understanding the applicable contract."
+        "answer": "Access the bytes through a character-type lvalue such as unsigned char.",
+        "explanation": "C permits character types to access an object's representation. The bytes may still be implementation-specific and are not automatically a portable external format."
       },
       {
         "id": "cl144-q3",
-        "prompt": "Which practice provides stronger evidence?",
+        "prompt": "Why is memcpy commonly used instead of pointer-cast type-punning?",
         "options": [
-          "Use documented standards, diagnostics and targeted tests.",
-          "Assume one compiler's behaviour is universal.",
-          "Ignore warnings and boundary cases."
+          "It copies bytes without accessing the source through an incompatible lvalue type.",
+          "It guarantees that all source and destination representations are identical.",
+          "It automatically converts values between unrelated numeric types.",
+          "It removes all alignment and size requirements from later accesses."
         ],
-        "answer": "Use documented standards, diagnostics and targeted tests.",
-        "explanation": "Multiple forms of evidence help distinguish guarantees from assumptions."
+        "answer": "It copies bytes without accessing the source through an incompatible lvalue type.",
+        "explanation": "memcpy transfers object-representation bytes. The destination must still have an appropriate size and type, and the copied representation must be valid before it is read as that type."
+      },
+      {
+        "id": "cl144-q4",
+        "prompt": "Why can memcmp give a surprising result for two structures whose members compare equal?",
+        "options": [
+          "Structure objects never contain padding.",
+          "Padding bytes can differ even when the values of the named members are equal.",
+          "memcmp compares structure member names rather than bytes.",
+          "The C standard requires all structures to have identical byte sequences."
+        ],
+        "answer": "Padding bytes can differ even when the values of the named members are equal.",
+        "explanation": "Structure object representations may contain padding bytes. Whole-object byte comparison can therefore report a difference even when every relevant member value is equal."
+      },
+      {
+        "id": "cl144-q5",
+        "prompt": "What is an important property of storage returned by malloc before a value is stored or copied into it?",
+        "options": [
+          "It always has declared type unsigned char.",
+          "It has no declared type, and effective-type rules depend on how the storage is accessed and populated.",
+          "It automatically has the type of the pointer variable receiving the result.",
+          "It may only be accessed through void lvalues."
+        ],
+        "answer": "It has no declared type, and effective-type rules depend on how the storage is accessed and populated.",
+        "explanation": "Allocated storage has no declared type. Stores and representation-copy operations can establish effective-type rules for subsequent accesses; this is distinct from changing the declared type of an existing object."
       }
     ]
   },
