@@ -6,39 +6,65 @@
   "title": "math.h: mathematical functions, domains and error considerations",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept or reference contract.",
-    "Trace the example and justify its behaviour.",
-    "Identify relevant assumptions and edge cases.",
-    "Apply the skill in a documented exercise."
+    "Identify common mathematical functions declared by <math.h> and the types of their arguments and results.",
+    "Explain domain and range restrictions for functions such as sqrt, log, asin, pow and exp.",
+    "Use isfinite, isnan and isinf to classify floating-point results without relying on ordinary equality tests for NaN.",
+    "Describe floating-point rounding, precision limits and why approximate comparisons require a justified tolerance.",
+    "Explain the roles and limitations of errno, math_errhandling and floating-point exception flags when math functions report errors.",
+    "Compile and test portable C mathematical code while documenting assumptions about the implementation and numerical input range."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL1.1",
+    "CL1.2",
+    "CL2.1",
+    "CL3.1",
+    "CL4.1",
+    "CL5.1",
+    "CL5.3",
+    "CL6.1",
+    "CL12.1",
+    "CL12.2",
+    "CL12.3",
+    "CL12.4"
+  ],
   "stages": {
     "understand": {
-      "concept": "math.h declares mathematical functions such as sqrt, pow, exp, log, sin and floor. Functions may have domain and range restrictions and can raise floating-point exceptions or set errno depending on the implementation and operation.",
-      "whyItMatters": "Correct numerical code validates domains, handles exceptional results and avoids assuming exact floating-point arithmetic.",
-      "analogy": "Treat a reference or learning task as a contract that states what is expected and how success is checked.",
-      "analogyLimit": "The analogy does not replace the exact C standard or library specification."
+      "concept": "The C header <math.h> declares mathematical functions that operate primarily on double values, with float and long double variants for many functions. Common groups include roots and powers (sqrt, cbrt, pow), exponentials and logarithms (exp, exp2, log, log10, log1p), trigonometry (sin, cos, tan, asin, acos, atan, atan2), rounding and remainder operations (ceil, floor, trunc, round, fmod, remainder), and classification or comparison macros such as isfinite, isnan, isinf and isgreater. Mathematical functions have domain and range conditions; invalid arguments and results outside the representable range need deliberate handling.",
+      "whyItMatters": "Floating-point calculations are approximate and can encounter invalid domains, overflow, underflow, infinities and NaNs. A program that assumes every result is an ordinary finite number can make unsafe decisions, print misleading output or propagate an error through later calculations.",
+      "analogy": "A mathematical function is like a measuring instrument: it can give a useful reading only when the input is within the instrument's valid operating range, and the reading has finite precision.",
+      "analogyLimit": "The analogy does not describe IEEE 754 details or replace the C implementation's documented floating-point and math-library behaviour. C permits implementation variation, and not every implementation has identical floating-point characteristics."
     },
     "explain": {
-      "narrative": "math.h declares mathematical functions such as sqrt, pow, exp, log, sin and floor. Functions may have domain and range restrictions and can raise floating-point exceptions or set errno depending on the implementation and operation.\n\nUse authoritative declarations and documentation, state assumptions explicitly and verify behaviour with focused examples. Where the implementation or C version matters, record it.",
+      "narrative": "## 1. Function groups and units\n\nInclude `<math.h>` for the declarations and macros. Many common functions accept and return `double`; corresponding names ending in `f` operate on `float`, and names ending in `l` operate on `long double`. Use the variant that matches the precision and range requirements of the calculation. Trigonometric functions use radians, not degrees. Convert degrees to radians using `degrees * (acos(-1.0) / 180.0)` when a portable value of pi is needed; the C standard does not require a `M_PI` macro.\n\n## 2. Domains and ranges\n\nA domain describes which inputs are mathematically valid. For real-valued `sqrt(x)`, require `x >= 0`; for `log(x)` and `log10(x)`, require `x > 0`; for `asin(x)` and `acos(x)`, require `-1 <= x <= 1`. `atan2(y, x)` accepts a wider set of finite coordinate pairs than `atan(y / x)` and preserves quadrant information. `pow(base, exponent)` has additional special cases, especially for negative bases and non-integer exponents. Even with a mathematically valid input, a result may exceed the representable range of the result type.\n\n## 3. Classifying results\n\nUse `isfinite(value)` to test whether a result is neither infinity nor NaN. `isnan(value)` identifies NaN, and `isinf(value)` identifies an infinity. NaN is unordered: comparisons such as `value == value` are false for NaN, so do not use ordinary equality as a NaN test. Validate input values before calling a function when the application has a clear domain policy, and classify results before using them in later decisions.\n\n## 4. Floating-point precision and comparisons\n\nMost decimal fractions cannot be represented exactly in binary floating-point. Repeated arithmetic can accumulate rounding error, and the result may differ slightly from the mathematical ideal. Avoid testing calculated values with `a == b` unless exact equality is guaranteed by the problem's design. A common approximate comparison is `fabs(a - b) <= tolerance`, but the tolerance must come from the scale, units and accuracy requirements of the application. For values near zero, an absolute tolerance may be appropriate; for values spanning large magnitudes, a combined absolute and relative tolerance is often more meaningful. Do not choose an arbitrary epsilon and assume it is correct for every problem.\n\n## 5. Error reporting and portability\n\nThe C math library can report errors through `errno`, floating-point exception flags, or both, depending on the implementation and the operation. `math_errhandling` indicates which mechanisms are supported: `MATH_ERRNO` and `MATH_ERREXCEPT`. When checking `errno`, set it to zero before the call and inspect it afterwards for the documented error conditions. When checking floating-point exceptions, include `<fenv.h>`, clear the relevant flags before the operation with `feclearexcept`, then test them with `fetestexcept`. Floating-point environment access and compiler optimizations require care; `#pragma STDC FENV_ACCESS ON` communicates intent where supported, but support and diagnostics vary. Do not assume a single error-reporting mechanism is universal.\n\n`FE_INVALID`, `FE_DIVBYZERO`, `FE_OVERFLOW` and `FE_UNDERFLOW` are common exception macros when the implementation supports them. The C standard's exact behaviour and the available flags depend on the implementation. A robust program documents which environment it targets and checks the mechanisms that environment guarantees.\n\n## 6. Practical checklist\n\n- Confirm units, especially radians versus degrees.\n- Validate the mathematical domain before the call when possible.\n- Check whether the result is finite before using it.\n- Choose a precision variant intentionally and avoid premature narrowing.\n- Compare approximate values with an application-justified tolerance.\n- Check the implementation's documented `errno` and floating-point exception behaviour when errors matter.\n- Link the math library where the toolchain requires it (for example, many GCC-based Unix-like environments use `-lm`).",
       "examples": [
         {
           "id": "cl125-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\n#include <math.h>\nint main(void) {\n double x = 25.0;\n if (x < 0.0) return 1;\n double root = sqrt(x);\n printf(\"%.3f\\n\", root);\n return 0;\n}",
-          "explanation": "sqrt is called only after the simple nonnegative-domain check. The result is a double and is printed to three fractional digits.",
-          "runnable": false
+          "title": "Validate domains and classify mathematical results",
+          "code": "#include <math.h>\n#include <stdio.h>\n\nstatic void show_sqrt(double value)\n{\n    if (!isfinite(value) || value < 0.0) {\n        printf(\"sqrt input %.3f is outside this program's accepted domain\\n\", value);\n        return;\n    }\n\n    {\n        double result = sqrt(value);\n        if (isfinite(result)) {\n            printf(\"sqrt(%.3f) = %.3f\\n\", value, result);\n        } else {\n            puts(\"sqrt produced a non-finite result.\");\n        }\n    }\n}\n\nint main(void)\n{\n    double values[] = {25.0, 0.0, -4.0, INFINITY, NAN};\n    size_t i;\n\n    for (i = 0U; i < sizeof values / sizeof values[0]; ++i) {\n        show_sqrt(values[i]);\n    }\n\n    if (isnan(NAN)) {\n        puts(\"NaN was classified with isnan.\");\n    }\n    return 0;\n}\n",
+          "explanation": "The helper applies the real square-root domain policy before calling sqrt and rejects non-finite inputs. It classifies the result with isfinite instead of assuming every floating-point operation produces an ordinary finite value. NAN and INFINITY are standard macros made available through math.h.",
+          "runnable": true
+        },
+        {
+          "id": "cl125-ex2",
+          "language": "en",
+          "title": "Use radians and a scale-aware approximate comparison",
+          "code": "#include <math.h>\n#include <stdio.h>\n\nstatic int nearly_equal(double a, double b, double absolute_tolerance,\n                        double relative_tolerance)\n{\n    double difference = fabs(a - b);\n    double scale = fmax(fabs(a), fabs(b));\n\n    return difference <= absolute_tolerance + relative_tolerance * scale;\n}\n\nint main(void)\n{\n    const double pi = acos(-1.0);\n    const double degrees = 60.0;\n    const double radians = degrees * (pi / 180.0);\n    const double actual = sin(radians);\n    const double expected = sqrt(3.0) / 2.0;\n\n    printf(\"sin(%.1f degrees) = %.12f\\n\", degrees, actual);\n    printf(\"Expected value   = %.12f\\n\", expected);\n    printf(\"Within tolerance = %s\\n\",\n           nearly_equal(actual, expected, 1e-12, 1e-12) ? \"yes\" : \"no\");\n    return 0;\n}\n",
+          "explanation": "The example converts degrees to radians using pi computed as acos(-1.0). It compares two independently calculated floating-point values using an explicit absolute-plus-relative tolerance. The tolerance is illustrative for this calculation, not a universal constant for all numerical programs.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Identify the domain restriction for sqrt and log.",
-      "independentTask": "Create a numerical helper that validates input and handles non-finite results using isfinite where supported.",
+      "guidedTask": "Compile both examples and run them. Change the first example to test log with zero and a negative value, then write the domain rule before the call. Change the second example's angle and tolerance, and explain how the tolerance affects the result. Identify which math error-reporting mechanisms your compiler and C library document.",
+      "independentTask": "Create a numerical utility that reads or defines a finite input, validates the domain for sqrt and log, calculates a trigonometric result after converting degrees to radians, and reports non-finite results. Add a comparison helper with documented absolute and relative tolerances. If your target implementation supports floating-point exception reporting, add a separate experiment using feclearexcept and fetestexcept and document the compiler and library assumptions.",
       "hints": [
-        "Floating-point calculations may round and should not be compared as exact decimal values without a defined tolerance.",
-        "Some math operations have implementation-defined or documented error reporting through errno and floating-point exceptions.",
-        "Include math.h for function declarations."
+        "sqrt on real values requires a nonnegative argument; log requires a strictly positive argument.",
+        "C trigonometric functions use radians, so convert degrees before calling sin, cos or tan.",
+        "Use isfinite, isnan and isinf to classify floating-point results; NaN is not equal to itself.",
+        "A valid mathematical domain does not guarantee the result fits in the floating-point type.",
+        "Choose tolerances from the scale, units and required accuracy of the problem, not by habit.",
+        "Check math_errhandling and the target library documentation before relying on errno or floating-point exception flags."
       ]
     }
   },
@@ -51,36 +77,58 @@
     "questions": [
       {
         "id": "cl125-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "Which input satisfies the real-valued domain of sqrt?",
         "options": [
-          "The learning or C language principle described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "A value greater than or equal to zero.",
+          "Only values greater than zero.",
+          "Any finite or infinite negative value."
         ],
-        "answer": "The learning or C language principle described in this lesson.",
-        "explanation": "The correct choice follows the concept or reference contract described above."
+        "answer": "A value greater than or equal to zero.",
+        "explanation": "The real square root is defined for nonnegative inputs, including zero."
       },
       {
         "id": "cl125-q2",
-        "prompt": "What should be checked before applying the concept?",
+        "prompt": "What unit do the standard C sin, cos and tan functions expect?",
         "options": [
-          "Its exact requirements, assumptions and edge cases.",
-          "Only the function or topic name.",
-          "Whether an unrelated example compiles."
+          "Radians.",
+          "Degrees.",
+          "Gradians."
         ],
-        "answer": "Its exact requirements, assumptions and edge cases.",
-        "explanation": "Reliable use depends on understanding the actual contract."
+        "answer": "Radians.",
+        "explanation": "Convert degree measurements to radians before passing them to the standard trigonometric functions."
       },
       {
         "id": "cl125-q3",
-        "prompt": "Which practice best demonstrates understanding?",
+        "prompt": "Which test is designed to identify a NaN value?",
         "options": [
-          "Explain the reasoning and test representative and boundary cases.",
-          "Memorize an output without explanation.",
-          "Ignore invalid input."
+          "isnan(value)",
+          "value == value",
+          "value > 0.0"
         ],
-        "answer": "Explain the reasoning and test representative and boundary cases.",
-        "explanation": "Reasoning and targeted tests demonstrate transferable understanding."
+        "answer": "isnan(value)",
+        "explanation": "NaN is unordered and does not compare equal to itself, so the classification macro is the appropriate test."
+      },
+      {
+        "id": "cl125-q4",
+        "prompt": "Why should calculated floating-point values often be compared with a tolerance?",
+        "options": [
+          "Many decimal values are approximated in binary floating-point, so small rounding differences can occur.",
+          "Floating-point values are always stored as exact decimal text.",
+          "A tolerance prevents every possible overflow."
+        ],
+        "answer": "Many decimal values are approximated in binary floating-point, so small rounding differences can occur.",
+        "explanation": "A tolerance allows for expected rounding differences, but it must be chosen according to the problem's scale and accuracy requirements."
+      },
+      {
+        "id": "cl125-q5",
+        "prompt": "What does math_errhandling communicate?",
+        "options": [
+          "Which supported mechanisms the math implementation uses to report errors, such as errno and floating-point exceptions.",
+          "The precision in decimal digits of every double value.",
+          "Whether the compiler automatically links every library."
+        ],
+        "answer": "Which supported mechanisms the math implementation uses to report errors, such as errno and floating-point exceptions.",
+        "explanation": "math_errhandling identifies supported math error-reporting mechanisms; consult the implementation's documentation for exact behaviour."
       }
     ]
   },
