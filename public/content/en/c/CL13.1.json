@@ -6,39 +6,60 @@
   "title": "Topic-level knowledge checks and concept questions",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept or reference contract.",
-    "Trace the example and justify its behaviour.",
-    "Identify relevant assumptions and edge cases.",
-    "Apply the skill in a documented exercise."
+    "Distinguish recall, conceptual explanation, code tracing, debugging, application and transfer questions, and select the type that measures a stated C learning objective.",
+    "Trace well-defined C expressions and short programs precisely, including sequencing, integer conversions, pointer operations and control flow.",
+    "Recognize undefined behaviour, implementation-defined behaviour, unspecified behaviour and ordinary defined results without guessing a single output.",
+    "Evaluate C code for preconditions, object bounds, lifetime, input validation, error paths and portability assumptions.",
+    "Construct and answer topic-specific questions with one defensible key, plausible misconception-based distractors and explanations for every option.",
+    "Use a repeatable self-check cycle: predict, justify from the C rules, compile where useful, test boundary cases and revise the mental model."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL1.3",
+    "CL2.6",
+    "CL3.4",
+    "CL4.2",
+    "CL5.3",
+    "CL8.8",
+    "CL14.2"
+  ],
   "stages": {
     "understand": {
-      "concept": "Topic-level checks assess whether learners can explain definitions, identify valid constructs, trace code and recognize common misconceptions. Questions should align with the lesson objectives and include explanations for correct answers.",
-      "whyItMatters": "Short feedback loops help learners detect misunderstandings before they build on them in later topics.",
-      "analogy": "Treat a reference or learning task as a contract that states what is expected and how success is checked.",
-      "analogyLimit": "The analogy does not replace the exact C standard or library specification."
+      "concept": "A topic-level knowledge check is a small assessment tied to one or more explicit learning objectives. It should reveal what a learner understands about a particular C concept—not merely whether the learner remembers a phrase. Strong checks can ask the learner to define a rule, distinguish similar concepts, trace a well-defined fragment, identify a defect, choose a safe design or explain why an apparent output cannot be guaranteed.\\n\\nC requires especially careful question design because a program's observed output is not always a portable language guarantee. A question must distinguish a defined result from undefined behaviour, implementation-defined choices and unspecified choices. If a question depends on the width of int, byte order, plain-char signedness, locale, operating-system APIs or compiler extensions, it must state the relevant implementation assumptions. If an expression has undefined behaviour, the correct answer is not a guessed output.",
+      "whyItMatters": "Frequent, focused checks expose misconceptions before they become habits. In C, a learner who memorizes a sample output without understanding integer promotions, array bounds, pointer lifetime or function contracts may write code that appears to work on one machine and fails elsewhere. A good check measures reasoning and safe application, not lucky guessing.",
+      "analogy": "Think of a topic check as a small diagnostic test on one part of a machine: it helps identify which component or operating rule needs attention before the whole system is used.",
+      "analogyLimit": "A diagnostic question samples a learner's understanding; it cannot prove complete mastery, and a machine analogy cannot capture the formal rules of the C abstract machine."
     },
     "explain": {
-      "narrative": "Topic-level checks assess whether learners can explain definitions, identify valid constructs, trace code and recognize common misconceptions. Questions should align with the lesson objectives and include explanations for correct answers.\n\nUse authoritative declarations and documentation, state assumptions explicitly and verify behaviour with focused examples. Where the implementation or C version matters, record it.",
+      "narrative": "## 1. Start with the learning objective\\n\\nWrite the objective before writing the question. The verb determines what evidence is needed:\\n\\n- **Recall:** name a header, keyword, type or operator rule. Useful for foundational facts, but insufficient by itself for advanced skill.\\n- **Explain:** describe why a rule exists or why a construct is safe or unsafe. Require reasoning rather than a copied definition.\\n- **Trace:** predict values or control flow for a fully defined program fragment. State assumptions and avoid undefined or implementation-dependent cases unless those are the subject.\\n- **Diagnose:** identify a defect, its cause and a correction. Distinguish compile-time constraint violations from runtime errors and undefined behaviour.\\n- **Apply:** choose or write a construct for a stated input/output contract, resource limit and error policy.\\n- **Transfer:** apply a familiar rule in a new setting, such as using a size-aware loop with a dynamically allocated array or checking a library function's return contract.\\n\\nA balanced topic check usually mixes more than one type. For example, a lesson about arrays might ask for the valid index range (recall), trace a loop (trace), identify an off-by-one defect (diagnose), and write a safe traversal (apply).\\n\\n## 2. Make code-tracing questions well-defined\\n\\nBefore asking “What is the output?”, inspect every expression for sequencing and side effects. Avoid unsequenced conflicting accesses such as `i++ + i++`; that expression has undefined behaviour in C and has no single correct numeric output. Avoid reading an uninitialized automatic object or accessing an array outside its bounds. If the question intentionally tests a defect, ask what rule is violated rather than requesting a guessed output.\\n\\nState relevant assumptions: the C version, input, initial values and any implementation properties needed. Do not assume `sizeof(int) == 4`, that plain `char` is signed, or that a particular byte order is universal. For a defined trace, show the reasoning in evaluation order and distinguish the value of an expression from the side effect it causes.\\n\\n## 3. Build useful distractors\\n\\nWrong options should represent recognizable misconceptions: confusing `=` with `==`, assuming arrays are passed by value as complete objects, believing `sizeof` on an array parameter reports the caller's array size, treating `free` as optional, or assuming a function's return value always signals failure in the same way. Do not use jokes, unrelated HTML/CSS options, vague wording or multiple options that are arguably correct.\\n\\nFor each question, record: objective ID; topic; question type; required assumptions; correct answer; explanation of the governing rule; and why each distractor is wrong. If two options can both be defended under reasonable assumptions, revise the question rather than forcing one answer.\\n\\n## 4. Assess understanding beyond multiple choice\\n\\nA multiple-choice answer can be guessed. Pair it with a short explanation, a code trace, a correction task or a small test. Ask learners to state the rule, identify the exact line, explain the risk and describe a safer alternative. For practical tasks, specify inputs, outputs, constraints, invalid-input behaviour and resource ownership.\\n\\n## 5. A reliable learner self-check\\n\\n1. Read the question and identify the exact concept being tested.\\n2. List initial values, types, object bounds and stated assumptions.\\n3. Apply the C rule; do not infer behaviour from a familiar compiler's output.\\n4. Decide whether the behaviour is defined, implementation-defined, unspecified or undefined.\\n5. Predict the result only when the language rules make it determinate.\\n6. Explain the reasoning in your own words.\\n7. Compile and test a minimal example when that adds evidence; use warnings and sanitizers where relevant.\\n8. Add boundary and invalid cases, then review any mismatch between prediction and observation.\\n\\n## 6. Reading compiler evidence correctly\\n\\nA successful compile does not prove that a program is correct: compilers are not required to diagnose every undefined behaviour or violated runtime precondition. A warning is useful evidence, not a complete proof. A sanitizer can detect certain executed defects, but it cannot prove that untested paths are safe. The language standard defines the portable contract; compiler output and runtime tools supplement that reasoning.\\n\\nWhen writing a question about implementation-defined behaviour, name the implementation or ask what the implementation must document. When writing about unspecified behaviour, do not demand one fixed choice unless the implementation or context is stated. When writing about undefined behaviour, do not offer “the compiler always prints…” as a correct answer.",
       "examples": [
         {
           "id": "cl131-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\nint main(void) {\n int x = 3;\n int y = x++;\n printf(\"%d %d\\n\", x, y);\n return 0;\n}",
-          "explanation": "The expression x++ yields the old value for y, then increments x. A useful knowledge check asks learners to predict both values and explain the sequencing.",
-          "runnable": false
+          "title": "Trace a defined post-increment expression step by step",
+          "code": "#include <stdio.h>\n\nint main(void)\n{\n    int value = 3;\n    int previous = value++;\n\n    printf(\"previous=%d value=%d\\n\", previous, value);\n    return 0;\n}\n",
+          "explanation": "This is a defined trace. The post-increment expression produces the old value of value, which initializes previous; its side effect increments value. Therefore the output is previous=3 value=4. A strong question asks learners to explain both the expression value and the side effect. Do not generalize this into a claim that every expression containing multiple increments has a predictable order.",
+          "runnable": true
+        },
+        {
+          "id": "cl131-ex2",
+          "language": "en",
+          "title": "Identify an array-boundary defect and repair the loop",
+          "code": "#include <stdio.h>\n\nint main(void)\n{\n    const int values[] = { 4, 7, 9, 12 };\n    const size_t count = sizeof values / sizeof values[0];\n    size_t i;\n    int total = 0;\n\n    for (i = 0; i < count; ++i) {\n        total += values[i];\n    }\n\n    printf(\"count=%zu total=%d\\n\", count, total);\n    return 0;\n}\n",
+          "explanation": "The array has four elements and valid indices 0 through 3. The loop condition i < count visits each valid element exactly once. Changing the condition to i <= count would access values[4] on the final iteration, which is outside the array and causes undefined behaviour. sizeof is applied here in the same scope where values is an actual array; if values were a function parameter declared as int values[], it would be adjusted to a pointer parameter and this sizeof calculation would not determine the caller's array length.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Write one concept question and one code-tracing question for a topic you have studied.",
-      "independentTask": "Create five questions with plausible distractors and explanations for every answer.",
+      "guidedTask": "For each worked example, write (1) the learning objective, (2) the question type, (3) the assumptions, (4) the answer, and (5) a short explanation of the governing C rule. Then change Example 2's loop condition from i < count to i <= count and explain why the modified program has undefined behaviour rather than a portable extra value.",
+      "independentTask": "Create a six-question knowledge check for one completed C topic: include one recall, one explain, one defined code trace, one debugging question, one boundary/error-handling question and one transfer/application question. Each question must have plausible distractors, one defensible answer, a unique ID and a detailed explanation. State the C version and implementation assumptions wherever they affect the answer. Finally, review all six questions for ambiguity and accidental undefined behaviour.",
       "hints": [
-        "Distractors should target real misconceptions, not ambiguous wording.",
-        "Test whether the question has one clearly defensible answer.",
-        "Align each question with a stated learning objective."
+        "Map every question to a specific learning objective before choosing its wording or answer options.",
+        "Use a short, self-contained code fragment with explicit types and initial values for tracing questions.",
+        "Check sequencing, initialization, object bounds and pointer lifetime before asking for a numeric output.",
+        "Use distractors based on real misconceptions, and explain why each incorrect option fails.",
+        "State implementation assumptions when widths, signedness, locale, byte order or platform APIs matter.",
+        "Do not treat a successful compile, one observed run or a sanitizer-clean test as proof of complete C correctness."
       ]
     }
   },
@@ -51,36 +72,63 @@
     "questions": [
       {
         "id": "cl131-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "In the statement `int previous = value++;`, assuming value is a valid initialized int and no other side effects are involved, what value is assigned to previous?",
         "options": [
-          "The learning or C language principle described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "The value value had before the increment.",
+          "The value value has after the increment.",
+          "The address of value.",
+          "An unspecified value in every C implementation."
         ],
-        "answer": "The learning or C language principle described in this lesson.",
-        "explanation": "The correct choice follows the concept or reference contract described above."
+        "answer": "The value value had before the increment.",
+        "explanation": "Post-increment yields the old value of its operand as the expression result and performs the increment as a side effect. The resulting stored value is one greater, provided the increment is representable."
       },
       {
         "id": "cl131-q2",
-        "prompt": "What should be checked before applying the concept?",
+        "prompt": "A question asks for the output of `printf(\"%d\", i++ + i++);`. What is the technically correct assessment response in C?",
         "options": [
-          "Its exact requirements, assumptions and edge cases.",
-          "Only the function or topic name.",
-          "Whether an unrelated example compiles."
+          "The expression has undefined behaviour; no single output is guaranteed.",
+          "The output is always twice the initial value plus one.",
+          "The right increment always happens first.",
+          "The compiler must reject the program."
         ],
-        "answer": "Its exact requirements, assumptions and edge cases.",
-        "explanation": "Reliable use depends on understanding the actual contract."
+        "answer": "The expression has undefined behaviour; no single output is guaranteed.",
+        "explanation": "The operands modify the same scalar object without the required sequencing between those side effects. The behaviour is undefined. A conforming implementation is not required to diagnose this at translation time."
       },
       {
         "id": "cl131-q3",
-        "prompt": "Which practice best demonstrates understanding?",
+        "prompt": "For `int items[4] = {1, 2, 3, 4};`, which index is outside the array's valid element range?",
         "options": [
-          "Explain the reasoning and test representative and boundary cases.",
-          "Memorize an output without explanation.",
-          "Ignore invalid input."
+          "4",
+          "0",
+          "2",
+          "3"
         ],
-        "answer": "Explain the reasoning and test representative and boundary cases.",
-        "explanation": "Reasoning and targeted tests demonstrate transferable understanding."
+        "answer": "4",
+        "explanation": "The four elements have indices 0, 1, 2 and 3. The expression items[4] attempts to access one past the last element; forming a one-past pointer can be valid in limited contexts, but dereferencing it is not."
+      },
+      {
+        "id": "cl131-q4",
+        "prompt": "Which is the strongest way to assess whether a learner understands a C library function's contract?",
+        "options": [
+          "Ask them to identify the header, explain preconditions and return/error rules, and apply it to a boundary case.",
+          "Ask only for the function name.",
+          "Ask them to memorize one output from a sample run.",
+          "Ask whether the code compiled once on their computer."
+        ],
+        "answer": "Ask them to identify the header, explain preconditions and return/error rules, and apply it to a boundary case.",
+        "explanation": "Understanding includes the declaration and semantic contract, valid inputs, return-value interpretation and failure handling. A single successful compile or memorized output provides much weaker evidence."
+      },
+      {
+        "id": "cl131-q5",
+        "prompt": "A code-tracing question depends on `sizeof(int) == 4`, but the question does not name a target implementation. What should the author do?",
+        "options": [
+          "State the required implementation assumption or rewrite the question so it is portable.",
+          "Assume every C implementation uses four-byte int.",
+          "Mark every answer as correct.",
+          "Treat sizeof as undefined behaviour."
+        ],
+        "answer": "State the required implementation assumption or rewrite the question so it is portable.",
+        "explanation": "C does not require int to occupy exactly four bytes. If the size matters, the assessment must state the target assumption or use a portable formulation that does not depend on that size."
       }
     ]
   },
