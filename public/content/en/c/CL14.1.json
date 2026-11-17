@@ -6,39 +6,63 @@
   "title": "C language standards: historical versions and selecting a target standard",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its relevant rules.",
-    "Trace the example and justify its behaviour.",
-    "Identify important assumptions and failure cases.",
-    "Apply the concept in a reviewed and tested exercise."
+    "Describe the major milestones in C standardisation from the pre-standard language through C23 and distinguish publication dates from compiler support.",
+    "Explain how a language standard specifies portable language and library behaviour while leaving some choices to implementations.",
+    "Interpret __STDC__ and __STDC_VERSION__ cautiously and explain why a predefined macro is not a complete feature-support or conformance test.",
+    "Choose a project target standard by evaluating required features, compiler and library support, deployment platforms, dependencies and maintenance constraints.",
+    "Configure and document consistent standard-mode, extension, warning and language-version settings across local, CI and release builds.",
+    "Verify a standards decision with small feature probes, strict compiler diagnostics, tests and a portability review rather than relying on compiler defaults."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL1.2",
+    "CL1.7",
+    "CL2.4",
+    "CL2.8",
+    "CL7.12",
+    "CL12.1",
+    "CL12.2",
+    "CL12.9",
+    "CL12.10",
+    "CL13.8"
+  ],
   "stages": {
     "understand": {
-      "concept": "C has evolved through standardized revisions including C90, C99, C11, C17 and C23. A project should select a target standard based on compiler support, platform requirements and needed language/library features, then use consistent build settings.",
-      "whyItMatters": "Standards selection affects syntax, library availability, diagnostics and portability. Explicit targets reduce accidental dependence on compiler defaults.",
-      "analogy": "Treat standards, interfaces and release steps as explicit contracts that make assumptions visible.",
-      "analogyLimit": "The analogy does not replace the C standard, implementation documentation or project-specific requirements."
+      "concept": "C is standardised so that source programs can be interpreted consistently across independently developed compilers and platforms. The standard defines the language, translation requirements and standard library. It does not require every implementation to provide every optional facility, nor does it make all operating-system interfaces portable. A standard is a contract for what a conforming implementation must support; compiler release notes and documentation describe how a particular toolchain implements that contract.\n\nThe history has several important milestones. The original language described by Kernighan and Ritchie predates ISO standardisation. ANSI X3.159-1989 is commonly called C89; ISO adopted the corresponding first international standard as ISO/IEC 9899:1990, commonly called C90. Amendment 1 in 1995 is often called C95. C99 introduced major language and library additions. C11 added facilities including atomics, threads as an optional library feature, alignment support and improved Unicode facilities. C17 (published as ISO/IEC 9899:2018 and often called C18) was primarily a correction and clarification revision rather than a large new feature release. C23 is the next major revision, published as ISO/IEC 9899:2024; its compiler support continues to evolve.\n\nA compiler's default language mode is not a project policy. It can change when a compiler is upgraded, and different compilers may choose different defaults. Select a named target explicitly, such as C11, C17 or C23, using the compiler's documented option. Then keep the target consistent in developer builds, continuous integration, test builds and release builds. A GCC/Clang-like command commonly uses -std=c17; other toolchains use different switches or project settings.\n\nThe target standard is not the same as the compiler version, platform, ABI or operating-system API level. A C17 build still depends on the compiler, C library, target architecture and any platform-specific interfaces. Strict language mode can reduce accidental use of extensions, but a project may intentionally require an extension. If so, document it as a dependency rather than describing the program as universally portable ISO C.\n\nThe predefined macro __STDC__ is defined as 1 by a conforming hosted implementation, subject to the standard's conditions. __STDC_VERSION__ identifies the C language version level when defined: commonly 199409L for C95, 199901L for C99, 201112L for C11, 201710L for C17 and 202311L for C23. It may be absent in older modes, and a compiler's value can reflect a published draft or its documented implementation mode. The macro does not prove that every optional feature, library facility, defect correction or platform API is available. Check specific feature macros, headers, library documentation and compile/link probes where needed.\n\nChoose the oldest standard that safely and clearly supports the project's actual requirements, unless a newer standard provides a concrete benefit that the supported toolchains can deliver. Consider supported compiler versions, embedded vendor toolchains, operating systems, C libraries, third-party dependencies, security maintenance, certification requirements and the cost of maintaining compatibility. Record the decision and a path for revisiting it. Do not choose an older standard merely from habit, or a newer one merely because it is newest.",
+      "whyItMatters": "An explicit and justified language target makes builds reproducible and prevents accidental dependence on compiler defaults or extensions. It also helps teams decide whether a feature is portable, optional or tied to a particular toolchain.",
+      "analogy": "A language standard is like a documented interface contract shared by independent implementations: it defines the required behaviour, while each implementation supplies the machinery.",
+      "analogyLimit": "A standard is much more detailed than an ordinary interface document, and conformance includes many translation and library rules. The analogy does not mean every platform provides identical optional features or identical performance."
     },
     "explain": {
-      "narrative": "C has evolved through standardized revisions including C90, C99, C11, C17 and C23. A project should select a target standard based on compiler support, platform requirements and needed language/library features, then use consistent build settings.\n\nState assumptions and constraints, consult the applicable standard or tool documentation, and verify the result with appropriate compiler diagnostics and tests. Separate portable guarantees from implementation-specific behaviour.",
+      "narrative": "**1. Separate the language revision from the toolchain.** “GCC 14”, “Clang 18”, “Windows”, “Linux” and “C17” describe different dimensions. The compiler implements a language mode; the C library supplies standard-library facilities; the target platform supplies ABI and operating-system interfaces. Record these separately in a build matrix.\n\n**2. Read historical labels accurately.** C89 and C90 refer to the ANSI and ISO publications of the first standardised C language. C95 is an amendment to C90. C99 and C11 introduced substantial changes. C17/C18 mainly incorporated corrections and clarifications. C23 is published as ISO/IEC 9899:2024. A standard's publication does not mean every compiler adopted it immediately or completely.\n\n**3. Understand what a target option does.** A GCC/Clang-like invocation such as `cc -std=c17 -Wall -Wextra -Wpedantic source.c -o app` requests C17 language mode and enables useful diagnostics. `-Werror` may be appropriate in controlled CI, but it can make compiler upgrades disruptive if every warning is promoted automatically. Warning policy is a project choice, not itself a language standard. Compiler-specific options and extension modes must be documented.\n\n**4. Treat version macros as clues.** `__STDC_VERSION__` can help conditionally compile code for a language revision. It is not a universal capability database. A compiler may implement some later features as extensions in an older mode, omit an optional facility, or have a library that differs from another implementation. Prefer testing the exact declaration, macro, library function or behaviour required by the project.\n\n**5. Build a decision matrix.** List each required language feature and library facility, minimum compiler and library versions, supported targets, dependency constraints and any certification or vendor restrictions. Test the oldest supported toolchain and every release toolchain. If one dependency requires a newer standard, decide whether to upgrade the project target, replace or isolate the dependency, or maintain a clearly documented compatibility layer.\n\n**6. Make the choice reproducible.** Put the language mode in the canonical build configuration, not only in a developer's terminal history. Apply it to application code, tests and generated source. Capture compiler identity and version in CI logs. Review third-party code and compiler extensions separately. A successful build on one machine is evidence for that configuration, not proof of portability to every conforming implementation.\n\nThe C standard also distinguishes required features from optional features and implementation-defined choices. A standards target narrows the rules that apply; it does not eliminate the need to read implementation documentation or test the actual deployment environment.",
       "examples": [
         {
           "id": "cl141-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "/* Example target selection on a GCC/Clang-like compiler:\n   cc -std=c17 -Wall -Wextra -Wpedantic main.c -o app\n*/\n#include <stdio.h>\nint main(void) { puts(\"Target a documented C standard\"); return 0; }",
-          "explanation": "The command selects C17 on a GCC/Clang-like toolchain. Other compilers may use different options and have different support levels.",
-          "runnable": false
+          "title": "Inspect the language-version macro without overclaiming",
+          "code": "#include <stdio.h>\n\nint main(void) {\n    puts(\"C language mode report\");\n#if !defined(__STDC_VERSION__)\n    puts(\"__STDC_VERSION__ is not defined in this mode\");\n#elif __STDC_VERSION__ >= 202311L\n    puts(\"C23 version macro or later\");\n#elif __STDC_VERSION__ >= 201710L\n    puts(\"C17/C18 version macro\");\n#elif __STDC_VERSION__ >= 201112L\n    puts(\"C11 version macro\");\n#elif __STDC_VERSION__ >= 199901L\n    puts(\"C99 version macro\");\n#elif __STDC_VERSION__ >= 199409L\n    puts(\"C95 amendment-era version macro\");\n#else\n    puts(\"Earlier or implementation-specific language mode\");\n#endif\n#ifdef __STDC__\n    printf(\"__STDC__=%d\\n\", __STDC__);\n#else\n    puts(\"__STDC__ is not defined\");\n#endif\n    return 0;\n}",
+          "explanation": "Compile the same source with a GCC/Clang-like compiler using `-std=c11`, `-std=c17` and, when supported, `-std=c23`. The value of __STDC_VERSION__ is a language-mode indicator: commonly 201112L for C11, 201710L for C17 and 202311L for C23. Some compilers use a draft-era value or do not yet accept the C23 option. The program intentionally says “C23 version macro or later” instead of claiming that every C23 optional feature is available. This is an inspection aid, not a conformance test.",
+          "runnable": true
+        },
+        {
+          "id": "cl141-ex2",
+          "language": "en",
+          "title": "Enforce a documented minimum language target",
+          "code": "#include <stdio.h>\n\n#if !defined(__STDC_VERSION__) || __STDC_VERSION__ < 201112L\n#error \"This project requires C11 or a later standard mode\"\n#endif\n\n_Static_assert(sizeof(int) >= 2,\n               \"The implementation must provide at least 2 bytes per int\");\n\nint main(void) {\n    printf(\"C11-or-later target accepted; sizeof(int)=%zu\\n\",\n           sizeof(int));\n    return 0;\n}",
+          "explanation": "The preprocessor check rejects a mode that does not advertise C11 or later through __STDC_VERSION__. The _Static_assert declaration is itself a C11 feature and checks a deliberately modest property: int occupies at least two C bytes. This demonstrates a compile-time project requirement, not proof of complete C11 conformance or availability of optional library features. A production project should test each required facility and document the exact supported compiler/library matrix. The example is expected to compile in C11 and C17 modes and to be rejected in C99 mode.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "List reasons a project might target C17 rather than a newer standard.",
-      "independentTask": "Choose a target standard for a legacy embedded project and justify the decision using compiler support and required features.",
+      "guidedTask": "Imagine a command-line utility that must run on a maintained desktop compiler and an older vendor compiler used for an embedded target. List the required language features, standard-library functions, platform APIs and third-party dependencies. Build a small compatibility matrix with the oldest supported compiler/library versions. Recommend a target standard and explain which features require a separate capability probe. Include the exact build option or IDE setting for each toolchain.",
+      "independentTask": "Prepare a one-page standards policy for a C project. State the selected standard and why it is the oldest suitable target; list supported compilers, versions, C libraries and architectures; identify optional features and non-standard extensions; define the canonical flags for production and tests; add a CI matrix covering the oldest and newest supported toolchains; and describe when the target decision must be reviewed. Verify the policy by compiling a version-macro probe and a feature-specific probe on every supported toolchain.",
       "hints": [
-        "Do not assume every compiler implements every recent standard feature fully.",
-        "Document required extensions separately from standard C features.",
-        "Test the actual compiler and library versions used for release."
+        "Do not confuse the year in a compiler release with the year or label of the C language standard it supports.",
+        "Remember that C89 and C90 are ANSI and ISO publication labels for the first standardised C revision; C95 was an amendment.",
+        "Check the exact __STDC_VERSION__ value, but do not infer that every optional library or language feature is present.",
+        "Write down the oldest compiler, library and platform combination that the project promises to support.",
+        "Put the language-mode option in the build system and CI configuration so local and release builds use the same target.",
+        "Test required features directly and record extensions or operating-system APIs separately from portable ISO C."
       ]
     }
   },
@@ -51,36 +75,63 @@
     "questions": [
       {
         "id": "cl141-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "Which statement correctly distinguishes C89/C90 and C95?",
         "options": [
-          "The C or learning principle described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "C89 and C90 are commonly used for the ANSI 1989 and ISO 1990 publications of the first C standard; C95 was an amendment to C90.",
+          "C89 is a compiler, C90 is an operating system and C95 is a C library.",
+          "C95 replaced C entirely with C++.",
+          "C89, C90 and C95 are three names for the C23 standard."
         ],
-        "answer": "The C or learning principle described in this lesson.",
-        "explanation": "The correct choice follows the concept and constraints described above."
+        "answer": "C89 and C90 are commonly used for the ANSI 1989 and ISO 1990 publications of the first C standard; C95 was an amendment to C90.",
+        "explanation": "The labels describe standardisation milestones. C95 amended the first ISO C standard; it was not a separate programming language or a replacement for C."
       },
       {
         "id": "cl141-q2",
-        "prompt": "What should be checked before applying the concept?",
+        "prompt": "A project compiles successfully with a compiler's default mode. Why should its build still specify a target standard explicitly?",
         "options": [
-          "The exact rules, assumptions and failure cases.",
-          "Only the file name.",
-          "Whether one unrelated example runs."
+          "The default mode is guaranteed to remain unchanged forever.",
+          "Explicit mode makes the intended language contract reproducible across developer, CI and release builds.",
+          "A standard option guarantees identical machine code on all processors.",
+          "Explicit mode removes the need for compiler and library version checks."
         ],
-        "answer": "The exact rules, assumptions and failure cases.",
-        "explanation": "Reliable C engineering depends on understanding the applicable contract."
+        "answer": "Explicit mode makes the intended language contract reproducible across developer, CI and release builds.",
+        "explanation": "Compiler defaults can vary by toolchain and release. An explicit standard option documents the language target, but compiler, library and platform compatibility still need verification."
       },
       {
         "id": "cl141-q3",
-        "prompt": "Which practice provides stronger evidence?",
+        "prompt": "What does a value such as `__STDC_VERSION__ == 201710L` normally indicate?",
         "options": [
-          "Use documented standards, diagnostics and targeted tests.",
-          "Assume one compiler's behaviour is universal.",
-          "Ignore warnings and boundary cases."
+          "The program is guaranteed to have every optional C17 library feature.",
+          "The compiler is reporting the C17/C18 language-version macro value for this translation mode.",
+          "The compiler was released in October 2017.",
+          "The operating system uses a 2017 ABI."
         ],
-        "answer": "Use documented standards, diagnostics and targeted tests.",
-        "explanation": "Multiple forms of evidence help distinguish guarantees from assumptions."
+        "answer": "The compiler is reporting the C17/C18 language-version macro value for this translation mode.",
+        "explanation": "201710L is the commonly used version macro for C17, published as ISO/IEC 9899:2018. It is not a compiler release date, ABI identifier or guarantee that every optional feature is present."
+      },
+      {
+        "id": "cl141-q4",
+        "prompt": "A C23 feature is required by a project, but one supported compiler does not implement it. What is the best engineering response?",
+        "options": [
+          "Assume the compiler will silently provide the feature because the source file has a .c extension.",
+          "Remove the compiler from the support matrix without reviewing project requirements.",
+          "Run a feature-specific probe and either update the supported toolchain baseline, isolate a fallback, or choose a different design; document the decision.",
+          "Compile in an older standard mode and assume all newer features become portable extensions."
+        ],
+        "answer": "Run a feature-specific probe and either update the supported toolchain baseline, isolate a fallback, or choose a different design; document the decision.",
+        "explanation": "A language target and an implementation's actual feature support are related but not identical. Verify the required feature on supported toolchains and make an explicit compatibility decision."
+      },
+      {
+        "id": "cl141-q5",
+        "prompt": "Which policy gives the strongest evidence that a standards decision is reproducible?",
+        "options": [
+          "Tell developers to use whichever compiler mode happens to be the default.",
+          "Record only the compiler brand, without its version or library.",
+          "Specify the language mode in the canonical build, apply it to tests and CI, and test the oldest supported compiler/library combination.",
+          "Use the newest standard option but do not test release builds."
+        ],
+        "answer": "Specify the language mode in the canonical build, apply it to tests and CI, and test the oldest supported compiler/library combination.",
+        "explanation": "A reproducible policy records the target in build configuration and validates the supported toolchain matrix. Testing only a recent local compiler leaves compatibility gaps."
       }
     ]
   },
