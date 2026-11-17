@@ -3,42 +3,69 @@
   "courseId": "c",
   "moduleId": "CL14",
   "topicId": "CL14.6",
-  "title": "Preprocessor phase, macro hazards and include dependency management",
+  "title": "Preprocessor phases, macro hazards and include dependency management",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its relevant rules.",
-    "Trace the example and justify its behaviour.",
-    "Identify important assumptions and failure cases.",
-    "Apply the concept in a reviewed and tested exercise."
+    "Describe the role of preprocessing in C translation and explain how directives, macro expansion and included files contribute to a translation unit.",
+    "Explain object-like and function-like macros, token substitution, stringification, token pasting and conditional compilation.",
+    "Identify macro hazards involving operator precedence, repeated argument evaluation, side effects, unparenthesised parameters and multiple-statement expansion.",
+    "Use inline functions, const-qualified objects, enums and ordinary functions instead of macros when type checking or single evaluation is required.",
+    "Design self-contained headers with unique include guards, controlled dependencies and clear ownership of declarations and definitions.",
+    "Use preprocessed output and dependency-generation tools to diagnose macro expansion, include order, transitive dependencies and stale build inputs."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL1.6",
+    "CL2.6",
+    "CL2.7",
+    "CL3.9",
+    "CL4.10",
+    "CL6.10",
+    "CL7.12",
+    "CL9.8",
+    "CL12.1",
+    "CL12.2",
+    "CL13.4",
+    "CL14.1",
+    "CL14.5"
+  ],
   "stages": {
     "understand": {
-      "concept": "The preprocessor handles directives and macro expansion before later translation phases. Macros are token substitutions, so operator precedence, repeated argument evaluation, name collisions and include cycles can create subtle defects. Header guards or equivalent mechanisms control repeated inclusion.",
-      "whyItMatters": "Understanding preprocessing helps diagnose expanded source, reduce hidden dependencies and design stable public headers.",
-      "analogy": "Treat standards, interfaces and release steps as explicit contracts that make assumptions visible.",
-      "analogyLimit": "The analogy does not replace the C standard, implementation documentation or project-specific requirements."
+      "concept": "The C preprocessor operates as part of translation before the compiler analyses the resulting translation unit. It processes preprocessing directives, expands macros, includes header contents and evaluates conditional inclusion. Preprocessing is not a separate programming language with C's type system: macros substitute preprocessing tokens. A macro therefore does not know the type of an expression, does not create a function call boundary and does not automatically evaluate an argument only once.\n\n**Object-like macros** replace an identifier with a token sequence. They are commonly used for feature switches, include guards and compile-time constants. **Function-like macros** accept arguments and substitute them into a replacement list. Parentheses around each parameter occurrence and around the entire replacement expression reduce precedence errors, but do not solve repeated evaluation or type-safety problems.\n\nFor example, `#define SQUARE(x) ((x) * (x))` looks reasonable. `SQUARE(i++)` substitutes the increment expression twice, causing an unsequenced modification and access to `i` in the multiplication expression; this has undefined behaviour. Even without side effects, `SQUARE(a + b)` needs parameter parentheses to avoid precedence changing the intended grouping. Parentheses are essential, but they are not a substitute for understanding the expansion.\n\n**Other macro hazards** include name collisions, accidental capture of identifiers, inconsistent macro naming, unexpected expansion of public identifiers, and macros that expand to multiple statements. A macro such as `#define LOG(x) printf(...); audit(x);` can break an unbraced `if` statement. A common defensive form wraps a multi-statement macro in `do { ... } while (0)`, but it still has macro-specific scope, argument-evaluation and control-flow constraints. Avoid `return`, `break` or `continue` inside macros unless the control-flow effect is explicitly part of the interface and documented.\n\nThe preprocessor provides **stringification** with `#` and **token pasting** with `##`. Stringification converts an argument's preprocessing-token spelling to a string literal; token pasting combines adjacent preprocessing tokens into one token. Macro expansion rules around `#`, `##`, argument prescan and rescanning are subtle. These operators are useful for carefully designed interfaces but can make diagnostics and debugging harder. They do not perform runtime string conversion or concatenate arbitrary character strings.\n\n**Conditional compilation** with `#if`, `#ifdef`, `#ifndef`, `#elif` and `#endif` selects source regions before ordinary compilation. `#if` expressions are restricted preprocessing constant expressions, not general C expressions. `defined` tests whether a macro is defined. `#ifdef NAME` is a concise form of `#if defined(NAME)`. Use explicit feature macros and documented build configuration rather than assuming that a compiler, operating system or library feature exists because a familiar name happens to be defined.\n\n**Prefer typed C constructs when they fit.** Use a `static inline` function for small typed operations that need ordinary argument evaluation and type checking. Use `enum` constants or `static const` objects when appropriate for named values. Use ordinary functions for operations that evaluate arguments once, need diagnostics, or have complex control flow. Macros remain appropriate for include guards, conditional compilation, compile-time token construction and selected generic interfaces, but should be narrowly scoped and documented.\n\n**Headers should manage dependencies deliberately.** Each public header should include the headers required for the types it exposes, use a unique include guard, and compile when included on its own. Avoid depending on a caller to include another header first. Prefer direct includes over accidental transitive dependencies. Forward declarations can reduce coupling where the C type rules permit them, but complete type definitions are required for objects and operations that need the size or members of a type. Keep implementation-only includes in `.c` files where possible.\n\nA source file's include graph is a build dependency graph. If a header changes, every translation unit that depends on it may need recompilation. Build systems and compiler dependency-generation options can record these relationships. A stale or incomplete dependency graph can leave old object files in a binary even after an interface has changed. Use generated dependencies and reproducible build commands rather than relying on developers to remember which source files to rebuild.\n\nThe most useful diagnostic technique is to inspect the preprocessed translation unit. It reveals expanded macros, included contents and active conditional branches. Combine this with compiler diagnostics and generated dependency files to distinguish a macro bug, an include-order problem, a missing direct dependency and a stale build artifact.",
+      "whyItMatters": "Macros and header dependencies influence every translation unit before type checking and linking. A subtle macro expansion can introduce undefined behaviour, while hidden header dependencies can make builds work only in one include order or leave stale object files. Predictable preprocessing and dependency management improve portability, debugging and reproducible builds.",
+      "analogy": "The preprocessor is like a source assembly stage: it expands templates and selects configured sections before the compiler checks the resulting program. A macro is a token template, not a type-safe function.",
+      "analogyLimit": "The analogy is incomplete because macro expansion follows precise token-based rules, including argument prescan, stringification, token pasting and rescanning. Inspect actual preprocessed output when behaviour is unclear."
     },
     "explain": {
-      "narrative": "The preprocessor handles directives and macro expansion before later translation phases. Macros are token substitutions, so operator precedence, repeated argument evaluation, name collisions and include cycles can create subtle defects. Header guards or equivalent mechanisms control repeated inclusion.\n\nState assumptions and constraints, consult the applicable standard or tool documentation, and verify the result with appropriate compiler diagnostics and tests. Separate portable guarantees from implementation-specific behaviour.",
+      "narrative": "**1. Know the translation sequence.** Preprocessing directives are handled before ordinary C semantic analysis. Header inclusion and macro replacement contribute tokens to a translation unit; conditional compilation removes inactive branches. The compiler then parses and type-checks the resulting program. A diagnostic line may refer to an expanded header or macro definition, so use the preprocessor output to see the exact source presented to the compiler.\n\n**2. Parenthesise macro parameters and results.** A function-like arithmetic macro should normally put parentheses around every parameter occurrence and around the complete replacement expression. This prevents many precedence and grouping defects. It does not prevent an argument from being evaluated multiple times. Never pass expressions with side effects to a macro unless the macro contract explicitly guarantees safe evaluation count and sequencing.\n\n**3. Make multi-statement macros behave as one statement.** If a macro must expand to multiple statements, `do { ... } while (0)` is a common idiom. It allows the caller to add a semicolon and makes the expansion act as one statement in an `if`/`else` context. It does not make hidden `return` or loop-control statements harmless, and local identifiers inside the macro need collision-resistant names.\n\n**4. Understand # and ##.** `#parameter` stringifies the argument's token spelling. `left ## right` pastes tokens to form a new preprocessing token. Directly stringified or pasted arguments are not expanded in the same way as ordinary arguments; an extra indirection macro is sometimes needed when expansion before pasting is intended. Keep such constructions simple and test the exact output with preprocessing tools.\n\n**5. Make headers self-contained.** A header should include what it needs to declare its public types and functions. Include guards stop duplicate processing within one translation unit; they do not eliminate dependencies between translation units. Avoid cyclic include designs where forward declarations or a clearer interface can break the cycle. Do not rely on a header being included after a particular unrelated header.\n\n**6. Track the include graph.** Use compiler dependency output, such as GCC/Clang `-M` or `-MM` modes, or the build system's equivalent. Ensure changes to a public header trigger recompilation of all dependent source files. Inspect preprocessed output with `-E` when macros or conditional compilation behave unexpectedly. Record compiler options, include paths and macro definitions in the build configuration so another machine can reproduce the same translation units.",
       "examples": [
         {
           "id": "cl146-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#define MAX_VALUE(a, b) ((a) > (b) ? (a) : (b))\n#include <stdio.h>\nint main(void) {\n int x = 4, y = 7;\n printf(\"%d\\n\", MAX_VALUE(x, y));\n return 0;\n}",
-          "explanation": "Parentheses protect grouping, but the macro may evaluate an argument more than once. Passing expressions with side effects is therefore unsafe.",
-          "runnable": false
+          "title": "Prefer a typed inline function over a repeated-evaluation macro",
+          "code": "#include <stdio.h>\n\nstatic inline int square_int(int value) {\n    return value * value;\n}\n\n#define SQUARE_MACRO(x) ((x) * (x))\n\nint main(void) {\n    int i = 3;\n    int safe = square_int(i++);\n\n    printf(\"safe=%d i=%d\\n\", safe, i);\n    printf(\"macro with a plain value=%d\\n\", SQUARE_MACRO(i));\n    return 0;\n}",
+          "explanation": "The inline function evaluates its argument expression once when the function is called, so i++ increments i exactly once and the function squares the old value. The macro is parenthesised to protect grouping, but SQUARE_MACRO(i++) would substitute i++ twice and cause undefined behaviour. The example deliberately passes a side-effect-free value to the macro. Prefer the typed function when single evaluation and type checking are important.",
+          "runnable": true
+        },
+        {
+          "id": "cl146-ex2",
+          "language": "en",
+          "title": "Inspect conditional compilation and macro expansion",
+          "code": "#include <stdio.h>\n\n#define APP_NAME \"CodeSaathi\"\n#define JOIN_RAW(a, b) a ## b\n#define JOIN(a, b) JOIN_RAW(a, b)\n#define FEATURE_LEVEL 2\n\nint main(void) {\n    int JOIN(item, 7) = FEATURE_LEVEL;\n\n#if FEATURE_LEVEL >= 2\n    printf(\"%s feature=%d\\n\", APP_NAME, item7);\n#else\n    puts(\"basic feature set\");\n#endif\n    return 0;\n}",
+          "explanation": "The JOIN macros demonstrate token pasting: JOIN(item, 7) expands through JOIN_RAW to the identifier item7. The #if directive selects the branch at preprocessing time. Compile with `cc -std=c11 -Wall -Wextra -Wpedantic -Werror file.c -o demo` and inspect the expanded source with `cc -std=c11 -E file.c`. The program prints the selected feature level. The two-level JOIN pattern makes argument expansion occur before the inner token-pasting operation.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Expand the macro for MAX_VALUE(x++, y) and explain why it is dangerous.",
-      "independentTask": "Design a header with include guards and replace a risky function-like macro with a typed function where appropriate.",
+      "guidedTask": "Create a macro that computes the larger of two values, first with only parentheses and then with a typed inline function. Expand the macro call using a preprocessor command and explain why passing `counter++` is unsafe. Add a multi-statement logging macro using `do { ... } while (0)`, test it in an if/else statement, and explain its remaining limitations.",
+      "independentTask": "Build a small two-file C module with a public self-contained header and an implementation file. Add one feature-test macro and one conditional compilation branch. Generate the preprocessed output and dependency file, then compile the caller and implementation. Remove a required direct include from the header and test whether the header still compiles independently. Record the dependency command, active macro configuration, exact compile commands and the changes needed to make the header self-contained.",
       "hints": [
-        "Avoid side effects in macro arguments.",
-        "Use unique macro names and consistent include guards.",
-        "Inspect preprocessed output when macro expansion is confusing."
+        "Macros substitute preprocessing tokens; they do not provide automatic type checking or function-call evaluation rules.",
+        "Parenthesise every macro parameter occurrence and the entire replacement expression, but remember that this does not prevent repeated evaluation.",
+        "Do not pass increment, decrement, assignment or other side-effecting expressions to a macro that may use an argument more than once.",
+        "Use a static inline function or ordinary function when single evaluation and type checking are required.",
+        "Use unique include guards and make each public header include the declarations it needs instead of relying on transitive includes.",
+        "Inspect preprocessed output with -E and dependency output with -M or -MM when diagnosing macros, include order or stale builds."
       ]
     }
   },
@@ -51,36 +78,63 @@
     "questions": [
       {
         "id": "cl146-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "Why can a function-like macro behave differently from an ordinary function?",
         "options": [
-          "The C or learning principle described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "A macro is expanded as preprocessing-token substitution and may evaluate an argument more than once.",
+          "A macro always has stronger type checking than a function.",
+          "A macro call always creates a separate stack frame.",
+          "A macro automatically converts all arguments to int."
         ],
-        "answer": "The C or learning principle described in this lesson.",
-        "explanation": "The correct choice follows the concept and constraints described above."
+        "answer": "A macro is expanded as preprocessing-token substitution and may evaluate an argument more than once.",
+        "explanation": "The preprocessor substitutes tokens; it does not create an ordinary function call. If an argument appears multiple times in the replacement list, its expression may be evaluated multiple times."
       },
       {
         "id": "cl146-q2",
-        "prompt": "What should be checked before applying the concept?",
+        "prompt": "What is the main problem with calling `SQUARE_MACRO(i++)` when the macro expands to `((x) * (x))`?",
         "options": [
-          "The exact rules, assumptions and failure cases.",
-          "Only the file name.",
-          "Whether one unrelated example runs."
+          "The macro cannot accept an int expression.",
+          "The increment expression is substituted twice, causing unsequenced side effects and undefined behaviour.",
+          "The preprocessor converts i to a floating-point value.",
+          "The macro is evaluated only once by definition."
         ],
-        "answer": "The exact rules, assumptions and failure cases.",
-        "explanation": "Reliable C engineering depends on understanding the applicable contract."
+        "answer": "The increment expression is substituted twice, causing unsequenced side effects and undefined behaviour.",
+        "explanation": "The replacement contains two occurrences of the argument. With i++, the same scalar is modified and accessed without the sequencing needed to make the expression defined."
       },
       {
         "id": "cl146-q3",
-        "prompt": "Which practice provides stronger evidence?",
+        "prompt": "What does the `##` preprocessing operator do?",
         "options": [
-          "Use documented standards, diagnostics and targeted tests.",
-          "Assume one compiler's behaviour is universal.",
-          "Ignore warnings and boundary cases."
+          "Converts a token into a runtime string.",
+          "Combines adjacent preprocessing tokens into one token.",
+          "Includes another header file.",
+          "Evaluates a C expression at compile time."
         ],
-        "answer": "Use documented standards, diagnostics and targeted tests.",
-        "explanation": "Multiple forms of evidence help distinguish guarantees from assumptions."
+        "answer": "Combines adjacent preprocessing tokens into one token.",
+        "explanation": "Token pasting combines preprocessing tokens to form a new preprocessing token. It does not perform runtime string concatenation or general expression evaluation."
+      },
+      {
+        "id": "cl146-q4",
+        "prompt": "What is the purpose of making a public header self-contained?",
+        "options": [
+          "It ensures the header can be included and compiled without depending on an unrelated prior include order.",
+          "It prevents the linker from resolving external functions.",
+          "It forces all identifiers in the header to have internal linkage.",
+          "It removes the need for include guards."
+        ],
+        "answer": "It ensures the header can be included and compiled without depending on an unrelated prior include order.",
+        "explanation": "A self-contained header includes the declarations required by its public interface. This reduces hidden transitive dependencies and makes translation units more reliable."
+      },
+      {
+        "id": "cl146-q5",
+        "prompt": "Which tool output is most useful for seeing macro expansions and active conditional branches?",
+        "options": [
+          "The final executable's runtime output only.",
+          "The preprocessed translation unit, commonly requested with a compiler -E option.",
+          "The linker symbol table alone.",
+          "A source file's modification timestamp."
+        ],
+        "answer": "The preprocessed translation unit, commonly requested with a compiler -E option.",
+        "explanation": "Preprocessed output shows included content, expanded macros and the source remaining after conditional compilation, making it a direct diagnostic view of the translation unit presented to the compiler."
       }
     ]
   },
