@@ -6,39 +6,71 @@
   "title": "Assessment answer explanations, hints and misconception feedback (CodeSaathi extension)",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its relevant rules.",
-    "Trace the example and justify its behaviour.",
-    "Identify important assumptions and failure cases.",
-    "Apply the concept in a reviewed and tested exercise."
+    "Distinguish assessment feedback that merely marks an answer from feedback that teaches the underlying concept and next step.",
+    "Write a precise correct-answer explanation that states the governing C rule, traces the relevant code and names important assumptions.",
+    "Diagnose the misconception represented by a distractor without labelling or discouraging the learner.",
+    "Design plausible, mutually exclusive distractors and verify that each question has one defensible best answer.",
+    "Sequence hints from conceptual orientation to a focused operation or trace without revealing the answer too early.",
+    "Use response evidence to select targeted remediation, retesting and accessible feedback while protecting learner confidence and privacy."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL1.7",
+    "CL2.6",
+    "CL3.9",
+    "CL4.10",
+    "CL5.9",
+    "CL6.10",
+    "CL7.12",
+    "CL8.12",
+    "CL9.10",
+    "CL10.4",
+    "CL13.1",
+    "CL13.2",
+    "CL13.3",
+    "CL13.4",
+    "CL13.5",
+    "CL13.6",
+    "CL13.7",
+    "CL13.8"
+  ],
   "stages": {
     "understand": {
-      "concept": "Useful assessment feedback explains why the correct answer follows from the concept, why each distractor is wrong and what misconception may have caused the error. Hints should progressively narrow the reasoning without immediately revealing the answer.",
-      "whyItMatters": "Feedback turns assessment into a learning activity and helps learners correct the underlying mental model.",
-      "analogy": "Treat standards, interfaces and release steps as explicit contracts that make assumptions visible.",
-      "analogyLimit": "The analogy does not replace the C standard, implementation documentation or project-specific requirements."
+      "concept": "An assessment becomes a learning opportunity when feedback helps a learner understand the rule, locate the reasoning step that mattered and choose a useful next action. A score or a green tick reports an outcome; it does not by itself explain the concept. High-quality feedback is specific, timely, respectful and actionable. It distinguishes the correctness of an answer from the worth or ability of the person who submitted it.\n\nFor a C question, an explanation should identify the relevant language rule and the assumptions needed to apply it. For a code-tracing question, show the important state changes in execution order. For a diagnostic question, explain the defect and its consequence without suggesting that undefined behaviour has one predictable output. If the answer depends on a C version, implementation-defined choice or platform contract, say so explicitly.\n\nA distractor is useful when it represents a plausible but incorrect reasoning path. Attach an internal misconception label to each distractor, such as POSTFIX_RETURNS_NEW_VALUE, ARRAY_PARAMETER_IS_ARRAY_OBJECT, SIGNED_OVERFLOW_WRAPAROUND or NULL_TERMINATOR_OMITTED. The label helps select remediation; it is not a judgement about the learner. Avoid trick wording, irrelevant grammar clues, overlapping options and distractors that are wrong for multiple unrelated reasons.\n\nUse a hint ladder. Hint 1 points to the concept or contract. Hint 2 identifies the relevant declaration, expression or boundary. Hint 3 suggests a trace or test. A final worked explanation may then reveal the complete reasoning. Hints should reduce uncertainty progressively, not simply repeat the question or disclose the answer in the first sentence.\n\nFeedback timing depends on the task. Immediate feedback is useful for a short practice check because the learner can connect the explanation to the decision just made. For a longer cumulative assessment, avoid interrupting every item if that would break concentration; provide item-level feedback after submission and a summary of topic-level patterns. A formative check guides learning; a summative result records achievement against stated criteria. Do not confuse the two.",
+      "whyItMatters": "Without useful explanations, a learner can memorise an answer while retaining the misconception that produced the error. Feedback tied to a specific rule and a next action supports transfer to new C programs, safer debugging and more reliable self-assessment.",
+      "analogy": "Feedback is like a debugger: a useful diagnostic identifies the failing condition and the evidence, rather than merely announcing that the program failed.",
+      "analogyLimit": "A learner is not a program, and learning is not deterministic. Use the analogy only to emphasise evidence and actionable diagnosis; adapt support to the learner and never reduce a person to an error label."
     },
     "explain": {
-      "narrative": "Useful assessment feedback explains why the correct answer follows from the concept, why each distractor is wrong and what misconception may have caused the error. Hints should progressively narrow the reasoning without immediately revealing the answer.\n\nState assumptions and constraints, consult the applicable standard or tool documentation, and verify the result with appropriate compiler diagnostics and tests. Separate portable guarantees from implementation-specific behaviour.",
+      "narrative": "**1. Start with the learning objective.** Each question should test one primary outcome: recall a rule, explain it, trace code, diagnose a defect, apply a contract or transfer the idea to a new context. State the C version and implementation assumptions when they affect the answer. A question that silently relies on a platform-specific integer width or output order cannot support a universal explanation.\n\n**2. Explain the correct answer, not just the letter.** Name the rule, show the reasoning and connect it to the prompt. In a trace question, list only the state changes needed to justify the result. In a pointer question, distinguish the pointer object, the pointed-to object and object lifetime. In an input question, identify the conversion and validation contract. Keep the explanation concise enough to be read, but complete enough to stand alone after the learner has forgotten the lesson page.\n\n**3. Explain distractors diagnostically.** For every distractor, write a short internal note describing the tempting but incorrect rule. Then write learner-facing feedback that corrects the rule. Example: “This choice treats postfix increment as if it returned the updated value. Postfix increment yields the old value; the incremented value is stored afterward.” Do not tell the learner “you do not understand pointers.” Describe the reasoning, not the person.\n\n**4. Validate the question before release.** Check that the prompt is unambiguous, all required code and input are present, options are mutually exclusive, exactly one option is correct under the stated assumptions, and no option is accidentally correct because of a wording loophole. Compile code examples with strict warnings and run focused tests. Do not ask learners to predict one output for undefined behaviour. Use “not defined by the C standard” when that is the correct lesson.\n\n**5. Sequence hints.** A first hint can remind the learner to identify the type or contract. A second can point to a specific expression or boundary. A third can ask the learner to trace a value or test one case. Reveal the full worked explanation after the attempt or when the learner requests it. Provide an accessible “show explanation” route; do not make colour, animation or sound the only carrier of correctness.\n\n**6. Turn patterns into a next step.** One wrong answer is weak evidence of a stable misconception. Look for repeated errors across related questions, then offer a short targeted explanation and a new question with different surface details. Let the learner retry. Report mastery only against explicit criteria, and distinguish “not yet demonstrated” from “cannot do.” Collect only the response data needed for learning; avoid exposing private learner-level diagnostics to other learners.",
       "examples": [
         {
           "id": "cl139-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\nint main(void) {\n int a = 4;\n int b = a++;\n printf(\"a=%d b=%d\\n\", a, b);\n return 0;\n}",
-          "explanation": "A good explanation states that postfix increment yields the old value before the increment is applied. It then identifies why the distractor that reverses these values reflects a common misconception.",
-          "runnable": false
+          "title": "A precise explanation for postfix increment",
+          "code": "#include <stdio.h>\n\nint main(void) {\n    int value = 4;\n    int previous = value++;\n    printf(\"previous=%d value=%d\\n\", previous, value);\n    return 0;\n}",
+          "explanation": "The declaration initializes value to 4. The postfix expression value++ produces the value of the operand before the increment, so previous receives 4. The increment is applied to value, which is then 5. The output is previous=4 value=5. A distractor claiming that previous is 5 usually reflects the misconception that postfix and prefix increment produce the same expression value. This example has defined behaviour: the modification is completed as part of the full expression before the next statement.",
+          "runnable": true
+        },
+        {
+          "id": "cl139-ex2",
+          "language": "en",
+          "title": "Use a response record to choose targeted feedback",
+          "code": "#include <stdio.h>\n\ntypedef enum {\n    MISCONCEPTION_NONE,\n    MISCONCEPTION_POSTFIX_VALUE,\n    MISCONCEPTION_ARRAY_BOUND\n} Misconception;\n\ntypedef struct {\n    int correct;\n    Misconception misconception;\n} Response;\n\nstatic const char *feedback_for(Response response) {\n    if (response.correct) {\n        return \"Correct: explain the rule in your own words.\";\n    }\n\n    switch (response.misconception) {\n        case MISCONCEPTION_POSTFIX_VALUE:\n            return \"Trace the old value and the stored value separately.\";\n        case MISCONCEPTION_ARRAY_BOUND:\n            return \"Check valid indices: zero through count minus one.\";\n        case MISCONCEPTION_NONE:\n        default:\n            return \"Review the question contract, then try a fresh example.\";\n    }\n}\n\nint main(void) {\n    const Response responses[] = {\n        {0, MISCONCEPTION_POSTFIX_VALUE},\n        {0, MISCONCEPTION_ARRAY_BOUND},\n        {1, MISCONCEPTION_NONE}\n    };\n    const size_t count = sizeof responses / sizeof responses[0];\n\n    for (size_t i = 0; i < count; ++i) {\n        printf(\"%s\\n\", feedback_for(responses[i]));\n    }\n    return 0;\n}",
+          "explanation": "The enum makes the misconception categories explicit, while the structure keeps correctness and diagnostic category together. feedback_for returns a message based on the response evidence. The program does not infer a permanent trait from one answer; it demonstrates how a learning system could select a relevant next explanation. In a production platform, validate the response identifier before constructing the record, keep learner records private and use repeated evidence before recommending a broader review.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Write a hint that guides a learner to trace postfix increment without stating the final output.",
-      "independentTask": "Create answer explanations and misconception tags for a three-question assessment.",
+      "guidedTask": "Create a single-answer question about array bounds in C. State the array length and the exact index expression. Write one correct option and three plausible distractors. For each distractor, record the misconception it represents. Then write a correct-answer explanation that names the valid index range and explains why each distractor fails. Add three hints: concept, focused trace, and boundary test. Compile any included C snippet and verify the answer under the stated C version.",
+      "independentTask": "Design a five-question formative check for a C topic already studied. Include at least one recall, one code-trace, one bug-diagnosis, one application and one transfer question. For every item provide the objective, assumptions, correct answer, explanation, distractor misconception notes, three progressive hints and a remediation action. Review the assessment for ambiguous wording, overlapping options, inaccessible feedback and claims about undefined behaviour. Ask a peer or use a fresh review pass to challenge whether exactly one answer is defensible.",
       "hints": [
-        "Feedback should address the reasoning error, not label the learner.",
-        "Keep hints specific to the concept being tested.",
-        "Ensure every question has one clearly correct answer."
+        "Begin with the objective: what should the learner be able to explain or do after this question?",
+        "For code tracing, write down the initial values and follow one full expression at a time.",
+        "For each wrong option, identify one specific mistaken rule; remove distractors that are merely silly or unrelated.",
+        "Make the first hint point to a concept, the next to a relevant expression, and the last to a trace or test.",
+        "State assumptions such as the C version, input constraints and implementation-defined choices before explaining an answer.",
+        "Use repeated response patterns to suggest a short review and a fresh retry; do not treat one mistake as a permanent ability label."
       ]
     }
   },
@@ -51,36 +83,63 @@
     "questions": [
       {
         "id": "cl139-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "A learner chooses an incorrect answer in a formative C quiz. Which feedback is most useful?",
         "options": [
-          "The C or learning principle described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "“Wrong. Read the chapter again.”",
+          "“This choice treats postfix increment as returning the updated value. It returns the old value; trace the later stored value separately.”",
+          "“You are weak at C.”",
+          "Reveal only the correct option letter."
         ],
-        "answer": "The C or learning principle described in this lesson.",
-        "explanation": "The correct choice follows the concept and constraints described above."
+        "answer": "“This choice treats postfix increment as returning the updated value. It returns the old value; trace the later stored value separately.”",
+        "explanation": "Specific feedback names the mistaken rule and gives a concrete next reasoning step. It corrects the response without judging the learner. The other choices provide no diagnosis or actionable guidance."
       },
       {
         "id": "cl139-q2",
-        "prompt": "What should be checked before applying the concept?",
+        "prompt": "Which hint sequence best supports a learner tracing `int b = a++;` when `a` initially equals 7?",
         "options": [
-          "The exact rules, assumptions and failure cases.",
-          "Only the file name.",
-          "Whether one unrelated example runs."
+          "“The answer is b=7 and a=8.” then repeat the answer three times.",
+          "“Think about C.” then “Try harder.” then show an unrelated pointer example.",
+          "“Recall the difference between prefix and postfix”; “Track the value produced by the expression”; “Write the values of b and a after this full statement.”",
+          "Give three hints that each state a different final output."
         ],
-        "answer": "The exact rules, assumptions and failure cases.",
-        "explanation": "Reliable C engineering depends on understanding the applicable contract."
+        "answer": "“Recall the difference between prefix and postfix”; “Track the value produced by the expression”; “Write the values of b and a after this full statement.”",
+        "explanation": "The sequence moves from concept to the relevant expression to a concrete trace. It narrows the reasoning without revealing the result in the first hint."
       },
       {
         "id": "cl139-q3",
-        "prompt": "Which practice provides stronger evidence?",
+        "prompt": "A multiple-choice item asks for the output of a program that reads an uninitialized automatic int. What is the best assessment-design response?",
         "options": [
-          "Use documented standards, diagnostics and targeted tests.",
-          "Assume one compiler's behaviour is universal.",
-          "Ignore warnings and boundary cases."
+          "Keep the question and mark the most common output as correct.",
+          "State that the C standard does not define a predictable output for this case; rewrite the item to test initialization or diagnose the defect.",
+          "Add the output observed on the author's computer as an assumption-free answer.",
+          "Accept every numeric option."
         ],
-        "answer": "Use documented standards, diagnostics and targeted tests.",
-        "explanation": "Multiple forms of evidence help distinguish guarantees from assumptions."
+        "answer": "State that the C standard does not define a predictable output for this case; rewrite the item to test initialization or diagnose the defect.",
+        "explanation": "A question must not teach that an observed result from one build is a portable guarantee. Reframe it around the defect or provide a defined program with explicit initialisation."
+      },
+      {
+        "id": "cl139-q4",
+        "prompt": "What makes a distractor pedagogically useful?",
+        "options": [
+          "It is obviously absurd, so learners can eliminate it quickly.",
+          "It differs from the correct answer only by punctuation.",
+          "It represents a plausible, identifiable misconception and is clearly wrong under the stated assumptions.",
+          "It contains more technical words than the correct answer."
+        ],
+        "answer": "It represents a plausible, identifiable misconception and is clearly wrong under the stated assumptions.",
+        "explanation": "A good distractor reveals a reasoning path that can be corrected. It should be plausible, unambiguous and not accidentally correct under another interpretation."
+      },
+      {
+        "id": "cl139-q5",
+        "prompt": "A learner repeatedly confuses array length with the final valid index. What is the strongest next step?",
+        "options": [
+          "Label the learner as careless and lower the course level.",
+          "Show a short array with its length and indices, ask the learner to trace a boundary access, then give a fresh transfer question.",
+          "Repeat the same question until the learner memorises its option letter.",
+          "Remove all array questions from future assessments."
+        ],
+        "answer": "Show a short array with its length and indices, ask the learner to trace a boundary access, then give a fresh transfer question.",
+        "explanation": "Repeated evidence can justify targeted remediation. A visualised index range, focused trace and new transfer item test whether the misconception has been corrected without stigmatising the learner."
       }
     ]
   },
