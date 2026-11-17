@@ -6,39 +6,67 @@
   "title": "Code review, version control, reproducible builds and release checks",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its relevant rules.",
-    "Trace the example and justify its behaviour.",
-    "Identify important assumptions and failure cases.",
-    "Apply the concept in a reviewed and tested exercise."
+    "Conduct a focused code review covering correctness, interfaces, ownership, security, portability, maintainability and test evidence.",
+    "Use Git working-tree, staging, commit, branch, diff, merge, revert and pull-request workflows safely.",
+    "Explain how pinned toolchains, explicit language standards, controlled dependencies and documented commands improve build repeatability.",
+    "Distinguish repeatable, reproducible and hermetic builds, and identify common sources of nondeterminism.",
+    "Apply release gates combining clean builds, strict diagnostics, tests, analysis, sanitizers, target checks, artifact verification and rollback planning.",
+    "Record trustworthy release evidence and respond to failed checks without bypassing review, exposing secrets or overstating guarantees."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL1.7",
+    "CL6.4",
+    "CL6.5",
+    "CL7.1",
+    "CL8.1",
+    "CL9.8",
+    "CL10.15",
+    "CL11.8",
+    "CL12.1",
+    "CL12.8",
+    "CL14.1",
+    "CL14.7",
+    "CL14.8",
+    "CL14.9"
+  ],
   "stages": {
     "understand": {
-      "concept": "A professional release workflow reviews source diffs, checks interfaces and ownership, runs tests and static/runtime diagnostics, records toolchain versions and produces a reproducible build artifact. Version control provides traceability and rollback.",
-      "whyItMatters": "Release discipline reduces the risk of shipping unreviewed defects and makes failures easier to reproduce after deployment.",
-      "analogy": "Treat standards, interfaces and release steps as explicit contracts that make assumptions visible.",
-      "analogyLimit": "The analogy does not replace the C standard, implementation documentation or project-specific requirements."
+      "concept": "A release is an evidence-backed decision, not merely a successful compile. A source change should be understandable, reviewable, tested and traceable to the exact artifact delivered. Code review asks whether the change is appropriate; version control records what changed and why; a controlled build records how source became an artifact; release gates establish whether required evidence exists.\n\nReview the change, not just the author. Start with the requirement, acceptance criteria and affected interfaces. Inspect a small, coherent diff. Check control flow, boundary conditions, integer ranges, pointer validity, ownership and cleanup, error handling, input trust, portability, dependencies and documentation. Confirm tests cover normal, boundary, invalid and failure paths. Separate blocking correctness or security defects from optional style suggestions. A review comment should explain the risk and expected correction. Approval reduces risk but does not prove a defect is impossible.\n\nGit records collaboration and history. The working tree contains edits; the index (staging area) selects the next commit; a commit records a snapshot and its parent history. Use status, diff, diff --staged, log and show to inspect state. Make small coherent commits with descriptive messages. Branches isolate work; pull requests expose a diff, discussion, checks and approvals. Resolve conflicts by understanding both sides and rerunning tests. Revert adds a new commit that reverses an earlier change and is usually suitable for shared history. Reset moves a local branch reference and may discard staged or working changes. Rebase rewrites commit identities, so do not rewrite history others already depend on unless explicitly coordinated. Git is not a backup or a test suite.\n\nNever commit passwords, tokens, private keys, production data, local environment files or unintended build outputs. A .gitignore rule does not remove a file already tracked. If a secret is committed, revoke or rotate it immediately; deleting it later does not make it secret again. Store CI credentials in the platform secret facility, grant least privilege, scope access narrowly and prevent secrets from appearing in logs.\n\nMake build inputs explicit. Record compiler and linker versions, target platform, C language standard, warning policy, dependency versions, build scripts and configuration. Build from a clean checkout. Avoid hidden dependence on a developer home directory, undeclared files, locale, current directory or ambient environment. Document generators and their inputs. Pinning dependencies helps but does not guarantee every external input is immutable or available.\n\nA repeatable build can be run again under stated conditions. A reproducible build aims for independent builds from the same declared inputs to produce bit-for-bit identical artifacts. A hermetic build additionally isolates the process from undeclared host inputs such as ambient tools, network access, environment and filesystem state. These terms are related but not interchangeable. Timestamps, absolute paths, random seeds, file ordering, locale, compiler build IDs and nondeterministic generators can make binaries differ. Do not claim byte-for-byte reproducibility merely because two builds succeed. Compare artifact hashes from independent builds and investigate differences.\n\nRelease gates should match product risk. A typical C pipeline checks out the reviewed commit, configures a pinned toolchain, clean-builds every translation unit, applies the explicit C standard and strict warnings, runs unit and integration tests, performs static analysis and appropriate sanitizers, checks supported compiler/platform targets, packages intended files, verifies artifact identity and records results. Review documentation, version, changelog, licences, dependency notices and known limitations. Publish only after required gates and approvals pass. Sign tags or artifacts only with a verified key-management process; a signature is not proof of code correctness.\n\nA green pipeline proves only that configured jobs passed for the tested commit, inputs and environment. It does not prove untested paths are correct, every target is supported or vulnerabilities are absent. A release record should identify commit, toolchain, configuration, test results, artifact hash, approver and accepted risks. If a gate fails, stop publication, preserve logs, diagnose, fix and rerun. For a released defect, assess impact, communicate, prepare a tested fix or rollback, and preserve an auditable hotfix trail.",
+      "whyItMatters": "C programs depend on compiler behaviour, platform interfaces, memory contracts and build configuration. Without disciplined review and release evidence, a locally successful executable may be unsafe, untraceable or impossible to rebuild. A controlled workflow makes defects easier to catch and incidents easier to investigate and reverse.",
+      "analogy": "A release resembles a documented maintenance handover: the work order states the change, another person inspects critical work, tools and parts are identified, checks are recorded, and service does not resume while a required check is failing.",
+      "analogyLimit": "Software checks cannot guarantee zero defects. The analogy highlights traceability and independent checks; it does not imply that passing a checklist proves correctness."
     },
     "explain": {
-      "narrative": "A professional release workflow reviews source diffs, checks interfaces and ownership, runs tests and static/runtime diagnostics, records toolchain versions and produces a reproducible build artifact. Version control provides traceability and rollback.\n\nState assumptions and constraints, consult the applicable standard or tool documentation, and verify the result with appropriate compiler diagnostics and tests. Separate portable guarantees from implementation-specific behaviour.",
+      "narrative": "Begin with the requirement and exact diff. Identify expected behaviour, compatibility constraints, public interfaces, ownership and failure semantics. Read the full change. Pointer changes need lifetime and bounds review; arithmetic changes need range and overflow review; file changes need error and cleanup review; build changes need dependency and target review.\n\nReview evidence at several levels. Ask whether tests cover expected values, empty inputs, boundaries, malformed data and failure paths. Check compiler warnings, static analysis and sanitizers where appropriate. Verify tests ran against the reviewed commit. For multi-file C programs, confirm every translation unit uses compatible options and the final link uses intended objects and libraries.\n\nInspect Git state before committing. Use status and diff to inspect working changes, stage only intended files, then inspect the staged diff. Commit a coherent change with a message describing action and context. Before pushing, check that no local configuration, generated binary, credential or unrelated edit is included. A pull request should explain purpose, design, tests, compatibility impact and known limitations.\n\nChoose history operations deliberately. Merge preserves branch ancestry. Rebase replays commits on a new base and changes their identities. Revert adds a compensating commit and is generally safer for published history. Reset is a local history-editing tool; save valuable work before destructive options. Conflict markers are not a resolution: understand the combined behaviour, remove markers, compile and test.\n\nDeclare build inputs and avoid hidden state. Maintain the C standard, compiler options, dependency versions and build/test commands in project configuration. Prefer clean builds from a fresh checkout. Avoid date/time macros in artifacts intended to be byte-for-byte reproducible unless their values are fixed intentionally. Do not depend on an untracked generated header or developer-specific path. Record compiler identity and target metadata; keep volatile metadata outside the binary where possible.\n\nVerify the artifact, not only the source tree. Confirm packaged files, versions and licences; calculate hashes; compare hashes when reproducibility is required. A hash identifies bytes but does not prove safety or trusted origin unless the hash itself came through a trusted channel. Protect signing keys and verify signatures through the documented trust process.\n\nA practical sequence is reviewed commit, clean configure, strict build, tests, static analysis and sanitizers, supported-target checks, package, artifact/hash verification, approval, provenance record and publication. CI should fail closed when a required gate is missing. Do not “fix” a failed release by disabling a check without documented approval and replacement evidence.",
       "examples": [
         {
           "id": "cl1410-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "/* Example release checks:\n   git diff --check\n   make clean all\n   make test\n   ./app --self-test\n*/\n#include <stdio.h>\nint main(void) { puts(\"Release checks are repeatable\"); return 0; }",
-          "explanation": "The commands illustrate whitespace validation, a clean build, tests and a self-test. Actual command names depend on the project's build system and test harness.",
-          "runnable": false
+          "title": "Testable checked arithmetic as a reviewable change",
+          "code": "#include <inttypes.h>\n#include <stdbool.h>\n#include <stdint.h>\n#include <stdio.h>\n\nstatic bool add_cents(int64_t left, int64_t right, int64_t *result)\n{\n    if (result == NULL) {\n        return false;\n    }\n    if ((right > 0 && left > INT64_MAX - right) ||\n        (right < 0 && left < INT64_MIN - right)) {\n        return false;\n    }\n    *result = left + right;\n    return true;\n}\n\nint main(void)\n{\n    int64_t total = 0;\n    int64_t unchanged = 77;\n\n    if (!add_cents(INT64_C(1250), INT64_C(2500), &total)) {\n        return 1;\n    }\n    if (add_cents(INT64_MAX, INT64_C(1), &unchanged)) {\n        return 2;\n    }\n    if (unchanged != 77) {\n        return 3;\n    }\n\n    printf(\"total_cents=%\" PRId64 \"\\n\", total);\n    printf(\"overflow_rejected=%s\\n\", unchanged == 77 ? \"yes\" : \"no\");\n    return 0;\n}",
+          "explanation": "The function rejects a null output pointer, checks signed overflow before addition and changes output only on success. Reviewers can inspect the contract and test positive and negative overflow, exact boundaries, zero and output preservation. This is not a complete financial system; currency, rounding and persistence policies are separate requirements.",
+          "runnable": true
+        },
+        {
+          "id": "cl1410-ex2",
+          "language": "en",
+          "title": "Explicit build identity without volatile timestamps",
+          "code": "#include <stdio.h>\n\n#ifndef APP_VERSION\n#define APP_VERSION \"dev\"\n#endif\n\n#ifndef BUILD_PROFILE\n#define BUILD_PROFILE \"debug\"\n#endif\n\nstatic void print_build_identity(void)\n{\n#if defined(__STDC_VERSION__)\n    printf(\"c_standard_macro=%ld\\n\", (long)__STDC_VERSION__);\n#else\n    puts(\"c_standard_macro=pre-C99-or-unspecified\");\n#endif\n    printf(\"app_version=%s\\n\", APP_VERSION);\n    printf(\"build_profile=%s\\n\", BUILD_PROFILE);\n}\n\nint main(void)\n{\n    print_build_identity();\n    return 0;\n}",
+          "explanation": "The build supplies APP_VERSION and BUILD_PROFILE as explicit inputs, for example with -DAPP_VERSION=\\\"1.2.0\\\" and -DBUILD_PROFILE=\\\"release\\\". The example avoids date/time macros, random values and machine-specific paths. Identical output does not prove identical binaries; compiler, linker, target, dependencies and all other build inputs still need control and independent verification.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "List the evidence required before marking a C module release-ready.",
-      "independentTask": "Create a release checklist covering review, compiler flags, tests, diagnostics, version metadata and rollback plan.",
+      "guidedTask": "Review a proposed C change to an array-size calculation and a public function signature. Write a review covering the contract, compatibility impact, overflow, bounds, ownership, normal and failure tests, build evidence, and an approve/request-changes decision with reasons. Describe how you would inspect, stage and commit only intended files.",
+      "independentTask": "Create a release checklist for a multi-file C application. Include exact commit, clean tree, review approval, pinned toolchain, explicit C standard, strict warnings, clean build of every translation unit, tests, static analysis, sanitizers, target matrix, dependency/licence review, package contents, artifact hash, version/changelog, secret scan, approval, publication and rollback/hotfix plan. Mark each item required, optional or not applicable and justify it.",
       "hints": [
-        "Review the exact commit that will be released.",
-        "Do not claim deployment based only on a local build or repository commit.",
-        "Record unresolved risks and known limitations explicitly."
+        "Read the requirement and complete diff before inferring intent from a function name.",
+        "Check arithmetic before it happens; the validation expression must not overflow itself.",
+        "Use git diff and git diff --staged to verify exactly what enters a commit.",
+        "Treat rebase as history rewriting; prefer revert when undoing a change already shared.",
+        "Record toolchain and dependency versions, and remove hidden dependence on local files or environment state.",
+        "A passing CI run applies only to configured checks and the tested commit; record artifact identity and unresolved risks."
       ]
     }
   },
@@ -51,36 +79,58 @@
     "questions": [
       {
         "id": "cl1410-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "A reviewer sees an allocation expression count * sizeof *items. What is the most important first check?",
         "options": [
-          "The C or learning principle described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "Verify count is bounded by SIZE_MAX / sizeof *items before multiplication",
+          "Assume size_t multiplication cannot overflow",
+          "Check the result only after memory has been allocated"
         ],
-        "answer": "The C or learning principle described in this lesson.",
-        "explanation": "The correct choice follows the concept and constraints described above."
+        "answer": "Verify count is bounded by SIZE_MAX / sizeof *items before multiplication",
+        "explanation": "Unsigned size arithmetic can wrap. Guard the multiplication before evaluating it."
       },
       {
         "id": "cl1410-q2",
-        "prompt": "What should be checked before applying the concept?",
+        "prompt": "Which Git operation is generally safest to undo a commit already shared with a team?",
         "options": [
-          "The exact rules, assumptions and failure cases.",
-          "Only the file name.",
-          "Whether one unrelated example runs."
+          "git revert, because it adds a new reversing commit",
+          "git reset --hard, because it rewrites the shared branch",
+          "Delete the repository .git directory"
         ],
-        "answer": "The exact rules, assumptions and failure cases.",
-        "explanation": "Reliable C engineering depends on understanding the applicable contract."
+        "answer": "git revert, because it adds a new reversing commit",
+        "explanation": "Revert preserves shared history and records the corrective action. Reset can rewrite history and discard work."
       },
       {
         "id": "cl1410-q3",
-        "prompt": "Which practice provides stronger evidence?",
+        "prompt": "What does a reproducible-build claim normally require?",
         "options": [
-          "Use documented standards, diagnostics and targeted tests.",
-          "Assume one compiler's behaviour is universal.",
-          "Ignore warnings and boundary cases."
+          "Independent builds from the same declared inputs produce bit-for-bit identical artifacts",
+          "Two developers both see a successful compiler exit code",
+          "The source code contains no comments"
         ],
-        "answer": "Use documented standards, diagnostics and targeted tests.",
-        "explanation": "Multiple forms of evidence help distinguish guarantees from assumptions."
+        "answer": "Independent builds from the same declared inputs produce bit-for-bit identical artifacts",
+        "explanation": "Successful builds are repeatability evidence, not proof of byte-identical reproducibility."
+      },
+      {
+        "id": "cl1410-q4",
+        "prompt": "A CI pipeline is green for one commit. Which conclusion is justified?",
+        "options": [
+          "The configured jobs passed for that commit and environment",
+          "The program has no security vulnerabilities on every platform",
+          "Every possible input and execution path is correct"
+        ],
+        "answer": "The configured jobs passed for that commit and environment",
+        "explanation": "CI evidence is limited by the jobs, tests, targets and environment actually configured."
+      },
+      {
+        "id": "cl1410-q5",
+        "prompt": "A private API token was committed and deleted in a later commit. What must happen?",
+        "options": [
+          "Revoke or rotate the exposed token and investigate the exposure",
+          "Assume deletion from the latest tree makes the token secret again",
+          "Only rename the file and keep using the token"
+        ],
+        "answer": "Revoke or rotate the exposed token and investigate the exposure",
+        "explanation": "The credential remains exposed in repository history and possibly clones or logs; deletion does not invalidate it."
       }
     ]
   },
