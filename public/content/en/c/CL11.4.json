@@ -6,39 +6,62 @@
   "title": "Project 4: file-based expense tracker",
   "language": "en",
   "learningObjectives": [
-    "Explain the topic and its C rules.",
-    "Trace the example and identify its purpose.",
-    "Identify important validation and failure cases.",
-    "Apply the concept in a tested program or reference exercise."
+    "Design a simple text-file record format for an expense date, category and amount.",
+    "Explain how fopen, fgets, fprintf, ferror and fclose are used to manage a text file.",
+    "Validate calendar dates, bounded category text and positive monetary amounts.",
+    "Represent money as integer cents to avoid binary floating-point rounding in totals.",
+    "Append expense records, read existing records and calculate a total with overflow checks.",
+    "Handle missing files, malformed records, overlong lines and file I/O errors without treating invalid data as valid."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL2.1",
+    "CL3.1",
+    "CL4.1",
+    "CL5.1",
+    "CL5.3",
+    "CL6.1",
+    "CL11.1",
+    "CL11.2",
+    "CL11.3"
+  ],
   "stages": {
     "understand": {
-      "concept": "A file-based expense tracker records date, category and amount, calculates totals and reloads saved entries. It must validate numeric values and handle file-open, read, write and close failures.",
-      "whyItMatters": "The project applies structures, file streams, parsing and aggregation to a useful persistent-data problem.",
-      "analogy": "Treat the project or language feature as a set of components with explicit interfaces and responsibilities.",
-      "analogyLimit": "The analogy does not replace C's formal language, library and resource-management rules."
+      "concept": "A file-based expense tracker stores one expense per line so records remain available after the program exits. Each record contains a date in YYYY-MM-DD form, a category and an amount. This project uses a documented pipe-delimited text format: date|category|cents. The amount is stored as a positive integer number of cents, not as a floating-point value. For example, 125.50 is stored as 12550. The program appends new records, reads the file back, validates each line and adds valid amounts to a running total.",
+      "whyItMatters": "Persistent data is a core requirement in practical programs. This project combines structures, text parsing, file streams, input validation, error reporting and arithmetic while making the file format explicit and inspectable.",
+      "analogy": "Think of the file as a paper ledger: each line is one expense entry, and the total is calculated by adding the valid entries.",
+      "analogyLimit": "A text file does not enforce a schema or protect itself from damaged lines. The C program must validate the format, check every file operation and decide how to handle invalid records."
     },
     "explain": {
-      "narrative": "A file-based expense tracker records date, category and amount, calculates totals and reloads saved entries. It must validate numeric values and handle file-open, read, write and close failures.\n\nFor a complete implementation, define input constraints, ownership, error handling and test cases before coding. Compile with warnings and verify normal, boundary and failure behaviour.",
+      "narrative": "The file format used here is one record per line: YYYY-MM-DD|category|cents. The date has exactly ten characters and is checked as a real calendar date, including leap years. A category is non-empty, bounded and cannot contain the pipe delimiter or control characters. The amount is a positive integer count of cents. A display amount such as 49.95 is converted to 4995 cents before storage. Keeping money in integer cents avoids common floating-point representation surprises when adding currency values.\\n\\nUse fopen with mode a to append and mode r to read. Always check whether fopen returned NULL. Check fprintf for a negative result and check fclose for EOF because buffered write errors can be reported when the stream is closed. While reading, use fgets with a fixed-size buffer. Detect a line that does not fit, discard the rest of that line and count it as invalid rather than parsing a partial record. Check ferror after the read loop and check fclose.\\n\\nA file may contain malformed or manually edited lines. Parse each record into a temporary structure and only use it after all fields pass validation. This implementation skips invalid lines and reports how many were skipped. If no file exists yet, listing reports that there are no saved expenses. The running total is checked against LLONG_MAX before addition so signed overflow is avoided.\\n\\nThe examples are intentionally small and use a local text file named expenses.txt. They do not provide encryption, multi-user locking, backups or transactional crash recovery. Those are separate production concerns. The file is a plain-text teaching format, so do not store sensitive personal or payment information in it.",
       "examples": [
         {
           "id": "cl114-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\nstruct Expense { int day; double amount; };\nint main(void) {\n struct Expense e = {16, 125.50};\n FILE *f = fopen(\"expenses.txt\", \"a\");\n if (f == NULL) return 1;\n int ok = fprintf(f, \"%d %.2f\\n\", e.day, e.amount) >= 0;\n if (fclose(f) == EOF) ok = 0;\n return ok ? 0 : 1;\n}",
-          "explanation": "The program appends one record to a text file and checks both the write and close. A full project must define a parseable format and validate every field when reading.",
-          "runnable": false
+          "title": "Validate expense records and calculate a safe total",
+          "code": "#include <assert.h>\n#include <ctype.h>\n#include <errno.h>\n#include <limits.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n#define DATE_SIZE 11\n#define CATEGORY_SIZE 41\n#define LINE_SIZE 128\n\nstruct Expense {\n    char date[DATE_SIZE];\n    char category[CATEGORY_SIZE];\n    long long cents;\n};\n\nstatic int leap_year(int year) {\n    return year % 400 == 0 || (year % 4 == 0 && year % 100 != 0);\n}\n\nstatic int valid_date(const char *date) {\n    static const int days[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };\n    int year = 0;\n    int month = 0;\n    int day = 0;\n    int i;\n    if (date == NULL || strlen(date) != 10U || date[4] != '-' || date[7] != '-') return 0;\n    for (i = 0; i < 10; ++i) {\n        if (i != 4 && i != 7 && !isdigit((unsigned char)date[i])) return 0;\n    }\n    for (i = 0; i < 4; ++i) year = year * 10 + (date[i] - '0');\n    month = (date[5] - '0') * 10 + (date[6] - '0');\n    day = (date[8] - '0') * 10 + (date[9] - '0');\n    if (year < 1 || month < 1 || month > 12 || day < 1) return 0;\n    if (month == 2 && leap_year(year)) return day <= 29;\n    return day <= days[month - 1];\n}\n\nstatic int valid_category(const char *category) {\n    size_t i;\n    size_t length;\n    if (category == NULL) return 0;\n    length = strlen(category);\n    if (length == 0U || length >= CATEGORY_SIZE) return 0;\n    for (i = 0; i < length; ++i) {\n        unsigned char ch = (unsigned char)category[i];\n        if (ch < 32U || ch == 127U || ch == (unsigned char)'|') return 0;\n    }\n    return 1;\n}\n\nstatic int parse_record(char *line, struct Expense *expense) {\n    char *first;\n    char *second;\n    char *end;\n    long long cents;\n    size_t date_length;\n    size_t category_length;\n    size_t line_length;\n    if (line == NULL || expense == NULL) return 0;\n    line_length = strlen(line);\n    while (line_length > 0U && (line[line_length - 1U] == '\\n' || line[line_length - 1U] == '\\r')) {\n        line[--line_length] = '\\0';\n    }\n    first = strchr(line, '|');\n    if (first == NULL) return 0;\n    *first = '\\0';\n    second = strchr(first + 1, '|');\n    if (second == NULL || strchr(second + 1, '|') != NULL) return 0;\n    *second = '\\0';\n    if (!valid_date(line) || !valid_category(first + 1)) return 0;\n    if (second[1] == '\\0') return 0;\n    errno = 0;\n    cents = strtoll(second + 1, &end, 10);\n    if (errno == ERANGE || end == second + 1 || *end != '\\0' || cents <= 0) return 0;\n    date_length = strlen(line);\n    category_length = strlen(first + 1);\n    if (date_length >= DATE_SIZE || category_length >= CATEGORY_SIZE) return 0;\n    memcpy(expense->date, line, date_length + 1U);\n    memcpy(expense->category, first + 1, category_length + 1U);\n    expense->cents = cents;\n    return 1;\n}\n\nstatic int add_total(long long *total, long long cents) {\n    if (total == NULL || cents < 0 || *total > LLONG_MAX - cents) return 0;\n    *total += cents;\n    return 1;\n}\n\nint main(void) {\n    char line[LINE_SIZE];\n    struct Expense expense;\n    long long total = 0;\n    char valid[] = \"2024-02-29|Groceries|1250\";\n    char bad_date[] = \"2023-02-29|Groceries|1250\";\n    char bad_amount[] = \"2024-03-01|Fuel|12x\";\n    char bad_delimiter[] = \"2024-03-01|Fuel|1200|extra\";\n    char bad_category[] = \"2024-03-01|Fuel|March|1200\";\n    char zero_amount[] = \"2024-03-01|Fuel|0\";\n\n    assert(valid_date(\"2000-02-29\"));\n    assert(valid_date(\"2024-02-29\"));\n    assert(!valid_date(\"1900-02-29\"));\n    assert(!valid_date(\"2023-02-29\"));\n    assert(!valid_date(\"2024-13-01\"));\n    assert(!valid_date(\"2024-04-31\"));\n    assert(parse_record(valid, &expense));\n    assert(strcmp(expense.date, \"2024-02-29\") == 0);\n    assert(strcmp(expense.category, \"Groceries\") == 0 && expense.cents == 1250);\n    assert(!parse_record(bad_date, &expense));\n    assert(!parse_record(bad_amount, &expense));\n    assert(!parse_record(bad_delimiter, &expense));\n    assert(!parse_record(bad_category, &expense));\n    assert(!parse_record(zero_amount, &expense));\n    assert(add_total(&total, 1250));\n    assert(add_total(&total, 250));\n    assert(total == 1500);\n    assert(!add_total(&total, LLONG_MAX));\n    assert(!parse_record(NULL, &expense));\n    (void)snprintf(line, sizeof line, \"2026-11-17|Transport|990\");\n    assert(parse_record(line, &expense) && expense.cents == 990);\n    puts(\"Expense record parsing and total tests passed.\");\n    return 0;\n}",
+          "explanation": "This deterministic test program validates leap-year dates, category and delimiter rules, positive integer-cent amounts and malformed lines. It also checks that a running total refuses an addition that would overflow a long long. The tests do not depend on an external file, so they can run repeatedly with the same result.",
+          "runnable": true
+        },
+        {
+          "id": "cl114-ex2",
+          "language": "en",
+          "title": "Complete append, list and total expense tracker",
+          "code": "#include <ctype.h>\n#include <errno.h>\n#include <limits.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n#define DATE_SIZE 11\n#define CATEGORY_SIZE 41\n#define LINE_SIZE 128\n#define RECORD_LINE_SIZE 128\n#define FILE_NAME \"expenses.txt\"\n\nstruct Expense {\n    char date[DATE_SIZE];\n    char category[CATEGORY_SIZE];\n    long long cents;\n};\n\nenum ReadResult { READ_OK, READ_END, READ_INVALID };\n\nstatic int leap_year(int year) {\n    return year % 400 == 0 || (year % 4 == 0 && year % 100 != 0);\n}\n\nstatic int valid_date(const char *date) {\n    static const int days[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };\n    int year = 0, month, day, i;\n    if (date == NULL || strlen(date) != 10U || date[4] != '-' || date[7] != '-') return 0;\n    for (i = 0; i < 10; ++i)\n        if (i != 4 && i != 7 && !isdigit((unsigned char)date[i])) return 0;\n    for (i = 0; i < 4; ++i) year = year * 10 + date[i] - '0';\n    month = (date[5] - '0') * 10 + date[6] - '0';\n    day = (date[8] - '0') * 10 + date[9] - '0';\n    if (year < 1 || month < 1 || month > 12 || day < 1) return 0;\n    if (month == 2 && leap_year(year)) return day <= 29;\n    return day <= days[month - 1];\n}\n\nstatic int valid_category(const char *category) {\n    size_t i, length;\n    if (category == NULL) return 0;\n    length = strlen(category);\n    if (length == 0U || length >= CATEGORY_SIZE) return 0;\n    for (i = 0; i < length; ++i) {\n        unsigned char ch = (unsigned char)category[i];\n        if (ch < 32U || ch == 127U || ch == (unsigned char)'|') return 0;\n    }\n    return 1;\n}\n\nstatic char *trim(char *text) {\n    char *start = text, *end;\n    while (isspace((unsigned char)*start)) ++start;\n    end = start + strlen(start);\n    while (end > start && isspace((unsigned char)end[-1])) --end;\n    *end = '\\0';\n    return start;\n}\n\nstatic enum ReadResult read_line(const char *prompt, char *buffer, size_t size) {\n    size_t length;\n    int ch;\n    fputs(prompt, stdout);\n    if (fgets(buffer, (int)size, stdin) == NULL) return READ_END;\n    length = strlen(buffer);\n    if (length > 0U && buffer[length - 1U] == '\\n') {\n        buffer[length - 1U] = '\\0';\n        return READ_OK;\n    }\n    ch = getchar();\n    if (ch == '\\n' || ch == EOF) return READ_OK;\n    while (ch != '\\n' && ch != EOF) ch = getchar();\n    return READ_INVALID;\n}\n\nstatic int read_positive_id_or_menu(const char *prompt, int *choice) {\n    char line[LINE_SIZE], *start, *end;\n    long value;\n    enum ReadResult result = read_line(prompt, line, sizeof line);\n    if (result != READ_OK) return result == READ_END ? 0 : -1;\n    start = trim(line);\n    errno = 0;\n    value = strtol(start, &end, 10);\n    while (isspace((unsigned char)*end)) ++end;\n    if (start == end || *end != '\\0' || errno == ERANGE\n        || value < 0L || value > (long)INT_MAX) return -1;\n    *choice = (int)value;\n    return 1;\n}\n\nstatic int read_amount(const char *prompt, long long *cents) {\n    char line[LINE_SIZE], *start, *p;\n    unsigned long long whole = 0ULL;\n    unsigned int fraction = 0U;\n    int digits = 0, decimals = 0;\n    enum ReadResult result = read_line(prompt, line, sizeof line);\n    if (result != READ_OK) return result == READ_END ? 0 : -1;\n    start = trim(line);\n    p = start;\n    while (*p >= '0' && *p <= '9') {\n        unsigned int digit = (unsigned int)(*p - '0');\n        if (whole > ((unsigned long long)LLONG_MAX / 100ULL - digit) / 10ULL) return -1;\n        whole = whole * 10ULL + digit;\n        ++digits;\n        ++p;\n    }\n    if (*p == '.') {\n        ++p;\n        while (*p >= '0' && *p <= '9' && decimals < 2) {\n            fraction = fraction * 10U + (unsigned int)(*p - '0');\n            ++decimals;\n            ++p;\n        }\n        if (decimals == 0) return -1;\n    }\n    if (*p != '\\0' || digits == 0) return -1;\n    if (decimals == 1) fraction *= 10U;\n    if (whole > (unsigned long long)LLONG_MAX / 100ULL) return -1;\n    if (whole * 100ULL > (unsigned long long)LLONG_MAX - fraction) return -1;\n    *cents = (long long)(whole * 100ULL + fraction);\n    if (*cents <= 0) return -1;\n    return 1;\n}\n\nstatic int read_expense_date(char date[DATE_SIZE]) {\n    char line[LINE_SIZE], *clean;\n    enum ReadResult result = read_line(\"Date (YYYY-MM-DD): \", line, sizeof line);\n    size_t length;\n    if (result != READ_OK) return result == READ_END ? 0 : -1;\n    clean = trim(line);\n    length = strlen(clean);\n    if (length != 10U || !valid_date(clean)) return -1;\n    memcpy(date, clean, DATE_SIZE);\n    return 1;\n}\n\nstatic int read_category(char category[CATEGORY_SIZE]) {\n    char line[LINE_SIZE], *clean;\n    enum ReadResult result = read_line(\"Category (no | character): \", line, sizeof line);\n    size_t length;\n    if (result != READ_OK) return result == READ_END ? 0 : -1;\n    clean = trim(line);\n    length = strlen(clean);\n    if (length >= CATEGORY_SIZE || !valid_category(clean)) return -1;\n    memcpy(category, clean, length + 1U);\n    return 1;\n}\n\nstatic int parse_record(char *line, struct Expense *expense) {\n    char *first, *second, *end;\n    long long cents;\n    size_t length;\n    if (line == NULL || expense == NULL) return 0;\n    length = strlen(line);\n    while (length > 0U && (line[length - 1U] == '\\n' || line[length - 1U] == '\\r'))\n        line[--length] = '\\0';\n    first = strchr(line, '|');\n    if (first == NULL) return 0;\n    *first = '\\0';\n    second = strchr(first + 1, '|');\n    if (second == NULL || strchr(second + 1, '|') != NULL) return 0;\n    *second = '\\0';\n    if (!valid_date(line) || !valid_category(first + 1) || second[1] == '\\0') return 0;\n    errno = 0;\n    cents = strtoll(second + 1, &end, 10);\n    if (errno == ERANGE || end == second + 1 || *end != '\\0' || cents <= 0) return 0;\n    memcpy(expense->date, line, strlen(line) + 1U);\n    memcpy(expense->category, first + 1, strlen(first + 1) + 1U);\n    expense->cents = cents;\n    return 1;\n}\n\nstatic int append_expense(const struct Expense *expense) {\n    FILE *file = fopen(FILE_NAME, \"a\");\n    int ok;\n    if (file == NULL) {\n        perror(\"Could not open expense file for appending\");\n        return 0;\n    }\n    ok = fprintf(file, \"%s|%s|%lld\\n\", expense->date,\n                 expense->category, expense->cents) >= 0;\n    if (fclose(file) == EOF) ok = 0;\n    return ok;\n}\n\nstatic void add_expense(void) {\n    struct Expense expense;\n    int status;\n    long long cents;\n    status = read_expense_date(expense.date);\n    if (status != 1) { puts(status == 0 ? \"Input ended.\" : \"Invalid date.\"); return; }\n    status = read_category(expense.category);\n    if (status != 1) { puts(status == 0 ? \"Input ended.\" : \"Invalid category.\"); return; }\n    status = read_amount(\"Amount (for example 125.50): \", &cents);\n    if (status != 1) { puts(status == 0 ? \"Input ended.\" : \"Invalid amount; use up to two decimal places.\"); return; }\n    expense.cents = cents;\n    if (append_expense(&expense)) puts(\"Expense saved.\");\n    else puts(\"Expense could not be saved.\");\n}\n\nstatic void show_expenses(void) {\n    FILE *file = fopen(FILE_NAME, \"r\");\n    char line[RECORD_LINE_SIZE];\n    size_t valid_count = 0U, invalid_count = 0U;\n    long long total = 0;\n    int total_overflow = 0;\n    if (file == NULL) {\n        if (errno == ENOENT) { puts(\"No expense file yet.\"); return; }\n        perror(\"Could not open expense file\");\n        return;\n    }\n    puts(\"\\nDATE       CATEGORY                                 AMOUNT\");\n    while (fgets(line, sizeof line, file) != NULL) {\n        struct Expense expense;\n        size_t length = strlen(line);\n        if (length > 0U && line[length - 1U] != '\\n' && !feof(file)) {\n            int ch;\n            while ((ch = fgetc(file)) != '\\n' && ch != EOF) { }\n            ++invalid_count;\n            continue;\n        }\n        if (!parse_record(line, &expense)) {\n            ++invalid_count;\n            continue;\n        }\n        printf(\"%s %-40s %lld.%02lld\\n\", expense.date, expense.category,\n               expense.cents / 100LL, expense.cents % 100LL);\n        ++valid_count;\n        if (!total_overflow && total > LLONG_MAX - expense.cents) total_overflow = 1;\n        else if (!total_overflow) total += expense.cents;\n    }\n    if (ferror(file)) perror(\"Error while reading expense file\");\n    if (fclose(file) == EOF) perror(\"Error while closing expense file\");\n    printf(\"Valid records: %zu | Invalid lines skipped: %zu\\n\", valid_count, invalid_count);\n    if (total_overflow) puts(\"Total is too large to represent.\");\n    else printf(\"Total: %lld.%02lld\\n\", total / 100LL, total % 100LL);\n}\n\nint main(void) {\n    for (;;) {\n        int choice;\n        int status;\n        puts(\"\\nEXPENSE TRACKER\");\n        puts(\"1 Add expense  2 List expenses and total  0 Exit\");\n        status = read_positive_id_or_menu(\"Choose: \", &choice);\n        if (status == 0) { puts(\"\\nEnd of input. Goodbye.\"); break; }\n        if (status < 0 || (choice != 0 && choice != 1 && choice != 2)) {\n            puts(\"Enter 0, 1 or 2.\");\n            continue;\n        }\n        if (choice == 0) { puts(\"Goodbye.\"); break; }\n        if (choice == 1) add_expense();\n        else show_expenses();\n    }\n    return 0;\n}\n",
+          "explanation": "The interactive program appends records to expenses.txt, reads them back, skips malformed or overlong lines, and displays a total using integer cents. It checks file opening, writes, read errors and close errors. Enter dates as YYYY-MM-DD, categories without the pipe character, and amounts with at most two decimal places.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "List the fields needed for a useful expense record.",
-      "independentTask": "Implement add, list and total commands. Test malformed file lines, missing files and failed writes.",
+      "guidedTask": "Run the deterministic tests and trace how 1250 cents plus 250 cents becomes a total of 1500 cents. Open the generated text file after adding an expense and explain why the amount is stored as an integer number of cents.",
+      "independentTask": "Extend the tracker with a category summary that totals valid expenses per category. Reuse the existing record parser, reject malformed records, check every total addition for overflow and test a missing file, an empty file, leap-day dates, invalid dates, amounts with zero/one/two decimal places, excessive decimal places, a category containing the delimiter, an overlong line and a failed file-open scenario. Keep the file format documented and do not use floating-point values for money.",
       "hints": [
-        "Use a documented delimiter and escaping policy for text records.",
-        "Do not assume every line in an existing file is valid.",
-        "Keep currency representation and rounding policy explicit."
+        "Write down the exact record format before implementing either the writer or the parser.",
+        "Store currency as integer cents and convert to a display value only when printing.",
+        "Validate a complete record in a temporary structure before including it in the total.",
+        "Use append mode to add records without replacing earlier entries, and check fopen, fprintf and fclose.",
+        "When fgets does not capture a complete line, discard the remainder so the next read starts at a record boundary.",
+        "Before adding a positive amount to a total, check that the addition cannot exceed LLONG_MAX."
       ]
     }
   },
@@ -51,36 +74,58 @@
     "questions": [
       {
         "id": "cl114-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "Why does this project store an expense amount as integer cents?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "To avoid common floating-point rounding surprises in currency totals.",
+          "Because C cannot store decimal values.",
+          "To make every expense amount negative."
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the topic and constraints described above."
+        "answer": "To avoid common floating-point rounding surprises in currency totals.",
+        "explanation": "Integer cents represent the smallest unit used by this example and make addition exact as long as overflow is checked."
       },
       {
         "id": "cl114-q2",
-        "prompt": "What is essential for a reliable implementation?",
+        "prompt": "Which fopen mode appends new records while preserving existing file contents?",
         "options": [
-          "Define the interface, validate inputs and handle failures.",
-          "Assume every input is valid.",
-          "Ignore resource ownership."
+          "a",
+          "w",
+          "r"
         ],
-        "answer": "Define the interface, validate inputs and handle failures.",
-        "explanation": "Reliable C programs make assumptions and failure behaviour explicit."
+        "answer": "a",
+        "explanation": "Append mode writes new data at the end of the file and creates the file if it does not exist."
       },
       {
         "id": "cl114-q3",
-        "prompt": "How should the work be verified?",
+        "prompt": "What should a program do when fopen returns NULL?",
         "options": [
-          "Compile with warnings and test representative and boundary cases.",
-          "Only check whether the source file exists.",
-          "Assume a single successful run proves correctness."
+          "Report or handle the open failure and avoid using the stream.",
+          "Continue calling fprintf with the null pointer.",
+          "Assume the file is empty in every case."
         ],
-        "answer": "Compile with warnings and test representative and boundary cases.",
-        "explanation": "Compilation and targeted tests provide evidence of correctness."
+        "answer": "Report or handle the open failure and avoid using the stream.",
+        "explanation": "A NULL FILE pointer means the stream was not opened and cannot be used for file I/O."
+      },
+      {
+        "id": "cl114-q4",
+        "prompt": "Why should each line be parsed and validated before its amount is added to the total?",
+        "options": [
+          "A text file may contain malformed or manually edited records.",
+          "fgets guarantees that every line follows the expected format.",
+          "Invalid lines should always be treated as zero-valued expenses."
+        ],
+        "answer": "A text file may contain malformed or manually edited records.",
+        "explanation": "Validation prevents partial, malformed or out-of-range data from silently affecting the result."
+      },
+      {
+        "id": "cl114-q5",
+        "prompt": "Which check helps prevent signed overflow when adding positive cents to a total?",
+        "options": [
+          "Verify total is no greater than LLONG_MAX minus the new amount.",
+          "Add first and check whether the result wrapped around.",
+          "Convert the total to unsigned and ignore the original range."
+        ],
+        "answer": "Verify total is no greater than LLONG_MAX minus the new amount.",
+        "explanation": "Checking the remaining representable range before addition avoids executing an overflowing signed operation."
       }
     ]
   },
