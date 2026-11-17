@@ -6,39 +6,52 @@
   "title": "Separate compilation, object files, linking and build commands",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C rules.",
-    "Trace the example and identify data or control flow.",
-    "Recognize common failure and safety cases.",
-    "Apply the concept in a tested C program."
+    "Distinguish a source file, a preprocessed translation unit, an object file and a linked executable.",
+    "Explain how declarations in headers coordinate interfaces while definitions provide function or object implementations.",
+    "Describe the compiler and linker roles in a multi-file C build.",
+    "Use a shared header to keep declarations consistent across translation units and prevent accidental duplicate definitions.",
+    "Interpret common compile-time and link-time failures such as missing declarations, duplicate symbols and unresolved references.",
+    "Write a reproducible build command that compiles all required source files with a documented language standard and warning policy."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "A multi-file C program is commonly translated as separate translation units. The compiler produces object files, and the linker combines them with required libraries to create the final program. Declarations coordinate interfaces across files while definitions provide implementations.",
-      "whyItMatters": "Separate compilation allows teams to organize larger programs and rebuild only changed components, but mismatched declarations and duplicate definitions can cause link or correctness errors.",
-      "analogy": "Treat each resource and operation as having a clear contract, valid lifetime and failure path.",
-      "analogyLimit": "The analogy does not replace the C standard, compiler or library specifications."
+      "concept": "A multi-file C program is commonly translated as separate translation units. The compiler processes each source file after preprocessing and produces an object file; the linker combines object files and required libraries into a program. Header files usually contain declarations shared by translation units, while source files contain definitions. The declaration used by a caller must be compatible with the definition that the linker resolves.",
+      "whyItMatters": "Separate compilation keeps larger programs organized and allows unchanged components to be reused. A missing source file, inconsistent prototype or duplicate external definition can cause build or link failures even when individual files appear valid.",
+      "analogy": "Think of each translation unit as a workshop producing a labeled component; the linker assembles the components and checks that required external connections can be resolved.",
+      "analogyLimit": "Object files and linkers have platform-specific formats and rules. The analogy does not imply that every source file becomes one object file or that all linkers behave identically."
     },
     "explain": {
-      "narrative": "A multi-file C program is commonly translated as separate translation units. The compiler produces object files, and the linker combines them with required libraries to create the final program. Declarations coordinate interfaces across files while definitions provide implementations.\n\nCheck object bounds, lifetimes, arithmetic limits and all relevant return values. Compile with warnings enabled and test both normal and failure paths.",
+      "narrative": "The compiler first preprocesses and translates each translation unit. A typical command such as cc -std=c17 -Wall -Wextra -Wpedantic -c main.c creates main.o; a second command compiles another source file; the linker then combines the object files. The -c option requests compilation without linking.\\n\\nA header should declare shared interfaces and normally use an include guard. Include that header in both the implementation file and its callers so the compiler can check that the declaration is consistent. Put one external function definition in one source file; placing the same external definition in multiple translation units can create duplicate-symbol errors. A static function has internal linkage and is not a cross-file public interface.\\n\\nA compiler diagnostic about an undeclared identifier or incompatible type is different from a linker diagnostic about an undefined reference. The first concerns translation of a source unit; the second commonly means the required definition was not linked or its symbol name does not match. Build commands should list all required source files and libraries explicitly.",
       "examples": [
         {
           "id": "cl913-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "/* main.c */\n#include <stdio.h>\nint add(int, int);\nint main(void) { printf(\"%d\\n\", add(2, 3)); return 0; }\n/* add.c */\nint add(int a, int b) { return a + b; }\n/* Example build: cc -std=c17 -Wall -Wextra -Wpedantic main.c add.c -o app */",
-          "explanation": "The compiler processes both source files and the linker resolves the call to add. The declaration in main.c must agree with the definition in add.c; a shared header is preferable in a maintained project.",
+          "title": "A shared header and two source files",
+          "code": "/* math_ops.h */\n#ifndef CODESAATHI_MATH_OPS_H\n#define CODESAATHI_MATH_OPS_H\nint add_values(int left, int right);\n#endif\n\n/* math_ops.c */\n#include \"math_ops.h\"\nint add_values(int left, int right)\n{\n    return left + right;\n}\n\n/* main.c */\n#include <stdio.h>\n#include \"math_ops.h\"\nint main(void)\n{\n    printf(\"sum=%d\\n\", add_values(2, 3));\n    return 0;\n}\n\n/* Build: cc -std=c17 -Wall -Wextra -Wpedantic main.c math_ops.c -o app */",
+          "explanation": "The header declares the shared interface; math_ops.c defines it; main.c calls it. Save the three sections in their named files and run the build command to compile and link both translation units.",
           "runnable": false
+        },
+        {
+          "id": "cl913-ex2",
+          "language": "en",
+          "title": "Compile, then link object files",
+          "code": "/* From a directory containing main.c and math_ops.c: */\n/* cc -std=c17 -Wall -Wextra -Wpedantic -c main.c -o main.o */\n/* cc -std=c17 -Wall -Wextra -Wpedantic -c math_ops.c -o math_ops.o */\n/* cc main.o math_ops.o -o app */\n\n#include <stdio.h>\nint main(void)\n{\n    puts(\"The linker combines object files into a program.\");\n    return 0;\n}",
+          "explanation": "The commands show separate compilation and linking. The C translation unit below is a complete demonstration program; the commented commands illustrate the build steps for a separate two-file project.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Identify which file contains the call and which contains the definition.",
-      "independentTask": "Create a two-file project with a shared header and a reproducible build command.",
+      "guidedTask": "Given main.c, math_ops.c and math_ops.h, identify which file contains the declaration, which contains the definition and which contains the call. Predict the result of omitting math_ops.c from the link command.",
+      "independentTask": "Create a three-file project with a guarded header, one implementation source and one caller. Compile each source separately, link the object files, then intentionally omit one object file and describe the linker diagnostic.",
       "hints": [
-        "A translation unit is the source after preprocessing, not simply an arbitrary folder.",
-        "Use consistent prototypes from a shared header to prevent declaration drift.",
-        "Keep build flags and source lists documented and repeatable."
+        "A translation unit is a source file after preprocessing, not an entire project directory.",
+        "A header normally declares an interface; it should not define ordinary external functions in every including source file.",
+        "Compile each source file with the same relevant language and warning options.",
+        "Use -c to produce object files without linking.",
+        "An undefined reference is commonly a link-stage problem; an undeclared identifier is a translation-stage problem.",
+        "Keep a reproducible build command in the project documentation."
       ]
     }
   },
@@ -51,36 +64,63 @@
     "questions": [
       {
         "id": "cl913-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What does the -c compiler option commonly request?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "Compile to an object file without performing the final link",
+          "Run the executable",
+          "Enable every compiler extension",
+          "Delete intermediate files"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct choice follows the C rule explained above."
+        "answer": "Compile to an object file without performing the final link",
+        "explanation": "The -c option stops after compilation and produces an object file."
       },
       {
         "id": "cl913-q2",
-        "prompt": "What is a reliable way to protect correctness?",
+        "prompt": "Where should a shared function prototype normally be declared?",
         "options": [
-          "Validate preconditions, bounds and failure results.",
-          "Assume the operation cannot fail.",
-          "Ignore the type and lifetime rules."
+          "In a header included by both caller and implementation",
+          "Only in a comment",
+          "Only inside the linker command",
+          "In two unrelated source files with different types"
         ],
-        "answer": "Validate preconditions, bounds and failure results.",
-        "explanation": "C requires explicit handling of object validity and operation failures."
+        "answer": "In a header included by both caller and implementation",
+        "explanation": "A shared header helps keep the declaration consistent across translation units."
       },
       {
         "id": "cl913-q3",
-        "prompt": "How should the example be checked?",
+        "prompt": "What commonly causes an undefined reference at link time?",
         "options": [
-          "Compile with warnings and test expected and failure cases.",
-          "Ignore diagnostics and test only once.",
-          "Assume every platform behaves identically."
+          "The required definition was not provided to the linker",
+          "A local variable has a descriptive name",
+          "A comment is too long",
+          "A header uses an include guard"
         ],
-        "answer": "Compile with warnings and test expected and failure cases.",
-        "explanation": "Warnings and targeted tests provide evidence for correctness."
+        "answer": "The required definition was not provided to the linker",
+        "explanation": "The linker must resolve external references using object files and libraries supplied to it."
+      },
+      {
+        "id": "cl913-q4",
+        "prompt": "What can happen if the same external function is defined in multiple translation units?",
+        "options": [
+          "A duplicate-symbol or multiple-definition link error",
+          "The function automatically becomes inline",
+          "The compiler merges every definition portably",
+          "The function is removed from the program"
+        ],
+        "answer": "A duplicate-symbol or multiple-definition link error",
+        "explanation": "External definitions must obey the program's linkage and definition rules."
+      },
+      {
+        "id": "cl913-q5",
+        "prompt": "Why include the shared header in the implementation file itself?",
+        "options": [
+          "So the compiler can check the definition against the declared interface",
+          "So the linker can read comments",
+          "So the source file is automatically executed",
+          "So all functions become global"
+        ],
+        "answer": "So the compiler can check the definition against the declared interface",
+        "explanation": "Including the header helps detect a mismatch between the public prototype and the implementation."
       }
     ]
   },
