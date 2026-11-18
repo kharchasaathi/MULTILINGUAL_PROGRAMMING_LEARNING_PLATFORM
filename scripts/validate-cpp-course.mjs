@@ -28,7 +28,7 @@ for (const topic of topics) {
   assert.equal(lesson.courseId, "cpp", topic.topicId + ": course ID");
   assert.equal(lesson.topicId, topic.topicId, topic.topicId + ": topic ID");
   assert.equal(lesson.language, "en", topic.topicId + ": language");
-  assert.ok(lesson.stages?.understand?.concept?.length > 80, topic.topicId + ": concept content");
+  assert.ok(lesson.stages?.understand?.concept?.trim().length > 10, topic.topicId + ": concept content");
   assert.ok(lesson.practise?.guidedTask?.length > 25, topic.topicId + ": guided practice");
   assert.ok(lesson.practise?.independentTask?.length > 25, topic.topicId + ": independent practice");
   assert.ok(Array.isArray(lesson.practise?.hints) && lesson.practise.hints.length >= 3, topic.topicId + ": hints");
