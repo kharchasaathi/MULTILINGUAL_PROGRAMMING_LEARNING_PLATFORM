@@ -84,7 +84,7 @@ test("keyboard users can open and dismiss the curriculum dialog", async ({ page 
   await expect(page.locator("#lessonDialog")).not.toBeVisible();
 });
 
-test("all 25 lessons render in the UI and all runnable starter programs execute in Chromium", async ({ page }) => {
+test("all six courses render representative lessons and starter programs execute in Chromium", async ({ page }) => {
   test.setTimeout(180000);
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
@@ -102,6 +102,10 @@ test("all 25 lessons render in the UI and all runnable starter programs execute 
     await expect(dialog.locator(".curriculum-draft-notice")).toHaveCount(0);
     await expect(dialog.locator(".lesson-objectives-list li")).toHaveCount(5);
     await expect(dialog.locator(".lesson-example")).toHaveCount(course === "cpp" ? 5 : 2);
+    if (course === "cpp") {
+      await expect(dialog.locator(".lesson-stage").nth(1)).toContainText("C++ is a general-purpose");
+      await expect(dialog.locator(".lesson-hints li")).toHaveCount(5);
+    }
     await expect(dialog.locator(".lesson-question")).toHaveCount(5);
     await expect(dialog.locator(".lesson-answer-option")).toHaveCount(15);
     await dialog.locator("#closeLesson").click();
