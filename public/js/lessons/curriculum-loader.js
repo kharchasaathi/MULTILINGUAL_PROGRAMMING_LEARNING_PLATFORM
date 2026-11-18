@@ -161,7 +161,7 @@
     // into the reusable three-stage renderer without changing source JSON files.
     const practice = lesson.stages.practise || lesson.practise || lesson.practice || {};
     const examples = Array.isArray(explain?.examples) ? explain.examples : (Array.isArray(lesson.examples) ? lesson.examples : []);
-    const explanationText = explain?.narrative || explain?.explain || lesson.explanation || understand.whyItMatters || understand.concept || "";
+    const explanationText = explain?.narrative || explain?.explain || lesson.explanation || "";
     const code = lesson.practice?.starterCode || "";
     const questions = lesson.assessment?.questions || [];
     const onComplete = () => {
