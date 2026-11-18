@@ -6,8 +6,8 @@
 - CPP1 currently has 20 registered lesson topics (CPP1.1–CPP1.20).
 - Proposed modules CPP2–CPP14 contain 10 planned topics each (130 additional topics).
 - **Proposed scope total: 150 topics.**
-- **Current draft-authored: 50 topics.**
-- **Remaining to author under this scope: 100 topics.**
+- **Current draft-authored: 60 topics.**
+- **Remaining to author under this scope: 90 topics.**
 - Counts can be adjusted after a curriculum audit; this roadmap should be updated when topic IDs or scope change.
 
 ## CPP1 — Foundations and First Programs (20 topics)
@@ -21,7 +21,7 @@ Already registered in curriculum index. CPP1.1–CPP1.10 were previously created
 
 ## CPP4 — Conditional Logic (10 topics — drafted in this batch)\n- CPP4.1: if statements\n- CPP4.2: if-else\n- CPP4.3: else-if chains\n- CPP4.4: Nested conditions\n- CPP4.5: switch statements\n- CPP4.6: Case labels and break\n- CPP4.7: default case\n- CPP4.8: Boolean expressions\n- CPP4.9: Input validation decisions\n- CPP4.10: Decision-based mini challenges
 
-## CPP5 — Loops and Iteration (10 topics)\n- CPP5.1: while loops\n- CPP5.2: do-while loops\n- CPP5.3: for loops\n- CPP5.4: Range-based for\n- CPP5.5: Loop counters and boundaries\n- CPP5.6: Nested loops\n- CPP5.7: break\n- CPP5.8: continue\n- CPP5.9: Sentinel-controlled loops\n- CPP5.10: Iteration patterns and trace tables
+## CPP5 — Loops and Iteration (10 topics — drafted)\n\n**Drafted CPP5.1–CPP5.10:** while, do-while, for, range-based for, counters/boundaries, nested loops, break, continue, sentinel-controlled loops and iteration tracing.\n- CPP5.1: while loops and repeated execution\n- CPP5.2: do-while loops\n- CPP5.3: for loops and counter-controlled iteration\n- CPP5.4: range-based for loops\n- CPP5.5: loop counters, boundaries and off-by-one errors\n- CPP5.6: nested loops\n- CPP5.7: break and early exit\n- CPP5.8: continue and skipping an iteration\n- CPP5.9: sentinel-controlled loops\n- CPP5.10: iteration patterns and trace tables
 
 ## CPP6 — Functions and Modular Design (10 topics)\n- CPP6.1: Function declaration and definition\n- CPP6.2: Parameters and arguments\n- CPP6.3: Return values\n- CPP6.4: void functions\n- CPP6.5: Default arguments\n- CPP6.6: Overloading basics\n- CPP6.7: Scope and local variables\n- CPP6.8: Recursion introduction\n- CPP6.9: Header and source separation\n- CPP6.10: Function contracts and testing
 
