@@ -1,106 +1,108 @@
 {
-  "id": "foundation.f2.5.en",
+  "id": "foundation.f2.6.en",
   "courseId": "foundation",
   "moduleId": "F2",
-  "topicId": "F2.5",
-  "title": "Conditional Expressions and Ternary Operator",
+  "topicId": "F2.6",
+  "title": "Nested Decisions and Decision Trees",
   "language": "en",
   "learningObjectives": [
-    "Explain how a conditional expression selects one of two values based on a Boolean condition.",
-    "Write a ternary expression using condition ? valueIfTrue : valueIfFalse.",
-    "Trace a ternary expression and predict its result.",
-    "Choose when a ternary expression is clearer than an if/else statement.",
-    "Avoid confusing, deeply nested ternary expressions and common syntax mistakes."
+    "Explain how one decision can contain another decision.",
+    "Trace nested if/else structures and identify which inner block is reached.",
+    "Represent nested decisions as a simple decision tree.",
+    "Avoid ambiguous else placement by using braces and indentation.",
+    "Refactor overly deep nesting when a clearer structure is possible."
   ],
   "prerequisites": [
     "F2.2",
     "F2.3",
-    "F2.4"
+    "F2.4",
+    "F2.5"
   ],
   "stages": {
     "understand": {
-      "concept": "A conditional expression evaluates a condition and produces one of two values. In JavaScript, the ternary operator is written condition ? expressionIfTrue : expressionIfFalse. The condition is evaluated first. If it is truthy, the expression after ? is selected; otherwise the expression after : is selected. Only the selected expression is evaluated.",
-      "whyItMatters": "Some decisions produce a value that will be stored, displayed, passed to a function, or used in another expression. A conditional expression can make a small two-choice decision concise without creating a separate multi-line if/else statement.",
-      "analogy": "A sign says, 'If the door is open, use the entrance; otherwise use the side entrance.' The condition determines which one of two choices is selected.",
-      "analogyLimit": "The analogy gives two choices, but real code expressions can compute values, have side effects, or contain complex logic. Keep ternary branches simple and avoid hiding important actions inside them."
+      "concept": "A nested decision is an if or else structure placed inside another decision's branch. The outer condition determines which section of code is reached; then an inner condition can make a more specific choice. A decision tree is a diagram of these possible paths.",
+      "whyItMatters": "Some decisions depend on more than one level of eligibility or state. For example, a user may first qualify as a member, then receive a different offer based on purchase amount. Nested decisions model such dependent choices.",
+      "analogy": "At a venue, the first check asks whether a visitor has a ticket. Only ticket holders go to the next check for seat type. Each check opens a smaller decision.",
+      "analogyLimit": "Real programs may have many possible paths and conditions that change over time. A tree is a simplification; always trace actual code and validate the conditions."
     },
     "explain": {
-      "narrative": "The ternary operator is the only JavaScript operator that takes three operands: a condition, the value expression chosen when the condition is truthy, and the value expression chosen when it is falsy. Its form is condition ? valueA : valueB. It is an expression, so it can be assigned to a variable or used where a value is expected. It is not a replacement for every if/else statement. Prefer if/else when branches perform multiple statements, when the decision has several outcomes, or when a ternary becomes difficult to scan. Parentheses can clarify complex conditions. Avoid nesting ternary operators unless the result remains immediately understandable.",
+      "narrative": "Nested decisions place a second if/else inside an outer branch. The inner condition is evaluated only when execution reaches it. Indent clearly and use braces to make each else belong to its intended if. Draw a decision tree to list paths, and consider reducing deep nesting with early returns, helper functions, or a multi-branch chain when appropriate.",
       "examples": [
         {
-          "id": "f2.5-ex1",
-          "title": "Select a message",
-          "code": "const isReady = true;\\nconst message = isReady ? 'Ready' : 'Please wait';\\nconsole.log(message);",
-          "expectedOutput": "Ready",
-          "explanation": "The condition is true, so the expression produces the first value, 'Ready', which is assigned to message."
+          "id": "f2.6-ex1",
+          "title": "Member then purchase threshold",
+          "code": "const isMember = true;\\nconst total = 1200;\\nif (isMember) {\\n  if (total >= 1000) {\\n    console.log('Member premium reward');\\n  } else {\\n    console.log('Member reward');\\n  }\\n} else {\\n  console.log('Guest offer');\\n}",
+          "expectedOutput": "Member premium reward",
+          "explanation": "The outer condition selects the member path; the inner condition then checks the purchase total."
         },
         {
-          "id": "f2.5-ex2",
-          "title": "Choose a numeric value",
-          "code": "const cartTotal = 450;\\nconst shipping = cartTotal >= 500 ? 0 : 50;\\nconsole.log(shipping);",
-          "expectedOutput": "50",
-          "explanation": "The total is below 500, so the false branch supplies the shipping amount of 50."
+          "id": "f2.6-ex2",
+          "title": "Nested path when outer condition is false",
+          "code": "const hasAccount = false;\\nif (hasAccount) {\\n  if (true) console.log('Account route');\\n} else {\\n  console.log('Create account');\\n}",
+          "expectedOutput": "Create account",
+          "explanation": "Because the outer condition is false, the inner if is never reached."
         },
         {
-          "id": "f2.5-ex3",
-          "title": "Use a ternary inside output",
-          "code": "const temperature = 31;\\nconsole.log(temperature > 30 ? 'Hot' : 'Comfortable');",
-          "expectedOutput": "Hot",
-          "explanation": "The selected string becomes the argument passed to console.log."
+          "id": "f2.6-ex3",
+          "title": "Two levels of access checks",
+          "code": "const loggedIn = true;\\nconst isAdmin = false;\\nif (loggedIn) {\\n  if (isAdmin) console.log('Admin panel');\\n  else console.log('User dashboard');\\n} else {\\n  console.log('Sign in');\\n}",
+          "expectedOutput": "User dashboard",
+          "explanation": "The outer login check passes; the inner admin check chooses the user dashboard."
         },
         {
-          "id": "f2.5-ex4",
-          "title": "Return a selected value from a function",
-          "code": "function accessLabel(isMember) {\\n  return isMember ? 'Member access' : 'Guest access';\\n}\\nconsole.log(accessLabel(false));",
-          "expectedOutput": "Guest access",
-          "explanation": "The function returns one of two values based on its parameter. A ternary is compact here because each branch is a simple value."
+          "id": "f2.6-ex4",
+          "title": "Trace a nested discount",
+          "code": "const age = 15;\\nconst accompanied = true;\\nif (age < 18) {\\n  if (accompanied) console.log('Entry with guardian');\\n  else console.log('Guardian required');\\n} else {\\n  console.log('Standard entry');\\n}",
+          "expectedOutput": "Entry with guardian",
+          "explanation": "The outer age branch is selected, then the inner accompanied check is true."
         },
         {
-          "id": "f2.5-ex5",
-          "title": "Prefer if/else for multiple actions",
-          "code": "const hasError = true;\\nif (hasError) {\\n  console.log('Show warning');\\n  console.log('Record diagnostic');\\n} else {\\n  console.log('Continue');\\n}",
-          "expectedOutput": "Show warning\\nRecord diagnostic",
-          "explanation": "This example intentionally uses if/else because the true branch contains two statements. Using a ternary here would not improve clarity."
+          "id": "f2.6-ex5",
+          "title": "Simplify a deep choice",
+          "code": "const ready = true;\\nconst hasData = true;\\nif (ready) {\\n  if (hasData) {\\n    console.log('Process');\\n  } else {\\n    console.log('Load data');\\n  }\\n} else {\\n  console.log('Wait');\\n}",
+          "expectedOutput": "Process",
+          "explanation": "Nested branches represent dependent checks. For more complex structures, a decision tree or helper function may make the paths easier to understand."
         }
       ],
       "commonMistakes": [
-        "Leaving out the colon that separates the two choices.",
-        "Using assignment (=) instead of comparison (===) in the condition.",
-        "Putting statements that do not produce a useful value into a ternary just to shorten code.",
-        "Nesting ternary operators until the decision becomes difficult to read.",
-        "Assuming both branches are evaluated; only the selected branch is evaluated."
+        "Misplacing else so it binds to an unexpected if.",
+        "Ignoring the inner condition because only the outer condition was traced.",
+        "Excessive nesting that hides the path logic.",
+        "Missing braces or inconsistent indentation.",
+        "Not testing each path, including the false path of the outer condition."
       ]
     },
     "practise": {
       "guidedTask": {
-        "title": "Guided: Display a payment status",
-        "instructions": "Create a conditional expression that assigns 'Paid' when paymentReceived is true and 'Pending' otherwise. Print the resulting status.",
+        "title": "Guided: Membership reward decision",
+        "instructions": "First check membership. If the person is a member, check whether the purchase total is at least 1000 and print the appropriate member reward. Otherwise print the guest message.",
         "steps": [
-          "Create a Boolean variable paymentReceived.",
-          "Use the condition ? 'Paid' : 'Pending' to select a value.",
-          "Assign the selected value to status.",
-          "Print status and change the Boolean to test both outcomes."
+          "Set isMember and purchaseTotal.",
+          "Write the outer membership if/else.",
+          "Inside the member branch, add the purchase threshold decision.",
+          "Indent and brace both levels carefully.",
+          "Test member and guest paths plus both inner outcomes."
         ],
-        "starterCode": "const paymentReceived = false;\\nconst status = paymentReceived ? 'Paid' : 'Pending';\\nconsole.log(status);"
+        "starterCode": "const isMember = true;\\nconst purchaseTotal = 1200;\\nif (isMember) {\\n  if (purchaseTotal >= 1000) console.log('Premium member reward');\\n  else console.log('Member reward');\\n} else {\\n  console.log('Guest offer');\\n}"
       },
       "independentTask": {
-        "title": "Independent: Ticket price label",
-        "instructions": "Select a label for a ticket based on whether the visitor is under 12. If under 12, select 'Child ticket'; otherwise select 'Regular ticket'. Use a ternary expression for the value selection, print it, and test both outcomes.",
+        "title": "Independent: Account access decision tree",
+        "instructions": "Model access decisions: if signed out, show Sign in; if signed in but not verified, show Verify account; if verified but not admin, show User dashboard; if verified admin, show Admin dashboard. Create a decision tree sketch before coding.",
         "requirements": [
-          "Use a Boolean condition or age comparison.",
-          "Produce exactly the two specified labels.",
-          "Store the selected label in a variable.",
-          "Test the true and false outcomes.",
-          "Then rewrite the same decision using if/else and compare readability."
+          "Use at least one nested decision.",
+          "Ensure inner conditions are evaluated only on the relevant outer path.",
+          "Make every outcome reachable and distinct.",
+          "Use braces and indentation to clarify else ownership.",
+          "Test all four paths."
         ]
       },
       "hints": [
-        "Read the condition before the question mark.",
-        "The expression before the colon is selected when the condition is truthy.",
-        "The expression after the colon is selected when the condition is falsy.",
-        "A ternary expression produces a value; it can be assigned or returned.",
-        "Keep both choices short and easy to understand.",
-        "If branches contain multiple actions or the expression is nested, consider if/else for clarity."
+        "Trace the outer condition first.",
+        "An inner condition runs only if its containing branch is selected.",
+        "Indent inner branches one level deeper and use braces.",
+        "Sketch a tree to enumerate all possible paths.",
+        "Test the false branch of every outer decision.",
+        "If nesting becomes deep, consider simplifying or extracting a helper."
       ]
     }
   },
@@ -110,59 +112,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "f2.5-en-q1",
-        "prompt": "What does the ternary operator do?",
+        "id": "f2.6-en-q1",
+        "prompt": "What is a nested decision?",
         "options": [
-          "Selects one of two expressions based on a condition",
-          "Repeats a block until a condition changes",
-          "Declares a function"
+          "A decision placed inside another decision branch",
+          "A loop inside a string",
+          "Two unrelated variables"
         ],
-        "answer": "Selects one of two expressions based on a condition",
-        "explanation": "The condition determines which of the two expressions supplies the resulting value."
+        "answer": "A decision placed inside another decision branch",
+        "explanation": "Nested decisions perform a more specific check after an outer branch has been selected."
       },
       {
-        "id": "f2.5-en-q2",
-        "prompt": "Which is the correct ternary structure?",
+        "id": "f2.6-en-q2",
+        "prompt": "When does an inner if condition execute?",
         "options": [
-          "condition ? valueA : valueB",
-          "condition : valueA ? valueB",
-          "condition ?? valueA : valueB"
+          "Only when execution reaches its containing outer branch",
+          "Every time the file loads",
+          "Only when the outer condition is false"
         ],
-        "answer": "condition ? valueA : valueB",
-        "explanation": "The ternary form uses a question mark followed by the true expression and a colon followed by the false expression."
+        "answer": "Only when execution reaches its containing outer branch",
+        "explanation": "The outer condition controls whether the nested block is reached."
       },
       {
-        "id": "f2.5-en-q3",
-        "prompt": "What is assigned by this code: const label = 8 > 5 ? 'Yes' : 'No';",
+        "id": "f2.6-en-q3",
+        "prompt": "What can a decision tree help you do?",
         "options": [
-          "Yes",
-          "No",
-          "true"
+          "Visualize branches and possible paths",
+          "Automatically fix syntax errors",
+          "Replace all tests"
         ],
-        "answer": "Yes",
-        "explanation": "The condition 8 > 5 is true, so the first expression is selected."
+        "answer": "Visualize branches and possible paths",
+        "explanation": "A tree maps conditions and outcomes so paths can be checked."
       },
       {
-        "id": "f2.5-en-q4",
-        "prompt": "When is if/else usually clearer than a ternary expression?",
+        "id": "f2.6-en-q4",
+        "prompt": "What makes nested if/else code easier to read?",
         "options": [
-          "When branches contain multiple statements or the decision is complex",
-          "Whenever a variable is declared",
-          "Only when the condition is false"
+          "Braces and consistent indentation",
+          "Removing all spacing",
+          "Using ambiguous single-line branches"
         ],
-        "answer": "When branches contain multiple statements or the decision is complex",
-        "explanation": "Use if/else for multi-step branches and decisions that are hard to read in a single expression."
+        "answer": "Braces and consistent indentation",
+        "explanation": "Clear indentation and braces help identify which else belongs to which if."
       },
       {
-        "id": "f2.5-en-q5",
-        "prompt": "Which practice improves ternary readability?",
+        "id": "f2.6-en-q5",
+        "prompt": "What should you consider if nesting becomes very deep?",
         "options": [
-          "Keep branches simple and avoid unnecessary nesting",
-          "Nest as many ternaries as possible",
-          "Put unrelated actions in both branches"
+          "Simplify the structure or extract helper functions",
+          "Add more nesting",
+          "Skip testing inner paths"
         ],
-        "answer": "Keep branches simple and avoid unnecessary nesting",
-        "explanation": "Simple branches make the expression easy to scan and reduce mistakes."
+        "answer": "Simplify the structure or extract helper functions",
+        "explanation": "Refactoring can reduce complexity and make decision paths easier to maintain."
       }
     ]
   },
