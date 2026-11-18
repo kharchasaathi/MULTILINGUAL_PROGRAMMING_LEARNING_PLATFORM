@@ -6,14 +6,16 @@
 - CPP1 currently has 20 registered lesson topics (CPP1.1–CPP1.20).
 - Proposed modules CPP2–CPP14 contain 10 planned topics each (130 additional topics).
 - **Proposed scope total: 150 topics.**
-- **Current draft-authored: 20 topics.**
-- **Remaining to author under this scope: 130 topics.**
+- **Current draft-authored: 30 topics.**
+- **Remaining to author under this scope: 120 topics.**
 - Counts can be adjusted after a curriculum audit; this roadmap should be updated when topic IDs or scope change.
 
 ## CPP1 — Foundations and First Programs (20 topics)
 Already registered in curriculum index. CPP1.1–CPP1.10 were previously created; CPP1.11–CPP1.20 were added in this batch. Technical compilation and editorial review remain pending.
 
-## CPP2 — Variables, Constants and Data Types (10 topics)\n- CPP2.1: Naming and identifiers\n- CPP2.2: Declaration vs definition\n- CPP2.3: Initialization forms\n- CPP2.4: Fundamental integer types\n- CPP2.5: Floating-point types\n- CPP2.6: Character and boolean types\n- CPP2.7: Type inference with auto\n- CPP2.8: const and constexpr basics\n- CPP2.9: Type sizes and limits\n- CPP2.10: Choosing types responsibly
+## CPP2 — Variables, Constants and Data Types (10 topics — drafted in this batch)
+
+**Drafted CPP2.1–CPP2.10:** Naming rules, declarations/definitions/scope, initialization forms, integer types, floating-point precision, char/bool, auto, const/constexpr, sizeof/limits, choosing types responsibly.\n- CPP2.1: Naming rules and identifiers\n- CPP2.2: Declaration, definition and scope basics\n- CPP2.3: Initialization forms in C++\n- CPP2.4: Fundamental integer types\n- CPP2.5: Floating-point types and precision\n- CPP2.6: Character and boolean types\n- CPP2.7: Type inference with auto\n- CPP2.8: const and constexpr basics\n- CPP2.9: Type sizes, limits and sizeof\n- CPP2.10: Choosing data types responsibly
 
 ## CPP3 — Operators and Expressions (10 topics)\n- CPP3.1: Arithmetic operators and integer division\n- CPP3.2: Increment and decrement\n- CPP3.3: Assignment and compound assignment\n- CPP3.4: Comparison operators\n- CPP3.5: Logical operators\n- CPP3.6: Bitwise operators\n- CPP3.7: Shift operations\n- CPP3.8: Precedence and associativity\n- CPP3.9: Conditional operator\n- CPP3.10: Expression evaluation and safe arithmetic
 
