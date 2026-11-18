@@ -6,8 +6,8 @@
 - CPP1 currently has 20 registered lesson topics (CPP1.1–CPP1.20).
 - Proposed modules CPP2–CPP14 contain 10 planned topics each (130 additional topics).
 - **Proposed scope total: 150 topics.**
-- **Current draft-authored: 60 topics.**
-- **Remaining to author under this scope: 90 topics.**
+- **Current draft-authored: 70 topics.**
+- **Remaining to author under this scope: 80 topics.**
 - Counts can be adjusted after a curriculum audit; this roadmap should be updated when topic IDs or scope change.
 
 ## CPP1 — Foundations and First Programs (20 topics)
