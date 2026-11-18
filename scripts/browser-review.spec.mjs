@@ -100,7 +100,7 @@ test("all six courses render representative lessons and starter programs execute
     await expect(dialog.locator(".lesson-template-title")).toContainText(topicId);
     await expect(dialog.locator(".curriculum-back")).toBeVisible();
     await expect(dialog.locator(".curriculum-draft-notice")).toHaveCount(0);
-    const lessonResponse = await page.request.get(`${baseURL/content/en/${course/${topicId.json}`);
+    const lessonResponse = await page.request.get(`${baseURL}/content/en/${course}/${topicId}.json`);
     expect(lessonResponse.ok(), topicId + " lesson file").toBeTruthy();
     const lessonData = await lessonResponse.json();
     const expectedExamples = lessonData.examples || lessonData.stages?.explain?.examples || [];
