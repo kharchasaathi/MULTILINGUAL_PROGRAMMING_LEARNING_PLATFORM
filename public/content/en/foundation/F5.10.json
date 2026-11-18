@@ -1,0 +1,177 @@
+{
+  "id": "foundation.f5.10.en",
+  "courseId": "foundation",
+  "moduleId": "F5",
+  "topicId": "F5.10",
+  "title": "Traversing, Searching, Updating, and Removing Collection Items",
+  "language": "en",
+  "learningObjectives": [
+    "Traverse collections systematically without skipping or repeating unintended items.",
+    "Search collections using a linear scan and recognize when keyed lookup is available.",
+    "Update an item while preserving the collection's intended structure.",
+    "Remove items safely while understanding how indexes can shift.",
+    "Choose a traversal or mutation approach that handles empty collections and boundary cases."
+  ],
+  "prerequisites": [
+    "F5.1",
+    "F5.2",
+    "F5.3",
+    "F5.5",
+    "F5.6",
+    "F5.8",
+    "F5.9",
+    "F3.8",
+    "F3.9"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Traversal visits items in a defined sequence or order. Searching checks items against a target or condition. Updating changes a stored value. Removing changes collection membership or length and may shift indexes. These operations must follow the collection's rules and account for empty data, missing items, and mutation during iteration.",
+      "whyItMatters": "Collection operations are core to nearly every program: displaying records, finding a product, editing a profile, filtering a list, or deleting a completed task. Safe operation order prevents skipped items, invalid indexes, and unintended changes.",
+      "analogy": "Imagine checking every shelf in a storeroom, finding a labeled box, changing its label, or removing it. If you remove shelves/items while counting forward, the next item may slide into the position you just passed.",
+      "analogyLimit": "Collection APIs differ. Some structures support efficient removal by key or iterator; array-like structures may shift indexes; iteration rules vary by language. Always use the actual language's documented behavior."
+    },
+    "explain": {
+      "narrative": "Traversal means visiting each element, often with a loop. A linear search compares each visited item with a target and can stop when it is found. Updating may be done by index, key, or reference, depending on the collection. Removing while traversing can change the remaining positions: if a forward loop increments after deleting the current element, the item shifted into that index may be skipped. Safer options include traversing backward for index-based removal, building a filtered collection, or using a collection's supported iterator/removal mechanism. For maps and sets, use their key/member operations rather than pretending they are indexed sequences. Empty and missing cases should be explicit.",
+      "examples": [
+        {
+          "id": "f5.10-ex1",
+          "title": "Traverse every item",
+          "code": "const values = [4, 7, 9];\nfor (const value of values) console.log(value);",
+          "expectedOutput": "4\\n7\\n9",
+          "explanation": "The loop visits each element once in iteration order without manually changing an index."
+        },
+        {
+          "id": "f5.10-ex2",
+          "title": "Linear search and early stop",
+          "code": "const names = ['Mina', 'Ravi', 'Zoya'];\nlet found = false;\nfor (const name of names) {\n  if (name === 'Ravi') { found = true; break; }\n}\nconsole.log(found);",
+          "expectedOutput": "true",
+          "explanation": "The search compares each value with the target and stops after a match. If no match occurs, found remains false."
+        },
+        {
+          "id": "f5.10-ex3",
+          "title": "Update by index",
+          "code": "const temperatures = [21, 22, 20];\ntemperatures[1] = 25;\nconsole.log(temperatures);",
+          "expectedOutput": "[21, 25, 20]",
+          "explanation": "The second element is updated directly. The collection length and other values remain unchanged."
+        },
+        {
+          "id": "f5.10-ex4",
+          "title": "Remove safely while iterating backward",
+          "code": "const numbers = [2, 5, 8, 11];\nfor (let i = numbers.length - 1; i >= 0; i--) {\n  if (numbers[i] % 2 === 0) numbers.splice(i, 1);\n}\nconsole.log(numbers);",
+          "expectedOutput": "[5, 11]",
+          "explanation": "Moving backward means removing an item does not shift any unvisited earlier indexes."
+        },
+        {
+          "id": "f5.10-ex5",
+          "title": "Search a map by key and update",
+          "code": "const stock = new Map([['A', 3], ['B', 6]]);\nif (stock.has('B')) stock.set('B', stock.get('B') + 1);\nconsole.log(stock.get('B'));",
+          "expectedOutput": "7",
+          "explanation": "Map membership and update use the key. The check avoids updating a missing key accidentally."
+        }
+      ],
+      "commonMistakes": [
+        "Incrementing a forward index after removing the current item and skipping the shifted item.",
+        "Assuming a search always finds the target.",
+        "Using an invalid index or missing key without checking the result.",
+        "Mutating a collection while iterating without understanding iterator rules.",
+        "Confusing changing an element with removing it from the collection.",
+        "Writing search code that fails to handle an empty collection."
+      ]
+    },
+    "practise": {
+      "guidedTask": {
+        "title": "Guided: Find, update, and remove matching values",
+        "instructions": "Work through a list of scores and safely change its contents.",
+        "steps": [
+          "Traverse the list and print each value.",
+          "Search for a target score; report found or not found.",
+          "Update one existing value by index.",
+          "Remove every value below a threshold using a safe strategy (backward loop or filtering).",
+          "Test the logic with an empty list and with no matches."
+        ],
+        "starterCode": "const scores = [12, 4, 18, 7, 3];\n// Traverse, search, update, and safely remove values."
+      },
+      "independentTask": {
+        "title": "Independent: Manage a small collection",
+        "instructions": "Create a program or pseudocode for a collection of tasks, names, inventory entries, or scores.",
+        "requirements": [
+          "Traverse and display all entries.",
+          "Search for one item and handle both match and no-match cases.",
+          "Update a found item without changing unrelated entries.",
+          "Remove one or more items using a safe mutation strategy.",
+          "Demonstrate empty collection and boundary/missing-item behavior."
+        ]
+      },
+      "hints": [
+        "Use a simple loop when you need to inspect every item.",
+        "Search should have a clear result for both found and not found.",
+        "Check the target index/key before changing data.",
+        "When deleting from an indexed sequence, consider iterating backward or building a new filtered sequence.",
+        "A forward deletion loop may skip the item that shifts into the deleted index.",
+        "Test empty collections and targets that do not exist."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "f5.10-en-q1",
+        "prompt": "What does traversal of a collection mean?",
+        "options": [
+          "Visiting its items according to a defined iteration order",
+          "Deleting every item at once",
+          "Checking only the first item"
+        ],
+        "answer": "Visiting its items according to a defined iteration order",
+        "explanation": "Traversal systematically visits collection elements, commonly using a loop."
+      },
+      {
+        "id": "f5.10-en-q2",
+        "prompt": "What is a linear search doing?",
+        "options": [
+          "Comparing visited items with a target or condition",
+          "Automatically sorting the collection",
+          "Removing duplicates before reading"
+        ],
+        "answer": "Comparing visited items with a target or condition",
+        "explanation": "A linear search checks elements one by one until it finds a match or reaches the end."
+      },
+      {
+        "id": "f5.10-en-q3",
+        "prompt": "Why can removing an item during a forward index loop skip the next item?",
+        "options": [
+          "Remaining items may shift left into the removed index",
+          "Removal always changes every item to null",
+          "Indexes never change after removal"
+        ],
+        "answer": "Remaining items may shift left into the removed index",
+        "explanation": "If the loop increments after removal, it may move past the newly shifted item."
+      },
+      {
+        "id": "f5.10-en-q4",
+        "prompt": "Which strategy can safely remove matching values from an indexed sequence when index shifting is a concern?",
+        "options": [
+          "Traverse indexes from the end toward the start",
+          "Always increment from index zero after each deletion",
+          "Remove the first value without checking it"
+        ],
+        "answer": "Traverse indexes from the end toward the start",
+        "explanation": "Backward traversal keeps earlier, unvisited indexes stable when later items are removed."
+      },
+      {
+        "id": "f5.10-en-q5",
+        "prompt": "What should a search routine return or report if no target exists?",
+        "options": [
+          "A clear not-found result",
+          "The last item regardless of match",
+          "An invented matching value"
+        ],
+        "answer": "A clear not-found result",
+        "explanation": "Search logic should explicitly represent failure to find a target rather than silently return an unrelated item."
+      }
+    ]
+  }
+}
