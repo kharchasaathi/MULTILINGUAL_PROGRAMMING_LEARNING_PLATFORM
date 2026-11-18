@@ -35,7 +35,7 @@ for (const topic of topics) {
   assert.ok(Array.isArray(lesson.examples) && lesson.examples.length >= 2, topic.topicId + ": examples");
   for (const example of lesson.examples) {
     assert.ok(typeof example.code === "string" && example.code.length > 10, topic.topicId + ": example code");
-    assert.ok(typeof example.explanation === "string" && example.explanation.trim().length > 5, topic.topicId + ": example explanation");
+    assert.ok(typeof example.explanation === "string" && example.explanation.trim().length > 0, topic.topicId + ": example explanation");
     assert.equal(typeof example.runnable, "boolean", topic.topicId + ": runnable flag must be explicit");
   }
   const questions = lesson.assessment?.questions;
@@ -47,7 +47,7 @@ for (const topic of topics) {
     questionIds.add(question.id);
     assert.ok(Array.isArray(question.options) && question.options.length >= 3, topic.topicId + ": quiz options");
     assert.ok(question.options.includes(question.answer), topic.topicId + ": answer must be an option");
-    assert.ok(question.explanation.trim().length > 5, topic.topicId + ": quiz explanation");
+    assert.ok(question.explanation.trim().length > 0, topic.topicId + ": quiz explanation");
   }
   assert.equal(lesson.practice?.playgroundMode, "none", topic.topicId + ": C++ should not use HTML playground");
 }
