@@ -6,8 +6,8 @@
 - CPP1 currently has 20 registered lesson topics (CPP1.1–CPP1.20).
 - Proposed modules CPP2–CPP14 contain 10 planned topics each (130 additional topics).
 - **Proposed scope total: 150 topics.**
-- **Current draft-authored: 40 topics.**
-- **Remaining to author under this scope: 110 topics.**
+- **Current draft-authored: 50 topics.**
+- **Remaining to author under this scope: 100 topics.**
 - Counts can be adjusted after a curriculum audit; this roadmap should be updated when topic IDs or scope change.
 
 ## CPP1 — Foundations and First Programs (20 topics)
@@ -19,7 +19,7 @@ Already registered in curriculum index. CPP1.1–CPP1.10 were previously created
 
 ## CPP3 — Operators and Expressions (10 topics — drafted in this batch)\n\n**Drafted CPP3.1–CPP3.10:** arithmetic and integer division, increment/decrement, compound assignment, comparisons, logical operators, bitwise operations, shifts, precedence, conditional operator, and safe expression evaluation.\n- CPP3.1: Arithmetic operators and integer division\n- CPP3.2: Increment and decrement\n- CPP3.3: Assignment and compound assignment\n- CPP3.4: Comparison operators\n- CPP3.5: Logical operators\n- CPP3.6: Bitwise operators\n- CPP3.7: Shift operations\n- CPP3.8: Precedence and associativity\n- CPP3.9: Conditional operator\n- CPP3.10: Expression evaluation and safe arithmetic
 
-## CPP4 — Conditional Logic (10 topics)\n- CPP4.1: if statements\n- CPP4.2: if-else\n- CPP4.3: else-if chains\n- CPP4.4: Nested conditions\n- CPP4.5: switch statements\n- CPP4.6: Case labels and break\n- CPP4.7: default case\n- CPP4.8: Boolean expressions\n- CPP4.9: Input validation decisions\n- CPP4.10: Decision-based mini challenges
+## CPP4 — Conditional Logic (10 topics — drafted in this batch)\n- CPP4.1: if statements\n- CPP4.2: if-else\n- CPP4.3: else-if chains\n- CPP4.4: Nested conditions\n- CPP4.5: switch statements\n- CPP4.6: Case labels and break\n- CPP4.7: default case\n- CPP4.8: Boolean expressions\n- CPP4.9: Input validation decisions\n- CPP4.10: Decision-based mini challenges
 
 ## CPP5 — Loops and Iteration (10 topics)\n- CPP5.1: while loops\n- CPP5.2: do-while loops\n- CPP5.3: for loops\n- CPP5.4: Range-based for\n- CPP5.5: Loop counters and boundaries\n- CPP5.6: Nested loops\n- CPP5.7: break\n- CPP5.8: continue\n- CPP5.9: Sentinel-controlled loops\n- CPP5.10: Iteration patterns and trace tables
 
