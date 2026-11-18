@@ -27,21 +27,115 @@ Already registered in curriculum index. CPP1.1–CPP1.10 were previously created
 
 ## CPP7 — Arrays, Strings and Collections (10 topics — drafted)
 
-**Drafted CPP7.1–CPP7.10:** array declaration and indexing, traversal, searching/updating, multidimensional arrays, std::array, C-style strings, std::string, string input/operations, vector, and choosing collections.\n- CPP7.1: C-style arrays overview\n- CPP7.2: Array initialization\n- CPP7.3: Indexing and bounds\n- CPP7.4: Traversal patterns\n- CPP7.5: Multidimensional arrays\n- CPP7.6: std::string basics\n- CPP7.7: String operations\n- CPP7.8: std::array\n- CPP7.9: std::vector basics\n- CPP7.10: Collection algorithms and iteration
+**Actual file titles verified:**
+- CPP7.1: Arrays — Declaration, Initialization and Indexing
+- CPP7.2: Traversing Arrays with Loops
+- CPP7.3: Modifying and Searching Array Elements
+- CPP7.4: Multidimensional Arrays
+- CPP7.5: std::array and Fixed-Size Collections
+- CPP7.6: C-Style Strings and Null Terminators
+- CPP7.7: std::string Basics
+- CPP7.8: String Operations and Input
+- CPP7.9: Vectors — Dynamic Collections
+- CPP7.10: Choosing Arrays, Strings and Vectors
 
-## CPP8 — Pointers, References and Memory (10 topics — drafted)\n\n**Drafted CPP8.1–CPP8.10:** pointer addresses/declarations, dereferencing/null, pointers and arrays, arithmetic/bounds, const pointer variants, references/aliasing, pointer/reference parameters, dynamic allocation/ownership, smart pointers, lifetime and dangling references.\n\n- CPP8.1: Address-of and dereference\n- CPP8.2: Pointer declarations\n- CPP8.3: Null pointers\n- CPP8.4: Reference basics\n- CPP8.5: Const pointers and pointer-to-const\n- CPP8.6: Pointer arithmetic cautions\n- CPP8.7: Array-pointer relationship\n- CPP8.8: Dynamic allocation overview\n- CPP8.9: Lifetime and dangling references\n- CPP8.10: Prefer RAII and smart pointers
+**Index mismatch noted:** the earlier roadmap description had several CPP7 topics assigned to different IDs than the current lesson files. This corrected listing reflects the file titles fetched from GitHub.
+## CPP8 — Pointers, References and Memory (10 topics — drafted)
 
-## CPP9 — Structs, Classes and Encapsulation (10 topics — drafted)\n\n**Drafted CPP9.1–CPP9.10:** struct definitions and objects, member access, aggregate initialization, structs with functions, composition, classes and methods, access specifiers, constructors, validation/encapsulation, and design practice.\n\n- CPP9.1: struct basics\n- CPP9.2: class basics\n- CPP9.3: Members and access control\n- CPP9.4: Constructors\n- CPP9.5: Member initialization lists\n- CPP9.6: Destructors\n- CPP9.7: Encapsulation\n- CPP9.8: this pointer\n- CPP9.9: Static members\n- CPP9.10: Class invariants and design
+**Actual file titles verified:**
+- CPP8.1: Pointers, Addresses and Pointer Declarations
+- CPP8.2: Dereferencing and Null Pointers
+- CPP8.3: Pointers and Arrays
+- CPP8.4: Pointer Arithmetic and Bounds
+- CPP8.5: Pointers to const and const Pointers
+- CPP8.6: References and Aliasing
+- CPP8.7: Passing Data by Pointer or Reference
+- CPP8.8: Dynamic Memory and Ownership Basics
+- CPP8.9: Smart Pointers — unique_ptr and shared_ptr
+- CPP8.10: Object Lifetime, Dangling References and Safe Memory
 
-## CPP10 — Object-Oriented Programming (10 topics — drafted)\n\n**Drafted CPP10.1–CPP10.10:** OOP principles, interface/responsibilities, object lifecycle, this pointer, static members, inheritance, access modes, overriding/virtual functions, polymorphism, and OOP design review.\n\n- CPP10.1: Inheritance basics\n- CPP10.2: Base and derived classes\n- CPP10.3: Protected access\n- CPP10.4: Virtual functions\n- CPP10.5: Override and final\n- CPP10.6: Abstract classes\n- CPP10.7: Polymorphism\n- CPP10.8: Composition vs inheritance\n- CPP10.9: Object slicing\n- CPP10.10: OOP design and testing
+**Index mismatch noted:** the previous roadmap IDs described several concepts in different positions than the existing lesson files. This listing is aligned to the current GitHub titles.
+## CPP9 — Structs, Classes and Encapsulation (10 topics — drafted)
 
-## CPP11 — Templates and Generic Programming (10 topics — drafted)\n\n**Drafted CPP11.1–CPP11.10:** function templates, deduction, multiple type parameters, non-type parameters, class templates, template members, specialization, generic algorithms, concepts/constraints and template testing.\n\n- CPP11.1: Function templates\n- CPP11.2: Template type parameters\n- CPP11.3: Class templates\n- CPP11.4: Template argument deduction\n- CPP11.5: Generic algorithms\n- CPP11.6: Concepts introduction\n- CPP11.7: Constraints overview\n- CPP11.8: Compile-time polymorphism\n- CPP11.9: Template errors and diagnostics\n- CPP11.10: Reusable generic design
+**Actual file titles verified:**
+- CPP9.1: Defining Structs and Creating Objects
+- CPP9.2: Struct Members and Member Access
+- CPP9.3: Struct Initialization and Aggregate Values
+- CPP9.4: Structs with Functions
+- CPP9.5: Nested Structs and Composition
+- CPP9.6: Classes — Data and Member Functions
+- CPP9.7: Access Specifiers — public and private
+- CPP9.8: Constructors and Member Initialization
+- CPP9.9: Encapsulation and Validation
+- CPP9.10: Structs vs Classes and Design Practice
 
-## CPP12 — Standard Library and Algorithms (10 topics)\n- CPP12.1: Namespaces and using declarations\n- CPP12.2: Containers overview\n- CPP12.3: Iterators\n- CPP12.4: Algorithms overview\n- CPP12.5: Sorting and searching\n- CPP12.6: Pair and tuple\n- CPP12.7: Maps and sets\n- CPP12.8: Stack and queue\n- CPP12.9: Optional and variant overview\n- CPP12.10: Choosing standard-library tools
+**Index mismatch noted:** the roadmap's previous sequence (class basics, constructors, destructors, etc.) was not aligned with the actual file names.
+## CPP10 — Object-Oriented Programming (10 topics — drafted)
 
-## CPP13 — Files, Exceptions and Robust Programs (10 topics)\n- CPP13.1: Text file streams\n- CPP13.2: Reading files\n- CPP13.3: Writing files\n- CPP13.4: Stream state and error checks\n- CPP13.5: Exceptions overview\n- CPP13.6: try and catch\n- CPP13.7: Throwing exceptions responsibly\n- CPP13.8: Input validation\n- CPP13.9: Resource cleanup and RAII\n- CPP13.10: Robust error-handling design
+**Actual file titles verified:**
+- CPP10.1: Object-Oriented Programming Principles
+- CPP10.2: Class Interfaces and Responsibilities
+- CPP10.3: Constructors, Destructors and Object Lifecycle
+- CPP10.4: this Pointer and Member Access
+- CPP10.5: Static Data Members and Static Methods
+- CPP10.6: Inheritance Basics and Base Classes
+- CPP10.7: Derived Classes and Access Modes
+- CPP10.8: Overriding and Virtual Functions
+- CPP10.9: Polymorphism Through Base References
+- CPP10.10: OOP Design Practice and Review
+## CPP11 — Templates and Generic Programming (10 topics — drafted)
 
-## CPP14 — Modern C++, Testing and Projects (10 topics)\n- CPP14.1: C++ standards overview\n- CPP14.2: auto and decltype\n- CPP14.3: Move semantics introduction\n- CPP14.4: Smart pointers\n- CPP14.5: Lambda expressions\n- CPP14.6: Build and dependency basics\n- CPP14.7: Debugging and sanitizers overview\n- CPP14.8: Unit testing concepts\n- CPP14.9: Performance and profiling basics\n- CPP14.10: Capstone project and review
+**Actual file titles verified:**
+- CPP11.1: Function Templates and Type Parameters
+- CPP11.2: Template Argument Deduction
+- CPP11.3: Multiple Template Parameters
+- CPP11.4: Non-Type Template Parameters
+- CPP11.5: Class Templates
+- CPP11.6: Class Template Member Functions
+- CPP11.7: Template Specialization Basics
+- CPP11.8: Generic Programming and Reusable Algorithms
+- CPP11.9: Constraints and Concepts Introduction
+- CPP11.10: Templates — Testing and Design Practice
+## CPP12 — Standard Library and Algorithms (10 topics)
 
+**Actual file titles verified:**
+- CPP12.1: Standard Library Overview and Headers
+- CPP12.2: vector Operations and Capacity
+- CPP12.3: Associative Containers — map and set
+- CPP12.4: Unordered Containers and Hashing
+- CPP12.5: Sequence Containers — deque, list and array
+- CPP12.6: Iterators and Iterator Safety
+- CPP12.7: Sorting and Searching with Algorithms
+- CPP12.8: Transform, Count, Find and Reverse
+- CPP12.9: Numeric Algorithms and Accumulation
+- CPP12.10: Choosing Containers and Algorithm Complexity
+## CPP13 — Files, Exceptions and Robust Programs (10 topics)
+
+**Actual file titles verified:**
+- CPP13.1: File Streams and Stream States
+- CPP13.2: Reading Text Files with getline
+- CPP13.3: Writing, Appending and File Modes
+- CPP13.4: Filesystem Paths and Directory Operations
+- CPP13.5: Parsing Records and Input Validation
+- CPP13.6: Exception Basics — try, throw and catch
+- CPP13.7: Standard Exceptions and Custom Error Types
+- CPP13.8: Error Handling and Exception Safety
+- CPP13.9: RAII and Resource Cleanup
+- CPP13.10: Robust File and Exception Handling Practice
+## CPP14 — Modern C++, Testing and Projects (10 topics)
+
+**Actual file titles verified:**
+- CPP14.1: Modern C++ Versions and Compatibility
+- CPP14.2: Uniform Initialization and Type Deduction
+- CPP14.3: Lambda Expressions and Capture Safety
+- CPP14.4: Structured Bindings
+- CPP14.5: optional, variant and string_view
+- CPP14.6: constexpr and Compile-Time Computation
+- CPP14.7: Move Semantics and Value Categories
+- CPP14.8: Testing, Assertions and Debugging
+- CPP14.9: Build Organization and Code Quality
+- CPP14.10: Practical Projects, Capstone and Portfolio
+
+**Index mismatch noted:** the prior roadmap had different topics assigned to CPP14 IDs; the above now matches the lesson file titles.
 ## Lesson standard
 Each lesson should include 5 learning objectives, Understand and explanatory content, 5 original examples, guided and independent practice, 5 hints, 5 topic-specific MCQs with valid answer keys, unique IDs, prerequisites, and no HTML/CSS/JS playground. Mark status draft until editorial and technical review are completed.
