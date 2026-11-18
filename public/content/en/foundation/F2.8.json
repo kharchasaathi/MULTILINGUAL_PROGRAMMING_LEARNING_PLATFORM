@@ -1,0 +1,173 @@
+{
+  "id": "foundation.f2.8.en",
+  "courseId": "foundation",
+  "moduleId": "F2",
+  "topicId": "F2.8",
+  "title": "switch/match-style Selection Concepts",
+  "language": "en",
+  "learningObjectives": [
+    "Explain when selection constructs are useful for choosing among several discrete alternatives.",
+    "Describe the flow of a switch-style construct using a selector, cases, and an optional default.",
+    "Recognize the difference between switch fall-through and match-style single-branch selection.",
+    "Choose between if/else chains and switch/match selection based on the kind of condition.",
+    "Avoid common selection mistakes such as missing breaks, duplicate cases, and unhandled values."
+  ],
+  "prerequisites": [
+    "F2.1",
+    "F2.2",
+    "F2.3",
+    "F2.5",
+    "F2.6"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Selection constructs provide a structured way to choose one action from several alternatives. A switch-style statement evaluates a selector and compares it with case labels. In languages such as JavaScript and C, a matching case can begin execution and may continue into later cases unless it is stopped (commonly with break). Match-style constructs in languages such as Python (match/case), Rust, or newer language features often express clearer single-branch behavior, but exact rules differ by language.",
+      "whyItMatters": "When a program must respond to a fixed set of values—such as a menu option, command name, status code, or weekday—selection constructs can make alternatives easier to scan than a long chain of repeated equality checks. Knowing the language's exact behavior prevents accidental extra branches or missing fallback cases.",
+      "analogy": "Imagine a parcel counter with numbered desks. The ticket number directs a visitor to one desk. If the number is not recognized, a clearly marked help desk handles the fallback.",
+      "analogyLimit": "A real program may need ranges, multiple conditions, guards, or actions that overlap. This simple selector analogy does not model those complexities, and not all languages implement switch or match the same way."
+    },
+    "explain": {
+      "narrative": "A classic switch-style construct evaluates one selector value, then finds a case that matches. In JavaScript, case labels are compared with strict equality. Without a break, execution can fall through into later cases; this is sometimes intentional but often a bug. The default branch is optional syntax but is usually helpful for unexpected values. Match-style constructs are language-specific: they may support patterns, ranges, destructuring, guards, or enforce that cases do not fall through. Use switch/match when comparing one expression against a set of discrete alternatives. Use if/else when decisions depend on ranges, compound Boolean conditions, or different kinds of tests. Validate inputs before selection if invalid values should not be treated as ordinary choices.",
+      "examples": [
+        {
+          "id": "f2.8-ex1",
+          "title": "Choose a menu label",
+          "code": "const option = 2;\\nswitch (option) {\\n  case 1: console.log('Profile'); break;\\n  case 2: console.log('Settings'); break;\\n  case 3: console.log('Help'); break;\\n  default: console.log('Unknown option');\\n}",
+          "expectedOutput": "Settings",
+          "explanation": "The selector value 2 matches the second case. The break prevents the next case from running."
+        },
+        {
+          "id": "f2.8-ex2",
+          "title": "Fallback for an unrecognized value",
+          "code": "const status = 'paused';\\nswitch (status) {\\n  case 'active': console.log('Running'); break;\\n  case 'paused': console.log('Waiting'); break;\\n  default: console.log('Status not recognized');\\n}",
+          "expectedOutput": "Waiting",
+          "explanation": "A recognized value selects its matching case. Default is reserved for values that do not match any listed case."
+        },
+        {
+          "id": "f2.8-ex3",
+          "title": "Understand fall-through",
+          "code": "const level = 1;\\nswitch (level) {\\n  case 1: console.log('Basic');\\n  case 2: console.log('Plus'); break;\\n  default: console.log('Other');\\n}",
+          "expectedOutput": "Basic\\nPlus",
+          "explanation": "This intentionally omits break after case 1, so execution falls through and runs case 2. This can be useful when grouped outcomes are intended, but it is easy to create accidentally."
+        },
+        {
+          "id": "f2.8-ex4",
+          "title": "Use if/else for a range",
+          "code": "const temperature = 34;\\nif (temperature >= 35) {\\n  console.log('Very hot');\\n} else if (temperature >= 25) {\\n  console.log('Warm');\\n} else {\\n  console.log('Cool');\\n}",
+          "expectedOutput": "Warm",
+          "explanation": "A range-based decision is clearer with ordered conditions than a switch on individual values."
+        },
+        {
+          "id": "f2.8-ex5",
+          "title": "Match-style idea (pseudocode)",
+          "code": "match command:\\n  'start'  -> launch task\\n  'pause'  -> suspend task\\n  'restart' -> reset task\\n  _         -> show help",
+          "expectedOutput": "One matching action is selected; otherwise show help.",
+          "explanation": "This language-neutral sketch illustrates match-style selection with one branch per pattern and a catch-all. Exact syntax and supported patterns vary by language."
+        }
+      ],
+      "commonMistakes": [
+        "Forgetting break in a classic switch and unintentionally falling through.",
+        "Assuming every language's switch or match has identical syntax and execution rules.",
+        "Using a switch for a range or compound condition that is easier to express with if/else.",
+        "Omitting a default or catch-all when unexpected values need a safe response.",
+        "Repeating case labels or failing to test every listed and unlisted value."
+      ]
+    },
+    "practise": {
+      "guidedTask": {
+        "title": "Guided: Route a simple command",
+        "instructions": "Use a switch to handle the command string 'open', 'save', or 'close'. Print 'Opening', 'Saving', or 'Closing' respectively. Print 'Unknown command' for every other value.",
+        "steps": [
+          "Create a command variable and test it with each supported value.",
+          "Write one case for 'open', one for 'save', and one for 'close'.",
+          "Print the matching action in each case.",
+          "Add break after each case to avoid unwanted fall-through.",
+          "Add a default branch and test an unsupported command."
+        ],
+        "starterCode": "const command = 'save';\\nswitch (command) {\\n  case 'open': console.log('Opening'); break;\\n  case 'save': console.log('Saving'); break;\\n  case 'close': console.log('Closing'); break;\\n  default: console.log('Unknown command');\\n}"
+      },
+      "independentTask": {
+        "title": "Independent: Simple weekday message",
+        "instructions": "Given a weekdayName string, select a short message for 'Monday', 'Friday', and 'Sunday'. All other values should print 'Regular day'. Use a switch-style selection and then explain how the same task would be expressed with if/else.",
+        "requirements": [
+          "Handle all three named values distinctly.",
+          "Include a default/fallback branch.",
+          "Use break statements where the language requires them.",
+          "Test each named value and at least one unlisted value.",
+          "Briefly compare switch/match with an if/else chain for this task."
+        ]
+      },
+      "hints": [
+        "The selector is the value being checked against case labels.",
+        "Cases typically represent discrete values, not numeric ranges.",
+        "In JavaScript switch, strict equality is used for matching cases.",
+        "A break prevents execution from continuing into the next case.",
+        "Default handles values that did not match a listed case.",
+        "Match-style syntax and fall-through rules are language-specific—check the language documentation."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "f2.8-en-q1",
+        "prompt": "Which kind of decision is a switch/match-style construct especially suited to?",
+        "options": [
+          "Choosing among discrete values of one selector",
+          "Checking several unrelated numeric ranges",
+          "Repeating an action until a condition changes"
+        ],
+        "answer": "Choosing among discrete values of one selector",
+        "explanation": "Switch/match-style selection is commonly used when one value determines which discrete alternative should run."
+      },
+      {
+        "id": "f2.8-en-q2",
+        "prompt": "In JavaScript, what can happen if a matching switch case has no break?",
+        "options": [
+          "Execution may continue into following case blocks",
+          "The selector is automatically changed",
+          "The default case is always skipped"
+        ],
+        "answer": "Execution may continue into following case blocks",
+        "explanation": "Classic JavaScript switch permits fall-through unless execution is stopped or otherwise redirected."
+      },
+      {
+        "id": "f2.8-en-q3",
+        "prompt": "What is the usual purpose of a default branch?",
+        "options": [
+          "Handle values that do not match any listed case",
+          "Make every case execute",
+          "Convert the selector into a Boolean"
+        ],
+        "answer": "Handle values that do not match any listed case",
+        "explanation": "Default is the fallback for unmatched selector values."
+      },
+      {
+        "id": "f2.8-en-q4",
+        "prompt": "Which decision is usually clearer with if/else rather than switch?",
+        "options": [
+          "Check whether a score is in a range such as 70–89",
+          "Select a menu action for the exact value 'settings'",
+          "Select a message for the exact value 'paused'"
+        ],
+        "answer": "Check whether a score is in a range such as 70–89",
+        "explanation": "Ordered range checks are naturally expressed with if/else conditions."
+      },
+      {
+        "id": "f2.8-en-q5",
+        "prompt": "Which statement about match-style constructs across languages is accurate?",
+        "options": [
+          "Their pattern features and branch rules vary by language",
+          "They always require break after every branch",
+          "They always use strict equality and only support numbers"
+        ],
+        "answer": "Their pattern features and branch rules vary by language",
+        "explanation": "Match/switch semantics differ across programming languages; learners should check the specific language rules."
+      }
+    ]
+  },
+  "status": "draft"
+}
