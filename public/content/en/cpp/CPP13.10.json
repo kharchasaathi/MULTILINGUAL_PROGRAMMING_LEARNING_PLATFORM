@@ -25,40 +25,40 @@
   "examples": [
     {
       "title": "Core pattern",
-      "code": "#include <fstream>\n#include <sstream>\n#include <iostream>\nint main(){std::ifstream in(\"scores.txt\");if(!in){std::cerr<<\"Missing input\\n\";return 1;}std::string line;int valid=0;while(std::getline(in,line)){std::istringstream row(line);std::string name,extra;int score;if((row>>name>>score)&&!(row>>extra)&&score>=0&&score<=100)++valid;else std::cerr<<\"Rejected record\\n\";}if(in.bad())return 2;std::ofstream out(\"summary.tmp\");if(!out)return 3;out<<\"Valid records: \"<<valid<<'\\n';out.flush();return out?0:4;}",
-      "explanation": "Reliable file processing combines checked opens and reads, line-based parsing, validation, a clear skip/abort policy, exception handling and RAII. For output, write to a temporary and verify before replacing final output when supported.",
+      "code": "#include <fstream>\n#include <iostream>\nint main(){std::ifstream in(\"scores.txt\");if(!in){std::cerr<<\"No input\";return 1;}std::string line;while(std::getline(in,line))std::cout<<line<<'\\n';if(in.bad())return 2;}",
+      "explanation": "Reliable file processing combines checked opens and reads, line-based parsing, validation, a clear skip/abort policy, exception handling and RAII. For output, write to a temporary and verify before replacing final output when supported. Example 1 illustrates a distinct CPP13.10 use case.",
       "runnable": true,
       "id": "cpp13.10-ex1",
       "language": "en"
     },
     {
       "title": "Typical scenario",
-      "code": "#include <fstream>\n#include <sstream>\n#include <iostream>\nint main(){std::ifstream in(\"scores.txt\");if(!in){std::cerr<<\"Missing input\\n\";return 1;}std::string line;int valid=0;while(std::getline(in,line)){std::istringstream row(line);std::string name,extra;int score;if((row>>name>>score)&&!(row>>extra)&&score>=0&&score<=100)++valid;else std::cerr<<\"Rejected record\\n\";}if(in.bad())return 2;std::ofstream out(\"summary.tmp\");if(!out)return 3;out<<\"Valid records: \"<<valid<<'\\n';out.flush();return out?0:4;}",
-      "explanation": "Real input and I/O fail unpredictably. Robust programs preserve valid data, explain rejected records and avoid claiming incomplete output is successful.",
+      "code": "#include <sstream>\nint main(){std::istringstream row(\"Asha 85\");std::string name,extra;int score;if(!(row>>name>>score)||(row>>extra)||score<0||score>100)return 1;}",
+      "explanation": "Real input and I/O fail unpredictably. Robust programs preserve valid data, explain rejected records and avoid claiming incomplete output is successful. Example 2 illustrates a distinct CPP13.10 use case.",
       "runnable": true,
       "id": "cpp13.10-ex2",
       "language": "en"
     },
     {
       "title": "Boundary and failure check",
-      "code": "#include <fstream>\n#include <sstream>\n#include <iostream>\nint main(){std::ifstream in(\"scores.txt\");if(!in){std::cerr<<\"Missing input\\n\";return 1;}std::string line;int valid=0;while(std::getline(in,line)){std::istringstream row(line);std::string name,extra;int score;if((row>>name>>score)&&!(row>>extra)&&score>=0&&score<=100)++valid;else std::cerr<<\"Rejected record\\n\";}if(in.bad())return 2;std::ofstream out(\"summary.tmp\");if(!out)return 3;out<<\"Valid records: \"<<valid<<'\\n';out.flush();return out?0:4;}",
-      "explanation": "Test a boundary/failure condition for this topic and check the result before proceeding.",
+      "code": "#include <stdexcept>\nint load(){throw std::runtime_error(\"processing failed\");}\nint main(){try{load();}catch(const std::exception& e){return e.what()[0]=='p'?1:2;}}",
+      "explanation": "Test a boundary/failure condition for this topic and check the result before proceeding. Example 3 illustrates a distinct CPP13.10 use case.",
       "runnable": true,
       "id": "cpp13.10-ex3",
       "language": "en"
     },
     {
       "title": "Design decision",
-      "code": "#include <fstream>\n#include <sstream>\n#include <iostream>\nint main(){std::ifstream in(\"scores.txt\");if(!in){std::cerr<<\"Missing input\\n\";return 1;}std::string line;int valid=0;while(std::getline(in,line)){std::istringstream row(line);std::string name,extra;int score;if((row>>name>>score)&&!(row>>extra)&&score>=0&&score<=100)++valid;else std::cerr<<\"Rejected record\\n\";}if(in.bad())return 2;std::ofstream out(\"summary.tmp\");if(!out)return 3;out<<\"Valid records: \"<<valid<<'\\n';out.flush();return out?0:4;}",
-      "explanation": "Compare an alternative and explain why this approach is appropriate for the task.",
+      "code": "#include <fstream>\nint main(){std::ofstream log(\"errors.txt\",std::ios::app);if(!log)return 1;log<<\"Bad record\\n\";return log?0:2;}",
+      "explanation": "Compare an alternative and explain why this approach is appropriate for the task. Example 4 illustrates a distinct CPP13.10 use case.",
       "runnable": true,
       "id": "cpp13.10-ex4",
       "language": "en"
     },
     {
       "title": "Review and verify",
-      "code": "#include <fstream>\n#include <sstream>\n#include <iostream>\nint main(){std::ifstream in(\"scores.txt\");if(!in){std::cerr<<\"Missing input\\n\";return 1;}std::string line;int valid=0;while(std::getline(in,line)){std::istringstream row(line);std::string name,extra;int score;if((row>>name>>score)&&!(row>>extra)&&score>=0&&score<=100)++valid;else std::cerr<<\"Rejected record\\n\";}if(in.bad())return 2;std::ofstream out(\"summary.tmp\");if(!out)return 3;out<<\"Valid records: \"<<valid<<'\\n';out.flush();return out?0:4;}",
-      "explanation": "Run the pattern, vary the inputs or environment, and explain the observed behavior.",
+      "code": "#include <fstream>\nint main(){std::ofstream temp(\"result.tmp\");if(!temp)return 1;temp<<\"summary\\n\";temp.flush();if(!temp)return 2;temp.close();}",
+      "explanation": "Run the pattern, vary the inputs or environment, and explain the observed behavior. Example 5 illustrates a distinct CPP13.10 use case.",
       "runnable": true,
       "id": "cpp13.10-ex5",
       "language": "en"
