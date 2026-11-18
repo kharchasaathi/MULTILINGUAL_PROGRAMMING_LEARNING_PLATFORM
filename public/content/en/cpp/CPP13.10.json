@@ -1,0 +1,153 @@
+{
+  "id": "cpp.cpp13.10.en",
+  "courseId": "cpp",
+  "moduleId": "CPP13",
+  "topicId": "CPP13.10",
+  "title": "Robust File and Exception Handling Practice",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the main rules of robust file-processing workflow.",
+    "Identify the key C++ constructs used for robust file-processing workflow.",
+    "Apply robust file-processing workflow in a small program.",
+    "Recognize common failure cases and safety concerns.",
+    "Test a practical scenario and justify the chosen approach."
+  ],
+  "prerequisites": [
+    "CPP12.1",
+    "CPP6.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Reliable file processing combines checked opens and reads, line-based parsing, validation, a clear skip/abort policy, exception handling and RAII. For output, write to a temporary and verify before replacing final output when supported.",
+      "whyItMatters": "Real input and I/O fail unpredictably. Robust programs preserve valid data, explain rejected records and avoid claiming incomplete output is successful."
+    }
+  },
+  "examples": [
+    {
+      "title": "Core pattern",
+      "code": "#include <fstream>\n#include <iostream>\nint main(){std::ifstream in(\"scores.txt\");if(!in){std::cerr<<\"No input\";return 1;}std::string line;while(std::getline(in,line))std::cout<<line<<'\\n';if(in.bad())return 2;}",
+      "explanation": "Reliable file processing combines checked opens and reads, line-based parsing, validation, a clear skip/abort policy, exception handling and RAII. For output, write to a temporary and verify before replacing final output when supported. Example 1 illustrates a distinct CPP13.10 use case.",
+      "runnable": true,
+      "id": "cpp13.10-ex1",
+      "language": "en"
+    },
+    {
+      "title": "Typical scenario",
+      "code": "#include <sstream>\nint main(){std::istringstream row(\"Asha 85\");std::string name,extra;int score;if(!(row>>name>>score)||(row>>extra)||score<0||score>100)return 1;}",
+      "explanation": "Real input and I/O fail unpredictably. Robust programs preserve valid data, explain rejected records and avoid claiming incomplete output is successful. Example 2 illustrates a distinct CPP13.10 use case.",
+      "runnable": true,
+      "id": "cpp13.10-ex2",
+      "language": "en"
+    },
+    {
+      "title": "Boundary and failure check",
+      "code": "#include <stdexcept>\nint load(){throw std::runtime_error(\"processing failed\");}\nint main(){try{load();}catch(const std::exception& e){return e.what()[0]=='p'?1:2;}}",
+      "explanation": "Test a boundary/failure condition for this topic and check the result before proceeding. Example 3 illustrates a distinct CPP13.10 use case.",
+      "runnable": true,
+      "id": "cpp13.10-ex3",
+      "language": "en"
+    },
+    {
+      "title": "Design decision",
+      "code": "#include <fstream>\nint main(){std::ofstream log(\"errors.txt\",std::ios::app);if(!log)return 1;log<<\"Bad record\\n\";return log?0:2;}",
+      "explanation": "Compare an alternative and explain why this approach is appropriate for the task. Example 4 illustrates a distinct CPP13.10 use case.",
+      "runnable": true,
+      "id": "cpp13.10-ex4",
+      "language": "en"
+    },
+    {
+      "title": "Review and verify",
+      "code": "#include <fstream>\nint main(){std::ofstream temp(\"result.tmp\");if(!temp)return 1;temp<<\"summary\\n\";temp.flush();if(!temp)return 2;temp.close();}",
+      "explanation": "Run the pattern, vary the inputs or environment, and explain the observed behavior. Example 5 illustrates a distinct CPP13.10 use case.",
+      "runnable": true,
+      "id": "cpp13.10-ex5",
+      "language": "en"
+    }
+  ],
+  "practise": {
+    "guidedTask": "Implement an importer that numbers lines, parses label and score, validates 0–100, collects valid rows and reports rejects. Test missing file, empty file, blank line, invalid score, extra field and valid row.",
+    "independentTask": "Build a grade report: malformed records are rejected but processing continues; missing input aborts; output is written to a temporary file and verified before considered ready. Include six tests.",
+    "hints": [
+      "Define the record format and failure policy first.",
+      "Check open and read failures separately.",
+      "Parse into temporary values and validate before accumulation.",
+      "Report rejected rows with line numbers.",
+      "Check output after write and flush."
+    ]
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "cpp13.10-q1",
+        "language": "en",
+        "prompt": "If input cannot open, what should the program do?",
+        "options": [
+          "Report and stop or use a defined fallback",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
+        ],
+        "answer": 0,
+        "explanation": "Reliable file processing combines checked opens and reads, line-based parsing, validation, a clear skip/abort policy, exception handling and RAII. For output, write to a temporary and verify before replacing final output when supported."
+      },
+      {
+        "id": "cpp13.10-q2",
+        "language": "en",
+        "prompt": "Why parse into temporary values?",
+        "options": [
+          "Validate before accepting data",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
+        ],
+        "answer": 0,
+        "explanation": "Reliable file processing combines checked opens and reads, line-based parsing, validation, a clear skip/abort policy, exception handling and RAII. For output, write to a temporary and verify before replacing final output when supported."
+      },
+      {
+        "id": "cpp13.10-q3",
+        "language": "en",
+        "prompt": "What is a reasonable policy for malformed records?",
+        "options": [
+          "Reject with diagnostics and continue if policy allows",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
+        ],
+        "answer": 0,
+        "explanation": "Reliable file processing combines checked opens and reads, line-based parsing, validation, a clear skip/abort policy, exception handling and RAII. For output, write to a temporary and verify before replacing final output when supported."
+      },
+      {
+        "id": "cpp13.10-q4",
+        "language": "en",
+        "prompt": "Why check after flush?",
+        "options": [
+          "Buffered write errors can surface at flush",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
+        ],
+        "answer": 0,
+        "explanation": "Reliable file processing combines checked opens and reads, line-based parsing, validation, a clear skip/abort policy, exception handling and RAII. For output, write to a temporary and verify before replacing final output when supported."
+      },
+      {
+        "id": "cpp13.10-q5",
+        "language": "en",
+        "prompt": "Why use a temporary output file?",
+        "options": [
+          "Reduce risk of partial final output",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
+        ],
+        "answer": 0,
+        "explanation": "Reliable file processing combines checked opens and reads, line-based parsing, validation, a clear skip/abort policy, exception handling and RAII. For output, write to a temporary and verify before replacing final output when supported."
+      }
+    ]
+  },
+  "status": "draft"
+}

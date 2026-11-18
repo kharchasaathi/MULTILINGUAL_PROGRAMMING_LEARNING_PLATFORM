@@ -1,0 +1,145 @@
+{
+  "id": "cpp.cpp8.9.en",
+  "courseId": "cpp",
+  "moduleId": "CPP8",
+  "topicId": "CPP8.9",
+  "title": "Smart Pointers: unique_ptr and shared_ptr",
+  "language": "en",
+  "learningObjectives": [
+    "Explain unique_ptr exclusive and shared_ptr shared ownership.",
+    "Use make_unique and make_shared.",
+    "Transfer unique ownership with move.",
+    "Use weak_ptr to observe without extending lifetime.",
+    "Choose ownership semantics intentionally."
+  ],
+  "prerequisites": [
+    "CPP2.1",
+    "CPP5.3",
+    "CPP6.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "unique_ptr represents exclusive ownership; shared_ptr represents shared ownership using a reference count. Use make_unique/make_shared and avoid shared ownership unless needed.",
+      "whyItMatters": "Smart pointers encode ownership and reduce manual cleanup mistakes.",
+      "explain": "Do not copy unique_ptr; avoid cycles with shared_ptr; use weak_ptr for non-owning links in cycles."
+    }
+  },
+  "examples": [
+    {
+      "id": "cpp8.9-ex1",
+      "language": "en",
+      "title": "Exclusive owner",
+      "code": "auto p=std::make_unique<int>(42);\\nstd::cout<<*p;",
+      "explanation": "unique_ptr owns the object and cleans it up automatically.",
+      "runnable": false
+    },
+    {
+      "id": "cpp8.9-ex2",
+      "language": "en",
+      "title": "Unique ownership transfer",
+      "code": "auto first=std::make_unique<int>(7);\\nauto second=std::move(first);",
+      "explanation": "Ownership moves; first becomes empty.",
+      "runnable": false
+    },
+    {
+      "id": "cpp8.9-ex3",
+      "language": "en",
+      "title": "Shared owner",
+      "code": "auto p=std::make_shared<int>(5);\\nauto q=p;std::cout<<*q;",
+      "explanation": "Two shared_ptr instances share ownership.",
+      "runnable": false
+    },
+    {
+      "id": "cpp8.9-ex4",
+      "language": "en",
+      "title": "Observe without owning",
+      "code": "std::weak_ptr<int> observer;\\n{auto owner=std::make_shared<int>(9);observer=owner;}\\n// observer.expired() is true",
+      "explanation": "weak_ptr does not extend lifetime; it can check whether owner remains.",
+      "runnable": false
+    },
+    {
+      "id": "cpp8.9-ex5",
+      "language": "en",
+      "title": "Prefer ownership types",
+      "code": "std::vector<std::unique_ptr<int>> items;\\nitems.push_back(std::make_unique<int>(3));",
+      "explanation": "Container holds unique owners; objects are automatically cleaned up.",
+      "runnable": false
+    }
+  ],
+  "practise": {
+    "guidedTask": "For Smart Pointers: unique_ptr and shared_ptr, draw the object and pointer/reference relationships for every example. Mark owner, target, constness, lifetime, validity of access, and any operation that could invalidate the pointer or reference.",
+    "independentTask": "Write a focused C++ exercise for Smart Pointers: unique_ptr and shared_ptr. Demonstrate at least three cases, including a safe usage and a boundary/invalid case explained in comments but not executed. State who owns the resource and when each object/view is valid.",
+    "hints": [
+      "Draw the pointer/reference and its target object.",
+      "Mark whether the object is alive and who owns it.",
+      "Check nullptr and bounds before access.",
+      "Consider invalidation, deletion and scope exit.",
+      "Use standard containers or smart pointers when they express ownership more safely."
+    ]
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "cpp8.9-q1",
+        "prompt": "unique_ptr ownership?",
+        "options": [
+          "Exclusive",
+          "Shared",
+          "Non-owning"
+        ],
+        "answer": "Exclusive",
+        "explanation": "unique_ptr owns one object exclusively."
+      },
+      {
+        "id": "cpp8.9-q2",
+        "prompt": "unique_ptr copied?",
+        "options": [
+          "No; move it",
+          "Yes freely",
+          "Only if raw pointer"
+        ],
+        "answer": "No; move it",
+        "explanation": "unique_ptr is move-only."
+      },
+      {
+        "id": "cpp8.9-q3",
+        "prompt": "shared_ptr uses?",
+        "options": [
+          "Shared reference-counted ownership",
+          "Exclusive ownership",
+          "Non-owning only"
+        ],
+        "answer": "Shared reference-counted ownership",
+        "explanation": "shared_ptr shares lifetime."
+      },
+      {
+        "id": "cpp8.9-q4",
+        "prompt": "weak_ptr does?",
+        "options": [
+          "Observe without owning",
+          "Increase strong ownership",
+          "Delete owner"
+        ],
+        "answer": "Observe without owning",
+        "explanation": "weak_ptr does not keep object alive."
+      },
+      {
+        "id": "cpp8.9-q5",
+        "prompt": "Use make_unique?",
+        "options": [
+          "Create unique_ptr safely",
+          "Make raw array",
+          "Null pointer"
+        ],
+        "answer": "Create unique_ptr safely",
+        "explanation": "make_unique creates a unique owner."
+      }
+    ]
+  },
+  "status": "draft"
+}

@@ -1,0 +1,153 @@
+{
+  "id": "cpp.cpp13.9.en",
+  "courseId": "cpp",
+  "moduleId": "CPP13",
+  "topicId": "CPP13.9",
+  "title": "RAII and Resource Cleanup",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the main rules of RAII resource ownership.",
+    "Identify the key C++ constructs used for RAII resource ownership.",
+    "Apply RAII resource ownership in a small program.",
+    "Recognize common failure cases and safety concerns.",
+    "Test a practical scenario and justify the chosen approach."
+  ],
+  "prerequisites": [
+    "CPP12.1",
+    "CPP6.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "RAII ties a resource to an object's lifetime. Resource-owning objects acquire during construction and release in destructors. Standard examples include streams, vector, unique_ptr and lock_guard.",
+      "whyItMatters": "Automatic cleanup works on normal return and exception paths, preventing leaks and forgotten unlock/close operations."
+    }
+  },
+  "examples": [
+    {
+      "title": "Core pattern",
+      "code": "#include <fstream>\nvoid save(){std::ofstream f(\"sample.txt\");if(f)f<<\"content\";}\nint main(){save();}",
+      "explanation": "RAII ties a resource to an object's lifetime. Resource-owning objects acquire during construction and release in destructors. Standard examples include streams, vector, unique_ptr and lock_guard. Example 1 illustrates a distinct CPP13.9 use case.",
+      "runnable": true,
+      "id": "cpp13.9-ex1",
+      "language": "en"
+    },
+    {
+      "title": "Typical scenario",
+      "code": "#include <memory>\nint main(){auto p=std::make_unique<int>(10);return *p==10?0:1;}",
+      "explanation": "Automatic cleanup works on normal return and exception paths, preventing leaks and forgotten unlock/close operations. Example 2 illustrates a distinct CPP13.9 use case.",
+      "runnable": true,
+      "id": "cpp13.9-ex2",
+      "language": "en"
+    },
+    {
+      "title": "Boundary and failure check",
+      "code": "#include <vector>\nint main(){std::vector<int> v(5,0);v[2]=8;return v[2]==8?0:1;}",
+      "explanation": "Test a boundary/failure condition for this topic and check the result before proceeding. Example 3 illustrates a distinct CPP13.9 use case.",
+      "runnable": true,
+      "id": "cpp13.9-ex3",
+      "language": "en"
+    },
+    {
+      "title": "Design decision",
+      "code": "#include <mutex>\nvoid work(std::mutex& m){std::lock_guard<std::mutex> g(m);}\nint main(){std::mutex m;work(m);}",
+      "explanation": "Compare an alternative and explain why this approach is appropriate for the task. Example 4 illustrates a distinct CPP13.9 use case.",
+      "runnable": true,
+      "id": "cpp13.9-ex4",
+      "language": "en"
+    },
+    {
+      "title": "Review and verify",
+      "code": "#include <memory>\n#include <stdexcept>\nvoid fail(){auto p=std::make_unique<int[]>(4);p[0]=1;throw std::runtime_error(\"error\");}\nint main(){try{fail();}catch(...){}}",
+      "explanation": "Run the pattern, vary the inputs or environment, and explain the observed behavior. Example 5 illustrates a distinct CPP13.9 use case.",
+      "runnable": true,
+      "id": "cpp13.9-ex5",
+      "language": "en"
+    }
+  ],
+  "practise": {
+    "guidedTask": "Open a file, perform a simulated operation that throws, and explain why the local stream still closes. Repeat using a vector or unique_ptr.",
+    "independentTask": "Demonstrate vector, unique_ptr and lock_guard. Compare RAII with a manual resource-release pattern and explain the failure path it prevents.",
+    "hints": [
+      "Match resource lifetime to scope.",
+      "Prefer standard RAII types over owning raw pointers.",
+      "unique_ptr expresses exclusive ownership.",
+      "lock_guard unlocks automatically.",
+      "Avoid throwing from destructors during unwinding."
+    ]
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "cpp13.9-q1",
+        "language": "en",
+        "prompt": "What is the RAII principle?",
+        "options": [
+          "Resource release tied to object lifetime",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
+        ],
+        "answer": 0,
+        "explanation": "RAII ties a resource to an object's lifetime. Resource-owning objects acquire during construction and release in destructors. Standard examples include streams, vector, unique_ptr and lock_guard."
+      },
+      {
+        "id": "cpp13.9-q2",
+        "language": "en",
+        "prompt": "What happens to a local ofstream at scope exit?",
+        "options": [
+          "Its destructor closes the file",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
+        ],
+        "answer": 0,
+        "explanation": "RAII ties a resource to an object's lifetime. Resource-owning objects acquire during construction and release in destructors. Standard examples include streams, vector, unique_ptr and lock_guard."
+      },
+      {
+        "id": "cpp13.9-q3",
+        "language": "en",
+        "prompt": "Which type provides exclusive dynamic ownership?",
+        "options": [
+          "unique_ptr",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
+        ],
+        "answer": 0,
+        "explanation": "RAII ties a resource to an object's lifetime. Resource-owning objects acquire during construction and release in destructors. Standard examples include streams, vector, unique_ptr and lock_guard."
+      },
+      {
+        "id": "cpp13.9-q4",
+        "language": "en",
+        "prompt": "Why use lock_guard?",
+        "options": [
+          "It unlocks automatically at scope exit",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
+        ],
+        "answer": 0,
+        "explanation": "RAII ties a resource to an object's lifetime. Resource-owning objects acquire during construction and release in destructors. Standard examples include streams, vector, unique_ptr and lock_guard."
+      },
+      {
+        "id": "cpp13.9-q5",
+        "language": "en",
+        "prompt": "Why is throwing during destructor unwinding dangerous?",
+        "options": [
+          "It can cause termination",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
+        ],
+        "answer": 0,
+        "explanation": "RAII ties a resource to an object's lifetime. Resource-owning objects acquire during construction and release in destructors. Standard examples include streams, vector, unique_ptr and lock_guard."
+      }
+    ]
+  },
+  "status": "draft"
+}

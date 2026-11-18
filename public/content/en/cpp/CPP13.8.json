@@ -1,0 +1,153 @@
+{
+  "id": "cpp.cpp13.8.en",
+  "courseId": "cpp",
+  "moduleId": "CPP13",
+  "topicId": "CPP13.8",
+  "title": "Error Handling and Exception Safety",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the main rules of exception safety guarantees.",
+    "Identify the key C++ constructs used for exception safety guarantees.",
+    "Apply exception safety guarantees in a small program.",
+    "Recognize common failure cases and safety concerns.",
+    "Test a practical scenario and justify the chosen approach."
+  ],
+  "prerequisites": [
+    "CPP12.1",
+    "CPP6.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "The basic guarantee leaves an object valid but possibly changed. The strong guarantee leaves observable state unchanged if an operation fails. The no-throw guarantee promises no exception escapes. Validate and prepare changes before committing.",
+      "whyItMatters": "Exception safety keeps state consistent and recoverable after failure."
+    }
+  },
+  "examples": [
+    {
+      "title": "Core pattern",
+      "code": "#include <stdexcept>\nint candidate(int x){if(x<0)throw std::invalid_argument(\"negative\");return x;}\nint main(){try{return candidate(4)==4?0:1;}catch(...){return 2;}}",
+      "explanation": "The basic guarantee leaves an object valid but possibly changed. The strong guarantee leaves observable state unchanged if an operation fails. The no-throw guarantee promises no exception escapes. Validate and prepare changes before committing. Example 1 illustrates a distinct CPP13.8 use case.",
+      "runnable": true,
+      "id": "cpp13.8-ex1",
+      "language": "en"
+    },
+    {
+      "title": "Typical scenario",
+      "code": "#include <string>\n#include <stdexcept>\nvoid set(std::string& live,std::string next){if(next.empty())throw std::invalid_argument(\"empty\");std::string temp=next;live.swap(temp);}\nint main(){std::string s=\"ok\";set(s,\"new\");}",
+      "explanation": "Exception safety keeps state consistent and recoverable after failure. Example 2 illustrates a distinct CPP13.8 use case.",
+      "runnable": true,
+      "id": "cpp13.8-ex2",
+      "language": "en"
+    },
+    {
+      "title": "Boundary and failure check",
+      "code": "#include <optional>\nint lookup(bool found){std::optional<int> result;if(found)result=12;return result.value_or(-1);}\nint main(){return lookup(false)==-1?0:1;}",
+      "explanation": "Test a boundary/failure condition for this topic and check the result before proceeding. Example 3 illustrates a distinct CPP13.8 use case.",
+      "runnable": true,
+      "id": "cpp13.8-ex3",
+      "language": "en"
+    },
+    {
+      "title": "Design decision",
+      "code": "#include <fstream>\n#include <stdexcept>\nvoid task(){std::ofstream f(\"trace.txt\");if(!f)throw std::runtime_error(\"open\");f<<\"partial\";throw std::runtime_error(\"demo\");}\nint main(){try{task();}catch(...){}}",
+      "explanation": "Compare an alternative and explain why this approach is appropriate for the task. Example 4 illustrates a distinct CPP13.8 use case.",
+      "runnable": true,
+      "id": "cpp13.8-ex4",
+      "language": "en"
+    },
+    {
+      "title": "Review and verify",
+      "code": "#include <string>\nvoid clear(std::string& s) noexcept{s.clear();}\nint main(){std::string x=\"data\";clear(x);}",
+      "explanation": "Run the pattern, vary the inputs or environment, and explain the observed behavior. Example 5 illustrates a distinct CPP13.8 use case.",
+      "runnable": true,
+      "id": "cpp13.8-ex5",
+      "language": "en"
+    }
+  ],
+  "practise": {
+    "guidedTask": "Implement a balance transfer: validate account IDs and amount, compute temporary balances, verify sufficient funds, then commit both. A rejected transfer must leave balances unchanged.",
+    "independentTask": "Refactor an update function to provide the strong guarantee using a prepared temporary and a final commit. Describe failure cases.",
+    "hints": [
+      "Define object invariants first.",
+      "Validate before mutating live state.",
+      "Prepare a temporary, then commit.",
+      "RAII cleans resources during unwinding.",
+      "Use noexcept only when no exception can escape."
+    ]
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "cpp13.8-q1",
+        "language": "en",
+        "prompt": "What is the basic guarantee?",
+        "options": [
+          "Object remains valid though its state may change",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
+        ],
+        "answer": 0,
+        "explanation": "The basic guarantee leaves an object valid but possibly changed. The strong guarantee leaves observable state unchanged if an operation fails. The no-throw guarantee promises no exception escapes. Validate and prepare changes before committing."
+      },
+      {
+        "id": "cpp13.8-q2",
+        "language": "en",
+        "prompt": "What defines the strong guarantee?",
+        "options": [
+          "Failure leaves observable state unchanged",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
+        ],
+        "answer": 0,
+        "explanation": "The basic guarantee leaves an object valid but possibly changed. The strong guarantee leaves observable state unchanged if an operation fails. The no-throw guarantee promises no exception escapes. Validate and prepare changes before committing."
+      },
+      {
+        "id": "cpp13.8-q3",
+        "language": "en",
+        "prompt": "Why prepare updates in a temporary?",
+        "options": [
+          "Avoids partial mutation before success",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
+        ],
+        "answer": 0,
+        "explanation": "The basic guarantee leaves an object valid but possibly changed. The strong guarantee leaves observable state unchanged if an operation fails. The no-throw guarantee promises no exception escapes. Validate and prepare changes before committing."
+      },
+      {
+        "id": "cpp13.8-q4",
+        "language": "en",
+        "prompt": "When is optional preferable to an exception?",
+        "options": [
+          "Routine result may be absent",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
+        ],
+        "answer": 0,
+        "explanation": "The basic guarantee leaves an object valid but possibly changed. The strong guarantee leaves observable state unchanged if an operation fails. The no-throw guarantee promises no exception escapes. Validate and prepare changes before committing."
+      },
+      {
+        "id": "cpp13.8-q5",
+        "language": "en",
+        "prompt": "What does noexcept promise?",
+        "options": [
+          "No exception escapes",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
+        ],
+        "answer": 0,
+        "explanation": "The basic guarantee leaves an object valid but possibly changed. The strong guarantee leaves observable state unchanged if an operation fails. The no-throw guarantee promises no exception escapes. Validate and prepare changes before committing."
+      }
+    ]
+  },
+  "status": "draft"
+}

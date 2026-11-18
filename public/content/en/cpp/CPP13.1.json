@@ -1,0 +1,154 @@
+{
+  "id": "cpp.cpp13.1.en",
+  "courseId": "cpp",
+  "moduleId": "CPP13",
+  "topicId": "CPP13.1",
+  "title": "File Streams and Stream States",
+  "language": "en",
+  "learningObjectives": [
+    "Choose ifstream, ofstream or fstream for a file task.",
+    "Open a file and verify that the operation succeeded.",
+    "Read a text file line by line without relying on eof() as a loop condition.",
+    "Distinguish fail(), bad(), eof() and the overall stream state.",
+    "Handle missing files and failed writes with clear program behavior."
+  ],
+  "prerequisites": [
+    "CPP12.1",
+    "CPP6.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "C++ file streams let programs read and write files. <fstream> provides ifstream (input), ofstream (output) and fstream (input and output). A stream carries state flags that indicate whether operations succeeded, reached end-of-file, or encountered an error.",
+      "whyItMatters": "Files may be missing, inaccessible, empty or contain unexpected data. Checking stream state prevents a program from silently using invalid input or assuming that output was saved.",
+      "explain": "Include <fstream> for file streams and <iostream> for console messages. Test a stream immediately after opening it (if (!file)). Read lines using while (std::getline(file, line)); this attempts a read and checks its result each iteration. eof() is set when a read reaches the end; fail() indicates an operation could not be completed; bad() signals a serious stream error. A failed open normally sets failbit. ofstream opens in output mode and may truncate an existing file by default; use std::ios::app to append. Streams close automatically when their objects leave scope (RAII), but you should still check write/flush errors when saving matters."
+    }
+  },
+  "examples": [
+    {
+      "id": "cpp13-1-ex1",
+      "language": "en",
+      "title": "Open a file and check it",
+      "code": "#include <fstream>\\n#include <iostream>\\n\\nint main() {\\n    std::ifstream in(\\\"notes.txt\\\");\\n    if (!in) {\\n        std::cerr << \\\"Could not open notes.txt\\\\n\\\";\\n        return 1;\\n    }\\n    std::cout << \\\"File opened successfully\\\\n\\\";\\n}",
+      "explanation": "Opening a missing or inaccessible file sets the stream to a failed state. Check it before reading.",
+      "runnable": true
+    },
+    {
+      "id": "cpp13-1-ex2",
+      "language": "en",
+      "title": "Read every line safely",
+      "code": "#include <fstream>\n#include <iostream>\n#include <string>\n\nint main() {\n    std::ifstream in(\"notes.txt\");\n    if (!in) return 1;\n    std::string line;\n    while (std::getline(in, line)) {\n        std::cout << line << '\\n';\n    }\n    if (in.bad()) std::cerr << \"Read error occurred\\n\";\n}",
+      "explanation": "The read itself controls the loop. Avoid while (!in.eof()), which can process stale data after a failed read.",
+      "runnable": true
+    },
+    {
+      "id": "cpp13-1-ex3",
+      "language": "en",
+      "title": "Write a new output file",
+      "code": "#include <fstream>\n#include <iostream>\n\nint main() {\n    std::ofstream out(\"report.txt\");\n    if (!out) {\n        std::cerr << \"Cannot create report\\n\";\n        return 1;\n    }\n    out << \"Report created\\n\";\n    if (!out) {\n        std::cerr << \"Write failed\\n\";\n        return 1;\n    }\n}",
+      "explanation": "ofstream usually truncates an existing file when opened for output. Check the stream after writing when success matters.",
+      "runnable": true
+    },
+    {
+      "id": "cpp13-1-ex4",
+      "language": "en",
+      "title": "Append instead of overwrite",
+      "code": "#include <fstream>\\n#include <iostream>\\n\\nint main() {\\n    std::ofstream out(\\\"log.txt\\\", std::ios::app);\\n    if (!out) {\\n        std::cerr << \\\"Cannot open log\\\\n\\\";\\n        return 1;\\n    }\\n    out << \\\"New log entry\\\\n\\\";\\n}",
+      "explanation": "std::ios::app directs each output write to the end of the existing file, preserving earlier content.",
+      "runnable": true
+    },
+    {
+      "id": "cpp13-1-ex5",
+      "language": "en",
+      "title": "Inspect stream state flags",
+      "code": "#include <fstream>\n#include <iostream>\n\nint main() {\n    std::ifstream in(\"missing.txt\");\n    std::cout << \"good: \" << in.good() << '\\n';\n    std::cout << \"fail: \" << in.fail() << '\\n';\n    std::cout << \"bad:  \" << in.bad() << '\\n';\n    std::cout << \"eof:  \" << in.eof() << '\\n';\n}",
+      "explanation": "A failed open normally sets failbit; good() is false and fail() is true. eof() is not necessarily true because the failure was not caused by reaching end-of-file.",
+      "runnable": true
+    }
+  ],
+  "practise": {
+    "guidedTask": "Create notes.txt with three lines. Open it with ifstream, check the open state, print each line with getline, and report a bad() read error if one occurs. Then try a filename that does not exist and confirm your program handles it without crashing.",
+    "independentTask": "Write a small file utility that asks for a filename, reads and displays its contents line by line, then appends a user-provided note to a separate log file. Check both the input open and output write states. Explain why using while (!in.eof()) is not the correct read-loop pattern.",
+    "hints": [
+      "Include <fstream> and <string> as needed.",
+      "Check the file immediately after opening it.",
+      "Use while (std::getline(in, line)) to read lines.",
+      "Use std::ios::app to append instead of replacing existing contents.",
+      "Streams close automatically when they leave scope; check write errors if the result is important."
+    ]
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "cpp13-1-q1",
+        "language": "en",
+        "prompt": "Which stream type is intended primarily for reading from a file?",
+        "options": [
+          "std::ofstream",
+          "std::ifstream",
+          "std::ostream",
+          "std::stringstream"
+        ],
+        "answer": 1,
+        "explanation": "ifstream is the file input stream type, designed for reading."
+      },
+      {
+        "id": "cpp13-1-q2",
+        "language": "en",
+        "prompt": "Why is while (std::getline(in, line)) preferred to while (!in.eof())?",
+        "options": [
+          "It makes the file open in append mode",
+          "It checks whether the read operation succeeded before using the line",
+          "It resets the file position every loop",
+          "It disables stream error flags"
+        ],
+        "answer": 1,
+        "explanation": "getline returns the stream; its boolean state lets the loop stop when a read fails or reaches the end."
+      },
+      {
+        "id": "cpp13-1-q3",
+        "language": "en",
+        "prompt": "What is the typical effect of opening an ofstream with std::ios::app?",
+        "options": [
+          "It erases the file before every write",
+          "It reads only the first line",
+          "It appends output at the end of the file",
+          "It prevents the file from being created"
+        ],
+        "answer": 2,
+        "explanation": "The append mode preserves existing contents and directs output to the file's end."
+      },
+      {
+        "id": "cpp13-1-q4",
+        "language": "en",
+        "prompt": "After an ifstream open fails, which check is normally true?",
+        "options": [
+          "in.good()",
+          "in.fail()",
+          "in.eof() always",
+          "in.bad() always"
+        ],
+        "answer": 1,
+        "explanation": "An unsuccessful open sets a failure state, so fail() returns true. eof() is not necessarily set for an open failure."
+      },
+      {
+        "id": "cpp13-1-q5",
+        "language": "en",
+        "prompt": "What happens to a local file stream when its object leaves scope?",
+        "options": [
+          "The file remains permanently locked",
+          "It is automatically closed by the stream object's destructor",
+          "It must always be manually deleted",
+          "The stream silently changes to append mode"
+        ],
+        "answer": 1,
+        "explanation": "File streams use RAII: their destructors release the associated file resource when the object lifetime ends."
+      }
+    ]
+  },
+  "status": "draft"
+}

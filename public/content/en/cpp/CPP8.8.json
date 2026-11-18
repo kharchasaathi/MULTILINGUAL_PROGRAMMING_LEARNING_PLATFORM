@@ -1,0 +1,137 @@
+{
+  "id": "cpp.cpp8.8.en",
+  "courseId": "cpp",
+  "moduleId": "CPP8",
+  "topicId": "CPP8.8",
+  "title": "Dynamic Memory and Ownership Basics",
+  "language": "en",
+  "learningObjectives": [
+    "Explain dynamic allocation and object ownership.",
+    "Pair scalar new/delete and array new/delete correctly.",
+    "Understand scope-based automatic cleanup.",
+    "Prefer standard containers and RAII to raw owning pointers.",
+    "Recognize leak, double-delete and dangling-pointer risks."
+  ],
+  "prerequisites": [
+    "CPP2.1",
+    "CPP5.3",
+    "CPP6.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Dynamic storage can outlive a scope but must have clear ownership. Raw new/delete are error-prone; prefer RAII objects and containers. Avoid mismatched delete forms and leaks.",
+      "whyItMatters": "Understanding dynamic allocation explains heap lifetime and why modern C++ uses managed ownership.",
+      "explain": "Match allocation/deallocation and prefer standard containers or smart pointers to manage lifetime automatically."
+    }
+  },
+  "examples": [
+    {
+      "id": "cpp8.8-ex1",
+      "language": "en",
+      "title": "Automatic lifetime",
+      "code": "int main(){int local=5;int* p=&local;std::cout<<*p;}",
+      "explanation": "local is alive during the pointer use; no delete is needed.",
+      "runnable": false
+    },
+    {
+      "id": "cpp8.8-ex2",
+      "language": "en",
+      "title": "Avoid manual ownership",
+      "code": "std::vector<int> values(3,0);\\nvalues[0]=7;",
+      "explanation": "Container manages its allocation and cleanup.",
+      "runnable": false
+    },
+    {
+      "id": "cpp8.8-ex3",
+      "language": "en",
+      "title": "RAII file object",
+      "code": "std::ifstream file(\\\"input.txt\\\");\\n// file closes when object leaves scope",
+      "explanation": "RAII object manages resource cleanup; include fstream.",
+      "runnable": false
+    },
+    {
+      "title": "Explicit raw allocation and matching release",
+      "code": "int* p=new int(42);\\nstd::cout<<*p;\\ndelete p;p=nullptr;\\n// Match scalar new with delete; prefer std::make_unique in modern code."
+    },
+    {
+      "title": "Raw array allocation (prefer vector)",
+      "code": "int* p=new int[3]{1,2,3};\\n// Use elements while valid, then release exactly once with delete[] p.\\n// Prefer std::vector<int> for automatic lifetime management."
+    }
+  ],
+  "practise": {
+    "guidedTask": "For Dynamic Memory and Ownership Basics, draw the object and pointer/reference relationships for every example. Mark owner, target, constness, lifetime, validity of access, and any operation that could invalidate the pointer or reference.",
+    "independentTask": "Write a focused C++ exercise for Dynamic Memory and Ownership Basics. Demonstrate at least three cases, including a safe usage and a boundary/invalid case explained in comments but not executed. State who owns the resource and when each object/view is valid.",
+    "hints": [
+      "Draw the pointer/reference and its target object.",
+      "Mark whether the object is alive and who owns it.",
+      "Check nullptr and bounds before access.",
+      "Consider invalidation, deletion and scope exit.",
+      "Use standard containers or smart pointers when they express ownership more safely."
+    ]
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "cpp8.8-q1",
+        "prompt": "Automatic local lifetime ends?",
+        "options": [
+          "At scope exit",
+          "At program start",
+          "Never"
+        ],
+        "answer": "At scope exit",
+        "explanation": "Local objects are destroyed when scope exits."
+      },
+      {
+        "id": "cpp8.8-q2",
+        "prompt": "RAII means?",
+        "options": [
+          "Resource tied to object's lifetime",
+          "Manual cleanup only",
+          "Pointer math"
+        ],
+        "answer": "Resource tied to object's lifetime",
+        "explanation": "Resource cleanup is managed by object lifetime."
+      },
+      {
+        "id": "cpp8.8-q3",
+        "prompt": "new scalar should match?",
+        "options": [
+          "delete",
+          "delete[]",
+          "free always"
+        ],
+        "answer": "delete",
+        "explanation": "Scalar new pairs with scalar delete."
+      },
+      {
+        "id": "cpp8.8-q4",
+        "prompt": "new array should match?",
+        "options": [
+          "delete[]",
+          "delete",
+          "free"
+        ],
+        "answer": "delete[]",
+        "explanation": "Array new requires delete[]."
+      },
+      {
+        "id": "cpp8.8-q5",
+        "prompt": "Modern preferred ownership?",
+        "options": [
+          "Containers and smart pointers",
+          "Raw new/delete everywhere",
+          "Uninitialized pointers"
+        ],
+        "answer": "Containers and smart pointers",
+        "explanation": "RAII containers/smart pointers reduce manual cleanup."
+      }
+    ]
+  },
+  "status": "draft"
+}
