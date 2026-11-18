@@ -1,0 +1,145 @@
+{
+  "id": "cpp.cpp8.10.en",
+  "courseId": "cpp",
+  "moduleId": "CPP8",
+  "topicId": "CPP8.10",
+  "title": "Object Lifetime, Dangling References and Safe Memory",
+  "language": "en",
+  "learningObjectives": [
+    "Explain object lifetime, dangling references and safe memory.",
+    "Describe pointer/reference or lifetime rules involved.",
+    "Trace a simple memory access or ownership operation.",
+    "Recognize common undefined behavior and safety risks.",
+    "Choose a safer approach for a practical task."
+  ],
+  "prerequisites": [
+    "CPP2.1",
+    "CPP5.3",
+    "CPP6.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A dangling pointer/reference refers to an object whose lifetime has ended. Accessing it is undefined. Ownership and lifetime are the key safety questions.",
+      "whyItMatters": "Lifetime bugs cause subtle failures and security issues.",
+      "explain": "Avoid returning references to locals, invalidated vector elements, and pointers after deletion; use value returns or owning types."
+    }
+  },
+  "examples": [
+    {
+      "id": "cpp8.10-ex1",
+      "language": "en",
+      "title": "Do not return local address",
+      "code": "int* bad(){int local=4;return &local;} // dangling",
+      "explanation": "The local lifetime ends at return; this function is unsafe.",
+      "runnable": false
+    },
+    {
+      "id": "cpp8.10-ex2",
+      "language": "en",
+      "title": "Safe value return",
+      "code": "int makeValue(){int local=4;return local;}",
+      "explanation": "Returning a value copies or moves the result safely.",
+      "runnable": false
+    },
+    {
+      "id": "cpp8.10-ex3",
+      "language": "en",
+      "title": "Vector growth caveat",
+      "code": "std::vector<int> v{1,2};int* p=&v[0];v.push_back(3);\\n// p may be invalidated if reallocation occurs",
+      "explanation": "Vector growth can invalidate pointers and references to its elements.",
+      "runnable": false
+    },
+    {
+      "id": "cpp8.10-ex4",
+      "language": "en",
+      "title": "Check owner lifetime",
+      "code": "std::unique_ptr<int> p=std::make_unique<int>(10);\\nint* view=p.get();std::cout<<*view;",
+      "explanation": "view is non-owning and valid only while p keeps the object alive.",
+      "runnable": false
+    },
+    {
+      "id": "cpp8.10-ex5",
+      "language": "en",
+      "title": "Avoid use-after-delete",
+      "code": "auto p=std::make_unique<int>(6);\\n// after p.reset(), its former pointee no longer exists",
+      "explanation": "Do not keep or dereference stale pointers after owner resets.",
+      "runnable": false
+    }
+  ],
+  "practise": {
+    "guidedTask": "Trace the five Object Lifetime, Dangling References and Safe Memory examples. Mark each pointer/reference's target, object lifetime, mutability and whether dereferencing is valid.",
+    "independentTask": "Build a small C++ exercise showing object lifetime, dangling references and safe memory. Include safe cases and deliberately describe (but do not execute) one invalid case. Demonstrate how ownership or lifetime is managed.",
+    "hints": [
+      "Draw pointer arrows to live objects.",
+      "Use nullptr for empty pointers and check before dereferencing.",
+      "Keep pointer arithmetic within one array.",
+      "Distinguish pointer constness from pointee constness.",
+      "Prefer value returns, containers and smart pointers to manual ownership."
+    ]
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "cpp8.10-q1",
+        "prompt": "Dangling pointer means?",
+        "options": [
+          "Points to an object whose lifetime ended",
+          "Null pointer",
+          "Pointer to static object"
+        ],
+        "answer": "Points to an object whose lifetime ended",
+        "explanation": "Dangling pointer no longer refers to a live object."
+      },
+      {
+        "id": "cpp8.10-q2",
+        "prompt": "Returning local reference?",
+        "options": [
+          "Unsafe",
+          "Always safe",
+          "Creates heap object"
+        ],
+        "answer": "Unsafe",
+        "explanation": "Local lifetime ends after function returns."
+      },
+      {
+        "id": "cpp8.10-q3",
+        "prompt": "Vector push_back can invalidate?",
+        "options": [
+          "Pointers/references if reallocation occurs",
+          "Only integer values",
+          "Vector name"
+        ],
+        "answer": "Pointers/references if reallocation occurs",
+        "explanation": "Reallocation may move elements."
+      },
+      {
+        "id": "cpp8.10-q4",
+        "prompt": "Non-owning view validity depends on?",
+        "options": [
+          "Owner lifetime",
+          "Variable name only",
+          "Compiler version"
+        ],
+        "answer": "Owner lifetime",
+        "explanation": "The owner must keep the object alive."
+      },
+      {
+        "id": "cpp8.10-q5",
+        "prompt": "After unique_ptr reset?",
+        "options": [
+          "Owned object destroyed",
+          "Object remains guaranteed",
+          "Pointer becomes shared"
+        ],
+        "answer": "Owned object destroyed",
+        "explanation": "reset releases ownership and destroys the object if solely owned."
+      }
+    ]
+  },
+  "status": "draft"
+}
