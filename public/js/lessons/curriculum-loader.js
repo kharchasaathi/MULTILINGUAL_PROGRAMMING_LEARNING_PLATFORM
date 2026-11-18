@@ -155,8 +155,11 @@
     // Editorial workflow status stays in lesson metadata; do not expose internal draft labels in the learner UI.
     const understand = lesson.stages.understand;
     const explain = lesson.stages.explain;
-    const practice = lesson.stages.practise;
-    const examples = Array.isArray(explain.examples) ? explain.examples : [];
+    // Normalize the authored C++ lesson contract (top-level examples/practice/assessment)
+    // into the reusable three-stage renderer without changing source JSON files.
+    const practice = lesson.stages.practise || lesson.practise || lesson.practice || {};
+    const examples = Array.isArray(explain.examples) ? explain.examples : (Array.isArray(lesson.examples) ? lesson.examples : []);
+    const explanationText = explain.narrative || explain.explain || (typeof explain === "string" ? explain : "");
     const code = lesson.practice?.starterCode || "";
     const questions = lesson.assessment?.questions || [];
     const onComplete = () => {
@@ -170,12 +173,12 @@
       learningObjectives: lesson.learningObjectives,
       understand: [understand.concept, understand.whyItMatters].filter(Boolean).join("\n\n"),
       context: [understand.history, understand.analogyLimit].filter(Boolean).join("\n\n"),
-      explanation: explain.narrative || "",
+      explanation: explanationText,
       analogy: understand.analogy,
       examples,
       code,
       practice: "Guided: " + (practice.guidedTask || "") + "\n\nIndependent: " + (practice.independentTask || ""),
-      hints: practice.hints || [],
+      hints: practice.hints || lesson.hints || [],
       questions,
       onComplete
     });
