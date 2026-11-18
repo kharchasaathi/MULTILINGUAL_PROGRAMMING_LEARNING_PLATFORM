@@ -1,0 +1,170 @@
+{
+  "id": "foundation.f4.10.en",
+  "courseId": "foundation",
+  "moduleId": "F4",
+  "topicId": "F4.10",
+  "title": "Value Semantics vs Reference Semantics",
+  "language": "en",
+  "learningObjectives": [
+    "Explain value semantics as using an independent value and reference semantics as access through a reference to data.",
+    "Predict how assignment and mutation may affect two variables under value or reference behavior.",
+    "Recognize copying, sharing, and aliasing as separate concepts.",
+    "Identify when shared data can create unintended side effects.",
+    "Check the language's specific rules for values, references, and copying."
+  ],
+  "prerequisites": [
+    "F4.1",
+    "F4.2",
+    "F4.3",
+    "F4.5"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "With value semantics, assigning or passing a value generally behaves as an independent value according to the type's rules. With reference semantics, variables may refer to the same underlying object or storage, so a change through one reference can be visible through another. The terms describe behavior, not simply whether a variable is called an object.",
+      "whyItMatters": "Assignment and function calls can create copies or shared access. Understanding this distinction helps predict changes, avoid accidental shared-state bugs, and choose when a copy or immutable structure is safer.",
+      "analogy": "Giving someone a photocopy of a document is like making an independent value copy. Giving two people the same shared document link is like sharing a reference—edits by one may be visible to the other.",
+      "analogyLimit": "Language and type rules vary. Some types have value semantics while others are reference-based, and some languages use copy-on-write or move semantics. The analogy is not a substitute for those rules."
+    },
+    "explain": {
+      "narrative": "When two variables are assigned, ask whether the assignment duplicates the relevant data or creates another way to reach the same data. Mutating shared data can affect every alias. Reassigning one variable, however, may change only that variable's binding. These two actions must be distinguished. Copying may be shallow or deep, and copying a structure that contains references can still leave nested data shared. If independence matters, use the appropriate copy operation or design immutable data.",
+      "examples": [
+        {
+          "id": "f4.10-ex1",
+          "title": "Independent primitive values",
+          "code": "let first = 4; let second = first; second = 9;",
+          "expectedOutput": "first = 4, second = 9",
+          "explanation": "Assigning the primitive value and then rebinding second leaves first unchanged in JavaScript."
+        },
+        {
+          "id": "f4.10-ex2",
+          "title": "Shared object reference",
+          "code": "const original = {score: 1}; const alias = original; alias.score = 5;",
+          "expectedOutput": "original.score = 5",
+          "explanation": "Both names reach the same object; mutating through alias is observable through original."
+        },
+        {
+          "id": "f4.10-ex3",
+          "title": "Rebinding does not mutate the shared object",
+          "code": "let a = {value: 2}; let b = a; b = {value: 7};",
+          "expectedOutput": "a.value = 2; b.value = 7",
+          "explanation": "b now refers to a new object; a still refers to the earlier object."
+        },
+        {
+          "id": "f4.10-ex4",
+          "title": "Shallow copy caveat",
+          "code": "const copy = {...source};",
+          "expectedOutput": "Outer object distinct; nested sharing possible",
+          "explanation": "A shallow copy creates a new outer object, but nested objects may still be shared unless copied separately."
+        },
+        {
+          "id": "f4.10-ex5",
+          "title": "Function receives a reference-like value",
+          "code": "function update(item) { item.count++; }",
+          "expectedOutput": "Caller-visible mutation to count",
+          "explanation": "In JavaScript, passing an object value copies the reference value, so the function can mutate the referenced object; reassigning the parameter alone does not rebind the caller's variable."
+        }
+      ],
+      "commonMistakes": [
+        "Assuming assignment always duplicates the complete structure.",
+        "Confusing mutation with rebinding.",
+        "Assuming a shallow copy makes every nested value independent.",
+        "Ignoring shared aliases that may be changed by another function.",
+        "Applying reference/value terminology without checking the language's exact semantics."
+      ]
+    },
+    "practise": {
+      "guidedTask": {
+        "title": "Guided: Test a data rule with examples",
+        "instructions": "Apply \"Value Semantics vs Reference Semantics\" to a small program scenario. Work through the rule and explain the result.",
+        "steps": [
+          "State what the data represents and what behavior is expected.",
+          "Identify the relevant comparison, constraint, or semantic rule.",
+          "Evaluate one valid case and one invalid or edge case.",
+          "Explain the result and any side effects.",
+          "Describe a test that would prevent a regression."
+        ],
+        "starterCode": "// Write a small test example here"
+      },
+      "independentTask": {
+        "title": "Independent: Build a data-rule test",
+        "instructions": "Design and test a small scenario using this lesson's concept.",
+        "requirements": [
+          "Write a realistic example.",
+          "State the rule or intended behavior.",
+          "Test at least one normal case.",
+          "Test one boundary, invalid, or unusual case.",
+          "Explain how the program should respond."
+        ]
+      },
+      "hints": [
+        "Describe the intended behavior before writing the condition.",
+        "Separate format/type checks from business rules.",
+        "Include a boundary or negative case in your tests.",
+        "Use exact language-specific comparison or assignment semantics.",
+        "Explain why the chosen rule is correct for this context."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "f4.10-en-q1",
+        "prompt": "Explain value semantics as using an independent value and reference semantics as access through a reference to data. Which statement is correct?",
+        "options": [
+          "Explain value semantics as using an independent value and reference semantics as access through a reference to data.",
+          "This rule can be ignored because data is always trustworthy.",
+          "The same behavior is guaranteed across all languages and contexts."
+        ],
+        "answer": "Explain value semantics as using an independent value and reference semantics as access through a reference to data.",
+        "explanation": "This is the lesson's core principle: Explain value semantics as using an independent value and reference semantics as access through a reference to data."
+      },
+      {
+        "id": "f4.10-en-q2",
+        "prompt": "Predict how assignment and mutation may affect two variables under value or reference behavior. Which statement is correct?",
+        "options": [
+          "Predict how assignment and mutation may affect two variables under value or reference behavior.",
+          "This rule can be ignored because data is always trustworthy.",
+          "The same behavior is guaranteed across all languages and contexts."
+        ],
+        "answer": "Predict how assignment and mutation may affect two variables under value or reference behavior.",
+        "explanation": "This is the lesson's core principle: Predict how assignment and mutation may affect two variables under value or reference behavior."
+      },
+      {
+        "id": "f4.10-en-q3",
+        "prompt": "Recognize copying, sharing, and aliasing as separate concepts. Which statement is correct?",
+        "options": [
+          "Recognize copying, sharing, and aliasing as separate concepts.",
+          "This rule can be ignored because data is always trustworthy.",
+          "The same behavior is guaranteed across all languages and contexts."
+        ],
+        "answer": "Recognize copying, sharing, and aliasing as separate concepts.",
+        "explanation": "This is the lesson's core principle: Recognize copying, sharing, and aliasing as separate concepts."
+      },
+      {
+        "id": "f4.10-en-q4",
+        "prompt": "Identify when shared data can create unintended side effects. Which statement is correct?",
+        "options": [
+          "Identify when shared data can create unintended side effects.",
+          "This rule can be ignored because data is always trustworthy.",
+          "The same behavior is guaranteed across all languages and contexts."
+        ],
+        "answer": "Identify when shared data can create unintended side effects.",
+        "explanation": "This is the lesson's core principle: Identify when shared data can create unintended side effects."
+      },
+      {
+        "id": "f4.10-en-q5",
+        "prompt": "Check the language's specific rules for values, references, and copying. Which statement is correct?",
+        "options": [
+          "Check the language's specific rules for values, references, and copying.",
+          "This rule can be ignored because data is always trustworthy.",
+          "The same behavior is guaranteed across all languages and contexts."
+        ],
+        "answer": "Check the language's specific rules for values, references, and copying.",
+        "explanation": "This is the lesson's core principle: Check the language's specific rules for values, references, and copying."
+      }
+    ]
+  }
+}
