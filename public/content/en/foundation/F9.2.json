@@ -1,0 +1,167 @@
+{
+  "id": "foundation.f9.2.en",
+  "courseId": "foundation",
+  "moduleId": "F9",
+  "topicId": "F9.2",
+  "title": "Exceptions, Error Values, and Failure Signals",
+  "language": "en",
+  "learningObjectives": [
+    "Describe the main idea and its role in reliable program behavior.",
+    "Recognize the topic in code or a real-world programming scenario.",
+    "Trace the relevant behavior and identify the likely outcome.",
+    "Explain a common mistake, risk, or limitation.",
+    "Apply the concept and verify the result with a suitable check."
+  ],
+  "prerequisites": [
+    "F9.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Programs communicate failures through different mechanisms: exceptions, returned error values, status codes, rejected promises, result types, or language-specific signals. An exception may interrupt normal control flow unless it is caught. A failure value can be handled explicitly by the caller. These mechanisms are not interchangeable across languages.",
+      "whyItMatters": "Knowing the failure signal helps determine where to handle it, what information to preserve, and whether execution can safely continue.",
+      "analogy": "A delivery process may report a failed delivery using a notice, a returned package, or a status in a tracking system. Each signal gives the next person information, but software failure signals have specific language and API rules.",
+      "analogyLimit": "The analogy is only a simplified comparison; software failures and recovery depend on language, runtime, system boundaries, and context."
+    },
+    "explain": {
+      "narrative": "Identify what a function promises to return on success and how it signals failure. Follow the signal to its caller. Preserve meaningful context, distinguish expected failures from programming defects, and ensure callers do not mistake a failure for a valid result.",
+      "examples": [
+        {
+          "id": "f9-2-ex1",
+          "title": "Explicit status value",
+          "code": "function divide(a,b){ if(b===0) return {ok:false,error:'zero divisor'}; return {ok:true,value:a/b}; }\nconsole.log(divide(8,2).value);",
+          "expectedOutput": "4",
+          "explanation": "The caller receives a result object and can inspect its status."
+        },
+        {
+          "id": "f9-2-ex2",
+          "title": "Inspect failure status",
+          "code": "const result={ok:false,error:'Not found'};\nconsole.log(result.ok);",
+          "expectedOutput": "false",
+          "explanation": "A status flag distinguishes success from failure."
+        },
+        {
+          "id": "f9-2-ex3",
+          "title": "Throw an exception",
+          "code": "function requireName(name){ if(!name) throw new Error('Name required'); return name; }\ntry { console.log(requireName('Asha')); } catch(e) { console.log(e.message); }",
+          "expectedOutput": "Asha",
+          "explanation": "The exception interrupts the function and is caught by the caller."
+        },
+        {
+          "id": "f9-2-ex4",
+          "title": "Promise rejection",
+          "code": "Promise.reject(new Error('Network unavailable')).catch(e=>console.log(e.message));",
+          "expectedOutput": "Network unavailable",
+          "explanation": "A rejected promise is handled through its rejection path."
+        },
+        {
+          "id": "f9-2-ex5",
+          "title": "Preserve context",
+          "code": "function load(){ throw new Error('Database unavailable'); }\ntry { load(); } catch(e) { console.log('Load failed: '+e.message); }",
+          "expectedOutput": "Load failed: Database unavailable",
+          "explanation": "A handler adds useful context without discarding the original reason."
+        }
+      ],
+      "commonMistakes": [
+        "Catching exceptions but returning an indistinguishable success value.",
+        "Ignoring rejected promises.",
+        "Using exceptions for routine branching without considering the language design.",
+        "Discarding the original error details.",
+        "Assuming every API signals failure in the same way."
+      ]
+    },
+    "practise": {
+      "guidedTask": {
+        "title": "Guided practice: Exceptions, Error Values, and Failure Signals",
+        "instructions": "Investigate a small scenario that demonstrates this topic and explain how to make its behavior reliable.",
+        "steps": [
+          "Describe the expected behavior and failure condition.",
+          "Identify the code, data, or boundary involved.",
+          "Trace the behavior step by step.",
+          "Choose a handling or correction strategy and explain its trade-off.",
+          "Test normal, invalid, and boundary cases and record the result."
+        ],
+        "starterCode": "// Write a small example for this lesson topic, then test a normal and a failure case."
+      },
+      "independentTask": {
+        "title": "Independent practice: Exceptions, Error Values, and Failure Signals",
+        "instructions": "Create a small original program or pseudocode scenario applying this topic.",
+        "requirements": [
+          "State the scenario and assumptions.",
+          "Implement the topic with clear behavior.",
+          "Include at least one normal case and one failure or edge case.",
+          "Show the observed output or test result.",
+          "Explain the design choice and one limitation."
+        ]
+      },
+      "hints": [
+        "Start by defining expected behavior precisely.",
+        "Inspect the earliest relevant failure or boundary.",
+        "Make one change at a time and retest.",
+        "Keep user-facing messages useful and safe.",
+        "Verify both normal and failure paths."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "f9-2-q1",
+        "prompt": "What type of issue is the example illustrating?",
+        "options": [
+          "The caller receives a result object and can inspect its status.",
+          "It guarantees every program is error-free.",
+          "It removes the need to test assumptions."
+        ],
+        "answer": "The caller receives a result object and can inspect its status.",
+        "explanation": "The caller receives a result object and can inspect its status."
+      },
+      {
+        "id": "f9-2-q2",
+        "prompt": "Which statement best describes the failure signal shown?",
+        "options": [
+          "A status flag distinguishes success from failure.",
+          "It guarantees every program is error-free.",
+          "It removes the need to test assumptions."
+        ],
+        "answer": "A status flag distinguishes success from failure.",
+        "explanation": "A status flag distinguishes success from failure."
+      },
+      {
+        "id": "f9-2-q3",
+        "prompt": "Why is the approach in the example useful?",
+        "options": [
+          "The exception interrupts the function and is caught by the caller.",
+          "It guarantees every program is error-free.",
+          "It removes the need to test assumptions."
+        ],
+        "answer": "The exception interrupts the function and is caught by the caller.",
+        "explanation": "The exception interrupts the function and is caught by the caller."
+      },
+      {
+        "id": "f9-2-q4",
+        "prompt": "What should a programmer verify before relying on this behavior?",
+        "options": [
+          "A rejected promise is handled through its rejection path.",
+          "It guarantees every program is error-free.",
+          "It removes the need to test assumptions."
+        ],
+        "answer": "A rejected promise is handled through its rejection path.",
+        "explanation": "A rejected promise is handled through its rejection path."
+      },
+      {
+        "id": "f9-2-q5",
+        "prompt": "Which principle is most closely demonstrated by the example?",
+        "options": [
+          "A handler adds useful context without discarding the original reason.",
+          "It guarantees every program is error-free.",
+          "It removes the need to test assumptions."
+        ],
+        "answer": "A handler adds useful context without discarding the original reason.",
+        "explanation": "A handler adds useful context without discarding the original reason."
+      }
+    ]
+  }
+}
