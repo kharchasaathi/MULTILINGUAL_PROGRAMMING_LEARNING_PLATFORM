@@ -6,8 +6,8 @@
 - CPP1 currently has 20 registered lesson topics (CPP1.1–CPP1.20).
 - Proposed modules CPP2–CPP14 contain 10 planned topics each (130 additional topics).
 - **Proposed scope total: 150 topics.**
-- **Current draft-authored: 110 topics.**
-- **Remaining to author under this scope: 40 topics.**
+- **Current draft-authored: 120 topics.**
+- **Remaining to author under this scope: 30 topics.**
 - Counts can be adjusted after a curriculum audit; this roadmap should be updated when topic IDs or scope change.
 
 ## CPP1 — Foundations and First Programs (20 topics)
@@ -35,7 +35,7 @@ Already registered in curriculum index. CPP1.1–CPP1.10 were previously created
 
 ## CPP10 — Object-Oriented Programming (10 topics — drafted)\n\n**Drafted CPP10.1–CPP10.10:** OOP principles, interface/responsibilities, object lifecycle, this pointer, static members, inheritance, access modes, overriding/virtual functions, polymorphism, and OOP design review.\n\n- CPP10.1: Inheritance basics\n- CPP10.2: Base and derived classes\n- CPP10.3: Protected access\n- CPP10.4: Virtual functions\n- CPP10.5: Override and final\n- CPP10.6: Abstract classes\n- CPP10.7: Polymorphism\n- CPP10.8: Composition vs inheritance\n- CPP10.9: Object slicing\n- CPP10.10: OOP design and testing
 
-## CPP11 — Templates and Generic Programming (10 topics)\n- CPP11.1: Function templates\n- CPP11.2: Template type parameters\n- CPP11.3: Class templates\n- CPP11.4: Template argument deduction\n- CPP11.5: Generic algorithms\n- CPP11.6: Concepts introduction\n- CPP11.7: Constraints overview\n- CPP11.8: Compile-time polymorphism\n- CPP11.9: Template errors and diagnostics\n- CPP11.10: Reusable generic design
+## CPP11 — Templates and Generic Programming (10 topics — drafted)\n\n**Drafted CPP11.1–CPP11.10:** function templates, deduction, multiple type parameters, non-type parameters, class templates, template members, specialization, generic algorithms, concepts/constraints and template testing.\n\n- CPP11.1: Function templates\n- CPP11.2: Template type parameters\n- CPP11.3: Class templates\n- CPP11.4: Template argument deduction\n- CPP11.5: Generic algorithms\n- CPP11.6: Concepts introduction\n- CPP11.7: Constraints overview\n- CPP11.8: Compile-time polymorphism\n- CPP11.9: Template errors and diagnostics\n- CPP11.10: Reusable generic design
 
 ## CPP12 — Standard Library and Algorithms (10 topics)\n- CPP12.1: Namespaces and using declarations\n- CPP12.2: Containers overview\n- CPP12.3: Iterators\n- CPP12.4: Algorithms overview\n- CPP12.5: Sorting and searching\n- CPP12.6: Pair and tuple\n- CPP12.7: Maps and sets\n- CPP12.8: Stack and queue\n- CPP12.9: Optional and variant overview\n- CPP12.10: Choosing standard-library tools
 
