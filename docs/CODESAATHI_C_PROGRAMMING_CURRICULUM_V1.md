@@ -112,34 +112,40 @@ The course is designed to take a learner from first contact with C through pract
 - [ ] CL8.4 · `realloc`, resizing and preserving the original allocation on failure
 - [ ] CL8.5 · `free`, ownership and release discipline
 - [ ] CL8.6 · Dynamic arrays, structures and nested allocations
-- [ ] CL8.7 · Common memory mistakes: leaks, double-free, use-after-free and invalid free
-- [ ] CL8.8 · Compiler errors, warnings, link errors and runtime failures
-- [ ] CL8.9 · Debugging with breakpoints, watch expressions and diagnostics
-- [ ] CL8.10 · `NULL`, error handling and input validation
-- [ ] CL8.11 · Allocation-size overflow and defensive allocation patterns (CodeSaathi extension)
-- [ ] CL8.12 · Sanitizers, static analysis and memory-checking workflow (CodeSaathi extension)
+- [x] CL8.7 · Common memory mistakes: leaks, double-free, use-after-free and invalid free
+- [x] CL8.8 · Compiler errors, warnings, link errors and runtime failures
+- [x] CL8.9 · Debugging with breakpoints, watch expressions and diagnostics
+- [x] CL8.10 · `NULL`, error handling and input validation
+- [x] CL8.11 · Allocation-size overflow and defensive allocation patterns (CodeSaathi extension)
+- [x] CL8.12 · Sanitizers, static analysis and memory-checking workflow (CodeSaathi extension)
 
 ### CL9 — C standard library, preprocessor and additional tools
-- [ ] CL9.1 · Date and time functions from `time.h`
-- [ ] CL9.2 · Pseudo-random numbers, seeding and limitations of `rand`
-- [ ] CL9.3 · Macros, object-like/function-like macros and conditional compilation
-- [ ] CL9.4 · Header files, declarations, include guards and organizing source files
-- [ ] CL9.5 · Storage classes and storage-duration concepts
-- [ ] CL9.6 · Bitwise operators, masks, shifts and bit manipulation
-- [ ] CL9.7 · Fixed-width integer types and format macros from `stdint.h`/`inttypes.h`
-- [ ] CL9.8 · Command-line arguments: `argc` and `argv`
-- [ ] CL9.9 · Environment access and process termination utilities (CodeSaathi extension)
-- [ ] CL9.10 · Build commands, compiler flags, warnings and language-standard selection (CodeSaathi extension)
+- [x] CL9.1 · Date and time functions from `time.h`
+- [x] CL9.2 · Pseudo-random numbers, seeding and limitations of `rand`
+- [x] CL9.3 · Macros, object-like/function-like macros and conditional compilation
+- [x] CL9.4 · Header files, declarations, include guards and organizing source files
+- [x] CL9.5 · Storage classes and storage-duration concepts
+- [x] CL9.6 · Bitwise operators, masks, shifts and bit manipulation
+- [x] CL9.7 · Fixed-width integer types and format macros from `stdint.h`/`inttypes.h`
+- [x] CL9.8 · Command-line arguments: `argc` and `argv`
+- [x] CL9.9 · Environment access and process termination utilities (CodeSaathi extension)
+- [x] CL9.10 · Build commands, compiler flags, warnings and language-standard selection (CodeSaathi extension)
+- [ ] CL9.11 · Supplemental: C standard library overview and headers (preserved prior lesson)
+- [ ] CL9.12 · Supplemental: Preprocessor directives, macros and conditional compilation (preserved prior lesson)
+- [ ] CL9.13 · Supplemental: Separate compilation, object files, linking and build commands (preserved prior lesson)
+- [ ] CL9.14 · Supplemental: Compiler warnings, language standards and portability flags (preserved prior lesson)
+- [ ] CL9.15 · Supplemental: Debugging and sanitizing tools (preserved prior lesson)
+- [ ] CL9.16 · Supplemental: Version control and reproducible C builds (preserved prior lesson)
 
 ### CL10 — Problem solving and data structures & algorithms
-- [ ] CL10.1 · A systematic C problem-solving workflow
-- [ ] CL10.2 · Building program logic and decomposing problems
-- [ ] CL10.3 · Edge cases, invalid input and error paths
-- [ ] CL10.4 · Designing, executing and interpreting test cases
-- [ ] CL10.5 · Data structures and algorithm analysis introduction
-- [ ] CL10.6 · Searching: linear search and binary search; preconditions
-- [ ] CL10.7 · Sorting fundamentals and common sorting algorithms
-- [ ] CL10.8 · Stacks: representation, push, pop, peek and overflow/underflow
+- [x] CL10.1 · A systematic C problem-solving workflow
+- [x] CL10.2 · Building program logic and decomposing problems
+- [x] CL10.3 · Edge cases, invalid input and error paths
+- [x] CL10.4 · Designing, executing and interpreting test cases
+- [x] CL10.5 · Data structures and algorithm analysis introduction
+- [x] CL10.6 · Searching: linear search and binary search; preconditions
+- [x] CL10.7 · Sorting fundamentals and common sorting algorithms
+- [x] CL10.8 · Stacks: representation, push, pop, peek and overflow/underflow
 - [ ] CL10.9 · Queues: enqueue, dequeue, front/rear and circular queues
 - [ ] CL10.10 · Linked lists: nodes, traversal, insertion and deletion
 - [ ] CL10.11 · Trees: terminology, representations and traversals
@@ -149,17 +155,17 @@ The course is designed to take a learner from first contact with C through pract
 - [ ] CL10.15 · Testing data structures: invariants, boundary cases and randomized tests (CodeSaathi extension)
 
 ### CL11 — Practical projects and consolidation
-- [ ] CL11.1 · C console calculator: input, validation, functions and switch
-- [ ] CL11.2 · Student records: structures, arrays and file persistence
-- [ ] CL11.3 · Dynamic inventory manager: allocation, search and update
-- [ ] CL11.4 · Search and sort a dataset: algorithm comparison and test data
-- [ ] CL11.5 · Final command-line data management project: modular source and robust errors
-- [ ] CL11.6 · Project requirements, design, implementation, test plan and README (CodeSaathi extension)
-- [ ] CL11.7 · Project review: portability, memory safety, maintainability and limitations (CodeSaathi extension)
+- [ ] CL11.1 · Project 1: command-line calculator
+- [ ] CL11.2 · Project 2: number guessing game with validated input and game-state rules
+- [ ] CL11.3 · Project 3: student record manager using structures, arrays and validated operations
+- [ ] CL11.4 · Project 4: file-based expense tracker with validated records and totals
+- [ ] CL11.5 · Project 5: contact book using dynamic memory and safe collection operations
+- [ ] CL11.6 · Project 6: inventory manager with structures and file persistence
+- [ ] CL11.7 · Project 7: mini address book with sorting and searching
 
 ### CL12 — C language and standard-library reference
 - [ ] CL12.1 · C keywords, reserved identifiers and language tokens
-- [ ] CL12.2 · `stdio.h`: streams, formatted I/O, character I/O and file operations
+- [ ] CL12.2 · C declarations, declarators and type qualifiers (CodeSaathi extension; standard I/O coverage is taught in CL7 and cross-referenced in CL12.9)
 - [ ] CL12.3 · `stdlib.h`: conversion, allocation, sorting/searching and process utilities
 - [ ] CL12.4 · `string.h`: string and memory functions
 - [ ] CL12.5 · `math.h`: mathematical functions, domains and error considerations
@@ -269,8 +275,8 @@ A lesson may be marked ready only after:
 - [ ] Telugu and other supported language files are translated and reviewed.
 - [ ] Compiler production release gates are passed.
 
-At the time of this roadmap update, the C curriculum index contains 16 English topic entries. This is not full course coverage. The roadmap above is the target coverage map; it does not claim that the additional topics have already been authored, indexed, translated, tested or deployed.
+At the time of this roadmap update, the C curriculum index contains 155 English topic entries: the 148 canonical roadmap IDs plus seven supplemental entries (CL11.8 and CL9.11–CL9.16). The six canonical CL9.1–CL9.6 lessons have been realigned to this roadmap; the six earlier lesson contents are preserved under supplemental IDs. This index count is not proof of full course coverage, technical review, translation, testing or deployment.
 
 ## 8. Change control
 
-Preserve the existing course ID `c`, module/topic ID prefixes `CL1`–`CL14`, repository architecture and compiler separation. Add lessons in batches, validate each batch, then update the curriculum index and progress tracker. Do not mark planned topics complete merely to make the roadmap appear finished.
+Preserve the existing course ID `c`, module/topic ID prefixes `CL1`–`CL14`, repository architecture and compiler separation. Keep canonical roadmap topics at their canonical IDs. When previously authored content does not match a canonical topic, preserve it under a clearly labelled supplemental ID, update its internal lesson/example/assessment IDs and index path, and never overwrite or discard it. Add lessons in batches, validate each batch, then update the curriculum index and progress tracker. Do not mark planned topics complete merely to make the roadmap appear finished.

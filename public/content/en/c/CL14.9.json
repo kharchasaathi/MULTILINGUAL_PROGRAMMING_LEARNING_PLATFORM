@@ -6,39 +6,74 @@
   "title": "Secure C basics: bounds, input trust, format strings and resource handling",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its relevant rules.",
-    "Trace the example and justify its behaviour.",
-    "Identify important assumptions and failure cases.",
-    "Apply the concept in a reviewed and tested exercise."
+    "Identify trust boundaries and define validation rules for untrusted input before it influences memory access, control flow, file operations or security-sensitive decisions.",
+    "Use bounded input, checked numeric conversion and explicit length/capacity contracts to prevent truncation, out-of-bounds access and malformed-input defects.",
+    "Explain how integer overflow, incorrect allocation-size calculations, unsafe format strings and invalid pointer lifetimes can become vulnerabilities.",
+    "Apply clear ownership, allocation-failure handling and cleanup rules so resources are released exactly once and remain valid for their intended lifetime.",
+    "Use least privilege, safe file handling, secret-management boundaries and error reporting that avoids leaking sensitive implementation details.",
+    "Build a practical secure-C review and testing process using compiler warnings, static analysis, sanitizers, boundary tests and documented threat assumptions."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL2.6",
+    "CL2.8",
+    "CL4.5",
+    "CL4.10",
+    "CL5.3",
+    "CL5.7",
+    "CL7.1",
+    "CL7.12",
+    "CL8.1",
+    "CL9.8",
+    "CL10.15",
+    "CL11.4",
+    "CL11.5",
+    "CL12.3",
+    "CL12.4",
+    "CL12.8",
+    "CL14.2",
+    "CL14.3",
+    "CL14.4",
+    "CL14.7",
+    "CL14.8"
+  ],
   "stages": {
     "understand": {
-      "concept": "Secure C programming validates untrusted input, checks array and allocation bounds, uses correct format strings, manages resource lifetimes and avoids undefined behaviour. Format strings should normally be controlled by the program rather than supplied directly by untrusted input.",
-      "whyItMatters": "Memory safety and input validation defects can become security vulnerabilities. Security must be built into interfaces and error paths, not added only after functionality is complete.",
-      "analogy": "Treat standards, interfaces and release steps as explicit contracts that make assumptions visible.",
-      "analogyLimit": "The analogy does not replace the C standard, implementation documentation or project-specific requirements."
+      "concept": "**Secure C programming starts with explicit trust boundaries.** Data from a terminal, file, network socket, environment variable, command-line argument, database, IPC channel or another process is untrusted until it has been validated for the operation that will use it. Validation is not merely checking that a string contains digits: it includes length, encoding, allowed values, numeric range, authorization, state transitions and resource limits. Validate at the boundary and preserve the contract as data moves between functions. Do not assume input is safe because it came from another part of the same application.\n\n**Memory bounds are security boundaries.** Every array and destination buffer has a capacity. Track the actual number of elements or bytes separately from capacity, reserve space for terminators, and check indices before access. Avoid unbounded input routines such as `gets`; use bounded input such as `fgets` and detect overlong records rather than silently treating a truncated prefix as a complete command. A null terminator is required before passing character data to string functions. A length received from an external source must be validated before it is used in pointer arithmetic, indexing, allocation or copying.\n\n**Integer arithmetic can undermine bounds checks.** Unsigned arithmetic wraps modulo its range; signed overflow is undefined. Expressions such as `count * sizeof *items`, `offset + length` or `capacity * 2` can overflow before a later bounds comparison. Check before performing the operation: for multiplication, compare against `SIZE_MAX / element_size`; for addition, compare against `SIZE_MAX - offset`. Do not trust a check that itself can overflow. Use `size_t` for object sizes, but remember that it too has a finite maximum. Treat conversion from parsed values to narrower types as a checked operation.\n\n**Format strings are executable formatting instructions.** Never pass untrusted text as the format argument to `printf`, `fprintf`, `syslog`-style APIs or other formatting functions. Use a trusted literal such as `printf(\"%s\", user_text)` or a length-aware output routine. Match each conversion specifier to the exact argument type; use `<inttypes.h>` macros for fixed-width integer types. A format-string vulnerability can disclose memory or cause writes when dangerous directives are interpreted. Escaping HTML, SQL, shell or URL data is a different context-specific operation; printf formatting does not make data safe for those interpreters.\n\n**Ownership and lifetime must be unambiguous.** Every allocated object should have a clear owner, a defined transfer rule and one cleanup path. Check allocation results before dereferencing. For `realloc`, assign to a temporary pointer first; on failure the original allocation remains valid. Do not use freed memory, return pointers to expired automatic objects, double-free a pointer, or access an object after ownership has transferred. Keep count/capacity invariants consistent and free all owned resources on success and error paths. File handles, locks and other resources also need explicit release rules.\n\n**File and operating-system operations need security review.** Check every I/O result, distinguish EOF from error with `feof`/`ferror` where appropriate, and do not assume a file path is trustworthy. Avoid constructing shell commands from untrusted input. Do not rely on a check-then-open sequence to prevent symlink or race attacks; where a threat model requires safe file creation or directory-relative access, use documented platform-specific APIs behind a reviewed adapter. Apply least privilege, restrict permissions, and avoid exposing secrets or sensitive paths in logs. Never embed passwords, API keys or private credentials in source code or client-side binaries.\n\n**Errors should be safe and useful.** Validate inputs and fail closed when a security-relevant condition is uncertain. Return explicit status values, preserve output parameters on failure where practical, and clean up partially acquired resources. User-facing messages should explain what action failed without exposing secrets, memory addresses, internal tokens or sensitive filesystem details. Keep detailed diagnostics in access-controlled logs and avoid logging raw credentials or untrusted control characters.\n\nSecurity is a lifecycle discipline, not a single function or compiler flag. Define assets, trust boundaries, attacker capabilities and impact; minimize exposed interfaces; review dangerous operations; compile with strong warnings; use static analysis and sanitizers; test boundary and malformed inputs; and review third-party dependencies. No tool proves a program secure, and a clean sanitizer run only covers the executions performed.",
+      "whyItMatters": "C gives programmers direct control over memory, object lifetimes and low-level interfaces. A small mistake in a length calculation, conversion, format string or cleanup path can become memory disclosure, memory corruption, denial of service or privilege misuse. Secure interfaces make assumptions explicit and keep invalid data from reaching dangerous operations.",
+      "analogy": "Treat every external value like a parcel at a secure facility: verify who may send it, inspect its size and contents, record who owns it, and release it only through an approved route.",
+      "analogyLimit": "Input validation is not a universal sanitizer. A value valid for one operation may be unsafe for another; each destination has its own grammar, range, authorization and encoding contract. The threat model determines which checks are necessary."
     },
     "explain": {
-      "narrative": "Secure C programming validates untrusted input, checks array and allocation bounds, uses correct format strings, manages resource lifetimes and avoids undefined behaviour. Format strings should normally be controlled by the program rather than supplied directly by untrusted input.\n\nState assumptions and constraints, consult the applicable standard or tool documentation, and verify the result with appropriate compiler diagnostics and tests. Separate portable guarantees from implementation-specific behaviour.",
+      "narrative": "**1. Define the threat model before choosing checks.** Identify protected data and operations, entry points, trust boundaries, attacker capabilities, resource limits and consequences of failure. A local command-line utility and a network-facing privileged service do not have identical threat models. State which inputs are attacker-controlled and which operating-system guarantees the design relies on.\n\n**2. Parse, validate and only then use.** Read into a bounded buffer, detect truncation, parse with functions that report conversion errors, check the complete token and enforce the destination range. Do not use `atoi` when conversion failure and range errors must be distinguished. Do not assume a null-terminated string if the source provides a pointer and length pair. Keep data length and buffer capacity separate.\n\n**3. Make arithmetic checks precede arithmetic.** For an allocation of `count` elements, first check `count <= SIZE_MAX / sizeof *items`, then calculate the byte count. For growth, check the capacity before doubling. For offsets, check `length <= SIZE_MAX - offset` before adding. After `realloc`, update the owning pointer only when the returned pointer is non-null.\n\n**4. Keep data separate from formatting instructions.** Use fixed format strings and pass user-controlled content as data. For example, `printf(\"%s\", message)` treats the string as text, while `printf(message)` treats percent sequences inside it as formatting directives. Use length-aware writes when the input may not be null-terminated. Do not reuse printf escaping as a substitute for SQL parameter binding, HTML output encoding or safe process invocation.\n\n**5. Make cleanup and error paths part of the design.** Initialize owned pointers and handles to safe empty values, acquire resources in a documented order, release them in reverse order, and set released handles to an empty state when appropriate. Keep ownership transfer explicit. Check file open/read/write/close results, allocation results and API status codes. Do not continue with partially initialized state after a failed operation.\n\n**6. Harden the build and review process.** Use a supported C standard mode, strong compiler warnings and a reviewed warning policy. Run static analysis, AddressSanitizer and UndefinedBehaviorSanitizer where available. Add tests for empty, maximum, overlong, malformed, negative, out-of-range and repeated-operation inputs. Review dependencies, permissions, logging, secret storage and platform-specific APIs. Treat each tool result as evidence with known limits, not a security guarantee.",
       "examples": [
         {
           "id": "cl149-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\nint main(void) {\n char user_text[] = \"visitor\";\n printf(\"%s\\n\", user_text);\n return 0;\n}",
-          "explanation": "The format string is a trusted literal and the user-controlled text is supplied as a data argument. Passing user_text directly as the format string would allow percent sequences to be interpreted as directives.",
-          "runnable": false
+          "title": "Parse a bounded integer token and reject malformed or out-of-range input",
+          "code": "#include <ctype.h>\n#include <errno.h>\n#include <limits.h>\n#include <stdio.h>\n#include <stdlib.h>\n\nstatic int parse_int(const char *text, int *result) {\n    char *end = NULL;\n    long value;\n\n    if (text == NULL || result == NULL) {\n        return 0;\n    }\n    errno = 0;\n    value = strtol(text, &end, 10);\n    if (end == text || errno == ERANGE) {\n        return 0;\n    }\n    while (*end != '\\0' && isspace((unsigned char)*end)) {\n        ++end;\n    }\n    if (*end != '\\0' || value < INT_MIN || value > INT_MAX) {\n        return 0;\n    }\n    *result = (int)value;\n    return 1;\n}\n\nint main(void) {\n    const char input[] = \" 123 \\n\";\n    int parsed = 0;\n\n    if (!parse_int(input, &parsed)) {\n        puts(\"invalid integer\");\n        return 1;\n    }\n    printf(\"parsed=%d\\n\", parsed);\n    return 0;\n}",
+          "explanation": "strtol reports where conversion stopped and uses errno to report range failure. The parser rejects empty input, trailing non-whitespace characters and values outside int range. It checks pointers and updates the output only after all validation succeeds. The isspace argument is converted to unsigned char, as required for safe use with arbitrary non-EOF byte values. A production line reader should also use a fixed-capacity buffer, detect a missing newline when the buffer fills, drain or reject the remainder of an overlong line, and distinguish EOF from an I/O error. The example uses a trusted in-memory test string so its parser contract is easy to inspect.",
+          "runnable": true
+        },
+        {
+          "id": "cl149-ex2",
+          "language": "en",
+          "title": "Grow a dynamic integer array with checked capacity arithmetic and safe realloc",
+          "code": "#include <stdint.h>\n#include <stdio.h>\n#include <stdlib.h>\n\nstatic int append_int(int **items, size_t *count, size_t *capacity, int value) {\n    size_t new_capacity;\n    int *grown;\n\n    if (items == NULL || count == NULL || capacity == NULL ||\n        *count > *capacity || (*capacity > 0 && *items == NULL)) {\n        return 0;\n    }\n    if (*count == *capacity) {\n        if (*capacity == 0) {\n            new_capacity = 4;\n        } else {\n            if (*capacity > SIZE_MAX / 2) {\n                return 0;\n            }\n            new_capacity = *capacity * 2;\n        }\n        if (new_capacity > SIZE_MAX / sizeof **items) {\n            return 0;\n        }\n        grown = realloc(*items, new_capacity * sizeof **items);\n        if (grown == NULL) {\n            return 0;\n        }\n        *items = grown;\n        *capacity = new_capacity;\n    }\n    (*items)[*count] = value;\n    ++*count;\n    return 1;\n}\n\nint main(void) {\n    int *values = NULL;\n    size_t count = 0;\n    size_t capacity = 0;\n    size_t i;\n\n    if (!append_int(&values, &count, &capacity, 10) ||\n        !append_int(&values, &count, &capacity, 20) ||\n        !append_int(&values, &count, &capacity, 30)) {\n        free(values);\n        fputs(\"unable to append value\\n\", stderr);\n        return 1;\n    }\n    for (i = 0; i < count; ++i) {\n        printf(\"%s%d\", i == 0 ? \"values=\" : \",\", values[i]);\n    }\n    putchar('\\n');\n    free(values);\n    return 0;\n}",
+          "explanation": "The function preserves the original allocation if realloc fails by storing the result in a temporary pointer. It checks capacity doubling and element-count multiplication before performing either operation, validates the count/capacity invariant, and updates ownership only after successful allocation. The caller frees the allocation on both the error path and the success path. A production container would also define whether zero-capacity/non-null-pointer states are permitted and test allocation failure using an injectable allocator or controlled test harness.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Explain the difference between printf(\"%s\", text) and printf(text).",
-      "independentTask": "Review a C input routine for bounds, format-string, allocation and cleanup risks. Write a fix and regression tests.",
+      "guidedTask": "Compile both examples with GCC and Clang under strict C11/C17 warnings, then add parser tests for empty input, whitespace, trailing characters, INT_MIN, INT_MAX, out-of-range values and unchanged output on failure. Extend the dynamic-array test to cross several capacity boundaries and verify count/capacity invariants after every append. Review the code for integer overflow, unsafe formatting and cleanup on every return path.",
+      "independentTask": "Perform a security review of a small C program or a self-contained sample. Write a threat model with assets, entry points, trust boundaries and attacker capabilities. Identify at least five risks across input parsing, bounds, integer arithmetic, ownership, format strings, files, permissions and logging. Implement fixes and regression tests, and document which risks remain outside the ISO C layer.",
       "hints": [
-        "Use bounded input and validate conversion results.",
-        "Never pass untrusted text as a printf format string.",
-        "Keep ownership and cleanup paths explicit."
+        "Treat every external input as untrusted, even when it comes from a local file or another process.",
+        "Validate length and numeric range before indexing, allocating, copying or narrowing a value.",
+        "Check multiplication and addition for overflow before performing the arithmetic.",
+        "Use trusted format strings; pass user-controlled text as a data argument.",
+        "Use a temporary pointer for realloc and preserve the original allocation on failure.",
+        "Design cleanup, error handling, permissions and secret-safe logging as part of the normal control flow."
       ]
     }
   },
@@ -51,36 +86,58 @@
     "questions": [
       {
         "id": "cl149-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "Why is printf(user_text) unsafe when user_text is untrusted?",
         "options": [
-          "The C or learning principle described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "Because printf cannot print strings.",
+          "Because percent sequences in user_text are interpreted as formatting directives.",
+          "Because user_text is automatically copied into a read-only buffer."
         ],
-        "answer": "The C or learning principle described in this lesson.",
-        "explanation": "The correct choice follows the concept and constraints described above."
+        "answer": "Because percent sequences in user_text are interpreted as formatting directives.",
+        "explanation": "The format argument is a program for the formatting function. Use a trusted literal such as printf(\"%s\", user_text) when printing a null-terminated string."
       },
       {
         "id": "cl149-q2",
-        "prompt": "What should be checked before applying the concept?",
+        "prompt": "What is the safest way to update an owning pointer after realloc?",
         "options": [
-          "The exact rules, assumptions and failure cases.",
-          "Only the file name.",
-          "Whether one unrelated example runs."
+          "Assign realloc directly to the only owning pointer before checking for failure.",
+          "Store the result in a temporary pointer and update the owner only if the result is non-null.",
+          "Free the original allocation before calling realloc."
         ],
-        "answer": "The exact rules, assumptions and failure cases.",
-        "explanation": "Reliable C engineering depends on understanding the applicable contract."
+        "answer": "Store the result in a temporary pointer and update the owner only if the result is non-null.",
+        "explanation": "If realloc fails for a nonzero requested size, the original allocation remains valid. A temporary pointer prevents losing the only reference."
       },
       {
         "id": "cl149-q3",
-        "prompt": "Which practice provides stronger evidence?",
+        "prompt": "How should code check whether count * sizeof *items is safe?",
         "options": [
-          "Use documented standards, diagnostics and targeted tests.",
-          "Assume one compiler's behaviour is universal.",
-          "Ignore warnings and boundary cases."
+          "Calculate the product and check whether it wrapped afterward.",
+          "Check count <= SIZE_MAX / sizeof *items before multiplication.",
+          "Assume size_t arithmetic cannot overflow."
         ],
-        "answer": "Use documented standards, diagnostics and targeted tests.",
-        "explanation": "Multiple forms of evidence help distinguish guarantees from assumptions."
+        "answer": "Check count <= SIZE_MAX / sizeof *items before multiplication.",
+        "explanation": "The division-based precondition prevents the multiplication from overflowing before the check."
+      },
+      {
+        "id": "cl149-q4",
+        "prompt": "Which input-handling approach is most secure for a numeric command?",
+        "options": [
+          "Use atoi and assume the input is valid.",
+          "Read without a size limit and rely on a later check.",
+          "Use bounded input, parse with error reporting, reject trailing junk and validate the destination range."
+        ],
+        "answer": "Use bounded input, parse with error reporting, reject trailing junk and validate the destination range.",
+        "explanation": "Secure parsing checks capacity, conversion status, complete-token consumption and the range required by the destination type."
+      },
+      {
+        "id": "cl149-q5",
+        "prompt": "What should a secure error path do after a partial resource acquisition fails?",
+        "options": [
+          "Continue with the partially initialized state.",
+          "Release resources already acquired, preserve ownership rules and return a clear failure status.",
+          "Print all internal secrets to help debugging."
+        ],
+        "answer": "Release resources already acquired, preserve ownership rules and return a clear failure status.",
+        "explanation": "Cleanup and safe failure behaviour are part of the resource-lifetime contract. Detailed diagnostics should not disclose secrets."
       }
     ]
   },

@@ -6,39 +6,90 @@
   "title": "Big O: time complexity, space complexity and growth rates",
   "language": "en",
   "learningObjectives": [
-    "Explain the topic and its C rules.",
-    "Trace the example and explain its data or control flow.",
-    "Identify edge cases and resource-management requirements.",
-    "Apply the concept in a tested C program."
+    "Explain input size, operation counting and asymptotic growth, and distinguish Big O upper bounds from exact running-time measurements.",
+    "Recognise constant, logarithmic, linear, linearithmic, quadratic and exponential growth rates and compare how they scale.",
+    "Analyse loops, nested loops, halving processes and recursive calls to estimate worst-case time complexity.",
+    "Distinguish best-case, average-case and worst-case analysis, and identify the assumptions needed for each claim.",
+    "Explain auxiliary space separately from input storage, including recursion-stack space and the effect of in-place algorithms.",
+    "Use operation counters and carefully chosen test sizes in C to compare algorithm growth without treating one timing measurement as proof."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL3.1",
+    "CL4.1",
+    "CL5.3",
+    "CL6.1",
+    "CL8.1",
+    "CL10.1"
+  ],
   "stages": {
     "understand": {
-      "concept": "Big O expresses an asymptotic upper bound on how an algorithm's resource use grows with input size. Common growth classes include O(1), O(log n), O(n), O(n log n), O(n squared) and O(2 to the n). Space complexity tracks additional storage under a stated convention.",
-      "whyItMatters": "Growth-rate analysis helps compare algorithm designs as input size increases, while measurements reveal real constants and hardware effects.",
-      "analogy": "Treat each algorithm or resource as a contract whose invariants must remain true after every operation.",
-      "analogyLimit": "The analogy does not replace C's formal rules for pointers, object lifetime, complexity or library contracts."
+      "concept": "Algorithm complexity describes how resource use changes as input size grows. Time complexity estimates the number of elementary operations; space complexity estimates memory use under a stated convention. Big O, written O(f(n)), gives an asymptotic upper bound: beyond some input size, the measured growth is bounded by a constant multiple of f(n). It does not mean an exact number of seconds. Common classes include O(1), O(log n), O(n), O(n log n), O(n²) and O(2ⁿ).",
+      "whyItMatters": "A program that works for ten values may become impractical for ten million. Complexity helps predict scalability before running large workloads and helps compare algorithm designs. It complements measurement: real performance also depends on constant factors, compiler optimisations, memory access, hardware and input distribution.",
+      "analogy": "Imagine checking tickets at an event. Looking up one ticket by a direct numbered seat map can take roughly the same number of steps regardless of the crowd size; checking every ticket against every other ticket grows much faster as the crowd increases.",
+      "analogyLimit": "The analogy is only about growth. Real algorithms have precise input models, operation costs, best and worst cases, memory limits and implementation details. Big O alone does not tell you which program is faster for every small input.",
+      "keyTerms": [
+        {
+          "term": "Input size (n)",
+          "definition": "A measure of how much data an algorithm receives, such as the number of array elements."
+        },
+        {
+          "term": "Time complexity",
+          "definition": "How the number of operations grows with input size under a stated case and cost model."
+        },
+        {
+          "term": "Space complexity",
+          "definition": "How memory use grows with input size; auxiliary space excludes the input when that convention is stated."
+        },
+        {
+          "term": "Big O",
+          "definition": "An asymptotic upper bound that suppresses constant factors and lower-order terms."
+        },
+        {
+          "term": "Big Theta",
+          "definition": "A tight asymptotic bound: the growth is bounded both above and below by constant multiples of the same function."
+        },
+        {
+          "term": "Worst / average / best case",
+          "definition": "The maximum, expected (under a specified input distribution) or minimum resource use among inputs of a given size."
+        },
+        {
+          "term": "Recursion stack",
+          "definition": "Memory used by active function calls, often proportional to recursion depth."
+        }
+      ],
+      "history": "The O notation was introduced in mathematical analysis by Paul Bachmann and later developed by Edmund Landau in number theory. Computer scientists adopted asymptotic notation to compare algorithms independently of particular machines. The letter O refers to an order or upper-bound family, not to a literal count of operations."
     },
     "explain": {
-      "narrative": "Big O expresses an asymptotic upper bound on how an algorithm's resource use grows with input size. Common growth classes include O(1), O(log n), O(n), O(n log n), O(n squared) and O(2 to the n). Space complexity tracks additional storage under a stated convention.\n\nState preconditions, invariants, empty and full cases, ownership and failure behaviour before implementation. Compile with warnings and test normal, boundary and failure paths.",
+      "narrative": "Start by defining n: for an array algorithm, n usually means the number of elements. Then choose the operation being counted, such as comparisons or loop iterations. A loop that visits each element once performs O(n) work. Two independent nested loops over the same n elements may perform O(n²) work. Repeatedly halving a search interval takes O(log n) steps. A loop nested inside a loop that halves its remaining range can produce O(n log n) work. Each claim must match the actual bounds and control flow.\n\nAsymptotic notation ignores constant factors and lower-order terms: 3n² + 5n + 8 is O(n²). Big O is an upper bound, while Big Theta expresses a tight bound when both upper and lower bounds match. State whether a claim is worst-case, average-case or best-case. For example, linear search is O(1) best case when the first item matches and O(n) worst case when the key is absent or last; its average case depends on the input distribution.\n\nSpace analysis needs a clear convention. An algorithm may use O(1) auxiliary storage while reading an input array of n elements. A recursive algorithm may use O(log n) call-stack space if its recursion depth halves the problem each time. Do not count the input as auxiliary memory unless the chosen convention explicitly includes it.\n\nThe first example counts comparisons for a nested-loop duplicate check and a linear scan. It demonstrates quadratic and linear growth directly without relying on noisy clock measurements. The second example compares iterative and recursive binary search on a sorted array. Both take O(log n) time in the worst case; the iterative version uses O(1) auxiliary space, while the recursive version uses O(log n) call-stack space. Binary search requires sorted input and a valid array length.",
       "examples": [
         {
           "id": "cl1013-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stddef.h>\nint has_duplicate(const int a[], size_t n) {\n for (size_t i=0; i<n; ++i)\n  for (size_t j=i+1; j<n; ++j)\n   if (a[i] == a[j]) return 1;\n return 0;\n}",
-          "explanation": "The nested loops may compare a number of pairs proportional to n squared in the worst case, so the time complexity is O(n squared). The function uses O(1) additional space.",
-          "runnable": false
+          "title": "Count operations in linear and quadratic algorithms",
+          "code": "#include <stdbool.h>\n#include <stddef.h>\n#include <stdio.h>\n\nstatic bool has_duplicate(const int values[], size_t count,\n                          size_t *comparisons)\n{\n    if (values == NULL || comparisons == NULL) return false;\n\n    *comparisons = 0U;\n    for (size_t i = 0U; i < count; ++i) {\n        for (size_t j = i + 1U; j < count; ++j) {\n            ++(*comparisons);\n            if (values[i] == values[j]) return true;\n        }\n    }\n    return false;\n}\n\nstatic bool contains_value(const int values[], size_t count, int target,\n                           size_t *comparisons)\n{\n    if (values == NULL || comparisons == NULL) return false;\n\n    *comparisons = 0U;\n    for (size_t i = 0U; i < count; ++i) {\n        ++(*comparisons);\n        if (values[i] == target) return true;\n    }\n    return false;\n}\n\nint main(void)\n{\n    const int values[] = { 4, 8, 2, 9, 5, 7 };\n    const size_t count = sizeof values / sizeof values[0];\n    size_t duplicate_checks = 0U;\n    size_t search_checks = 0U;\n\n    bool duplicate = has_duplicate(values, count, &duplicate_checks);\n    bool found = contains_value(values, count, 7, &search_checks);\n\n    printf(\"Duplicate present: %s (%zu comparisons)\\n\",\n           duplicate ? \"yes\" : \"no\", duplicate_checks);\n    printf(\"Target found: %s (%zu comparisons)\\n\",\n           found ? \"yes\" : \"no\", search_checks);\n    printf(\"Maximum pair checks for %zu values: %zu\\n\",\n           count, count * (count - 1U) / 2U);\n    return 0;\n}",
+          "explanation": "has_duplicate checks every unordered pair until it finds a match. In the no-duplicate worst case, the inner loop performs (n-1) + (n-2) + ... + 1 comparisons, which equals n(n-1)/2 and therefore grows as O(n squared). It may return early when a duplicate is found, so actual work depends on the input. contains_value checks at most n elements, giving O(n) worst-case time and O(1) auxiliary space. The comparison counters make the work visible; they are not wall-clock timings. Both functions require a valid array whenever count is nonzero. The example uses a fixed, small array so its demonstration count arithmetic is safely within size_t.",
+          "runnable": true
+        },
+        {
+          "id": "cl1013-ex2",
+          "language": "en",
+          "title": "Compare iterative and recursive binary search",
+          "code": "#include <stdbool.h>\n#include <stddef.h>\n#include <stdio.h>\n\nstatic bool binary_search_iterative(const int values[], size_t count,\n                                    int target, size_t *steps)\n{\n    size_t low = 0U;\n    size_t high = count;\n\n    *steps = 0U;\n    while (low < high) {\n        size_t middle = low + (high - low) / 2U;\n        ++(*steps);\n\n        if (values[middle] == target) return true;\n        if (values[middle] < target) {\n            low = middle + 1U;\n        } else {\n            high = middle;\n        }\n    }\n    return false;\n}\n\nstatic bool binary_search_recursive_range(const int values[],\n                                          size_t low, size_t high,\n                                          int target, size_t *steps)\n{\n    if (low >= high) return false;\n\n    size_t middle = low + (high - low) / 2U;\n    ++(*steps);\n\n    if (values[middle] == target) return true;\n    if (values[middle] < target) {\n        return binary_search_recursive_range(\n            values, middle + 1U, high, target, steps);\n    }\n    return binary_search_recursive_range(\n        values, low, middle, target, steps);\n}\n\nstatic bool binary_search_recursive(const int values[], size_t count,\n                                    int target, size_t *steps)\n{\n    *steps = 0U;\n    return binary_search_recursive_range(values, 0U, count, target, steps);\n}\n\nint main(void)\n{\n    const int sorted[] = { 2, 5, 8, 12, 16, 23, 38, 56, 72, 91, 105 };\n    const size_t count = sizeof sorted / sizeof sorted[0];\n    size_t iterative_steps = 0U;\n    size_t recursive_steps = 0U;\n\n    bool iterative_found = binary_search_iterative(\n        sorted, count, 56, &iterative_steps);\n    bool recursive_found = binary_search_recursive(\n        sorted, count, 56, &recursive_steps);\n\n    printf(\"Iterative: %s in %zu steps\\n\",\n           iterative_found ? \"found\" : \"not found\", iterative_steps);\n    printf(\"Recursive: %s in %zu steps\\n\",\n           recursive_found ? \"found\" : \"not found\", recursive_steps);\n    return 0;\n}",
+          "explanation": "Both functions maintain a half-open search range [low, high), where high is one past the last candidate. The midpoint uses low + (high - low) / 2 to avoid the overflow risk of (low + high) / 2. Each unsuccessful comparison discards at least half the remaining candidates, so worst-case time is O(log n). The iterative implementation uses a fixed number of local variables and therefore O(1) auxiliary space. The recursive helper makes one call per halving step, so its call-stack space is O(log n). The array must be sorted in nondecreasing order, and a nonzero count requires a valid values array. An empty range returns false without reading an element.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Count comparisons for n equal to 4 and 10 in the no-duplicate case.",
-      "independentTask": "Compare the nested-loop duplicate check with a sorting-based or hash-based approach, stating assumptions and trade-offs.",
+      "guidedTask": "For the array [4, 8, 2, 9, 5, 7], count how many pair comparisons the nested duplicate check performs when no duplicate exists. Then count the comparisons for a linear search for 7. Repeat the theoretical pair-count calculation for n = 4, 8 and 16, and explain how doubling n affects the quadratic count compared with the linear count.",
+      "independentTask": "Implement linear search, binary search and a nested-loop duplicate detector. Count comparisons rather than using elapsed time. Test empty input, one element, a match at the first and last positions, a missing value, duplicate values and sorted versus unsorted arrays. Write a short analysis stating each algorithm's best and worst time complexity and auxiliary space. Explain why binary search must not be used on an unsorted array.",
       "hints": [
-        "State whether the analysis is worst-case, average-case or best-case.",
-        "Big O ignores constant factors and lower-order terms.",
-        "Include input constraints and auxiliary storage in your analysis."
+        "Define n before analysing an algorithm; do not leave the input-size measure ambiguous.",
+        "A single pass over n elements is O(n); two nested passes over pairs can be O(n squared).",
+        "The sum 1 + 2 + ... + (n - 1) equals n(n - 1)/2, which is Theta(n squared).",
+        "Repeatedly halving a search range gives logarithmic growth, but binary search requires sorted data.",
+        "Separate the memory occupied by the input from auxiliary storage, and include recursive call-stack use when relevant.",
+        "State best, average or worst case and the assumptions behind average-case input distributions; one timing run does not prove complexity."
       ]
     }
   },
@@ -51,36 +102,63 @@
     "questions": [
       {
         "id": "cl1013-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What does Big O notation primarily describe?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "An asymptotic upper bound on how resource use grows with input size",
+          "The exact number of CPU seconds for every input",
+          "The number of lines in a C source file",
+          "The amount of RAM installed in a computer"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the topic and constraints described above."
+        "answer": "An asymptotic upper bound on how resource use grows with input size",
+        "explanation": "Big O describes an upper bound on growth after ignoring constant factors and lower-order terms; it is not an exact runtime measurement."
       },
       {
         "id": "cl1013-q2",
-        "prompt": "What should be verified before relying on the implementation?",
+        "prompt": "In the worst case, how many comparisons does a nested-loop check of all unordered pairs of n elements perform?",
         "options": [
-          "Preconditions, invariants, bounds and failure cases.",
-          "Only the name of the algorithm.",
-          "Whether one input produced a result."
+          "n(n - 1)/2, which is Theta(n squared)",
+          "Exactly n",
+          "Exactly log n",
+          "A constant independent of n"
         ],
-        "answer": "Preconditions, invariants, bounds and failure cases.",
-        "explanation": "Correctness depends on maintaining the data structure or algorithm contract."
+        "answer": "n(n - 1)/2, which is Theta(n squared)",
+        "explanation": "The loop compares each pair once, giving (n-1) + (n-2) + ... + 1 comparisons."
       },
       {
         "id": "cl1013-q3",
-        "prompt": "Which test strategy is most useful?",
+        "prompt": "Why does binary search have logarithmic worst-case time on a sorted array?",
         "options": [
-          "Test empty, boundary and representative operation sequences.",
-          "Ignore allocation failures.",
-          "Assume one successful example proves all cases."
+          "Each comparison discards about half of the remaining search range",
+          "It checks every element twice",
+          "It allocates a new array for every comparison",
+          "It always finds the target at index zero"
         ],
-        "answer": "Test empty, boundary and representative operation sequences.",
-        "explanation": "Targeted tests expose defects ordinary examples can miss."
+        "answer": "Each comparison discards about half of the remaining search range",
+        "explanation": "Repeated halving reduces the candidate range geometrically, requiring O(log n) comparisons."
+      },
+      {
+        "id": "cl1013-q4",
+        "prompt": "What is the auxiliary space complexity of the iterative binary search shown in the lesson?",
+        "options": [
+          "O(1)",
+          "O(n)",
+          "O(n squared)",
+          "O(log n)"
+        ],
+        "answer": "O(1)",
+        "explanation": "The iterative algorithm uses a fixed number of local variables and does not allocate storage that grows with n."
+      },
+      {
+        "id": "cl1013-q5",
+        "prompt": "Which statement about average-case complexity is correct?",
+        "options": [
+          "It depends on an assumed or specified distribution of inputs",
+          "It is always exactly halfway between best and worst case",
+          "It is identical to Big O for every algorithm",
+          "It can be determined from one timing measurement"
+        ],
+        "answer": "It depends on an assumed or specified distribution of inputs",
+        "explanation": "Average-case analysis requires a model of how inputs are distributed; without that assumption the average is not defined."
       }
     ]
   },

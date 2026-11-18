@@ -6,39 +6,69 @@
   "title": "Interview Q&A: explain code, diagnose bugs and justify design choices",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its relevant rules.",
-    "Trace the example and justify its behaviour.",
-    "Identify important assumptions and failure cases.",
-    "Apply the concept in a reviewed and tested exercise."
+    "Structure a technical answer by stating the requirement, assumptions, relevant C rules, reasoning, result and limitations.",
+    "Trace declarations, expressions, loops, pointers and function calls accurately, including object lifetime, array bounds and integer conversions.",
+    "Diagnose common C defects such as null dereferences, out-of-bounds access, uninitialized values, lifetime errors, signed overflow and unchecked library results.",
+    "Compare alternative designs using explicit criteria such as correctness, interface clarity, portability, complexity, performance and maintainability.",
+    "Support a proposed fix with focused regression tests, compiler diagnostics and appropriate static-analysis or sanitizer evidence.",
+    "Communicate uncertainty honestly by distinguishing defined behaviour, implementation-defined behaviour, unspecified behaviour and undefined behaviour."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL1.7",
+    "CL2.6",
+    "CL3.9",
+    "CL4.10",
+    "CL5.9",
+    "CL6.10",
+    "CL7.12",
+    "CL8.12",
+    "CL9.10",
+    "CL10.4",
+    "CL13.1",
+    "CL13.3",
+    "CL13.4",
+    "CL13.5",
+    "CL13.6",
+    "CL13.7"
+  ],
   "stages": {
     "understand": {
-      "concept": "Technical interviews often ask candidates to explain code, reason about edge cases, diagnose defects and justify trade-offs. Strong answers state assumptions, trace behaviour and distinguish language guarantees from implementation details.",
-      "whyItMatters": "Interview preparation strengthens communication and engineering reasoning beyond memorizing definitions.",
-      "analogy": "Treat standards, interfaces and release steps as explicit contracts that make assumptions visible.",
-      "analogyLimit": "The analogy does not replace the C standard, implementation documentation or project-specific requirements."
+      "concept": "A C technical interview is a conversation about engineering reasoning, not a contest to recite definitions. An interviewer may ask you to explain a short function, trace its output, identify a defect, propose a correction, compare two interfaces or describe how you would test a change. A strong answer makes its assumptions visible and connects every claim to the C language rules or a stated requirement.\n\nUse a repeatable response structure: clarify the requirement; state assumptions and constraints; identify relevant types, object lifetimes and preconditions; trace the code; state what is guaranteed; identify defects or trade-offs; propose a minimal correction; and describe tests that would distinguish the corrected behaviour from the faulty behaviour. If the code is incomplete, ask for the missing contract rather than silently inventing one.\n\nCode tracing begins with declarations and initial values. Determine each expression's type and conversions before evaluating it. Follow execution order, loop conditions and function calls. For pointers, identify the object designated and whether its lifetime continues. For arrays, write down the valid index range and verify every access. For library calls, check their documented preconditions and return values. If behaviour is undefined, do not invent a predictable output. Explain the invalid operation and why the C implementation is not required to produce a particular result.\n\nBug diagnosis should be specific. Instead of saying “the pointer is wrong,” identify the exact expression, the violated precondition and the consequence. For example, `values[i]` is invalid if `i` is not less than the number of elements; dereferencing a null pointer is invalid; using a pointer after the pointed-to object's lifetime ends is invalid; and signed overflow is undefined behaviour. A missing check is a defect only in relation to a stated contract—first establish whether the input is allowed to be empty, null or out of range.\n\nDesign justification compares alternatives against requirements. An output parameter plus a status result can distinguish a valid zero from failure, while a sentinel return may be simpler when the value domain leaves a sentinel unused. Passing an array pointer and count makes bounds explicit but relies on the caller to provide a valid range. A fixed-size array avoids allocation failure but imposes a capacity limit. Dynamic allocation supports growth but adds ownership, cleanup and failure paths. Do not call one design universally best; state the conditions under which it is appropriate.\n\nTesting is part of the explanation. Include a typical case, empty input, boundary values, invalid arguments and failure paths relevant to the contract. A regression test should fail on the original defect and pass after the fix. Compiler warnings, static analysis and sanitizers provide evidence, but each has limits. A clean run on one compiler does not prove portability or correctness for every input.",
+      "whyItMatters": "Interview questions reveal whether a learner can apply C concepts under new conditions, communicate technical decisions and reason about defects. The same skills are essential in code review, debugging and collaborative software development.",
+      "analogy": "Explaining code in an interview is like presenting a reproducible investigation: show the evidence, explain the rule, demonstrate the fix and describe how another person can verify it.",
+      "analogyLimit": "An analogy cannot replace precise language-lawyer reasoning. A correct answer must identify actual C types, object lifetimes, constraints and behaviour categories."
     },
     "explain": {
-      "narrative": "Technical interviews often ask candidates to explain code, reason about edge cases, diagnose defects and justify trade-offs. Strong answers state assumptions, trace behaviour and distinguish language guarantees from implementation details.\n\nState assumptions and constraints, consult the applicable standard or tool documentation, and verify the result with appropriate compiler diagnostics and tests. Separate portable guarantees from implementation-specific behaviour.",
+      "narrative": "## 1. A reliable answer framework\n\nUse this sequence when asked to explain or review code:\n\n1. **Requirement:** restate what the code is supposed to do.\n2. **Contract:** identify valid inputs, bounds, ownership, side effects and failure behaviour.\n3. **Trace:** follow declarations, expressions, branches, loops and calls in execution order.\n4. **Rule:** connect the result to the applicable C rule or library contract.\n5. **Risk:** identify defects, edge cases and assumptions that are not guaranteed.\n6. **Alternative:** propose the smallest safe change and explain its trade-off.\n7. **Evidence:** name tests and diagnostics that verify the change.\n\nIf an interviewer asks for output, first check whether the program has defined behaviour under the stated assumptions. If it does, trace it carefully. If it does not, identify the operation that causes undefined behaviour; do not guess what a particular machine might print. If an implementation-defined choice matters, say that the implementation documents its choice. If behaviour is unspecified, explain that the standard permits multiple outcomes without requiring the implementation to document which one it selects.\n\n## 2. Frequently asked C questions and strong answer points\n\n**Q: Does C pass arguments by reference?** C passes arguments by value. A pointer value can be passed so a function can access or modify the pointed-to object, but the pointer argument itself is still copied. To change a caller's pointer variable, pass a pointer to that pointer.\n\n**Q: Is an array parameter the same as an array object?** In a function parameter declaration, an array parameter is adjusted to a pointer parameter. The function does not receive the array length automatically. Pass a count or another explicit range contract.\n\n**Q: What is the difference between `const int *p` and `int *const p`?** The first prevents modification of the pointed-to `int` through `p`; the pointer can be reassigned. The second makes the pointer itself non-reassignable after initialization; the pointed-to `int` may be modified through it if it is not otherwise const-qualified.\n\n**Q: Why is `realloc` usually assigned to a temporary pointer?** On failure, `realloc` returns a null pointer and the original allocation remains allocated. Assigning directly to the only owning pointer can lose the original address and leak the allocation. Check size multiplication before allocation and update the owner only after success.\n\n**Q: Is `sizeof(array_parameter)` the array's byte size?** No. After parameter adjustment, the parameter is a pointer, so `sizeof` gives the pointer size. Compute an array's element count in the scope where it is an actual array, or pass the count explicitly.\n\n**Q: What does `volatile` guarantee?** It tells the implementation that accesses through the volatile-qualified lvalue are observable according to the implementation's rules; it is not a general thread-synchronization primitive and does not make compound operations atomic.\n\n**Q: Why can signed integer overflow not be used as wraparound?** In C, signed overflow is undefined behaviour. If modular arithmetic is required, use an appropriate unsigned type and still reason about conversions and the intended range.\n\n## 3. Worked example A: explain and defend an average function\n\nThe first example receives an array of scores, an explicit count and an output pointer. The contract is: the output pointer must be valid; a nonzero count requires a pointer to at least that many readable integers; the count must be nonzero; every score is between 0 and 100; and the output is changed only on success. The function sums in `long long`, validates each score and calculates an integer average.\n\nTrace: the values 72, 85, 91 and 68 sum to 316. Integer division by 4 gives 79. Expected output: `average=79`.\n\nAn interview answer should mention that the result is an integer average truncated toward zero, which is exact here. If a fractional average is required, define the rounding policy and use an appropriate representation. The function does not know the actual array allocation size; the caller must honour the pointer/count contract.\n\n## 4. Worked example B: diagnose and explain a search function\n\nThe second example searches a caller-owned array and returns success/failure separately from the found index. This avoids confusing “not found” with a valid index such as zero. The output index is written only when a match is found; on failure it remains unchanged. The function accepts a null pointer only when count is zero and never dereferences it in that case.\n\nTrace: target 21 is first found at index 1. Target 30 is absent, so the function returns false and leaves the caller's index value unchanged. Expected output: `found at index 1` and `30 not found; index output unchanged`.\n\nA useful design comparison is a sentinel index such as `SIZE_MAX` versus a status return and output parameter. The status/output design makes failure explicit and leaves the complete `size_t` index domain available. A sentinel can be concise, but the contract must reserve it and callers must check it.\n\n## 5. Diagnose common interview defects\n\n- **Out-of-bounds access:** verify `index < count` before subscripting; test zero, first, last and one-past-last cases.\n- **Null dereference:** validate required pointers before access; define whether null is allowed for an empty range.\n- **Uninitialized read:** initialize objects or prove every control-flow path assigns them before use.\n- **Dangling pointer:** do not return or retain a pointer to an object whose lifetime has ended.\n- **Signed overflow:** check before addition or multiplication, not after the expression has overflowed.\n- **Format mismatch:** ensure each `printf` conversion specification matches the corresponding argument type.\n- **Unchecked library result:** handle failed input conversion, allocation, file operations and resource closure according to the API contract.\n- **Ownership confusion:** state who allocates, frees and retains each object; avoid double-free and use-after-free.\n\n## 6. Justify design choices with trade-offs\n\nA good answer names the requirement that drives the choice. Fixed arrays are simple when a strict small maximum is known; dynamic storage is useful when size varies but requires capacity checks, allocation-failure handling and a clear owner. Returning a status plus output parameter is explicit when zero is a valid result; a sentinel may be simpler if it cannot collide with valid values. A linear search is easy and works for unsorted small data; a binary search reduces comparisons but requires sorted input and careful boundary logic. Avoid claiming an optimisation is better without considering data size, input guarantees and maintenance cost.\n\n## 7. Regression-test and evidence strategy\n\nFor each bug, write a test that demonstrates the defect, then a test for the corrected boundary. For array functions test null with zero count, null with nonzero count, one element, first/last match, no match and repeated values. For arithmetic test values at and beyond the permitted range. For file functions test missing files, malformed records, read/write errors and close failures where they can be simulated. Compile with a selected C standard and warnings; use static analysis and sanitizers where appropriate. Record tool versions and exact commands when reproducibility matters.\n\n## 8. Communicate clearly under uncertainty\n\nIt is acceptable to say that a detail depends on the C version or implementation, provided you identify what must be checked. Ask for missing declarations, compiler flags, input constraints or expected behaviour. Separate what the source proves from what you assume. A precise “the snippet is insufficient to determine this” is stronger than a confident guess.",
       "examples": [
         {
           "id": "cl138-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\nsize_t length(const char *text) {\n size_t n = 0;\n if (text == NULL) return 0;\n while (text[n] != '\\0') ++n;\n return n;\n}\nint main(void) { printf(\"%zu\\n\", length(\"C\")); return 0; }",
-          "explanation": "The function counts characters until the null terminator and handles a null pointer by returning zero. An interview discussion should ask whether zero is an appropriate result for NULL or whether a separate error signal would be clearer.",
-          "runnable": false
+          "title": "Explain a validated average function and its pointer/count contract",
+          "code": "#include <limits.h>\n#include <stddef.h>\n#include <stdio.h>\n\nstatic int average_score(const int scores[], size_t count, int *average_out)\n{\n    size_t i;\n    long long total = 0;\n\n    if (average_out == NULL || (count > 0U && scores == NULL)) {\n        return 0;\n    }\n    if (count == 0U) {\n        return 0;\n    }\n    for (i = 0U; i < count; ++i) {\n        if (scores[i] < 0 || scores[i] > 100 ||\n            total > LLONG_MAX - (long long)scores[i]) {\n            return 0;\n        }\n        total += (long long)scores[i];\n    }\n    *average_out = (int)(total / (long long)count);\n    return 1;\n}\n\nint main(void)\n{\n    const int scores[] = {72, 85, 91, 68};\n    int average = -1;\n\n    if (!average_score(scores, sizeof scores / sizeof scores[0], &average)) {\n        fputs(\"invalid score data\\n\", stderr);\n        return 1;\n    }\n    printf(\"average=%d\\n\", average);\n    return 0;\n}",
+          "explanation": "The function rejects a null output pointer, null input with nonzero count, an empty set and scores outside 0–100. It accumulates in `long long` and writes the output only after the loop succeeds. Trace: 72 + 85 + 91 + 68 = 316; 316 / 4 = 79. Expected output: `average=79`. The integer division truncates; a fractional result would require an explicit rounding policy. The caller remains responsible for supplying a pointer to at least `count` readable elements.",
+          "runnable": true
+        },
+        {
+          "id": "cl138-ex2",
+          "language": "en",
+          "title": "Defend a search API that separates not-found from a valid index",
+          "code": "#include <stddef.h>\n#include <stdio.h>\n\nstatic int find_first(const int values[], size_t count, int target,\n                      size_t *index_out)\n{\n    size_t i;\n\n    if (index_out == NULL || (count > 0U && values == NULL)) {\n        return 0;\n    }\n    for (i = 0U; i < count; ++i) {\n        if (values[i] == target) {\n            *index_out = i;\n            return 1;\n        }\n    }\n    return 0;\n}\n\nint main(void)\n{\n    const int readings[] = {18, 21, 21, 24, 27};\n    const size_t count = sizeof readings / sizeof readings[0];\n    size_t index = 999U;\n\n    if (find_first(readings, count, 21, &index)) {\n        printf(\"found at index %zu\\n\", index);\n    } else {\n        puts(\"not found\");\n    }\n\n    if (!find_first(readings, count, 30, &index)) {\n        puts(\"30 not found; index output unchanged\");\n    }\n    return 0;\n}",
+          "explanation": "The function returns 1 when it finds the first matching element and writes the index only on success. It returns 0 for invalid arguments or no match; the caller's output index remains unchanged. The first 21 is at index 1. Expected output: `found at index 1` and `30 not found; index output unchanged`. This avoids using index zero as a not-found sentinel, because zero is a valid index.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Explain the function's time complexity and NULL policy.",
-      "independentTask": "Prepare an interview answer that explains a pointer bug, proposes a fix and describes regression tests.",
+      "guidedTask": "Take the average example and prepare a two-minute interview explanation: state the contract, trace the values, explain the integer division and pointer/count assumptions, identify at least four boundary tests, and compare status-plus-output with a sentinel return. Then deliberately introduce one defect and write a regression test that fails before the fix and passes afterward.",
+      "independentTask": "Prepare a mock C interview with ten questions: two on types/expressions, two on arrays/strings, two on pointers/functions, one on structures/files, one on dynamic memory, one on undefined behaviour and one design/debugging scenario. For each, write a concise answer, a code trace or counterexample, the governing rule, one trade-off and at least two verification tests. Include one question where the correct response is that the provided code is insufficient to determine the result.",
       "hints": [
-        "State assumptions before making claims about behaviour.",
-        "Compare at least one alternative and explain the trade-off.",
-        "Do not claim undefined behaviour has a predictable output."
+        "Clarify the expected behaviour and input constraints before judging whether a line is defective.",
+        "Trace types and initial values first; then follow control flow and pointer targets in execution order.",
+        "State the exact violated precondition or language rule instead of describing a bug vaguely.",
+        "Never predict a guaranteed output for undefined behaviour; explain the operation that makes behaviour undefined.",
+        "Compare alternatives against the stated requirements, including failure signalling, bounds, ownership, portability and complexity.",
+        "Make tests falsifiable: include a case that exposes the original defect and a regression case that proves the correction."
       ]
     }
   },
@@ -51,38 +81,59 @@
     "questions": [
       {
         "id": "cl138-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "A function parameter is declared `int values[]`. What should an interviewer expect you to explain?",
         "options": [
-          "The C or learning principle described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "The parameter is adjusted to a pointer parameter; the function needs a separate count or range contract",
+          "The function receives the complete array including its length automatically",
+          "`sizeof values` inside the function always gives the caller's array byte size"
         ],
-        "answer": "The C or learning principle described in this lesson.",
-        "explanation": "The correct choice follows the concept and constraints described above."
+        "answer": "The parameter is adjusted to a pointer parameter; the function needs a separate count or range contract",
+        "explanation": "Array parameters are adjusted to pointer parameters, so the function cannot infer the original array length from that parameter."
       },
       {
         "id": "cl138-q2",
-        "prompt": "What should be checked before applying the concept?",
+        "prompt": "A search function returns index 0 when it does not find a value. What is the design problem?",
         "options": [
-          "The exact rules, assumptions and failure cases.",
-          "Only the file name.",
-          "Whether one unrelated example runs."
+          "Index 0 is a valid result, so failure is ambiguous unless the contract reserves another representation",
+          "C arrays cannot have an element at index 0",
+          "The return type must always be a pointer"
         ],
-        "answer": "The exact rules, assumptions and failure cases.",
-        "explanation": "Reliable C engineering depends on understanding the applicable contract."
+        "answer": "Index 0 is a valid result, so failure is ambiguous unless the contract reserves another representation",
+        "explanation": "Use a status result with an output parameter or a clearly reserved sentinel such as a documented out-of-range value."
       },
       {
         "id": "cl138-q3",
-        "prompt": "Which practice provides stronger evidence?",
+        "prompt": "What is the correct response when a code-tracing question contains signed integer overflow?",
         "options": [
-          "Use documented standards, diagnostics and targeted tests.",
-          "Assume one compiler's behaviour is universal.",
-          "Ignore warnings and boundary cases."
+          "Identify the undefined operation and explain that no portable output is guaranteed",
+          "Calculate the wrapped result and present it as required by C",
+          "Assume every compiler uses two's-complement wraparound for signed arithmetic"
         ],
-        "answer": "Use documented standards, diagnostics and targeted tests.",
-        "explanation": "Multiple forms of evidence help distinguish guarantees from assumptions."
+        "answer": "Identify the undefined operation and explain that no portable output is guaranteed",
+        "explanation": "Signed integer overflow is undefined behaviour; a specific observed result is not a portable language guarantee."
+      },
+      {
+        "id": "cl138-q4",
+        "prompt": "Why is assigning `realloc` directly to the only owning pointer dangerous?",
+        "options": [
+          "If realloc fails, the original allocation remains allocated but its address can be lost",
+          "realloc always frees the original allocation before attempting the new one",
+          "The returned pointer is guaranteed to be larger"
+        ],
+        "answer": "If realloc fails, the original allocation remains allocated but its address can be lost",
+        "explanation": "Use a temporary pointer and update the owner only after successful reallocation."
+      },
+      {
+        "id": "cl138-q5",
+        "prompt": "Which test strategy best supports a proposed bug fix?",
+        "options": [
+          "Add a regression case that exposes the original defect, then test boundary and normal cases after the fix",
+          "Run only the example input that happened to work before the change",
+          "Rely on a warning-free compile as proof of runtime correctness"
+        ],
+        "answer": "Add a regression case that exposes the original defect, then test boundary and normal cases after the fix",
+        "explanation": "A targeted regression test demonstrates that the defect is caught and remains fixed; additional tests cover neighbouring behaviour."
       }
     ]
-  },
-  "status": "draft"
+  }
 }

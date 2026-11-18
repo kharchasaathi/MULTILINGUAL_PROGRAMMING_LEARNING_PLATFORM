@@ -6,22 +6,22 @@
   "title": "if, else and else if decisions",
   "language": "en",
   "learningObjectives": [
-    "Explain the core ideas behind if, else and else if decisions.",
-    "Identify relevant C syntax, types, standard-library interfaces and constraints.",
-    "Trace a small example and predict its behaviour.",
-    "Recognize boundary cases, common defects and portability risks.",
-    "Apply the concept in a tested C program."
+    "Write if, else if and else statements with correct C syntax.",
+    "Explain how conditions select one branch of a decision.",
+    "Order mutually exclusive and overlapping conditions correctly.",
+    "Recognize dangling-else association and use braces for clarity.",
+    "Test boundary values for every branch."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "if, else and else if decisions is an important part of writing correct, maintainable C programs. Learn the exact language rules rather than relying on what one compiler appears to accept. C is a compiled, standardized language: distinguish language guarantees from implementation-defined choices, compiler extensions and behaviour that the standard leaves undefined.",
+      "concept": "The if statement selects a substatement based on a scalar condition: zero is false and nonzero is true. An optional else provides an alternative branch. An else associates with the nearest preceding unmatched if. Braces create compound statements and make branch boundaries explicit, improving correctness and readability.",
       "whyItMatters": "Understanding if, else and else if decisions helps you reason about program behaviour instead of memorizing syntax. It is useful in exams, debugging and building reliable C applications.",
       "analogy": "Treat the concept as a tool with a precise contract: it has valid inputs, defined operations and observable results.",
       "analogyLimit": "An analogy is only an aid; the C standard and the relevant function specifications determine actual behaviour."
     },
     "explain": {
-      "narrative": "## Concept and mental model\nif, else and else if decisions should be understood in terms of the C abstract machine: objects have types, storage duration and lifetimes; expressions are evaluated according to language rules; and library calls have specified preconditions and results. The compiler translates a translation unit, but a successful compilation does not prove that a program is correct.\n\n## How to reason about this topic\n1. Identify the inputs, objects, types and operations involved.\n2. Check the applicable syntax and semantic constraints.\n3. Determine valid input ranges and boundary cases.\n4. Check every function result and handle failure where the API permits failure.\n5. Compile with warnings enabled and test normal, boundary and invalid cases.\n\n## Correctness and portability\nDo not assume that int has a particular width, that memory addresses are identical across runs, or that undefined behaviour has a predictable result. Use standard headers and documented interfaces. State any platform assumptions explicitly. Prefer small functions, clear names and explicit invariants.\n\n## Worked example 1 — establish a testable baseline\nThe example below demonstrates a small, compilable C program. Adapt the declaration, expression or API call to the exact concept being studied, then change one condition at a time and observe the result.\n\n## Worked example 2 — validate a boundary\nA second useful test is to exercise the smallest valid input, largest valid input, one value outside the valid range and an ordinary middle value. Record the expected result before running the program; this prevents a test from merely confirming an assumption.\n\n## Common mistakes\n- Assuming a successful compile means the result is correct.\n- Ignoring warnings or failing to check a library function's return value.\n- Using a value outside the range permitted by its type or API.\n- Confusing a compiler extension with portable ISO C.\n- Testing only one ordinary input and missing boundary cases.",
+      "narrative": "## 1. Basic if\n\nUse `if (condition) { ... }` to execute a block only when the condition is true. A scalar condition is false when it is zero and true when it is nonzero.\n\n## 2. if and else\n\nAn else branch runs when the associated if condition is false. Use braces even for short branches so later edits do not accidentally change which statements are controlled.\n\n## 3. else if chains\n\nAn else-if chain tests conditions in order. Once a condition is true, its branch executes and the remaining chain is skipped. Put more specific or narrower conditions before broader ones when they overlap.\n\n## 4. Dangling else\n\nIn nested if statements, an else associates with the nearest unmatched if. Braces make the intended structure clear and prevent a reader from guessing which if owns the else.\n\n## 5. Test decision boundaries\n\nFor a range such as pass >= 50, test 49, 50 and 51. Include invalid inputs and combinations that may overlap. A decision is correct only when every intended case reaches the right branch.",
       "examples": [
         {
           "id": "cl3.5-ex1",
@@ -42,14 +42,14 @@
       ]
     },
     "practise": {
-      "guidedTask": "Write a minimal program that demonstrates if, else and else if decisions. Compile it with warnings enabled, explain each declaration and operation, and record its output.",
-      "independentTask": "Create two test cases for if, else and else if decisions: one normal case and one boundary or failure case. State the expected behaviour before running them, then compare the result and explain any difference.",
+      "guidedTask": "Write and trace a C program demonstrating CL3.5. Record the condition or expression values at each step, then compile with warnings and test boundary cases.",
+      "independentTask": "Create a second program for CL3.5 with a different input range or control-flow structure. Include a boundary case and one invalid or unexpected case; explain why each result occurs.",
       "hints": [
-        "Read the compiler diagnostic carefully; fix the first meaningful error before chasing later messages.",
-        "Use the exact type and format specifier required by the operation.",
-        "Test zero, negative values where valid, maximum/minimum boundaries and invalid input as appropriate.",
-        "Do not dereference an uninitialized, null or expired pointer.",
-        "Prefer defined, portable behaviour over code that merely appears to work on one machine."
+        "Trace each expression and condition in evaluation order.",
+        "Use braces to make control-flow boundaries explicit.",
+        "Check zero, one and boundary iterations where loops are involved.",
+        "Avoid undefined behavior and unintended side effects.",
+        "Test the behavior rather than relying only on visual inspection."
       ]
     }
   },
@@ -62,58 +62,58 @@
     "questions": [
       {
         "id": "cl3.5-q1",
-        "prompt": "Which approach is safest when applying if, else and else if decisions?",
+        "prompt": "When does the else branch execute?",
         "options": [
-          "Follow the C language rules, validate inputs and check relevant return values.",
-          "Assume every compiler and platform behaves identically.",
-          "Ignore warnings whenever the program produces output."
+          "When its associated if condition is false",
+          "Whenever the program starts",
+          "Only when the condition is negative"
         ],
-        "answer": "Follow the C language rules, validate inputs and check relevant return values.",
-        "explanation": "Correct C programming depends on defined behaviour, valid inputs and careful handling of operations that can fail."
+        "answer": "When its associated if condition is false",
+        "explanation": "else is the alternative branch of its associated if."
       },
       {
         "id": "cl3.5-q2",
-        "prompt": "Why should boundary cases be tested?",
+        "prompt": "In an else-if chain, what happens after a condition matches?",
         "options": [
-          "They reveal errors that ordinary inputs may not expose.",
-          "They are unnecessary when one example works.",
-          "They make compiler warnings irrelevant."
+          "That branch runs and the remaining chain is skipped",
+          "Every later branch also runs",
+          "The program must terminate"
         ],
-        "answer": "They reveal errors that ordinary inputs may not expose.",
-        "explanation": "Boundary tests check the edges of valid ranges and important exceptional conditions."
+        "answer": "That branch runs and the remaining chain is skipped",
+        "explanation": "An if/else-if chain selects the first true branch."
       },
       {
         "id": "cl3.5-q3",
-        "prompt": "What does a successful compilation establish?",
+        "prompt": "Which condition should usually come first when ranges overlap?",
         "options": [
-          "The compiler accepted the translation under its selected settings; it does not prove runtime correctness.",
-          "The program is free from all defects.",
-          "The program is portable to every C implementation."
+          "The more specific or narrower condition",
+          "The broadest condition in every case",
+          "A random condition"
         ],
-        "answer": "The compiler accepted the translation under its selected settings; it does not prove runtime correctness.",
-        "explanation": "Compilation is one validation step. Tests, review and correct reasoning are also required."
+        "answer": "The more specific or narrower condition",
+        "explanation": "A broad earlier condition may prevent a narrower branch from being reached."
       },
       {
         "id": "cl3.5-q4",
-        "prompt": "Which practice improves portability?",
+        "prompt": "To which if does an else associate by default?",
         "options": [
-          "Use standard C features and document unavoidable platform assumptions.",
-          "Depend on undocumented compiler extensions.",
-          "Assume int and pointer sizes are fixed everywhere."
+          "The nearest preceding unmatched if",
+          "The first if in the file",
+          "The outermost if always"
         ],
-        "answer": "Use standard C features and document unavoidable platform assumptions.",
-        "explanation": "Portable programs avoid assumptions that the C standard does not guarantee."
+        "answer": "The nearest preceding unmatched if",
+        "explanation": "This is the dangling-else rule."
       },
       {
         "id": "cl3.5-q5",
-        "prompt": "What should you do when a library operation can fail?",
+        "prompt": "For a rule that passes scores >= 50, which values best test the boundary?",
         "options": [
-          "Check its documented result and handle the failure path.",
-          "Assume it always succeeds.",
-          "Continue using its output without checking."
+          "49, 50 and 51",
+          "0, 10 and 1000 only",
+          "50 only"
         ],
-        "answer": "Check its documented result and handle the failure path.",
-        "explanation": "Many standard-library operations report failure through return values or stream indicators."
+        "answer": "49, 50 and 51",
+        "explanation": "Testing immediately below, at and above the boundary reveals off-by-one errors."
       }
     ]
   },

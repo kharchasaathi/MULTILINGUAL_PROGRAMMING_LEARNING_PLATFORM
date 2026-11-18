@@ -6,39 +6,50 @@
   "title": "Decomposition, reusable functions and interface contracts (CodeSaathi extension)",
   "language": "en",
   "learningObjectives": [
-    "Explain the C concept and its rules.",
-    "Trace the example and describe data flow.",
-    "Identify relevant failure and boundary cases.",
-    "Apply the concept in a tested C program."
+    "Break a larger task into functions with focused responsibilities.",
+    "Define preconditions, postconditions and side effects for each function.",
+    "Choose parameter and return types that express the function's contract.",
+    "Handle errors consistently and document ownership rules.",
+    "Test functions independently and test their integration."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "Program decomposition separates a larger task into functions with clear responsibilities. An interface contract states what inputs are valid, what outputs or side effects are produced, and what errors or ownership rules apply.",
+      "concept": "Program decomposition separates a larger task into functions with clear responsibilities. An interface contract states valid inputs, outputs, side effects and error behavior. A reliable function also makes pointer ownership and object lifetime expectations explicit. Good decomposition reduces duplication while keeping each function understandable and testable.",
       "whyItMatters": "Explicit contracts make functions easier to test, reuse and maintain. They also reduce hidden assumptions between callers and callees.",
       "analogy": "Treat the operation as a clearly specified contract between the program and its data.",
       "analogyLimit": "The analogy does not replace C's type, lifetime, I/O and object representation rules."
     },
     "explain": {
-      "narrative": "Program decomposition separates a larger task into functions with clear responsibilities. An interface contract states what inputs are valid, what outputs or side effects are produced, and what errors or ownership rules apply.\n\nCheck all return values, object lifetimes, types and preconditions. Enable compiler warnings and test expected as well as failure paths.",
+      "narrative": "## 1. Decompose by responsibility\n\nSeparate input, validation, calculation, storage and presentation when those tasks have distinct responsibilities. Avoid both one enormous function and excessive fragmentation into meaningless helpers.\n\n## 2. Define the contract\n\nDocument preconditions, postconditions, side effects and failure behavior. State whether pointer parameters may be null and whether the function borrows or owns pointed-to storage.\n\n## 3. Design the interface\n\nUse parameter types that communicate what the function needs. Use const-qualified pointers for read-only access and return values or output parameters to communicate results.\n\n## 4. Handle errors predictably\n\nChoose a consistent error strategy: status return values, documented sentinel values or another explicit interface. Do not silently return plausible but incorrect data after a failure.\n\n## 5. Test at two levels\n\nTest each function against its contract, then test the composition of functions in the complete program. Boundary and failure tests are part of the contract, not optional extras.",
       "examples": [
         {
-          "id": "cl610-ex1",
+          "id": "cl6.10-ex1",
           "language": "en",
-          "title": "Focused C example",
+          "title": "Core example",
           "code": "#include <stdbool.h>\n#include <stddef.h>\nbool average(const int values[], size_t count, double *result) {\n if (values == NULL || result == NULL || count == 0) return false;\n long long sum = 0;\n for (size_t i=0; i<count; ++i) sum += values[i];\n *result = (double)sum / (double)count;\n return true;\n}",
-          "explanation": "The function documents its input requirements through checks, writes the result only when the request is valid and reports success with bool. A production contract should also define the permitted value range and overflow policy for sum.",
+          "explanation": "Trace each declaration, call, expression and return. Check types and boundary conditions.",
+          "runnable": false
+        },
+        {
+          "id": "cl6.10-ex2",
+          "language": "en",
+          "title": "Apply the function contract",
+          "code": "#include <stdbool.h>\n#include <stddef.h>\nbool average(const int values[], size_t count, double *result) { if (values == NULL || result == NULL || count == 0) return false; long long sum = 0; for (size_t i=0; i<count; ++i) sum += values[i]; *result = (double)sum / (double)count; return true; }\nint main(void) { int values[] = {2,4,6}; double result; return average(values,3,&result) ? 0 : 1; }",
+          "explanation": "This second example reinforces the function contract. Compile with warnings and test both valid and boundary inputs.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Identify the preconditions, postconditions and failure result.",
-      "independentTask": "Decompose a small inventory report into input validation, calculation and output functions. Write a contract for each function.",
+      "guidedTask": "Implement a focused C program demonstrating CL6.10. State the function's inputs, output, preconditions and failure behavior before coding.",
+      "independentTask": "Create a second implementation of CL6.10 with a clear interface contract. Add tests for ordinary input, boundary input and a failure or invalid case; explain the result.",
       "hints": [
-        "A function contract should state pointer nullability, array count, ownership and mutation.",
-        "Keep I/O separate from calculation when that makes the logic easier to test.",
-        "Choose return values that distinguish valid results from failure."
+        "Write the function prototype before its implementation.",
+        "Trace argument values and return paths explicitly.",
+        "Check pointer validity and object lifetime where relevant.",
+        "Use compiler warnings to catch type mismatches.",
+        "Test boundary cases and failure paths."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl610-q1",
-        "prompt": "Which statement best describes the lesson?",
+        "id": "cl6.10-q1",
+        "prompt": "What is program decomposition?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "Separating a larger task into functions with focused responsibilities",
+          "Putting all code into one function",
+          "Removing all function parameters"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the C rule described in the lesson."
+        "answer": "Separating a larger task into functions with focused responsibilities",
+        "explanation": "Decomposition separates responsibilities into manageable units."
       },
       {
-        "id": "cl610-q2",
-        "prompt": "What should be verified before using this feature?",
+        "id": "cl6.10-q2",
+        "prompt": "What does a function precondition describe?",
         "options": [
-          "Types, preconditions, object validity and relevant return values.",
-          "Only the source file name.",
-          "Whether a single run appeared successful."
+          "What must be true before the function is called",
+          "What happens after the program exits",
+          "The function's file name"
         ],
-        "answer": "Types, preconditions, object validity and relevant return values.",
-        "explanation": "C correctness depends on valid objects, correct types and checked operations."
+        "answer": "What must be true before the function is called",
+        "explanation": "Preconditions define valid call conditions."
       },
       {
-        "id": "cl610-q3",
-        "prompt": "Which practice improves reliability?",
+        "id": "cl6.10-q3",
+        "prompt": "What should an interface contract describe?",
         "options": [
-          "Compile with warnings and test normal and failure paths.",
-          "Ignore I/O and compiler diagnostics.",
-          "Assume all environments behave identically."
+          "Inputs, outputs, side effects and failure behavior",
+          "Only indentation style",
+          "Only CPU architecture"
         ],
-        "answer": "Compile with warnings and test normal and failure paths.",
-        "explanation": "Diagnostics and tests provide evidence for program behaviour."
+        "answer": "Inputs, outputs, side effects and failure behavior",
+        "explanation": "A contract communicates how the function is expected to be used."
+      },
+      {
+        "id": "cl6.10-q4",
+        "prompt": "Why document pointer ownership?",
+        "options": [
+          "To prevent leaks, double frees and dangling references",
+          "To make pointers print shorter",
+          "To remove the need for null checks"
+        ],
+        "answer": "To prevent leaks, double frees and dangling references",
+        "explanation": "Ownership clarity establishes who releases storage and how long it may be used."
+      },
+      {
+        "id": "cl6.10-q5",
+        "prompt": "How should a function be verified?",
+        "options": [
+          "Test its contract and its integration with other functions",
+          "Only inspect its name",
+          "Assume it works if it compiles"
+        ],
+        "answer": "Test its contract and its integration with other functions",
+        "explanation": "Unit and integration tests cover different aspects of behavior."
       }
     ]
   },

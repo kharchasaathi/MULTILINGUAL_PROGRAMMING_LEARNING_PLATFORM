@@ -6,39 +6,63 @@
   "title": "stdlib.h: conversion, allocation, sorting/searching and process utilities",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept or reference contract.",
-    "Trace the example and justify its behaviour.",
-    "Identify relevant assumptions and edge cases.",
-    "Apply the skill in a documented exercise."
+    "Identify the purpose of the commonly used conversion, allocation, sorting, searching, random-number and process-control facilities declared by <stdlib.h>.",
+    "Use strtol with an end pointer, errno and range checks to distinguish valid integer text from malformed or out-of-range input.",
+    "Allocate and resize dynamic storage with malloc and realloc while preserving ownership and checking size arithmetic and allocation results.",
+    "Write a qsort comparison function that defines a consistent ordering without risking integer overflow.",
+    "Use bsearch only on an array sorted according to the same comparison relation used by the search.",
+    "Explain the limitations of rand and the correct use of standard process termination status macros."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL1.1",
+    "CL1.2",
+    "CL2.1",
+    "CL3.1",
+    "CL4.1",
+    "CL5.1",
+    "CL5.3",
+    "CL6.1",
+    "CL12.1",
+    "CL12.2"
+  ],
   "stages": {
     "understand": {
-      "concept": "stdlib.h declares general utilities including strtol-family conversions, malloc-family allocation, qsort, bsearch, rand and process termination functions. Each interface has specific preconditions and return-value rules.",
-      "whyItMatters": "This header contains widely used facilities, but their contracts differ: parsing needs range checks, allocation needs ownership, and sorting/searching needs consistent comparison rules.",
-      "analogy": "Treat a reference or learning task as a contract that states what is expected and how success is checked.",
-      "analogyLimit": "The analogy does not replace the exact C standard or library specification."
+      "concept": "The C standard library header <stdlib.h> declares general-purpose utilities. Important groups include numeric text conversion (strtol, strtoul, strtod), dynamic memory management (malloc, calloc, realloc, free), sorting and searching (qsort, bsearch), pseudo-random number generation (rand, srand), and process control (exit, abort, EXIT_SUCCESS, EXIT_FAILURE). These functions do not share one generic success rule: each function has its own return-value and precondition contract.",
+      "whyItMatters": "These utilities appear in command-line programs, collections and data-processing tasks. Incorrect conversion checks can accept bad input, incorrect allocation handling can lose memory or access invalid storage, and mismatched sorting/searching comparators can make a search return the wrong result.",
+      "analogy": "Think of <stdlib.h> as a toolbox with different tools: a measuring tool for conversion, storage tools for memory, ordering tools for sorting and searching, and control tools for ending a program.",
+      "analogyLimit": "A toolbox analogy does not imply that the functions are interchangeable. Read and follow each function's exact C library contract, including its preconditions, return values and ownership rules."
     },
     "explain": {
-      "narrative": "stdlib.h declares general utilities including strtol-family conversions, malloc-family allocation, qsort, bsearch, rand and process termination functions. Each interface has specific preconditions and return-value rules.\n\nUse authoritative declarations and documentation, state assumptions explicitly and verify behaviour with focused examples. Where the implementation or C version matters, record it.",
+      "narrative": "## 1. Numeric text conversion\n\n`strtol`, `strtoul` and `strtod` convert an initial portion of a string to a numeric value. They accept leading white space and can stop before the end of the string. Supply an end-pointer argument so the caller can detect whether any characters were converted and whether unexpected trailing characters remain. Set `errno` to zero before the call; for `strtol`, check `errno == ERANGE` and also check whether the result fits the destination type. A successful conversion of a prefix is not automatically validation of the whole input. For strict input, decide whether trailing white space is allowed and reject any other trailing text.\n\n`atoi` is unsuitable when reliable error detection is required because it does not provide the same end-pointer and range-reporting mechanism. Choose a conversion function whose contract exposes the errors the program needs to handle.\n\n## 2. Dynamic memory\n\n`malloc(n)` requests storage for `n` bytes and returns either a pointer to allocated storage or a null pointer. The bytes are uninitialized. `calloc(count, size)` allocates space for an array and initializes all bits to zero. `realloc(old, new_size)` may move a block; on success it returns the new pointer, while on failure with a nonzero requested size the original block remains allocated and unchanged. Therefore, assign the result to a temporary pointer first. Check multiplication and capacity growth before computing allocation sizes, and call `free` exactly once for each still-owned allocation. Do not use a pointer after its allocation has been freed or moved by a successful `realloc`.\n\n## 3. Sorting and searching\n\n`qsort` sorts an array of `count` elements, each `size` bytes, using a comparator. The comparator returns a negative value when the first element precedes the second, zero when they compare equal, and a positive value when the first follows the second. Do not compare integers by subtracting them: subtraction can overflow. Use relational comparisons instead. The comparator must provide a consistent ordering for the values being sorted.\n\n`bsearch` searches an array that is already sorted according to the same comparison relation. It returns a pointer to a matching element or a null pointer when no match is found. Searching an unsorted array, or using a different ordering rule from the one used to sort it, violates the required precondition and does not produce a reliable result. If duplicate keys exist, `bsearch` does not promise which matching duplicate is returned.\n\n## 4. Pseudo-random values and process control\n\n`rand` returns a pseudo-random integer in the inclusive range from zero through `RAND_MAX`. Calling `srand` selects the starting seed for the sequence; programs commonly seed once when starting, not before every generated value. The sequence is deterministic for a given implementation and seed. The standard generator is not suitable for cryptographic secrets, and simple modulo reduction can introduce distribution bias when the range does not divide evenly into `RAND_MAX + 1`.\n\n`exit(EXIT_SUCCESS)` and `exit(EXIT_FAILURE)` terminate the program and communicate a success or failure status to the host environment. `exit` performs normal termination processing, including calling functions registered with `atexit` and flushing/closing standard I/O streams. `abort` requests abnormal termination and is not a substitute for reporting an ordinary error. Returning from `main` is equivalent to normal termination with the returned status.\n\n## 5. Choosing and checking an interface\n\nBefore using a facility, identify its input constraints, result representation, failure signal, ownership effects and any ordering or initialization precondition. Test normal, boundary and failure cases. The examples below are independent C11 programs and can be compiled as separate translation units.",
       "examples": [
         {
           "id": "cl123-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\n#include <stdlib.h>\nint compare(const void *a, const void *b) {\n int x = *(const int *)a, y = *(const int *)b;\n return (x > y) - (x < y);\n}\nint main(void) {\n int values[] = {4, 1, 3};\n qsort(values, 3, sizeof values[0], compare);\n printf(\"%d\\n\", values[0]);\n return EXIT_SUCCESS;\n}",
-          "explanation": "qsort sorts the array using the supplied comparator. EXIT_SUCCESS is a standard termination status macro declared by stdlib.h.",
-          "runnable": false
+          "title": "Parse integer text and grow a dynamic array safely",
+          "code": "#include <ctype.h>\n#include <errno.h>\n#include <limits.h>\n#include <stdint.h>\n#include <stdio.h>\n#include <stdlib.h>\n\nstatic int parse_int(const char *text, int *result)\n{\n    char *end = NULL;\n    long value;\n\n    errno = 0;\n    value = strtol(text, &end, 10);\n    if (text == end || errno == ERANGE || value < INT_MIN || value > INT_MAX) {\n        return 0;\n    }\n    while (*end != '\\0' && isspace((unsigned char)*end)) {\n        ++end;\n    }\n    if (*end != '\\0') {\n        return 0;\n    }\n    *result = (int)value;\n    return 1;\n}\n\nstatic int append_int(int **items, size_t *count, size_t *capacity, int value)\n{\n    if (*count == *capacity) {\n        size_t new_capacity = (*capacity == 0U) ? 2U : *capacity * 2U;\n        int *temporary;\n\n        if (new_capacity < *capacity || new_capacity > SIZE_MAX / sizeof **items) {\n            return 0;\n        }\n        temporary = realloc(*items, new_capacity * sizeof **items);\n        if (temporary == NULL) {\n            return 0;\n        }\n        *items = temporary;\n        *capacity = new_capacity;\n    }\n    (*items)[*count] = value;\n    ++(*count);\n    return 1;\n}\n\nint main(void)\n{\n    const char *input[] = {\" 42 \", \"-7\", \"12x\", \"999999999999999999999999\"};\n    int *values = NULL;\n    size_t count = 0U;\n    size_t capacity = 0U;\n    size_t i;\n\n    for (i = 0U; i < sizeof input / sizeof input[0]; ++i) {\n        int parsed;\n        if (parse_int(input[i], &parsed)) {\n            if (!append_int(&values, &count, &capacity, parsed)) {\n                fputs(\"Could not grow the array.\\n\", stderr);\n                free(values);\n                return EXIT_FAILURE;\n            }\n            printf(\"Accepted: %d\\n\", parsed);\n        } else {\n            printf(\"Rejected: %s\\n\", input[i]);\n        }\n    }\n\n    printf(\"Stored %zu value(s).\\n\", count);\n    free(values);\n    return EXIT_SUCCESS;\n}\n",
+          "explanation": "The parser uses strtol's end pointer and errno, rejects trailing non-white-space text and verifies the int range. The append routine checks capacity arithmetic and uses a temporary pointer for realloc, so a failed resize does not overwrite the only pointer to the old allocation. The caller releases the owned block with free.",
+          "runnable": true
+        },
+        {
+          "id": "cl123-ex2",
+          "language": "en",
+          "title": "Sort records with qsort and locate one with bsearch",
+          "code": "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct {\n    int id;\n    const char *label;\n} Item;\n\nstatic int compare_item_id(const void *left, const void *right)\n{\n    const Item *a = left;\n    const Item *b = right;\n\n    return (a->id > b->id) - (a->id < b->id);\n}\n\nint main(void)\n{\n    Item items[] = {{30, \"Gamma\"}, {10, \"Alpha\"}, {20, \"Beta\"}};\n    const size_t count = sizeof items / sizeof items[0];\n    Item key = {20, NULL};\n    Item *found;\n    size_t i;\n\n    qsort(items, count, sizeof items[0], compare_item_id);\n    for (i = 0U; i < count; ++i) {\n        printf(\"%d: %s\\n\", items[i].id, items[i].label);\n    }\n\n    found = bsearch(&key, items, count, sizeof items[0], compare_item_id);\n    if (found != NULL) {\n        printf(\"Found ID %d (%s).\\n\", found->id, found->label);\n    } else {\n        puts(\"ID not found.\");\n    }\n    return EXIT_SUCCESS;\n}\n",
+          "explanation": "The comparator compares IDs using relational operators rather than subtraction, avoiding signed overflow. qsort establishes ascending ID order, and bsearch uses exactly the same comparator and element size to find the key. The array is already sorted before the search begins.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Name three stdlib.h facilities and state the risk or precondition for each.",
-      "independentTask": "Use strtol to parse an integer, malloc to allocate a collection and qsort to order it. Check every relevant result.",
+      "guidedTask": "Compile each example as a separate C11 program. In the first, add input cases for an empty string, a value just outside the int range, leading white space, trailing letters and trailing white space. In the second, change the key to an absent ID and observe the null result. Explain which library contract determines each outcome.",
+      "independentTask": "Write a small record manager that reads whole-line integer IDs with strtol, stores accepted records in a dynamically resized array, sorts them with qsort and searches for an ID with bsearch. Reject malformed and out-of-range input, check every allocation, keep the array sorted before searching, and free all owned memory on every exit path. State why rand must not be used to generate passwords or other secrets.",
       "hints": [
-        "Use strtol's end pointer and range information when parsing untrusted text.",
-        "Check allocation results before accessing allocated storage.",
-        "qsort's comparator must define a consistent ordering."
+        "Set errno to zero immediately before a conversion call and inspect it after the call.",
+        "Use the end pointer to distinguish no conversion from a valid numeric prefix followed by unwanted text.",
+        "Check both the source value's range and the destination type's limits before narrowing a converted value.",
+        "Store realloc's return value in a temporary pointer; only replace the original pointer after success.",
+        "Use relational comparisons in a qsort comparator instead of returning a subtraction result.",
+        "Sort and search with the same comparison rule; bsearch does not sort the array for you."
       ]
     }
   },
@@ -51,36 +75,58 @@
     "questions": [
       {
         "id": "cl123-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "After strtol converts the beginning of a string, what is the main purpose of its end-pointer argument?",
         "options": [
-          "The learning or C language principle described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "It identifies the first character not consumed by the conversion.",
+          "It reports the amount of allocated memory.",
+          "It stores the converted number as a string."
         ],
-        "answer": "The learning or C language principle described in this lesson.",
-        "explanation": "The correct choice follows the concept or reference contract described above."
+        "answer": "It identifies the first character not consumed by the conversion.",
+        "explanation": "The caller uses the end pointer to detect whether conversion occurred and whether trailing characters remain."
       },
       {
         "id": "cl123-q2",
-        "prompt": "What should be checked before applying the concept?",
+        "prompt": "Why should a program assign realloc's result to a temporary pointer first?",
         "options": [
-          "Its exact requirements, assumptions and edge cases.",
-          "Only the function or topic name.",
-          "Whether an unrelated example compiles."
+          "A failed realloc with a nonzero size leaves the original allocation valid, and assigning directly could lose its pointer.",
+          "realloc always returns a different address.",
+          "A temporary pointer automatically frees the old allocation."
         ],
-        "answer": "Its exact requirements, assumptions and edge cases.",
-        "explanation": "Reliable use depends on understanding the actual contract."
+        "answer": "A failed realloc with a nonzero size leaves the original allocation valid, and assigning directly could lose its pointer.",
+        "explanation": "If realloc fails, it returns null while the old block remains allocated. Overwriting the only old pointer would leak that block."
       },
       {
         "id": "cl123-q3",
-        "prompt": "Which practice best demonstrates understanding?",
+        "prompt": "Which comparator expression safely orders two int values without subtraction overflow?",
         "options": [
-          "Explain the reasoning and test representative and boundary cases.",
-          "Memorize an output without explanation.",
-          "Ignore invalid input."
+          "(a > b) - (a < b)",
+          "a - b",
+          "a / b"
         ],
-        "answer": "Explain the reasoning and test representative and boundary cases.",
-        "explanation": "Reasoning and targeted tests demonstrate transferable understanding."
+        "answer": "(a > b) - (a < b)",
+        "explanation": "Relational comparisons produce zero or one, so their difference is -1, 0 or 1 without subtracting the potentially extreme input values."
+      },
+      {
+        "id": "cl123-q4",
+        "prompt": "What must be true before bsearch is used on an array?",
+        "options": [
+          "The array must already be sorted according to the same comparison relation used by bsearch.",
+          "The array must contain only positive numbers.",
+          "The array must have been allocated by calloc."
+        ],
+        "answer": "The array must already be sorted according to the same comparison relation used by bsearch.",
+        "explanation": "bsearch requires the array to be sorted consistently with the comparator supplied for the search."
+      },
+      {
+        "id": "cl123-q5",
+        "prompt": "Which statement about rand is correct?",
+        "options": [
+          "It generates pseudo-random values and is not suitable for cryptographic secrets.",
+          "It produces unpredictable cryptographic values on every implementation.",
+          "Calling srand before every rand call guarantees unbiased values."
+        ],
+        "answer": "It generates pseudo-random values and is not suitable for cryptographic secrets.",
+        "explanation": "rand is a standard pseudo-random generator, not a cryptographic random source; modulo reduction can also introduce bias."
       }
     ]
   },

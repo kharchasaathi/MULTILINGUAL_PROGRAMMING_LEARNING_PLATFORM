@@ -6,39 +6,69 @@
   "title": "Portability across compilers, operating systems and architectures",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its relevant rules.",
-    "Trace the example and justify its behaviour.",
-    "Identify important assumptions and failure cases.",
-    "Apply the concept in a reviewed and tested exercise."
+    "Separate ISO C guarantees, implementation-defined choices, unspecified behaviour, undefined behaviour and compiler or operating-system extensions when evaluating portability.",
+    "Write code without assuming fixed widths for int, bytes, pointers, structure layout, alignment or byte order.",
+    "Use standard headers, optional exact-width integer types and documented feature checks instead of guessing platform capabilities.",
+    "Design portable file, text, binary-data and operating-system interfaces without relying on host-specific path, newline or ABI assumptions.",
+    "Configure and test builds across multiple compilers, language modes, operating systems and architectures while recording the tested matrix.",
+    "Explain why successful compilation on one target is not proof of portability and create targeted tests for representation, limits and platform boundaries."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL1.2",
+    "CL1.7",
+    "CL2.4",
+    "CL2.6",
+    "CL2.8",
+    "CL4.10",
+    "CL5.5",
+    "CL7.1",
+    "CL7.12",
+    "CL12.1",
+    "CL12.9",
+    "CL14.1",
+    "CL14.2",
+    "CL14.4",
+    "CL14.5",
+    "CL14.7"
+  ],
   "stages": {
     "understand": {
-      "concept": "Portable C relies on standard language and library guarantees, avoids undocumented extensions, checks implementation-defined properties and handles differences in integer widths, alignment, file modes and toolchain behaviour.",
-      "whyItMatters": "Software that works on one machine may fail elsewhere if it relies on assumptions about sizes, byte order, path syntax or compiler extensions.",
-      "analogy": "Treat standards, interfaces and release steps as explicit contracts that make assumptions visible.",
-      "analogyLimit": "The analogy does not replace the C standard, implementation documentation or project-specific requirements."
+      "concept": "**Portability** means that a program's required behaviour can be preserved across the implementations and environments it claims to support. C provides a common language and library contract, but implementations still differ in supported language versions, optional facilities, integer ranges, object representations, alignment, file-system interfaces, ABI rules and compiler extensions. A program is not portable merely because it compiles on two machines; its assumptions and observable results must also remain valid.\n\nStart by separating five categories. A **standard guarantee** is required by the selected C standard. An **implementation-defined behaviour** is chosen by the implementation and documented by it. An **unspecified behaviour** permits one of several possibilities without requiring the implementation to document which is selected. **Undefined behaviour** gives the standard no requirements for that execution. A **platform or compiler extension** belongs to an implementation-specific contract, not automatically to ISO C. CL14.2 introduced the behaviour categories; portability work uses them to decide what must be avoided, documented or tested.\n\n**Do not assume machine sizes.** `sizeof` reports a size in C bytes, and one C byte is `CHAR_BIT` bits; it is not universally guaranteed to be eight bits. `sizeof(char)` is always 1, but `sizeof(int)`, pointer sizes and other object sizes can differ. Use `size_t` for object sizes and the `%zu` format specifier for `size_t`. Use `sizeof object` rather than a remembered byte count when allocating storage. Check numeric limits with `<limits.h>` and floating-point properties with `<float.h>` rather than assuming a type's range or precision.\n\nThe exact-width types such as `uint32_t` and `int32_t` from `<stdint.h>` are optional: an implementation defines them only when it provides a type with exactly that width and the required representation. The least-width and fast-width families have different guarantees. `uint_least32_t` means at least 32 value bits; it does not mean exactly 32. Choose a type according to the contract: `size_t` for sizes, `ptrdiff_t` for pointer differences, `intmax_t` for the widest supported signed integer, and exact-width types only when the external format truly requires that width and the type is available. Check the corresponding limit macros before using optional exact-width types.\n\n**Avoid object-layout assumptions.** Structure members may have padding; alignment requirements and `sizeof(struct)` can differ between ABIs. Do not serialize a structure by writing its raw memory and expecting another compiler or architecture to read the same bytes. Padding bytes, member representation, alignment and endianness can differ, and pointers or floating-point objects are not portable wire formats. Define a byte-level external format and encode/decode each field explicitly. If a protocol specifies 32-bit big-endian integers, write four octets in that order rather than dumping a native `uint32_t` or a structure. The code must also account for whether the implementation provides 8-bit bytes and the required exact-width type.\n\n**Treat text and files deliberately.** ISO C text streams may translate external representations; binary streams preserve the bytes the implementation supports, but the representation of arbitrary objects is still not a portable interchange format. Text files can differ in newline conventions, character encodings and locale-sensitive formatting. Use standard text functions for text, binary mode for defined byte formats, explicit encoding rules for external text and checked return values for every I/O operation. File-name syntax, directory separators, permissions, atomic rename behaviour and path-length limits are not fully standardized by ISO C. Keep platform-specific file-system code behind a small interface and implement it separately for each supported platform.\n\n**Separate ISO C from operating-system APIs.** POSIX calls, Windows APIs, compiler intrinsics, inline assembly, linker scripts, environment variables and shared-library loading conventions are outside the portable ISO C interface. They may be appropriate, but identify them as dependencies and isolate them behind a platform layer. Prefer standard library facilities where they meet the requirement. Use documented feature-test macros or build-system compile/link probes for optional APIs; do not infer support solely from an operating-system name or compiler brand. A declaration being present in a header does not always prove the corresponding library symbol is available at link time.\n\n**Build a target matrix.** Record supported compiler versions, C language modes, operating systems, architectures, library/runtime versions and required options. Compile every translation unit with consistent warning flags, then run tests on the actual targets or reliable target environments. Cross-compilation can check target compilation and linking, but execution still needs target hardware, a simulator, an emulator or a trustworthy test service. Test boundary values, file behaviour, binary-format bytes, locale assumptions and platform adapters. A clean build on one host is only one data point, not a portability guarantee.",
+      "whyItMatters": "Portable software survives compiler upgrades, new operating systems, different processor widths and deployment environments without relying on accidental properties of one developer's machine. Explicit contracts reduce data corruption, build failures and security defects caused by assumptions about sizes, paths, object layouts or platform APIs.",
+      "analogy": "A portable program is like a document with a clearly specified format: different devices can use it because the rules describe the content, not the private layout of one device's memory.",
+      "analogyLimit": "The analogy does not remove implementation differences. C still permits documented implementation-defined choices and optional facilities, so a real portability claim must name its target matrix and state which implementation contracts it relies on."
     },
     "explain": {
-      "narrative": "Portable C relies on standard language and library guarantees, avoids undocumented extensions, checks implementation-defined properties and handles differences in integer widths, alignment, file modes and toolchain behaviour.\n\nState assumptions and constraints, consult the applicable standard or tool documentation, and verify the result with appropriate compiler diagnostics and tests. Separate portable guarantees from implementation-specific behaviour.",
+      "narrative": "**1. Begin with the supported-target contract.** Write down which C standard modes, compilers, versions, operating systems, architectures and library runtimes are supported. A project cannot meaningfully claim portability to every possible C implementation if it relies on an optional type, a POSIX API or a compiler intrinsic. Make the boundary explicit.\n\n**2. Use the right type for the job.** Use `size_t` for sizes and object counts, `ptrdiff_t` for pointer differences, and `<limits.h>` for integer limits. `sizeof` counts C bytes, whose bit count is `CHAR_BIT`. Use exact-width integer types only when the implementation provides them and the external contract requires that exact width. If a format requires a 32-bit unsigned field, verify `UINT32_MAX` is defined before depending on `uint32_t`; do not silently substitute `unsigned long` and assume its width.\n\n**3. Define external bytes, not native memory.** Never write an entire structure, pointer or floating-point object to a file as a portable interchange format. Define field widths, byte order, character encoding and versioning. Encode and decode bytes explicitly. The second example writes and reads a four-byte big-endian integer using shifts and masks; it does not depend on host endianness or structure padding. It intentionally requires an implementation with 8-bit bytes and `uint32_t`, and demonstrates how to state that requirement rather than pretending it is universal.\n\n**4. Isolate platform-specific behaviour.** Put OS APIs, path construction, directory enumeration, permissions and platform-specific timing behind a small interface. Keep the rest of the program in ISO C where possible. Probe optional declarations and link symbols using the build system, and document the platform implementation selected. Do not scatter operating-system `#ifdef` branches throughout business logic.\n\n**5. Make build configuration reproducible.** Use explicit language-mode options and warning flags; record compiler versions and target triples. Compile and link every translation unit for every supported target. Distinguish a successful cross-compile from a successful runtime test. Keep compiler extensions intentional and identify them in the portability contract.\n\n**6. Test portability assumptions directly.** Test numeric limits, empty and maximum-size inputs, file read/write failures, text encoding boundaries, binary byte sequences and target-specific adapters. Run the same behavioural test suite on each supported platform. Compare semantic results, not raw structure bytes or output formatting that the specification leaves locale-dependent.",
       "examples": [
         {
           "id": "cl148-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\n#include <limits.h>\n#include <stdint.h>\nint main(void) {\n printf(\"CHAR_BIT=%d INT_MAX=%d\\n\", CHAR_BIT, INT_MAX);\n#ifdef UINT32_MAX\n printf(\"uint32_t is available\\n\");\n#endif\n return 0;\n}",
-          "explanation": "CHAR_BIT and INT_MAX expose implementation properties. UINT32_MAX is defined when the corresponding exact-width unsigned type is available.",
-          "runnable": false
+          "title": "Inspect implementation properties without assuming fixed sizes",
+          "code": "#include <limits.h>\n#include <stddef.h>\n#include <stdint.h>\n#include <stdio.h>\n\nint main(void) {\n    printf(\"CHAR_BIT=%d\\n\", CHAR_BIT);\n    printf(\"sizeof(char)=%zu\\n\", sizeof(char));\n    printf(\"sizeof(int)=%zu INT_MAX=%d\\n\", sizeof(int), INT_MAX);\n    printf(\"sizeof(void *)=%zu\\n\", sizeof(void *));\n    printf(\"sizeof(size_t)=%zu\\n\", sizeof(size_t));\n#ifdef UINT32_MAX\n    printf(\"exact 32-bit unsigned integer: available\\n\");\n#else\n    printf(\"exact 32-bit unsigned integer: unavailable\\n\");\n#endif\n    return 0;\n}",
+          "explanation": "The program reports properties selected by the implementation instead of assuming int or pointers have a particular size. sizeof returns a count of C bytes, and CHAR_BIT gives the number of bits in each C byte. The UINT32_MAX test checks whether the optional exact-width uint32_t family is available. The output is expected to differ across some implementations; that difference is the point of the inspection. The %zu conversion specifier is for size_t.",
+          "runnable": true
+        },
+        {
+          "id": "cl148-ex2",
+          "language": "en",
+          "title": "Encode and decode a fixed byte order instead of dumping native objects",
+          "code": "#include <inttypes.h>\n#include <limits.h>\n#include <stdint.h>\n#include <stdio.h>\n\n#if CHAR_BIT != 8\n#error \"This four-octet format requires 8-bit C bytes\"\n#endif\n#ifndef UINT32_MAX\n#error \"This example requires an exact 32-bit unsigned integer type\"\n#endif\n\nstatic void encode_be32(uint32_t value, unsigned char out[4]) {\n    out[0] = (unsigned char)(value >> 24);\n    out[1] = (unsigned char)(value >> 16);\n    out[2] = (unsigned char)(value >> 8);\n    out[3] = (unsigned char)value;\n}\n\nstatic uint32_t decode_be32(const unsigned char in[4]) {\n    return ((uint32_t)in[0] << 24) |\n           ((uint32_t)in[1] << 16) |\n           ((uint32_t)in[2] << 8) |\n           (uint32_t)in[3];\n}\n\nint main(void) {\n    const uint32_t original = UINT32_C(0x1234ABCD);\n    unsigned char bytes[4];\n    encode_be32(original, bytes);\n    printf(\"bytes=%02X %02X %02X %02X\\n\",\n           (unsigned)bytes[0], (unsigned)bytes[1],\n           (unsigned)bytes[2], (unsigned)bytes[3]);\n    printf(\"decoded=%\" PRIu32 \"\\n\", decode_be32(bytes));\n    return 0;\n}",
+          "explanation": "The external format is defined as four 8-bit bytes in big-endian order. Encoding and decoding use shifts and masks, so the result does not depend on the host machine's native byte order, structure padding or alignment. The compile-time checks make the requirements explicit: this example is not suitable for an implementation without 8-bit C bytes or an exact uint32_t type. A real file or network protocol should also specify versioning, validation, I/O failure handling and any permitted value ranges.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "List three assumptions that can make C code non-portable.",
-      "independentTask": "Build and test a small project with two compilers or target environments. Record differences and remove unnecessary assumptions.",
+      "guidedTask": "Build Example 1 with two available compilers and compare the reported properties. Build Example 2 with strict C11 and C17 warnings, inspect its four encoded bytes, and explain why the same bytes are produced on little-endian and big-endian hosts. Then inspect a sample structure and explain why sizeof(struct) and its raw memory image are not a portable file format.",
+      "independentTask": "Create a portability plan for a small multi-file C application. Define its target matrix, standard-library boundary, optional type requirements, binary/text file contract, OS-specific adapter, compiler feature probes, cross-compilation policy and runtime test evidence. Include at least five assumptions you will test rather than guess.",
       "hints": [
-        "Use standard types and headers rather than assuming int is 32 bits.",
-        "Check feature availability and compiler extensions explicitly.",
-        "Avoid hard-coded structure layouts and platform-specific path assumptions."
+        "sizeof counts C bytes; use CHAR_BIT when the number of bits per byte matters.",
+        "Do not assume int, long, pointers or structure sizes have universal widths.",
+        "Exact-width integer typedefs are optional; check the corresponding limit macro before using one.",
+        "Do not serialize structures or pointers by writing their raw object representation.",
+        "Separate ISO C facilities from POSIX, Windows and compiler-specific extensions.",
+        "A successful cross-compile checks compilation and linking, not necessarily runtime behaviour on the target."
       ]
     }
   },
@@ -51,36 +81,58 @@
     "questions": [
       {
         "id": "cl148-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What does sizeof report in C?",
         "options": [
-          "The C or learning principle described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "A count of 8-bit octets on every implementation.",
+          "A count of C bytes; CHAR_BIT specifies the number of bits in each C byte.",
+          "The number of bits in an object, including padding."
         ],
-        "answer": "The C or learning principle described in this lesson.",
-        "explanation": "The correct choice follows the concept and constraints described above."
+        "answer": "A count of C bytes; CHAR_BIT specifies the number of bits in each C byte.",
+        "explanation": "A C byte is the size of char and may contain a number of bits specified by CHAR_BIT; it is not universally guaranteed to be eight bits."
       },
       {
         "id": "cl148-q2",
-        "prompt": "What should be checked before applying the concept?",
+        "prompt": "Why should a program check whether UINT32_MAX is defined before using uint32_t?",
         "options": [
-          "The exact rules, assumptions and failure cases.",
-          "Only the file name.",
-          "Whether one unrelated example runs."
+          "Because exact-width integer typedefs are optional and exist only when the implementation supports the required width and representation.",
+          "Because uint32_t is always a floating-point type.",
+          "Because UINT32_MAX selects the machine's byte order."
         ],
-        "answer": "The exact rules, assumptions and failure cases.",
-        "explanation": "Reliable C engineering depends on understanding the applicable contract."
+        "answer": "Because exact-width integer typedefs are optional and exist only when the implementation supports the required width and representation.",
+        "explanation": "The exact-width typedef family is provided only when the implementation has a matching type."
       },
       {
         "id": "cl148-q3",
-        "prompt": "Which practice provides stronger evidence?",
+        "prompt": "Why is writing an entire structure with fwrite not a portable interchange format?",
         "options": [
-          "Use documented standards, diagnostics and targeted tests.",
-          "Assume one compiler's behaviour is universal.",
-          "Ignore warnings and boundary cases."
+          "Because fwrite cannot write structures.",
+          "Because structure padding, member representation, alignment and byte order can differ between implementations.",
+          "Because structures cannot contain integer members."
         ],
-        "answer": "Use documented standards, diagnostics and targeted tests.",
-        "explanation": "Multiple forms of evidence help distinguish guarantees from assumptions."
+        "answer": "Because structure padding, member representation, alignment and byte order can differ between implementations.",
+        "explanation": "Portable external formats define fields and byte order explicitly instead of depending on a compiler's native object layout."
+      },
+      {
+        "id": "cl148-q4",
+        "prompt": "Which statement about POSIX or Windows APIs is correct?",
+        "options": [
+          "They are all guaranteed by ISO C.",
+          "They are platform interfaces and should be treated as explicit dependencies, often isolated behind an adapter.",
+          "They are automatically available whenever stdio.h is included."
+        ],
+        "answer": "They are platform interfaces and should be treated as explicit dependencies, often isolated behind an adapter.",
+        "explanation": "ISO C does not standardize all operating-system APIs. A portability boundary makes platform dependencies visible and testable."
+      },
+      {
+        "id": "cl148-q5",
+        "prompt": "What does a successful cross-compilation prove by itself?",
+        "options": [
+          "The program will behave correctly on the target hardware.",
+          "The target compilation and linking succeeded under that toolchain; runtime behaviour still needs target execution or suitable emulation/testing.",
+          "Every operating system will accept the same binary."
+        ],
+        "answer": "The target compilation and linking succeeded under that toolchain; runtime behaviour still needs target execution or suitable emulation/testing.",
+        "explanation": "Compilation and linking do not exercise target runtime, filesystem, ABI or hardware behaviour."
       }
     ]
   },

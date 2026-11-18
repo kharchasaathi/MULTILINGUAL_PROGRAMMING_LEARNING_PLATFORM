@@ -6,39 +6,56 @@
   "title": "Command-line arguments: argc and argv",
   "language": "en",
   "learningObjectives": [
-    "Explain the topic and its C rules.",
-    "Trace the example and explain its data or control flow.",
-    "Identify edge cases and resource-management requirements.",
-    "Apply the concept in a tested C program."
+    "Describe main's argc and argv parameters and explain their roles in a hosted C program.",
+    "Explain valid argument indexes and the null pointer sentinel at argv[argc].",
+    "Validate argc before accessing an argument and treat argument strings as external input.",
+    "Parse numeric arguments with strtol and check digit consumption, trailing text and range errors.",
+    "Design usage messages and distinct success and failure exit statuses.",
+    "Test missing, extra, malformed, boundary and quoted command-line arguments."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL4.4 Formatted I/O",
+    "CL5.3 Pointers and arrays",
+    "CL8.10 Input validation"
+  ],
   "stages": {
     "understand": {
-      "concept": "A hosted C program may receive command-line arguments through main's argc and argv parameters. argc counts the argument strings, and argv points to an array of pointers to null-terminated strings; argv[argc] is a null pointer.",
-      "whyItMatters": "Command-line arguments make programs scriptable and allow users to configure input paths and options without interactive prompts.",
-      "analogy": "Treat each algorithm or resource as a contract whose invariants must remain true after every operation.",
-      "analogyLimit": "The analogy does not replace C's formal rules for pointers, object lifetime, complexity or library contracts."
+      "concept": "A hosted C program can receive command-line arguments through int main(int argc, char *argv[]). argc counts the argument strings. argv points to an array of pointers to null-terminated strings, and argv[argc] is a null pointer. argv[0] conventionally identifies the program but its exact content is implementation-defined and it may be empty when unavailable.",
+      "whyItMatters": "Command-line interfaces make programs scriptable. Incorrect argc assumptions can access outside the argument array; unvalidated text can cause conversion errors or unsafe file operations.",
+      "analogy": "A portable C interface is a contract between source code and the implementation.",
+      "analogyLimit": "The analogy does not replace the exact C standard and implementation guarantees."
     },
     "explain": {
-      "narrative": "A hosted C program may receive command-line arguments through main's argc and argv parameters. argc counts the argument strings, and argv points to an array of pointers to null-terminated strings; argv[argc] is a null pointer.\n\nState preconditions, invariants, empty and full cases, ownership and failure behaviour before implementation. Compile with warnings and test normal, boundary and failure paths.",
+      "narrative": "Valid indexes range from zero through argc minus one; check argc before reading a particular index. argv[argc] is a sentinel, not another argument. Do not assume argv[0] is an absolute path. Shell quoting determines how text is split before the program receives it. Treat every argument as untrusted text. atoi cannot reliably distinguish invalid input from zero or report range errors. Prefer strtol: set errno to zero, check whether digits were consumed, reject trailing text according to the interface, check ERANGE and enforce the application's range. Print usage errors to stderr. Use EXIT_SUCCESS and EXIT_FAILURE; returning from the initial call to main has normal exit semantics. Freestanding C environments may not provide hosted command-line support.",
       "examples": [
         {
           "id": "cl98-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\nint main(int argc, char *argv[]) {\n for (int i=0; i<argc; ++i) printf(\"arg[%d]=%s\\n\", i, argv[i]);\n return 0;\n}",
-          "explanation": "The loop visits each argument string from index zero through argc minus one. The first argument is conventionally the program name, though its exact content is implementation-defined.",
-          "runnable": false
+          "title": "Inspect arguments within bounds",
+          "code": "#include <stdio.h>\nint main(int argc, char *argv[])\n{\n    for (int i = 0; i < argc; ++i) printf(\"argv[%d]=%s\\n\", i, argv[i]);\n    if (argv[argc] != NULL) return 1;\n    return 0;\n}",
+          "explanation": "The loop visits only indexes below argc. argv[argc] is the null pointer sentinel. argv[0]'s exact content depends on the host.",
+          "runnable": true
+        },
+        {
+          "id": "cl98-ex2",
+          "language": "en",
+          "title": "Validate a numeric command-line argument",
+          "code": "#include <errno.h>\n#include <limits.h>\n#include <stdio.h>\n#include <stdlib.h>\nint main(int argc, char *argv[])\n{\n    char *end = NULL;\n    long value;\n    if (argc != 2) { fprintf(stderr, \"Usage: %s <count>\\n\", argc > 0 ? argv[0] : \"program\"); return EXIT_FAILURE; }\n    errno = 0;\n    value = strtol(argv[1], &end, 10);\n    if (end == argv[1] || *end != '\\0' || errno == ERANGE || value < 1 || value > INT_MAX) {\n        fputs(\"count must be from 1 through INT_MAX\\n\", stderr); return EXIT_FAILURE;\n    }\n    printf(\"validated count=%ld\\n\", value);\n    return EXIT_SUCCESS;\n}",
+          "explanation": "The program validates the argument count, then checks strtol's end pointer, trailing characters, ERANGE and the application's range.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Predict argc and argv entries for a command with two user-supplied arguments.",
-      "independentTask": "Add an option parser that validates a numeric argument and handles missing or extra arguments.",
+      "guidedTask": "Run a program with no extra arguments, one argument and too many arguments. Predict argc and valid argv indexes.",
+      "independentTask": "Create a command-line utility accepting a filename and positive count. Validate argument count, parse with strtol, reject trailing characters and out-of-range values, and print usage to stderr.",
       "hints": [
-        "Check argc before accessing argv at a particular index.",
-        "Treat command-line text as untrusted input and validate conversions.",
-        "Do not assume argv[0] contains an absolute path."
+        "Check bounds before accessing array elements.",
+        "Validate external text before conversion or use.",
+        "Use the matching standard-library interface and type.",
+        "Document preconditions and failure behaviour.",
+        "Test normal, boundary and invalid-input cases.",
+        "Record implementation-specific assumptions instead of guessing."
       ]
     }
   },
@@ -51,36 +68,58 @@
     "questions": [
       {
         "id": "cl98-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What does argc represent?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "The number of argument strings supplied to the program.",
+          "The number of bytes in argv.",
+          "The index of the final argument."
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the topic and constraints described above."
+        "answer": "The number of argument strings supplied to the program.",
+        "explanation": "Valid argument indexes range from zero through argc minus one."
       },
       {
         "id": "cl98-q2",
-        "prompt": "What should be verified before relying on the implementation?",
+        "prompt": "What is guaranteed about argv[argc]?",
         "options": [
-          "Preconditions, invariants, bounds and failure cases.",
-          "Only the name of the algorithm.",
-          "Whether one input produced a result."
+          "It is a null pointer sentinel.",
+          "It contains the program's full path.",
+          "It is the last user argument."
         ],
-        "answer": "Preconditions, invariants, bounds and failure cases.",
-        "explanation": "Correctness depends on maintaining the data structure or algorithm contract."
+        "answer": "It is a null pointer sentinel.",
+        "explanation": "The sentinel marks the end of the argument pointer array."
       },
       {
         "id": "cl98-q3",
-        "prompt": "Which test strategy is most useful?",
+        "prompt": "Why is atoi unsuitable for strict command-line validation?",
         "options": [
-          "Test empty, boundary and representative operation sequences.",
-          "Ignore allocation failures.",
-          "Assume one successful example proves all cases."
+          "It does not reliably distinguish invalid text from zero or report range errors.",
+          "It accepts only unsigned numbers.",
+          "It allocates memory for every conversion."
         ],
-        "answer": "Test empty, boundary and representative operation sequences.",
-        "explanation": "Targeted tests expose defects ordinary examples can miss."
+        "answer": "It does not reliably distinguish invalid text from zero or report range errors.",
+        "explanation": "strtol exposes an end pointer and range reporting."
+      },
+      {
+        "id": "cl98-q4",
+        "prompt": "Which condition must be checked before reading argv[2]?",
+        "options": [
+          "argc must be at least 3.",
+          "argc must equal zero.",
+          "argv[argc] must be non-NULL."
+        ],
+        "answer": "argc must be at least 3.",
+        "explanation": "Argument index 2 exists only when at least three argument strings are present."
+      },
+      {
+        "id": "cl98-q5",
+        "prompt": "Where should a command-line usage error normally be printed?",
+        "options": [
+          "stderr",
+          "stdin",
+          "The argv array"
+        ],
+        "answer": "stderr",
+        "explanation": "stderr is the standard diagnostic stream."
       }
     ]
   },

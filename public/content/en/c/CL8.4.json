@@ -6,39 +6,65 @@
   "title": "realloc, resizing and preserving the original allocation on failure",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C rules.",
-    "Trace the example and identify data or resource flow.",
-    "Recognize relevant safety and failure cases.",
-    "Apply the concept in a tested C program."
+    "Describe how `realloc` requests a new size for an existing allocated block and which part of the previous contents is preserved.",
+    "Explain why a successful `realloc` may move the block and why the returned pointer must replace the old pointer for subsequent access.",
+    "Use a temporary pointer to handle a failed nonzero-size `realloc` call without losing the original allocation.",
+    "Initialize newly added array elements after growing an allocation and avoid reading indeterminate values.",
+    "Handle shrinking, unchanged sizes and zero-size requests deliberately, including using `free` explicitly when the program intends to release the allocation.",
+    "Write and test a resizing routine that maintains a clear ownership rule and does not leak or access an invalidated pointer."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL8.1 — Memory regions, allocation concepts and object lifetime",
+    "CL8.2 — malloc and allocated storage",
+    "CL8.3 — Accessing allocated memory safely"
+  ],
   "stages": {
     "understand": {
-      "concept": "realloc attempts to resize an allocated block while preserving the contents up to the smaller of the old and new sizes. On failure for a nonzero requested size, it returns NULL and the original allocation remains valid. Assigning directly to the only owning pointer can lose that allocation.",
-      "whyItMatters": "Safe resizing needs a temporary pointer so failure does not overwrite the original owner. The program must also define behaviour for zero requested size according to the C version and library contract it targets.",
-      "analogy": "Treat each object or stream as a resource with a defined lifetime and explicit rules for access.",
-      "analogyLimit": "The analogy does not replace C's formal object, storage-duration, alignment or library rules."
+      "concept": "`realloc` is declared in `<stdlib.h>` and attempts to change the size of a block previously obtained from an allocation function. For a nonzero requested size, success returns a pointer to the resized block and preserves the contents up to the smaller of the old and new sizes. The block may move. If the request fails, `realloc` returns `NULL` and the original allocation remains valid and unchanged.",
+      "whyItMatters": "Dynamic arrays often need to grow as data arrives or shrink when capacity is no longer needed. Correct `realloc` use allows this without discarding existing values, but an unsafe assignment can lose the only pointer to the original allocation.",
+      "analogy": "Think of moving the contents of a storage unit into a differently sized unit. If the new unit is provided, you must use its new location; if the request fails, your old unit is still yours.",
+      "analogyLimit": "The C library does not promise that a physical move will occur or that the address will change. The old allocation's lifetime and pointer-validity rules are governed by the function's success or failure, not by the analogy."
     },
     "explain": {
-      "narrative": "realloc attempts to resize an allocated block while preserving the contents up to the smaller of the old and new sizes. On failure for a nonzero requested size, it returns NULL and the original allocation remains valid. Assigning directly to the only owning pointer can lose that allocation.\n\nCheck all allocation, I/O and conversion results. Respect object bounds and lifetime, initialize data before reading it, and define who owns and releases each resource.",
+      "narrative": "## 1. The `realloc` contract\n\nThe declaration is available from `<stdlib.h>`:\n\n```c\nvoid *realloc(void *ptr, size_t new_size);\n```\n\nFor a nonzero `new_size`, the function attempts to resize the allocation designated by `ptr`. On success, it returns a pointer to the resized allocation. The contents are preserved up to the smaller of the old and new sizes; any additional bytes in a grown block have indeterminate values. The allocation may be moved to a different address.\n\nIf the request fails, the function returns `NULL` and the original allocation remains valid. This failure guarantee is why the program must not overwrite its only owning pointer before checking the result.\n\n## 2. The temporary-pointer pattern\n\nAvoid this unsafe pattern when `items` is the only pointer to the allocation:\n\n```c\nitems = realloc(items, new_size); /* unsafe on failure */\n```\n\nIf the request fails, `items` becomes `NULL` and the original allocation can no longer be reached for cleanup. Instead, use a temporary pointer:\n\n```c\nint *resized = realloc(items, new_count * sizeof *items);\nif (resized == NULL) {\n    /* items still owns the original allocation */\n    /* handle failure and eventually free(items) */\n} else {\n    items = resized;\n}\n```\n\nThe multiplication must itself be checked for `size_t` overflow when the count is variable; see CL8.11.\n\n## 3. Initialize new elements\n\nWhen an array grows, only the portion corresponding to the old allocation is preserved. Do not assume the new elements are zero. Assign a valid value to every newly added element before reading it. When an array shrinks, elements beyond the new size are no longer part of the allocation.\n\n## 4. Treat the old pointer as replaced after success\n\nAfter successful `realloc`, use the returned pointer. Do not continue using aliases to the old allocation as though they still designated the resized object. Even if the returned address appears unchanged, the old allocation has been replaced according to the allocation function's contract.\n\n## 5. Handle zero-size intentions explicitly\n\nZero-size `realloc` behavior has varied across C standards and implementations. Portable code should not use `realloc(ptr, 0)` as a substitute for a clear release policy. If the intention is to release the allocation, call `free(ptr)` and set the owning pointer to `NULL`. If the intention is to keep an empty container, represent that state explicitly in the program's data structure.\n\n## 6. Preserve ownership on every path\n\nA resizing function should document whether it takes ownership, borrows the allocation or updates the caller's pointer. On failure, the caller must still know which pointer remains valid and who must release it.",
       "examples": [
         {
           "id": "cl84-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\n#include <stdlib.h>\nint main(void) {\n size_t old_count = 2, new_count = 4;\n int *items = malloc(old_count * sizeof *items);\n if (items == NULL) return 1;\n items[0] = 10; items[1] = 20;\n int *grown = realloc(items, new_count * sizeof *items);\n if (grown == NULL) { free(items); return 1; }\n items = grown;\n items[2] = 30; items[3] = 40;\n printf(\"%d %d\\n\", items[0], items[3]);\n free(items);\n return 0;\n}",
-          "explanation": "grown receives the result. If realloc fails, items still owns the original block and can be freed. If it succeeds, the returned pointer becomes the new owner and is assigned back to items.",
+          "title": "Grow an integer array without losing the original pointer",
+          "code": "#include <stdio.h>\n#include <stdlib.h>\n\nint main(void) {\n    size_t old_count = 2;\n    size_t new_count = 4;\n    int *values = malloc(old_count * sizeof *values);\n    if (values == NULL) {\n        fputs(\"initial allocation failed\\n\", stderr);\n        return 1;\n    }\n\n    values[0] = 10;\n    values[1] = 20;\n\n    int *resized = realloc(values, new_count * sizeof *values);\n    if (resized == NULL) {\n        fputs(\"resize failed\\n\", stderr);\n        free(values);\n        return 1;\n    }\n    values = resized;\n\n    for (size_t i = old_count; i < new_count; ++i) {\n        values[i] = (int)(i + 1) * 10;\n    }\n    for (size_t i = 0; i < new_count; ++i) {\n        printf(\"%d%c\", values[i], i + 1 == new_count ? '\\n' : ' ');\n    }\n\n    free(values);\n    return 0;\n}",
+          "explanation": "Expected output: `10 20 30 40`. The first two values are written before resizing. The temporary `resized` pointer protects the original `values` pointer if the request fails. After success, the program updates the owner pointer, initializes the two new elements, prints all four values and frees the resized allocation.",
+          "runnable": false
+        },
+        {
+          "id": "cl84-ex2",
+          "language": "en",
+          "title": "A reusable nonzero-size resize helper",
+          "code": "#include <stdio.h>\n#include <stdlib.h>\n\nint resize_int_array(int **owner, size_t new_count) {\n    if (owner == NULL || *owner == NULL || new_count == 0) {\n        return 0;\n    }\n    int *resized = realloc(*owner, new_count * sizeof **owner);\n    if (resized == NULL) {\n        return 0;\n    }\n    *owner = resized;\n    return 1;\n}\n\nint main(void) {\n    int *numbers = malloc(2 * sizeof *numbers);\n    if (numbers == NULL) return 1;\n    numbers[0] = 3;\n    numbers[1] = 6;\n\n    if (!resize_int_array(&numbers, 3)) {\n        free(numbers);\n        return 1;\n    }\n    numbers[2] = 9;\n    printf(\"%d %d %d\\n\", numbers[0], numbers[1], numbers[2]);\n    free(numbers);\n    return 0;\n}",
+          "explanation": "Expected output: `3 6 9`. The helper rejects invalid owner pointers and a zero element count, then calls `realloc` through a temporary pointer. If resizing fails, `*owner` still contains the original valid pointer. On success, the helper updates the caller's pointer. The caller initializes the newly added element before reading it. In production, also validate the multiplication for overflow before calling `realloc`.",
           "runnable": false
         }
+      ],
+      "commonMistakes": [
+        "Assigning `realloc` directly to the only owning pointer and losing the original allocation if resizing fails.",
+        "Assuming a successful resize always moves the block or always keeps the same address.",
+        "Reading newly added bytes without initializing them.",
+        "Using aliases to the old allocation after a successful resize.",
+        "Assuming that `realloc` failure destroys the original allocation; for a nonzero request it remains valid.",
+        "Using `realloc(ptr, 0)` as a portable way to free memory.",
+        "Multiplying an untrusted element count by `sizeof` without checking for `size_t` overflow."
       ]
     },
     "practise": {
-      "guidedTask": "Explain why assigning realloc directly to items is dangerous on failure.",
-      "independentTask": "Write a resize helper that checks multiplication overflow, preserves the old pointer on failure and updates the count only after success.",
+      "guidedTask": "Allocate two integers, store two values, then resize the allocation to hold four integers. Use a temporary pointer, handle failure without losing the original allocation, initialize both new elements and print all four values.",
+      "independentTask": "Implement a function that grows a dynamic integer list from its current count to a larger count. Define its ownership contract, reject invalid arguments, preserve the old pointer on failure, initialize every new element and test both successful growth and a simulated or documented allocation-failure path.",
       "hints": [
-        "After successful realloc, use the returned pointer; the old pointer may no longer be valid.",
-        "Do not access newly added bytes before initializing them.",
-        "Define an explicit policy for a requested size of zero."
+        "Use a temporary pointer to receive the result of `realloc`.",
+        "For a nonzero requested size, a failed resize leaves the original allocation valid.",
+        "After success, use the returned pointer and stop using old aliases.",
+        "Newly added bytes are not automatically initialized.",
+        "Handle an intended release with `free` rather than relying on zero-size `realloc` behavior.",
+        "Check the element-count multiplication before calculating the byte count."
       ]
     }
   },
@@ -51,36 +77,58 @@
     "questions": [
       {
         "id": "cl84-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "For a nonzero requested size, what happens to the original allocation if `realloc` fails?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "It remains valid and unchanged.",
+          "It is automatically freed.",
+          "It is resized to zero bytes."
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the C rule described in the lesson."
+        "answer": "It remains valid and unchanged.",
+        "explanation": "The failure guarantee for a nonzero request leaves the original allocation available to the caller. The caller should retain its pointer and later free it or retry."
       },
       {
         "id": "cl84-q2",
-        "prompt": "Which practice best protects correctness?",
+        "prompt": "Why should the result of `realloc` usually be stored in a temporary pointer?",
         "options": [
-          "Check validity, bounds and operation results before access.",
-          "Assume memory and file operations cannot fail.",
-          "Use data before initialization."
+          "To avoid losing the only pointer to the original allocation if the request fails.",
+          "To force the allocation to move to another address.",
+          "To initialize the newly added bytes."
         ],
-        "answer": "Check validity, bounds and operation results before access.",
-        "explanation": "C programs must explicitly handle resource validity and failure paths."
+        "answer": "To avoid losing the only pointer to the original allocation if the request fails.",
+        "explanation": "If `realloc` returns `NULL` and the result was assigned directly to the only owner pointer, the original block becomes unreachable. A temporary pointer preserves ownership until success is confirmed."
       },
       {
         "id": "cl84-q3",
-        "prompt": "How should the example be verified?",
+        "prompt": "What values do newly added bytes have after a successful growth with `realloc`?",
         "options": [
-          "Compile with warnings and test success and failure paths.",
-          "Ignore warnings and test only one happy path.",
-          "Assume the same layout on every platform."
+          "They are indeterminate and must be initialized before being read.",
+          "They are always zero.",
+          "They repeat the last preserved element."
         ],
-        "answer": "Compile with warnings and test success and failure paths.",
-        "explanation": "Compiler diagnostics and deliberate tests provide evidence for correctness."
+        "answer": "They are indeterminate and must be initialized before being read.",
+        "explanation": "The function preserves the old portion but does not initialize the added portion. Assign valid values before reading the new elements."
+      },
+      {
+        "id": "cl84-q4",
+        "prompt": "After a successful `realloc`, which pointer should the program use for the resized allocation?",
+        "options": [
+          "The pointer returned by `realloc`.",
+          "Any pointer copied from the old allocation before resizing.",
+          "The old pointer only if its printed address looks unchanged."
+        ],
+        "answer": "The pointer returned by `realloc`.",
+        "explanation": "A successful resize replaces the old allocation. The returned pointer is the one the program must use, even if the numeric address appears unchanged."
+      },
+      {
+        "id": "cl84-q5",
+        "prompt": "What is the clearest portable action when a program intends to release an allocation?",
+        "options": [
+          "Call `free` explicitly and set the owning pointer to `NULL` if useful.",
+          "Call `realloc(pointer, 0)` and assume identical behavior everywhere.",
+          "Assign zero to the pointer's first byte."
+        ],
+        "answer": "Call `free` explicitly and set the owning pointer to `NULL` if useful.",
+        "explanation": "Zero-size `realloc` behavior has varied across standards and implementations. An explicit `free` expresses the intended release operation clearly."
       }
     ]
   },

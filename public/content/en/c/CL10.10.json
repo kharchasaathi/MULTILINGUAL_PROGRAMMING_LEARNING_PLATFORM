@@ -6,39 +6,57 @@
   "title": "Linked lists: nodes, traversal, insertion and deletion",
   "language": "en",
   "learningObjectives": [
-    "Explain the topic and its C rules.",
-    "Trace the example and explain its data or control flow.",
-    "Identify edge cases and resource-management requirements.",
-    "Apply the concept in a tested C program."
+    "Describe a singly linked list as nodes containing a data value and a pointer to the next node.",
+    "Explain the roles of the head pointer, NULL terminator and pointer-to-pointer parameters.",
+    "Traverse a list safely and identify the O(n) cost of searching for a value.",
+    "Insert nodes at the front and delete a matching node while preserving the remaining links.",
+    "Use malloc and free with checked allocation, explicit ownership and complete cleanup.",
+    "Test empty, one-node, head, middle, tail, missing-value and allocation-failure cases."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL5.3",
+    "CL6.1",
+    "CL7.1",
+    "CL10.5"
+  ],
   "stages": {
     "understand": {
-      "concept": "A linked list is a sequence of nodes where each node stores data and a pointer to the next node. Insertion and deletion update links; dynamically allocated nodes require explicit ownership and release.",
-      "whyItMatters": "Linked lists allow insertion and removal without shifting an array, but traversal is sequential and pointer mistakes can lose nodes or access freed storage.",
-      "analogy": "Treat each algorithm or resource as a contract whose invariants must remain true after every operation.",
-      "analogyLimit": "The analogy does not replace C's formal rules for pointers, object lifetime, complexity or library contracts."
+      "concept": "A singly linked list is a sequence of separately stored nodes. Each node contains a data value and a pointer to the next node. The head pointer identifies the first node; the final node points to NULL. Unlike an array, list elements do not need to occupy adjacent memory locations.",
+      "whyItMatters": "Linked lists allow insertion or removal near a known node without shifting later elements. They help learners understand pointer relationships and dynamic memory ownership. Every allocated node must eventually be freed.",
+      "analogy": "Think of a chain of cards: each card stores information and an arrow to the next card. The head is the first card, and the final arrow points to nothing.",
+      "analogyLimit": "Real C pointers are addresses, not safe visual arrows. A wrong pointer update can lose the rest of the list, create a cycle or access freed memory. The analogy also does not show allocation failure."
     },
     "explain": {
-      "narrative": "A linked list is a sequence of nodes where each node stores data and a pointer to the next node. Insertion and deletion update links; dynamically allocated nodes require explicit ownership and release.\n\nState preconditions, invariants, empty and full cases, ownership and failure behaviour before implementation. Compile with warnings and test normal, boundary and failure paths.",
+      "narrative": "A node can be declared as `struct Node { int value; struct Node *next; };`. The list is represented by a pointer to its first node. An empty list has head == NULL. To traverse, start at head and follow next until the current pointer becomes NULL. Never dereference a NULL pointer.\n\nTo insert at the front, allocate a node, check that malloc did not return NULL, initialize its value and next pointer, then update the caller's head. A function that changes the caller's head can receive `struct Node **head`. For deletion, keep a pointer to the link that points to the current node. When the target is found, redirect that link to current->next before freeing current. This handles deletion of the head and a later node using the same logic.\n\nThe example uses a clear ownership rule: the list owns every node successfully allocated for it, and the caller must eventually destroy the list. Do not use a node after free, free the same node twice, or lose the only pointer to an allocated node. Front insertion is O(1); traversal and search are O(n); deleting a value after searching is O(n).",
       "examples": [
         {
           "id": "cl1010-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdlib.h>\nstruct Node { int value; struct Node *next; };\nvoid push_front(struct Node **head, int value) {\n struct Node *node = malloc(sizeof *node);\n if (node == NULL) return;\n node->value = value; node->next = *head; *head = node;\n}",
-          "explanation": "The function receives a pointer to the head pointer so it can update the caller's list head. A new node points to the old head before the head is replaced.",
-          "runnable": false
+          "title": "Insert, traverse, delete and free a singly linked list",
+          "code": "#include <stdbool.h>\n#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node { int value; struct Node *next; };\n\nstatic bool push_front(struct Node **head, int value)\n{\n    if (head == NULL) return false;\n    struct Node *node = malloc(sizeof *node);\n    if (node == NULL) return false;\n    node->value = value;\n    node->next = *head;\n    *head = node;\n    return true;\n}\n\nstatic bool remove_first(struct Node **head, int target)\n{\n    if (head == NULL) return false;\n    struct Node **link = head;\n    while (*link != NULL && (*link)->value != target) {\n        link = &(*link)->next;\n    }\n    if (*link == NULL) return false;\n    struct Node *removed = *link;\n    *link = removed->next;\n    free(removed);\n    return true;\n}\n\nstatic void print_list(const struct Node *head)\n{\n    for (const struct Node *p = head; p != NULL; p = p->next) {\n        printf(\"%d \", p->value);\n    }\n    putchar('\\n');\n}\n\nstatic void destroy_list(struct Node **head)\n{\n    if (head == NULL) return;\n    while (*head != NULL) {\n        struct Node *next = (*head)->next;\n        free(*head);\n        *head = next;\n    }\n}\n\nint main(void)\n{\n    struct Node *head = NULL;\n    if (!push_front(&head, 30) || !push_front(&head, 20) || !push_front(&head, 10)) {\n        destroy_list(&head);\n        return 1;\n    }\n    print_list(head);\n    if (!remove_first(&head, 20)) {\n        destroy_list(&head);\n        return 2;\n    }\n    print_list(head);\n    (void)remove_first(&head, 99);\n    destroy_list(&head);\n    return 0;\n}",
+          "explanation": "push_front allocates and initializes a node before publishing it as the new head. remove_first uses a pointer to the link that owns the current node, so removing the first node and a later node follow the same pointer-update pattern. It reconnects the list before freeing the removed node. destroy_list saves the next pointer before freeing each current node, then clears the caller's head.",
+          "runnable": true
+        },
+        {
+          "id": "cl1010-ex2",
+          "language": "en",
+          "title": "Traverse a list without modifying it",
+          "code": "#include <stdio.h>\n\nstruct Node { int value; const struct Node *next; };\n\nstatic void print_values(const struct Node *head)\n{\n    const struct Node *current = head;\n    while (current != NULL) {\n        printf(\"%d\\n\", current->value);\n        current = current->next;\n    }\n}\n\nint main(void)\n{\n    const struct Node third = {30, NULL};\n    const struct Node second = {20, &third};\n    const struct Node first = {10, &second};\n    print_values(&first);\n    return 0;\n}",
+          "explanation": "The nodes have automatic storage duration and are linked in reverse declaration order. The traversal receives a pointer to const node and only reads values and next pointers. It stops at NULL and does not allocate or free these nodes.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Draw the pointer changes when inserting before the first node.",
-      "independentTask": "Implement traversal, search, deletion and full-list cleanup, including deletion of the head node.",
+      "guidedTask": "Draw three nodes containing 10, 20 and 30. Trace head and every next pointer while inserting 5 at the front, deleting 20, deleting the head value 5, and searching for 99. After each operation identify which nodes remain reachable from head.",
+      "independentTask": "Extend the list with append, contains and remove_all operations. Define whether duplicates are allowed, check allocation failures and write a destroy function. Test empty lists, one node, deleting head/middle/tail, missing values and cleanup after partial construction.",
       "hints": [
-        "Update links before freeing a node that is being removed.",
-        "Check allocation failure before dereferencing the new node.",
-        "Define who owns the list and who is responsible for freeing all nodes."
+        "An empty singly linked list is represented by head == NULL.",
+        "Allocate and initialize a new node before changing existing list links.",
+        "A pointer-to-pointer can represent the link that points to the current node, including the head link.",
+        "Save the next pointer before freeing a node during cleanup.",
+        "After unlinking a node, never read its fields; free it exactly once.",
+        "Document ownership: every successfully allocated node must remain reachable until it is freed."
       ]
     }
   },
@@ -51,36 +69,63 @@
     "questions": [
       {
         "id": "cl1010-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What marks the end of a conventional singly linked list?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "A next pointer equal to NULL",
+          "A node with value zero",
+          "The largest data value",
+          "The head pointer becoming an integer"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the topic and constraints described above."
+        "answer": "A next pointer equal to NULL",
+        "explanation": "The final node's next pointer is NULL, so traversal knows there is no following node."
       },
       {
         "id": "cl1010-q2",
-        "prompt": "What should be verified before relying on the implementation?",
+        "prompt": "Why does push_front receive struct Node **head?",
         "options": [
-          "Preconditions, invariants, bounds and failure cases.",
-          "Only the name of the algorithm.",
-          "Whether one input produced a result."
+          "So it can update the caller's head pointer",
+          "So every node becomes constant",
+          "So malloc cannot fail",
+          "So the list is automatically sorted"
         ],
-        "answer": "Preconditions, invariants, bounds and failure cases.",
-        "explanation": "Correctness depends on maintaining the data structure or algorithm contract."
+        "answer": "So it can update the caller's head pointer",
+        "explanation": "The function needs to modify the pointer variable owned by the caller, so it receives that variable's address."
       },
       {
         "id": "cl1010-q3",
-        "prompt": "Which test strategy is most useful?",
+        "prompt": "What must be checked after malloc?",
         "options": [
-          "Test empty, boundary and representative operation sequences.",
-          "Ignore allocation failures.",
-          "Assume one successful example proves all cases."
+          "Whether the returned pointer is NULL",
+          "Whether the new value is positive",
+          "Whether the list is sorted",
+          "Whether the next node is larger"
         ],
-        "answer": "Test empty, boundary and representative operation sequences.",
-        "explanation": "Targeted tests expose defects ordinary examples can miss."
+        "answer": "Whether the returned pointer is NULL",
+        "explanation": "malloc can fail. The program must not dereference a null result."
+      },
+      {
+        "id": "cl1010-q4",
+        "prompt": "When deleting a node, what is the safe order?",
+        "options": [
+          "Reconnect the previous link, then free the removed node",
+          "Free the node, then read its next pointer",
+          "Set head to NULL in every case",
+          "Free the next node first"
+        ],
+        "answer": "Reconnect the previous link, then free the removed node",
+        "explanation": "The list must retain a valid path to remaining nodes, and the removed node must not be accessed after free."
+      },
+      {
+        "id": "cl1010-q5",
+        "prompt": "What is the worst-case time complexity of searching an unsorted singly linked list of n nodes?",
+        "options": [
+          "O(n)",
+          "O(1)",
+          "O(log n)",
+          "O(n log n)"
+        ],
+        "answer": "O(n)",
+        "explanation": "In the worst case the search examines every node because nodes are reached sequentially."
       }
     ]
   },

@@ -6,39 +6,50 @@
   "title": "Pointer parameters and pass-by-address patterns",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C language rules.",
-    "Trace the example and explain data flow.",
-    "Identify common errors and boundary conditions.",
-    "Apply the concept in a small tested program."
+    "Explain that C function arguments are always passed by value.",
+    "Use pointer parameters to let a function access or modify caller-owned objects.",
+    "Validate pointer arguments and document whether null is permitted.",
+    "Distinguish changing a pointed-to object from changing the local pointer parameter.",
+    "Use const-qualified pointer parameters when a function must not modify the pointed-to data."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "C passes every function argument by value. Passing a pointer copies the address value, allowing the function to access and modify the caller's object through that pointer. The pointer parameter itself is still a local copy.",
+      "concept": "C passes every function argument by value. When a pointer is passed, the function receives a copy of the address value. The function can use that copy to access or modify the caller's object, but reassigning the local pointer parameter does not change the caller's pointer variable. Pointer parameters should define nullability, lifetime and access requirements.",
       "whyItMatters": "This pattern supports output parameters and in-place updates while keeping ownership and object lifetime explicit.",
       "analogy": "Treat a function or pointer operation as an explicit contract between caller and callee.",
       "analogyLimit": "The analogy does not replace C's formal rules for types, object lifetime, scope and linkage."
     },
     "explain": {
-      "narrative": "C passes every function argument by value. Passing a pointer copies the address value, allowing the function to access and modify the caller's object through that pointer. The pointer parameter itself is still a local copy.\n\nWhen applying this concept, check declared types, preconditions, object lifetime and all control-flow paths. Compile with warnings enabled and test both typical and boundary inputs.",
+      "narrative": "## 1. Pass-by-value in C\n\nC does not have a pass-by-reference parameter mode. A function receives a copy of each argument. When the argument is a pointer, the copied value is an address that may designate a caller-owned object.\n\n## 2. Modify a caller's object\n\nA function can dereference a pointer parameter and update the object it designates. The caller observes the change because both the caller's pointer and the parameter's copy designate the same object.\n\n## 3. Reassigning the parameter\n\nAssigning a new address to the local pointer parameter changes only that local copy. To update the caller's pointer variable itself, pass a pointer to that pointer, such as `int **`.\n\n## 4. Validate and document\n\nCheck required pointer parameters before dereferencing. State whether NULL is accepted, whether the function reads or writes the object, and how long the object must remain alive.\n\n## 5. Use const for read-only access\n\nA parameter such as `const int *values` communicates that the function will not modify the int elements through that pointer. It does not make the caller's entire program immutable; it defines the function's access through that parameter.",
       "examples": [
         {
-          "id": "cl58-ex1",
+          "id": "cl5.8-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\nvoid add_one(int *value) {\n if (value != NULL) ++*value;\n}\nint main(void) {\n int count = 4;\n add_one(&count);\n printf(\"%d\\n\", count);\n return 0;\n}",
-          "explanation": "The call passes the address of count. The function receives a copy of that address and increments the pointed-to object, so count becomes five.",
+          "title": "Modify a caller-owned value",
+          "code": "#include <stdio.h>\n\nvoid add_one(int *value) {\n    if (value != NULL) ++*value;\n}\n\nint main(void) {\n    int count = 4;\n    add_one(&count);\n    printf(\"%d\\n\", count);\n    return 0;\n}",
+          "explanation": "The pointer value is copied into the parameter, but it still designates count. Dereferencing it updates the caller's object.",
+          "runnable": false
+        },
+        {
+          "id": "cl5.8-ex2",
+          "language": "en",
+          "title": "Read-only pointer parameter",
+          "code": "#include <stddef.h>\n#include <stdio.h>\n\nvoid print_values(const int *values, size_t count) {\n    for (size_t i = 0; i < count; ++i) printf(\"%d\\n\", values[i]);\n}\n\nint main(void) {\n    int data[] = {1, 2, 3};\n    print_values(data, 3);\n    return 0;\n}",
+          "explanation": "The const-qualified element type communicates that the function reads but does not modify the array elements through this parameter.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Trace the pointer parameter and the caller's count object.",
-      "independentTask": "Write a function that receives two int pointers and swaps the pointed-to values after checking both for NULL.",
+      "guidedTask": "Write a C program demonstrating CL5.8. State the relevant input, pointer or conversion contract, then compile and trace the normal and failure paths.",
+      "independentTask": "Create a second example for CL5.8 that exercises a boundary or invalid state. Add checks, document the ownership or input rules, and explain why unsafe behavior is avoided.",
       "hints": [
-        "A pointer parameter is passed by value; C does not have pass-by-reference parameters.",
-        "Document whether a pointer may be NULL and whether the function modifies its target.",
-        "Never retain a pointer to an object beyond that object's lifetime."
+        "Read the declared types carefully, including every pointer and qualifier level.",
+        "Check return values and validate inputs before use.",
+        "Keep object lifetime and ownership explicit.",
+        "Avoid dereferencing invalid or out-of-range pointers.",
+        "Test both success and failure paths."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl58-q1",
-        "prompt": "Which statement best describes the lesson?",
+        "id": "cl5.8-q1",
+        "prompt": "How are function arguments passed in C?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "By value",
+          "By reference by default",
+          "By global variable"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the C rule described above."
+        "answer": "By value",
+        "explanation": "C passes copies of argument values to function parameters."
       },
       {
-        "id": "cl58-q2",
-        "prompt": "What should be checked before relying on this construct?",
+        "id": "cl5.8-q2",
+        "prompt": "How can a function modify a caller's int object?",
         "options": [
-          "Its type rules, preconditions and lifetime or range requirements.",
-          "Only whether the code looks short.",
-          "Whether it worked once on another machine."
+          "Receive an int pointer and modify the object through it",
+          "Receive an int value and change the local copy",
+          "Return void without a pointer"
         ],
-        "answer": "Its type rules, preconditions and lifetime or range requirements.",
-        "explanation": "C correctness depends on the language rules and valid object use."
+        "answer": "Receive an int pointer and modify the object through it",
+        "explanation": "The pointer copy designates the caller's object."
       },
       {
-        "id": "cl58-q3",
-        "prompt": "What is a sound verification practice?",
+        "id": "cl5.8-q3",
+        "prompt": "Does assigning a new address to a local int * parameter change the caller's pointer variable?",
         "options": [
-          "Compile with warnings and test representative and boundary cases.",
-          "Ignore diagnostics.",
-          "Assume one output proves all cases."
+          "No",
+          "Yes, automatically",
+          "Only when the pointer is const"
         ],
-        "answer": "Compile with warnings and test representative and boundary cases.",
-        "explanation": "Diagnostics and tests provide evidence across relevant cases."
+        "answer": "No",
+        "explanation": "The pointer parameter is a local copy of the caller's pointer value."
+      },
+      {
+        "id": "cl5.8-q4",
+        "prompt": "What does const int *values communicate?",
+        "options": [
+          "The function should not modify int elements through this pointer",
+          "The pointer itself can never change",
+          "The array is copied automatically"
+        ],
+        "answer": "The function should not modify int elements through this pointer",
+        "explanation": "The pointed-to int type is const-qualified through this access path."
+      },
+      {
+        "id": "cl5.8-q5",
+        "prompt": "What is needed to let a function update the caller's pointer variable itself?",
+        "options": [
+          "Pass a pointer to that pointer, such as int **",
+          "Pass the pointer by value again",
+          "Use printf"
+        ],
+        "answer": "Pass a pointer to that pointer, such as int **",
+        "explanation": "The function needs the address of the caller's pointer object."
       }
     ]
   },

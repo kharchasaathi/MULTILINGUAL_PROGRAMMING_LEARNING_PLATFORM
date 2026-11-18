@@ -6,39 +6,50 @@
   "title": "Multidimensional arrays and row/column traversal",
   "language": "en",
   "learningObjectives": [
-    "Explain the language rule and its constraints.",
-    "Trace the example and predict its output.",
-    "Identify relevant boundary and safety cases.",
-    "Apply the concept in a tested C program."
+    "Declare and initialize two-dimensional arrays as arrays of row arrays.",
+    "Use row and column indices within their separate bounds.",
+    "Traverse two-dimensional arrays with nested loops.",
+    "Explain row-major storage order and contiguous rows.",
+    "Pass multidimensional arrays to functions with the required column bound."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "A two-dimensional array is an array of row arrays. For int grid[2][3], valid row indices are 0–1 and column indices are 0–2. C stores rows contiguously in row-major order.",
+      "concept": "A two-dimensional array in C is an array whose elements are themselves arrays. For `int grid[2][3]`, the outer array has two rows and each row has three int elements. The valid row indices are 0–1 and column indices 0–2. C stores the elements in row-major order, with each row's elements contiguous.",
       "whyItMatters": "This concept supports correct handling of C data and helps prevent invalid memory access or incorrect program behaviour.",
       "analogy": "Think of the construct as a precisely bounded sequence of storage and operations.",
       "analogyLimit": "The analogy does not replace C's rules for object lifetime, bounds, types or undefined behaviour."
     },
     "explain": {
-      "narrative": "A two-dimensional array is an array of row arrays. For int grid[2][3], valid row indices are 0–1 and column indices are 0–2. C stores rows contiguously in row-major order.\n\nAlways check the types, object bounds and preconditions required by the operation. Compile with warnings enabled and test ordinary as well as boundary inputs.",
+      "narrative": "## 1. Declare a two-dimensional array\n\n`int grid[2][3]` defines two rows, each containing three integers. It is not a special matrix object; it is an array of two elements whose element type is an array of three int values.\n\n## 2. Initialize rows\n\nUse nested braces such as `{{1, 2, 3}, {4, 5, 6}}`. The first subscript selects the row and the second selects the column. Both bounds must be respected.\n\n## 3. Traverse with nested loops\n\nThe outer loop commonly visits rows and the inner loop visits columns. Use the actual row and column counts to set the loop limits. A swapped bound can read outside a row or skip data.\n\n## 4. Row-major storage\n\nC stores each row's elements contiguously, then the next row. This matters when reasoning about pointer arithmetic, memory layout and performance. The array's element type is an array, so pointer arithmetic follows the row type at the outer level.\n\n## 5. Function parameters\n\nWhen passing a two-dimensional array to a function, the compiler must know the size of each row to calculate element addresses. A parameter can be written with a fixed column bound or a variable-length array bound where supported by the selected C version. Pass the row count separately when it is needed.",
       "examples": [
         {
-          "id": "cl44-ex1",
+          "id": "cl4.4-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\nint main(void) {\n int grid[2][3] = {{1,2,3},{4,5,6}};\n for (size_t r=0; r<2; ++r) {\n  for (size_t c=0; c<3; ++c) printf(\"%d \", grid[r][c]);\n  putchar('\\n');\n }\n return 0;\n}",
-          "explanation": "The outer loop selects a row and the inner loop visits its columns. The output is two rows: 1 2 3 and 4 5 6.",
+          "title": "Traverse a 2 by 3 array",
+          "code": "#include <stdio.h>\n\nint main(void) {\n    int grid[2][3] = {{1, 2, 3}, {4, 5, 6}};\n    for (size_t row = 0; row < 2; ++row) {\n        for (size_t col = 0; col < 3; ++col) {\n            printf(\"%d \", grid[row][col]);\n        }\n        putchar('\\n');\n    }\n    return 0;\n}",
+          "explanation": "The outer loop selects each row and the inner loop selects each column.",
+          "runnable": false
+        },
+        {
+          "id": "cl4.4-ex2",
+          "language": "en",
+          "title": "Pass a 2D array to a function",
+          "code": "#include <stdio.h>\n\nvoid print_grid(size_t rows, int grid[][3]) {\n    for (size_t r = 0; r < rows; ++r)\n        for (size_t c = 0; c < 3; ++c)\n            printf(\"%d%c\", grid[r][c], c == 2 ? '\\\\n' : ' ');\n}\n\nint main(void) {\n    int data[2][3] = {{1, 2, 3}, {4, 5, 6}};\n    print_grid(2, data);\n    return 0;\n}",
+          "explanation": "The function parameter specifies the column count so the compiler can compute the address of each row element.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Draw a 2-by-3 grid and label each element with its row and column index.",
-      "independentTask": "Calculate each row's sum in a 3-by-4 matrix and test every boundary.",
+      "guidedTask": "Implement a small C program demonstrating CL4.4. Identify the relevant array or string capacity, valid indices, expected results and failure cases before compiling and testing.",
+      "independentTask": "Create a second example for CL4.4 that handles a boundary case explicitly. Add tests for empty input, the smallest valid case, the largest valid case and one invalid or oversized case. Explain how your code prevents invalid access.",
       "hints": [
-        "Use bounds separately for each dimension.",
-        "When passing a 2D array to a function, later dimension sizes are part of the parameter type.",
-        "C multidimensional arrays are arrays of arrays, not automatically resizable matrices."
+        "Write down the exact array length and valid index range.",
+        "Include null terminator space when working with C strings.",
+        "Check function preconditions and return values.",
+        "Pass array lengths explicitly when a function needs them.",
+        "Test exact-fit and one-past-boundary cases."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl44-q1",
-        "prompt": "Which statement best matches this lesson?",
+        "id": "cl4.4-q1",
+        "prompt": "How many int elements are in `int a[2][3]`?",
         "options": [
-          "The C rule and constraints explained in this lesson.",
-          "An unrelated HTML element.",
-          "A CSS property."
+          "6",
+          "5",
+          "2"
         ],
-        "answer": "The C rule and constraints explained in this lesson.",
-        "explanation": "The correct choice follows the C rule and its constraints."
+        "answer": "6",
+        "explanation": "There are two rows with three elements each."
       },
       {
-        "id": "cl44-q2",
-        "prompt": "How should a boundary-sensitive operation be checked?",
+        "id": "cl4.4-q2",
+        "prompt": "Which expression selects row 1, column 2?",
         "options": [
-          "Identify valid bounds and test boundary cases.",
-          "Assume C checks every array bound automatically.",
-          "Ignore compiler warnings."
+          "a[1][2]",
+          "a[2][1]",
+          "a[1,2]"
         ],
-        "answer": "Identify valid bounds and test boundary cases.",
-        "explanation": "C requires the programmer to respect object bounds and preconditions."
+        "answer": "a[1][2]",
+        "explanation": "The first subscript selects the row and the second selects the column."
       },
       {
-        "id": "cl44-q3",
-        "prompt": "Why trace the example?",
+        "id": "cl4.4-q3",
+        "prompt": "What is row-major storage?",
         "options": [
-          "To understand execution order and state changes.",
-          "To replace compilation.",
-          "To avoid checking input."
+          "All elements of one row are stored contiguously before the next row",
+          "Columns are stored as separate linked lists",
+          "Each element is stored at a random address"
         ],
-        "answer": "To understand execution order and state changes.",
-        "explanation": "Tracing makes the data flow explicit; compilation and testing remain necessary."
+        "answer": "All elements of one row are stored contiguously before the next row",
+        "explanation": "C arrays store nested row arrays contiguously."
+      },
+      {
+        "id": "cl4.4-q4",
+        "prompt": "Why does a function parameter for a 2D array need the column bound?",
+        "options": [
+          "The compiler needs the row type size to calculate element addresses",
+          "It is required only for printing",
+          "The column count is stored in the function name"
+        ],
+        "answer": "The compiler needs the row type size to calculate element addresses",
+        "explanation": "Pointer arithmetic across rows depends on the size of each row."
+      },
+      {
+        "id": "cl4.4-q5",
+        "prompt": "Which traversal pattern visits every element of a 2 by 3 array?",
+        "options": [
+          "Two nested loops with row limit 2 and column limit 3",
+          "One loop with index less than 2 only",
+          "One loop with index less than 3 only"
+        ],
+        "answer": "Two nested loops with row limit 2 and column limit 3",
+        "explanation": "Each dimension needs its own valid index range."
       }
     ]
   },

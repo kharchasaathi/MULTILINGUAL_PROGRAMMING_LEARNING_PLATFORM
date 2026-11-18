@@ -6,39 +6,56 @@
   "title": "Environment access and process termination utilities (CodeSaathi extension)",
   "language": "en",
   "learningObjectives": [
-    "Explain the topic and its C rules.",
-    "Trace the example and explain its data or control flow.",
-    "Identify edge cases and resource-management requirements.",
-    "Apply the concept in a tested C program."
+    "Use getenv and handle the possibility that an environment variable is absent.",
+    "Explain why environment values are external input and why the returned string must not be modified or freed.",
+    "Distinguish the portable C environment interface from platform-specific mutation APIs.",
+    "Compare normal termination with exit, immediate termination with _Exit and abnormal termination with abort.",
+    "Explain atexit registration order and normal stream-flushing behaviour.",
+    "Choose safe configuration defaults and deliberate process exit statuses."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL8.10 NULL and error handling",
+    "CL4.4 Standard streams",
+    "CL9.8 Command-line arguments"
+  ],
   "stages": {
     "understand": {
-      "concept": "The standard library provides getenv to inspect environment variables and exit, _Exit and abort for different termination behaviours. Environment values may be absent and should be treated as external input. exit performs normal termination processing, including registered handlers and stream flushing; _Exit does not perform the same cleanup.",
-      "whyItMatters": "Environment and termination behaviour affect deployment, configuration and cleanup. Programs should not depend on environment variables being present or trusted.",
-      "analogy": "Treat each algorithm or resource as a contract whose invariants must remain true after every operation.",
-      "analogyLimit": "The analogy does not replace C's formal rules for pointers, object lifetime, complexity or library contracts."
+      "concept": "getenv retrieves an environment variable's value or returns a null pointer when unavailable. The standard library also provides exit, _Exit (since C99) and abort, which have different termination and cleanup behaviour. Environment values may be absent and must be treated as external input.",
+      "whyItMatters": "Environment variables influence configuration, paths and deployment. They are not guaranteed to exist or contain valid values. Choosing the wrong termination function can skip buffered output or registered cleanup handlers.",
+      "analogy": "A portable C interface is a contract between source code and the implementation.",
+      "analogyLimit": "The analogy does not replace the exact C standard and implementation guarantees."
     },
     "explain": {
-      "narrative": "The standard library provides getenv to inspect environment variables and exit, _Exit and abort for different termination behaviours. Environment values may be absent and should be treated as external input. exit performs normal termination processing, including registered handlers and stream flushing; _Exit does not perform the same cleanup.\n\nState preconditions, invariants, empty and full cases, ownership and failure behaviour before implementation. Compile with warnings and test normal, boundary and failure paths.",
+      "narrative": "Check getenv for NULL before using the result. Do not modify or free the returned string; it is managed by the implementation. Copy it into application-owned storage if it must be preserved independently. ISO C does not standardize setenv; identify platform-specific APIs explicitly. exit performs normal termination: atexit handlers run in reverse registration order and open streams are flushed and closed. Returning from the initial main call has the same normal-termination effect. _Exit terminates without the normal atexit and stream-flushing sequence. abort causes abnormal termination and may produce a diagnostic or core dump depending on the environment. Use EXIT_SUCCESS and EXIT_FAILURE for portable intent.",
       "examples": [
         {
           "id": "cl99-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\n#include <stdlib.h>\nint main(void) {\n const char *mode = getenv(\"APP_MODE\");\n if (mode == NULL) mode = \"default\";\n printf(\"mode=%s\\n\", mode);\n return EXIT_SUCCESS;\n}",
-          "explanation": "getenv returns a pointer to a string or NULL when the variable is not present. The program supplies a default and returns the standard success status.",
-          "runnable": false
+          "title": "Read optional configuration with a default",
+          "code": "#include <stdio.h>\n#include <stdlib.h>\nint main(void)\n{\n    const char *mode = getenv(\"APP_MODE\");\n    if (mode == NULL || mode[0] == '\\0') mode = \"standard\";\n    printf(\"mode=%s\\n\", mode);\n    return EXIT_SUCCESS;\n}",
+          "explanation": "getenv may return NULL when absent. This example also treats an empty value as a request for the default and never modifies or frees the returned string.",
+          "runnable": true
+        },
+        {
+          "id": "cl99-ex2",
+          "language": "en",
+          "title": "Register a normal-termination handler",
+          "code": "#include <stdio.h>\n#include <stdlib.h>\nstatic void report_shutdown(void) { puts(\"normal termination handler ran\"); }\nint main(void)\n{\n    if (atexit(report_shutdown) != 0) { fputs(\"registration failed\\n\", stderr); return EXIT_FAILURE; }\n    puts(\"program work completed\");\n    return EXIT_SUCCESS;\n}",
+          "explanation": "atexit registers a no-argument, void-returning function. It runs during normal termination, including return from main or exit, but not in _Exit's immediate termination sequence or abort's abnormal termination.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Explain why getenv may return NULL and why the returned string should not be modified.",
-      "independentTask": "Read a configuration variable, validate its allowed values and choose a documented fallback.",
+      "guidedTask": "Run the configuration example with APP_MODE absent, empty and non-empty. Record which branch is selected.",
+      "independentTask": "Read an optional environment setting, validate it against an allow-list, use a safe default and register a normal-termination handler. Explain why getenv's pointer is not freed.",
       "hints": [
-        "Do not store secrets in environment variables without considering the deployment threat model.",
-        "The pointer returned by getenv must not be freed by the caller.",
-        "Use EXIT_SUCCESS and EXIT_FAILURE for portable status intent."
+        "Check bounds before accessing array elements.",
+        "Validate external text before conversion or use.",
+        "Use the matching standard-library interface and type.",
+        "Document preconditions and failure behaviour.",
+        "Test normal, boundary and invalid-input cases.",
+        "Record implementation-specific assumptions instead of guessing."
       ]
     }
   },
@@ -51,36 +68,58 @@
     "questions": [
       {
         "id": "cl99-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What may getenv return when a variable is unavailable?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "A null pointer.",
+          "An allocated empty string in every case.",
+          "A pointer the caller must free."
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the topic and constraints described above."
+        "answer": "A null pointer.",
+        "explanation": "The caller must check the result before using it as a string."
       },
       {
         "id": "cl99-q2",
-        "prompt": "What should be verified before relying on the implementation?",
+        "prompt": "What should a program do with the string returned by getenv?",
         "options": [
-          "Preconditions, invariants, bounds and failure cases.",
-          "Only the name of the algorithm.",
-          "Whether one input produced a result."
+          "Treat it as implementation-managed storage; do not modify or free it.",
+          "Always free it after printing.",
+          "Write a null terminator into it."
         ],
-        "answer": "Preconditions, invariants, bounds and failure cases.",
-        "explanation": "Correctness depends on maintaining the data structure or algorithm contract."
+        "answer": "Treat it as implementation-managed storage; do not modify or free it.",
+        "explanation": "The returned pointer is not an allocation transferred to the caller."
       },
       {
         "id": "cl99-q3",
-        "prompt": "Which test strategy is most useful?",
+        "prompt": "Which statement describes exit?",
         "options": [
-          "Test empty, boundary and representative operation sequences.",
-          "Ignore allocation failures.",
-          "Assume one successful example proves all cases."
+          "It performs normal termination processing including atexit handlers and stream flushing.",
+          "It skips all cleanup and flushes no streams.",
+          "It always causes abnormal termination."
         ],
-        "answer": "Test empty, boundary and representative operation sequences.",
-        "explanation": "Targeted tests expose defects ordinary examples can miss."
+        "answer": "It performs normal termination processing including atexit handlers and stream flushing.",
+        "explanation": "exit initiates normal program termination."
+      },
+      {
+        "id": "cl99-q4",
+        "prompt": "Which function terminates without normal atexit-handler processing and stream flushing?",
+        "options": [
+          "_Exit",
+          "exit",
+          "atexit"
+        ],
+        "answer": "_Exit",
+        "explanation": "_Exit performs immediate termination without normal termination processing."
+      },
+      {
+        "id": "cl99-q5",
+        "prompt": "When are atexit handlers called?",
+        "options": [
+          "During normal termination, in reverse registration order.",
+          "Whenever any function returns.",
+          "Only after abort."
+        ],
+        "answer": "During normal termination, in reverse registration order.",
+        "explanation": "Successfully registered handlers run in last-in, first-out order during normal termination."
       }
     ]
   },

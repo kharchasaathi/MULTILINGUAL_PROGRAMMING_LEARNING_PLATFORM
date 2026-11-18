@@ -6,11 +6,11 @@
   "title": "Characters and Character Constants",
   "language": "en",
   "learningObjectives": [
-    "Explain the central rules behind characters and character constants in C.",
-    "Identify the relevant types, declarations, operators or library facilities.",
-    "Trace a worked example and explain its result.",
-    "Recognize common mistakes, portability concerns and unsafe assumptions.",
-    "Apply the concept in a small program and test normal and boundary cases."
+    "Distinguish character constants such as 'A' from string literals such as \"A\".",
+    "Explain that an ordinary character constant has type int in C.",
+    "Store character values in char objects and print them with appropriate conversions.",
+    "Recognize escape sequences such as newline, tab, quote and backslash.",
+    "Avoid assuming one char represents every user-perceived character in Unicode text."
   ],
   "prerequisites": [
     "CL1.1",
@@ -18,13 +18,13 @@
   ],
   "stages": {
     "understand": {
-      "concept": "In C, a character constant such as 'A' has type int in the ordinary execution character set. A char object stores a small integer value and may be signed or unsigned depending on the implementation. Character encodings map character values to code units; do not assume every character from every writing system fits in one char.",
+      "concept": "In C, an ordinary character constant such as 'A' has type int and a value determined by the execution character set. A string literal such as \"A\" is an array of char including a terminating null character. A char object stores a small integer value; whether plain char behaves as signed or unsigned is implementation-defined. Encoded text may require multiple char elements for one user-perceived character.",
       "whyItMatters": "Understanding character representation helps avoid incorrect assumptions about text, byte counts and signedness. C strings are sequences of char values terminated by a null character, but multibyte encodings mean one visible character may occupy multiple bytes.",
       "analogy": "Think of a type as a contract that describes what kind of value an object can hold and which operations make sense for it.",
       "analogyLimit": "The analogy is only an introduction; C types also determine representation, conversions, alignment and constraints."
     },
     "explain": {
-      "narrative": "In C, a character constant such as 'A' has type int in the ordinary execution character set. A char object stores a small integer value and may be signed or unsigned depending on the implementation. Character encodings map character values to code units; do not assume every character from every writing system fits in one char.\n\nUnderstanding character representation helps avoid incorrect assumptions about text, byte counts and signedness. C strings are sequences of char values terminated by a null character, but multibyte encodings mean one visible character may occupy multiple bytes.\n\nWhen reviewing code, identify the declared types first, then trace conversions and the exact expression being evaluated. Compile with warnings enabled and test boundary values. Do not rely on assumptions about another compiler or machine.",
+      "narrative": "## 1. Character constant versus string literal\n\n`'A'` is an integer character constant in C. `\"A\"` is a string literal: an array containing the character code for A followed by a null character. These forms are not interchangeable.\n\n## 2. Store and display a character\n\nA char object can store a character value from the implementation's execution character set. Use `%c` to display a character value and `%d` to inspect its integer value after the relevant promotions. Plain char may be signed or unsigned depending on the implementation.\n\n## 3. Escape sequences\n\nCommon escapes include `\\n` for newline, `\\t` for horizontal tab, `\\\\` for backslash, `\\'` for a single quote and `\\\"` for a double quote. They let a string or character constant represent characters that are difficult to type directly.\n\n## 4. Text and encodings\n\nA C string is a sequence of char elements terminated by a null character. In UTF-8, a visible character outside the ASCII range can occupy multiple bytes. Therefore strlen counts bytes before the null character, not necessarily user-perceived characters.\n\n## 5. Use character APIs carefully\n\nFunctions from `<ctype.h>` generally require EOF or a value representable as unsigned char. Convert a possibly signed char to unsigned char before passing it to character classification functions.",
       "examples": [
         {
           "id": "cl2.5-ex1",
@@ -45,14 +45,14 @@
       ]
     },
     "practise": {
-      "guidedTask": "Write a program that stores a letter, a digit character and a newline character. Print them with %c and inspect their integer values where appropriate.",
-      "independentTask": "Read a line of UTF-8 text and explain why strlen counts bytes rather than user-perceived characters. Avoid assuming one char equals one Unicode character.",
+      "guidedTask": "Write a small C program that demonstrates the central rules in CL2.5. Compile with warnings enabled, run it with ordinary and boundary values, and explain each result in your own words.",
+      "independentTask": "Create a second example for CL2.5 using different values and names. Include one likely mistake as a separate experiment, observe the compiler diagnostic or behavior, then correct it. Record the rule that explains the correction.",
       "hints": [
-        "A character constant such as 'A' has type int in C.",
-        "char may be signed or unsigned depending on the implementation.",
-        "Use %c for character output and %d for an integer value.",
-        "Escape sequences such as \\\\n and \\\\t represent special characters.",
-        "A UTF-8 character can occupy multiple bytes."
+        "Start by identifying the exact type of every object and expression.",
+        "Check the C language rule before assuming a platform-specific result.",
+        "Use compiler warnings as feedback, not as proof of correctness.",
+        "Test normal values and important boundaries.",
+        "Explain why the result follows from the language rules."
       ]
     }
   },
@@ -65,58 +65,58 @@
     "questions": [
       {
         "id": "cl2.5-q1",
-        "prompt": "Which statement is correct about characters and character constants?",
+        "prompt": "What is the type of the ordinary character constant 'A' in C?",
         "options": [
-          "It follows C's type and language rules and should be checked with compiler diagnostics.",
-          "C ignores all declared types.",
-          "The browser decides its meaning."
+          "int",
+          "char *",
+          "An array of char"
         ],
-        "answer": "It follows C's type and language rules and should be checked with compiler diagnostics.",
-        "explanation": "C semantics are defined by the language and implementation."
+        "answer": "int",
+        "explanation": "An ordinary character constant has type int in C."
       },
       {
         "id": "cl2.5-q2",
-        "prompt": "What is the safest general practice?",
+        "prompt": "What does the string literal \"A\" contain?",
         "options": [
-          "Choose types and operations deliberately, initialize data and validate assumptions.",
-          "Ignore warnings and assume values are valid.",
-          "Use casts to silence every warning."
+          "A char array with A followed by a null terminator",
+          "Only one char and no terminator",
+          "An integer pointer"
         ],
-        "answer": "Choose types and operations deliberately, initialize data and validate assumptions.",
-        "explanation": "Deliberate types and checks improve correctness."
+        "answer": "A char array with A followed by a null terminator",
+        "explanation": "String literals include a terminating null character."
       },
       {
         "id": "cl2.5-q3",
-        "prompt": "What should you do when a result is unexpected?",
+        "prompt": "Which escape sequence represents a newline?",
         "options": [
-          "Create a small test case and inspect types, values and conversions.",
-          "Guess the result from the variable name.",
-          "Remove the test."
+          "\\n",
+          "\\t",
+          "\\\\"
         ],
-        "answer": "Create a small test case and inspect types, values and conversions.",
-        "explanation": "Small reproducible tests make behaviour easier to reason about."
+        "answer": "\\n",
+        "explanation": "The newline escape sequence is backslash followed by n."
       },
       {
         "id": "cl2.5-q4",
-        "prompt": "Which statement about portability is accurate?",
+        "prompt": "Does one char always represent one Unicode character?",
         "options": [
-          "Some type sizes and ranges depend on the implementation.",
-          "All C implementations use identical type widths.",
-          "Compiler warnings change the C standard."
+          "No; an encoding such as UTF-8 can use multiple bytes",
+          "Yes, for every possible Unicode character",
+          "Only when char is unsigned"
         ],
-        "answer": "Some type sizes and ranges depend on the implementation.",
-        "explanation": "Use standard guarantees and inspect implementation limits."
+        "answer": "No; an encoding such as UTF-8 can use multiple bytes",
+        "explanation": "A char is a byte-sized storage unit, not a universal Unicode character container."
       },
       {
         "id": "cl2.5-q5",
-        "prompt": "Which is a strong learning outcome?",
+        "prompt": "What should be passed to many ctype.h functions when a plain char may be negative?",
         "options": [
-          "Explain the rule and apply it in a tested C program.",
-          "Memorize one output only.",
-          "Copy code without checking it."
+          "Convert it to unsigned char first",
+          "Pass any negative int directly",
+          "Pass a pointer to the char"
         ],
-        "answer": "Explain the rule and apply it in a tested C program.",
-        "explanation": "Understanding plus testing demonstrates transferable knowledge."
+        "answer": "Convert it to unsigned char first",
+        "explanation": "The ctype functions accept EOF or a value representable as unsigned char."
       }
     ]
   },

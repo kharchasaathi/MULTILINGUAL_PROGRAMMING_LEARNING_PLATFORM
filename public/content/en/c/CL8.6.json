@@ -6,39 +6,67 @@
   "title": "Dynamic arrays, structures and nested allocations",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C rules.",
-    "Trace the example and identify data or control flow.",
-    "Recognize common failure and safety cases.",
-    "Apply the concept in a tested C program."
+    "Allocate an array of structures at runtime and access its members using valid array indices and structure-member operators.",
+    "Explain the difference between allocating a structure and allocating separate objects referenced by pointer members inside that structure.",
+    "Design an ownership and cleanup plan for a structure that contains one or more dynamically allocated members.",
+    "Initialize pointer members and element counts before performing nested allocations so partial-failure cleanup is safe.",
+    "Release nested allocations before releasing the outer structure, and handle partially constructed objects without leaks or invalid frees.",
+    "Choose between a single contiguous allocation and multiple nested allocations based on lifetime, ownership, resizing and data-layout requirements."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL8.1 — Memory regions, allocation concepts and object lifetime",
+    "CL8.2 — malloc and allocated storage",
+    "CL8.3 — Accessing allocated memory safely",
+    "CL7.4 — Structures and member access",
+    "CL7.6 — Structures and pointers"
+  ],
   "stages": {
     "understand": {
-      "concept": "Dynamic allocation can create arrays and structures whose storage size is decided at runtime. A structure may contain pointers to separately allocated resources; those nested allocations require their own ownership and cleanup plan.",
-      "whyItMatters": "Dynamic data structures are flexible but increase the number of allocation failures and cleanup paths a program must handle.",
-      "analogy": "Treat each resource and operation as having a clear contract, valid lifetime and failure path.",
-      "analogyLimit": "The analogy does not replace the C standard, compiler or library specifications."
+      "concept": "A program can allocate an array of structures or allocate a structure whose pointer members refer to separate allocations. These designs have different memory and ownership requirements. Allocating the outer structure does not automatically allocate the objects referenced by its pointer members. Each successful nested allocation needs initialization, a clear owner and a matching release.",
+      "whyItMatters": "Real programs often represent records, users, inventory items or other objects whose number of elements and text/data sizes are known only at runtime. Correct nested allocation makes these structures flexible while preventing leaks when only part of an object can be created.",
+      "analogy": "Imagine a folder that contains references to separate documents. Buying the folder does not create the documents inside it. Each document must be obtained separately, tracked and returned by whoever owns the folder's contents.",
+      "analogyLimit": "A C structure stores pointer values, not automatic ownership relationships. The language does not recursively allocate or free pointer members when a structure is allocated or released."
     },
     "explain": {
-      "narrative": "Dynamic allocation can create arrays and structures whose storage size is decided at runtime. A structure may contain pointers to separately allocated resources; those nested allocations require their own ownership and cleanup plan.\n\nCheck object bounds, lifetimes, arithmetic limits and all relevant return values. Compile with warnings enabled and test both normal and failure paths.",
+      "narrative": "## 1. An array of structures\n\nIf a program needs `count` records, it can allocate `count * sizeof *records` bytes and treat the result as an array of structures. Each element is a complete structure object, and the program must check the allocation and keep all indexing within `0` through `count - 1`.\n\n## 2. Pointer members are separate resources\n\nConsider:\n\n```c\nstruct Student {\n    char *name;\n    int *scores;\n    size_t score_count;\n};\n```\n\nAllocating one `struct Student` creates storage for the structure members themselves. The `name` and `scores` members are pointer objects; they do not cause character or integer arrays to be allocated automatically. The program must allocate those separately and store their addresses in the members.\n\n## 3. Initialize before nested allocation\n\nImmediately after allocating the outer structure, set pointer members to `NULL` and counts to a safe value. Then allocate each nested resource and check each result before using it. This makes it possible to clean up a partially constructed structure safely if a later allocation fails.\n\n## 4. Define destruction order\n\nRelease each nested allocation owned by the structure, then release the outer structure. A destructor-like helper can centralize this rule. Do not free a pointer member unless the structure owns the allocation it points to; a borrowed pointer must not be released by the borrower.\n\n## 5. Partial construction is a normal failure case\n\nIf the first nested allocation succeeds but the second fails, the first still needs to be freed. Initialize every owned pointer to `NULL` and make the cleanup function tolerate `NULL`. This prevents error handling from becoming a separate source of invalid frees.\n\n## 6. Choose the representation deliberately\n\nA single contiguous allocation can improve locality and simplify cleanup for fixed-layout arrays. Separate nested allocations allow members to have independent sizes and lifetimes but require more careful cleanup and may involve more allocation calls. Choose based on access patterns, ownership, resizing and the complexity the program can safely maintain.",
       "examples": [
         {
           "id": "cl86-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\n#include <stdlib.h>\nstruct Buffer { size_t length; int *data; };\nint main(void) {\n struct Buffer b = {0, NULL};\n b.length = 3;\n b.data = malloc(b.length * sizeof *b.data);\n if (b.data == NULL) return 1;\n for (size_t i=0; i<b.length; ++i) b.data[i] = (int)i;\n printf(\"%d\\n\", b.data[2]);\n free(b.data);\n return 0;\n}",
-          "explanation": "The structure stores a length and a pointer to a separately allocated array. Releasing the structure's data allocation is necessary; freeing a structure object alone would not release nested allocations automatically.",
+          "title": "Create and destroy a structure with nested allocations",
+          "code": "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\nstruct Student {\n    char *name;\n    int *scores;\n    size_t score_count;\n};\n\nvoid destroy_student(struct Student *student) {\n    if (student == NULL) return;\n    free(student->scores);\n    free(student->name);\n    free(student);\n}\n\nint main(void) {\n    struct Student *student = malloc(sizeof *student);\n    if (student == NULL) return 1;\n    student->name = NULL;\n    student->scores = NULL;\n    student->score_count = 0;\n\n    student->name = malloc(sizeof \"Mina\");\n    if (student->name == NULL) {\n        destroy_student(student);\n        return 1;\n    }\n    memcpy(student->name, \"Mina\", sizeof \"Mina\");\n\n    student->score_count = 3;\n    student->scores = malloc(student->score_count * sizeof *student->scores);\n    if (student->scores == NULL) {\n        destroy_student(student);\n        return 1;\n    }\n    student->scores[0] = 78;\n    student->scores[1] = 84;\n    student->scores[2] = 91;\n\n    printf(\"%s: %d %d %d\\n\", student->name,\n           student->scores[0], student->scores[1], student->scores[2]);\n    destroy_student(student);\n    return 0;\n}",
+          "explanation": "Expected output: `Mina: 78 84 91`. The outer structure, the name string and the scores array are three separate allocations. Pointer members are initialized to `NULL` before nested allocations. If either nested request fails, `destroy_student` can safely release whichever resources were acquired because `free(NULL)` is permitted. The helper releases nested members before the outer structure.",
+          "runnable": false
+        },
+        {
+          "id": "cl86-ex2",
+          "language": "en",
+          "title": "Allocate and traverse a runtime-sized array of structures",
+          "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Product {\n    int code;\n    double price;\n};\n\nint main(void) {\n    size_t count = 3;\n    struct Product *products = malloc(count * sizeof *products);\n    if (products == NULL) {\n        fputs(\"allocation failed\\n\", stderr);\n        return 1;\n    }\n\n    products[0] = (struct Product){ 101, 19.50 };\n    products[1] = (struct Product){ 102, 25.00 };\n    products[2] = (struct Product){ 103, 12.75 };\n\n    for (size_t i = 0; i < count; ++i) {\n        printf(\"%d: %.2f\\n\", products[i].code, products[i].price);\n    }\n\n    free(products);\n    return 0;\n}",
+          "explanation": "Expected output:\\n`101: 19.50`\\n`102: 25.00`\\n`103: 12.75`\\nThe allocation contains three complete `struct Product` objects in one contiguous array. Compound literals assign each structure value, and the loop accesses only valid indices. There are no nested pointer members in this example, so one `free` releases the entire array.",
           "runnable": false
         }
+      ],
+      "commonMistakes": [
+        "Assuming that `malloc(sizeof *student)` also allocates storage for pointer members such as `name` and `scores`.",
+        "Reading a pointer member before assigning it a valid pointer or initializing it to `NULL`.",
+        "Failing to release an earlier nested allocation when a later allocation fails.",
+        "Freeing the outer structure before releasing nested resources that the cleanup code still needs to reach.",
+        "Freeing borrowed memory that the structure does not own.",
+        "Using the wrong element size when allocating an array of structures.",
+        "Assuming that freeing an array of structures automatically frees allocations referenced by pointer members."
       ]
     },
     "practise": {
-      "guidedTask": "Identify every allocated object and its matching release.",
-      "independentTask": "Create a dynamically allocated structure containing a dynamically allocated string. Handle partial allocation failure and release all acquired resources.",
+      "guidedTask": "Define a structure containing a pointer to a character array and a pointer to an integer array. Allocate the outer structure, initialize both members to `NULL`, allocate each nested array, check each result, and write one cleanup function that safely handles partial construction.",
+      "independentTask": "Build a small dynamic contact list using an array of structures. Each structure should own a separately allocated name string. Support adding records, printing them and destroying the entire list. Test failure during a later name allocation and ensure every earlier allocation is released exactly once.",
       "hints": [
-        "Initialize pointer members to NULL before attempting allocation.",
-        "When a later allocation fails, release any earlier allocations already acquired.",
-        "Document whether a function returns a shallow copy or transfers ownership."
+        "Allocate the outer structure and each pointer member separately unless you deliberately design one combined allocation.",
+        "Initialize all owned pointer members to `NULL` before any operation that can fail.",
+        "Keep an explicit count for each dynamically allocated array.",
+        "Release nested resources before releasing the outer structure.",
+        "A cleanup helper should safely accept partially initialized objects.",
+        "Free only allocations the current structure or function actually owns."
       ]
     }
   },
@@ -51,36 +79,58 @@
     "questions": [
       {
         "id": "cl86-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "After `malloc(sizeof *student)` succeeds, what is true of `student->name` if it is a pointer member?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "The pointer member exists, but it does not automatically point to a separately allocated name string.",
+          "A name string of arbitrary length has already been allocated.",
+          "The pointer member is guaranteed to be `NULL`."
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct choice follows the C rule explained above."
+        "answer": "The pointer member exists, but it does not automatically point to a separately allocated name string.",
+        "explanation": "Allocating the structure allocates storage for the pointer member itself, not for the object it might later designate. The program must initialize and allocate the pointed-to resource separately."
       },
       {
         "id": "cl86-q2",
-        "prompt": "What is a reliable way to protect correctness?",
+        "prompt": "Why initialize nested pointer members to `NULL` immediately after allocating a structure?",
         "options": [
-          "Validate preconditions, bounds and failure results.",
-          "Assume the operation cannot fail.",
-          "Ignore the type and lifetime rules."
+          "So cleanup can safely release resources that were acquired before a later failure.",
+          "So every pointer automatically receives allocated storage.",
+          "So `free` will recursively release all members."
         ],
-        "answer": "Validate preconditions, bounds and failure results.",
-        "explanation": "C requires explicit handling of object validity and operation failures."
+        "answer": "So cleanup can safely release resources that were acquired before a later failure.",
+        "explanation": "A partially constructed structure may have some members allocated and others not. Initializing pointers to `NULL` lets a cleanup helper call `free` on each member safely."
       },
       {
         "id": "cl86-q3",
-        "prompt": "How should the example be checked?",
+        "prompt": "What is the correct cleanup order for an owning structure with separately allocated members?",
         "options": [
-          "Compile with warnings and test expected and failure cases.",
-          "Ignore diagnostics and test only once.",
-          "Assume every platform behaves identically."
+          "Release owned nested allocations, then release the outer structure.",
+          "Release the outer structure first and then access its pointer members.",
+          "Free only the outer structure; C recursively frees its members."
         ],
-        "answer": "Compile with warnings and test expected and failure cases.",
-        "explanation": "Warnings and targeted tests provide evidence for correctness."
+        "answer": "Release owned nested allocations, then release the outer structure.",
+        "explanation": "The outer structure contains the pointers needed to reach the nested resources. Release those owned resources before freeing the structure itself."
+      },
+      {
+        "id": "cl86-q4",
+        "prompt": "A program allocates an array of five structures. What does one successful `free(array)` release?",
+        "options": [
+          "The array allocation itself, but not separate allocations referenced by pointer members.",
+          "The array and every allocation referenced by all pointer members.",
+          "Only the first structure element."
+        ],
+        "answer": "The array allocation itself, but not separate allocations referenced by pointer members.",
+        "explanation": "C does not recursively free pointer members. Every separately allocated resource needs its own ownership and cleanup step."
+      },
+      {
+        "id": "cl86-q5",
+        "prompt": "Which design helps prevent leaks when the second nested allocation fails?",
+        "options": [
+          "Initialize owned pointers to `NULL` and call a cleanup helper that releases every resource already acquired.",
+          "Return immediately without freeing the first successful allocation.",
+          "Overwrite all pointer members with arbitrary non-null values."
+        ],
+        "answer": "Initialize owned pointers to `NULL` and call a cleanup helper that releases every resource already acquired.",
+        "explanation": "A cleanup helper can safely free `NULL` members and release earlier successful allocations. This makes partial-construction failure paths manageable."
       }
     ]
   },

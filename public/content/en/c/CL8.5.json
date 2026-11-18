@@ -6,39 +6,65 @@
   "title": "free, ownership and release discipline",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C rules.",
-    "Trace the example and identify data or control flow.",
-    "Recognize common failure and safety cases.",
-    "Apply the concept in a tested C program."
+    "Explain how `free` ends the lifetime of an allocation and identify which allocation functions produce pointers that may be passed to it.",
+    "Distinguish an owning pointer from a borrowed or observing pointer, and define which part of a program is responsible for releasing each allocation.",
+    "Release each successful allocation exactly once, including on error and early-return paths, without freeing stack objects, interior pointers or already-freed storage.",
+    "Recognize that all aliases to an allocation become invalid for access after it is freed, even if their pointer values have not changed.",
+    "Use `free(NULL)` safely and explain why setting an owning pointer to `NULL` does not update other aliases.",
+    "Design a cleanup function or structured cleanup path that makes resource ownership and release responsibilities explicit."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL8.1 — Memory regions, allocation concepts and object lifetime",
+    "CL8.2 — malloc and allocated storage",
+    "CL8.4 — realloc and resizing"
+  ],
   "stages": {
     "understand": {
-      "concept": "free releases storage previously obtained from an allocation function. After release, the allocated object no longer exists and every pointer to it becomes invalid. Ownership rules identify which part of a program is responsible for releasing each allocation.",
-      "whyItMatters": "Clear ownership prevents leaks, double-free errors and use-after-free defects, especially when objects are passed between functions.",
-      "analogy": "Treat each resource and operation as having a clear contract, valid lifetime and failure path.",
-      "analogyLimit": "The analogy does not replace the C standard, compiler or library specifications."
+      "concept": "`free` is declared in `<stdlib.h>` and releases storage previously obtained from a compatible memory-allocation function, such as `malloc`, `calloc` or `realloc`. Passing `NULL` is permitted and has no effect. Passing a pointer that was not returned by an allocation function, passing an interior pointer, or freeing an allocation more than once results in undefined behavior. After a successful release, the allocated object no longer exists.",
+      "whyItMatters": "Dynamic memory remains allocated until the program releases it. Clear ownership prevents memory leaks and prevents invalid releases, double-free errors and use-after-free bugs. Every successful allocation needs one well-defined release responsibility.",
+      "analogy": "Think of a rented tool that has one responsible borrower. That borrower must return it once. Other people may have written down its storage location, but those notes do not grant them ownership after the tool has been returned.",
+      "analogyLimit": "C does not track ownership or erase copied pointer values. The programmer must maintain the rule. Setting one pointer to `NULL` does not change the value of aliases held elsewhere."
     },
     "explain": {
-      "narrative": "free releases storage previously obtained from an allocation function. After release, the allocated object no longer exists and every pointer to it becomes invalid. Ownership rules identify which part of a program is responsible for releasing each allocation.\n\nCheck object bounds, lifetimes, arithmetic limits and all relevant return values. Compile with warnings enabled and test both normal and failure paths.",
+      "narrative": "## 1. What `free` accepts\n\nThe function is declared in `<stdlib.h>`:\n\n```c\nvoid free(void *ptr);\n```\n\nThe argument must be `NULL` or a pointer value returned by a memory allocation function that has not already been released or invalidated. Do not pass the address of an automatic local variable, a pointer into the middle of an allocation, or an arbitrary address. `free(NULL)` is explicitly safe and performs no action.\n\n## 2. Lifetime ends at release\n\nAfter `free(ptr)`, the allocated object no longer exists. Do not read or write through `ptr`, compare or dereference aliases as if they still referred to a live object, or pass an alias to `free` again. The pointer variable may still contain the old address, but that does not make the object valid.\n\nSetting the owning pointer to `NULL` immediately after release can help prevent accidental reuse through that variable:\n\n```c\nfree(buffer);\nbuffer = NULL;\n```\n\nThis assignment changes only `buffer`. It does not clear other pointer variables that previously copied its value.\n\n## 3. Ownership is a program design rule\n\nAn owning pointer is responsible for ensuring that the allocation is eventually released. A borrowed pointer may access the object under an agreed lifetime but must not release it. Document which function creates, owns, borrows, transfers and destroys each resource. A clear contract avoids both leaks and multiple attempts to free the same allocation.\n\n## 4. Release on every path\n\nAfter allocation succeeds, later failures must still lead to cleanup. If a function acquires multiple resources, release each resource already acquired before returning from an error path. A single cleanup section can make this easier to review, provided every pointer is initialized to `NULL` before cleanup can run.\n\n## 5. Common invalid operations\n\n- **Memory leak:** the program loses the last owning pointer without freeing the allocation.\n- **Double free:** the same allocation is released more than once.\n- **Invalid free:** a pointer that is not the start of a currently allocated block is passed to `free`.\n- **Use after free:** code accesses an object after its lifetime has ended.\n\nThese are not ordinary recoverable errors; they can produce undefined behavior. Prevent them through ownership discipline, review, tests and runtime diagnostics.",
       "examples": [
         {
           "id": "cl85-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdlib.h>\n#include <stdio.h>\nint main(void) {\n int *value = malloc(sizeof *value);\n if (value == NULL) return 1;\n *value = 42;\n printf(\"%d\\n\", *value);\n free(value);\n value = NULL;\n return 0;\n}",
-          "explanation": "The program owns the allocated object, uses it while valid, releases it once and clears its local pointer to reduce accidental reuse.",
+          "title": "Release an allocation exactly once",
+          "code": "#include <stdio.h>\n#include <stdlib.h>\n\nint main(void) {\n    int *owner = malloc(sizeof *owner);\n    if (owner == NULL) {\n        fputs(\"allocation failed\\n\", stderr);\n        return 1;\n    }\n\n    *owner = 64;\n    printf(\"value=%d\\n\", *owner);\n\n    free(owner);\n    owner = NULL;\n    free(owner); /* safe: free(NULL) does nothing */\n    puts(\"released\");\n    return 0;\n}",
+          "explanation": "Expected output:\\n`value=64`\\n`released`\\nThe first `free` releases the allocated object. The owner pointer is then set to `NULL`; the second `free` is safe because `free(NULL)` has no effect. The example does not call `free` twice on the same live allocation.",
+          "runnable": false
+        },
+        {
+          "id": "cl85-ex2",
+          "language": "en",
+          "title": "Centralize release and clear the caller's owner pointer",
+          "code": "#include <stdio.h>\n#include <stdlib.h>\n\nvoid destroy_int(int **owner) {\n    if (owner == NULL) return;\n    free(*owner);\n    *owner = NULL;\n}\n\nint main(void) {\n    int *number = malloc(sizeof *number);\n    if (number == NULL) return 1;\n    *number = 125;\n    printf(\"before=%d\\n\", *number);\n\n    destroy_int(&number);\n    printf(\"owner_is_null=%s\\n\", number == NULL ? \"yes\" : \"no\");\n    return 0;\n}",
+          "explanation": "Expected output:\\n`before=125`\\n`owner_is_null=yes`\\nThe function receives the address of the owning pointer, releases the allocation and sets that caller-owned pointer to `NULL`. The pointer-to-pointer parameter lets the function update the caller's pointer variable. This does not automatically clear any separate aliases that may exist.",
           "runnable": false
         }
+      ],
+      "commonMistakes": [
+        "Calling `free` on a pointer to an automatic local variable or on an interior pointer such as `buffer + 1`.",
+        "Calling `free` twice on the same allocation.",
+        "Using a pointer after the allocation it designated has been freed.",
+        "Assuming that setting one pointer to `NULL` also clears aliases in other variables or data structures.",
+        "Losing the owning pointer before releasing the allocation.",
+        "Freeing borrowed memory when the current function does not own the allocation.",
+        "Returning early after an allocation failure or later error without releasing resources already acquired."
       ]
     },
     "practise": {
-      "guidedTask": "Draw the ownership timeline from malloc through free.",
-      "independentTask": "Design a function that creates an object and document whether the caller or callee owns the returned allocation.",
+      "guidedTask": "Allocate one integer, store and print a value, then release it exactly once. Set the owner pointer to `NULL` and call `free` on it again to demonstrate why `free(NULL)` is safe. Explain why this is not a double free.",
+      "independentTask": "Write a function that acquires two separate allocations and releases both on success and on every partial-failure path. Document which function owns each allocation, test the case where the second allocation fails, and ensure no pointer is used after release.",
       "hints": [
-        "free accepts NULL safely, but it must not be passed an invalid or already-freed pointer.",
-        "Every successful allocation should have a clear release path.",
-        "Setting one pointer to NULL does not clear other aliases to the same allocation."
+        "Only pass `NULL` or the start pointer returned by a compatible allocation function to `free`.",
+        "Every successful allocation needs one release responsibility.",
+        "All aliases become invalid for access when their allocation is freed.",
+        "Setting the owner pointer to `NULL` does not modify aliases.",
+        "`free(NULL)` is safe, but freeing a stale non-null pointer is not.",
+        "Initialize cleanup pointers to `NULL` so a common cleanup path can safely release acquired resources."
       ]
     }
   },
@@ -51,36 +77,58 @@
     "questions": [
       {
         "id": "cl85-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "Which argument is always safe to pass to `free`?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "`NULL`",
+          "A pointer to an automatic local variable",
+          "A pointer to the middle of an allocated array"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct choice follows the C rule explained above."
+        "answer": "`NULL`",
+        "explanation": "The C library specifies that `free(NULL)` does nothing. A pointer to an automatic object or an interior pointer is not a valid argument."
       },
       {
         "id": "cl85-q2",
-        "prompt": "What is a reliable way to protect correctness?",
+        "prompt": "What happens to an allocated object after it is successfully passed to `free`?",
         "options": [
-          "Validate preconditions, bounds and failure results.",
-          "Assume the operation cannot fail.",
-          "Ignore the type and lifetime rules."
+          "Its lifetime ends and it must not be accessed again.",
+          "It becomes a static object.",
+          "It is automatically copied to another allocation."
         ],
-        "answer": "Validate preconditions, bounds and failure results.",
-        "explanation": "C requires explicit handling of object validity and operation failures."
+        "answer": "Its lifetime ends and it must not be accessed again.",
+        "explanation": "After release, the object no longer exists. Any pointer that designated it must not be used to access it."
       },
       {
         "id": "cl85-q3",
-        "prompt": "How should the example be checked?",
+        "prompt": "A program copies `owner` into `alias`, then calls `free(owner)` and sets `owner = NULL`. What is true of `alias`?",
         "options": [
-          "Compile with warnings and test expected and failure cases.",
-          "Ignore diagnostics and test only once.",
-          "Assume every platform behaves identically."
+          "It still contains the old pointer value, but it must not be used to access the released object.",
+          "It is automatically changed to `NULL`.",
+          "It becomes the new owner of a live allocation."
         ],
-        "answer": "Compile with warnings and test expected and failure cases.",
-        "explanation": "Warnings and targeted tests provide evidence for correctness."
+        "answer": "It still contains the old pointer value, but it must not be used to access the released object.",
+        "explanation": "Pointer assignment copies a value; it does not create shared ownership tracking. Updating one pointer variable does not update aliases."
+      },
+      {
+        "id": "cl85-q4",
+        "prompt": "Which design best prevents a memory leak when a later operation fails after allocation?",
+        "options": [
+          "Release every resource already acquired before leaving the failure path.",
+          "Return immediately and assume the operating system will manage the program's logic.",
+          "Overwrite the owner pointer with `NULL` without freeing the allocation."
+        ],
+        "answer": "Release every resource already acquired before leaving the failure path.",
+        "explanation": "The program is responsible for releasing allocations it owns. Cleanup must account for resources acquired before the failure."
+      },
+      {
+        "id": "cl85-q5",
+        "prompt": "Which situation is a double-free error?",
+        "options": [
+          "Calling `free` twice on the same allocation without a new allocation in between.",
+          "Calling `free(NULL)`.",
+          "Calling `free` once on each of two distinct allocations."
+        ],
+        "answer": "Calling `free` twice on the same allocation without a new allocation in between.",
+        "explanation": "The first call ends the allocation's lifetime. Passing the stale pointer again is undefined behavior; `free(NULL)` is explicitly harmless."
       }
     ]
   },

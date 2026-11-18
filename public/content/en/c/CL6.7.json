@@ -6,39 +6,50 @@
   "title": "Math library functions and math.h",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C language rules.",
-    "Trace the example and explain data flow.",
-    "Identify common errors and boundary conditions.",
-    "Apply the concept in a small tested program."
+    "Include math.h for standard mathematical function declarations.",
+    "Use functions such as sqrt, pow, sin, cos, floor and ceil with appropriate types.",
+    "Explain domain and range errors for mathematical operations.",
+    "Link the math library where the toolchain requires it.",
+    "Account for floating-point approximation when testing results."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "The math.h header declares mathematical functions such as sqrt, pow, sin, cos, floor and ceil. Functions commonly operate on double values; domain errors, range errors, floating-point precision and implementation behaviour must be considered.",
+      "concept": "The math.h header declares mathematical functions such as sqrt, pow, sin, cos, floor and ceil. Many functions operate on double values. Programs must consider domain and range errors, floating-point approximation, special values and toolchain linking requirements. A mathematical result should not be assumed exact merely because it is printed with a limited number of decimal places.",
       "whyItMatters": "Using the standard math library avoids reimplementing common numerical operations, but callers must still validate inputs and interpret floating-point results appropriately.",
       "analogy": "Treat a function or pointer operation as an explicit contract between caller and callee.",
       "analogyLimit": "The analogy does not replace C's formal rules for types, object lifetime, scope and linkage."
     },
     "explain": {
-      "narrative": "The math.h header declares mathematical functions such as sqrt, pow, sin, cos, floor and ceil. Functions commonly operate on double values; domain errors, range errors, floating-point precision and implementation behaviour must be considered.\n\nWhen applying this concept, check declared types, preconditions, object lifetime and all control-flow paths. Compile with warnings enabled and test both typical and boundary inputs.",
+      "narrative": "## 1. Include math.h\n\nInclude `<math.h>` to obtain declarations for standard mathematical functions. Check the function signature and use arguments of the expected type.\n\n## 2. Common functions\n\n`sqrt` calculates a square root, `pow` raises a value to a power, `sin` and `cos` use radians, and `floor` and `ceil` round toward negative and positive infinity respectively.\n\n## 3. Domain and range\n\nSome inputs are outside a function's mathematical domain or produce results outside the representable range. Understand the function's error behavior and check errno or floating-point status where the application requires it.\n\n## 4. Floating-point results\n\nFloating-point values are approximations. Avoid exact equality checks for many calculated results; use a tolerance appropriate to the scale and error requirements.\n\n## 5. Build and link\n\nSome toolchains require linking the math library explicitly, for example with a compiler option such as `-lm`. This is toolchain-specific, not C source syntax.",
       "examples": [
         {
-          "id": "cl67-ex1",
+          "id": "cl6.7-ex1",
           "language": "en",
-          "title": "Focused C example",
+          "title": "Core example",
           "code": "#include <stdio.h>\n#include <math.h>\nint main(void) {\n double value = sqrt(81.0);\n printf(\"%.2f\\n\", value);\n return 0;\n}",
-          "explanation": "sqrt returns the square root as a double. The format %.2f prints two digits after the decimal point. Some toolchains require linking the math library explicitly, for example with a compiler-specific -lm option.",
+          "explanation": "Trace each declaration, call, expression and return. Check types and boundary conditions.",
+          "runnable": false
+        },
+        {
+          "id": "cl6.7-ex2",
+          "language": "en",
+          "title": "Apply the function contract",
+          "code": "#include <math.h>\n#include <stdio.h>\nint main(void) { double x = sqrt(2.0); printf(\"%.3f\\n\", x); return 0; }",
+          "explanation": "This second example reinforces the function contract. Compile with warnings and test both valid and boundary inputs.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Predict the result and explain why the literal is written as 81.0.",
-      "independentTask": "Calculate the hypotenuse using sqrt and pow or multiplication. Validate inputs and compare floating-point values with a tolerance when appropriate.",
+      "guidedTask": "Implement a focused C program demonstrating CL6.7. State the function's inputs, output, preconditions and failure behavior before coding.",
+      "independentTask": "Create a second implementation of CL6.7 with a clear interface contract. Add tests for ordinary input, boundary input and a failure or invalid case; explain the result.",
       "hints": [
-        "Include math.h for declarations rather than inventing your own prototype.",
-        "Floating-point equality can be unsuitable for results affected by rounding.",
-        "Compiler and linker command-line options differ by platform."
+        "Write the function prototype before its implementation.",
+        "Trace argument values and return paths explicitly.",
+        "Check pointer validity and object lifetime where relevant.",
+        "Use compiler warnings to catch type mismatches.",
+        "Test boundary cases and failure paths."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl67-q1",
-        "prompt": "Which statement best describes the lesson?",
+        "id": "cl6.7-q1",
+        "prompt": "Which header declares sqrt and pow?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "math.h",
+          "stdio.h",
+          "ctype.h"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the C rule described above."
+        "answer": "math.h",
+        "explanation": "The standard mathematical functions are declared in math.h."
       },
       {
-        "id": "cl67-q2",
-        "prompt": "What should be checked before relying on this construct?",
+        "id": "cl6.7-q2",
+        "prompt": "What unit do sin and cos expect for their angle arguments?",
         "options": [
-          "Its type rules, preconditions and lifetime or range requirements.",
-          "Only whether the code looks short.",
-          "Whether it worked once on another machine."
+          "Radians",
+          "Degrees",
+          "Gradians only"
         ],
-        "answer": "Its type rules, preconditions and lifetime or range requirements.",
-        "explanation": "C correctness depends on the language rules and valid object use."
+        "answer": "Radians",
+        "explanation": "The standard C trigonometric functions use radians."
       },
       {
-        "id": "cl67-q3",
-        "prompt": "What is a sound verification practice?",
+        "id": "cl6.7-q3",
+        "prompt": "Why may exact equality be unsuitable for calculated floating-point results?",
         "options": [
-          "Compile with warnings and test representative and boundary cases.",
-          "Ignore diagnostics.",
-          "Assume one output proves all cases."
+          "Floating-point values are approximations",
+          "The compiler ignores all comparisons",
+          "double has no comparison operators"
         ],
-        "answer": "Compile with warnings and test representative and boundary cases.",
-        "explanation": "Diagnostics and tests provide evidence across relevant cases."
+        "answer": "Floating-point values are approximations",
+        "explanation": "Rounding can make mathematically equal results differ in representation."
+      },
+      {
+        "id": "cl6.7-q4",
+        "prompt": "What does floor do?",
+        "options": [
+          "Rounds toward negative infinity",
+          "Rounds toward positive infinity",
+          "Always truncates toward zero"
+        ],
+        "answer": "Rounds toward negative infinity",
+        "explanation": "floor returns the greatest integer value not greater than its argument, represented as double."
+      },
+      {
+        "id": "cl6.7-q5",
+        "prompt": "What might some toolchains require when linking math functions?",
+        "options": [
+          "An explicit math library link option such as -lm",
+          "A new C keyword",
+          "A change to every variable type"
+        ],
+        "answer": "An explicit math library link option such as -lm",
+        "explanation": "This is a toolchain-specific link requirement."
       }
     ]
   },

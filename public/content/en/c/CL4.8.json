@@ -6,39 +6,50 @@
   "title": "Character classification and conversion with ctype.h",
   "language": "en",
   "learningObjectives": [
-    "Explain the language rule and its constraints.",
-    "Trace the example and predict its output.",
-    "Identify relevant boundary and safety cases.",
-    "Apply the concept in a tested C program."
+    "Use character classification functions such as isalpha, isdigit and isspace.",
+    "Use character conversion functions such as tolower and toupper.",
+    "Explain the EOF or unsigned-char argument requirement for ctype functions.",
+    "Avoid passing a negative plain char value directly to ctype functions.",
+    "Distinguish byte-oriented character classification from full Unicode text processing."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "ctype.h provides functions such as isalpha, isdigit, isspace, tolower and toupper. Their argument must be EOF or a value representable as unsigned char.",
+      "concept": "The ctype.h header provides character classification functions such as isalpha, isdigit and isspace, and conversion functions such as tolower and toupper. Their argument must be EOF or a value representable as unsigned char. Because plain char may be signed, passing a negative char value directly can cause undefined behavior. These functions operate according to the current C locale and are not full Unicode character classifiers.",
       "whyItMatters": "This concept supports correct handling of C data and helps prevent invalid memory access or incorrect program behaviour.",
       "analogy": "Think of the construct as a precisely bounded sequence of storage and operations.",
       "analogyLimit": "The analogy does not replace C's rules for object lifetime, bounds, types or undefined behaviour."
     },
     "explain": {
-      "narrative": "ctype.h provides functions such as isalpha, isdigit, isspace, tolower and toupper. Their argument must be EOF or a value representable as unsigned char.\n\nAlways check the types, object bounds and preconditions required by the operation. Compile with warnings enabled and test ordinary as well as boundary inputs.",
+      "narrative": "## 1. Character classification\n\nFunctions such as `isalpha`, `isdigit`, `isspace`, `islower` and `isupper` test properties of a character value. They return zero when the property is false and nonzero when it is true.\n\n## 2. Character conversion\n\n`tolower` converts an uppercase character to its lowercase counterpart when such a mapping exists in the current locale. `toupper` performs the corresponding uppercase conversion. Otherwise, the input value is returned unchanged according to the function's contract.\n\n## 3. The argument rule matters\n\nEach ctype function accepts EOF or a value representable as unsigned char. Plain char may be signed, so a byte with its high bit set may become negative when promoted to int. Convert through unsigned char before calling a ctype function.\n\n## 4. Locale and encoding\n\nThe classification behavior depends on the current C locale. The functions operate on individual byte values, not complete UTF-8 code points or grapheme clusters. Unicode-aware text processing needs a separate decoding and classification strategy.\n\n## 5. Process a string safely\n\nWhen iterating over a null-terminated string, stop at the terminator. Convert each char to unsigned char before classification or conversion, and store converted values only when the destination representation and text encoding permit it.",
       "examples": [
         {
-          "id": "cl48-ex1",
+          "id": "cl4.8-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "Plain char may be signed. Passing a negative char value directly to a ctype function can cause undefined behaviour; convert through unsigned char first.",
-          "explanation": "#include <stdio.h>\n#include <ctype.h>\nint main(void) {\n const char text[] = \"Code 2026\";\n for (size_t i=0; text[i] != '\\0'; ++i) {\n  unsigned char ch = (unsigned char)text[i];\n  putchar(isalpha(ch) ? toupper(ch) : ch);\n }\n putchar('\\n');\n return 0;\n}",
+          "title": "Classify ASCII input safely",
+          "code": "#include <ctype.h>\n#include <stdio.h>\n\nint main(void) {\n    const char text[] = \"A7 z\";\n    for (size_t i = 0; text[i] != '\\0'; ++i) {\n        unsigned char ch = (unsigned char)text[i];\n        if (isalpha(ch)) puts(\"letter\");\n        else if (isdigit(ch)) puts(\"digit\");\n        else if (isspace(ch)) puts(\"space\");\n    }\n    return 0;\n}",
+          "explanation": "The conversion to unsigned char ensures the argument is in the range required by the ctype functions.",
+          "runnable": false
+        },
+        {
+          "id": "cl4.8-ex2",
+          "language": "en",
+          "title": "Convert a character",
+          "code": "#include <ctype.h>\n#include <stdio.h>\n\nint main(void) {\n    unsigned char ch = (unsigned char)'Q';\n    printf(\"%c\\n\", tolower(ch));\n    return 0;\n}",
+          "explanation": "tolower receives an unsigned-char value promoted to int and returns the converted character value or the original value.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Each byte is converted to unsigned char before classification. Letters are printed in uppercase; the space and digits remain unchanged.",
-      "independentTask": "Predict the output and count the alphabetic characters.",
+      "guidedTask": "Implement a small C program demonstrating CL4.8. Identify the relevant array or string capacity, valid indices, expected results and failure cases before compiling and testing.",
+      "independentTask": "Create a second example for CL4.8 that handles a boundary case explicitly. Add tests for empty input, the smallest valid case, the largest valid case and one invalid or oversized case. Explain how your code prevents invalid access.",
       "hints": [
-        "Count digits and whitespace in a string, using a valid ctype argument.",
-        "ctype functions follow the active C locale and are not a complete Unicode text-processing system.",
-        "Do not assume isdigit returns exactly one; use it as a truth value."
+        "Write down the exact array length and valid index range.",
+        "Include null terminator space when working with C strings.",
+        "Check function preconditions and return values.",
+        "Pass array lengths explicitly when a function needs them.",
+        "Test exact-fit and one-past-boundary cases."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl48-q1",
-        "prompt": "Which statement best matches this lesson?",
+        "id": "cl4.8-q1",
+        "prompt": "Which header declares isalpha and tolower?",
         "options": [
-          "The C rule and constraints explained in this lesson.",
-          "An unrelated HTML element.",
-          "A CSS property."
+          "ctype.h",
+          "string.h",
+          "stdio.h"
         ],
-        "answer": "The C rule and constraints explained in this lesson.",
-        "explanation": "The correct choice follows the C rule and its constraints."
+        "answer": "ctype.h",
+        "explanation": "The character classification and conversion functions are declared in ctype.h."
       },
       {
-        "id": "cl48-q2",
-        "prompt": "How should a boundary-sensitive operation be checked?",
+        "id": "cl4.8-q2",
+        "prompt": "What argument may a ctype function accept?",
         "options": [
-          "Identify valid bounds and test boundary cases.",
-          "Assume C checks every array bound automatically.",
-          "Ignore compiler warnings."
+          "EOF or a value representable as unsigned char",
+          "Any pointer",
+          "Any negative char value"
         ],
-        "answer": "Identify valid bounds and test boundary cases.",
-        "explanation": "C requires the programmer to respect object bounds and preconditions."
+        "answer": "EOF or a value representable as unsigned char",
+        "explanation": "Passing other values violates the function's domain requirements."
       },
       {
-        "id": "cl48-q3",
-        "prompt": "Why trace the example?",
+        "id": "cl4.8-q3",
+        "prompt": "Why cast a plain char to unsigned char before calling isdigit?",
         "options": [
-          "To understand execution order and state changes.",
-          "To replace compilation.",
-          "To avoid checking input."
+          "Plain char may be negative, but the function requires EOF or an unsigned-char-representable value",
+          "isdigit accepts only pointers",
+          "The cast converts letters into digits"
         ],
-        "answer": "To understand execution order and state changes.",
-        "explanation": "Tracing makes the data flow explicit; compilation and testing remain necessary."
+        "answer": "Plain char may be negative, but the function requires EOF or an unsigned-char-representable value",
+        "explanation": "The conversion avoids passing an out-of-domain negative value."
+      },
+      {
+        "id": "cl4.8-q4",
+        "prompt": "Do ctype functions fully classify UTF-8 Unicode characters?",
+        "options": [
+          "No; they classify individual byte values according to the C locale",
+          "Yes, every Unicode grapheme cluster",
+          "Only when char is signed"
+        ],
+        "answer": "No; they classify individual byte values according to the C locale",
+        "explanation": "UTF-8 characters can contain multiple bytes and require decoding."
+      },
+      {
+        "id": "cl4.8-q5",
+        "prompt": "What does isspace return when its argument is whitespace?",
+        "options": [
+          "A nonzero value",
+          "Exactly the character's ASCII code",
+          "A string"
+        ],
+        "answer": "A nonzero value",
+        "explanation": "Classification functions return zero or nonzero rather than a required specific true value."
       }
     ]
   },

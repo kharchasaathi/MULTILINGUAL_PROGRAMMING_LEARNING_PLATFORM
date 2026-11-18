@@ -6,39 +6,63 @@
   "title": "ctype.h: character classification and conversion; unsigned-char precondition",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept or reference contract.",
-    "Trace the example and justify its behaviour.",
-    "Identify relevant assumptions and edge cases.",
-    "Apply the skill in a documented exercise."
+    "Identify common character-classification functions in <ctype.h> and explain what each tests.",
+    "Explain the EOF-or-unsigned-char argument requirement and why a negative plain char can violate it.",
+    "Read input with int so every byte value remains distinct from EOF.",
+    "Use tolower and toupper safely and interpret their integer return values.",
+    "Describe the effects of the active C locale and the single-byte scope of ctype.",
+    "Design and test byte-oriented text processing for EOF, signed char and non-ASCII input."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL1.1",
+    "CL1.2",
+    "CL2.1",
+    "CL3.1",
+    "CL4.1",
+    "CL5.1",
+    "CL5.3",
+    "CL6.1",
+    "CL12.1",
+    "CL12.2"
+  ],
   "stages": {
     "understand": {
-      "concept": "ctype.h declares character classification and case-conversion functions. Each argument must be EOF or representable as unsigned char. Passing a negative plain char value other than EOF is undefined behaviour.",
-      "whyItMatters": "The unsigned-char precondition is essential when processing arbitrary byte values on implementations where char is signed.",
-      "analogy": "Treat a reference or learning task as a contract that states what is expected and how success is checked.",
-      "analogyLimit": "The analogy does not replace the exact C standard or library specification."
+      "concept": "The <ctype.h> header declares functions and macros that classify a single character value or convert its case. Examples include isalpha, isdigit, isspace, isalnum, islower, isupper, ispunct, tolower and toupper. Their argument contract is strict: the value must be EOF or representable as unsigned char. A negative value produced by converting a byte to a signed plain char is not a valid argument unless it is exactly EOF. Passing any other out-of-range negative value causes undefined behaviour.",
+      "whyItMatters": "Text-processing code often reads bytes whose high bit is set. On implementations where plain char is signed, those bytes may become negative. Passing such a value directly to a ctype function can trigger undefined behaviour even though the input came from a file or standard input. Correct conversion protects the program and makes byte-level assumptions explicit.",
+      "analogy": "Think of a ctype function as a tool that accepts either a special end-of-input marker or a byte in the range supported by unsigned char. Converting a signed byte back to unsigned char puts an ordinary byte into the tool's accepted range.",
+      "analogyLimit": "The analogy describes only the argument range. It does not make ctype functions Unicode-aware, guarantee identical locale classifications, or define how an application should interpret arbitrary encoded text."
     },
     "explain": {
-      "narrative": "ctype.h declares character classification and case-conversion functions. Each argument must be EOF or representable as unsigned char. Passing a negative plain char value other than EOF is undefined behaviour.\n\nUse authoritative declarations and documentation, state assumptions explicitly and verify behaviour with focused examples. Where the implementation or C version matters, record it.",
+      "narrative": "## 1. Classification functions\n\nInclude <ctype.h> to use the character classification and conversion interfaces. isalpha tests for a letter in the current locale; isdigit tests for a decimal digit; isalnum accepts letters or digits; isspace tests whitespace; islower and isupper test case; and ispunct tests punctuation. Other functions include isprint, isgraph, iscntrl and isxdigit.\n\nA classification function returns zero when the condition is false and a nonzero value when it is true. Do not assume the true result must be exactly 1. Use it as a condition or normalize it explicitly when storing a Boolean-like result.\n\n## 2. The unsigned-char rule\n\nThe argument to every ctype function must be EOF or a value representable as unsigned char. A common safe pattern for a byte already stored in char is isalpha((unsigned char)ch). The cast must happen before the call. This is especially important when plain char is signed and the stored byte has its high bit set.\n\nDo not cast an input value to unsigned char before checking for EOF. getchar returns int precisely so it can represent every possible unsigned-char value and the distinct EOF sentinel. Read into an int, compare with EOF, and only then pass the value to a ctype function or convert it to unsigned char.\n\n## 3. Case conversion\n\ntolower converts an uppercase character to its lowercase counterpart when the active locale defines such a mapping; otherwise it returns the input value unchanged. toupper works in the opposite direction. Their arguments obey the same EOF-or-unsigned-char rule. A safe conversion of a stored byte is tolower((unsigned char)ch). Keep the result in int while handling input sentinels, or convert it to unsigned char when storing an ordinary converted byte.\n\n## 4. Locale and encoding boundaries\n\nClassification and conversion behaviour is affected by the current C locale, initially the C locale unless the program changes it. The standard ctype interfaces operate on single-byte character values; they do not decode a UTF-8 sequence into a Unicode code point. A UTF-8 character outside ASCII may occupy several bytes, and classifying each byte separately does not classify the character as a whole. For Unicode-aware text, use a deliberate decoding and Unicode library strategy rather than treating ctype as a Unicode API.\n\n## 5. Practical design rules\n\nUse int for values returned by getchar or fgetc until after checking EOF. If a function accepts a char, cast that value to unsigned char at the ctype call. Keep locale assumptions documented, and test ordinary ASCII, empty input, end-of-file and bytes with the high bit set. Never rely on undefined behaviour as a shortcut for classifying arbitrary input.",
       "examples": [
         {
           "id": "cl126-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\n#include <ctype.h>\nint main(void) {\n int ch;\n while ((ch = getchar()) != EOF) {\n  unsigned char byte = (unsigned char)ch;\n  if (isdigit(byte)) putchar(byte);\n }\n return 0;\n}",
-          "explanation": "getchar returns int so EOF can be represented separately. Each non-EOF input value is converted to unsigned char before classification.",
-          "runnable": false
+          "title": "Count character categories safely from standard input",
+          "code": "#include <ctype.h>\n#include <stdio.h>\n\nint main(void)\n{\n    int ch;\n    unsigned long letters = 0UL;\n    unsigned long digits = 0UL;\n    unsigned long spaces = 0UL;\n\n    while ((ch = getchar()) != EOF) {\n        if (isalpha((unsigned char)ch) != 0) {\n            ++letters;\n        }\n        if (isdigit((unsigned char)ch) != 0) {\n            ++digits;\n        }\n        if (isspace((unsigned char)ch) != 0) {\n            ++spaces;\n        }\n    }\n\n    if (ferror(stdin) != 0) {\n        fputs(\"Input error.\\n\", stderr);\n        return 1;\n    }\n\n    printf(\"letters=%lu digits=%lu spaces=%lu\\n\",\n           letters, digits, spaces);\n    return 0;\n}\n",
+          "explanation": "getchar returns int, so EOF is checked before the value is converted to unsigned char. Each classification call receives a value in the permitted range. The program also checks ferror so an input failure is not silently treated as normal end-of-file.",
+          "runnable": true
+        },
+        {
+          "id": "cl126-ex2",
+          "language": "en",
+          "title": "Convert a byte array to lowercase safely",
+          "code": "#include <ctype.h>\n#include <stdio.h>\n\nint main(void)\n{\n    const char input[] = \"CodeSaathi 2026!\";\n    size_t i;\n\n    for (i = 0U; input[i] != '\\0'; ++i) {\n        int converted = tolower((unsigned char)input[i]);\n        putchar(converted);\n    }\n    putchar('\\n');\n    return 0;\n}\n",
+          "explanation": "Each stored char is converted to unsigned char before it is passed to tolower. The return value is kept in int and sent to putchar. In the initial C locale, ASCII letters become lowercase while digits, spaces and punctuation remain unchanged.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Explain why getchar returns int and why the cast occurs after the EOF check.",
-      "independentTask": "Write a function that counts alphabetic, digit and whitespace characters without violating ctype argument rules.",
+      "guidedTask": "Run Example 1 with Abc 123! followed by a newline. Predict the three counts, then run it with empty input. Explain why the loop variable is int and why the cast occurs only after the EOF check.",
+      "independentTask": "Write a byte-oriented text analyser that counts letters, digits, whitespace and punctuation. Read with getchar into int, handle EOF and ferror separately, and cast each non-EOF value to unsigned char before every ctype call. Add a routine that converts ASCII letters to lowercase safely. State whether your program assumes the initial C locale and whether it supports only single-byte text.",
       "hints": [
-        "Check EOF before converting the input value to unsigned char.",
-        "ctype functions are locale-sensitive and classify single-byte characters, not arbitrary Unicode code points.",
-        "Use the return value as a truth value rather than assuming it equals one."
+        "The ctype argument rule is about the value passed to the function, not merely the declared type of the original variable.",
+        "Use int for getchar and fgetc results so EOF remains distinct from every possible input byte.",
+        "Check ch != EOF before converting ch to unsigned char; converting EOF first loses the sentinel distinction.",
+        "For a value stored in plain char, cast to unsigned char at the call site: isalpha((unsigned char)value).",
+        "Classification results are zero or nonzero; do not depend on a true result being exactly one.",
+        "ctype operates on single-byte values under the current C locale. It does not decode UTF-8 or provide general Unicode case folding."
       ]
     }
   },
@@ -51,36 +75,58 @@
     "questions": [
       {
         "id": "cl126-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "Which values are valid arguments to a function such as isalpha?",
         "options": [
-          "The learning or C language principle described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "EOF or a value representable as unsigned char",
+          "Any int value, including every negative value",
+          "Only values from A through Z"
         ],
-        "answer": "The learning or C language principle described in this lesson.",
-        "explanation": "The correct choice follows the concept or reference contract described above."
+        "answer": "EOF or a value representable as unsigned char",
+        "explanation": "The ctype contract permits EOF or a value representable as unsigned char. Other negative values are not valid arguments."
       },
       {
         "id": "cl126-q2",
-        "prompt": "What should be checked before applying the concept?",
+        "prompt": "Why should the result of getchar be stored in int?",
         "options": [
-          "Its exact requirements, assumptions and edge cases.",
-          "Only the function or topic name.",
-          "Whether an unrelated example compiles."
+          "So it can represent every input byte and the distinct EOF value",
+          "Because getchar never returns a character value",
+          "Because int automatically converts UTF-8 into Unicode"
         ],
-        "answer": "Its exact requirements, assumptions and edge cases.",
-        "explanation": "Reliable use depends on understanding the actual contract."
+        "answer": "So it can represent every input byte and the distinct EOF value",
+        "explanation": "The int return type preserves all unsigned-char byte values plus the separate EOF sentinel."
       },
       {
         "id": "cl126-q3",
-        "prompt": "Which practice best demonstrates understanding?",
+        "prompt": "A byte is stored in a possibly signed plain char named value. Which call is safe?",
         "options": [
-          "Explain the reasoning and test representative and boundary cases.",
-          "Memorize an output without explanation.",
-          "Ignore invalid input."
+          "isalpha((unsigned char)value)",
+          "isalpha(value) for every possible byte",
+          "isalpha((int)(signed char)value)"
         ],
-        "answer": "Explain the reasoning and test representative and boundary cases.",
-        "explanation": "Reasoning and targeted tests demonstrate transferable understanding."
+        "answer": "isalpha((unsigned char)value)",
+        "explanation": "Converting to unsigned char before the call ensures the argument is in the permitted byte range."
+      },
+      {
+        "id": "cl126-q4",
+        "prompt": "What does a true result from isdigit guarantee?",
+        "options": [
+          "A nonzero result, not necessarily exactly 1",
+          "Exactly the integer 1 on every implementation",
+          "A converted digit character is returned"
+        ],
+        "answer": "A nonzero result, not necessarily exactly 1",
+        "explanation": "Classification functions return zero for false and a nonzero value for true. They do not promise the exact value one."
+      },
+      {
+        "id": "cl126-q5",
+        "prompt": "Which statement about ctype and UTF-8 is correct?",
+        "options": [
+          "ctype classifies single-byte values according to the current C locale; it does not decode UTF-8 code points",
+          "Calling isalpha on each UTF-8 byte classifies the complete Unicode character",
+          "tolower performs full Unicode case folding for every language"
+        ],
+        "answer": "ctype classifies single-byte values according to the current C locale; it does not decode UTF-8 code points",
+        "explanation": "The standard ctype interfaces accept EOF or unsigned-char-range values and are not Unicode decoding or full Unicode case-folding APIs."
       }
     ]
   },

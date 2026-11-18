@@ -6,39 +6,50 @@
   "title": "Enumerations, enum constants and underlying integer considerations",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C rules.",
-    "Trace the example and identify data or resource flow.",
-    "Recognize relevant safety and failure cases.",
-    "Apply the concept in a tested C program."
+    "Define an enum with meaningful named constants.",
+    "Use enumerators as integer constant expressions.",
+    "Understand that enum values are integer values and can be converted.",
+    "Avoid assuming a fixed underlying enum representation across implementations.",
+    "Validate externally supplied integer values before treating them as a valid enum state."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "An enum defines a set of named integer constant values and an enumeration type. Enumerators are integer constant expressions. The compatible integer type used for an enum is implementation-defined within the constraints of the C standard.",
+      "concept": "An enum defines an enumeration type and named integer constant values called enumerators. Enumerators are integer constant expressions. C does not guarantee one universal underlying integer representation for every enum type across implementations, so portable interfaces should not assume a fixed size or binary encoding without an explicit contract.",
       "whyItMatters": "Named states are clearer than unexplained numeric codes, but programs should not assume every enum has a fixed width or external representation.",
       "analogy": "Treat each object or stream as a resource with a defined lifetime and explicit rules for access.",
       "analogyLimit": "The analogy does not replace C's formal object, storage-duration, alignment or library rules."
     },
     "explain": {
-      "narrative": "An enum defines a set of named integer constant values and an enumeration type. Enumerators are integer constant expressions. The compatible integer type used for an enum is implementation-defined within the constraints of the C standard.\n\nCheck all allocation, I/O and conversion results. Respect object bounds and lifetime, initialize data before reading it, and define who owns and releases each resource.",
+      "narrative": "## 1. Define named states\n\nAn enum groups related named values, such as NEW, ACTIVE and CLOSED. This makes state-oriented code easier to read than unexplained numeric constants.\n\n## 2. Enumerator values\n\nUnless explicit values are assigned, enumerators are assigned successive integer values starting at zero. Explicit values can be used when an interface requires particular constants.\n\n## 3. Use enum objects\n\nDeclare objects using the enum type and compare them with named enumerators. The compiler can help make the intended state clearer, but C does not enforce that every possible integer value is one of the named enumerators.\n\n## 4. Validate external values\n\nData read from a file, network or user input may not correspond to a valid enumerator. Check the value against the allowed set before using it as a state.\n\n## 5. Avoid representation assumptions\n\nThe compatible integer type is implementation-defined within the standard's constraints. Do not assume enum size or raw representation for portable serialization.",
       "examples": [
         {
-          "id": "cl710-ex1",
+          "id": "cl7.10-ex1",
           "language": "en",
-          "title": "Focused C example",
+          "title": "Core concept",
           "code": "#include <stdio.h>\nenum Status { STATUS_NEW, STATUS_ACTIVE, STATUS_CLOSED };\nint main(void) {\n enum Status state = STATUS_ACTIVE;\n if (state == STATUS_ACTIVE) puts(\"Active\");\n return 0;\n}",
-          "explanation": "The enumerators receive values beginning at zero unless explicitly assigned. The comparison uses the named constant instead of a magic number.",
+          "explanation": "Trace the operations and check the relevant C standard library contracts and failure cases.",
+          "runnable": false
+        },
+        {
+          "id": "cl7.10-ex2",
+          "language": "en",
+          "title": "Apply the concept safely",
+          "code": "#include <stdio.h>\nenum Mode { MODE_READ = 1, MODE_WRITE = 2, MODE_APPEND = 4 };\nint main(void) { enum Mode mode = MODE_APPEND; switch (mode) { case MODE_READ: puts(\"read\"); break; case MODE_WRITE: puts(\"write\"); break; case MODE_APPEND: puts(\"append\"); break; default: puts(\"invalid\"); } return 0; }",
+          "explanation": "This example reinforces the topic with explicit validation or resource handling. Compile with warnings and test failure paths.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "List the values assigned to the three enumerators.",
-      "independentTask": "Create an enum for a service ticket lifecycle and write a switch that handles every declared state.",
+      "guidedTask": "Create a small C program demonstrating Enumerations, enum constants and integer considerations. Write down its preconditions, expected result and failure handling before implementation.",
+      "independentTask": "Extend the example for Enumerations, enum constants and integer considerations to handle a boundary case and an error case. Explain the relevant C rule and add a test for each path.",
       "hints": [
-        "An enum variable can hold integer values beyond the named enumerators depending on its compatible type; validate external values.",
-        "Do not assume an enum has the same size on every target.",
-        "Use explicit values only when a stable numeric mapping is part of the interface contract."
+        "Read the declaration and function contract carefully.",
+        "Check all library return values before using results.",
+        "Keep object bounds, lifetime and resource ownership explicit.",
+        "Do not assume implementation-specific memory or file representations are portable.",
+        "Test both success and failure paths."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl710-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "id": "cl7.10-q1",
+        "prompt": "What does an enum define?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "Named integer constants and an enumeration type",
+          "A new floating-point type",
+          "A dynamic array"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the C rule described in the lesson."
+        "answer": "Named integer constants and an enumeration type",
+        "explanation": "Enumerators are named integer constant values."
       },
       {
-        "id": "cl710-q2",
-        "prompt": "Which practice best protects correctness?",
+        "id": "cl7.10-q2",
+        "prompt": "What is the default value of the first enumerator when no values are specified?",
         "options": [
-          "Check validity, bounds and operation results before access.",
-          "Assume memory and file operations cannot fail.",
-          "Use data before initialization."
+          "0",
+          "1",
+          "-1"
         ],
-        "answer": "Check validity, bounds and operation results before access.",
-        "explanation": "C programs must explicitly handle resource validity and failure paths."
+        "answer": "0",
+        "explanation": "Implicit enumerator values start at zero and increase by one."
       },
       {
-        "id": "cl710-q3",
-        "prompt": "How should the example be verified?",
+        "id": "cl7.10-q3",
+        "prompt": "Does C guarantee that every enum object contains only a named enumerator?",
         "options": [
-          "Compile with warnings and test success and failure paths.",
-          "Ignore warnings and test only one happy path.",
-          "Assume the same layout on every platform."
+          "No",
+          "Yes, at runtime",
+          "Only with switch"
         ],
-        "answer": "Compile with warnings and test success and failure paths.",
-        "explanation": "Compiler diagnostics and deliberate tests provide evidence for correctness."
+        "answer": "No",
+        "explanation": "C enum objects can hold integer values beyond the listed enumerators."
+      },
+      {
+        "id": "cl7.10-q4",
+        "prompt": "What should be done with an enum value read from external input?",
+        "options": [
+          "Validate it against the allowed enumerators",
+          "Assume it is always valid",
+          "Convert it directly to a pointer"
+        ],
+        "answer": "Validate it against the allowed enumerators",
+        "explanation": "External values may not correspond to a valid application state."
+      },
+      {
+        "id": "cl7.10-q5",
+        "prompt": "Can all implementations be assumed to use the same enum size?",
+        "options": [
+          "No",
+          "Yes, always sizeof(int)",
+          "Only on 64-bit systems"
+        ],
+        "answer": "No",
+        "explanation": "The compatible integer type is implementation-defined within standard constraints."
       }
     ]
   },

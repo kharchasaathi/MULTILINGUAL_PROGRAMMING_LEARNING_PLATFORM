@@ -3,42 +3,69 @@
   "courseId": "c",
   "moduleId": "CL8",
   "topicId": "CL8.8",
-  "title": "Compiler errors, warnings, link errors and runtime failures",
+  "title": "Compiler errors, warnings, linker errors and runtime failures",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C rules.",
-    "Trace the example and identify data or control flow.",
-    "Recognize common failure and safety cases.",
-    "Apply the concept in a tested C program."
+    "Distinguish preprocessing, compilation, assembly and linking stages, and identify which kinds of diagnostics commonly arise at each stage.",
+    "Recognize syntax and constraint violations, warnings, unresolved external symbols and runtime failures from representative compiler and program output.",
+    "Explain why a warning may still produce an executable, why a link failure prevents a complete program from being produced and why a successful build does not prove runtime correctness.",
+    "Use compiler exit status, diagnostic location, build commands and minimal reproductions to isolate a failure without changing unrelated code.",
+    "Compile C programs with explicit language standards and useful warning options, and interpret diagnostics without assuming every compiler uses identical wording.",
+    "Apply a repeatable diagnose, correct, rebuild and regression-test workflow to a C program while preserving the original failure evidence."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL1.3 — C program structure and syntax",
+    "CL1.7 — Compile, link and run",
+    "CL8.1 — Memory regions and object lifetime",
+    "CL8.7 — Common memory-management defects"
+  ],
   "stages": {
     "understand": {
-      "concept": "Build failures occur at different stages. Syntax and constraint violations are diagnosed during translation; unresolved external symbols may appear at link time; runtime failures occur after a program starts. Warnings identify suspicious code that may still compile.",
-      "whyItMatters": "Identifying the failure stage narrows investigation and avoids changing unrelated code. A successful compile does not prove runtime correctness.",
-      "analogy": "Treat each resource and operation as having a clear contract, valid lifetime and failure path.",
-      "analogyLimit": "The analogy does not replace the C standard, compiler or library specifications."
+      "concept": "A C program passes through several toolchain stages. The preprocessor handles directives and included headers; the compiler translates C source into lower-level code; an assembler may produce object files; and the linker combines object files and libraries into an executable. Diagnostics can appear at different stages. A runtime failure happens after the program starts executing. A warning is a diagnostic about suspicious code and does not necessarily stop the build.",
+      "whyItMatters": "Knowing where a failure occurs narrows the search. Editing a linker command will not fix a missing semicolon, and changing C syntax will not resolve a library that was never linked. Separating build-time diagnostics from runtime behavior makes debugging faster and more systematic.",
+      "analogy": "Think of producing a book: editing checks the manuscript, typesetting creates printable pages, binding combines sections, and reading reveals problems that were not obvious during production. Each stage has its own checks and possible failures.",
+      "analogyLimit": "Real compiler pipelines can combine or reorder stages, and toolchains differ. The analogy explains the distinction but does not prescribe the exact internal architecture of every compiler."
     },
     "explain": {
-      "narrative": "Build failures occur at different stages. Syntax and constraint violations are diagnosed during translation; unresolved external symbols may appear at link time; runtime failures occur after a program starts. Warnings identify suspicious code that may still compile.\n\nCheck object bounds, lifetimes, arithmetic limits and all relevant return values. Compile with warnings enabled and test both normal and failure paths.",
+      "narrative": "## 1. The main translation and build stages\n\nA common hosted C toolchain performs these logical steps:\n\n1. **Preprocessing:** processes directives such as `#include`, `#define` and conditional compilation. Missing headers or malformed preprocessing directives can fail here.\n2. **Compilation:** checks C syntax and semantic constraints, performs analysis and generates lower-level code. A missing semicolon, incompatible type use or undeclared identifier can produce a diagnostic here.\n3. **Assembly:** converts assembly output into object code. Toolchain or target-specific assembly problems can appear here.\n4. **Linking:** combines object files and libraries, resolves external references and produces an executable. A function declared and called but never defined or linked can cause an unresolved-symbol error here.\n\nA driver such as `gcc` or `clang` may run several stages with one command. Options such as `-E`, `-S` and `-c` can help inspect or stop at intermediate stages; exact output and supported options depend on the toolchain.\n\n## 2. Errors and warnings are not identical\n\nA **diagnostic error** reports a problem that prevents the requested translation or build from completing. A **warning** reports code the compiler considers suspicious or potentially incorrect. Many compilers still produce an executable when warnings are present. Projects can choose stricter policies, for example treating selected or all warnings as errors with `-Werror`.\n\nA warning should not be ignored merely because an executable was produced. Understand the warning, correct the underlying issue where appropriate, and rebuild. Warning names and default settings vary between compiler versions and implementations.\n\n## 3. Linker errors\n\nThe compiler can accept a call to a function when a suitable declaration is visible, while the linker later fails to find the function's definition. For example, a source file may call `calculate_total` but the object file containing its definition was omitted from the link command. Check spelling, external linkage, object-file lists and required libraries. A declaration tells the compiler about an interface; it does not by itself provide the function's implementation.\n\n## 4. Runtime failures\n\nA program can compile and link successfully but still behave incorrectly or terminate abnormally. Examples include invalid memory access, failed file operations, invalid input assumptions, division by zero and explicit error exits. Some runtime defects produce a diagnostic or signal; others silently produce wrong results. Test normal, boundary and failure inputs.\n\n## 5. Read diagnostics systematically\n\nStart with the first relevant diagnostic, source file and line/column location. Inspect nearby code and declarations. Fix one root cause at a time, rebuild, and then run a focused test. Later messages can be consequences of an earlier error, so do not blindly fix every line in the order printed.\n\n## 6. A practical warning-enabled build\n\nFor GCC or Clang, a useful project-specific starting point is:\n\n```sh\ngcc -std=c11 -Wall -Wextra -Wpedantic -g main.c -o app\n```\n\nFor stricter projects, add options such as `-Wconversion`, `-Wshadow` and eventually `-Werror` after understanding their effects. Compiler options are implementation-specific; do not assume every compiler accepts the same flags or emits identical diagnostics.\n\n## 7. Make failures reproducible\n\nRecord the exact command, compiler version, first diagnostic, input and observed result. Reduce the issue to the smallest source example that still reproduces it. After the fix, rerun the failing case and add a regression test so the same defect is less likely to return.",
       "examples": [
         {
           "id": "cl88-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\nint main(void) {\n int total = 5;\n printf(\"%d\\n\", total);\n return 0;\n}",
-          "explanation": "This minimal program can be compiled, linked and run as separate stages by many toolchains. Each stage has different inputs and possible diagnostics.",
+          "title": "Build a small program with explicit warnings and verify its runtime result",
+          "code": "#include <stdio.h>\n\nstatic int add_values(int left, int right) {\n    return left + right;\n}\n\nint main(void) {\n    const int result = add_values(17, 25);\n    printf(\"result=%d\\n\", result);\n    return 0;\n}",
+          "explanation": "Expected output: `result=42`. A GCC or Clang build can use `-std=c11 -Wall -Wextra -Wpedantic -g` to request the C11 language mode, common warnings and debug information. The build command's exit status indicates whether the requested build completed; running the resulting executable is a separate step. The code is intentionally straightforward so diagnostics and runtime output can be examined independently.",
+          "runnable": false
+        },
+        {
+          "id": "cl88-ex2",
+          "language": "en",
+          "title": "Separate a function declaration from its definition across two source files",
+          "code": "/* calculator.h */\n#ifndef CALCULATOR_H\n#define CALCULATOR_H\nint multiply_values(int left, int right);\n#endif\n\n/* calculator.c */\n#include \"calculator.h\"\nint multiply_values(int left, int right) {\n    return left * right;\n}\n\n/* main.c */\n#include <stdio.h>\n#include \"calculator.h\"\nint main(void) {\n    printf(\"product=%d\\n\", multiply_values(6, 7));\n    return 0;\n}\n\n/* Build both implementation and caller:\n   gcc -std=c11 -Wall -Wextra -Wpedantic main.c calculator.c -o app\n*/",
+          "explanation": "Expected output: `product=42`. The header declares the function interface, `calculator.c` supplies its definition, and `main.c` calls it. Compiling and linking both source files provides the definition needed by the linker. If `calculator.c` is omitted from the build command, the compiler may accept the call but the linker will commonly report an unresolved reference. The example is presented as a three-file layout; place each labelled section in its own file before building.",
           "runnable": false
         }
+      ],
+      "commonMistakes": [
+        "Assuming that every diagnostic is a runtime error; many failures happen before the program can execute.",
+        "Assuming that a warning means the compiler necessarily stopped or that a warning-free build proves the program is correct.",
+        "Trying to fix a missing function definition by changing a valid function call's syntax instead of checking linked object files and libraries.",
+        "Treating a successful compile and link as proof that all inputs and execution paths are safe.",
+        "Ignoring the first relevant diagnostic and editing many unrelated lines at once.",
+        "Using compiler flags without checking whether the selected compiler supports them.",
+        "Failing to rerun the exact input that originally exposed the defect after making a fix."
       ]
     },
     "practise": {
-      "guidedTask": "Classify sample messages as compile-time, link-time or runtime failures.",
-      "independentTask": "Intentionally create one syntax error, one missing definition and one runtime failure. Record how each tool reports it.",
+      "guidedTask": "Take a small two-file C program. First introduce a syntax error and record the compiler diagnostic. Next restore it, omit the source file that defines a called function and record the linker diagnostic. Finally build successfully and test a deliberately invalid input path. Classify each failure by stage and record the command and observed result.",
+      "independentTask": "Create a small C project with a header, implementation file and main file. Build it with explicit C standard and warning flags. Deliberately introduce one warning, one compile-time error and one missing-definition link error in separate attempts. Restore the project, run normal and boundary tests, and write a short diagnostic log describing how each issue was isolated and fixed.",
       "hints": [
-        "Read the first relevant diagnostic and inspect the source location before changing code.",
-        "A warning is not necessarily a build failure, but it should be understood and resolved where possible.",
-        "Runtime tests do not replace compile-time diagnostics."
+        "Record the exact build command and the first relevant diagnostic before editing.",
+        "Use `-E`, `-S` or `-c` when you need to inspect a particular translation stage; check your compiler's documentation.",
+        "A visible function prototype does not replace the function definition needed at link time.",
+        "Warnings may still allow an executable to be produced, depending on compiler options.",
+        "Check the program's exit status and runtime output separately from the compiler's exit status.",
+        "After fixing a defect, rerun the original failing case and add a regression test."
       ]
     }
   },
@@ -51,36 +78,58 @@
     "questions": [
       {
         "id": "cl88-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "A C source file contains a call to a declared function, but the object file defining that function is missing from the build. At which stage is the unresolved external reference commonly reported?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "Linking",
+          "Preprocessing",
+          "Runtime execution"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct choice follows the C rule explained above."
+        "answer": "Linking",
+        "explanation": "The compiler can use the declaration to check the call, but the linker must find the external definition when combining object files and libraries."
       },
       {
         "id": "cl88-q2",
-        "prompt": "What is a reliable way to protect correctness?",
+        "prompt": "What is generally true about a compiler warning?",
         "options": [
-          "Validate preconditions, bounds and failure results.",
-          "Assume the operation cannot fail.",
-          "Ignore the type and lifetime rules."
+          "It identifies suspicious code and may still allow an executable to be produced.",
+          "It always means the program failed to link.",
+          "It is reported only after the program crashes."
         ],
-        "answer": "Validate preconditions, bounds and failure results.",
-        "explanation": "C requires explicit handling of object validity and operation failures."
+        "answer": "It identifies suspicious code and may still allow an executable to be produced.",
+        "explanation": "Warnings are diagnostics and do not necessarily stop a build. Build policies such as `-Werror` can promote warnings to errors."
       },
       {
         "id": "cl88-q3",
-        "prompt": "How should the example be checked?",
+        "prompt": "A program compiles and links, then crashes when a particular input is entered. Which category best describes the observed failure?",
         "options": [
-          "Compile with warnings and test expected and failure cases.",
-          "Ignore diagnostics and test only once.",
-          "Assume every platform behaves identically."
+          "A runtime failure",
+          "A preprocessing failure",
+          "A missing-header compile failure"
         ],
-        "answer": "Compile with warnings and test expected and failure cases.",
-        "explanation": "Warnings and targeted tests provide evidence for correctness."
+        "answer": "A runtime failure",
+        "explanation": "The program reached execution and the failure appeared while handling input. The successful build does not guarantee correct behavior for every runtime path."
+      },
+      {
+        "id": "cl88-q4",
+        "prompt": "Why should a developer record the exact command and first relevant diagnostic before changing code?",
+        "options": [
+          "It preserves reproducible evidence and helps identify the stage and likely root cause.",
+          "It guarantees that the compiler will emit the same wording on every platform.",
+          "It automatically repairs the source file."
+        ],
+        "answer": "It preserves reproducible evidence and helps identify the stage and likely root cause.",
+        "explanation": "The command, toolchain and first diagnostic provide context. Reproducing the failure makes it easier to test a focused correction."
+      },
+      {
+        "id": "cl88-q5",
+        "prompt": "Which command most directly requests a C11 build with common GCC warnings and debug information?",
+        "options": [
+          "`gcc -std=c11 -Wall -Wextra -Wpedantic -g main.c -o app`",
+          "`gcc --run-only main.c`",
+          "`gcc -html main.c -o app`"
+        ],
+        "answer": "`gcc -std=c11 -Wall -Wextra -Wpedantic -g main.c -o app`",
+        "explanation": "The command selects C11, enables common warning groups, includes debug information and names the output executable. The exact available flags depend on the compiler."
       }
     ]
   },

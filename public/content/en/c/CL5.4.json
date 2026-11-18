@@ -6,39 +6,50 @@
   "title": "Pointers and arrays; array-to-pointer conversion",
   "language": "en",
   "learningObjectives": [
-    "Explain the language rule and its constraints.",
-    "Trace the example and predict its behaviour.",
-    "Identify boundary and safety cases.",
-    "Apply the concept in a tested C program."
+    "Explain array-to-pointer conversion in most expression contexts.",
+    "Identify exceptions such as sizeof and unary & where array conversion does not occur.",
+    "Distinguish an array object from a pointer variable.",
+    "Explain how array parameters are adjusted to pointer parameters.",
+    "Pass an element count separately when a function needs the array length."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "In most expressions, an array expression is converted to a pointer to its first element. The array itself is not a pointer object, and sizeof applied to an actual array gives the size of the entire array. Function parameters declared as array parameters are adjusted to pointer parameters.",
+      "concept": "In most expressions, an array expression is converted to a pointer to its first element. The array itself is not a pointer object. Important exceptions include when the array is the operand of sizeof or unary &, and when it is used to initialize an array from a string literal. Function parameters declared with array syntax are adjusted to pointer parameters, so the original array bound is not carried into the function.",
       "whyItMatters": "This knowledge helps reason about C data representation, object bounds and valid memory access.",
       "analogy": "Think of memory objects as labelled storage and pointers as typed references to that storage.",
       "analogyLimit": "The analogy does not replace C's formal pointer, lifetime and object-access rules."
     },
     "explain": {
-      "narrative": "In most expressions, an array expression is converted to a pointer to its first element. The array itself is not a pointer object, and sizeof applied to an actual array gives the size of the entire array. Function parameters declared as array parameters are adjusted to pointer parameters.\n\nCheck the declared types, object lifetime, valid bounds and function preconditions before using the construct. Enable compiler warnings and test edge cases.",
+      "narrative": "## 1. Array-to-pointer conversion\n\nGiven `int values[4]`, the expression values usually converts to a pointer to its first element, equivalent in many contexts to `&values[0]`. This is why arrays can be passed to functions that accept pointers.\n\n## 2. Important exceptions\n\n`sizeof values` gives the size of the entire array object when values is an actual array in that scope. `&values` gives a pointer to the entire array, with a different type from `values` after conversion. These distinctions matter for pointer arithmetic.\n\n## 3. Array is not pointer\n\nAn array has a fixed object size and cannot be assigned a new address. A pointer is a separate object that can store different pointer values during its lifetime. Similar syntax does not make their types or behavior identical.\n\n## 4. Function parameter adjustment\n\nA parameter written `int values[]` is adjusted to `int *values`. The function receives a pointer value, not a copy of the entire array. sizeof values inside the function therefore gives the pointer size.\n\n## 5. Pass the length\n\nA function that traverses an array should normally receive the element count separately. Its contract should define whether a null pointer is allowed for a zero count and how indices are validated.",
       "examples": [
         {
-          "id": "cl54-ex1",
+          "id": "cl5.4-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "Understanding the distinction prevents incorrect sizeof calculations and helps explain why functions need an explicit element count when receiving an array.",
-          "explanation": "#include <stdio.h>\nvoid print_values(const int values[], size_t count) {\n for (size_t i=0; i<count; ++i) printf(\"%d \", values[i]);\n putchar('\\n');\n}\nint main(void) {\n int data[] = {3, 6, 9};\n print_values(data, sizeof data / sizeof data[0]);\n return 0;\n}",
+          "title": "Array conversion and sizeof",
+          "code": "#include <stdio.h>\n\nint main(void) {\n    int values[4] = {2, 4, 6, 8};\n    int *first = values;\n    printf(\"first=%d count=%zu\\n\", *first,\n           sizeof values / sizeof values[0]);\n    return 0;\n}",
+          "explanation": "The array expression converts to a pointer for initialization of first. sizeof values still measures the complete array.",
+          "runnable": false
+        },
+        {
+          "id": "cl5.4-ex2",
+          "language": "en",
+          "title": "Array parameter is a pointer",
+          "code": "#include <stdio.h>\n\nvoid show_size(int values[], size_t count) {\n    printf(\"parameter pointer size=%zu, count=%zu\\n\",\n           sizeof values, count);\n}\n\nint main(void) {\n    int data[5] = {0};\n    show_size(data, sizeof data / sizeof data[0]);\n    return 0;\n}",
+          "explanation": "Inside the function, values is a pointer parameter. The caller supplies the element count explicitly.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "At the call site, data is converted to a pointer to its first element. The function receives that pointer and the separately supplied count; it cannot recover the original array length with sizeof values.",
-      "independentTask": "Compare sizeof data in main with sizeof values inside print_values.",
+      "guidedTask": "Write a C program demonstrating CL5.4. State the relevant input, pointer or conversion contract, then compile and trace the normal and failure paths.",
+      "independentTask": "Create a second example for CL5.4 that exercises a boundary or invalid state. Add checks, document the ownership or input rules, and explain why unsafe behavior is avoided.",
       "hints": [
-        "Write a function that accepts a const int array parameter and a count, then returns the largest element with a documented empty-input policy.",
-        "Array-to-pointer conversion is not performed in every context, including sizeof and unary &.",
-        "An array parameter declaration does not pass the complete array by value."
+        "Read the declared types carefully, including every pointer and qualifier level.",
+        "Check return values and validate inputs before use.",
+        "Keep object lifetime and ownership explicit.",
+        "Avoid dereferencing invalid or out-of-range pointers.",
+        "Test both success and failure paths."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl54-q1",
-        "prompt": "Which statement best matches this lesson?",
+        "id": "cl5.4-q1",
+        "prompt": "In most expressions, what does an array expression convert to?",
         "options": [
-          "The C rule and constraints explained in this lesson.",
-          "An unrelated HTML element.",
-          "A CSS property."
+          "A pointer to its first element",
+          "A pointer to its last element",
+          "A copy of the entire array"
         ],
-        "answer": "The C rule and constraints explained in this lesson.",
-        "explanation": "The correct choice follows the C rule and its constraints."
+        "answer": "A pointer to its first element",
+        "explanation": "Array-to-pointer conversion produces a pointer to the first element."
       },
       {
-        "id": "cl54-q2",
-        "prompt": "What is the safest way to handle the relevant boundary or validity condition?",
+        "id": "cl5.4-q2",
+        "prompt": "What does sizeof array give for an actual array object?",
         "options": [
-          "Check the documented preconditions and bounds before access.",
-          "Assume C automatically checks every pointer and array access.",
-          "Ignore the result if one run appears successful."
+          "The total size of the array object in bytes",
+          "The size of a pointer in every case",
+          "The number of elements automatically"
         ],
-        "answer": "Check the documented preconditions and bounds before access.",
-        "explanation": "C programs must explicitly respect object bounds, pointer validity and conversion results."
+        "answer": "The total size of the array object in bytes",
+        "explanation": "sizeof is an exception to array-to-pointer conversion."
       },
       {
-        "id": "cl54-q3",
-        "prompt": "Why should the example be traced?",
+        "id": "cl5.4-q3",
+        "prompt": "What is the type of &values when values is int[4]?",
         "options": [
-          "To understand execution order and object state.",
-          "To replace compilation and tests.",
-          "To avoid checking inputs."
+          "Pointer to an array of 4 int",
+          "int *",
+          "int **"
         ],
-        "answer": "To understand execution order and object state.",
-        "explanation": "Tracing complements compilation, warnings and testing."
+        "answer": "Pointer to an array of 4 int",
+        "explanation": "Unary & produces a pointer to the entire array object."
+      },
+      {
+        "id": "cl5.4-q4",
+        "prompt": "What happens to an array parameter declaration in a function?",
+        "options": [
+          "It is adjusted to a pointer parameter",
+          "The full array is always copied",
+          "The compiler stores its length in sizeof"
+        ],
+        "answer": "It is adjusted to a pointer parameter",
+        "explanation": "Array parameters are adjusted to pointer types."
+      },
+      {
+        "id": "cl5.4-q5",
+        "prompt": "What should a function receive to know how many elements it may traverse?",
+        "options": [
+          "A separate element count",
+          "Only the pointer value",
+          "Only sizeof of the pointer"
+        ],
+        "answer": "A separate element count",
+        "explanation": "The pointer parameter does not retain the original array bound."
       }
     ]
   },

@@ -6,39 +6,64 @@
   "title": "Defined, implementation-defined, unspecified and undefined behaviour",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its relevant rules.",
-    "Trace the example and justify its behaviour.",
-    "Identify important assumptions and failure cases.",
-    "Apply the concept in a reviewed and tested exercise."
+    "Distinguish behaviour fully specified by the C standard from implementation-defined choices, unspecified choices and undefined behaviour.",
+    "Explain the documentation obligation for implementation-defined behaviour and why unspecified behaviour need not be documented.",
+    "Identify common C examples of each category, including unsigned arithmetic, plain char properties, evaluation order and invalid memory operations.",
+    "Explain why undefined behaviour is not a guaranteed crash, a predictable wraparound or merely an output that varies between runs.",
+    "Use the applicable C standard, compiler documentation, diagnostics and carefully designed tests to classify a disputed behaviour.",
+    "Rewrite code to avoid dependence on unspecified choices, implementation-specific assumptions and undefined behaviour while preserving the intended result."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL1.7",
+    "CL2.6",
+    "CL2.8",
+    "CL3.9",
+    "CL4.10",
+    "CL6.10",
+    "CL7.12",
+    "CL12.1",
+    "CL12.2",
+    "CL13.8",
+    "CL14.1"
+  ],
   "stages": {
     "understand": {
-      "concept": "Defined behaviour is specified by the C standard. Implementation-defined behaviour is selected and documented by an implementation. Unspecified behaviour permits one of several outcomes without requiring documentation. Undefined behaviour imposes no requirements on the implementation.",
-      "whyItMatters": "Distinguishing these categories is essential for portable reasoning and security. A program must not rely on undefined behaviour or confuse unspecified choices with documented implementation decisions.",
-      "analogy": "Treat standards, interfaces and release steps as explicit contracts that make assumptions visible.",
-      "analogyLimit": "The analogy does not replace the C standard, implementation documentation or project-specific requirements."
+      "concept": "When a C program is translated or executed, the C standard does not describe every detail in the same way. Four categories are essential for portable reasoning.\n\n**Defined behaviour** is behaviour for which the C standard specifies the requirements. For example, unsigned integer arithmetic is performed modulo one more than the maximum value of the unsigned type. If an unsigned value is at its maximum, adding one produces zero. A program may rely on that rule when it is appropriate to its algorithm.\n\n**Implementation-defined behaviour** is a choice for which the C standard permits an implementation to select a behaviour and requires that implementation to document its choice. The signedness of plain `char` is a familiar example: plain `char` has the same range, representation and behaviour as either `signed char` or `unsigned char`, as chosen by the implementation. Code that depends on the choice should inspect the implementation's documentation or use a type whose signedness is explicit.\n\n**Unspecified behaviour** is behaviour where the C standard permits two or more possibilities and does not require the implementation to document which possibility it chooses. The order in which function arguments are evaluated is a common example. In a call such as `printf(\"%d %d\", first(), second())`, either function may be evaluated first. The order is not a portable promise. This does not automatically make the call undefined: the example is safe if the functions have independent, well-defined effects.\n\n**Undefined behaviour (UB)** is behaviour for which the C standard imposes no requirements. Examples include signed integer overflow, accessing an array outside its bounds, dereferencing an invalid pointer, using an object after its lifetime ends and modifying the same scalar more than once between sequence points without the required sequencing. Once a program execution reaches UB, the standard does not require a particular result. A compiler may optimise on the assumption that a well-defined program does not execute such an operation. UB is not simply “a random output” and is not required to crash.\n\nDo not confuse these categories with **unspecified value**, **implementation limit**, **constraint violation** or a diagnostic requirement. A constraint violation generally requires a diagnostic during translation; it is not a synonym for runtime UB. Some standard clauses explicitly state that a result is unspecified, implementation-defined or undefined. Read the exact clause and version rather than classifying from intuition.\n\nA practical classification method is: (1) identify the exact expression, library call or environment property; (2) state the target C version; (3) find the governing standard wording; (4) determine whether the standard specifies one result, permits a documented implementation choice, permits an undocumented choice, or imposes no requirements; and (5) separate that language rule from platform, ABI and operating-system contracts. Record implementation-defined assumptions and remove reliance on unspecified order. Prevent UB rather than trying to test for a preferred result.",
+      "whyItMatters": "These categories determine what a program may safely rely on. Treating UB as a predictable result creates security and correctness defects; treating implementation-defined behaviour as universal breaks portability; and assuming an unspecified choice is stable makes code fragile across compilers and versions.",
+      "analogy": "Think of four kinds of contract: a rule that specifies the result, a rule that lets each supplier choose and document a result, a rule that allows a choice without requiring documentation, and a case for which the contract gives no requirements.",
+      "analogyLimit": "The analogy is only a memory aid. C standard wording is precise and category assignments depend on the exact clause, language version and sometimes the implementation environment."
     },
     "explain": {
-      "narrative": "Defined behaviour is specified by the C standard. Implementation-defined behaviour is selected and documented by an implementation. Unspecified behaviour permits one of several outcomes without requiring documentation. Undefined behaviour imposes no requirements on the implementation.\n\nState assumptions and constraints, consult the applicable standard or tool documentation, and verify the result with appropriate compiler diagnostics and tests. Separate portable guarantees from implementation-specific behaviour.",
+      "narrative": "**A. Compare the categories side by side.** Defined behaviour has a standard-specified contract. Implementation-defined behaviour is a permitted implementation choice that must be documented. Unspecified behaviour permits one of several possibilities without requiring documentation. Undefined behaviour has no requirements imposed by the standard. The distinction between the middle two categories is the documentation obligation.\n\n**B. Examples and safe interpretation.**\n\n- Defined: unsigned arithmetic wraps modulo `UINT_MAX + 1` for `unsigned int`; the actual maximum depends on the implementation, but the modulo rule is specified.\n- Implementation-defined: whether plain `char` behaves as signed or unsigned; the implementation documents its choice. Use `signed char` or `unsigned char` when the requirement is explicit.\n- Unspecified: the order of evaluation of function arguments. Do not write code whose correctness depends on which argument is evaluated first. If the argument functions have conflicting unsequenced side effects, the program may instead have UB; the exact expression matters.\n- Undefined: signed overflow, out-of-bounds access and dereferencing an invalid pointer. Do not use the output observed on one compiler as a specification.\n\n**C. Avoid the “it worked on my compiler” trap.** A test run can reveal a defect, but it cannot prove that UB is safe. Different optimisation levels may expose different consequences because the compiler is permitted to assume that UB does not occur in a valid execution. Sanitizers can detect some executed instances of UB, but they do not prove the whole program is free of it.\n\n**D. Distinguish unspecified order from unsequenced side effects.** Two function arguments may be evaluated in either order. That is an unspecified order. But an expression that modifies one scalar more than once without the sequencing required by the language can have UB. Never infer that every evaluation-order question is UB, or that every such expression is safe. Identify the objects modified and the sequencing relationships.\n\n**E. Make assumptions explicit.** If code depends on plain-char signedness, integer width, byte size, right-shifting a negative signed value, or a library extension, document the exact implementation requirement or replace it with a portable design. A compiler option or a successful build does not turn an implementation-defined or undefined operation into defined portable behaviour.\n\n**F. Use evidence correctly.** Compiler warnings, static analysis, sanitizers and tests are complementary. A clean run only shows that the tested execution did not trigger a detected issue. For classification, consult the standard text and implementation documentation. For prevention, use explicit types, checked arithmetic, bounds-aware interfaces, clear sequencing and ownership/lifetime rules.",
       "examples": [
         {
           "id": "cl142-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\nint main(void) {\n unsigned int value = 0;\n value = value - 1u;\n printf(\"%u\\n\", value);\n return 0;\n}",
-          "explanation": "Unsigned arithmetic is defined modulo one more than the maximum representable value. This differs from signed integer overflow, which is undefined when the mathematical result is not representable.",
-          "runnable": false
+          "title": "Defined unsigned wraparound and implementation-defined plain-char signedness",
+          "code": "#include <limits.h>\n#include <stdio.h>\n\nint main(void) {\n    unsigned int value = UINT_MAX;\n    value = value + 1u;\n    printf(\"unsigned_after_increment=%u\\n\", value);\n\n#if CHAR_MIN < 0\n    puts(\"plain_char_behaves_as_signed_char\");\n#else\n    puts(\"plain_char_behaves_as_unsigned_char\");\n#endif\n    return 0;\n}",
+          "explanation": "The unsigned addition is defined modulo UINT_MAX + 1, so the result is zero. The value of CHAR_MIN describes the implementation's plain-char choice: it is negative when plain char has the signed range and zero when plain char has the unsigned range. The category for plain-char signedness is implementation-defined; the program reports the selected property rather than assuming one universal answer. The exact numeric value of UINT_MAX is also implementation-dependent within the standard's constraints, but the unsigned modulo rule is specified.",
+          "runnable": true
+        },
+        {
+          "id": "cl142-ex2",
+          "language": "en",
+          "title": "Demonstrate unspecified function-argument evaluation order safely",
+          "code": "#include <stdio.h>\n\nstatic int first(void) {\n    puts(\"first() evaluated\");\n    return 10;\n}\n\nstatic int second(void) {\n    puts(\"second() evaluated\");\n    return 20;\n}\n\nint main(void) {\n    int total = first() + second();\n    printf(\"total=%d\\n\", total);\n    return 0;\n}",
+          "explanation": "The order in which the two function calls are evaluated is unspecified; either diagnostic line may appear first. Each function writes a separate string to the output stream and returns a fixed value, so the example does not rely on a shared mutable scalar or conflicting side effects. The addition result is always 30. This is a safe illustration of unspecified evaluation order, not undefined behaviour. Do not infer that all expressions with multiple function calls are safe: their side effects and sequencing must be examined individually.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Classify signed overflow, unsigned wraparound and a documented implementation-defined choice.",
-      "independentTask": "Review a short C program and label each behaviour category with the applicable standard rule.",
+      "guidedTask": "Classify each case and justify the classification using the relevant C rule: (1) incrementing an unsigned int whose value is UINT_MAX; (2) checking whether plain char has a negative minimum; (3) calling two independent functions as arguments to one function; (4) adding one to INT_MAX in type int; (5) reading one element past the end of an array. For each, state whether the result is portable, implementation-selected, unspecified or undefined, and explain what a programmer should do.",
+      "independentTask": "Perform a behaviour-category audit on a small C program or a project module. Create a table with the exact source expression/property, target C version, category, standard rule or implementation documentation, observed compiler behaviour (if tested), portability risk and proposed correction. Include at least one example of each of the four categories. Do not execute deliberately undefined examples as if their output were evidence; use static reasoning and a sanitizer only as a diagnostic aid. Rewrite the program so that it no longer depends on unspecified evaluation order or implementation-specific plain-char behaviour and cannot overflow signed arithmetic.",
       "hints": [
-        "Undefined behaviour is not merely an unpredictable but otherwise valid result.",
-        "Implementation-defined behaviour should be documented by the implementation.",
-        "Do not infer a language guarantee from one compiler's observed output."
+        "Ask first whether the standard specifies one result, allows an implementation choice, allows an undocumented choice, or imposes no requirements.",
+        "Implementation-defined behaviour carries a documentation obligation; unspecified behaviour does not.",
+        "Unsigned wraparound is defined modulo the unsigned type's range, while signed overflow is undefined.",
+        "Function-argument evaluation order can be unspecified without making a program undefined; inspect the side effects as well as the order.",
+        "An observed output from one compiler does not define the behaviour of an undefined expression.",
+        "Classify the exact expression under the stated C version, then redesign code to avoid relying on fragile choices."
       ]
     }
   },
@@ -51,36 +76,63 @@
     "questions": [
       {
         "id": "cl142-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "Which statement correctly distinguishes implementation-defined behaviour from unspecified behaviour?",
         "options": [
-          "The C or learning principle described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "Implementation-defined behaviour must be documented by the implementation; unspecified behaviour does not require the implementation to document which permitted choice it makes.",
+          "Both categories require the same documented choice.",
+          "Unspecified behaviour means the program has undefined behaviour.",
+          "Implementation-defined behaviour is always a compiler bug."
         ],
-        "answer": "The C or learning principle described in this lesson.",
-        "explanation": "The correct choice follows the concept and constraints described above."
+        "answer": "Implementation-defined behaviour must be documented by the implementation; unspecified behaviour does not require the implementation to document which permitted choice it makes.",
+        "explanation": "The documentation obligation is the key distinction. Both categories permit choices, but only implementation-defined behaviour requires the implementation to document its choice."
       },
       {
         "id": "cl142-q2",
-        "prompt": "What should be checked before applying the concept?",
+        "prompt": "What is the result category when an unsigned int with value UINT_MAX is incremented by one using unsigned arithmetic?",
         "options": [
-          "The exact rules, assumptions and failure cases.",
-          "Only the file name.",
-          "Whether one unrelated example runs."
+          "Undefined behaviour because the mathematical result is too large.",
+          "Implementation-defined because each CPU chooses its own result.",
+          "Defined behaviour: unsigned arithmetic wraps modulo UINT_MAX + 1.",
+          "Unspecified behaviour because the compiler may choose any value."
         ],
-        "answer": "The exact rules, assumptions and failure cases.",
-        "explanation": "Reliable C engineering depends on understanding the applicable contract."
+        "answer": "Defined behaviour: unsigned arithmetic wraps modulo UINT_MAX + 1.",
+        "explanation": "The standard specifies modulo arithmetic for unsigned integer types. The maximum value varies with the type and implementation, but the wraparound rule is defined."
       },
       {
         "id": "cl142-q3",
-        "prompt": "Which practice provides stronger evidence?",
+        "prompt": "A program evaluates `first() + second()`. Both functions return fixed integers and print separate messages, with no shared mutable state. What should the programmer expect?",
         "options": [
-          "Use documented standards, diagnostics and targeted tests.",
-          "Assume one compiler's behaviour is universal.",
-          "Ignore warnings and boundary cases."
+          "The function calls must occur left to right.",
+          "The function calls may occur in either order; this order is unspecified, while the sum remains defined for these functions.",
+          "The program necessarily has undefined behaviour because it calls two functions.",
+          "The compiler must document which function is called first."
         ],
-        "answer": "Use documented standards, diagnostics and targeted tests.",
-        "explanation": "Multiple forms of evidence help distinguish guarantees from assumptions."
+        "answer": "The function calls may occur in either order; this order is unspecified, while the sum remains defined for these functions.",
+        "explanation": "The evaluation order of the operands is unspecified. Since the functions' effects do not conflict and both return fixed values, either order is valid and the sum is the same."
+      },
+      {
+        "id": "cl142-q4",
+        "prompt": "A signed int operation attempts to produce a mathematical result greater than INT_MAX. Which statement is correct?",
+        "options": [
+          "The result must wrap to INT_MIN.",
+          "The implementation must document the wrapped result.",
+          "The operation has undefined behaviour; a program must not rely on a particular result.",
+          "The result is merely unspecified, so all possible values are equally valid."
+        ],
+        "answer": "The operation has undefined behaviour; a program must not rely on a particular result.",
+        "explanation": "Signed integer overflow is undefined behaviour in C. It is not guaranteed to wrap and is not an implementation-defined choice."
+      },
+      {
+        "id": "cl142-q5",
+        "prompt": "A test build prints a plausible value after an out-of-bounds array read. What is the sound engineering conclusion?",
+        "options": [
+          "The read is safe because it produced a value once.",
+          "The compiler has documented the value by printing it.",
+          "The read is undefined behaviour; the observed result does not create a language guarantee, so the bounds defect must be fixed.",
+          "The behaviour is implementation-defined on that computer."
+        ],
+        "answer": "The read is undefined behaviour; the observed result does not create a language guarantee, so the bounds defect must be fixed.",
+        "explanation": "An out-of-bounds array access is undefined behaviour. A plausible observed value on one build is not evidence of correctness or portability."
       }
     ]
   },

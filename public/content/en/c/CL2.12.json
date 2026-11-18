@@ -3,53 +3,53 @@
   "courseId": "c",
   "moduleId": "CL2",
   "topicId": "CL2.12",
-  "title": "Choosing types for correctness, range and portability (CodeSaathi extension)",
+  "title": "Choosing C Types for Correctness, Range and Portability",
   "language": "en",
   "learningObjectives": [
-    "Explain the core ideas behind Choosing types for correctness, range and portability (CodeSaathi extension).",
-    "Identify relevant C syntax, types, standard-library interfaces and constraints.",
-    "Trace a small example and predict its behaviour.",
-    "Recognize boundary cases, common defects and portability risks.",
-    "Apply the concept in a tested C program."
+    "Translate a program's data requirements into explicit type and range requirements.",
+    "Choose integer and floating types based on range, precision, signedness and interface constraints.",
+    "Check intermediate-expression ranges, not only the final destination type.",
+    "Use standard limits and fixed-width facilities where their guarantees fit the requirement.",
+    "Document representation assumptions at file, network, hardware and API boundaries."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "Choosing types for correctness, range and portability (CodeSaathi extension) is an important part of writing correct, maintainable C programs. Learn the exact language rules rather than relying on what one compiler appears to accept. C is a compiled, standardized language: distinguish language guarantees from implementation-defined choices, compiler extensions and behaviour that the standard leaves undefined.",
+      "concept": "Choosing a C type is a correctness decision, not merely a storage optimization. The choice should account for the domain's valid range, intermediate calculations, signedness, precision, object representation and external interfaces. A type that can store the final result may still be too narrow for an intermediate expression. Portable code uses documented language guarantees and implementation limits rather than assumptions about one machine.",
       "whyItMatters": "Understanding Choosing types for correctness, range and portability (CodeSaathi extension) helps you reason about program behaviour instead of memorizing syntax. It is useful in exams, debugging and building reliable C applications.",
       "analogy": "Treat the concept as a tool with a precise contract: it has valid inputs, defined operations and observable results.",
       "analogyLimit": "An analogy is only an aid; the C standard and the relevant function specifications determine actual behaviour."
     },
     "explain": {
-      "narrative": "## Concept and mental model\nChoosing types for correctness, range and portability (CodeSaathi extension) should be understood in terms of the C abstract machine: objects have types, storage duration and lifetimes; expressions are evaluated according to language rules; and library calls have specified preconditions and results. The compiler translates a translation unit, but a successful compilation does not prove that a program is correct.\n\n## How to reason about this topic\n1. Identify the inputs, objects, types and operations involved.\n2. Check the applicable syntax and semantic constraints.\n3. Determine valid input ranges and boundary cases.\n4. Check every function result and handle failure where the API permits failure.\n5. Compile with warnings enabled and test normal, boundary and invalid cases.\n\n## Correctness and portability\nDo not assume that int has a particular width, that memory addresses are identical across runs, or that undefined behaviour has a predictable result. Use standard headers and documented interfaces. State any platform assumptions explicitly. Prefer small functions, clear names and explicit invariants.\n\n## Worked example 1 — establish a testable baseline\nThe example below demonstrates a small, compilable C program. Adapt the declaration, expression or API call to the exact concept being studied, then change one condition at a time and observe the result.\n\n## Worked example 2 — validate a boundary\nA second useful test is to exercise the smallest valid input, largest valid input, one value outside the valid range and an ordinary middle value. Record the expected result before running the program; this prevents a test from merely confirming an assumption.\n\n## Common mistakes\n- Assuming a successful compile means the result is correct.\n- Ignoring warnings or failing to check a library function's return value.\n- Using a value outside the range permitted by its type or API.\n- Confusing a compiler extension with portable ISO C.\n- Testing only one ordinary input and missing boundary cases.",
+      "narrative": "## 1. Start with the domain\n\nBefore choosing a type, describe the values the program must represent. A count may never be negative; a temperature may be fractional; an identifier may need to match a file or network format. Record the minimum, maximum, units and whether exact representation is required.\n\n## 2. Account for intermediate results\n\nThe type of an expression is determined by its operands and the usual arithmetic conversions. Assigning the result to a wider destination does not necessarily make a narrow intermediate calculation safe. Promote or convert operands before the operation when the required range demands it, and check bounds before signed arithmetic.\n\n## 3. Signedness is part of the contract\n\nUse unsigned types only when modulo arithmetic or a nonnegative representation is appropriate. Avoid mixing signed and unsigned values without checking conversion rules. Validate negative input before converting it to an unsigned type.\n\n## 4. Precision and representation\n\nUse floating point when approximation is acceptable and the precision is sufficient. For exact decimal quantities such as currency, consider storing scaled integer units with explicit overflow checks. For external binary formats, use exact-width integer types when available and serialize bytes explicitly rather than writing raw structures blindly.\n\n## 5. Inspect implementation limits\n\nUse limits.h, float.h, stdint.h and inttypes.h as appropriate. sizeof and CHAR_BIT describe the current implementation. Document any required compiler, ABI, byte order, hardware or protocol assumptions.\n\n## 6. Test boundaries\n\nTest the smallest valid value, largest valid value, values just outside the valid range and intermediate-operation boundaries. Type correctness is established by matching the language rules to the application's data contract, not by observing that one test happened to work.",
       "examples": [
         {
           "id": "cl2.12-ex1",
           "language": "en",
-          "title": "A small C program to compile and inspect",
-          "code": "#include <stdio.h>\n\nint main(void) {\n    int value = 12;\n    printf(\"Value: %d\\\\n\", value);\n    return 0;\n}",
-          "explanation": "The program declares an int object, initializes it, prints it with the matching %d conversion specification and returns a success status.",
-          "runnable": true
+          "title": "Validate before converting to unsigned",
+          "code": "#include <stdio.h>\n#include <stdlib.h>\n\nint main(void) {\n    long input = -1;\n    if (input < 0) {\n        puts(\"A count cannot be negative\");\n        return EXIT_FAILURE;\n    }\n    unsigned long count = (unsigned long)input;\n    printf(\"Count: %lu\\n\", count);\n    return EXIT_SUCCESS;\n}",
+          "explanation": "The program rejects a negative domain value before converting it to an unsigned type. Real input code must also check the conversion function's return status and range.",
+          "runnable": false
         },
         {
           "id": "cl2.12-ex2",
           "language": "en",
-          "title": "Iterating over a fixed array",
-          "code": "#include <stdio.h>\n\nint main(void) {\n    int values[] = { 3, 6, 9, 12 };\n    size_t count = sizeof values / sizeof values[0];\n    for (size_t i = 0; i < count; ++i) {\n        printf(\"%d\\\\n\", values[i]);\n    }\n    return 0;\n}",
-          "explanation": "The array length is derived from its total size divided by the size of one element. The loop visits valid indices from zero through count minus one.",
-          "runnable": true
+          "title": "Use integer-scaled units for exact cents",
+          "code": "#include <stdio.h>\n\nint main(void) {\n    long price_cents = 1299;\n    printf(\"$%ld.%02ld\\n\", price_cents / 100, price_cents % 100);\n    return 0;\n}",
+          "explanation": "Storing cents as an integer avoids binary floating-point approximation for this simple currency representation. Production code must define rounding, range and overflow policies.",
+          "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Write a minimal program that demonstrates Choosing types for correctness, range and portability (CodeSaathi extension). Compile it with warnings enabled, explain each declaration and operation, and record its output.",
-      "independentTask": "Create two test cases for Choosing types for correctness, range and portability (CodeSaathi extension): one normal case and one boundary or failure case. State the expected behaviour before running them, then compare the result and explain any difference.",
+      "guidedTask": "Create a short program that demonstrates the type-selection rules in CL2.12. Record the valid data range, type chosen, relevant implementation limits and expected results before compiling and running.",
+      "independentTask": "Design a second example for CL2.12 that crosses a type or representation boundary. Explain what can go wrong, revise the program to handle the boundary, and test the smallest, largest and invalid values.",
       "hints": [
-        "Read the compiler diagnostic carefully; fix the first meaningful error before chasing later messages.",
-        "Use the exact type and format specifier required by the operation.",
-        "Test zero, negative values where valid, maximum/minimum boundaries and invalid input as appropriate.",
-        "Do not dereference an uninitialized, null or expired pointer.",
-        "Prefer defined, portable behaviour over code that merely appears to work on one machine."
+        "Write down the data contract before selecting a type.",
+        "Consider intermediate expressions and implicit conversions.",
+        "Consult the relevant standard header for limits and format macros.",
+        "Do not assume every implementation has the same type sizes.",
+        "Test boundary values and document external representation requirements."
       ]
     }
   },
@@ -62,58 +62,58 @@
     "questions": [
       {
         "id": "cl2.12-q1",
-        "prompt": "Which approach is safest when applying Choosing types for correctness, range and portability (CodeSaathi extension)?",
+        "prompt": "What should guide the choice of a C type?",
         "options": [
-          "Follow the C language rules, validate inputs and check relevant return values.",
-          "Assume every compiler and platform behaves identically.",
-          "Ignore warnings whenever the program produces output."
+          "The domain's valid range, precision, signedness and interface requirements",
+          "Only the type's spelling length",
+          "Whichever type makes the source shortest"
         ],
-        "answer": "Follow the C language rules, validate inputs and check relevant return values.",
-        "explanation": "Correct C programming depends on defined behaviour, valid inputs and careful handling of operations that can fail."
+        "answer": "The domain's valid range, precision, signedness and interface requirements",
+        "explanation": "Type selection should follow explicit data requirements."
       },
       {
         "id": "cl2.12-q2",
-        "prompt": "Why should boundary cases be tested?",
+        "prompt": "Why is checking only the final destination type insufficient?",
         "options": [
-          "They reveal errors that ordinary inputs may not expose.",
-          "They are unnecessary when one example works.",
-          "They make compiler warnings irrelevant."
+          "An intermediate expression may overflow or lose information before assignment",
+          "The destination always changes the expression type",
+          "Assignments are never checked"
         ],
-        "answer": "They reveal errors that ordinary inputs may not expose.",
-        "explanation": "Boundary tests check the edges of valid ranges and important exceptional conditions."
+        "answer": "An intermediate expression may overflow or lose information before assignment",
+        "explanation": "The operation is evaluated according to operand conversions before assignment."
       },
       {
         "id": "cl2.12-q3",
-        "prompt": "What does a successful compilation establish?",
+        "prompt": "What should happen before converting a possibly negative count to unsigned?",
         "options": [
-          "The compiler accepted the translation under its selected settings; it does not prove runtime correctness.",
-          "The program is free from all defects.",
-          "The program is portable to every C implementation."
+          "Validate that the value is nonnegative and within the required range",
+          "Cast immediately and check later",
+          "Ignore the sign"
         ],
-        "answer": "The compiler accepted the translation under its selected settings; it does not prove runtime correctness.",
-        "explanation": "Compilation is one validation step. Tests, review and correct reasoning are also required."
+        "answer": "Validate that the value is nonnegative and within the required range",
+        "explanation": "Unsigned conversion does not preserve the intended meaning of a negative domain value."
       },
       {
         "id": "cl2.12-q4",
-        "prompt": "Which practice improves portability?",
+        "prompt": "Which representation may be appropriate for exact cents in a simple application?",
         "options": [
-          "Use standard C features and document unavoidable platform assumptions.",
-          "Depend on undocumented compiler extensions.",
-          "Assume int and pointer sizes are fixed everywhere."
+          "An integer count of cents with explicit range and overflow rules",
+          "A binary double with assumed exact decimal representation",
+          "A char variable"
         ],
-        "answer": "Use standard C features and document unavoidable platform assumptions.",
-        "explanation": "Portable programs avoid assumptions that the C standard does not guarantee."
+        "answer": "An integer count of cents with explicit range and overflow rules",
+        "explanation": "Scaled integer units can represent whole cents exactly within a defined range."
       },
       {
         "id": "cl2.12-q5",
-        "prompt": "What should you do when a library operation can fail?",
+        "prompt": "How should a binary protocol field be represented portably?",
         "options": [
-          "Check its documented result and handle the failure path.",
-          "Assume it always succeeds.",
-          "Continue using its output without checking."
+          "Use specified-width values where available and encode/decode bytes according to the protocol",
+          "Write an arbitrary C structure directly and assume its layout",
+          "Assume every machine has the same byte order"
         ],
-        "answer": "Check its documented result and handle the failure path.",
-        "explanation": "Many standard-library operations report failure through return values or stream indicators."
+        "answer": "Use specified-width values where available and encode/decode bytes according to the protocol",
+        "explanation": "C structure padding and byte order are not automatically a portable external format."
       }
     ]
   },

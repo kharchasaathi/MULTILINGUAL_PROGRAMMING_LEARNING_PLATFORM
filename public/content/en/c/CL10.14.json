@@ -6,39 +6,126 @@
   "title": "Choosing data structures based on operation requirements (CodeSaathi extension)",
   "language": "en",
   "learningObjectives": [
-    "Explain the topic and its C rules.",
-    "Trace the example and explain its data or control flow.",
-    "Identify edge cases and resource-management requirements.",
-    "Apply the concept in a tested C program."
+    "Identify the dominant operations, data volume, ordering requirements, update frequency and memory constraints in a problem before selecting a data structure.",
+    "Compare arrays and linked lists for indexed access, traversal, insertion, deletion, memory overhead and cache locality.",
+    "Choose stacks, queues, trees and hash tables according to LIFO, FIFO, ordered-search and key-lookup requirements.",
+    "Interpret time and auxiliary-space complexity alongside practical factors such as allocation cost, locality, implementation complexity and failure handling.",
+    "Explain how workload patterns and required invariants affect a data-structure choice, and justify trade-offs rather than naming a universally best structure.",
+    "Implement and test a suitable C representation with explicit bounds, ownership, allocation-failure, empty-state and cleanup behaviour."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL5.3",
+    "CL6.1",
+    "CL7.1",
+    "CL8.1",
+    "CL10.1",
+    "CL10.9",
+    "CL10.10",
+    "CL10.11",
+    "CL10.12",
+    "CL10.13"
+  ],
   "stages": {
     "understand": {
-      "concept": "Data-structure selection should begin with required operations, input size, update patterns, ordering needs, memory constraints and failure handling. Arrays, linked lists, stacks, queues, trees and hash tables have different operation costs and implementation complexity.",
-      "whyItMatters": "The best structure is not universal. Matching the structure to actual operations avoids unnecessary complexity and poor performance.",
-      "analogy": "Treat each algorithm or resource as a contract whose invariants must remain true after every operation.",
-      "analogyLimit": "The analogy does not replace C's formal rules for pointers, object lifetime, complexity or library contracts."
+      "concept": "A data structure is a way to organise values and support operations on them. Choose it by starting with the workload: which operations happen most often, how large the data can become, whether order matters, how often data changes, and what memory and reliability limits apply. An array offers direct indexing and compact contiguous storage. A linked list supports local insertion and deletion when the node is already known, but reaching an index requires traversal. A stack serves last-in, first-out (LIFO) work; a queue serves first-in, first-out (FIFO) work. Trees support hierarchical or ordered relationships, while hash tables support key-based lookup when collisions are handled correctly.",
+      "whyItMatters": "A structure that makes the common operation expensive can dominate the total cost of a program. Choosing deliberately can improve performance and simplify correctness, but a theoretically fast structure may still be a poor choice when its memory overhead, allocation behaviour or implementation complexity is unsuitable.",
+      "analogy": "Think of organising a workshop. A labelled drawer gives quick access when you know the drawer number; a chain of linked boxes requires opening each earlier box to reach a later one. A stack of trays gives access to the most recently placed tray, while a service line serves the person who arrived first.",
+      "analogyLimit": "Physical storage is only an intuition. C data structures have precise complexity, pointer validity, object lifetime, memory ownership, overflow and allocation-failure rules.",
+      "keyTerms": [
+        {
+          "term": "Workload",
+          "definition": "The expected mix and frequency of operations, such as indexed reads, searches, insertions, removals and iteration."
+        },
+        {
+          "term": "Contiguous storage",
+          "definition": "Elements occupy adjacent memory locations, as in an array; this enables indexing and often improves cache locality."
+        },
+        {
+          "term": "LIFO",
+          "definition": "Last in, first out; the most recently added item is removed first, as with a stack."
+        },
+        {
+          "term": "FIFO",
+          "definition": "First in, first out; the earliest added item is removed first, as with a queue."
+        },
+        {
+          "term": "Locality",
+          "definition": "How closely related memory accesses are located in memory; contiguous arrays often have better cache locality than pointer-heavy structures."
+        },
+        {
+          "term": "Invariant",
+          "definition": "A condition that must remain true after every valid operation, such as head and tail indices staying within a circular queue's capacity."
+        },
+        {
+          "term": "Ownership",
+          "definition": "The rule identifying which part of a C program is responsible for releasing dynamically allocated memory."
+        }
+      ],
+      "selectionGuide": [
+        {
+          "need": "Frequent random access by numeric index",
+          "choice": "Array or dynamic array",
+          "reason": "Indexing is O(1); contiguous storage is compact and cache-friendly."
+        },
+        {
+          "need": "Frequent insertions/removals at a known node",
+          "choice": "Linked list",
+          "reason": "The link update can be O(1), but locating the node is usually O(n) and each node adds pointer overhead."
+        },
+        {
+          "need": "Undo history or nested operations",
+          "choice": "Stack",
+          "reason": "Push and pop naturally implement LIFO behaviour."
+        },
+        {
+          "need": "Tasks processed in arrival order",
+          "choice": "Queue or circular buffer",
+          "reason": "Enqueue and dequeue can be O(1) with a suitable implementation."
+        },
+        {
+          "need": "Ordered data and range traversal",
+          "choice": "Balanced search tree",
+          "reason": "Search, insertion and removal can be O(log n) when balancing guarantees are maintained."
+        },
+        {
+          "need": "Frequent lookup by key",
+          "choice": "Hash table",
+          "reason": "Expected lookup can be O(1) with a suitable hash function and controlled load factor; worst case can be O(n)."
+        }
+      ],
+      "history": "Arrays are among the oldest and most direct ways to represent sequences in programming languages. Linked structures became important for flexible dynamic collections, while stacks and queues formalised common access orders. Search trees and hash tables developed to support efficient searching and retrieval. In C, these are generally built from arrays, structs and pointers rather than provided as one universal built-in collection."
     },
     "explain": {
-      "narrative": "Data-structure selection should begin with required operations, input size, update patterns, ordering needs, memory constraints and failure handling. Arrays, linked lists, stacks, queues, trees and hash tables have different operation costs and implementation complexity.\n\nState preconditions, invariants, empty and full cases, ownership and failure behaviour before implementation. Compile with warnings and test normal, boundary and failure paths.",
+      "narrative": "Do not choose a structure from its name or from one Big O figure alone. First write down the operations and their expected frequency. For example, if a workload performs thousands of indexed reads and only a few changes, an array is usually simpler and faster than a linked list. If it repeatedly removes the oldest item, a queue is a natural fit. If it needs to undo the latest action, use a stack. If it needs ordered range traversal, consider a balanced tree; if it needs key lookup without sorted order, consider a hash table.\n\nAn array provides O(1) indexed access. Searching an unsorted array is O(n), and inserting into its middle may require shifting O(n) elements. A linked list requires O(n) traversal to reach an index; insertion or removal can be O(1) only after the target position or node is already known. Each linked node also needs pointer storage and usually a separate allocation, and traversal can have poorer cache locality.\n\nA stack and a queue describe access rules rather than one mandatory memory layout. Both can be implemented using arrays or linked nodes. A fixed array implementation has a capacity limit that must be checked. A circular queue reuses freed positions by wrapping indices around its storage. Trees and hash tables can improve particular searches, but they introduce invariants such as tree ordering/balance or collision and load-factor management. Complexity claims depend on the exact implementation and assumptions.\n\nThe first example compares indexed array access with finding the same position in a linked list. It counts linked-node visits to make the difference visible. The second example implements a bounded circular queue for a FIFO workload. It checks full and empty states and demonstrates wrap-around without dynamic allocation. In both examples, the chosen structure is justified by the dominant operation rather than by a claim that one structure is best for every task.",
       "examples": [
         {
           "id": "cl1014-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "/* A fixed array provides constant-time indexed access. */\n#include <stddef.h>\nint get_at(const int values[], size_t count, size_t index, int *out) {\n if (values == NULL || out == NULL || index >= count) return 0;\n *out = values[index]; return 1;\n}",
-          "explanation": "The array supports direct indexed access after bounds validation. A linked list would require traversal to reach the same index, so it would not offer the same access cost.",
-          "runnable": false
+          "title": "Compare indexed array access with linked-list traversal",
+          "code": "#include <stdbool.h>\n#include <stddef.h>\n#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node {\n    int value;\n    struct Node *next;\n};\n\nstatic struct Node *list_from_array(const int values[], size_t count)\n{\n    struct Node *head = NULL;\n    struct Node **tail = &head;\n\n    for (size_t i = 0U; i < count; ++i) {\n        struct Node *node = malloc(sizeof *node);\n        if (node == NULL) {\n            while (head != NULL) {\n                struct Node *next = head->next;\n                free(head);\n                head = next;\n            }\n            return NULL;\n        }\n        node->value = values[i];\n        node->next = NULL;\n        *tail = node;\n        tail = &node->next;\n    }\n    return head;\n}\n\nstatic void free_list(struct Node *head)\n{\n    while (head != NULL) {\n        struct Node *next = head->next;\n        free(head);\n        head = next;\n    }\n}\n\nstatic bool list_get(const struct Node *head, size_t index,\n                     int *out, size_t *visits)\n{\n    *visits = 0U;\n    while (head != NULL && index > 0U) {\n        head = head->next;\n        --index;\n        ++(*visits);\n    }\n    if (head == NULL) return false;\n\n    ++(*visits);\n    *out = head->value;\n    return true;\n}\n\nint main(void)\n{\n    const int values[] = { 12, 24, 36, 48, 60, 72 };\n    const size_t count = sizeof values / sizeof values[0];\n    const size_t index = 4U;\n    struct Node *head = list_from_array(values, count);\n    int list_value = 0;\n    size_t visits = 0U;\n\n    if (head == NULL) {\n        puts(\"Could not allocate linked list\");\n        return EXIT_FAILURE;\n    }\n\n    printf(\"Array index %zu: %d (one indexed access)\\n\",\n           index, values[index]);\n    if (list_get(head, index, &list_value, &visits)) {\n        printf(\"List index %zu: %d (%zu node visits)\\n\",\n               index, list_value, visits);\n    } else {\n        puts(\"List index is out of range\");\n        free_list(head);\n        return EXIT_FAILURE;\n    }\n\n    free_list(head);\n    return EXIT_SUCCESS;\n}\n",
+          "explanation": "The array retrieves values[index] directly, so indexed access is O(1). list_get follows next pointers until it reaches the requested position, so indexed access is O(n) in the worst case. The linked list is built by appending nodes through a pointer to the next link; if allocation fails, already-created nodes are freed before returning. free_list releases every node exactly once. This example uses a valid fixed index, but a general array API should check index < count before indexing. The linked-list function naturally reports false when the requested node does not exist.",
+          "runnable": true
+        },
+        {
+          "id": "cl1014-ex2",
+          "language": "en",
+          "title": "Use a circular queue for first-in, first-out tasks",
+          "code": "#include <stdbool.h>\n#include <stddef.h>\n#include <stdio.h>\n\n#define QUEUE_CAPACITY 5U\n\nstruct Queue {\n    int items[QUEUE_CAPACITY];\n    size_t head;\n    size_t tail;\n    size_t count;\n};\n\nstatic void queue_init(struct Queue *queue)\n{\n    queue->head = 0U;\n    queue->tail = 0U;\n    queue->count = 0U;\n}\n\nstatic bool enqueue(struct Queue *queue, int value)\n{\n    if (queue->count == QUEUE_CAPACITY) return false;\n\n    queue->items[queue->tail] = value;\n    queue->tail = (queue->tail + 1U) % QUEUE_CAPACITY;\n    ++queue->count;\n    return true;\n}\n\nstatic bool dequeue(struct Queue *queue, int *value)\n{\n    if (queue->count == 0U || value == NULL) return false;\n\n    *value = queue->items[queue->head];\n    queue->head = (queue->head + 1U) % QUEUE_CAPACITY;\n    --queue->count;\n    return true;\n}\n\nint main(void)\n{\n    struct Queue tasks;\n    int next_task = 0;\n\n    queue_init(&tasks);\n    if (!enqueue(&tasks, 101) || !enqueue(&tasks, 102) ||\n        !enqueue(&tasks, 103)) {\n        puts(\"Initial enqueue failed\");\n        return 1;\n    }\n\n    if (dequeue(&tasks, &next_task)) {\n        printf(\"Processed task: %d\\n\", next_task);\n    }\n\n    if (!enqueue(&tasks, 104) || !enqueue(&tasks, 105) ||\n        !enqueue(&tasks, 106)) {\n        puts(\"Queue is full\");\n        return 1;\n    }\n\n    while (dequeue(&tasks, &next_task)) {\n        printf(\"Processed task: %d\\n\", next_task);\n    }\n\n    if (!dequeue(&tasks, &next_task)) {\n        puts(\"Queue is empty\");\n    }\n    return 0;\n}\n",
+          "explanation": "A queue is appropriate when tasks must be processed in arrival order (FIFO). head identifies the next item to remove, tail identifies the next free position, and count distinguishes empty from full. Both enqueue and dequeue perform a fixed number of operations, so they are O(1). Modulo capacity wraps indices to the beginning of the array. The fixed-size array uses O(1) storage for this fixed capacity, but it cannot grow; enqueue reports false when full and dequeue reports false when empty. The count invariant is always between zero and QUEUE_CAPACITY. This representation avoids dynamic allocation and makes its capacity limit explicit.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Choose a structure for a task with frequent random reads and few insertions.",
-      "independentTask": "Compare array, linked list, queue and hash table choices for a small inventory workload. Justify each choice using operations and constraints.",
+      "guidedTask": "A small application stores 2,000 product records. It reads a product by array index frequently, occasionally updates an existing record, and rarely inserts a new product. Recommend a data structure and justify the choice. Then change the workload so the application repeatedly removes the oldest pending service ticket; explain why a queue is now a better fit.",
+      "independentTask": "Design a data structure for each workload: (1) browser-style undo history, (2) print jobs processed in arrival order, (3) contacts searched by unique key, (4) ordered scores that must support range traversal, and (5) a collection with frequent indexed reads. For each, state the dominant operations, expected time complexity, memory trade-offs, failure cases and one reason an alternative might be unsuitable. Implement at least one of the choices in C and test empty, full, boundary and repeated-operation sequences.",
       "hints": [
-        "List the dominant operations before choosing the structure.",
-        "Consider memory overhead, locality and implementation risk, not only asymptotic complexity.",
-        "Measure a representative workload when performance is important."
+        "Write the operation list and estimate how often each operation occurs before selecting a structure.",
+        "Arrays offer O(1) indexing and good locality, but middle insertion or deletion may shift many elements.",
+        "A linked list does not make arbitrary indexed access fast; reaching a node still requires traversal.",
+        "Stacks are LIFO and queues are FIFO; either access rule can be implemented with an array or linked nodes.",
+        "Hash tables offer expected O(1) key lookup under suitable assumptions, not a guaranteed O(1) worst case.",
+        "Include memory overhead, allocation failure, capacity limits, invariants, ownership and implementation complexity in the final justification."
       ]
     }
   },
@@ -51,36 +138,63 @@
     "questions": [
       {
         "id": "cl1014-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "An application frequently reads elements by numeric index and rarely inserts into the middle. Which structure is usually the simplest fit?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "Array",
+          "Singly linked list",
+          "Queue only",
+          "Binary tree only"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the topic and constraints described above."
+        "answer": "Array",
+        "explanation": "An array provides O(1) indexed access and compact contiguous storage. Rare insertions make occasional shifting less costly."
       },
       {
         "id": "cl1014-q2",
-        "prompt": "What should be verified before relying on the implementation?",
+        "prompt": "When can insertion into a singly linked list be O(1)?",
         "options": [
-          "Preconditions, invariants, bounds and failure cases.",
-          "Only the name of the algorithm.",
-          "Whether one input produced a result."
+          "When the insertion position or preceding node is already known",
+          "Whenever the requested numeric index is large",
+          "Only after sorting the list",
+          "Only when the list contains no nodes"
         ],
-        "answer": "Preconditions, invariants, bounds and failure cases.",
-        "explanation": "Correctness depends on maintaining the data structure or algorithm contract."
+        "answer": "When the insertion position or preceding node is already known",
+        "explanation": "The link update itself is constant time, but locating a node by index generally requires O(n) traversal."
       },
       {
         "id": "cl1014-q3",
-        "prompt": "Which test strategy is most useful?",
+        "prompt": "Which access rule does a stack implement?",
         "options": [
-          "Test empty, boundary and representative operation sequences.",
-          "Ignore allocation failures.",
-          "Assume one successful example proves all cases."
+          "Last in, first out (LIFO)",
+          "First in, first out (FIFO)",
+          "Sorted ascending order",
+          "Random order"
         ],
-        "answer": "Test empty, boundary and representative operation sequences.",
-        "explanation": "Targeted tests expose defects ordinary examples can miss."
+        "answer": "Last in, first out (LIFO)",
+        "explanation": "A stack removes the most recently pushed item first, which suits undo histories and nested operations."
+      },
+      {
+        "id": "cl1014-q4",
+        "prompt": "Why is a circular queue useful for a bounded FIFO workload?",
+        "options": [
+          "It reuses freed array positions while supporting constant-time enqueue and dequeue",
+          "It sorts every task automatically",
+          "It provides arbitrary indexed search in O(1)",
+          "It never needs a full or empty check"
+        ],
+        "answer": "It reuses freed array positions while supporting constant-time enqueue and dequeue",
+        "explanation": "Head and tail indices wrap around the fixed array, while a count tracks empty and full states."
+      },
+      {
+        "id": "cl1014-q5",
+        "prompt": "Which factor should be considered in addition to asymptotic complexity when choosing a data structure in C?",
+        "options": [
+          "Memory overhead, locality, ownership and allocation-failure handling",
+          "Only the number of letters in its name",
+          "Whether the example has the fewest source lines",
+          "Whether it is always faster for every possible input"
+        ],
+        "answer": "Memory overhead, locality, ownership and allocation-failure handling",
+        "explanation": "Real designs must consider memory layout, allocation, cleanup, cache behaviour, invariants and implementation risk as well as complexity."
       }
     ]
   },

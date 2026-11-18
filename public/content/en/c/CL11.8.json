@@ -6,39 +6,61 @@
   "title": "Project 8: modular multi-file C application",
   "language": "en",
   "learningObjectives": [
-    "Explain the topic and its C rules.",
-    "Trace the example and identify its purpose.",
-    "Identify important validation and failure cases.",
-    "Apply the concept in a tested program or reference exercise."
+    "Explain how a C project separates public headers, implementation source files, application entry points and tests.",
+    "Design a small module API with an opaque structure type, documented ownership rules and explicit status values.",
+    "Use include guards and compatible declarations to prevent header duplication and declaration mismatches.",
+    "Compile multiple translation units and link their object code into an executable using a repeatable Makefile.",
+    "Separate application code from module implementation and test the public API independently.",
+    "Diagnose common compile-time, link-time and runtime failures while using strict compiler warnings and cleanup targets."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL2.1",
+    "CL3.1",
+    "CL4.1",
+    "CL5.1",
+    "CL6.1",
+    "CL7.1",
+    "CL11.3",
+    "CL11.5"
+  ],
   "stages": {
     "understand": {
-      "concept": "A modular C application separates public declarations, implementation files, application entry points and tests. Each module should expose a small interface and keep implementation details private where possible.",
-      "whyItMatters": "Modular organization supports maintainability, independent testing and team collaboration as a C program grows.",
-      "analogy": "Treat the project or language feature as a set of components with explicit interfaces and responsibilities.",
-      "analogyLimit": "The analogy does not replace C's formal language, library and resource-management rules."
+      "concept": "A multi-file C application divides a program into translation units. Header files (.h) publish declarations and shared types. Source files (.c) provide function definitions. The application entry point calls the public module API, while test source files exercise that API independently. The compiler translates each source file and the linker combines the resulting object code and required libraries into an executable. A Makefile records dependencies and build commands so the same build can be repeated consistently.",
+      "whyItMatters": "As a C program grows, keeping every function in one source file makes it harder to understand, test and maintain. Modules create clear boundaries, allow independent compilation and make it easier to reuse code or work with other developers.",
+      "analogy": "A header is like a service contract: it tells other parts of the program which operations are available. The implementation file contains the internal work that fulfils that contract. The linker connects the compiled modules.",
+      "analogyLimit": "A header does not contain the implementation merely because it declares a function. Every externally linked function needs one compatible definition in a linked source file. Include guards prevent repeated inclusion in one translation unit; they do not prevent duplicate definitions across source files."
     },
     "explain": {
-      "narrative": "A modular C application separates public declarations, implementation files, application entry points and tests. Each module should expose a small interface and keep implementation details private where possible.\n\nFor a complete implementation, define input constraints, ownership, error handling and test cases before coding. Compile with warnings and verify normal, boundary and failure behaviour.",
+      "narrative": "This project builds a small GradeBook module. The public header include/gradebook.h declares an opaque GradeBook type, a status enumeration and the functions callers may use. The structure definition and dynamic score array remain private inside src/gradebook.c. Callers create the object with gradebook_create and release it with gradebook_destroy; this makes ownership explicit. The API validates scores from 0 through 100, reports an empty book instead of dividing by zero, and returns status codes so callers can handle errors.\\n\\nThe application in src/main.c includes only the public header. It does not know how GradeBook stores its scores. This separation means the implementation could later change its internal representation without changing the calling code, provided the public API remains compatible. The test in tests/test_gradebook.c also includes the same header and checks the public contract independently of the demonstration application.\\n\\nThe Makefile compiles src/main.c and src/gradebook.c as part of one executable, and builds a separate test executable from tests/test_gradebook.c and src/gradebook.c. In a larger project, each .c file can first be compiled into its own .o object file and those objects can then be linked. The dependency list makes changes to the header or implementation trigger a rebuild. The clean target removes generated files without deleting source code.\\n\\nA compile error usually means a source or declaration is invalid. A link error such as an undefined reference often means a function was declared and called but its defining source file was omitted from the link command, or the function names/signatures do not match. A multiple-definition error often means the same external function was defined in more than one translation unit. Put declarations in headers and ordinary external function definitions in one .c file. Do not put non-static function bodies in a header that is included by multiple .c files unless the design deliberately uses an appropriate inline strategy.\\n\\nThe examples use a POSIX-compatible shell to create the project files and run make. Example 1 creates the header, implementation, application and Makefile, then builds and runs the application and test target. Example 2 creates a focused API test file and runs the separate test target. Run Example 1 before Example 2 in the same working directory. The Makefile uses strict C11 warning flags; CC can be set to gcc or clang when invoking make, for example make clean all CC=gcc.",
       "examples": [
         {
           "id": "cl118-ex1",
-          "language": "en",
-          "title": "Focused C example",
-          "code": "/* inventory.h */\n#ifndef INVENTORY_H\n#define INVENTORY_H\nint inventory_count(void);\n#endif\n/* inventory.c */\n#include \"inventory.h\"\nint inventory_count(void) { return 0; }\n/* main.c includes inventory.h and calls inventory_count */",
-          "explanation": "The header declares the public function and the source file defines it. A build command compiles and links both source files; a real project should add tests and error contracts.",
-          "runnable": false
+          "language": "bash",
+          "title": "Create and build a modular GradeBook application",
+          "code": "#!/bin/sh\nset -eu\nmkdir -p include src tests build\n\ncat > include/gradebook.h <<'EOF'\n#ifndef GRADEBOOK_H\n#define GRADEBOOK_H\n\n#include <stddef.h>\n\ntypedef struct GradeBook GradeBook;\n\ntypedef enum {\n    GRADEBOOK_OK = 0,\n    GRADEBOOK_INVALID_ARGUMENT,\n    GRADEBOOK_NO_MEMORY,\n    GRADEBOOK_EMPTY\n} GradeBookStatus;\n\nGradeBook *gradebook_create(void);\nvoid gradebook_destroy(GradeBook *book);\nGradeBookStatus gradebook_add(GradeBook *book, int score);\nsize_t gradebook_count(const GradeBook *book);\nGradeBookStatus gradebook_average(const GradeBook *book, double *average);\nGradeBookStatus gradebook_min_max(const GradeBook *book, int *minimum, int *maximum);\n\n#endif\nEOF\n\ncat > src/gradebook.c <<'EOF'\n#include \"gradebook.h\"\n\n#include <stdint.h>\n#include <stdlib.h>\n\nstruct GradeBook {\n    int *scores;\n    size_t count;\n    size_t capacity;\n};\n\nstatic int reserve_scores(GradeBook *book, size_t needed)\n{\n    size_t capacity;\n    int *temporary;\n\n    if (needed <= book->capacity) {\n        return 1;\n    }\n    if (needed > SIZE_MAX / sizeof *book->scores) {\n        return 0;\n    }\n\n    capacity = book->capacity == 0U ? 4U : book->capacity;\n    while (capacity < needed) {\n        if (capacity > SIZE_MAX / 2U) {\n            capacity = needed;\n            break;\n        }\n        capacity *= 2U;\n    }\n    if (capacity > SIZE_MAX / sizeof *book->scores) {\n        return 0;\n    }\n\n    temporary = realloc(book->scores, capacity * sizeof *book->scores);\n    if (temporary == NULL) {\n        return 0;\n    }\n    book->scores = temporary;\n    book->capacity = capacity;\n    return 1;\n}\n\nGradeBook *gradebook_create(void)\n{\n    return calloc(1U, sizeof(GradeBook));\n}\n\nvoid gradebook_destroy(GradeBook *book)\n{\n    if (book != NULL) {\n        free(book->scores);\n        book->scores = NULL;\n        free(book);\n    }\n}\n\nGradeBookStatus gradebook_add(GradeBook *book, int score)\n{\n    if (book == NULL || score < 0 || score > 100) {\n        return GRADEBOOK_INVALID_ARGUMENT;\n    }\n    if (book->count == SIZE_MAX ||\n        !reserve_scores(book, book->count + 1U)) {\n        return GRADEBOOK_NO_MEMORY;\n    }\n    book->scores[book->count] = score;\n    ++book->count;\n    return GRADEBOOK_OK;\n}\n\nsize_t gradebook_count(const GradeBook *book)\n{\n    return book == NULL ? 0U : book->count;\n}\n\nGradeBookStatus gradebook_average(const GradeBook *book, double *average)\n{\n    size_t i;\n    long double total = 0.0L;\n\n    if (book == NULL || average == NULL) {\n        return GRADEBOOK_INVALID_ARGUMENT;\n    }\n    if (book->count == 0U) {\n        return GRADEBOOK_EMPTY;\n    }\n    for (i = 0U; i < book->count; ++i) {\n        total += (long double)book->scores[i];\n    }\n    *average = (double)(total / (long double)book->count);\n    return GRADEBOOK_OK;\n}\n\nGradeBookStatus gradebook_min_max(\n    const GradeBook *book, int *minimum, int *maximum)\n{\n    size_t i;\n    int low;\n    int high;\n\n    if (book == NULL || minimum == NULL || maximum == NULL) {\n        return GRADEBOOK_INVALID_ARGUMENT;\n    }\n    if (book->count == 0U) {\n        return GRADEBOOK_EMPTY;\n    }\n\n    low = book->scores[0];\n    high = book->scores[0];\n    for (i = 1U; i < book->count; ++i) {\n        if (book->scores[i] < low) {\n            low = book->scores[i];\n        }\n        if (book->scores[i] > high) {\n            high = book->scores[i];\n        }\n    }\n    *minimum = low;\n    *maximum = high;\n    return GRADEBOOK_OK;\n}\nEOF\n\ncat > src/main.c <<'EOF'\n#include \"gradebook.h\"\n\n#include <stdio.h>\n\nint main(void)\n{\n    const int sample_scores[] = {82, 91, 76, 100, 88};\n    const size_t sample_count =\n        sizeof sample_scores / sizeof sample_scores[0];\n    GradeBook *book = gradebook_create();\n    size_t i;\n    double average;\n    int minimum;\n    int maximum;\n\n    if (book == NULL) {\n        fputs(\"Could not create grade book.\\n\", stderr);\n        return 1;\n    }\n\n    for (i = 0U; i < sample_count; ++i) {\n        if (gradebook_add(book, sample_scores[i]) != GRADEBOOK_OK) {\n            fputs(\"Could not add score.\\n\", stderr);\n            gradebook_destroy(book);\n            return 1;\n        }\n    }\n\n    if (gradebook_average(book, &average) != GRADEBOOK_OK ||\n        gradebook_min_max(book, &minimum, &maximum) != GRADEBOOK_OK) {\n        fputs(\"Could not calculate grade summary.\\n\", stderr);\n        gradebook_destroy(book);\n        return 1;\n    }\n\n    printf(\"Students: %zu\\n\", gradebook_count(book));\n    printf(\"Average: %.2f\\n\", average);\n    printf(\"Lowest: %d\\n\", minimum);\n    printf(\"Highest: %d\\n\", maximum);\n\n    gradebook_destroy(book);\n    return 0;\n}\nEOF\n\ncat > Makefile <<'EOF'\nCC = cc\nCPPFLAGS = -Iinclude\nCFLAGS = -std=c11 -Wall -Wextra -Wpedantic -Wconversion -Wshadow -Werror\nBUILD = build\nLIB_SOURCE = src/gradebook.c\nAPP_SOURCE = src/main.c\n\n.PHONY: all test clean\nall: $(BUILD)/gradebook_demo\n\n$(BUILD):\n\tmkdir -p $(BUILD)\n\n$(BUILD)/gradebook_demo: $(APP_SOURCE) $(LIB_SOURCE) include/gradebook.h | $(BUILD)\n\t$(CC) $(CPPFLAGS) $(CFLAGS) $(APP_SOURCE) $(LIB_SOURCE) -o $@\n\n$(BUILD)/test_gradebook: tests/test_gradebook.c $(LIB_SOURCE) include/gradebook.h | $(BUILD)\n\t$(CC) $(CPPFLAGS) $(CFLAGS) tests/test_gradebook.c $(LIB_SOURCE) -o $@\n\ntest: $(BUILD)/test_gradebook\n\t./$(BUILD)/test_gradebook\n\nclean:\n\trm -rf $(BUILD)\nEOF\n\nmake clean all\n./build/gradebook_demo\n",
+          "explanation": "Run this POSIX shell script in an empty working directory. It creates include/gradebook.h, src/gradebook.c, src/main.c and a Makefile, then compiles and runs the multi-file C demonstration. Example 2 adds the independent test source and runs the test target. The scripts use here-documents to make the separate source files and project layout explicit.",
+          "runnable": true
+        },
+        {
+          "id": "cl118-ex2",
+          "language": "bash",
+          "title": "Add independent API tests and run the test target",
+          "code": "#!/bin/sh\nset -eu\n\n# Run this after Example 1 has created include/gradebook.h and src/gradebook.c.\nmkdir -p tests build\n\ncat > tests/test_gradebook.c <<'EOF'\n#include \"gradebook.h\"\n\n#include <assert.h>\n#include <stdio.h>\n\nint main(void)\n{\n    GradeBook *book = gradebook_create();\n    double average = 0.0;\n    int minimum = -1;\n    int maximum = -1;\n\n    assert(book != NULL);\n    assert(gradebook_count(book) == 0U);\n    assert(gradebook_average(book, &average) == GRADEBOOK_EMPTY);\n    assert(gradebook_min_max(book, &minimum, &maximum) == GRADEBOOK_EMPTY);\n    assert(gradebook_add(book, 75) == GRADEBOOK_OK);\n    assert(gradebook_add(book, 100) == GRADEBOOK_OK);\n    assert(gradebook_add(book, 0) == GRADEBOOK_OK);\n    assert(gradebook_add(book, 101) == GRADEBOOK_INVALID_ARGUMENT);\n    assert(gradebook_add(book, -1) == GRADEBOOK_INVALID_ARGUMENT);\n    assert(gradebook_count(book) == 3U);\n    assert(gradebook_average(book, &average) == GRADEBOOK_OK);\n    assert(average > 58.333 && average < 58.334);\n    assert(gradebook_min_max(book, &minimum, &maximum) == GRADEBOOK_OK);\n    assert(minimum == 0);\n    assert(maximum == 100);\n    assert(gradebook_average(NULL, &average) == GRADEBOOK_INVALID_ARGUMENT);\n    gradebook_destroy(book);\n    gradebook_destroy(NULL);\n\n    puts(\"GradeBook API tests passed.\");\n    return 0;\n}\nEOF\n\nmake test\n",
+          "explanation": "Run this script in the same directory after Example 1. It creates tests/test_gradebook.c, compiles that test as a separate executable linked with the module implementation, and checks valid scores, invalid scores, empty-book behaviour, average, minimum, maximum and cleanup.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Identify public interface versus implementation detail.",
-      "independentTask": "Create a three-module program with headers, source files, a Makefile and a test plan.",
+      "guidedTask": "Run Example 1 and inspect the generated directory tree. Identify which declarations are public in gradebook.h, which data members remain private in gradebook.c, and why main.c can use GradeBook without knowing its structure definition. Then run Example 2 and explain why the test executable links gradebook.c but does not link src/main.c.",
+      "independentTask": "Add a gradebook_remove_last function to the public header and its implementation. Update the test file to cover removing from an empty book, removing one score, and recalculating the average after removal. Update the Makefile dependencies if you add another source file. Build with both GCC and Clang, run the tests, then intentionally omit gradebook.c from a link command and explain the undefined-reference error. Restore the correct build and run make clean.",
       "hints": [
-        "Use include guards in headers.",
-        "Avoid exposing mutable internal state unnecessarily.",
-        "Ensure every external function has one compatible declaration and one definition."
+        "Put include guards around each public header and include only the headers a source file needs.",
+        "Use an opaque structure declaration in the public header when callers do not need to access internal members.",
+        "Keep one external function definition in one implementation file; include declarations rather than copying definitions into callers.",
+        "Link every implementation source file that provides a function used by the application or test executable.",
+        "Use explicit Makefile prerequisites so changing a header or source file triggers the correct rebuild.",
+        "Treat compiler warnings, link errors, API tests and memory ownership as separate parts of the verification process."
       ]
     }
   },
@@ -51,36 +73,58 @@
     "questions": [
       {
         "id": "cl118-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What is the main purpose of a public header in a modular C project?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "To declare the module's public types and functions for other source files.",
+          "To store the executable program's machine code.",
+          "To replace the linker."
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the topic and constraints described above."
+        "answer": "To declare the module's public types and functions for other source files.",
+        "explanation": "Headers publish declarations and shared types; implementation definitions normally live in source files."
       },
       {
         "id": "cl118-q2",
-        "prompt": "What is essential for a reliable implementation?",
+        "prompt": "What does an include guard prevent?",
         "options": [
-          "Define the interface, validate inputs and handle failures.",
-          "Assume every input is valid.",
-          "Ignore resource ownership."
+          "Repeated processing of the same header within one translation unit.",
+          "Every possible duplicate function definition across all source files.",
+          "All linker errors."
         ],
-        "answer": "Define the interface, validate inputs and handle failures.",
-        "explanation": "Reliable C programs make assumptions and failure behaviour explicit."
+        "answer": "Repeated processing of the same header within one translation unit.",
+        "explanation": "Include guards prevent repeated inclusion in one preprocessing translation unit, not duplicate external definitions across separate .c files."
       },
       {
         "id": "cl118-q3",
-        "prompt": "How should the work be verified?",
+        "prompt": "What is a common cause of an undefined-reference linker error?",
         "options": [
-          "Compile with warnings and test representative and boundary cases.",
-          "Only check whether the source file exists.",
-          "Assume a single successful run proves correctness."
+          "The implementation source file containing the called function was not linked.",
+          "A comment is missing from the header.",
+          "The executable has too many local variables."
         ],
-        "answer": "Compile with warnings and test representative and boundary cases.",
-        "explanation": "Compilation and targeted tests provide evidence of correctness."
+        "answer": "The implementation source file containing the called function was not linked.",
+        "explanation": "A declaration lets compilation proceed, but the linker still needs the matching function definition."
+      },
+      {
+        "id": "cl118-q4",
+        "prompt": "Why does the GradeBook header use an opaque structure declaration?",
+        "options": [
+          "It hides the internal representation so callers use the public API.",
+          "It allows callers to access every private field directly.",
+          "It makes dynamic memory allocation unnecessary."
+        ],
+        "answer": "It hides the internal representation so callers use the public API.",
+        "explanation": "The caller can hold a pointer to the incomplete type but cannot depend on the private members."
+      },
+      {
+        "id": "cl118-q5",
+        "prompt": "Why should the test program link the module implementation but not the demonstration main.c?",
+        "options": [
+          "The test has its own main function and needs the module functions being tested.",
+          "The linker cannot link more than one source file.",
+          "A test program must not include a header."
+        ],
+        "answer": "The test has its own main function and needs the module functions being tested.",
+        "explanation": "The test executable supplies its own entry point and links the implementation under test; linking another main would cause a duplicate entry point."
       }
     ]
   },

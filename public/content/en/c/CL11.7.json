@@ -6,39 +6,61 @@
   "title": "Project 7: mini address book with sorting and searching",
   "language": "en",
   "learningObjectives": [
-    "Explain the topic and its C rules.",
-    "Trace the example and identify its purpose.",
-    "Identify important validation and failure cases.",
-    "Apply the concept in a tested program or reference exercise."
+    "Represent contacts with a structure containing a unique ID, a bounded name and a phone string.",
+    "Explain how qsort uses a comparator to establish a consistent ordering of structures.",
+    "Implement a case-insensitive ASCII name comparison without passing a negative plain char to character-classification functions.",
+    "Use binary search and a lower-bound algorithm to find all contacts with a matching name in a sorted array.",
+    "Manage a dynamically allocated contact array safely using count, capacity, realloc and overflow checks.",
+    "Validate interactive input, reject duplicate IDs and release allocated memory during program cleanup."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL2.1",
+    "CL3.1",
+    "CL4.1",
+    "CL5.1",
+    "CL5.3",
+    "CL6.1",
+    "CL11.3",
+    "CL11.5"
+  ],
   "stages": {
     "understand": {
-      "concept": "An address book stores contact records and supports sorting by name and searching by key. The comparison rule must be consistent and string storage must remain valid for every record.",
-      "whyItMatters": "This project integrates structures, string handling, sorting and searching, while exposing the relationship between sort order and search preconditions.",
-      "analogy": "Treat the project or language feature as a set of components with explicit interfaces and responsibilities.",
-      "analogyLimit": "The analogy does not replace C's formal language, library and resource-management rules."
+      "concept": "A mini address book stores a collection of contacts. Each contact has a unique positive numeric ID, a bounded name and a bounded phone string. The project sorts contacts by name and searches for names efficiently. A sorting comparator must define a consistent ordering; the binary-search comparison must use the same name-ordering rule. This lesson uses case-insensitive ASCII comparison and uses the contact ID as a tie-breaker so equal names still have a deterministic total order.",
+      "whyItMatters": "Sorting and searching are common operations in data-processing programs. This project connects structures, strings, dynamic arrays, qsort, comparator functions and binary-search preconditions in one practical application.",
+      "analogy": "Sorting is like arranging an address register alphabetically before looking up a name. Binary search repeatedly narrows the part of the register where the requested name can be.",
+      "analogyLimit": "Binary search is correct only when the data is already sorted using the same comparison rule. The simple ASCII case-folding policy used here is not full Unicode or locale-aware alphabetical collation."
     },
     "explain": {
-      "narrative": "An address book stores contact records and supports sorting by name and searching by key. The comparison rule must be consistent and string storage must remain valid for every record.\n\nFor a complete implementation, define input constraints, ownership, error handling and test cases before coding. Compile with warnings and verify normal, boundary and failure behaviour.",
+      "narrative": "The Contact structure stores an ID, name and phone number in fixed-size character arrays. This keeps each record self-contained and avoids separate allocations for every string. Input is read with fgets and copied only after checking the destination size. The sample phone validation accepts digits and an optional plus sign only at the beginning; a real application may need country-specific formatting rules.\\n\\nThe contact collection uses a dynamically allocated array. count is the number of active contacts; capacity is the number of allocated slots. Before growing the array, reserve_contacts checks that the requested element count can be multiplied by sizeof without overflowing SIZE_MAX. It assigns realloc to a temporary pointer so a failed allocation does not lose the original block. IDs are checked for uniqueness before insertion.\\n\\nThe qsort comparator receives pointers to two array elements as const void pointers. It converts them to const struct Contact pointers, compares names case-insensitively, and uses the ID as a tie-breaker. The comparison returns a negative value, zero or a positive value. It does not subtract IDs, because subtraction can overflow. The character passed to tolower is converted to unsigned char first, as required for safe use of the character-classification functions.\\n\\nAfter sorting, lower_bound_name performs binary search for the first contact whose name is not less than the key. Starting there, the program walks forward while names compare equal, so it can show every contact sharing that name. This is more useful than returning an arbitrary duplicate match. A name search is case-insensitive for the basic ASCII characters; non-ASCII text may require a Unicode-aware library and a defined locale policy.\\n\\nThe interactive example offers Add, List sorted and Search by name. It sorts before listing and searching, and frees the single dynamic array on exit. This lesson keeps contacts in memory only: they are lost when the process exits. Persistence, deletion and editing can be added as later extensions.",
       "examples": [
         {
           "id": "cl117-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\nstruct Contact { char name[32]; int id; };\nint by_name(const void *a, const void *b) {\n const struct Contact *x = a, *y = b;\n return strcmp(x->name, y->name);\n}\nint main(void) {\n struct Contact c[] = {{\"Mira\",2},{\"Asha\",1}};\n qsort(c, 2, sizeof c[0], by_name);\n puts(c[0].name);\n return 0;\n}",
-          "explanation": "qsort uses the comparator to order records by name. After sorting, a compatible binary search can be used; a search using a different comparison rule would be incorrect.",
-          "runnable": false
+          "title": "Sort contacts and find duplicate names with binary search",
+          "code": "#include <assert.h>\n#include <ctype.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n#define NAME_SIZE 40\nstruct Contact { int id; char name[NAME_SIZE]; char phone[24]; };\n\nstatic int compare_name_text(const char *a,const char *b) {\n    while(*a!='\\0'&&*b!='\\0'){\n        int ca=tolower((unsigned char)*a),cb=tolower((unsigned char)*b);\n        if(ca<cb)return -1;\n        if(ca>cb)return 1;\n        ++a;++b;\n    }\n    if(*a=='\\0'&&*b=='\\0')return 0;\n    return *a=='\\0'?-1:1;\n}\nstatic int compare_contacts(const void *left,const void *right) {\n    const struct Contact *a=left,*b=right;\n    int by_name=compare_name_text(a->name,b->name);\n    if(by_name!=0)return by_name;\n    return (a->id>b->id)-(a->id<b->id);\n}\nstatic size_t lower_bound_name(const struct Contact *items,size_t count,const char *key) {\n    size_t low=0U,high=count;\n    while(low<high){\n        size_t mid=low+(high-low)/2U;\n        if(compare_name_text(items[mid].name,key)<0)low=mid+1U;\n        else high=mid;\n    }\n    return low;\n}\nstatic size_t find_id(const struct Contact *items,size_t count,int id) {\n    size_t i;for(i=0;i<count;++i)if(items[i].id==id)return i;return count;\n}\nint main(void) {\n    struct Contact contacts[]={{3,\"Mira\",\"9000000003\"},{1,\"asha\",\"9000000001\"},{4,\"Asha\",\"9000000004\"},{2,\"Zoya\",\"9000000002\"}};\n    const size_t count=sizeof contacts/sizeof contacts[0];\n    size_t i,at,matches=0U;\n    qsort(contacts,count,sizeof contacts[0],compare_contacts);\n    assert(strcmp(contacts[0].name,\"asha\")==0);\n    assert(strcmp(contacts[1].name,\"Asha\")==0);\n    assert(strcmp(contacts[3].name,\"Zoya\")==0);\n    at=lower_bound_name(contacts,count,\"ASHA\");\n    while(at+matches<count&&compare_name_text(contacts[at+matches].name,\"asha\")==0)++matches;\n    assert(matches==2U);\n    assert(find_id(contacts,count,3)==2U);\n    assert(find_id(contacts,count,99)==count);\n    for(i=0;i<count;++i)printf(\"%d | %s | %s\\n\",contacts[i].id,contacts[i].name,contacts[i].phone);\n    printf(\"Case-insensitive matches for Asha: %zu\\n\",matches);\n    puts(\"Sorting and binary-search tests passed.\");\n    return 0;\n}\n",
+          "explanation": "This deterministic example sorts a small contact array with qsort, compares names case-insensitively, uses IDs to break ties, and finds the first and all matching names using a lower-bound binary search. Assertions verify ordering, duplicate-name matches and ID lookup.",
+          "runnable": true
+        },
+        {
+          "id": "cl117-ex2",
+          "language": "en",
+          "title": "Interactive mini address book",
+          "code": "#include <ctype.h>\n#include <limits.h>\n#include <stdint.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n#define NAME_SIZE 40\n#define PHONE_SIZE 24\n#define INPUT_SIZE 128\nstruct Contact { int id; char name[NAME_SIZE]; char phone[PHONE_SIZE]; };\nstruct AddressBook { struct Contact *items; size_t count; size_t capacity; };\n\nstatic char *trim(char *s) {\n    char *start=s,*end;\n    while(isspace((unsigned char)*start))++start;\n    end=start+strlen(start);\n    while(end>start&&isspace((unsigned char)end[-1]))--end;\n    *end='\\0';return start;\n}\nstatic int read_line(const char *prompt,char *buf,size_t size) {\n    size_t n;int ch;fputs(prompt,stdout);\n    if(fgets(buf,(int)size,stdin)==NULL)return 0;\n    n=strlen(buf);\n    if(n>0U&&buf[n-1U]=='\\n'){buf[n-1U]='\\0';return 1;}\n    ch=getchar();if(ch=='\\n'||ch==EOF)return 1;\n    while(ch!='\\n'&&ch!=EOF)ch=getchar();\n    return -1;\n}\nstatic int read_int(const char *prompt,int min,int max,int *out) {\n    char line[INPUT_SIZE],*s,*end;long value;int r=read_line(prompt,line,sizeof line);\n    if(r!=1)return r;\n    s=trim(line);value=strtol(s,&end,10);\n    while(isspace((unsigned char)*end))++end;\n    if(s==end||*end!='\\0'||value<min||value>max)return -1;\n    *out=(int)value;return 1;\n}\nstatic int compare_name_text(const char *a,const char *b) {\n    while(*a!='\\0'&&*b!='\\0'){\n        int ca=tolower((unsigned char)*a),cb=tolower((unsigned char)*b);\n        if(ca<cb)return -1;\n        if(ca>cb)return 1;\n        ++a;++b;\n    }\n    if(*a=='\\0'&&*b=='\\0')return 0;\n    return *a=='\\0'?-1:1;\n}\nstatic int compare_contacts(const void *left,const void *right) {\n    const struct Contact *a=left,*b=right;\n    int c=compare_name_text(a->name,b->name);\n    if(c!=0)return c;\n    return (a->id>b->id)-(a->id<b->id);\n}\nstatic size_t lower_bound_name(const struct Contact *items,size_t count,const char *key) {\n    size_t low=0U,high=count;\n    while(low<high){size_t mid=low+(high-low)/2U;\n        if(compare_name_text(items[mid].name,key)<0)low=mid+1U;else high=mid;\n    }return low;\n}\nstatic size_t find_id(const struct AddressBook *book,int id) {\n    size_t i;for(i=0;i<book->count;++i)if(book->items[i].id==id)return i;return book->count;\n}\nstatic int reserve_contacts(struct AddressBook *book,size_t needed) {\n    size_t cap;struct Contact *tmp;\n    if(needed<=book->capacity)return 1;\n    if(needed>SIZE_MAX/sizeof *book->items)return 0;\n    cap=book->capacity==0U?4U:book->capacity;\n    while(cap<needed){if(cap>SIZE_MAX/2U){cap=needed;break;}cap*=2U;}\n    if(cap>SIZE_MAX/sizeof *book->items)return 0;\n    tmp=realloc(book->items,cap*sizeof *book->items);\n    if(tmp==NULL)return 0;\n    book->items=tmp;book->capacity=cap;return 1;\n}\nstatic int add_contact(struct AddressBook *book,const struct Contact *contact) {\n    if(contact->id<=0||contact->name[0]=='\\0'||strlen(contact->name)>=NAME_SIZE\n       ||contact->phone[0]=='\\0'||strlen(contact->phone)>=PHONE_SIZE\n       ||find_id(book,contact->id)!=book->count||book->count==SIZE_MAX)return 0;\n    if(!reserve_contacts(book,book->count+1U))return 0;\n    book->items[book->count++]=*contact;return 1;\n}\nstatic void add_menu(struct AddressBook *book) {\n    struct Contact c;char line[INPUT_SIZE],*s;size_t n;int r;\n    r=read_int(\"Contact ID: \",1,INT_MAX,&c.id);\n    if(r!=1){puts(r==0?\"Input ended.\":\"Invalid ID.\");return;}\n    if(find_id(book,c.id)!=book->count){puts(\"That ID already exists.\");return;}\n    r=read_line(\"Name: \",line,sizeof line);\n    if(r!=1){puts(r==0?\"Input ended.\":\"Name is too long.\");return;}\n    s=trim(line);n=strlen(s);\n    if(n==0U||n>=NAME_SIZE||strchr(s,'|')!=NULL){puts(\"Enter a name of 1 to 39 characters.\");return;}\n    memcpy(c.name,s,n+1U);\n    r=read_line(\"Phone (digits and optional leading +): \",line,sizeof line);\n    if(r!=1){puts(r==0?\"Input ended.\":\"Phone is too long.\");return;}\n    s=trim(line);n=strlen(s);\n    if(n==0U||n>=PHONE_SIZE||strchr(s,'|')!=NULL){puts(\"Enter a phone value of 1 to 23 characters.\");return;}\n    {size_t i;for(i=0;i<n;++i)if(!(isdigit((unsigned char)s[i])||(i==0U&&s[i]=='+'))){puts(\"Phone must contain digits and an optional leading +.\");return;}}\n    memcpy(c.phone,s,n+1U);\n    if(!add_contact(book,&c))puts(\"Could not add contact (memory or validation failure).\");\n    else puts(\"Contact added.\");\n}\nstatic void list_contacts(struct AddressBook *book) {\n    size_t i;if(book->count==0U){puts(\"Address book is empty.\");return;}\n    if(book->count>1U)qsort(book->items,book->count,sizeof book->items[0],compare_contacts);\n    puts(\"\\nID     NAME                                     PHONE\");\n    for(i=0;i<book->count;++i)printf(\"%-6d %-40s %s\\n\",book->items[i].id,book->items[i].name,book->items[i].phone);\n}\nstatic void search_contacts(struct AddressBook *book) {\n    char key[INPUT_SIZE],*s;size_t at,matches=0U,n;int r;\n    r=read_line(\"Name to search (case-insensitive): \",key,sizeof key);\n    if(r!=1){puts(r==0?\"Input ended.\":\"Search text is too long.\");return;}\n    s=trim(key);n=strlen(s);if(n==0U){puts(\"Enter a name.\");return;}\n    if(book->count>1U)qsort(book->items,book->count,sizeof book->items[0],compare_contacts);\n    at=lower_bound_name(book->items,book->count,s);\n    while(at+matches<book->count&&compare_name_text(book->items[at+matches].name,s)==0)++matches;\n    if(matches==0U){puts(\"No matching contact.\");return;}\n    printf(\"%zu matching contact(s):\\n\",matches);\n    while(matches>0U){const struct Contact *c=&book->items[at++];\n        printf(\"%d | %s | %s\\n\",c->id,c->name,c->phone);--matches;\n    }\n}\nint main(void) {\n    struct AddressBook book={NULL,0U,0U};int done=0;\n    while(!done){\n        int choice,r;\n        puts(\"\\nMINI ADDRESS BOOK\");\n        puts(\"1 Add contact  2 List sorted  3 Search by name  0 Exit\");\n        r=read_int(\"Choose: \",0,3,&choice);\n        if(r==0){puts(\"\\nEnd of input.\");break;}\n        if(r<0){puts(\"Choose 0, 1, 2 or 3.\");continue;}\n        switch(choice){\n            case 1:add_menu(&book);break;\n            case 2:list_contacts(&book);break;\n            case 3:search_contacts(&book);break;\n            case 0:done=1;break;\n            default:break;\n        }\n    }\n    free(book.items);book.items=NULL;book.count=0U;book.capacity=0U;\n    puts(\"Address book memory released. Goodbye.\");return 0;\n}\n",
+          "explanation": "This complete menu-driven program lets a user add contacts, list them in sorted order and search for all contacts with a matching name. It validates bounded input, rejects duplicate IDs, grows the array safely and releases its allocation at exit. Data is held in memory only.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Predict which name appears first after sorting.",
-      "independentTask": "Add case-sensitivity policy, duplicate-name handling and binary search. Test empty and equal-name cases.",
+      "guidedTask": "Compile and run Example 1. Trace the comparator result for the two Asha records and explain why the ID is used as a tie-breaker. Then follow lower_bound_name for the search key ASHA and identify the first matching index.",
+      "independentTask": "Extend the interactive address book with a delete-by-ID option. After deleting a contact, verify that the remaining records still sort correctly and that searching returns all matching names. Add tests for an empty address book, one contact, duplicate names with different letter case, a missing search key, a duplicate ID, maximum-length input and allocation failure. Consider what changes would be needed for Unicode-aware name sorting.",
       "hints": [
-        "Ensure strings are null-terminated before strcmp.",
-        "The comparator must define a consistent ordering.",
-        "Document whether names are compared case-sensitively and how locale affects ordering."
+        "A qsort comparator receives pointers to elements; convert each pointer to the correct const structure pointer type.",
+        "Return comparison results by testing less-than and greater-than rather than subtracting potentially large integer IDs.",
+        "Cast a char to unsigned char before passing it to tolower or other character-classification functions.",
+        "Sort the active count of elements, not the allocated capacity, and use the same comparison rule for binary search.",
+        "Use lower-bound search to find the first equal name, then scan the adjacent equal range to report duplicate names.",
+        "Keep count and capacity separate, check allocation-size overflow, preserve the old pointer on realloc failure and free the array once."
       ]
     }
   },
@@ -51,36 +73,58 @@
     "questions": [
       {
         "id": "cl117-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What does the qsort comparator return when the first contact should appear before the second?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "A negative integer value.",
+          "The index of the first contact.",
+          "The length of the first contact name."
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the topic and constraints described above."
+        "answer": "A negative integer value.",
+        "explanation": "The qsort comparator returns a negative, zero or positive result to describe relative ordering."
       },
       {
         "id": "cl117-q2",
-        "prompt": "What is essential for a reliable implementation?",
+        "prompt": "What must be true before binary search is used on the contact array?",
         "options": [
-          "Define the interface, validate inputs and handle failures.",
-          "Assume every input is valid.",
-          "Ignore resource ownership."
+          "The array is sorted using the same comparison rule used by the search.",
+          "The array must contain exactly two contacts.",
+          "Every contact must have a different name."
         ],
-        "answer": "Define the interface, validate inputs and handle failures.",
-        "explanation": "Reliable C programs make assumptions and failure behaviour explicit."
+        "answer": "The array is sorted using the same comparison rule used by the search.",
+        "explanation": "Binary search relies on the ordering established by the matching comparator."
       },
       {
         "id": "cl117-q3",
-        "prompt": "How should the work be verified?",
+        "prompt": "Why is a char converted to unsigned char before calling tolower?",
         "options": [
-          "Compile with warnings and test representative and boundary cases.",
-          "Only check whether the source file exists.",
-          "Assume a single successful run proves correctness."
+          "The character functions require EOF or a value representable as unsigned char.",
+          "It makes every character uppercase.",
+          "It sorts the array automatically."
         ],
-        "answer": "Compile with warnings and test representative and boundary cases.",
-        "explanation": "Compilation and targeted tests provide evidence of correctness."
+        "answer": "The character functions require EOF or a value representable as unsigned char.",
+        "explanation": "Passing a negative plain char value other than EOF to tolower has undefined behaviour."
+      },
+      {
+        "id": "cl117-q4",
+        "prompt": "How can the program find every contact with the same name after sorting?",
+        "options": [
+          "Find the lower bound, then scan forward while names compare equal.",
+          "Return the first array element without checking its name.",
+          "Search only the unused capacity slots."
+        ],
+        "answer": "Find the lower bound, then scan forward while names compare equal.",
+        "explanation": "The equal-name records are adjacent after sorting by the same name comparator."
+      },
+      {
+        "id": "cl117-q5",
+        "prompt": "Why does reserve_contacts store realloc's result in a temporary pointer?",
+        "options": [
+          "To preserve the original allocation if realloc fails.",
+          "To force realloc to move the array every time.",
+          "To avoid checking the requested capacity."
+        ],
+        "answer": "To preserve the original allocation if realloc fails.",
+        "explanation": "If realloc returns NULL, the original pointer remains valid and must not be overwritten."
       }
     ]
   },

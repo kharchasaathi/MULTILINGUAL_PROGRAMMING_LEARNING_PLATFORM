@@ -6,39 +6,56 @@
   "title": "Build commands, compiler flags, warnings and language-standard selection (CodeSaathi extension)",
   "language": "en",
   "learningObjectives": [
-    "Explain the topic and its C rules.",
-    "Trace the example and explain its data or control flow.",
-    "Identify edge cases and resource-management requirements.",
-    "Apply the concept in a tested C program."
+    "Explain the stages of a hosted C build and distinguish source files, object files, libraries and executables.",
+    "Select an explicit C language standard and explain strict conformance options versus compiler extensions.",
+    "Use warning flags to expose suspicious conversions, shadowing and non-portable constructs.",
+    "Distinguish compile diagnostics, linker failures and runtime failures using command output.",
+    "Construct repeatable single-file and multi-file build commands with explicit inputs and outputs.",
+    "Document compiler identity, version, flags and target environment for reproducible builds."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL8.8 Compiler and linker diagnostics",
+    "CL8.12 Sanitizers and static analysis",
+    "CL9.3 Separate compilation and linking"
+  ],
   "stages": {
     "understand": {
-      "concept": "A build command selects the compiler, language standard, warning options, include paths, source files and linker inputs. These choices determine which language features are accepted and which diagnostics are produced.",
-      "whyItMatters": "Documented build settings make results repeatable and help catch portability defects before deployment.",
-      "analogy": "Treat each algorithm or resource as a contract whose invariants must remain true after every operation.",
-      "analogyLimit": "The analogy does not replace C's formal rules for pointers, object lifetime, complexity or library contracts."
+      "concept": "A build command selects the compiler, language standard, warning options, include paths, source files, object files, libraries and linker inputs. The compiler driver coordinates preprocessing, compilation, assembly and linking.",
+      "whyItMatters": "Identical source can behave differently under different standards, extensions, warning settings, libraries or targets. Explicit build settings improve portability and reproducibility.",
+      "analogy": "A build configuration is a documented contract between source code and the toolchain.",
+      "analogyLimit": "Compiler flags are implementation-specific; one compiler's options are not universal."
     },
     "explain": {
-      "narrative": "A build command selects the compiler, language standard, warning options, include paths, source files and linker inputs. These choices determine which language features are accepted and which diagnostics are produced.\n\nState preconditions, invariants, empty and full cases, ownership and failure behaviour before implementation. Compile with warnings and test normal, boundary and failure paths.",
+      "narrative": "Use an explicit mode such as -std=c17 or -std=c23 when supported. Compiler defaults may change and may enable extensions. GCC/Clang-style -pedantic requests diagnostics for some non-standard extensions. Common warning options include -Wall, -Wextra and -Wpedantic; -Wconversion and -Wshadow add further diagnostics on supported compilers. Treat -Werror as a deliberate project policy after the warning baseline is understood. A one-command build can compile and link multiple sources. For larger projects, compile each source to an object with -c, then link the objects. Include paths are often supplied with -I. Syntax/type diagnostics occur during compilation; undefined references usually occur during linking; crashes and wrong results occur at runtime. Record compiler name/version, target, standard, flags, dependencies and exact commands.",
       "examples": [
         {
           "id": "cl910-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "/* GCC/Clang-like example:\n   cc -std=c17 -Wall -Wextra -Wpedantic -Wconversion main.c -o app\n*/\n#include <stdio.h>\nint main(void) { puts(\"Build configuration matters\"); return 0; }",
-          "explanation": "The command requests C17 and additional diagnostics. Flag availability and behaviour are compiler-specific, so projects should record the tested toolchain.",
+          "title": "Build a single source with explicit diagnostics",
+          "code": "/* GCC/Clang-style command:\n cc -std=c17 -Wall -Wextra -Wpedantic -Wconversion -Wshadow \\\n    -g -O0 main.c -o app\n*/\n#include <stdio.h>\nint main(void) { puts(\"Build settings are part of the evidence.\"); return 0; }",
+          "explanation": "The command selects C17, warning groups, debug symbols and a debug-oriented optimization level. Verify option support with the selected compiler.",
+          "runnable": true
+        },
+        {
+          "id": "cl910-ex2",
+          "language": "en",
+          "title": "Compile and link separate translation units",
+          "code": "/* GCC/Clang-style commands:\n cc -std=c17 -Wall -Wextra -Wpedantic -c main.c -o main.o\n cc -std=c17 -Wall -Wextra -Wpedantic -c message.c -o message.o\n cc main.o message.o -o app\n*/\n/* main.c */\n#include <stdio.h>\nvoid show_message(void);\nint main(void) { show_message(); return 0; }\n/* message.c */\n#include <stdio.h>\nvoid show_message(void) { puts(\"linked successfully\"); }",
+          "explanation": "Each source is compiled to an object file, then the linker resolves the external function reference. A real project should put the shared declaration in a header.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Explain what changes when the selected standard changes.",
-      "independentTask": "Create a build script that records compiler version, standard and warning flags.",
+      "guidedTask": "Build a small program with an explicit standard and warning flags. Record the exact command and identify compiler-specific options.",
+      "independentTask": "Create a reproducible build note for a two-file C program: compiler/version, target, standard, warnings, compile commands, link command and expected output. Introduce a missing function definition and identify the link-stage diagnostic.",
       "hints": [
-        "Use a standard supported by the target compiler and deployment environment.",
-        "Do not suppress a warning without understanding its cause.",
-        "Use the same build options in continuous integration and local testing."
+        "Set the language standard explicitly instead of relying on compiler defaults.",
+        "-Wall and -Wextra enable useful warning groups but do not detect every defect.",
+        "-Wpedantic, -Wconversion and -Wshadow behaviour depends on the compiler.",
+        "Use -Werror only as a deliberate policy after understanding the warning baseline.",
+        "-c compiles a translation unit without linking an executable.",
+        "Record compiler version, flags, target and commands for reproducibility."
       ]
     }
   },
@@ -51,36 +68,58 @@
     "questions": [
       {
         "id": "cl910-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "Why specify a C standard with a compiler option?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "To make the intended language version explicit instead of relying on a compiler default.",
+          "To make all compilers identical.",
+          "To disable the linker."
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the topic and constraints described above."
+        "answer": "To make the intended language version explicit instead of relying on a compiler default.",
+        "explanation": "Defaults and extension modes can change between compiler versions."
       },
       {
         "id": "cl910-q2",
-        "prompt": "What should be verified before relying on the implementation?",
+        "prompt": "What does -c do in common GCC/Clang-style drivers?",
         "options": [
-          "Preconditions, invariants, bounds and failure cases.",
-          "Only the name of the algorithm.",
-          "Whether one input produced a result."
+          "Compiles a source file to an object file without linking an executable.",
+          "Runs the resulting program.",
+          "Enables every warning."
         ],
-        "answer": "Preconditions, invariants, bounds and failure cases.",
-        "explanation": "Correctness depends on maintaining the data structure or algorithm contract."
+        "answer": "Compiles a source file to an object file without linking an executable.",
+        "explanation": "The object file can be linked with other objects and libraries later."
       },
       {
         "id": "cl910-q3",
-        "prompt": "Which test strategy is most useful?",
+        "prompt": "What is a likely cause of an undefined reference diagnostic?",
         "options": [
-          "Test empty, boundary and representative operation sequences.",
-          "Ignore allocation failures.",
-          "Assume one successful example proves all cases."
+          "A missing or mismatched definition discovered during linking.",
+          "A runtime array index error.",
+          "A missing semicolon always discovered by the linker."
         ],
-        "answer": "Test empty, boundary and representative operation sequences.",
-        "explanation": "Targeted tests expose defects ordinary examples can miss."
+        "answer": "A missing or mismatched definition discovered during linking.",
+        "explanation": "The linker cannot resolve a referenced external symbol."
+      },
+      {
+        "id": "cl910-q4",
+        "prompt": "What should happen before adding -Werror to a project?",
+        "options": [
+          "Understand and stabilize the warning baseline, then adopt it as an explicit policy.",
+          "Suppress all warnings.",
+          "Assume every compiler emits identical warnings."
+        ],
+        "answer": "Understand and stabilize the warning baseline, then adopt it as an explicit policy.",
+        "explanation": "-Werror turns warnings into errors and can make builds sensitive to compiler-version changes."
+      },
+      {
+        "id": "cl910-q5",
+        "prompt": "Which information best supports a reproducible build?",
+        "options": [
+          "Compiler/version, target, language standard, flags, dependencies and exact commands.",
+          "Only the source filename.",
+          "Only the executable display name."
+        ],
+        "answer": "Compiler/version, target, language standard, flags, dependencies and exact commands.",
+        "explanation": "Reproduction requires the toolchain and material configuration choices."
       }
     ]
   },

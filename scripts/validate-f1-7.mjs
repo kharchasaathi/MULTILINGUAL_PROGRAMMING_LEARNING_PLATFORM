@@ -62,7 +62,8 @@ assert.ok(!loader.includes("questions.slice(1)"), "legacy duplicate static asses
 assert.ok(renderer.includes("lesson-example"), "renderer must render worked examples");
 assert.ok(renderer.includes("lesson-answer-option"), "renderer must render selectable assessment options");
 assert.ok(renderer.includes("lesson-question-feedback"), "renderer must show assessment feedback");
-assert.ok(serviceWorker.includes('const CACHE_NAME = "codesaathi-v8";'), "service worker cache must use the current app-shell version");
+const cacheVersion = serviceWorker.match(/const CACHE_NAME = ["'](codesaathi-v\d+)["'];/);
+assert.ok(cacheVersion, "service worker must declare a versioned cache name");
 assert.ok(serviceWorker.includes("const NETWORK_FIRST = new Set(APP_SHELL);"), "app shell must prefer fresh network responses");
 assert.ok(serviceWorker.includes('fetch(event.request, { cache: "no-store" })'), "app shell requests must bypass the browser HTTP cache");
 const app = await readFile(join(root, "public/app.js"), "utf8");

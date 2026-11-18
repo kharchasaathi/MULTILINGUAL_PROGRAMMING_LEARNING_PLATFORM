@@ -6,39 +6,50 @@
   "title": "Pointer arithmetic and valid traversal boundaries",
   "language": "en",
   "learningObjectives": [
-    "Explain the language rule and its constraints.",
-    "Trace the example and predict its behaviour.",
-    "Identify boundary and safety cases.",
-    "Apply the concept in a tested C program."
+    "Apply pointer addition and subtraction only within one array object and its one-past position.",
+    "Explain why pointer arithmetic advances by elements rather than raw bytes.",
+    "Use pointer comparisons to traverse a valid array range.",
+    "Explain when pointer subtraction is defined and its ptrdiff_t result.",
+    "Avoid dereferencing one-past pointers or comparing unrelated pointers relationally."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "Pointer arithmetic is defined within an array object and one position past its final element. A one-past pointer may be compared or used as an end marker but must not be dereferenced. Pointer subtraction is defined for pointers into the same array object.",
+      "concept": "Pointer arithmetic is defined within an array object and one position past its final element. Adding one to a pointer advances by one element of the pointed-to type, not one byte. A one-past pointer may be used as an end marker but must not be dereferenced. Subtracting two pointers is defined when both point into the same array object or one past it, and the result has type ptrdiff_t.",
       "whyItMatters": "This knowledge helps reason about C data representation, object bounds and valid memory access.",
       "analogy": "Think of memory objects as labelled storage and pointers as typed references to that storage.",
       "analogyLimit": "The analogy does not replace C's formal pointer, lifetime and object-access rules."
     },
     "explain": {
-      "narrative": "Pointer arithmetic is defined within an array object and one position past its final element. A one-past pointer may be compared or used as an end marker but must not be dereferenced. Pointer subtraction is defined for pointers into the same array object.\n\nCheck the declared types, object lifetime, valid bounds and function preconditions before using the construct. Enable compiler warnings and test edge cases.",
+      "narrative": "## 1. Pointer addition\n\nIf p points to an element of an array, `p + 1` points to the next element, scaled by the size of the pointed-to type. Pointer arithmetic is not general integer arithmetic and must remain within the same array object or its one-past position.\n\n## 2. One-past end pointer\n\nFor an array of N elements, `array + N` is a valid one-past pointer. It can be compared with another pointer in the same array range and used as an iteration endpoint. It does not designate an element and must not be dereferenced.\n\n## 3. Pointer subtraction\n\nSubtracting two pointers into the same array object, including its one-past position, produces the number of elements between them. The result type is ptrdiff_t, declared in `<stddef.h>`. The difference must be representable in ptrdiff_t.\n\n## 4. Comparisons\n\nEquality comparisons can be used for compatible pointer values. Relational comparisons such as < and > have defined array-order meaning when the pointers refer to elements of the same array object or its one-past position. Do not use relational comparisons to order unrelated objects.\n\n## 5. Prefer range-based traversal\n\nUse a begin pointer and an end pointer for a range. Ensure both refer to the same array object, and stop before dereferencing end. This pattern makes the boundary visible and avoids computing an invalid index.",
       "examples": [
         {
-          "id": "cl55-ex1",
+          "id": "cl5.5-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "Pointer traversal is common in low-level C, but it is safe only when pointer values stay within the same array object or its permitted one-past position.",
-          "explanation": "#include <stdio.h>\nint main(void) {\n int data[] = {10, 20, 30};\n int *begin = data;\n int *end = data + 3;\n for (int *p = begin; p != end; ++p) printf(\"%d \", *p);\n putchar('\\n');\n return 0;\n}",
+          "title": "Traverse using begin and end pointers",
+          "code": "#include <stdio.h>\n\nint main(void) {\n    int values[] = {3, 6, 9};\n    int *begin = values;\n    int *end = values + 3;\n    for (int *p = begin; p != end; ++p) printf(\"%d\\n\", *p);\n    return 0;\n}",
+          "explanation": "end is one past the last element. The loop checks p != end before dereferencing p.",
+          "runnable": false
+        },
+        {
+          "id": "cl5.5-ex2",
+          "language": "en",
+          "title": "Subtract pointers within one array",
+          "code": "#include <stddef.h>\n#include <stdio.h>\n\nint main(void) {\n    int values[5] = {0};\n    int *first = &values[1];\n    int *last = &values[4];\n    ptrdiff_t distance = last - first;\n    printf(\"%td elements apart\\n\", distance);\n    return 0;\n}",
+          "explanation": "Both pointers refer to elements of the same array, so their difference is defined and measured in elements.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "data + 3 points one past the last element. The loop dereferences p only while p differs from end, so the one-past pointer is never dereferenced.",
-      "independentTask": "Draw the three elements and mark begin and end.",
+      "guidedTask": "Write a C program demonstrating CL5.5. State the relevant input, pointer or conversion contract, then compile and trace the normal and failure paths.",
+      "independentTask": "Create a second example for CL5.5 that exercises a boundary or invalid state. Add checks, document the ownership or input rules, and explain why unsafe behavior is avoided.",
       "hints": [
-        "Rewrite the traversal using indices, then compare which version makes the bound clearer to you.",
-        "Pointer addition advances by elements, not by raw bytes.",
-        "Do not dereference the one-past pointer."
+        "Read the declared types carefully, including every pointer and qualifier level.",
+        "Check return values and validate inputs before use.",
+        "Keep object lifetime and ownership explicit.",
+        "Avoid dereferencing invalid or out-of-range pointers.",
+        "Test both success and failure paths."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl55-q1",
-        "prompt": "Which statement best matches this lesson?",
+        "id": "cl5.5-q1",
+        "prompt": "What does p + 1 do when p points to an element of an int array?",
         "options": [
-          "The C rule and constraints explained in this lesson.",
-          "An unrelated HTML element.",
-          "A CSS property."
+          "Advances to the next int element",
+          "Advances exactly one byte",
+          "Doubles the address value"
         ],
-        "answer": "The C rule and constraints explained in this lesson.",
-        "explanation": "The correct choice follows the C rule and its constraints."
+        "answer": "Advances to the next int element",
+        "explanation": "Pointer arithmetic is scaled by the size of the pointed-to type."
       },
       {
-        "id": "cl55-q2",
-        "prompt": "What is the safest way to handle the relevant boundary or validity condition?",
+        "id": "cl5.5-q2",
+        "prompt": "May a one-past pointer be dereferenced?",
         "options": [
-          "Check the documented preconditions and bounds before access.",
-          "Assume C automatically checks every pointer and array access.",
-          "Ignore the result if one run appears successful."
+          "No",
+          "Yes, it refers to an extra element",
+          "Only when the array is global"
         ],
-        "answer": "Check the documented preconditions and bounds before access.",
-        "explanation": "C programs must explicitly respect object bounds, pointer validity and conversion results."
+        "answer": "No",
+        "explanation": "A one-past pointer is an allowed endpoint, not an accessible element."
       },
       {
-        "id": "cl55-q3",
-        "prompt": "Why should the example be traced?",
+        "id": "cl5.5-q3",
+        "prompt": "When is pointer subtraction defined?",
         "options": [
-          "To understand execution order and object state.",
-          "To replace compilation and tests.",
-          "To avoid checking inputs."
+          "When both pointers refer into the same array object or its one-past position",
+          "For any two pointer values in the program",
+          "Only when both pointers are null"
         ],
-        "answer": "To understand execution order and object state.",
-        "explanation": "Tracing complements compilation, warnings and testing."
+        "answer": "When both pointers refer into the same array object or its one-past position",
+        "explanation": "C defines pointer subtraction for positions within the same array object."
+      },
+      {
+        "id": "cl5.5-q4",
+        "prompt": "What type represents a pointer difference?",
+        "options": [
+          "ptrdiff_t",
+          "size_t",
+          "unsigned char"
+        ],
+        "answer": "ptrdiff_t",
+        "explanation": "The subtraction result has type ptrdiff_t."
+      },
+      {
+        "id": "cl5.5-q5",
+        "prompt": "Should relational pointer comparisons be used to order unrelated objects?",
+        "options": [
+          "No",
+          "Yes, their numeric addresses always define portable order",
+          "Only after casting to int"
+        ],
+        "answer": "No",
+        "explanation": "Relational pointer ordering is only defined for positions within the same array object."
       }
     ]
   },

@@ -3,42 +3,96 @@
   "courseId": "c",
   "moduleId": "CL10",
   "topicId": "CL10.12",
-  "title": "Hash tables: hashing, collisions and collision handling",
+  "title": "Hash tables: hash functions, collisions and collision resolution",
   "language": "en",
   "learningObjectives": [
-    "Explain the topic and its C rules.",
-    "Trace the example and explain its data or control flow.",
-    "Identify edge cases and resource-management requirements.",
-    "Apply the concept in a tested C program."
+    "Explain how a hash function maps a key to a table index and why distinct keys can produce the same index.",
+    "Distinguish separate chaining from open addressing, including the storage and search trade-offs of each.",
+    "Implement a separate-chaining table with linked bucket entries, key comparison, insertion, lookup and deletion.",
+    "Implement linear probing with explicit EMPTY, OCCUPIED and DELETED states, and explain why deletion needs a tombstone.",
+    "Calculate load factor, describe clustering and resizing, and explain why changing capacity requires rehashing entries.",
+    "Test collisions, duplicate keys, absent keys, deletion, full tables, zero capacity and allocation failure while preserving memory ownership."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL5.3",
+    "CL6.1",
+    "CL7.1",
+    "CL10.10",
+    "CL10.11"
+  ],
   "stages": {
     "understand": {
-      "concept": "A hash table maps keys to bucket positions using a hash function. Collisions occur when distinct keys map to the same bucket. Separate chaining stores multiple entries per bucket; open addressing searches for another available slot according to a probe sequence.",
-      "whyItMatters": "A hash function alone is not a complete hash table. Correctness requires collision resolution, key equality, capacity management and resizing rules.",
-      "analogy": "Treat each algorithm or resource as a contract whose invariants must remain true after every operation.",
-      "analogyLimit": "The analogy does not replace C's formal rules for pointers, object lifetime, complexity or library contracts."
+      "concept": "A hash table stores key-value entries in an array of buckets. A hash function converts a key into a hash value, and the table maps that value to a valid bucket index, commonly with a remainder operation. Different keys can map to the same bucket; this is a collision, not necessarily a defect. A collision-resolution strategy is therefore part of the data structure. Separate chaining keeps a collection of entries at each bucket, often as a linked list. Open addressing keeps entries in the bucket array itself and probes other positions when the preferred slot is occupied.",
+      "whyItMatters": "Hash tables can provide expected constant-time lookup, insertion and deletion when the hash function distributes keys well and the load factor is controlled. They are used in symbol tables, caches, indexes and dictionaries. Their performance and correctness depend on more than calculating an index: keys must be compared for equality, collisions must be resolved, capacity must be managed and memory must have clear ownership.",
+      "analogy": "Imagine a library assigning each book to a shelf section using a code derived from its catalogue number. Two books may be assigned to the same section. The librarian still checks each book's actual catalogue number instead of assuming that sharing a section makes them the same book.",
+      "analogyLimit": "A hash is not a unique identity and a bucket is not proof of key equality. Real hash tables also need defined behaviour for duplicates, deletion, capacity exhaustion, resizing and adversarial or poorly distributed keys.",
+      "keyTerms": [
+        {
+          "term": "Hash function",
+          "definition": "A deterministic function that maps a key to a hash value; equal keys must produce equal hash values."
+        },
+        {
+          "term": "Bucket",
+          "definition": "A table position or collection associated with a hash result."
+        },
+        {
+          "term": "Collision",
+          "definition": "Two distinct keys map to the same bucket index."
+        },
+        {
+          "term": "Separate chaining",
+          "definition": "Each bucket refers to a collection of entries, commonly a linked list."
+        },
+        {
+          "term": "Open addressing",
+          "definition": "All entries are stored in the array; a probe sequence searches for another slot after a collision."
+        },
+        {
+          "term": "Load factor",
+          "definition": "The number of stored entries divided by the number of buckets or slots, depending on the design."
+        },
+        {
+          "term": "Tombstone",
+          "definition": "A deleted marker in open addressing that tells a search to continue probing rather than stop."
+        },
+        {
+          "term": "Rehashing",
+          "definition": "Recomputing table positions for all entries after capacity or hash configuration changes."
+        }
+      ],
+      "history": "Hashing grew from ideas in information retrieval and fast table lookup. Modern hash tables combine a hash function with collision-resolution and capacity policies. The term hash suggests transforming or mixing a key into a value used to locate its storage position; the result is an index aid, not a substitute for checking the original key."
     },
     "explain": {
-      "narrative": "A hash table maps keys to bucket positions using a hash function. Collisions occur when distinct keys map to the same bucket. Separate chaining stores multiple entries per bucket; open addressing searches for another available slot according to a probe sequence.\n\nState preconditions, invariants, empty and full cases, ownership and failure behaviour before implementation. Compile with warnings and test normal, boundary and failure paths.",
+      "narrative": "For a table with capacity m, a simple integer-key example is `index = key % m`. The capacity must be nonzero before using the remainder operation. A simple remainder hash is useful for teaching but may distribute patterned keys poorly; production designs select a hash function appropriate to the key type and threat model.\n\nIn separate chaining, each bucket points to the first entry in a linked list. Insertion must compare keys and decide what a duplicate means. This lesson uses map-style behaviour: inserting an existing key updates its value. Lookup walks one chain and compares the complete key. Deletion unlinks the matching entry before freeing it. The table owns every allocated entry and must release all entries during destruction. With a reasonable distribution, expected chain length is related to the load factor n/m; worst-case operations can still be O(n).\n\nIn open addressing, a collision triggers a probe sequence. Linear probing checks `(start + step) % capacity` until it finds the key or a slot that proves the key is absent. A deleted slot cannot simply become EMPTY: a later key may have been placed beyond it during an earlier probe. Marking it DELETED (a tombstone) lets searches continue while allowing future insertions to reuse that slot. If every slot is occupied or deleted, insertion must report that no slot is available. Linear probing can cause primary clustering, where groups of occupied slots grow and attract more probes.\n\nLoad factor helps determine when a table should grow. When capacity changes, old bucket indices are generally no longer valid, so entries must be reinserted using the new capacity; copying the old array positions is not sufficient. The two examples use a fixed capacity to keep the core collision rules visible. A production implementation should define resizing, overflow limits, key ownership, hash quality and failure behaviour explicitly.",
       "examples": [
         {
           "id": "cl1012-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stddef.h>\nsize_t bucket_for(unsigned int key, size_t capacity) {\n return capacity == 0 ? 0 : (size_t)key % capacity;\n}",
-          "explanation": "The function chooses a bucket index for nonzero capacity. A complete table must still compare keys and handle multiple keys that map to the same bucket.",
-          "runnable": false
+          "title": "Separate chaining with insertion, lookup, deletion and cleanup",
+          "code": "#include <stdbool.h>\n#include <stddef.h>\n#include <stdio.h>\n#include <stdlib.h>\n\nenum { BUCKET_COUNT = 7 };\n\nstruct Entry {\n    unsigned int key;\n    int value;\n    struct Entry *next;\n};\n\nstruct HashTable {\n    struct Entry *buckets[BUCKET_COUNT];\n    size_t size;\n};\n\nstatic size_t bucket_index(unsigned int key)\n{\n    return (size_t)(key % BUCKET_COUNT);\n}\n\nstatic bool table_put(struct HashTable *table, unsigned int key, int value)\n{\n    if (table == NULL) return false;\n\n    size_t index = bucket_index(key);\n    for (struct Entry *entry = table->buckets[index];\n         entry != NULL; entry = entry->next) {\n        if (entry->key == key) {\n            entry->value = value;\n            return true;\n        }\n    }\n\n    struct Entry *entry = malloc(sizeof *entry);\n    if (entry == NULL) return false;\n\n    entry->key = key;\n    entry->value = value;\n    entry->next = table->buckets[index];\n    table->buckets[index] = entry;\n    ++table->size;\n    return true;\n}\n\nstatic bool table_get(const struct HashTable *table,\n                      unsigned int key, int *value_out)\n{\n    if (table == NULL || value_out == NULL) return false;\n\n    size_t index = bucket_index(key);\n    for (const struct Entry *entry = table->buckets[index];\n         entry != NULL; entry = entry->next) {\n        if (entry->key == key) {\n            *value_out = entry->value;\n            return true;\n        }\n    }\n    return false;\n}\n\nstatic bool table_remove(struct HashTable *table, unsigned int key)\n{\n    if (table == NULL) return false;\n\n    size_t index = bucket_index(key);\n    struct Entry **link = &table->buckets[index];\n\n    while (*link != NULL && (*link)->key != key) {\n        link = &(*link)->next;\n    }\n    if (*link == NULL) return false;\n\n    struct Entry *removed = *link;\n    *link = removed->next;\n    free(removed);\n    --table->size;\n    return true;\n}\n\nstatic void table_destroy(struct HashTable *table)\n{\n    if (table == NULL) return;\n\n    for (size_t i = 0U; i < BUCKET_COUNT; ++i) {\n        struct Entry *entry = table->buckets[i];\n        while (entry != NULL) {\n            struct Entry *next = entry->next;\n            free(entry);\n            entry = next;\n        }\n        table->buckets[i] = NULL;\n    }\n    table->size = 0U;\n}\n\nint main(void)\n{\n    struct HashTable table = { { NULL }, 0U };\n    int value = 0;\n\n    if (!table_put(&table, 10U, 100) ||\n        !table_put(&table, 17U, 170) ||\n        !table_put(&table, 24U, 240)) {\n        table_destroy(&table);\n        return 1;\n    }\n\n    if (table_get(&table, 17U, &value)) {\n        printf(\"Key 17 has value %d\\n\", value);\n    }\n\n    if (!table_remove(&table, 17U)) {\n        table_destroy(&table);\n        return 2;\n    }\n\n    printf(\"Key 17 present after removal: %s\\n\",\n           table_get(&table, 17U, &value) ? \"yes\" : \"no\");\n    printf(\"Entries remaining: %zu\\n\", table.size);\n\n    table_destroy(&table);\n    return 0;\n}\n",
+          "explanation": "The table has seven bucket heads. bucket_index maps each unsigned key to a position from zero through six. Keys 10, 17 and 24 all map to bucket 3, so this run deliberately creates a collision chain. table_put first searches that chain; an existing key has its value updated, while a new key gets one allocated entry inserted at the front. Allocation is checked before the node is linked into the table. table_get compares the full key rather than trusting the bucket index. table_remove uses a pointer to the link that owns the current entry, unlinks the match and only then frees it. table_destroy walks every bucket, saves each next pointer before freeing the current entry, clears bucket heads and resets the size. The expected output reports value 170, then that key 17 is absent, with two entries remaining. The table owns its entries; callers must not retain or use entry pointers after removal or destruction.",
+          "runnable": true
+        },
+        {
+          "id": "cl1012-ex2",
+          "language": "en",
+          "title": "Open addressing with linear probing and tombstones",
+          "code": "#include <stdbool.h>\n#include <stddef.h>\n#include <stdio.h>\n\nenum { CAPACITY = 7 };\nenum SlotState { EMPTY, OCCUPIED, DELETED };\n\nstruct Slot {\n    unsigned int key;\n    int value;\n    enum SlotState state;\n};\n\nstruct HashTable {\n    struct Slot slots[CAPACITY];\n    size_t size;\n};\n\nstatic size_t hash_index(unsigned int key)\n{\n    return (size_t)(key % CAPACITY);\n}\n\nstatic bool table_put(struct HashTable *table,\n                      unsigned int key, int value)\n{\n    if (table == NULL) return false;\n\n    size_t first_deleted = CAPACITY;\n    size_t start = hash_index(key);\n\n    for (size_t step = 0U; step < CAPACITY; ++step) {\n        size_t index = (start + step) % CAPACITY;\n        struct Slot *slot = &table->slots[index];\n\n        if (slot->state == OCCUPIED && slot->key == key) {\n            slot->value = value;\n            return true;\n        }\n        if (slot->state == DELETED && first_deleted == CAPACITY) {\n            first_deleted = index;\n        }\n        if (slot->state == EMPTY) {\n            size_t destination =\n                first_deleted != CAPACITY ? first_deleted : index;\n            table->slots[destination].key = key;\n            table->slots[destination].value = value;\n            table->slots[destination].state = OCCUPIED;\n            ++table->size;\n            return true;\n        }\n    }\n\n    if (first_deleted != CAPACITY) {\n        table->slots[first_deleted].key = key;\n        table->slots[first_deleted].value = value;\n        table->slots[first_deleted].state = OCCUPIED;\n        ++table->size;\n        return true;\n    }\n    return false;\n}\n\nstatic bool table_get(const struct HashTable *table,\n                      unsigned int key, int *value_out)\n{\n    if (table == NULL || value_out == NULL) return false;\n\n    size_t start = hash_index(key);\n    for (size_t step = 0U; step < CAPACITY; ++step) {\n        size_t index = (start + step) % CAPACITY;\n        const struct Slot *slot = &table->slots[index];\n\n        if (slot->state == EMPTY) return false;\n        if (slot->state == OCCUPIED && slot->key == key) {\n            *value_out = slot->value;\n            return true;\n        }\n    }\n    return false;\n}\n\nstatic bool table_remove(struct HashTable *table, unsigned int key)\n{\n    if (table == NULL) return false;\n\n    size_t start = hash_index(key);\n    for (size_t step = 0U; step < CAPACITY; ++step) {\n        size_t index = (start + step) % CAPACITY;\n        struct Slot *slot = &table->slots[index];\n\n        if (slot->state == EMPTY) return false;\n        if (slot->state == OCCUPIED && slot->key == key) {\n            slot->state = DELETED;\n            --table->size;\n            return true;\n        }\n    }\n    return false;\n}\n\nint main(void)\n{\n    struct HashTable table = { { { 0U, 0, EMPTY } }, 0U };\n    int value = 0;\n\n    if (!table_put(&table, 10U, 100) ||\n        !table_put(&table, 17U, 170) ||\n        !table_put(&table, 24U, 240)) {\n        return 1;\n    }\n\n    if (!table_remove(&table, 17U)) return 2;\n\n    if (table_get(&table, 24U, &value)) {\n        printf(\"Key 24 remains reachable with value %d\\n\", value);\n    }\n\n    if (!table_put(&table, 31U, 310)) return 3;\n    printf(\"Key 31 inserted into the available probe sequence\\n\");\n    printf(\"Entries remaining: %zu\\n\", table.size);\n    return 0;\n}\n",
+          "explanation": "Every slot has an explicit state. EMPTY means a search may stop because no earlier insertion could have passed this point in the probe sequence. OCCUPIED stores a key and value. DELETED is a tombstone: a search must continue beyond it because a colliding key may be stored later. table_put remembers the first tombstone but continues probing to ensure it does not create a duplicate key farther along the sequence. It inserts at the remembered tombstone when it reaches an EMPTY slot, or uses the tombstone after a full scan. table_get stops at EMPTY, skips DELETED and compares keys in OCCUPIED slots. table_remove marks the slot DELETED instead of EMPTY, preserving the search path for keys inserted later in the same cluster. Keys 10, 17 and 24 collide at the initial index; after removing 17, lookup for 24 still succeeds. Key 31 can reuse the tombstone. The table is fixed-size and reports failure when no reusable slot exists. A production table should also define resizing and a policy for cleaning up accumulated tombstones.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Give two distinct keys that map to the same bucket for a small capacity.",
-      "independentTask": "Implement separate chaining for integer keys and test collisions, deletion and resizing.",
+      "guidedTask": "Use capacity 7 and the integer hash function key % 7. Insert keys 10, 17, 24 and 31. Draw the separate-chaining bucket and the linear-probing slots after each insertion. Remove 17 and trace a lookup for 24 in both designs. Explain why a tombstone is needed for open addressing but a linked-chain deletion can unlink and free its node.",
+      "independentTask": "Extend one implementation with a documented duplicate-key policy and a resize operation. For separate chaining, allocate a larger bucket array and relink or reinsert every entry using the new capacity, handling allocation failure without losing the old table. For open addressing, rebuild into a larger empty array and remove tombstones. Test duplicate updates, several keys with the same initial index, missing keys, deletion at the start and middle of a probe sequence, a completely full table, and cleanup after a failed resize. Record the load factor before and after resizing.",
       "hints": [
-        "A hash match does not mean the original keys are equal.",
-        "Keep equality consistent with the key representation.",
-        "Rehash entries when the bucket array capacity changes."
+        "A hash function chooses where to begin; always compare the original key to confirm a match.",
+        "Use a nonzero capacity before applying the remainder operator to calculate an array index.",
+        "Separate chaining stores colliding entries in a bucket collection; open addressing probes other array slots.",
+        "In linear probing, stop a search at EMPTY, but continue through DELETED tombstones.",
+        "When inserting, continue past a tombstone long enough to check that the same key is not already stored later in the probe sequence.",
+        "Changing capacity changes bucket positions. Rehash every entry, and define what happens if allocating the new table fails."
       ]
     }
   },
@@ -51,36 +105,63 @@
     "questions": [
       {
         "id": "cl1012-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "Two different keys produce the same bucket index. What is this situation called?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "A collision",
+          "A duplicate key by definition",
+          "A memory leak",
+          "A resize"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the topic and constraints described above."
+        "answer": "A collision",
+        "explanation": "A collision occurs when distinct keys map to the same bucket. The table must resolve it and still compare the original keys."
       },
       {
         "id": "cl1012-q2",
-        "prompt": "What should be verified before relying on the implementation?",
+        "prompt": "How does separate chaining commonly handle collisions?",
         "options": [
-          "Preconditions, invariants, bounds and failure cases.",
-          "Only the name of the algorithm.",
-          "Whether one input produced a result."
+          "It stores multiple entries in a collection at the bucket, often a linked list.",
+          "It overwrites the old key without comparing it.",
+          "It stops accepting all further keys.",
+          "It converts every key to a string."
         ],
-        "answer": "Preconditions, invariants, bounds and failure cases.",
-        "explanation": "Correctness depends on maintaining the data structure or algorithm contract."
+        "answer": "It stores multiple entries in a collection at the bucket, often a linked list.",
+        "explanation": "Each bucket points to a chain or other collection of entries that share the same bucket index."
       },
       {
         "id": "cl1012-q3",
-        "prompt": "Which test strategy is most useful?",
+        "prompt": "Why should an open-addressing deletion usually leave a DELETED tombstone instead of changing the slot to EMPTY?",
         "options": [
-          "Test empty, boundary and representative operation sequences.",
-          "Ignore allocation failures.",
-          "Assume one successful example proves all cases."
+          "A search must be able to continue to colliding keys stored later in the probe sequence.",
+          "It makes the key larger.",
+          "It automatically resizes the table.",
+          "It prevents all future collisions."
         ],
-        "answer": "Test empty, boundary and representative operation sequences.",
-        "explanation": "Targeted tests expose defects ordinary examples can miss."
+        "answer": "A search must be able to continue to colliding keys stored later in the probe sequence.",
+        "explanation": "Changing the slot to EMPTY could make a later key appear absent because a lookup would stop too early."
+      },
+      {
+        "id": "cl1012-q4",
+        "prompt": "What does the load factor n/m represent in a table with n entries and m buckets or slots?",
+        "options": [
+          "The ratio of stored entries to table capacity",
+          "The number of collisions multiplied by the key size",
+          "The byte size of one entry",
+          "The number of deleted nodes only"
+        ],
+        "answer": "The ratio of stored entries to table capacity",
+        "explanation": "Load factor describes how full the table is and helps guide resizing policies."
+      },
+      {
+        "id": "cl1012-q5",
+        "prompt": "After increasing a hash table's capacity, why must entries normally be rehashed?",
+        "options": [
+          "The bucket index depends on capacity, so old positions may no longer be correct.",
+          "The keys become invalid C objects.",
+          "The hash function must return unique values.",
+          "The table no longer needs key comparisons."
+        ],
+        "answer": "The bucket index depends on capacity, so old positions may no longer be correct.",
+        "explanation": "A changed capacity changes the mapping from hash values to indices. Reinsert entries using the new capacity and collision policy."
       }
     ]
   },

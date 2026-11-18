@@ -6,39 +6,50 @@
   "title": "Variadic functions and stdarg.h (CodeSaathi extension)",
   "language": "en",
   "learningObjectives": [
-    "Explain the C concept and its rules.",
-    "Trace the example and describe data flow.",
-    "Identify relevant failure and boundary cases.",
-    "Apply the concept in a tested C program."
+    "Recognize the ellipsis in a variadic function declaration.",
+    "Use va_list, va_start, va_arg, va_copy and va_end according to their contracts.",
+    "Explain the need for a fixed parameter before the ellipsis.",
+    "Apply default argument promotions when retrieving variadic arguments.",
+    "Provide an explicit count or format contract so argument types can be interpreted safely."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "A variadic function accepts a fixed set of named parameters followed by a variable number of arguments, indicated by an ellipsis. The stdarg.h macros va_start, va_arg, va_copy and va_end access those additional arguments according to a convention established by the function.",
+      "concept": "A variadic function accepts fixed named parameters followed by a variable number of arguments, indicated by an ellipsis. The stdarg.h macros va_start, va_arg, va_copy and va_end access additional arguments according to a contract established by the function. The function must know how many arguments exist and what promoted types to retrieve; incorrect va_arg types cause undefined behavior.",
       "whyItMatters": "Variadic interfaces are flexible but provide limited automatic type checking. The function needs a reliable way to know the number and types of supplied arguments, such as a count or format string.",
       "analogy": "Treat the operation as a clearly specified contract between the program and its data.",
       "analogyLimit": "The analogy does not replace C's type, lifetime, I/O and object representation rules."
     },
     "explain": {
-      "narrative": "A variadic function accepts a fixed set of named parameters followed by a variable number of arguments, indicated by an ellipsis. The stdarg.h macros va_start, va_arg, va_copy and va_end access those additional arguments according to a convention established by the function.\n\nCheck all return values, object lifetimes, types and preconditions. Enable compiler warnings and test expected as well as failure paths.",
+      "narrative": "## 1. Variadic declaration\n\nA variadic function has at least one named parameter followed by `...`, such as `int sum_ints(int count, ...)`. The named parameter provides a way to determine how many extra arguments to read.\n\n## 2. Start and retrieve arguments\n\nDeclare a va_list, call va_start using the final named parameter, and retrieve each argument with va_arg using its actual promoted type.\n\n## 3. Default argument promotions\n\nArguments corresponding to the ellipsis undergo default argument promotions. For example, float is promoted to double, and integer types narrower than int are promoted according to the integer promotions. Retrieve the promoted type, not the original narrow type.\n\n## 4. End the traversal\n\nCall va_end before the function returns. If a second traversal is required, use va_copy to create a separate va_list and end both lists appropriately.\n\n## 5. Design a safe contract\n\nThe function must know the number and types of its variadic arguments, often through a count or format string. Passing too few arguments or retrieving the wrong type causes undefined behavior.",
       "examples": [
         {
-          "id": "cl611-ex1",
+          "id": "cl6.11-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\n#include <stdarg.h>\nint sum_ints(int count, ...) {\n va_list args;\n va_start(args, count);\n int total = 0;\n for (int i=0; i<count; ++i) total += va_arg(args, int);\n va_end(args);\n return total;\n}\nint main(void) {\n printf(\"%d\\n\", sum_ints(3, 4, 5, 6));\n return 0;\n}",
-          "explanation": "count tells the function how many int arguments follow. va_arg retrieves each as int. Passing an argument with a mismatched type or incorrect count can cause undefined behaviour.",
+          "title": "Sum a known number of integer arguments",
+          "code": "#include <stdarg.h>\n#include <stdio.h>\n\nint sum_ints(int count, ...) {\n    va_list args;\n    va_start(args, count);\n    int total = 0;\n    for (int i = 0; i < count; ++i) total += va_arg(args, int);\n    va_end(args);\n    return total;\n}\n\nint main(void) {\n    printf(\"%d\\n\", sum_ints(3, 4, 5, 6));\n    return 0;\n}",
+          "explanation": "The count defines exactly how many int arguments are retrieved. The caller and callee must agree on both count and types.",
+          "runnable": false
+        },
+        {
+          "id": "cl6.11-ex2",
+          "language": "en",
+          "title": "Retrieve promoted floating-point arguments",
+          "code": "#include <stdarg.h>\n#include <stdio.h>\n\ndouble sum_values(int count, ...) {\n    va_list args;\n    va_start(args, count);\n    double total = 0.0;\n    for (int i = 0; i < count; ++i) total += va_arg(args, double);\n    va_end(args);\n    return total;\n}\n\nint main(void) {\n    printf(\"%.1f\\n\", sum_values(2, 1.5f, 2.5));\n    return 0;\n}",
+          "explanation": "A float argument passed through an ellipsis is promoted to double, so va_arg must retrieve double.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Trace the three va_arg operations and the running total.",
-      "independentTask": "Design a variadic function with a documented count and supported argument type. Explain how misuse is prevented or constrained.",
+      "guidedTask": "Write a variadic function that accepts a count followed by that many int values. Use va_start, va_arg and va_end, and document the caller's count/type contract.",
+      "independentTask": "Extend the exercise to accept a documented set of promoted argument types. Explain why the caller and callee must agree exactly, and test zero arguments and the maximum supported count.",
       "hints": [
-        "Always call va_end for a va_list after use.",
-        "Default argument promotions affect the types retrieved from the variadic portion.",
-        "Variadic arguments do not carry runtime type metadata for automatic checking."
+        "Keep at least one named parameter before the ellipsis.",
+        "Retrieve each argument using its actual promoted type.",
+        "Call va_end on each active va_list.",
+        "Use va_copy for independent traversals.",
+        "Document count and argument type expectations."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl611-q1",
-        "prompt": "Which statement best describes the lesson?",
+        "id": "cl6.11-q1",
+        "prompt": "What does the ellipsis indicate in a function declaration?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "A variable number of additional arguments",
+          "A pointer return type",
+          "An empty parameter list"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the C rule described in the lesson."
+        "answer": "A variable number of additional arguments",
+        "explanation": "The ellipsis marks a variadic parameter sequence."
       },
       {
-        "id": "cl611-q2",
-        "prompt": "What should be verified before using this feature?",
+        "id": "cl6.11-q2",
+        "prompt": "Which header provides va_list and va_arg?",
         "options": [
-          "Types, preconditions, object validity and relevant return values.",
-          "Only the source file name.",
-          "Whether a single run appeared successful."
+          "stdarg.h",
+          "string.h",
+          "math.h"
         ],
-        "answer": "Types, preconditions, object validity and relevant return values.",
-        "explanation": "C correctness depends on valid objects, correct types and checked operations."
+        "answer": "stdarg.h",
+        "explanation": "The variadic argument macros and type are declared in stdarg.h."
       },
       {
-        "id": "cl611-q3",
-        "prompt": "Which practice improves reliability?",
+        "id": "cl6.11-q3",
+        "prompt": "What does va_start require?",
         "options": [
-          "Compile with warnings and test normal and failure paths.",
-          "Ignore I/O and compiler diagnostics.",
-          "Assume all environments behave identically."
+          "The va_list and the final named parameter",
+          "Only the function name",
+          "The number of source files"
         ],
-        "answer": "Compile with warnings and test normal and failure paths.",
-        "explanation": "Diagnostics and tests provide evidence for program behaviour."
+        "answer": "The va_list and the final named parameter",
+        "explanation": "va_start initializes traversal after the last named parameter."
+      },
+      {
+        "id": "cl6.11-q4",
+        "prompt": "How is a float argument passed through an ellipsis?",
+        "options": [
+          "Promoted to double",
+          "Converted to int",
+          "Passed as float without promotion"
+        ],
+        "answer": "Promoted to double",
+        "explanation": "Default argument promotions convert float to double."
+      },
+      {
+        "id": "cl6.11-q5",
+        "prompt": "What happens if va_arg retrieves an argument using an incompatible type?",
+        "options": [
+          "The behavior is undefined",
+          "The value is automatically converted safely",
+          "The function returns zero"
+        ],
+        "answer": "The behavior is undefined",
+        "explanation": "The caller and callee must agree on the promoted argument types."
       }
     ]
   },

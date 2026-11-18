@@ -6,39 +6,58 @@
   "title": "C language reference: keywords, tokens and translation phases",
   "language": "en",
   "learningObjectives": [
-    "Explain the topic and its C rules.",
-    "Trace the example and identify its purpose.",
-    "Identify important validation and failure cases.",
-    "Apply the concept in a tested program or reference exercise."
+    "Distinguish C keywords, identifiers, constants, string literals, punctuators and preprocessing tokens.",
+    "Recognize the 44 reserved keywords in the C11 language version and explain why they cannot be used as ordinary identifiers.",
+    "Apply the basic identifier spelling rules and distinguish a valid identifier from a keyword or malformed name.",
+    "Describe the eight translation phases at a high level, including line splicing, comment replacement and preprocessing.",
+    "Explain how include directives, macro expansion, stringizing, token pasting and adjacent string-literal concatenation affect source translation.",
+    "Use compiler preprocessing output and strict compilation diagnostics to investigate token and macro behaviour."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL1.1",
+    "CL1.2",
+    "CL2.1",
+    "CL3.1",
+    "CL4.1"
+  ],
   "stages": {
     "understand": {
-      "concept": "C source is translated through phases that include character mapping, preprocessing, tokenization, syntax and semantic analysis, translation to implementation output and linking. Keywords are reserved tokens with defined grammatical roles; identifiers and literals follow lexical rules.",
-      "whyItMatters": "Understanding tokens and translation phases helps diagnose why source text is interpreted differently than expected and clarifies the roles of preprocessing, compilation and linking.",
-      "analogy": "Treat the project or language feature as a set of components with explicit interfaces and responsibilities.",
-      "analogyLimit": "The analogy does not replace C's formal language, library and resource-management rules."
+      "concept": "A C program begins as source characters and is translated through a sequence of standard-defined phases. During preprocessing and lexical analysis, the implementation recognizes preprocessing tokens and later language tokens. Important token categories include keywords, identifiers, integer and floating constants, character constants, string literals and punctuators. Whitespace and comments separate tokens but are not ordinary executable tokens. A keyword such as while has a reserved grammatical meaning; an identifier such as item_count names a program entity. The examples in this lesson use the C11 keyword set and basic ASCII identifier spelling.",
+      "whyItMatters": "Understanding tokens and translation phases explains why macros are expanded before ordinary parsing, why comments cannot always be placed anywhere, why a keyword cannot be used as a variable name, and why some errors are reported during preprocessing, compilation or linking rather than at program execution.",
+      "analogy": "Think of translation as a document-processing pipeline: characters are normalized, lines are joined, comments and preprocessing instructions are handled, tokens are recognized, syntax and meaning are checked, and the final program is linked.",
+      "analogyLimit": "The phases are a language-standard model, not a promise that every compiler must run eight visibly separate programs or emit a separate file at every stage. Real compilers may combine internal work while preserving the required observable behaviour."
     },
     "explain": {
-      "narrative": "C source is translated through phases that include character mapping, preprocessing, tokenization, syntax and semantic analysis, translation to implementation output and linking. Keywords are reserved tokens with defined grammatical roles; identifiers and literals follow lexical rules.\n\nFor a complete implementation, define input constraints, ownership, error handling and test cases before coding. Compile with warnings and verify normal, boundary and failure behaviour.",
+      "narrative": "**Keywords and identifiers.** In C11, the language defines 44 keywords: auto, break, case, char, const, continue, default, do, double, else, enum, extern, float, for, goto, if, inline, int, long, register, restrict, return, short, signed, sizeof, static, struct, switch, typedef, union, unsigned, void, volatile, while, and the ten underscored keywords _Alignas, _Alignof, _Atomic, _Bool, _Complex, _Generic, _Imaginary, _Noreturn, _Static_assert and _Thread_local. A keyword has a reserved role in the language and cannot be used as an ordinary identifier. Identifiers name objects, functions, types and other entities. In the basic ASCII form, an identifier begins with a letter or underscore and continues with letters, digits or underscores. It cannot begin with a digit. C also has rules for universal character names and implementation-supported characters; the simple checker in Example 1 intentionally demonstrates only the basic ASCII subset. Avoid reserved identifier patterns such as names beginning with two underscores or an underscore followed by an uppercase letter in application code.\\n\\n**Token categories.** In `int total = 3 + 4;`, `int` is a keyword, `total` is an identifier, `3` and `4` are integer constants, and `=`, `+` and `;` are punctuators. A quoted sequence such as `\\\"hello\\\"` is a string literal. A character constant such as `'A'` is a character constant. The preprocessor first works with preprocessing tokens, which include items such as header names, identifiers, preprocessing numbers, character and string literals, and punctuators. After preprocessing, these are converted into language tokens for syntax and semantic analysis.\\n\\n**The eight translation phases (C11 model).** 1. Physical source characters are mapped to the source character set; C11 also specifies trigraph replacement. 2. Each backslash immediately followed by a newline is deleted, joining physical lines. 3. The source is decomposed into preprocessing tokens and whitespace; each comment is replaced by one space, and newline characters are retained. 4. Preprocessing directives are executed, included files are processed, and macros are expanded. 5. Character constants and string literals are converted to the execution character set and escape sequences are interpreted. 6. Adjacent string-literal tokens are concatenated. 7. Preprocessing tokens are converted to tokens; syntax and semantic analysis take place and the translation unit is translated. 8. External references are resolved and required library components are linked to form the program. The C11 trigraph feature is historical and was removed in C23; this lesson describes the C11 model used by the course.\\n\\n**Preprocessing.** Lines beginning with `#` can include headers, define or remove macros, and select conditional source. Object-like macros replace a name with replacement tokens. Function-like macros accept arguments. The `#` operator stringizes a macro argument and `##` pastes tokens together. Macro arguments used with `#` or `##` are not expanded in the same way as ordinary arguments; an extra wrapper macro can request expansion before stringizing, as shown by `TO_TEXT`. Parenthesize macro parameters and the replacement expression to reduce precedence surprises. Avoid passing expressions with side effects to macros that may evaluate an argument more than once.\\n\\n**Inspecting translation.** GCC and Clang can show preprocessed source with `-E`; for example, `gcc -std=c11 -E -P source.c` or `clang -std=c11 -E -P source.c`. The `-P` option suppresses line markers. Preprocessing output helps inspect includes and macro expansion, but it is not a replacement for compiling the translation unit. A normal strict build such as `-std=c11 -Wall -Wextra -Wpedantic -Werror` checks later stages too. Compiler diagnostics often identify the phase where a problem becomes detectable, but implementations are not required to use identical wording or internal stage boundaries.",
       "examples": [
         {
           "id": "cl121-ex1",
-          "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\n#define LIMIT 3\nint main(void) {\n for (int i=0; i<LIMIT; ++i) puts(\"token\");\n return 0;\n}",
-          "explanation": "The preprocessor handles the include and macro directive before later translation stages. The compiler then parses tokens such as for, int, identifiers, constants and string literals.",
-          "runnable": false
+          "language": "c",
+          "title": "Recognize C11 keywords and basic identifiers",
+          "code": "#include <ctype.h>\n#include <stdio.h>\n#include <string.h>\n\nstatic const char *const c11_keywords[] = {\n    \"_Alignas\", \"_Alignof\", \"_Atomic\", \"_Bool\", \"_Complex\",\n    \"_Generic\", \"_Imaginary\", \"_Noreturn\", \"_Static_assert\",\n    \"_Thread_local\", \"auto\", \"break\", \"case\", \"char\", \"const\",\n    \"continue\", \"default\", \"do\", \"double\", \"else\", \"enum\",\n    \"extern\", \"float\", \"for\", \"goto\", \"if\", \"inline\", \"int\",\n    \"long\", \"register\", \"restrict\", \"return\", \"short\", \"signed\",\n    \"sizeof\", \"static\", \"struct\", \"switch\", \"typedef\", \"union\",\n    \"unsigned\", \"void\", \"volatile\", \"while\"\n};\n\nstatic int is_keyword(const char *word)\n{\n    size_t i;\n    const size_t count = sizeof c11_keywords / sizeof c11_keywords[0];\n\n    for (i = 0U; i < count; ++i) {\n        if (strcmp(word, c11_keywords[i]) == 0) {\n            return 1;\n        }\n    }\n    return 0;\n}\n\n/* This helper checks the basic ASCII identifier form used in this example. */\nstatic int is_basic_identifier(const char *text)\n{\n    const unsigned char *p = (const unsigned char *)text;\n\n    if (*p == '\\0' || !(isalpha(*p) || *p == '_')) {\n        return 0;\n    }\n    ++p;\n    while (*p != '\\0') {\n        if (!(isalnum(*p) || *p == '_')) {\n            return 0;\n        }\n        ++p;\n    }\n    return 1;\n}\n\nint main(void)\n{\n    const char *const samples[] = {\n        \"while\", \"student_count\", \"_temporary\", \"9lives\", \"total-cost\"\n    };\n    size_t i;\n    const size_t count = sizeof samples / sizeof samples[0];\n\n    for (i = 0U; i < count; ++i) {\n        const char *word = samples[i];\n\n        if (!is_basic_identifier(word)) {\n            printf(\"%-16s invalid basic identifier form\\n\", word);\n        } else if (is_keyword(word)) {\n            printf(\"%-16s C11 keyword\\n\", word);\n        } else {\n            printf(\"%-16s identifier\\n\", word);\n        }\n    }\n\n    puts(\"\\nExample tokens in: int total = 3 + 4;\");\n    puts(\"int       keyword\");\n    puts(\"total     identifier\");\n    puts(\"= + ;     punctuators\");\n    puts(\"3 and 4   integer constants\");\n    return 0;\n}\n",
+          "explanation": "The program compares sample words with a C11 keyword list and checks a deliberately limited basic ASCII identifier form. It distinguishes keywords from identifiers and reports malformed examples. The small classifier is a learning aid, not a complete C lexer: it does not implement universal character names, implementation-specific extended characters or every preprocessing-token rule.",
+          "runnable": true
+        },
+        {
+          "id": "cl121-ex2",
+          "language": "c",
+          "title": "Observe macro expansion, stringizing and token pasting",
+          "code": "#include <stdio.h>\n\n#define BASE_VALUE 6\n#define MULTIPLY_BY_BASE(x) ((x) * BASE_VALUE)\n#define JOIN_NAME(a, b) a##b\n#define TO_TEXT_RAW(x) #x\n#define TO_TEXT(x) TO_TEXT_RAW(x)\n\n#if BASE_VALUE >= 5\n#define LEVEL_NAME \"standard configuration\"\n#else\n#define LEVEL_NAME \"small configuration\"\n#endif\n\nint main(void)\n{\n    int JOIN_NAME(item_, 1) = MULTIPLY_BY_BASE(7);\n    int JOIN_NAME(item_, 2) = MULTIPLY_BY_BASE(3);\n\n    printf(\"%s\\n\", LEVEL_NAME);\n    printf(\"item_1 = %d\\n\", item_1);\n    printf(\"item_2 = %d\\n\", item_2);\n    printf(\"Stringized expression: %s\\n\", TO_TEXT(MULTIPLY_BY_BASE(2)));\n    return 0;\n}\n",
+          "explanation": "This program uses an object-like macro, a function-like macro, conditional preprocessing, token pasting with ## and two-level stringizing with #. Compile it normally to observe the result. Then run the compiler preprocessor with -E -P to inspect how the directives and macro calls are transformed before ordinary compilation.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Classify keywords, identifiers, punctuators and literals in the example.",
-      "independentTask": "Explain how a macro is expanded before the compiler parses the resulting translation unit.",
+      "guidedTask": "Compile and run both examples. In Example 1, classify each sample as a keyword, valid basic identifier or invalid basic identifier form. In Example 2, use `gcc -std=c11 -E -P file.c` or the equivalent Clang command and locate the expanded integer declarations, conditional text and stringized expression. Explain which parts are handled by preprocessing and which are ordinary C statements.",
+      "independentTask": "Write a short C source file that includes a standard header, defines an object-like macro and a function-like macro, uses a conditional compilation block, and declares at least three identifiers. Annotate its keywords, identifiers, constants, string literals and punctuators. Inspect its preprocessed output with both GCC and Clang, compile it with strict C11 warnings, and deliberately try using a keyword as a variable name to observe the diagnostic. Also test adjacent string literals such as `\"C \" \"language\"` and explain why they form one string literal during translation.",
       "hints": [
-        "Keywords cannot be used as ordinary identifiers in the same grammatical context.",
-        "Preprocessing is not the same as linking.",
-        "Use compiler preprocessing output when diagnosing macro expansion."
+        "Do not confuse a keyword with an identifier: keywords have reserved grammatical meanings.",
+        "The simple identifier checker in Example 1 covers basic ASCII names only, not the complete international identifier rules.",
+        "Comments are replaced during preprocessing-token formation; they do not act like arbitrary text that can split a token.",
+        "Macro expansion occurs during preprocessing, before the compiler performs ordinary syntax and semantic analysis.",
+        "The # and ## operators have special argument-expansion rules; a two-level wrapper can expand an argument before stringizing it.",
+        "Use compiler -E output to inspect preprocessing, then perform a normal strict compile to check the complete translation unit."
       ]
     }
   },
@@ -51,36 +70,58 @@
     "questions": [
       {
         "id": "cl121-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "Which of the following is a C11 keyword?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "while",
+          "student_total",
+          "main_value"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the topic and constraints described above."
+        "answer": "while",
+        "explanation": "while is a reserved C11 keyword used to form an iteration statement."
       },
       {
         "id": "cl121-q2",
-        "prompt": "What is essential for a reliable implementation?",
+        "prompt": "Which spelling follows the basic ASCII identifier form used in this lesson?",
         "options": [
-          "Define the interface, validate inputs and handle failures.",
-          "Assume every input is valid.",
-          "Ignore resource ownership."
+          "student_count2",
+          "2students",
+          "total-cost"
         ],
-        "answer": "Define the interface, validate inputs and handle failures.",
-        "explanation": "Reliable C programs make assumptions and failure behaviour explicit."
+        "answer": "student_count2",
+        "explanation": "A basic identifier starts with a letter or underscore and continues with letters, digits or underscores."
       },
       {
         "id": "cl121-q3",
-        "prompt": "How should the work be verified?",
+        "prompt": "In which translation phase are preprocessing directives executed and macros expanded?",
         "options": [
-          "Compile with warnings and test representative and boundary cases.",
-          "Only check whether the source file exists.",
-          "Assume a single successful run proves correctness."
+          "Phase 4",
+          "Phase 2",
+          "Phase 8"
         ],
-        "answer": "Compile with warnings and test representative and boundary cases.",
-        "explanation": "Compilation and targeted tests provide evidence of correctness."
+        "answer": "Phase 4",
+        "explanation": "Phase 4 executes preprocessing directives, includes files and expands macros."
+      },
+      {
+        "id": "cl121-q4",
+        "prompt": "What does the ## preprocessing operator do?",
+        "options": [
+          "Pastes adjacent preprocessing tokens into one token.",
+          "Concatenates adjacent string literals after preprocessing.",
+          "Links two object files."
+        ],
+        "answer": "Pastes adjacent preprocessing tokens into one token.",
+        "explanation": "The token-pasting operator combines the tokens on its left and right during macro replacement."
+      },
+      {
+        "id": "cl121-q5",
+        "prompt": "Which compiler option is useful for inspecting preprocessed source?",
+        "options": [
+          "-E",
+          "-o",
+          "-g"
+        ],
+        "answer": "-E",
+        "explanation": "The -E option runs preprocessing and emits the resulting source instead of performing a normal compilation and link."
       }
     ]
   },

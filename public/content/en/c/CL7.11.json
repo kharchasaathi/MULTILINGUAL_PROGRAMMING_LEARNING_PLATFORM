@@ -6,10 +6,11 @@
   "title": "Struct assignment, comparison limitations and serialization cautions (CodeSaathi extension)",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C rules.",
-    "Trace the example and identify data or resource flow.",
-    "Recognize relevant safety and failure cases.",
-    "Apply the concept in a tested C program."
+    "Assign compatible structure objects using the assignment operator.",
+    "Explain why C does not provide built-in whole-structure equality comparison.",
+    "Compare members explicitly according to application semantics.",
+    "Explain why memcmp is not a general semantic structure comparison.",
+    "Avoid serializing raw structure bytes as a portable interchange format."
   ],
   "prerequisites": [],
   "stages": {
@@ -23,22 +24,32 @@
       "narrative": "Structure assignment copies the value of each member from one compatible structure object to another. C does not provide a built-in == operator for comparing complete structure values. Padding and pointer members also complicate raw byte comparison and serialization.\n\nCheck all allocation, I/O and conversion results. Respect object bounds and lifetime, initialize data before reading it, and define who owns and releases each resource.",
       "examples": [
         {
-          "id": "cl711-ex1",
+          "id": "cl7.11-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdbool.h>\nstruct Point { int x; int y; };\nbool same_point(struct Point a, struct Point b) {\n return a.x == b.x && a.y == b.y;\n}\nint main(void) {\n struct Point first = {2, 3};\n struct Point second = first;\n return same_point(first, second) ? 0 : 1;\n}",
-          "explanation": "The assignment copies the structure value. same_point compares the meaningful members explicitly instead of comparing padding bytes with memcmp.",
+          "title": "Assign and compare structure members",
+          "code": "#include <stdbool.h>\n#include <stdio.h>\n\nstruct Point { int x; int y; };\n\nbool same_point(struct Point a, struct Point b) {\n    return a.x == b.x && a.y == b.y;\n}\n\nint main(void) {\n    struct Point first = {2, 3};\n    struct Point second = first;\n    printf(\"%s\\n\", same_point(first, second) ? \"same\" : \"different\");\n    return 0;\n}",
+          "explanation": "Structure assignment copies member values. The comparison function expresses the application's semantic equality by comparing both fields.",
+          "runnable": false
+        },
+        {
+          "id": "cl7.11-ex2",
+          "language": "en",
+          "title": "Compare pointed-to content deliberately",
+          "code": "#include <stdbool.h>\n#include <stddef.h>\n\nstruct BufferView { const unsigned char *data; size_t length; };\n\nbool same_bytes(struct BufferView a, struct BufferView b) {\n    if (a.length != b.length) return false;\n    if (a.length == 0) return true;\n    if (a.data == NULL || b.data == NULL) return false;\n    for (size_t i = 0; i < a.length; ++i)\n        if (a.data[i] != b.data[i]) return false;\n    return true;\n}",
+          "explanation": "A structure containing a pointer needs an explicit comparison contract. This function compares the pointed-to byte sequences, not just pointer addresses; callers must ensure both ranges are valid for their stated lengths.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Explain why first == second is not valid structure comparison syntax in C.",
-      "independentTask": "Define equality for a record containing an ID and a name. Explain how pointer members and string contents should be compared.",
+      "guidedTask": "Implement a structure assignment example and a comparison function that checks the fields relevant to the application's meaning.",
+      "independentTask": "Design a structure containing a pointer and length. Define whether equality means pointer identity or equal pointed-to contents, implement that rule, and explain why raw memcmp is not a substitute.",
       "hints": [
-        "Structure assignment is allowed for compatible structure types.",
-        "memcmp compares object representations, not semantic field equality.",
-        "Do not write raw structure bytes as a portable external file format without a defined representation."
+        "Structure assignment copies member values, including pointer values.",
+        "C does not define == for whole structures.",
+        "Padding can make memcmp unsuitable for semantic equality.",
+        "Choose explicitly whether pointer identity or pointed-to content matters.",
+        "Use a field-by-field comparison or a defined serialization format."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl711-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "id": "cl7.11-q1",
+        "prompt": "What does structure assignment copy?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "Member values from one compatible structure object to another",
+          "Only the first member",
+          "The source object's address"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the C rule described in the lesson."
+        "answer": "Member values from one compatible structure object to another",
+        "explanation": "Structure assignment copies the structure value."
       },
       {
-        "id": "cl711-q2",
-        "prompt": "Which practice best protects correctness?",
+        "id": "cl7.11-q2",
+        "prompt": "Why is memcmp not a general structure equality test?",
         "options": [
-          "Check validity, bounds and operation results before access.",
-          "Assume memory and file operations cannot fail.",
-          "Use data before initialization."
+          "Padding bytes may differ even when member values are equal",
+          "memcmp ignores every member",
+          "Structures cannot contain bytes"
         ],
-        "answer": "Check validity, bounds and operation results before access.",
-        "explanation": "C programs must explicitly handle resource validity and failure paths."
+        "answer": "Padding bytes may differ even when member values are equal",
+        "explanation": "Object representation can include padding with unspecified values."
       },
       {
-        "id": "cl711-q3",
-        "prompt": "How should the example be verified?",
+        "id": "cl7.11-q3",
+        "prompt": "How should semantic structure equality be implemented?",
         "options": [
-          "Compile with warnings and test success and failure paths.",
-          "Ignore warnings and test only one happy path.",
-          "Assume the same layout on every platform."
+          "Compare the fields relevant to the application's meaning",
+          "Always compare raw addresses",
+          "Use == on the whole structure"
         ],
-        "answer": "Compile with warnings and test success and failure paths.",
-        "explanation": "Compiler diagnostics and deliberate tests provide evidence for correctness."
+        "answer": "Compare the fields relevant to the application's meaning",
+        "explanation": "C requires the program to define the desired comparison."
+      },
+      {
+        "id": "cl7.11-q4",
+        "prompt": "What happens when a structure with a pointer member is assigned?",
+        "options": [
+          "The pointer value is copied, not the pointed-to object",
+          "The pointed-to object is automatically cloned",
+          "The allocation is transferred automatically"
+        ],
+        "answer": "The pointer value is copied, not the pointed-to object",
+        "explanation": "Structure assignment is not a deep copy of pointed-to storage."
+      },
+      {
+        "id": "cl7.11-q5",
+        "prompt": "Why avoid raw structure serialization?",
+        "options": [
+          "Layout and representation may vary across implementations",
+          "It always loses the structure tag",
+          "It cannot write bytes"
+        ],
+        "answer": "Layout and representation may vary across implementations",
+        "explanation": "Portable serialization needs a separately specified byte format."
       }
     ]
   },

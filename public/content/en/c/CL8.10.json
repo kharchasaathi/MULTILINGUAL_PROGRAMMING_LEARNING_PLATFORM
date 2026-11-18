@@ -6,39 +6,58 @@
   "title": "NULL, error handling and input validation",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C rules.",
-    "Trace the example and identify data or control flow.",
-    "Recognize common failure and safety cases.",
-    "Apply the concept in a tested C program."
+    "Distinguish null, uninitialized, dangling and otherwise invalid pointers, and explain the limits of NULL checks.",
+    "Specify function contracts for nullable arguments, preconditions, success, failure and ownership.",
+    "Validate pointer arguments, numeric ranges, text conversions and library return values before use.",
+    "Choose error-reporting methods including status returns, output parameters, errno and stream indicators.",
+    "Design cleanup paths that release resources exactly once and preserve the primary failure.",
+    "Test normal, boundary and failure paths including null arguments, failed conversions, allocation and I/O errors."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL5.3 Pointers",
+    "CL5.7 Null pointers",
+    "CL8.2 malloc",
+    "CL8.5 Ownership",
+    "CL8.8 Diagnostics"
+  ],
   "stages": {
     "understand": {
-      "concept": "NULL is a null pointer constant commonly used to represent an absent pointer. Error handling defines how a function reports invalid input, failed allocation, failed I/O or another exceptional condition. Validation checks assumptions before using values or resources.",
-      "whyItMatters": "A program becomes more predictable when failures are explicit and callers know whether an operation succeeded.",
-      "analogy": "Treat each resource and operation as having a clear contract, valid lifetime and failure path.",
-      "analogyLimit": "The analogy does not replace the C standard, compiler or library specifications."
+      "concept": "A null pointer is a pointer value guaranteed not to compare equal to a pointer to any object or function. NULL is a macro for a null pointer constant and commonly represents an absent object reference. It is not the same as an uninitialized pointer, dangling pointer or arbitrary invalid address. Error handling defines observable success and failure outcomes; validation checks that values satisfy the contract before use.",
+      "whyItMatters": "C does not automatically check pointer validity, array bounds, numeric ranges, allocation success or I/O success. Explicit contracts and failure paths prevent invalid assumptions from becoming memory errors or corrupted data.",
+      "analogy": "Treat each function and allocation request as a contract with valid inputs, promised results and defined failure behaviour.",
+      "analogyLimit": "The analogy does not replace C's rules for object lifetime, bounds, arithmetic or library contracts."
     },
     "explain": {
-      "narrative": "NULL is a null pointer constant commonly used to represent an absent pointer. Error handling defines how a function reports invalid input, failed allocation, failed I/O or another exceptional condition. Validation checks assumptions before using values or resources.\n\nCheck object bounds, lifetimes, arithmetic limits and all relevant return values. Compile with warnings enabled and test both normal and failure paths.",
+      "narrative": "Initialize pointers before use. A check that p is not NULL proves only that it is not null; it does not prove that p designates a live object of the correct type or that indexing is in bounds. Document whether pointer arguments may be NULL, the extent of arrays, mutation and ownership. Return a status when callers must decide what to do; use output parameters for results and specify whether they remain unchanged on failure. Validate external input at its boundary. Check scanf conversion counts or strtol end pointers and range, reject invalid lengths before indexing, and check allocation and I/O results. errno is meaningful only when the called function documents its use and its specified failure condition occurs. For streams, distinguish end-of-file from I/O failure with feof and ferror. Use staged cleanup so every acquired resource is released exactly once.",
       "examples": [
         {
           "id": "cl810-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdbool.h>\n#include <stddef.h>\nbool percentage(int part, int total, double *result) {\n if (result == NULL || total <= 0 || part < 0 || part > total) return false;\n *result = 100.0 * (double)part / (double)total;\n return true;\n}",
-          "explanation": "The function rejects a null output pointer, a non-positive total and a part outside the permitted range. It writes the result only after validating the inputs.",
-          "runnable": false
+          "title": "Validated function with status result",
+          "code": "#include <stdbool.h>\n#include <stddef.h>\nbool percentage(int part, int total, double *result)\n{\n    if (result == NULL || total <= 0 || part < 0 || part > total) return false;\n    *result = 100.0 * (double)part / (double)total;\n    return true;\n}\nint main(void) { double value = 0.0; if (percentage(3, 4, &value)) { /* use value */ } return 0; }",
+          "explanation": "The function validates the output pointer and numeric preconditions before writing. The caller checks the status before using the output.",
+          "runnable": true
+        },
+        {
+          "id": "cl810-ex2",
+          "language": "en",
+          "title": "Parse and range-check an integer",
+          "code": "#include <errno.h>\n#include <limits.h>\n#include <stdbool.h>\n#include <stdlib.h>\nbool parse_quantity(const char *text, int *out)\n{\n    char *end = NULL; long value;\n    if (text == NULL || out == NULL || *text == '\\0') return false;\n    errno = 0; value = strtol(text, &end, 10);\n    if (end == text || *end != '\\0' || errno == ERANGE || value < 0 || value > INT_MAX) return false;\n    *out = (int)value; return true;\n}\nint main(void) { int n = 0; return parse_quantity(\"25\", &n) ? 0 : 1; }",
+          "explanation": "strtol supplies an end pointer and reports range errors through errno. The function rejects empty input, no digits, trailing text and values outside int range; output is written only after all checks pass.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Identify every invalid input and explain why the function returns false.",
-      "independentTask": "Design a function with a documented error result and tests for null pointers, zero values and out-of-range inputs.",
+      "guidedTask": "Test percentage with valid 3/4, total zero, part greater than total and NULL output. State whether the output changes in each case.",
+      "independentTask": "Test percentage with valid 3/4, total zero, part greater than total and NULL output. State whether the output changes in each case. Add boundary and failure tests and explain the expected result for each.",
       "hints": [
-        "Validate external input at the boundary where it enters the program.",
-        "A NULL check alone does not prove a non-null pointer is valid.",
-        "Do not silently replace invalid input with a plausible default unless the interface contract says to do so."
+        "Validate inputs before dereferencing or indexing.",
+        "Check library return values and document failure behaviour.",
+        "Keep output parameters unchanged on failure when promised by the contract.",
+        "Release each acquired resource exactly once.",
+        "Test normal, boundary and failure paths.",
+        "A diagnostic or check proves only what its defined scope covers."
       ]
     }
   },
@@ -51,36 +70,58 @@
     "questions": [
       {
         "id": "cl810-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What does p != NULL establish?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "Only that p is not a null pointer value.",
+          "That p points to a live object.",
+          "That every index is in bounds."
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct choice follows the C rule explained above."
+        "answer": "Only that p is not a null pointer value.",
+        "explanation": "A non-null pointer may still be dangling, misaligned or outside its intended object's bounds."
       },
       {
         "id": "cl810-q2",
-        "prompt": "What is a reliable way to protect correctness?",
+        "prompt": "Why check out == NULL before writing through out?",
         "options": [
-          "Validate preconditions, bounds and failure results.",
-          "Assume the operation cannot fail.",
-          "Ignore the type and lifetime rules."
+          "To avoid dereferencing a null pointer when NULL is not permitted.",
+          "To allocate storage automatically.",
+          "To convert it to an integer."
         ],
-        "answer": "Validate preconditions, bounds and failure results.",
-        "explanation": "C requires explicit handling of object validity and operation failures."
+        "answer": "To avoid dereferencing a null pointer when NULL is not permitted.",
+        "explanation": "The function contract must permit or reject a null output pointer before writing through it."
       },
       {
         "id": "cl810-q3",
-        "prompt": "How should the example be checked?",
+        "prompt": "Which checks matter after strtol?",
         "options": [
-          "Compile with warnings and test expected and failure cases.",
-          "Ignore diagnostics and test only once.",
-          "Assume every platform behaves identically."
+          "Digit consumption, trailing characters and range error.",
+          "Only whether the result is nonzero.",
+          "No checks are needed."
         ],
-        "answer": "Compile with warnings and test expected and failure cases.",
-        "explanation": "Warnings and targeted tests provide evidence for correctness."
+        "answer": "Digit consumption, trailing characters and range error.",
+        "explanation": "The end pointer identifies no conversion and trailing text; errno can report range failure as documented."
+      },
+      {
+        "id": "cl810-q4",
+        "prompt": "When is errno meaningful?",
+        "options": [
+          "When the function documents its use and its failure condition occurs.",
+          "After every expression.",
+          "Whenever a pointer is non-NULL."
+        ],
+        "answer": "When the function documents its use and its failure condition occurs.",
+        "explanation": "errno is not a universal error flag; inspect the function's specified result first."
+      },
+      {
+        "id": "cl810-q5",
+        "prompt": "If unchanged output on failure is promised, what must happen?",
+        "options": [
+          "The output remains unchanged on every failure path.",
+          "It is always set to zero.",
+          "A partial result is returned."
+        ],
+        "answer": "The output remains unchanged on every failure path.",
+        "explanation": "Write the output only after validation and successful computation."
       }
     ]
   },

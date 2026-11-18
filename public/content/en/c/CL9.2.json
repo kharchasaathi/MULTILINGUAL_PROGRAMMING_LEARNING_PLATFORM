@@ -3,42 +3,59 @@
   "courseId": "c",
   "moduleId": "CL9",
   "topicId": "CL9.2",
-  "title": "Preprocessor directives, macros and conditional compilation",
+  "title": "Pseudo-random numbers, seeding and limitations of rand",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C rules.",
-    "Trace the example and identify data or control flow.",
-    "Recognize common failure and safety cases.",
-    "Apply the concept in a tested C program."
+    "Distinguish a deterministic pseudo-random sequence from physical randomness and explain how a seed selects a sequence.",
+    "Use rand() within its documented range and initialize the pseudo-random sequence with srand() once during normal program startup.",
+    "Explain why reseeding with time(NULL) on every draw can repeat or correlate sequences when calls occur close together.",
+    "Map rand() results to a requested interval while recognizing modulo bias and the limits of simple scaling.",
+    "Use unsigned arithmetic carefully when calculating the rand() output range and rejection thresholds.",
+    "Identify that rand() is not cryptographically secure and choose a platform cryptographic random source when unpredictability is a security requirement."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL2.6 Integer types, ranges and signedness",
+    "CL3.1 Arithmetic operators and remainder",
+    "CL6.1 Function calls and return values"
+  ],
   "stages": {
     "understand": {
-      "concept": "The preprocessor handles directives such as #include, #define, #if, #ifdef and #endif before the compiler processes the resulting translation unit. Object-like and function-like macros perform token substitution and can affect code in ways that ordinary functions do not.",
-      "whyItMatters": "Preprocessor features support configuration and shared constants, but macros lack normal function type checking and may evaluate arguments more than once.",
-      "analogy": "Treat each resource and operation as having a clear contract, valid lifetime and failure path.",
-      "analogyLimit": "The analogy does not replace the C standard, compiler or library specifications."
+      "concept": "rand() returns a pseudo-random integer in the inclusive range 0 through RAND_MAX. A deterministic algorithm produces a sequence from an initial internal state. srand(seed) initializes that state; using the same seed with the same implementation reproduces the same sequence. C does not promise that different implementations produce the same sequence or that rand() has cryptographic quality.",
+      "whyItMatters": "Pseudo-random values are useful for simulations, games, randomized demonstrations and test data. Incorrect range mapping can bias results, while using rand() for tokens, passwords or security-sensitive identifiers can make systems vulnerable.",
+      "analogy": "A seed is like the starting position of a mechanical number generator: the same starting point and same machine reproduce the same sequence.",
+      "analogyLimit": "A computer's pseudo-random algorithm is not a physical source of entropy. The analogy does not imply unpredictability, statistical quality or cryptographic security."
     },
     "explain": {
-      "narrative": "The preprocessor handles directives such as #include, #define, #if, #ifdef and #endif before the compiler processes the resulting translation unit. Object-like and function-like macros perform token substitution and can affect code in ways that ordinary functions do not.\n\nCheck object bounds, lifetimes, arithmetic limits and all relevant return values. Compile with warnings enabled and test both normal and failure paths.",
+      "narrative": "Call srand() once near program startup. A fixed seed is useful for repeatable tests and demonstrations on the same implementation. A varying seed is platform-dependent: time() may have coarse resolution or fail, and converting time_t to unsigned int is not a universal source of entropy. Re-seeding before every rand() call is a common mistake because multiple calls can receive the same seed and restart the same sequence.\n\nrand() % bound is easy to read but may be biased unless the number of possible rand() results is an exact multiple of bound. Rejection sampling can remove this range-mapping bias when rand() is treated as uniform over its documented output range, but it cannot improve the generator's underlying statistical or security quality. RAND_MAX is an int constant; widen before adding one to avoid signed overflow concerns. Never use rand() for cryptographic secrets.",
       "examples": [
         {
           "id": "cl92-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\n#define SQUARE(x) ((x) * (x))\nint main(void) {\n int value = 5;\n printf(\"%d\\n\", SQUARE(value));\n return 0;\n}",
-          "explanation": "Parentheses protect the macro argument and the full replacement expression from many precedence problems. Even so, passing an expression with side effects can evaluate it more than once.",
-          "runnable": false
+          "title": "Seed once and keep a result inside a small interval",
+          "code": "#include <stdio.h>\n#include <stdlib.h>\n\nint main(void)\n{\n    srand(2026U); /* fixed seed: repeatable sequence on this implementation */\n\n    for (int i = 0; i < 5; ++i) {\n        int draw = rand();\n        printf(\"raw=%d range_demo=%d\\n\", draw, draw % 100);\n    }\n    return 0;\n}",
+          "explanation": "srand is called once before drawing values. A fixed seed makes the sequence repeatable on the same implementation, which is useful for learning and tests. The modulo operation demonstrates simple range mapping but may be biased; it is not statistically rigorous or security-sensitive.",
+          "runnable": true
+        },
+        {
+          "id": "cl92-ex2",
+          "language": "en",
+          "title": "Use rejection sampling to avoid modulo range bias",
+          "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstatic int bounded_rand(unsigned int bound, unsigned int *result)\n{\n    unsigned long range;\n    unsigned long limit;\n    unsigned long value;\n\n    if (bound == 0U || result == NULL) {\n        return 0;\n    }\n    range = (unsigned long)RAND_MAX + 1UL;\n    if ((unsigned long)bound > range) {\n        return 0;\n    }\n    limit = range - (range % (unsigned long)bound);\n    do {\n        value = (unsigned long)rand();\n    } while (value >= limit);\n    *result = (unsigned int)(value % (unsigned long)bound);\n    return 1;\n}\n\nint main(void)\n{\n    unsigned int value;\n    srand(1234U);\n    if (!bounded_rand(10U, &value)) {\n        return 1;\n    }\n    printf(\"value=%u\\n\", value);\n    return 0;\n}",
+          "explanation": "The function rejects values in the incomplete tail of the generator's range. The accepted range is divisible by bound, so each remainder has the same number of accepted source values. This corrects modulo mapping bias under the assumed uniform source model; it does not make rand cryptographically secure.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Expand SQUARE(value + 1) mentally and explain the parentheses.",
-      "independentTask": "Create a header guard and a configuration macro. Explain what code is included under each condition.",
+      "guidedTask": "Run the first example twice with the same explicit seed and compare results. Then move srand inside the loop and explain why reseeding from a coarse clock can repeat values. Inspect the second example's `limit` calculation for bounds 10 and 16.",
+      "independentTask": "Implement a function that returns a value in [0, bound) with rejection sampling, rejects bound == 0, and documents the source generator's limitations. Test bounds 1, 10 and RAND_MAX where representable.",
       "hints": [
-        "Prefer functions or const objects when they provide safer semantics than macros.",
-        "Macro arguments may be substituted multiple times; avoid side effects in arguments.",
-        "Use unique macro names and parenthesize macro parameters and replacement expressions."
+        "rand() returns a value from zero through RAND_MAX inclusive.",
+        "srand selects the initial state; it is not a request to produce a fresh independent source on every call.",
+        "Call srand once, not once per generated value.",
+        "The number of possible rand results is RAND_MAX + 1; widen before adding one.",
+        "Reject the incomplete tail of the source range before taking a remainder to avoid modulo bias.",
+        "rand() is not suitable for passwords, session tokens, keys or other security-sensitive values."
       ]
     }
   },
@@ -51,36 +68,63 @@
     "questions": [
       {
         "id": "cl92-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What does srand(seed) control?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "The initial state of the rand() pseudo-random sequence.",
+          "The maximum possible value returned by rand().",
+          "The number of values rand() will return.",
+          "The system clock resolution."
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct choice follows the C rule explained above."
+        "answer": "The initial state of the rand() pseudo-random sequence.",
+        "explanation": "srand initializes the pseudo-random generator's state, selecting the sequence that rand returns."
       },
       {
         "id": "cl92-q2",
-        "prompt": "What is a reliable way to protect correctness?",
+        "prompt": "What is the inclusive documented result range of rand()?",
         "options": [
-          "Validate preconditions, bounds and failure results.",
-          "Assume the operation cannot fail.",
-          "Ignore the type and lifetime rules."
+          "0 through RAND_MAX.",
+          "1 through RAND_MAX.",
+          "0 through RAND_MAX - 1.",
+          "Any nonnegative value representable by unsigned long."
         ],
-        "answer": "Validate preconditions, bounds and failure results.",
-        "explanation": "C requires explicit handling of object validity and operation failures."
+        "answer": "0 through RAND_MAX.",
+        "explanation": "rand returns an int from 0 through RAND_MAX inclusive."
       },
       {
         "id": "cl92-q3",
-        "prompt": "How should the example be checked?",
+        "prompt": "Why is reseeding before every draw often a mistake?",
         "options": [
-          "Compile with warnings and test expected and failure cases.",
-          "Ignore diagnostics and test only once.",
-          "Assume every platform behaves identically."
+          "Repeated or low-resolution seeds can restart the same sequence.",
+          "It guarantees cryptographic randomness.",
+          "It makes RAND_MAX increase.",
+          "It removes all modulo bias automatically."
         ],
-        "answer": "Compile with warnings and test expected and failure cases.",
-        "explanation": "Warnings and targeted tests provide evidence for correctness."
+        "answer": "Repeated or low-resolution seeds can restart the same sequence.",
+        "explanation": "If repeated calls use the same seed, they restart the same sequence; time-based seeds can repeat when clock resolution is coarse."
+      },
+      {
+        "id": "cl92-q4",
+        "prompt": "Why can `rand() % bound` be biased?",
+        "options": [
+          "The source range may not contain an equal number of values for each remainder.",
+          "The remainder operator is unavailable for integers.",
+          "rand() always returns negative values.",
+          "The result can never be zero."
+        ],
+        "answer": "The source range may not contain an equal number of values for each remainder.",
+        "explanation": "If the source range size is not divisible by bound, some remainders occur more often than others."
+      },
+      {
+        "id": "cl92-q5",
+        "prompt": "Which use is inappropriate for rand()?",
+        "options": [
+          "Generating password-reset tokens or cryptographic keys.",
+          "A simple classroom simulation.",
+          "A non-security-sensitive game demonstration.",
+          "Deterministic test data with a fixed seed."
+        ],
+        "answer": "Generating password-reset tokens or cryptographic keys.",
+        "explanation": "The C rand interface does not promise cryptographic unpredictability; use an operating-system or vetted cryptographic random source for secrets."
       }
     ]
   },

@@ -6,39 +6,62 @@
   "title": "Project 5: contact book using dynamic memory",
   "language": "en",
   "learningObjectives": [
-    "Explain the topic and its C rules.",
-    "Trace the example and identify its purpose.",
-    "Identify important validation and failure cases.",
-    "Apply the concept in a tested program or reference exercise."
+    "Explain why a dynamic array is useful when the number of contacts is not known in advance.",
+    "Use malloc-family allocation concepts and realloc safely to grow an array of structures.",
+    "Track count and capacity separately and guard allocation-size calculations against overflow.",
+    "Implement add, list, search, update and delete operations while enforcing unique positive contact IDs.",
+    "Handle allocation failure without losing the original pointer or corrupting existing contacts.",
+    "Release allocated storage exactly once and verify behaviour with boundary and failure-oriented tests."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL2.1",
+    "CL3.1",
+    "CL4.1",
+    "CL5.1",
+    "CL5.3",
+    "CL6.1",
+    "CL11.1",
+    "CL11.2",
+    "CL11.3"
+  ],
   "stages": {
     "understand": {
-      "concept": "A contact book stores a variable number of contacts, supports search and deletion, and releases every allocation. A design may use a resizable array of structures or a linked list.",
-      "whyItMatters": "This project exercises allocation, resizing, string ownership, search and cleanup discipline.",
-      "analogy": "Treat the project or language feature as a set of components with explicit interfaces and responsibilities.",
-      "analogyLimit": "The analogy does not replace C's formal language, library and resource-management rules."
+      "concept": "A contact book may need to store a number of records that is not known when the program starts. This project uses a dynamically allocated array of struct Contact. The array has a count (number of active contacts) and a capacity (number of allocated slots). When count reaches capacity, realloc requests a larger block, normally doubling capacity. Each Contact stores a positive unique ID, a bounded name and a bounded phone string directly in its structure. The collection itself is dynamic; the fixed-size character arrays keep ownership simple and avoid separate allocations for every field.",
+      "whyItMatters": "Dynamic memory lets a program adapt storage to its current workload. Understanding allocation, resizing, failure handling and cleanup is essential for robust C programs that manage collections whose size changes at runtime.",
+      "analogy": "Imagine a shelf that can be replaced with a wider shelf when it becomes full. Count is the number of books currently placed on it; capacity is the number of spaces on the shelf.",
+      "analogyLimit": "realloc may move the block to a new address, and it can fail. C does not automatically update pointers held elsewhere, free unused memory or protect an array index. The program must manage these rules explicitly."
     },
     "explain": {
-      "narrative": "A contact book stores a variable number of contacts, supports search and deletion, and releases every allocation. A design may use a resizable array of structures or a linked list.\n\nFor a complete implementation, define input constraints, ownership, error handling and test cases before coding. Compile with warnings and verify normal, boundary and failure behaviour.",
+      "narrative": "The contact book stores records in one contiguous dynamic array. Start with items = NULL, count = 0 and capacity = 0. Before adding a record, ensure there is a free slot. The reserve function grows the capacity from zero to two and then doubles it until it can hold the requested number of elements. It checks needed * sizeof *items for size_t overflow before allocating.\\n\\nAlways assign realloc to a temporary pointer. If realloc fails, it returns NULL and the original allocation remains valid; assigning directly to the only pointer would lose the address of that allocation. Update items and capacity only after realloc succeeds. Do not use pointers into the old array after a successful realloc because the block may have moved.\\n\\nThe program keeps count separate from capacity. Only items[0] through items[count - 1] are active. Search scans this active range. Deletion shifts later active structures left and decreases count; it does not need to shrink the allocation immediately. When the program finishes, free the array exactly once and reset its fields. free(NULL) is safe, which makes cleanup of an empty book straightforward.\\n\\nEach contact has a positive unique integer ID, a non-empty bounded name and a phone string containing 7 to 23 digits with an optional leading plus. Input is read as complete bounded lines and validated before a record is committed. The example uses fixed-size character arrays inside each structure, so copying a structure copies the character data as well. It does not store pointers to separately allocated strings. This is deliberate: it demonstrates dynamic collection storage without introducing unnecessary per-field ownership.\\n\\nAllocation failure is handled by leaving the old array intact and reporting that the new contact was not added. This lesson does not promise a particular maximum contact count; available memory and SIZE_MAX bound the allocation. A production application would also consider persistence, privacy, backups and robust phone-number normalization.",
       "examples": [
         {
           "id": "cl115-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdlib.h>\nstruct Contact { char *name; char *phone; };\nint main(void) {\n struct Contact *contacts = calloc(2, sizeof *contacts);\n if (contacts == NULL) return 1;\n /* Initialize owned strings before use in a complete implementation. */\n free(contacts);\n return 0;\n}",
-          "explanation": "calloc allocates storage for two Contact objects and initializes their bytes to zero. It does not allocate the strings referenced by the pointer members; a complete implementation must allocate, validate and free those strings separately.",
-          "runnable": false
+          "title": "Test dynamic allocation, growth, search, update and deletion",
+          "code": "#include <assert.h>\n#include <stdint.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n#define NAME_SIZE 64\n#define PHONE_SIZE 25\n\nstruct Contact {\n    int id;\n    char name[NAME_SIZE];\n    char phone[PHONE_SIZE];\n};\n\nstruct ContactBook {\n    struct Contact *items;\n    size_t count;\n    size_t capacity;\n};\n\nstatic int valid_contact(const struct Contact *contact) {\n    size_t i;\n    size_t name_length;\n    size_t phone_length;\n    size_t digit_count = 0U;\n    if (contact == NULL || contact->id <= 0) return 0;\n    name_length = strlen(contact->name);\n    phone_length = strlen(contact->phone);\n    if (name_length == 0U || name_length >= NAME_SIZE || phone_length >= PHONE_SIZE) return 0;\n    for (i = 0; i < phone_length; ++i) {\n        if (i == 0U && contact->phone[i] == '+') continue;\n        if (contact->phone[i] < '0' || contact->phone[i] > '9') return 0;\n        ++digit_count;\n    }\n    if (digit_count < 7U || digit_count > 23U) return 0;\n    return 1;\n}\n\nstatic int reserve_contacts(struct ContactBook *book, size_t needed) {\n    size_t new_capacity;\n    struct Contact *new_items;\n    if (book == NULL) return 0;\n    if (needed <= book->capacity) return 1;\n    if (needed > SIZE_MAX / sizeof *book->items) return 0;\n    new_capacity = book->capacity == 0U ? 2U : book->capacity;\n    while (new_capacity < needed) {\n        if (new_capacity > SIZE_MAX / 2U) {\n            new_capacity = needed;\n            break;\n        }\n        new_capacity *= 2U;\n    }\n    if (new_capacity > SIZE_MAX / sizeof *book->items) return 0;\n    new_items = realloc(book->items, new_capacity * sizeof *book->items);\n    if (new_items == NULL) return 0;\n    book->items = new_items;\n    book->capacity = new_capacity;\n    return 1;\n}\n\nstatic size_t find_contact(const struct ContactBook *book, int id) {\n    size_t i;\n    if (book == NULL) return 0U;\n    for (i = 0; i < book->count; ++i)\n        if (book->items[i].id == id) return i;\n    return book->count;\n}\n\nstatic int add_contact(struct ContactBook *book, const struct Contact *contact) {\n    if (book == NULL || !valid_contact(contact)) return 0;\n    if (find_contact(book, contact->id) != book->count) return 0;\n    if (book->count == SIZE_MAX || !reserve_contacts(book, book->count + 1U)) return 0;\n    book->items[book->count] = *contact;\n    ++book->count;\n    return 1;\n}\n\nstatic int update_phone(struct ContactBook *book, int id, const char *phone) {\n    size_t index;\n    struct Contact candidate;\n    if (book == NULL || phone == NULL) return 0;\n    index = find_contact(book, id);\n    if (index == book->count) return 0;\n    candidate = book->items[index];\n    if (strlen(phone) >= PHONE_SIZE) return 0;\n    (void)snprintf(candidate.phone, sizeof candidate.phone, \"%s\", phone);\n    if (!valid_contact(&candidate)) return 0;\n    book->items[index] = candidate;\n    return 1;\n}\n\nstatic int delete_contact(struct ContactBook *book, int id) {\n    size_t index;\n    size_t i;\n    if (book == NULL) return 0;\n    index = find_contact(book, id);\n    if (index == book->count) return 0;\n    for (i = index; i + 1U < book->count; ++i)\n        book->items[i] = book->items[i + 1U];\n    --book->count;\n    return 1;\n}\n\nstatic void destroy_book(struct ContactBook *book) {\n    if (book == NULL) return;\n    free(book->items);\n    book->items = NULL;\n    book->count = 0U;\n    book->capacity = 0U;\n}\n\nint main(void) {\n    struct ContactBook book = { NULL, 0U, 0U };\n    const struct Contact a = { 1, \"Asha Rao\", \"+919876543210\" };\n    const struct Contact b = { 2, \"Ravi Kumar\", \"9876543210\" };\n    const struct Contact c = { 3, \"Mina Das\", \"9123456789\" };\n    const struct Contact duplicate = { 2, \"Duplicate\", \"9000000000\" };\n    const struct Contact invalid = { 4, \"Bad Phone\", \"12AB\" };\n\n    assert(add_contact(&book, &a));\n    assert(book.count == 1U && book.capacity >= 1U);\n    assert(add_contact(&book, &b));\n    assert(book.capacity >= 2U);\n    assert(add_contact(&book, &c));\n    assert(book.capacity >= 3U);\n    assert(!add_contact(&book, &duplicate));\n    assert(!add_contact(&book, &invalid));\n    assert(find_contact(&book, 2) == 1U);\n    assert(find_contact(&book, 99) == book.count);\n    assert(update_phone(&book, 2, \"+911234567890\"));\n    assert(strcmp(book.items[1].phone, \"+911234567890\") == 0);\n    assert(!update_phone(&book, 2, \"bad-number\"));\n    assert(!update_phone(&book, 99, \"9123456789\"));\n    assert(delete_contact(&book, 1));\n    assert(book.count == 2U && book.items[0].id == 2);\n    assert(!delete_contact(&book, 99));\n    destroy_book(&book);\n    assert(book.items == NULL && book.count == 0U && book.capacity == 0U);\n    puts(\"Dynamic contact book tests passed.\");\n    return 0;\n}\n",
+          "explanation": "This deterministic program begins with an empty contact book, grows its array as contacts are added, rejects duplicate IDs and invalid phone data, searches records, updates a phone number and deletes a contact. It then frees the array and verifies that the book has been reset. The assertions cover both logical behaviour and the count/capacity relationship.",
+          "runnable": true
+        },
+        {
+          "id": "cl115-ex2",
+          "language": "en",
+          "title": "Complete interactive dynamic contact book",
+          "code": "#include <ctype.h>\n#include <errno.h>\n#include <limits.h>\n#include <stdint.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n#define NAME_SIZE 64\n#define PHONE_SIZE 25\n#define LINE_SIZE 128\n\nstruct Contact {\n    int id;\n    char name[NAME_SIZE];\n    char phone[PHONE_SIZE];\n};\n\nstruct ContactBook {\n    struct Contact *items;\n    size_t count;\n    size_t capacity;\n};\n\nenum ReadResult { READ_OK, READ_END, READ_INVALID };\n\nstatic enum ReadResult read_line(const char *prompt, char *buffer, size_t size) {\n    size_t length;\n    int ch;\n    fputs(prompt, stdout);\n    if (fgets(buffer, (int)size, stdin) == NULL) return READ_END;\n    length = strlen(buffer);\n    if (length > 0U && buffer[length - 1U] == '\\n') {\n        buffer[length - 1U] = '\\0';\n        return READ_OK;\n    }\n    ch = getchar();\n    if (ch == '\\n' || ch == EOF) return READ_OK;\n    while (ch != '\\n' && ch != EOF) ch = getchar();\n    return READ_INVALID;\n}\n\nstatic char *trim(char *text) {\n    char *start = text;\n    char *end;\n    while (isspace((unsigned char)*start)) ++start;\n    end = start + strlen(start);\n    while (end > start && isspace((unsigned char)end[-1])) --end;\n    *end = '\\0';\n    return start;\n}\n\nstatic int read_integer(const char *prompt, int *value) {\n    char line[LINE_SIZE];\n    char *start;\n    char *end;\n    long parsed;\n    enum ReadResult result = read_line(prompt, line, sizeof line);\n    if (result != READ_OK) return result == READ_END ? 0 : -1;\n    start = trim(line);\n    errno = 0;\n    parsed = strtol(start, &end, 10);\n    while (isspace((unsigned char)*end)) ++end;\n    if (start == end || *end != '\\0' || errno == ERANGE\n        || parsed < 1L || parsed > (long)INT_MAX) return -1;\n    *value = (int)parsed;\n    return 1;\n}\n\nstatic int read_text(const char *prompt, char *destination, size_t capacity) {\n    char line[LINE_SIZE];\n    char *clean;\n    size_t length;\n    enum ReadResult result = read_line(prompt, line, sizeof line);\n    if (result != READ_OK) return result == READ_END ? 0 : -1;\n    clean = trim(line);\n    length = strlen(clean);\n    if (length == 0U || length >= capacity) return -1;\n    memcpy(destination, clean, length + 1U);\n    return 1;\n}\n\nstatic int valid_phone(const char *phone) {\n    size_t i;\n    size_t length;\n    size_t digit_count = 0U;\n    if (phone == NULL) return 0;\n    length = strlen(phone);\n    if (length == 0U || length >= PHONE_SIZE) return 0;\n    for (i = 0; i < length; ++i) {\n        if (i == 0U && phone[i] == '+') continue;\n        if (phone[i] < '0' || phone[i] > '9') return 0;\n        ++digit_count;\n    }\n    return digit_count >= 7U && digit_count <= 23U;\n}\n\nstatic size_t find_contact(const struct ContactBook *book, int id) {\n    size_t i;\n    for (i = 0; i < book->count; ++i)\n        if (book->items[i].id == id) return i;\n    return book->count;\n}\n\nstatic int reserve_contacts(struct ContactBook *book, size_t needed) {\n    size_t new_capacity;\n    struct Contact *new_items;\n    if (needed <= book->capacity) return 1;\n    if (needed > SIZE_MAX / sizeof *book->items) return 0;\n    new_capacity = book->capacity == 0U ? 2U : book->capacity;\n    while (new_capacity < needed) {\n        if (new_capacity > SIZE_MAX / 2U) {\n            new_capacity = needed;\n            break;\n        }\n        new_capacity *= 2U;\n    }\n    if (new_capacity > SIZE_MAX / sizeof *book->items) return 0;\n    new_items = realloc(book->items, new_capacity * sizeof *book->items);\n    if (new_items == NULL) return 0;\n    book->items = new_items;\n    book->capacity = new_capacity;\n    return 1;\n}\n\nstatic void add_contact(struct ContactBook *book) {\n    struct Contact item;\n    int status;\n    if (book->count == SIZE_MAX || !reserve_contacts(book, book->count + 1U)) {\n        puts(\"Memory allocation failed; no contact was added.\");\n        return;\n    }\n    status = read_integer(\"Contact ID (positive integer): \", &item.id);\n    if (status != 1) { puts(status == 0 ? \"Input ended.\" : \"Invalid ID.\"); return; }\n    if (find_contact(book, item.id) != book->count) {\n        puts(\"That ID already exists.\");\n        return;\n    }\n    status = read_text(\"Name: \", item.name, sizeof item.name);\n    if (status != 1) { puts(status == 0 ? \"Input ended.\" : \"Invalid or overlong name.\"); return; }\n    status = read_text(\"Phone (7-23 digits, optional leading +): \", item.phone, sizeof item.phone);\n    if (status != 1 || !valid_phone(item.phone)) {\n        puts(status == 0 ? \"Input ended.\" : \"Invalid phone number.\");\n        return;\n    }\n    book->items[book->count] = item;\n    ++book->count;\n    puts(\"Contact added.\");\n}\n\nstatic void list_contacts(const struct ContactBook *book) {\n    size_t i;\n    if (book->count == 0U) { puts(\"No contacts.\"); return; }\n    puts(\"\\nID       NAME                                     PHONE\");\n    for (i = 0; i < book->count; ++i)\n        printf(\"%-8d %-40s %s\\n\", book->items[i].id,\n               book->items[i].name, book->items[i].phone);\n}\n\nstatic void search_contact(const struct ContactBook *book) {\n    int id;\n    int status = read_integer(\"ID to search: \", &id);\n    size_t index;\n    if (status != 1) { puts(status == 0 ? \"Input ended.\" : \"Invalid ID.\"); return; }\n    index = find_contact(book, id);\n    if (index == book->count) puts(\"Contact not found.\");\n    else printf(\"Found: %d | %s | %s\\n\", book->items[index].id,\n                book->items[index].name, book->items[index].phone);\n}\n\nstatic void update_contact(struct ContactBook *book) {\n    int id;\n    int status = read_integer(\"ID to update: \", &id);\n    size_t index;\n    char phone[PHONE_SIZE];\n    if (status != 1) { puts(status == 0 ? \"Input ended.\" : \"Invalid ID.\"); return; }\n    index = find_contact(book, id);\n    if (index == book->count) { puts(\"Contact not found.\"); return; }\n    status = read_text(\"New phone: \", phone, sizeof phone);\n    if (status != 1 || !valid_phone(phone)) {\n        puts(status == 0 ? \"Input ended.\" : \"Invalid phone number.\");\n        return;\n    }\n    (void)snprintf(book->items[index].phone, sizeof book->items[index].phone, \"%s\", phone);\n    puts(\"Contact updated.\");\n}\n\nstatic void delete_contact(struct ContactBook *book) {\n    int id;\n    int status = read_integer(\"ID to delete: \", &id);\n    size_t index;\n    size_t i;\n    if (status != 1) { puts(status == 0 ? \"Input ended.\" : \"Invalid ID.\"); return; }\n    index = find_contact(book, id);\n    if (index == book->count) { puts(\"Contact not found.\"); return; }\n    for (i = index; i + 1U < book->count; ++i)\n        book->items[i] = book->items[i + 1U];\n    --book->count;\n    puts(\"Contact deleted.\");\n}\n\nint main(void) {\n    struct ContactBook book = { NULL, 0U, 0U };\n    for (;;) {\n        char line[LINE_SIZE];\n        char *start;\n        char *end;\n        long choice;\n        enum ReadResult status;\n        puts(\"\\nDYNAMIC CONTACT BOOK\");\n        puts(\"1 Add  2 List  3 Search  4 Update phone  5 Delete  0 Exit\");\n        status = read_line(\"Choose: \", line, sizeof line);\n        if (status == READ_END) { puts(\"\\nEnd of input.\"); break; }\n        if (status != READ_OK) { puts(\"Menu line too long.\"); continue; }\n        start = trim(line);\n        errno = 0;\n        choice = strtol(start, &end, 10);\n        while (isspace((unsigned char)*end)) ++end;\n        if (start == end || *end != '\\0' || errno == ERANGE\n            || choice < 0L || choice > 5L) {\n            puts(\"Choose a number from 0 to 5.\");\n            continue;\n        }\n        switch (choice) {\n            case 1: add_contact(&book); break;\n            case 2: list_contacts(&book); break;\n            case 3: search_contact(&book); break;\n            case 4: update_contact(&book); break;\n            case 5: delete_contact(&book); break;\n            case 0: goto finished;\n            default: break;\n        }\n    }\nfinished:\n    free(book.items);\n    book.items = NULL;\n    book.count = 0U;\n    book.capacity = 0U;\n    puts(\"Contact book memory released. Goodbye.\");\n    return 0;\n}\n",
+          "explanation": "The menu-driven program supports adding, listing, searching, updating and deleting contacts. It grows the array with realloc, validates bounded line input and phone numbers, rejects duplicate IDs, and releases the allocation on normal exit or EOF. Names and phone values are stored inline in each structure; the dynamic allocation is for the contact array.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Draw the contact array and its separately owned name and phone strings.",
-      "independentTask": "Implement add, search, update and delete while documenting ownership and handling partial allocation failures.",
+      "guidedTask": "Trace the first example from an empty book. After the first, second and third additions, record count and capacity. Explain why the capacity grows, why realloc is assigned to a temporary pointer, and why free is called once when the book is destroyed.",
+      "independentTask": "Add a menu option that searches contacts by a case-insensitive name prefix. Keep the dynamic array and its ownership rules unchanged. Test an empty book, first allocation, several growth steps, duplicate IDs, invalid names and phone values, missing IDs, deletion from the beginning/middle/end, EOF during input and cleanup. Review every return path to ensure that a failed allocation leaves the existing contacts available and that the final allocation is freed.",
       "hints": [
-        "A zeroed pointer member is a null pointer on ordinary hosted implementations, but initialize and manage pointer members according to C rules and project portability.",
-        "Free each owned string before releasing the containing array.",
-        "A shallow structure copy duplicates pointer values, not the pointed-to strings."
+        "Keep count and capacity as separate size_t values; count must never exceed capacity.",
+        "Check needed against SIZE_MAX divided by the element size before calculating allocation bytes.",
+        "Store realloc's result in a temporary pointer and update the book only after success.",
+        "Do not keep pointers to array elements across a successful realloc because the block may move.",
+        "After deletion, shift only active records and decrement count; shrinking is optional.",
+        "Use one cleanup path that calls free on the owning array and resets its pointer, count and capacity."
       ]
     }
   },
@@ -51,36 +74,58 @@
     "questions": [
       {
         "id": "cl115-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What is the difference between count and capacity in the contact book?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "Count is the number of active contacts; capacity is the number of allocated slots.",
+          "Count is the allocated bytes; capacity is the number of IDs.",
+          "They must always have different numeric values."
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the topic and constraints described above."
+        "answer": "Count is the number of active contacts; capacity is the number of allocated slots.",
+        "explanation": "The active elements occupy indices from zero through count minus one, while capacity describes the allocated array size."
       },
       {
         "id": "cl115-q2",
-        "prompt": "What is essential for a reliable implementation?",
+        "prompt": "Why should realloc's result be stored in a temporary pointer?",
         "options": [
-          "Define the interface, validate inputs and handle failures.",
-          "Assume every input is valid.",
-          "Ignore resource ownership."
+          "If realloc fails, the original allocation remains valid and its pointer must not be lost.",
+          "realloc always returns the same address.",
+          "A temporary pointer automatically frees the old allocation."
         ],
-        "answer": "Define the interface, validate inputs and handle failures.",
-        "explanation": "Reliable C programs make assumptions and failure behaviour explicit."
+        "answer": "If realloc fails, the original allocation remains valid and its pointer must not be lost.",
+        "explanation": "Assigning realloc directly to the only owning pointer can lose the original block when allocation fails."
       },
       {
         "id": "cl115-q3",
-        "prompt": "How should the work be verified?",
+        "prompt": "What may happen to pointers into the contact array after realloc succeeds?",
         "options": [
-          "Compile with warnings and test representative and boundary cases.",
-          "Only check whether the source file exists.",
-          "Assume a single successful run proves correctness."
+          "The allocation may move, making old interior pointers invalid.",
+          "Every pointer is automatically updated by C.",
+          "The array becomes sorted automatically."
         ],
-        "answer": "Compile with warnings and test representative and boundary cases.",
-        "explanation": "Compilation and targeted tests provide evidence of correctness."
+        "answer": "The allocation may move, making old interior pointers invalid.",
+        "explanation": "After successful reallocation, use the returned base pointer and recompute element addresses."
+      },
+      {
+        "id": "cl115-q4",
+        "prompt": "Which expression should be checked before allocating an array of n structures?",
+        "options": [
+          "n <= SIZE_MAX / sizeof *items",
+          "n == sizeof items",
+          "n < 0"
+        ],
+        "answer": "n <= SIZE_MAX / sizeof *items",
+        "explanation": "This check prevents overflow when calculating the number of bytes required for the array."
+      },
+      {
+        "id": "cl115-q5",
+        "prompt": "When should the contact array be released?",
+        "options": [
+          "When the book is finished with the allocation, using free exactly once for the owning pointer.",
+          "After every search operation.",
+          "Before each realloc call, even when existing contacts must be preserved."
+        ],
+        "answer": "When the book is finished with the allocation, using free exactly once for the owning pointer.",
+        "explanation": "The program owns one dynamic array and releases it when no further contact operations are needed."
       }
     ]
   },

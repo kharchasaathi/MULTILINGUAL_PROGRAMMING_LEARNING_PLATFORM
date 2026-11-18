@@ -6,39 +6,50 @@
   "title": "Parameters, arguments, return types and void",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C language rules.",
-    "Trace the example and explain data flow.",
-    "Identify common errors and boundary conditions.",
-    "Apply the concept in a small tested program."
+    "Distinguish formal parameters from actual argument expressions.",
+    "Match argument types and order to the function prototype.",
+    "Explain the meaning of void as a return type and parameter list.",
+    "Use return values to communicate results and status.",
+    "Recognize that C does not provide default function arguments."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "Parameters are named objects declared in a function's parameter list; arguments are the expressions supplied at a call. A return type describes the value produced by a function. void as a parameter list in a declaration means the function takes no arguments; void as a return type means it returns no value.",
+      "concept": "Parameters are named objects declared in a function's parameter list; arguments are expressions supplied at a call. A return type describes the value produced. `void` as a parameter list in a declaration means no arguments, while `void` as a return type means no value is returned. C does not support default arguments or function overloading.",
       "whyItMatters": "Correct function interfaces make data flow explicit and help the compiler diagnose incompatible calls.",
       "analogy": "Treat a function or pointer operation as an explicit contract between caller and callee.",
       "analogyLimit": "The analogy does not replace C's formal rules for types, object lifetime, scope and linkage."
     },
     "explain": {
-      "narrative": "Parameters are named objects declared in a function's parameter list; arguments are the expressions supplied at a call. A return type describes the value produced by a function. void as a parameter list in a declaration means the function takes no arguments; void as a return type means it returns no value.\n\nWhen applying this concept, check declared types, preconditions, object lifetime and all control-flow paths. Compile with warnings enabled and test both typical and boundary inputs.",
+      "narrative": "## 1. Parameters and arguments\n\nParameters are local objects initialized from argument values. The number, order and types of arguments must be compatible with the function declaration.\n\n## 2. Return types\n\nA function returning `int` communicates an integer result. A function returning `void` communicates no result value; it may still perform an action or update an object through a pointer parameter.\n\n## 3. No-parameter functions\n\nIn a function prototype, `int read_count(void)` explicitly states that the function takes no parameters. An empty parameter list in an old-style declaration does not provide the same prototype type checking.\n\n## 4. Return values and status\n\nChoose a return type that represents the result and define how errors are communicated. For more complex operations, a status return plus output parameters may be appropriate.\n\n## 5. C function interfaces\n\nC does not provide default parameter values or overloads based only on parameter types. Use distinct function names or a carefully designed interface.",
       "examples": [
         {
-          "id": "cl62-ex1",
+          "id": "cl6.2-ex1",
           "language": "en",
-          "title": "Focused C example",
+          "title": "Core example",
           "code": "#include <stdio.h>\nvoid show_total(int total) {\n printf(\"Total: %d\\n\", total);\n}\nint get_default_count(void) {\n return 3;\n}\nint main(void) {\n show_total(get_default_count());\n return 0;\n}",
-          "explanation": "get_default_count takes no arguments and returns an int. Its result becomes the argument passed to show_total, which returns no value.",
+          "explanation": "Trace each declaration, call, expression and return. Check types and boundary conditions.",
+          "runnable": false
+        },
+        {
+          "id": "cl6.2-ex2",
+          "language": "en",
+          "title": "Apply the function contract",
+          "code": "#include <stdio.h>\nvoid print_message(const char *message) { if (message != NULL) puts(message); }\nint main(void) { print_message(\"Hello\"); return 0; }",
+          "explanation": "This second example reinforces the function contract. Compile with warnings and test both valid and boundary inputs.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Identify each parameter, argument, return type and void use.",
-      "independentTask": "Declare and define one function that accepts no arguments and returns a status code, plus one function that accepts a value and prints it.",
+      "guidedTask": "Implement a focused C program demonstrating CL6.2. State the function's inputs, output, preconditions and failure behavior before coding.",
+      "independentTask": "Create a second implementation of CL6.2 with a clear interface contract. Add tests for ordinary input, boundary input and a failure or invalid case; explain the result.",
       "hints": [
-        "In a prototype, f(void) explicitly declares no parameters in C.",
-        "A function returning void must not be used where a value is required.",
-        "Match format specifiers to the actual argument types."
+        "Write the function prototype before its implementation.",
+        "Trace argument values and return paths explicitly.",
+        "Check pointer validity and object lifetime where relevant.",
+        "Use compiler warnings to catch type mismatches.",
+        "Test boundary cases and failure paths."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl62-q1",
-        "prompt": "Which statement best describes the lesson?",
+        "id": "cl6.2-q1",
+        "prompt": "What is an argument?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "An expression supplied at a function call",
+          "A name in the function parameter list",
+          "A function return type"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the C rule described above."
+        "answer": "An expression supplied at a function call",
+        "explanation": "Arguments are supplied by callers; parameters are declared by the function."
       },
       {
-        "id": "cl62-q2",
-        "prompt": "What should be checked before relying on this construct?",
+        "id": "cl6.2-q2",
+        "prompt": "What does void mean in `void show(void)`?",
         "options": [
-          "Its type rules, preconditions and lifetime or range requirements.",
-          "Only whether the code looks short.",
-          "Whether it worked once on another machine."
+          "The function takes no arguments and returns no value",
+          "The function takes any number of arguments",
+          "The function returns an integer"
         ],
-        "answer": "Its type rules, preconditions and lifetime or range requirements.",
-        "explanation": "C correctness depends on the language rules and valid object use."
+        "answer": "The function takes no arguments and returns no value",
+        "explanation": "The first void is the return type; the parameter-list void specifies no parameters."
       },
       {
-        "id": "cl62-q3",
-        "prompt": "What is a sound verification practice?",
+        "id": "cl6.2-q3",
+        "prompt": "Does C support default function argument values?",
         "options": [
-          "Compile with warnings and test representative and boundary cases.",
-          "Ignore diagnostics.",
-          "Assume one output proves all cases."
+          "No",
+          "Yes, for every function",
+          "Only for static functions"
         ],
-        "answer": "Compile with warnings and test representative and boundary cases.",
-        "explanation": "Diagnostics and tests provide evidence across relevant cases."
+        "answer": "No",
+        "explanation": "Default argument values are not a C language feature."
+      },
+      {
+        "id": "cl6.2-q4",
+        "prompt": "What should a function prototype enable the compiler to check?",
+        "options": [
+          "Argument and return types",
+          "The user's keyboard layout",
+          "The function's runtime speed"
+        ],
+        "answer": "Argument and return types",
+        "explanation": "A prototype provides parameter and return type information."
+      },
+      {
+        "id": "cl6.2-q5",
+        "prompt": "What is a suitable way to report both operation status and a separate result?",
+        "options": [
+          "Return a status and write the result through a validated output parameter",
+          "Ignore all errors",
+          "Return an uninitialized local variable"
+        ],
+        "answer": "Return a status and write the result through a validated output parameter",
+        "explanation": "A status plus output parameter is one explicit interface design."
       }
     ]
   },

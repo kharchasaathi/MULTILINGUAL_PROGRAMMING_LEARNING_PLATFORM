@@ -6,39 +6,117 @@
   "title": "Project 1: command-line calculator",
   "language": "en",
   "learningObjectives": [
-    "Explain the topic and its C rules.",
-    "Trace the example and identify its purpose.",
-    "Identify important validation and failure cases.",
-    "Apply the concept in a tested program or reference exercise."
+    "Translate a calculator's requirements into a clear input grammar, supported operators, output format and error policy.",
+    "Separate parsing, arithmetic calculation and user interaction into small functions with explicit interfaces.",
+    "Use fgets and strtod safely to parse a complete expression, checking conversion progress, range errors, non-finite values and trailing characters.",
+    "Implement addition, subtraction, multiplication and division while validating operators, zero divisors and non-finite arithmetic results.",
+    "Design a command loop with a quit command, clear diagnostics, bounded input handling and recovery after invalid input.",
+    "Compile and test the calculator with strict C11 warnings, representative expressions, boundary values, malformed input and failure cases."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL2.1",
+    "CL3.1",
+    "CL4.1",
+    "CL5.1",
+    "CL5.3",
+    "CL6.1",
+    "CL10.13"
+  ],
   "stages": {
     "understand": {
-      "concept": "A command-line calculator combines input parsing, arithmetic operations, validation and formatted output. It should reject malformed expressions and handle division by zero before performing the operation.",
-      "whyItMatters": "A small project tests whether the learner can combine functions, types, control flow and input validation into one coherent program.",
-      "analogy": "Treat the project or language feature as a set of components with explicit interfaces and responsibilities.",
-      "analogyLimit": "The analogy does not replace C's formal language, library and resource-management rules."
+      "concept": "A command-line calculator reads an expression, validates its syntax, performs one arithmetic operation and displays a result. This project supports the grammar: number operator number, where number is a finite decimal value accepted by strtod and operator is +, -, * or /. A reliable program separates three responsibilities: parsing text into typed values, calculating from validated values, and interacting with the user. It rejects malformed expressions, unsupported operators, division by positive or negative zero, numeric conversion range errors and non-finite results.",
+      "whyItMatters": "This project combines functions, selection, numeric types, standard input, strings, error handling and testing into one small application. It also demonstrates why input must be treated as untrusted text: a successful-looking line may contain missing operands, extra characters, an unsupported operator or a value outside the representable range.",
+      "analogy": "Think of a calculator as a small service counter. The input desk checks that the request is complete and understandable; the calculation unit performs only supported operations; the display desk reports either a result or a clear reason the request could not be completed.",
+      "analogyLimit": "The analogy does not define floating-point behaviour. C double values use finite precision, decimal fractions may not be represented exactly, and arithmetic can overflow to infinity or produce other exceptional values. This project deliberately rejects non-finite operands and results.",
+      "keyTerms": [
+        {
+          "term": "Parsing",
+          "definition": "Converting text into structured values while checking that the input follows a defined grammar."
+        },
+        {
+          "term": "strtod",
+          "definition": "A standard C library function that converts the initial part of a string to double and reports where conversion stopped."
+        },
+        {
+          "term": "errno",
+          "definition": "A library error indicator that can report range errors such as ERANGE after numeric conversion."
+        },
+        {
+          "term": "Finite value",
+          "definition": "A floating-point value that is neither infinity nor NaN; isfinite can test this property."
+        },
+        {
+          "term": "Input buffer",
+          "definition": "A fixed-size character array used to receive a line safely with fgets."
+        },
+        {
+          "term": "Separation of concerns",
+          "definition": "Keeping parsing, calculation and user interaction in separate functions so each can be tested independently."
+        },
+        {
+          "term": "Error policy",
+          "definition": "A documented decision about which inputs or results are rejected and how the program reports them."
+        }
+      ],
+      "designRequirements": [
+        {
+          "item": "Input grammar",
+          "detail": "One expression per line: finite number, one of + - * /, then finite number; optional surrounding whitespace; no trailing non-whitespace characters."
+        },
+        {
+          "item": "Supported operations",
+          "detail": "Addition, subtraction, multiplication and division."
+        },
+        {
+          "item": "Validation",
+          "detail": "Reject missing operands, invalid numbers, unsupported operators, conversion range errors, trailing text and division by zero."
+        },
+        {
+          "item": "Result policy",
+          "detail": "Reject non-finite results, including overflow to infinity; print finite results with a readable precision."
+        },
+        {
+          "item": "Interaction",
+          "detail": "Accept multiple expressions until the user enters q or EOF; report an invalid line and continue."
+        },
+        {
+          "item": "Input safety",
+          "detail": "Use fgets with a fixed buffer, detect overlong lines and drain the remainder before reading the next expression."
+        }
+      ],
+      "history": "Mechanical calculating devices predate electronic computers by centuries. Early electronic calculators introduced arithmetic circuits, while command-line calculators became common teaching projects because they expose the complete path from text input to validated computation. C's strtod function is part of the standard library and provides more control over numeric parsing than a simple unchecked input conversion."
     },
     "explain": {
-      "narrative": "A command-line calculator combines input parsing, arithmetic operations, validation and formatted output. It should reject malformed expressions and handle division by zero before performing the operation.\n\nFor a complete implementation, define input constraints, ownership, error handling and test cases before coding. Compile with warnings and verify normal, boundary and failure behaviour.",
+      "narrative": "Design the program before coding. The input grammar is one expression per line: a number, an operator (+, -, * or /), and another number. Whitespace may appear between fields, but no extra non-whitespace text is allowed. The interactive program repeats until q or end-of-file. Invalid input should produce a diagnostic and return to the prompt rather than terminating the whole session.\n\nUse fgets to read a bounded line. Unlike an unbounded input operation, fgets limits how many characters are written into the destination buffer. If the buffer fills without a newline and the stream has not reached EOF, the line may be longer than the buffer; drain the rest of that line and reject it so its tail is not mistaken for a new expression.\n\nUse strtod to parse each number. Set errno to zero before conversion, check that the end pointer moved, reject ERANGE and reject non-finite values with isfinite. Skip whitespace explicitly, read exactly one supported operator, parse the second number and then require the rest of the line to contain only whitespace. This prevents inputs such as 12abc + 3 or 1 + 2 extra from being silently accepted.\n\nKeep arithmetic in a separate function. It should reject non-finite operands, unsupported operators and a divisor equal to 0.0 (which also catches negative zero). After the operation, check that the result is finite. Floating-point arithmetic is approximate: this project displays a finite result but does not promise exact decimal arithmetic for currency or accounting. A production money application should use an explicitly designed fixed-point or decimal representation and a documented rounding policy.\n\nExample 1 tests the calculation function directly. It covers all four operations, division by zero, an unsupported operator and a result that overflows to a non-finite value. Example 2 is a complete interactive command-line calculator with safe line input, strict parsing, clear errors and a quit command. The examples use only standard C library facilities and do not require the HTML/CSS/JavaScript playground.",
       "examples": [
         {
           "id": "cl111-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\nint main(void) {\n double a, b;\n char op;\n if (scanf(\"%lf %c %lf\", &a, &op, &b) != 3) return 1;\n if (op == '/' && b == 0.0) { puts(\"division by zero\"); return 1; }\n switch (op) {\n case '+': printf(\"%.2f\\n\", a+b); break;\n case '-': printf(\"%.2f\\n\", a-b); break;\n case '*': printf(\"%.2f\\n\", a*b); break;\n case '/': printf(\"%.2f\\n\", a/b); break;\n default: puts(\"unknown operator\"); return 1;\n }\n return 0;\n}",
-          "explanation": "The program checks that three input fields were converted, rejects a zero divisor and dispatches on the operator. A production calculator should also define numeric range, trailing input and floating-point error policies.",
-          "runnable": false
+          "title": "Build and test the calculator arithmetic engine",
+          "code": "#include <float.h>\n#include <math.h>\n#include <stdbool.h>\n#include <stdio.h>\n\nstatic bool calculate(double left, char op, double right, double *result)\n{\n    if (result == NULL || !isfinite(left) || !isfinite(right)) {\n        return false;\n    }\n\n    double value = 0.0;\n    switch (op) {\n    case '+':\n        value = left + right;\n        break;\n    case '-':\n        value = left - right;\n        break;\n    case '*':\n        value = left * right;\n        break;\n    case '/':\n        if (right == 0.0) return false;\n        value = left / right;\n        break;\n    default:\n        return false;\n    }\n\n    if (!isfinite(value)) return false;\n    *result = value;\n    return true;\n}\n\nstatic bool check_result(const char *label, double left, char op,\n                         double right, double expected)\n{\n    double actual = 0.0;\n    if (!calculate(left, op, right, &actual) || actual != expected) {\n        printf(\"FAIL: %s\\n\", label);\n        return false;\n    }\n    printf(\"PASS: %s = %.6g\\n\", label, actual);\n    return true;\n}\n\nint main(void)\n{\n    double result = 0.0;\n\n    if (!check_result(\"addition\", 8.0, '+', 3.0, 11.0)) return 1;\n    if (!check_result(\"subtraction\", 8.0, '-', 3.0, 5.0)) return 1;\n    if (!check_result(\"multiplication\", 8.0, '*', 3.0, 24.0)) return 1;\n    if (!check_result(\"division\", 8.0, '/', 2.0, 4.0)) return 1;\n\n    if (calculate(8.0, '/', 0.0, &result)) {\n        puts(\"FAIL: division by zero was accepted\");\n        return 1;\n    }\n    if (calculate(8.0, '%', 3.0, &result)) {\n        puts(\"FAIL: unsupported operator was accepted\");\n        return 1;\n    }\n    if (calculate(DBL_MAX, '*', 2.0, &result)) {\n        puts(\"FAIL: non-finite result was accepted\");\n        return 1;\n    }\n    if (calculate(1.0, '+', 2.0, NULL)) {\n        puts(\"FAIL: null result pointer was accepted\");\n        return 1;\n    }\n\n    puts(\"All arithmetic engine tests passed.\");\n    return 0;\n}\n",
+          "explanation": "calculate accepts two finite double operands, a supported operator and a valid output pointer. It rejects division by zero before dividing and checks the computed value with isfinite before storing it. check_result tests normal arithmetic independently of user input. The remaining checks verify that division by zero, an unsupported operator, overflow to a non-finite result and a null output pointer are rejected. Exact equality is suitable for these selected integer-valued results; general floating-point calculations often need a tolerance-based comparison. The program intentionally tests the calculation layer separately from parsing and terminal interaction.",
+          "runnable": true
+        },
+        {
+          "id": "cl111-ex2",
+          "language": "en",
+          "title": "Create a complete interactive command-line calculator",
+          "code": "#include <ctype.h>\n#include <errno.h>\n#include <math.h>\n#include <stdbool.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n#define INPUT_SIZE 256U\n\nstatic const char *skip_spaces(const char *text)\n{\n    while (isspace((unsigned char)*text)) {\n        ++text;\n    }\n    return text;\n}\n\nstatic bool parse_number(const char **cursor, double *value)\n{\n    char *end = NULL;\n    errno = 0;\n    double parsed = strtod(*cursor, &end);\n\n    if (end == *cursor || errno == ERANGE || !isfinite(parsed)) {\n        return false;\n    }\n\n    *cursor = end;\n    *value = parsed;\n    return true;\n}\n\nstatic bool parse_expression(const char *line, double *left,\n                             char *op, double *right)\n{\n    const char *cursor = skip_spaces(line);\n\n    if (!parse_number(&cursor, left)) return false;\n    cursor = skip_spaces(cursor);\n\n    if (*cursor != '+' && *cursor != '-' &&\n        *cursor != '*' && *cursor != '/') {\n        return false;\n    }\n    *op = *cursor;\n    ++cursor;\n    cursor = skip_spaces(cursor);\n\n    if (!parse_number(&cursor, right)) return false;\n    cursor = skip_spaces(cursor);\n\n    return *cursor == '\\0';\n}\n\nstatic bool calculate(double left, char op, double right, double *result)\n{\n    if (result == NULL || !isfinite(left) || !isfinite(right)) {\n        return false;\n    }\n\n    double value = 0.0;\n    switch (op) {\n    case '+':\n        value = left + right;\n        break;\n    case '-':\n        value = left - right;\n        break;\n    case '*':\n        value = left * right;\n        break;\n    case '/':\n        if (right == 0.0) return false;\n        value = left / right;\n        break;\n    default:\n        return false;\n    }\n\n    if (!isfinite(value)) return false;\n    *result = value;\n    return true;\n}\n\nstatic bool is_quit_command(const char *line)\n{\n    const char *text = skip_spaces(line);\n    return text[0] == 'q' && skip_spaces(text + 1)[0] == '\\0';\n}\n\nstatic bool read_line(char buffer[INPUT_SIZE])\n{\n    if (fgets(buffer, (int)INPUT_SIZE, stdin) == NULL) {\n        return false;\n    }\n\n    char *newline = strchr(buffer, '\\n');\n    if (newline != NULL) {\n        *newline = '\\0';\n        return true;\n    }\n\n    if (!feof(stdin)) {\n        int ch;\n        while ((ch = getchar()) != '\\n' && ch != EOF) {\n            /* Discard the rest of an overlong input line. */\n        }\n        return false;\n    }\n\n    return true;\n}\n\nint main(void)\n{\n    char line[INPUT_SIZE];\n\n    puts(\"CodeSaathi Calculator (+, -, *, /). Enter q to quit.\");\n\n    for (;;) {\n        double left = 0.0;\n        double right = 0.0;\n        double result = 0.0;\n        char op = '\\0';\n\n        fputs(\"> \", stdout);\n        fflush(stdout);\n\n        if (!read_line(line)) {\n            if (feof(stdin)) break;\n            puts(\"Input line too long; please try a shorter expression.\");\n            continue;\n        }\n\n        if (is_quit_command(line)) break;\n\n        if (!parse_expression(line, &left, &op, &right)) {\n            puts(\"Invalid expression. Use: number operator number\");\n            continue;\n        }\n\n        if (!calculate(left, op, right, &result)) {\n            puts(\"Cannot calculate: check the divisor and numeric range.\");\n            continue;\n        }\n\n        printf(\"= %.10g\\n\", result);\n    }\n\n    puts(\"Goodbye.\");\n    return 0;\n}\n",
+          "explanation": "skip_spaces uses isspace after converting each character to unsigned char, as required by the character-classification functions. parse_number uses strtod and checks that conversion consumed characters, errno is not ERANGE and the result is finite. parse_expression accepts exactly two numbers and one supported operator, then rejects trailing non-whitespace text. read_line uses fgets with a fixed-size buffer; if the line is too long, it drains the remainder so the next prompt starts with a fresh line. The main loop accepts repeated expressions and q, recovers from invalid input and reports arithmetic failures. The result is checked for finiteness before display. EOF exits cleanly. The project uses double for general arithmetic, not exact currency calculations.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Trace the input 8 * 3 and 8 / 0.",
-      "independentTask": "Extend the calculator with a loop, a quit command and tests for invalid operators and malformed input.",
+      "guidedTask": "Trace these expressions through parsing and calculation: `8 * 3`, `15 / 4`, `9 / 0`, `12abc + 3`, `1 + 2 extra` and `q`. For each one, state whether parsing succeeds, whether calculation runs and what the user should see. Then add a test for negative zero as the divisor.",
+      "independentTask": "Extend the interactive calculator with a remainder operation for integer-only operands or add a power operation with a clearly documented numeric policy. Keep parsing, calculation and interaction separate. Add tests for leading/trailing whitespace, missing operands, multiple operators, unsupported operators, overlong input, EOF, conversion range errors, division by zero, non-finite results and repeated invalid lines. Document why binary floating-point is not appropriate for exact financial amounts.",
       "hints": [
-        "Check scanf's assignment count before using the variables.",
-        "Floating-point division by zero and integer division by zero have different language and environment considerations; define a deliberate policy.",
-        "Separate parsing, calculation and display into functions."
+        "Define the expression grammar before parsing; decide whether signs belong to numbers and whether whitespace is permitted.",
+        "Check strtod's end pointer and errno after every conversion; a returned numeric value alone does not prove the whole token was valid.",
+        "Use fgets with a fixed buffer and detect an input line that does not fit; discard its remainder before reading again.",
+        "Separate parse_expression from calculate so each function can be tested without terminal input.",
+        "Compare a divisor with 0.0 to reject both positive and negative floating-point zero; check isfinite after arithmetic.",
+        "A double calculator is suitable for general demonstration arithmetic, but money needs a defined decimal/fixed-point representation and rounding policy."
       ]
     }
   },
@@ -51,36 +129,63 @@
     "questions": [
       {
         "id": "cl111-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "Why should parsing be separate from the arithmetic calculation function?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "It allows text validation and arithmetic rules to be tested independently",
+          "It makes invalid input automatically valid",
+          "It removes the need to check division by zero",
+          "It guarantees exact decimal arithmetic"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the topic and constraints described above."
+        "answer": "It allows text validation and arithmetic rules to be tested independently",
+        "explanation": "Separate functions have clearer responsibilities and can be tested with focused inputs."
       },
       {
         "id": "cl111-q2",
-        "prompt": "What is essential for a reliable implementation?",
+        "prompt": "What should a robust strtod-based parser check?",
         "options": [
-          "Define the interface, validate inputs and handle failures.",
-          "Assume every input is valid.",
-          "Ignore resource ownership."
+          "That conversion advanced the end pointer, errno is not ERANGE and the value is finite",
+          "Only whether the returned value is nonzero",
+          "Only whether the input line contains a decimal point",
+          "Whether the operator appears before the first number"
         ],
-        "answer": "Define the interface, validate inputs and handle failures.",
-        "explanation": "Reliable C programs make assumptions and failure behaviour explicit."
+        "answer": "That conversion advanced the end pointer, errno is not ERANGE and the value is finite",
+        "explanation": "These checks reject missing conversions, range errors and non-finite values."
       },
       {
         "id": "cl111-q3",
-        "prompt": "How should the work be verified?",
+        "prompt": "Why does the calculator reject a divisor equal to 0.0?",
         "options": [
-          "Compile with warnings and test representative and boundary cases.",
-          "Only check whether the source file exists.",
-          "Assume a single successful run proves correctness."
+          "To prevent a division-by-zero calculation, including a negative-zero divisor",
+          "Because C does not support the division operator",
+          "Because every decimal value is stored as zero",
+          "To force the result to be an integer"
         ],
-        "answer": "Compile with warnings and test representative and boundary cases.",
-        "explanation": "Compilation and targeted tests provide evidence of correctness."
+        "answer": "To prevent a division-by-zero calculation, including a negative-zero divisor",
+        "explanation": "The equality check with 0.0 matches both positive and negative floating-point zero."
+      },
+      {
+        "id": "cl111-q4",
+        "prompt": "What is the purpose of detecting an overlong input line after fgets?",
+        "options": [
+          "To reject the incomplete line and discard its remaining characters",
+          "To execute the first part of the expression twice",
+          "To increase the buffer automatically without a limit",
+          "To skip numeric validation"
+        ],
+        "answer": "To reject the incomplete line and discard its remaining characters",
+        "explanation": "Draining the rest prevents leftover characters from being treated as a separate next expression."
+      },
+      {
+        "id": "cl111-q5",
+        "prompt": "Which statement about using double for a financial calculator is most accurate?",
+        "options": [
+          "Binary floating-point may not represent decimal amounts exactly, so money needs a defined fixed-point or decimal policy",
+          "double always stores every decimal amount exactly",
+          "A double value prevents rounding errors in all operations",
+          "The printf format controls the internal precision of arithmetic"
+        ],
+        "answer": "Binary floating-point may not represent decimal amounts exactly, so money needs a defined fixed-point or decimal policy",
+        "explanation": "Formatting changes how a value is displayed, not how it is represented or rounded internally."
       }
     ]
   },

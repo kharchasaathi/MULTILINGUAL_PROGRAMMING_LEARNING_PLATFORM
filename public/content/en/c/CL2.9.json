@@ -6,11 +6,11 @@
   "title": "Constants and const-Qualified Objects",
   "language": "en",
   "learningObjectives": [
-    "Explain the central rules behind constants and const-qualified objects in C.",
-    "Identify the relevant types, declarations, operators or library facilities.",
-    "Trace a worked example and explain its result.",
-    "Recognize common mistakes, portability concerns and unsafe assumptions.",
-    "Apply the concept in a small program and test normal and boundary cases."
+    "Explain the role of const-qualified objects and the limits of const in C.",
+    "Distinguish const objects from preprocessor macros and enumeration constants.",
+    "Use const to prevent modification through a particular lvalue.",
+    "Recognize that const does not automatically make an object a C integer constant expression.",
+    "Choose named constants to make program intent and constraints clear."
   ],
   "prerequisites": [
     "CL1.1",
@@ -18,13 +18,13 @@
   ],
   "stages": {
     "understand": {
-      "concept": "A constant expression is an expression that can be evaluated where the language requires a compile-time constant. The const qualifier makes an object non-modifiable through that lvalue; it does not automatically make every initialized object a compile-time constant expression in C. Enumeration constants and macros have different rules from const-qualified objects.",
+      "concept": "The const type qualifier makes an object non-modifiable through an lvalue with that qualified type. It does not automatically make every initialized const object a compile-time constant expression in C. Preprocessor macros and enumeration constants follow different rules for substitution, type and scope. Choose the appropriate mechanism based on the required language context.",
       "whyItMatters": "Clear constants reduce accidental changes and communicate intent. Knowing the distinction between const objects, macros and enumeration constants avoids assuming they have identical type, scope or evaluation behaviour.",
       "analogy": "Think of a type as a contract that describes what kind of value an object can hold and which operations make sense for it.",
       "analogyLimit": "The analogy is only an introduction; C types also determine representation, conversions, alignment and constraints."
     },
     "explain": {
-      "narrative": "A constant expression is an expression that can be evaluated where the language requires a compile-time constant. The const qualifier makes an object non-modifiable through that lvalue; it does not automatically make every initialized object a compile-time constant expression in C. Enumeration constants and macros have different rules from const-qualified objects.\n\nClear constants reduce accidental changes and communicate intent. Knowing the distinction between const objects, macros and enumeration constants avoids assuming they have identical type, scope or evaluation behaviour.\n\nWhen reviewing code, identify the declared types first, then trace conversions and the exact expression being evaluated. Compile with warnings enabled and test boundary values. Do not rely on assumptions about another compiler or machine.",
+      "narrative": "## 1. const-qualified objects\n\nA declaration such as `const double tax_rate = 0.05;` defines an object that cannot be modified through an lvalue of const-qualified type. The qualifier communicates intent and allows the compiler to diagnose attempted modification through that access path.\n\n## 2. const is not the same as a macro\n\nA macro such as `#define BUFFER_LIMIT 256` is handled by preprocessing. It performs token substitution and does not create a typed object. A const object has a type, storage and an address like other objects.\n\n## 3. Enumeration constants\n\nAn enumeration declaration can introduce named integer constants, for example `enum { MENU_ITEMS = 4 };`. These are integer constant expressions and can be used in contexts that require them, subject to the language's rules.\n\n## 4. Constant-expression contexts\n\nIn C, a block-scope `const int` object is not generally interchangeable with an integer constant expression. Do not assume it can be used wherever a compile-time integer constant is required. Understand the specific context and the C version in use.\n\n## 5. Select deliberately\n\nUse const for objects that should not be modified through a given access path, macros for suitable preprocessing substitutions, and enumeration constants for named integer constants. Avoid macros with side effects or confusing substitutions.",
       "examples": [
         {
           "id": "cl2.9-ex1",
@@ -45,14 +45,14 @@
       ]
     },
     "practise": {
-      "guidedTask": "Define configuration values using const objects, an enum constant and a macro. Explain their types, scope and when each is suitable.",
-      "independentTask": "Refactor repeated literal values into named constants. Keep buffer capacities, protocol values and mutable state clearly distinguished.",
+      "guidedTask": "Write a small C program that demonstrates the central rules in CL2.9. Compile with warnings enabled, run it with ordinary and boundary values, and explain each result in your own words.",
+      "independentTask": "Create a second example for CL2.9 using different values and names. Include one likely mistake as a separate experiment, observe the compiler diagnostic or behavior, then correct it. Record the rule that explains the correction.",
       "hints": [
-        "const prevents modification through the qualified lvalue; it is not a universal compile-time constant marker.",
-        "Macros are handled by the preprocessor and have no ordinary C type.",
-        "Enum constants are integer constants.",
-        "Initialize const objects at declaration where possible.",
-        "Use names that communicate units and constraints."
+        "Start by identifying the exact type of every object and expression.",
+        "Check the C language rule before assuming a platform-specific result.",
+        "Use compiler warnings as feedback, not as proof of correctness.",
+        "Test normal values and important boundaries.",
+        "Explain why the result follows from the language rules."
       ]
     }
   },
@@ -65,58 +65,58 @@
     "questions": [
       {
         "id": "cl2.9-q1",
-        "prompt": "Which statement is correct about constants and const-qualified objects?",
+        "prompt": "What does const do to an object?",
         "options": [
-          "It follows C's type and language rules and should be checked with compiler diagnostics.",
-          "C ignores all declared types.",
-          "The browser decides its meaning."
+          "Prevents modification through an lvalue with the const-qualified type",
+          "Makes every value a compile-time constant expression",
+          "Removes the object's storage"
         ],
-        "answer": "It follows C's type and language rules and should be checked with compiler diagnostics.",
-        "explanation": "C semantics are defined by the language and implementation."
+        "answer": "Prevents modification through an lvalue with the const-qualified type",
+        "explanation": "const is a type qualifier; it does not erase the object or universally make it an integer constant expression."
       },
       {
         "id": "cl2.9-q2",
-        "prompt": "What is the safest general practice?",
+        "prompt": "Which mechanism is handled by the preprocessor?",
         "options": [
-          "Choose types and operations deliberately, initialize data and validate assumptions.",
-          "Ignore warnings and assume values are valid.",
-          "Use casts to silence every warning."
+          "#define BUFFER_LIMIT 256",
+          "const int limit = 256;",
+          "int limit = 256;"
         ],
-        "answer": "Choose types and operations deliberately, initialize data and validate assumptions.",
-        "explanation": "Deliberate types and checks improve correctness."
+        "answer": "#define BUFFER_LIMIT 256",
+        "explanation": "A macro is expanded by preprocessing."
       },
       {
         "id": "cl2.9-q3",
-        "prompt": "What should you do when a result is unexpected?",
+        "prompt": "Which declaration introduces a named integer constant?",
         "options": [
-          "Create a small test case and inspect types, values and conversions.",
-          "Guess the result from the variable name.",
-          "Remove the test."
+          "enum { MENU_ITEMS = 4 };",
+          "char *MENU_ITEMS;",
+          "void MENU_ITEMS(void);"
         ],
-        "answer": "Create a small test case and inspect types, values and conversions.",
-        "explanation": "Small reproducible tests make behaviour easier to reason about."
+        "answer": "enum { MENU_ITEMS = 4 };",
+        "explanation": "An enumerator defines an integer constant."
       },
       {
         "id": "cl2.9-q4",
-        "prompt": "Which statement about portability is accurate?",
+        "prompt": "Is a block-scope const int always usable as an integer constant expression in C?",
         "options": [
-          "Some type sizes and ranges depend on the implementation.",
-          "All C implementations use identical type widths.",
-          "Compiler warnings change the C standard."
+          "No",
+          "Yes, in every C version and context",
+          "Only when its name is uppercase"
         ],
-        "answer": "Some type sizes and ranges depend on the implementation.",
-        "explanation": "Use standard guarantees and inspect implementation limits."
+        "answer": "No",
+        "explanation": "C const-qualified objects are not generally integer constant expressions."
       },
       {
         "id": "cl2.9-q5",
-        "prompt": "Which is a strong learning outcome?",
+        "prompt": "Why use const for a function parameter accessed read-only?",
         "options": [
-          "Explain the rule and apply it in a tested C program.",
-          "Memorize one output only.",
-          "Copy code without checking it."
+          "To document and enforce non-modification through that parameter expression",
+          "To make the function execute faster in every case",
+          "To convert the parameter to a macro"
         ],
-        "answer": "Explain the rule and apply it in a tested C program.",
-        "explanation": "Understanding plus testing demonstrates transferable knowledge."
+        "answer": "To document and enforce non-modification through that parameter expression",
+        "explanation": "The qualifier communicates the function's intended access contract."
       }
     ]
   },

@@ -6,39 +6,58 @@
   "title": "Sanitizers, static analysis and memory-checking workflow (CodeSaathi extension)",
   "language": "en",
   "learningObjectives": [
-    "Explain the topic and its C rules.",
-    "Trace the example and explain its data or control flow.",
-    "Identify edge cases and resource-management requirements.",
-    "Apply the concept in a tested C program."
+    "Differentiate compiler warnings, static analysis, runtime sanitizers, dynamic memory checkers and tests by what each observes.",
+    "Build a debug configuration with useful warnings, debug symbols and appropriate optimization.",
+    "Use AddressSanitizer and UndefinedBehaviorSanitizer on supported toolchains to investigate executed defects.",
+    "Interpret diagnostic reports by reproducing inputs and tracing application frames, lifetime and bounds.",
+    "Review static-analysis findings without assuming every warning is a defect or every clean report proves safety.",
+    "Create a repeatable workflow recording tool versions, commands, inputs, findings and limitations."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL8.7 Memory errors",
+    "CL8.8 Compiler and runtime diagnostics",
+    "CL8.9 Debugging",
+    "CL8.10 Input validation",
+    "CL8.11 Allocation overflow"
+  ],
   "stages": {
     "understand": {
-      "concept": "A defensive C workflow combines compiler warnings, static analysis, runtime sanitizers, targeted tests and review of ownership and bounds. Static analysis inspects code without executing every path; sanitizers instrument executed paths to detect selected runtime defects.",
-      "whyItMatters": "No single tool proves a C program safe. Layered checks provide independent evidence and make defects easier to reproduce and diagnose.",
-      "analogy": "Treat each algorithm or resource as a contract whose invariants must remain true after every operation.",
-      "analogyLimit": "The analogy does not replace C's formal rules for pointers, object lifetime, complexity or library contracts."
+      "concept": "A diagnostic workflow combines complementary tools. Compiler warnings report suspicious constructs during translation. Static analysis reasons about source code without executing every path. Runtime sanitizers instrument a built program and detect selected defects on paths that execute. Dynamic memory checkers monitor runtime memory operations. Tests provide chosen inputs and expected behaviour. Each tool has a different observation boundary and blind spots.",
+      "whyItMatters": "C defects may depend on rare inputs, object lifetime, build configuration or platform behaviour. Layered diagnostics make defects reproducible and reduce the risk of treating one tool's blind spot as proof of correctness.",
+      "analogy": "Treat each function and allocation request as a contract with valid inputs, promised results and defined failure behaviour.",
+      "analogyLimit": "The analogy does not replace C's rules for object lifetime, bounds, arithmetic or library contracts."
     },
     "explain": {
-      "narrative": "A defensive C workflow combines compiler warnings, static analysis, runtime sanitizers, targeted tests and review of ownership and bounds. Static analysis inspects code without executing every path; sanitizers instrument executed paths to detect selected runtime defects.\n\nState preconditions, invariants, empty and full cases, ownership and failure behaviour before implementation. Compile with warnings and test normal, boundary and failure paths.",
+      "narrative": "Start with a warning build such as cc -std=c11 -Wall -Wextra -Wpedantic -g -O0 app.c -o app. Add conversion and shadow warnings when supported. AddressSanitizer, enabled with -fsanitize=address on supported GCC/Clang toolchains, detects many executed out-of-bounds accesses, use-after-free and invalid frees. Leak detection varies by platform. UndefinedBehaviorSanitizer, enabled with -fsanitize=undefined, detects selected undefined operations such as some invalid shifts, signed overflow and misalignment; it is not exhaustive. Static analyzers inspect possible paths without requiring every path to execute, but can produce false positives or miss defects. Record source revision, compiler/tool versions, flags, test inputs and output. Run deterministic tests in ordinary and instrumented builds, including normal, boundary and safely simulated failure cases. Fix the earliest root cause first. Never run deliberately undefined-behaviour examples as expected-output demonstrations; explain the defect and execute a corrected version.",
       "examples": [
         {
           "id": "cl812-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "/* Example Clang/GCC-like test build:\n   cc -g -O1 -Wall -Wextra -fsanitize=address,undefined app.c -o app\n*/\n#include <stdio.h>\nint main(void) { puts(\"Run tests under diagnostic tools\"); return 0; }",
-          "explanation": "The build requests warnings and runtime instrumentation on a supported toolchain. The test suite must exercise relevant paths for runtime tools to observe them.",
-          "runnable": false
+          "title": "Build and run with ASan and UBSan",
+          "code": "/* Supported GCC/Clang example:\n cc -std=c11 -g -O1 -Wall -Wextra -Wpedantic \\\n    -fsanitize=address,undefined -fno-omit-frame-pointer app.c -o app\n ./app\n*/\n#include <stdio.h>\n#include <stdlib.h>\nint main(void)\n{\n    int *values = malloc(3 * sizeof *values);\n    if (values == NULL) return 1;\n    for (size_t i = 0; i < 3; ++i) { values[i] = (int)(i * 10); printf(\"%d\\n\", values[i]); }\n    free(values); return 0;\n}",
+          "explanation": "The command enables warnings, debug symbols, ASan and UBSan. The program checks allocation, accesses only three elements and frees the allocation. A clean run is evidence only for exercised paths.",
+          "runnable": true
+        },
+        {
+          "id": "cl812-ex2",
+          "language": "en",
+          "title": "Deterministic boundary tests",
+          "code": "#include <stdbool.h>\n#include <stddef.h>\n#include <stdio.h>\nbool index_is_valid(size_t index, size_t length) { return index < length; }\nint main(void)\n{\n    if (!index_is_valid(0, 3) || !index_is_valid(2, 3) || index_is_valid(3, 3) || index_is_valid(0, 0)) {\n        fputs(\"boundary test failed\\n\", stderr); return 1;\n    }\n    puts(\"boundary tests passed\"); return 0;\n}",
+          "explanation": "The test checks first and last valid indexes, one-past-the-end and an empty range. Run the same deterministic test in ordinary and sanitizer builds.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "List which defects static analysis may find and which require executing a test path.",
-      "independentTask": "Create a repeatable debug build and test checklist. Record tool versions and unresolved findings.",
+      "guidedTask": "Compile safe examples with warnings and with ASan plus UBSan where supported. Record commands and outputs and explain each tool's limitations.",
+      "independentTask": "Compile safe examples with warnings and with ASan plus UBSan where supported. Record commands and outputs and explain each tool's limitations. Add boundary and failure tests and explain the expected result for each.",
       "hints": [
-        "Run the same deterministic tests in ordinary and diagnostic builds.",
-        "A clean sanitizer run does not prove that unexecuted paths are correct.",
-        "Treat each diagnostic as evidence to investigate, not as a substitute for understanding."
+        "Use a separate diagnostic build so sanitizer flags do not become production flags.",
+        "Keep -g in debug builds to identify source locations.",
+        "ASan and UBSan detect different selected defect classes; neither is exhaustive.",
+        "A sanitizer cannot report a path the tests never execute.",
+        "Investigate the first relevant application frame and root cause.",
+        "Record unsupported tools and platform limitations instead of treating skipped checks as passes."
       ]
     }
   },
@@ -51,36 +70,58 @@
     "questions": [
       {
         "id": "cl812-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What is the main difference between static analysis and a runtime sanitizer?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "Static analysis inspects code without executing every path; a sanitizer instruments executed paths.",
+          "Both require every possible input to run.",
+          "A sanitizer proves all code correct."
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the topic and constraints described above."
+        "answer": "Static analysis inspects code without executing every path; a sanitizer instruments executed paths.",
+        "explanation": "They observe programs differently and have different strengths and blind spots."
       },
       {
         "id": "cl812-q2",
-        "prompt": "What should be verified before relying on the implementation?",
+        "prompt": "What does a clean ASan/UBSan run prove?",
         "options": [
-          "Preconditions, invariants, bounds and failure cases.",
-          "Only the name of the algorithm.",
-          "Whether one input produced a result."
+          "No issue was detected by enabled checks on paths exercised in that run.",
+          "The program has no undefined behaviour for any input.",
+          "All platforms behave identically."
         ],
-        "answer": "Preconditions, invariants, bounds and failure cases.",
-        "explanation": "Correctness depends on maintaining the data structure or algorithm contract."
+        "answer": "No issue was detected by enabled checks on paths exercised in that run.",
+        "explanation": "Runtime instrumentation reports only supported defects that occur in executed instrumented code."
       },
       {
         "id": "cl812-q3",
-        "prompt": "Which test strategy is most useful?",
+        "prompt": "Why include -g in a diagnostic build?",
         "options": [
-          "Test empty, boundary and representative operation sequences.",
-          "Ignore allocation failures.",
-          "Assume one successful example proves all cases."
+          "To include debug information mapping diagnostics to source locations.",
+          "To enable automatic allocation.",
+          "To disable warnings."
         ],
-        "answer": "Test empty, boundary and representative operation sequences.",
-        "explanation": "Targeted tests expose defects ordinary examples can miss."
+        "answer": "To include debug information mapping diagnostics to source locations.",
+        "explanation": "Debug symbols provide source-level context for debuggers and reports."
+      },
+      {
+        "id": "cl812-q4",
+        "prompt": "How should a static-analysis warning be handled?",
+        "options": [
+          "Inspect the reasoning and code path, then fix or document it with evidence.",
+          "Suppress every warning immediately.",
+          "Ignore it because compilation succeeded."
+        ],
+        "answer": "Inspect the reasoning and code path, then fix or document it with evidence.",
+        "explanation": "Analysis findings require judgement; false positives and real defects are both possible."
+      },
+      {
+        "id": "cl812-q5",
+        "prompt": "Which record makes a diagnostic result reproducible?",
+        "options": [
+          "Tool versions, flags, source revision, test input and output.",
+          "Only the executable filename.",
+          "A statement that it worked once."
+        ],
+        "answer": "Tool versions, flags, source revision, test input and output.",
+        "explanation": "Reproducibility requires enough detail to recreate the same build and test conditions."
       }
     ]
   },

@@ -6,11 +6,11 @@
   "title": "Boolean Conditions in C",
   "language": "en",
   "learningObjectives": [
-    "Explain the central rules behind boolean conditions in c in C.",
-    "Identify the relevant types, declarations, operators or library facilities.",
-    "Trace a worked example and explain its result.",
-    "Recognize common mistakes, portability concerns and unsafe assumptions.",
-    "Apply the concept in a small program and test normal and boundary cases."
+    "Explain how C conditions interpret zero as false and nonzero as true.",
+    "Use _Bool and the bool, true and false names where supported by the selected C version.",
+    "Recognize that relational and logical operators produce int results in C.",
+    "Distinguish logical operators && and || from bitwise operators & and |.",
+    "Write clear conditions and test boundary cases around zero and nonzero values."
   ],
   "prerequisites": [
     "CL1.1",
@@ -18,13 +18,13 @@
   ],
   "stages": {
     "understand": {
-      "concept": "C uses integer-like truth values in conditions: zero is false and nonzero is true. The standard _Bool type stores 0 or 1; stdbool.h provides the bool, true and false convenience names in C versions where it is available as a macro header. Relational and logical operators produce int results in C.",
+      "concept": "C conditions use scalar expressions: zero is false and nonzero is true. The type _Bool stores the values 0 or 1. The stdbool.h header provides bool, true and false convenience macros in C versions where the header defines them. Relational and logical operators produce int results in C. Logical && and || short-circuit; bitwise & and | operate on integer representations.",
       "whyItMatters": "Reliable decisions depend on clear conditions. Explicit boolean intent makes code easier to read and helps avoid confusing numeric values, pointers and truth conditions.",
       "analogy": "Think of a type as a contract that describes what kind of value an object can hold and which operations make sense for it.",
       "analogyLimit": "The analogy is only an introduction; C types also determine representation, conversions, alignment and constraints."
     },
     "explain": {
-      "narrative": "C uses integer-like truth values in conditions: zero is false and nonzero is true. The standard _Bool type stores 0 or 1; stdbool.h provides the bool, true and false convenience names in C versions where it is available as a macro header. Relational and logical operators produce int results in C.\n\nReliable decisions depend on clear conditions. Explicit boolean intent makes code easier to read and helps avoid confusing numeric values, pointers and truth conditions.\n\nWhen reviewing code, identify the declared types first, then trace conversions and the exact expression being evaluated. Compile with warnings enabled and test boundary values. Do not rely on assumptions about another compiler or machine.",
+      "narrative": "## 1. Truth values in C\n\nC does not require a separate built-in Boolean keyword in the way some languages do. In a condition, zero is false and any nonzero scalar value is true. The type `_Bool` stores 0 or 1.\n\n## 2. bool, true and false\n\nIn C versions where `<stdbool.h>` provides them as macros, `bool`, `true` and `false` make Boolean intent easier to read. These names do not change the underlying rules for conditions.\n\n## 3. Relational and logical operators\n\nOperators such as `<`, `>=`, `==` and `!=` compare values. Logical `&&` means AND and `||` means OR. Logical `!` negates a truth value. In C, these operators produce an int result of 0 or 1.\n\n## 4. Short-circuit evaluation\n\nFor `A && B`, B is evaluated only if A is true. For `A || B`, B is evaluated only if A is false. This lets code safely check a pointer before dereferencing it in the right operand, provided the left condition establishes the required guarantee.\n\n## 5. Logical versus bitwise\n\n`&&` and `||` combine truth conditions and short-circuit. `&` and `|` are bitwise operators on integer operands and do not short-circuit. Use the operator that matches the intended meaning.",
       "examples": [
         {
           "id": "cl2.10-ex1",
@@ -45,14 +45,14 @@
       ]
     },
     "practise": {
-      "guidedTask": "Write conditions for a valid age range, a non-empty array length and a successful status flag. Test true, false and boundary cases.",
-      "independentTask": "Refactor a long nested condition into named boolean variables and explain how each part contributes to the final decision.",
+      "guidedTask": "Write a small C program that demonstrates the central rules in CL2.10. Compile with warnings enabled, run it with ordinary and boundary values, and explain each result in your own words.",
+      "independentTask": "Create a second example for CL2.10 using different values and names. Include one likely mistake as a separate experiment, observe the compiler diagnostic or behavior, then correct it. Record the rule that explains the correction.",
       "hints": [
-        "Zero is false; nonzero is true in a C condition.",
-        "_Bool stores 0 or 1.",
-        "Logical operators produce int results in C.",
-        "Use parentheses to make compound conditions readable.",
-        "Test boundary values, not only typical values."
+        "Start by identifying the exact type of every object and expression.",
+        "Check the C language rule before assuming a platform-specific result.",
+        "Use compiler warnings as feedback, not as proof of correctness.",
+        "Test normal values and important boundaries.",
+        "Explain why the result follows from the language rules."
       ]
     }
   },
@@ -65,58 +65,58 @@
     "questions": [
       {
         "id": "cl2.10-q1",
-        "prompt": "Which statement is correct about boolean conditions in c?",
+        "prompt": "How does C interpret a scalar condition?",
         "options": [
-          "It follows C's type and language rules and should be checked with compiler diagnostics.",
-          "C ignores all declared types.",
-          "The browser decides its meaning."
+          "Zero is false and nonzero is true",
+          "Only 1 is true; all other values are invalid",
+          "Negative values are always false"
         ],
-        "answer": "It follows C's type and language rules and should be checked with compiler diagnostics.",
-        "explanation": "C semantics are defined by the language and implementation."
+        "answer": "Zero is false and nonzero is true",
+        "explanation": "C conditions use zero for false and nonzero for true."
       },
       {
         "id": "cl2.10-q2",
-        "prompt": "What is the safest general practice?",
+        "prompt": "What values can _Bool store?",
         "options": [
-          "Choose types and operations deliberately, initialize data and validate assumptions.",
-          "Ignore warnings and assume values are valid.",
-          "Use casts to silence every warning."
+          "0 or 1",
+          "Any floating-point value without conversion",
+          "Only negative integers"
         ],
-        "answer": "Choose types and operations deliberately, initialize data and validate assumptions.",
-        "explanation": "Deliberate types and checks improve correctness."
+        "answer": "0 or 1",
+        "explanation": "The _Bool type represents Boolean values as 0 or 1."
       },
       {
         "id": "cl2.10-q3",
-        "prompt": "What should you do when a result is unexpected?",
+        "prompt": "What is the key difference between && and &?",
         "options": [
-          "Create a small test case and inspect types, values and conversions.",
-          "Guess the result from the variable name.",
-          "Remove the test."
+          "&& is logical and short-circuits; & is bitwise and does not short-circuit",
+          "They are identical",
+          "& works only on strings"
         ],
-        "answer": "Create a small test case and inspect types, values and conversions.",
-        "explanation": "Small reproducible tests make behaviour easier to reason about."
+        "answer": "&& is logical and short-circuits; & is bitwise and does not short-circuit",
+        "explanation": "Logical AND can skip evaluation of its right operand."
       },
       {
         "id": "cl2.10-q4",
-        "prompt": "Which statement about portability is accurate?",
+        "prompt": "When is the right operand of A || B evaluated?",
         "options": [
-          "Some type sizes and ranges depend on the implementation.",
-          "All C implementations use identical type widths.",
-          "Compiler warnings change the C standard."
+          "Only when A is false",
+          "Only when A is true",
+          "Always before A"
         ],
-        "answer": "Some type sizes and ranges depend on the implementation.",
-        "explanation": "Use standard guarantees and inspect implementation limits."
+        "answer": "Only when A is false",
+        "explanation": "Logical OR short-circuits when its left operand is true."
       },
       {
         "id": "cl2.10-q5",
-        "prompt": "Which is a strong learning outcome?",
+        "prompt": "What type do relational and logical operators produce in C?",
         "options": [
-          "Explain the rule and apply it in a tested C program.",
-          "Memorize one output only.",
-          "Copy code without checking it."
+          "int",
+          "bool as a distinct mandatory keyword type",
+          "double"
         ],
-        "answer": "Explain the rule and apply it in a tested C program.",
-        "explanation": "Understanding plus testing demonstrates transferable knowledge."
+        "answer": "int",
+        "explanation": "These operators produce an int value of zero or one."
       }
     ]
   },

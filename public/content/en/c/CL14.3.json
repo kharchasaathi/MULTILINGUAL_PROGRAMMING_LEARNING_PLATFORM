@@ -6,39 +6,68 @@
   "title": "Integer overflow, signedness pitfalls and safe arithmetic",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its relevant rules.",
-    "Trace the example and justify its behaviour.",
-    "Identify important assumptions and failure cases.",
-    "Apply the concept in a reviewed and tested exercise."
+    "Distinguish defined unsigned modulo arithmetic from undefined signed overflow and identify the exact type in which an expression is evaluated.",
+    "Apply integer promotions and the usual arithmetic conversions to explain how mixed signed and unsigned expressions are evaluated.",
+    "Recognise dangerous boundary cases involving addition, subtraction, multiplication, division, negation, shifts and integer conversions.",
+    "Implement checked arithmetic that validates representability before evaluating an operation that could overflow.",
+    "Validate size calculations and allocation bounds using SIZE_MAX, sizeof and explicit count/capacity contracts.",
+    "Design tests for minimum and maximum values, mixed-sign inputs and failure paths while preserving outputs when a checked operation fails."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL2.4",
+    "CL2.6",
+    "CL2.7",
+    "CL2.8",
+    "CL3.9",
+    "CL4.10",
+    "CL6.10",
+    "CL7.12",
+    "CL10.15",
+    "CL12.1",
+    "CL12.2",
+    "CL13.3",
+    "CL13.4",
+    "CL14.1",
+    "CL14.2"
+  ],
   "stages": {
     "understand": {
-      "concept": "Unsigned integer arithmetic wraps modulo the range size. Signed integer overflow is undefined when the mathematical result cannot be represented. Usual arithmetic conversions can also change signedness and width in mixed expressions.",
-      "whyItMatters": "Integer arithmetic defects can corrupt sizes, indexes, financial calculations and security checks. Defensive code validates ranges before performing operations.",
-      "analogy": "Treat standards, interfaces and release steps as explicit contracts that make assumptions visible.",
-      "analogyLimit": "The analogy does not replace the C standard, implementation documentation or project-specific requirements."
+      "concept": "Integer arithmetic in C is governed by the type of the operands after integer promotions and the usual arithmetic conversions. The type written in a declaration is not always the type in which a later expression is evaluated. Before reviewing an arithmetic expression, identify each operand's type, the promotions and conversions, and the representable range of the resulting type.\n\n**Unsigned arithmetic** is defined modulo one more than the maximum value of the unsigned type. For an unsigned type with maximum UMAX, a result is reduced modulo UMAX + 1. This rule can be useful for bit masks and modular counters, but it does not make unsigned arithmetic automatically safe. An unsigned wrap can still cause a too-small allocation, an incorrect length check or an out-of-bounds index.\n\n**Signed overflow** is undefined behaviour when the mathematical result cannot be represented by the signed result type. Do not assume two's-complement hardware makes signed overflow wrap. A compiler may optimise on the assumption that signed overflow does not occur in a defined execution. The same care is needed for operations such as negating INT_MIN, dividing INT_MIN by -1, and left-shifting a signed value into or beyond an unrepresentable result.\n\n**Integer promotions and usual arithmetic conversions** can produce surprising results. Small integer types such as signed char and short are commonly promoted to int (or, where required, unsigned int). When signed and unsigned operands are combined, the conversions depend on their ranks and ranges. A negative signed value may be converted to a large unsigned value before a comparison or subtraction. For example, comparing a negative int with a sufficiently ranked unsigned int can convert the int to unsigned, making a test such as `signed_value < unsigned_value` behave differently from a mathematical signed comparison. Avoid mixed-sign comparisons unless the conversion is deliberate and documented.\n\n**Conversions are not overflow checks.** Converting an integer to an unsigned type is defined modulo the destination range. Converting an out-of-range value to a signed integer type is not a portable saturation operation; the result is implementation-defined or an implementation-defined signal may be raised under the applicable standard wording. Validate before converting when correctness depends on preserving the value.\n\n**Safe arithmetic validates first.** For addition of signed int values `a` and `b`, if `b > 0`, reject when `a > INT_MAX - b`; if `b < 0`, reject when `a < INT_MIN - b`. These limit calculations are themselves representable. Only then evaluate `a + b`. For subtraction, use corresponding preconditions or a reviewed helper. For multiplication, division-based checks must handle zero and the `INT_MIN * -1` cases explicitly; do not perform the multiplication and then inspect whether it overflowed.\n\n**Size calculations need their own checks.** Before allocating `count` objects of a type, verify `count <= SIZE_MAX / sizeof *pointer`. Otherwise `count * sizeof *pointer` may wrap in size_t and allocate less storage than intended. Check additions to buffer lengths and capacity growth as well. `sizeof` has type size_t, so mixing it with signed values can trigger unsigned conversions.\n\nThe goal is not to avoid every unsigned operation or every cast. It is to make the type and range contract explicit, reject values that cannot be represented, and ensure that the operation itself is evaluated only after its preconditions are established.",
+      "whyItMatters": "Integer defects can corrupt balances, lengths, indexes, allocation sizes and security boundaries. A wrapped size may lead to an undersized allocation followed by memory corruption; signed overflow may invalidate compiler assumptions. Checked operations turn hidden assumptions into explicit success or failure paths.",
+      "analogy": "Treat an integer type as a container with a documented range. Before combining values, check that the mathematical result fits the destination container rather than assuming the container will stretch.",
+      "analogyLimit": "The container analogy does not explain promotions or conversions between different integer types. Those require the actual C type rules and the implementation's documented ranges."
     },
     "explain": {
-      "narrative": "Unsigned integer arithmetic wraps modulo the range size. Signed integer overflow is undefined when the mathematical result cannot be represented. Usual arithmetic conversions can also change signedness and width in mixed expressions.\n\nState assumptions and constraints, consult the applicable standard or tool documentation, and verify the result with appropriate compiler diagnostics and tests. Separate portable guarantees from implementation-specific behaviour.",
+      "narrative": "**1. Determine the expression type.** Read declarations and integer constants, then apply integer promotions and the usual arithmetic conversions. Unsuffixed decimal constants, hexadecimal constants and suffixes such as `U`, `L` and `LL` can have different types. A cast changes the type of an expression; it does not prove that the value is in range.\n\n**2. Separate arithmetic from conversion.** `unsigned_value + 1u` uses unsigned arithmetic and wraps modulo the type's range. `signed_value + 1` is undefined if the mathematical result is outside the signed type's range. If one operand is unsigned, the other may be converted to unsigned before the operation. A negative value can therefore become a large positive unsigned value.\n\n**3. Audit boundary-sensitive operations.** Check addition, subtraction, multiplication, unary negation, division, remainder, shifts, increment/decrement, array indexing and allocation-size calculations. In particular, `-INT_MIN` and `INT_MIN / -1` cannot be represented as int. A shift count must be non-negative and smaller than the width of the promoted left operand; signed left shifts have additional representability rules. Do not use a left shift as a substitute for checked multiplication without proving the shift is valid.\n\n**4. Check before evaluating.** For signed addition, compare against `INT_MAX - b` or `INT_MIN - b` under the appropriate sign condition. For subtraction, derive the bounds without evaluating the potentially overflowing subtraction. For multiplication, use a reviewed helper with sign-specific division checks or a wider type only when that wider type is guaranteed to represent every possible product. Never calculate the potentially overflowing result first and test afterward.\n\n**5. Protect sizes and capacities.** Before `count * sizeof *items`, test `count > SIZE_MAX / sizeof *items`. Before growing a capacity, check the addition or multiplication used to calculate the new capacity. Ensure that the logical count never exceeds the allocated capacity and that indices remain below count. `realloc` failure must not destroy the original allocation: store its result in a temporary pointer.\n\n**6. Test the boundaries.** Include zero, one, negative values, INT_MIN, INT_MAX, exact-fit results, one-past-range results, mixed signed/unsigned operands, zero divisors and invalid shift counts. Test that failure leaves output parameters unchanged. Use compiler warnings, static analysis and undefined-behaviour sanitizers as supporting evidence, not as a replacement for a proof of the preconditions.",
       "examples": [
         {
           "id": "cl143-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <limits.h>\n#include <stdbool.h>\nbool add_int(int a, int b, int *out) {\n if (out == 0) return false;\n if (b > 0 && a > INT_MAX - b) return false;\n if (b < 0 && a < INT_MIN - b) return false;\n *out = a + b;\n return true;\n}",
-          "explanation": "The checks ensure the mathematical sum fits in int before performing the addition. The function reports failure rather than evaluating an overflowing signed expression.",
-          "runnable": false
+          "title": "Checked signed addition with output preservation",
+          "code": "#include <limits.h>\n#include <stdbool.h>\n#include <stdio.h>\n\nstatic bool checked_add_int(int a, int b, int *out) {\n    if (out == NULL) {\n        return false;\n    }\n    if ((b > 0 && a > INT_MAX - b) ||\n        (b < 0 && a < INT_MIN - b)) {\n        return false;\n    }\n    *out = a + b;\n    return true;\n}\n\nint main(void) {\n    int result = 99;\n\n    if (checked_add_int(20, 22, &result)) {\n        printf(\"20 + 22 = %d\\n\", result);\n    }\n    result = 99;\n    if (!checked_add_int(INT_MAX, 1, &result)) {\n        printf(\"overflow rejected; result remains %d\\n\", result);\n    }\n    result = 99;\n    if (!checked_add_int(INT_MIN, -1, &result)) {\n        printf(\"underflow rejected; result remains %d\\n\", result);\n    }\n    return 0;\n}",
+          "explanation": "The function rejects a null output pointer and checks the relevant boundary before evaluating `a + b`. When b is positive, INT_MAX - b is representable; when b is negative, INT_MIN - b is representable. The addition is performed only after the mathematical result is known to fit in int. The output is written only on success, so callers can detect failure without losing their previous value. The main function demonstrates an ordinary sum and both signed boundary failures.",
+          "runnable": true
+        },
+        {
+          "id": "cl143-ex2",
+          "language": "en",
+          "title": "Check an allocation count before multiplying by element size",
+          "code": "#include <stdint.h>\n#include <stdio.h>\n#include <stdlib.h>\n\nstatic int *allocate_ints(size_t count) {\n    int *items;\n\n    if (count == 0 || count > SIZE_MAX / sizeof *items) {\n        return NULL;\n    }\n    items = malloc(count * sizeof *items);\n    return items;\n}\n\nint main(void) {\n    const size_t count = 4;\n    int *values = allocate_ints(count);\n\n    if (values == NULL) {\n        puts(\"allocation rejected or unavailable\");\n        return 1;\n    }\n    for (size_t i = 0; i < count; ++i) {\n        values[i] = (int)(i + 1u);\n    }\n    printf(\"allocated %zu integers; last=%d\\n\", count, values[count - 1u]);\n    free(values);\n    return 0;\n}",
+          "explanation": "The guard checks the multiplication before it is evaluated. If count exceeds SIZE_MAX divided by the element size, the byte count cannot be represented in size_t and allocation is rejected. The cast in the demonstration loop is safe for this fixed count of four; a general conversion from size_t to int must be range-checked. A successful malloc still requires checking for NULL, and the caller must keep every index below count and release the allocation exactly once.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Test the function with INT_MAX plus one and INT_MIN minus one.",
-      "independentTask": "Write checked multiplication for signed integers and explain how sign combinations affect overflow checks.",
+      "guidedTask": "Extend the checked-addition function with a checked-subtraction operation. Derive the conditions for positive and negative b, and prove that the limit expressions used in the checks cannot overflow. Test ordinary results, INT_MAX minus -1, INT_MIN minus 1, zero, and a null output pointer. Ensure the output value is unchanged on every failure.",
+      "independentTask": "Write a safe integer-and-buffer utility that accepts a signed input count, rejects negative counts before converting to size_t, checks `count * sizeof element` against SIZE_MAX, and allocates only after all range checks pass. Add a checked capacity-growth function that prevents both arithmetic overflow and capacity exceeding a project-defined maximum. Document the input contract, return values, ownership and cleanup. Test INT_MIN, -1, 0, 1, INT_MAX, exact maximum allocation arithmetic, one-over-maximum and allocation failure paths.",
       "hints": [
-        "Validate before the potentially overflowing operation.",
-        "Be careful when converting between signed and unsigned types.",
-        "Use size_t for object sizes but still check size arithmetic for overflow."
+        "Write down the type of every operand after integer promotions; do not reason from the mathematical values alone.",
+        "Unsigned wraparound is defined, but a wrapped length or allocation size can still break program invariants.",
+        "Never perform a signed operation first and inspect the result for overflow afterward; check the boundary before evaluating it.",
+        "For signed addition, split the check by the sign of the second operand so the limit calculation stays representable.",
+        "Before multiplying a count by an element size, compare count with SIZE_MAX divided by that element size.",
+        "Test failure paths as carefully as success paths, especially output preservation, negative-to-unsigned conversion and exact boundary values."
       ]
     }
   },
@@ -51,36 +80,63 @@
     "questions": [
       {
         "id": "cl143-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What is the key difference between unsigned wraparound and signed integer overflow in C?",
         "options": [
-          "The C or learning principle described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "Both are guaranteed to wrap modulo the type's range.",
+          "Unsigned arithmetic is defined modulo the unsigned range; signed overflow is undefined when the result is not representable.",
+          "Signed overflow is implementation-defined and must always be documented.",
+          "Unsigned overflow is undefined, but signed overflow is unspecified."
         ],
-        "answer": "The C or learning principle described in this lesson.",
-        "explanation": "The correct choice follows the concept and constraints described above."
+        "answer": "Unsigned arithmetic is defined modulo the unsigned range; signed overflow is undefined when the result is not representable.",
+        "explanation": "C specifies modulo arithmetic for unsigned integer types. It does not guarantee wraparound for an unrepresentable signed result; that operation has undefined behaviour."
       },
       {
         "id": "cl143-q2",
-        "prompt": "What should be checked before applying the concept?",
+        "prompt": "An expression compares a negative int with an unsigned int of sufficient rank. What is an important risk?",
         "options": [
-          "The exact rules, assumptions and failure cases.",
-          "Only the file name.",
-          "Whether one unrelated example runs."
+          "The unsigned operand is always converted to int.",
+          "The negative int may be converted to unsigned, changing the comparison result.",
+          "The comparison is automatically undefined behaviour.",
+          "The compiler must reject every mixed-sign comparison."
         ],
-        "answer": "The exact rules, assumptions and failure cases.",
-        "explanation": "Reliable C engineering depends on understanding the applicable contract."
+        "answer": "The negative int may be converted to unsigned, changing the comparison result.",
+        "explanation": "The usual arithmetic conversions can convert the signed operand to unsigned. A negative value then becomes a large unsigned value, so the comparison may not match ordinary signed mathematical intuition."
       },
       {
         "id": "cl143-q3",
-        "prompt": "Which practice provides stronger evidence?",
+        "prompt": "Why must a checked-add function test bounds before evaluating `a + b`?",
         "options": [
-          "Use documented standards, diagnostics and targeted tests.",
-          "Assume one compiler's behaviour is universal.",
-          "Ignore warnings and boundary cases."
+          "Because checking after the addition is enough to recover from signed overflow.",
+          "Because the overflowing addition itself would already have undefined behaviour.",
+          "Because int addition is always performed as floating point.",
+          "Because INT_MAX and INT_MIN are optional library functions."
         ],
-        "answer": "Use documented standards, diagnostics and targeted tests.",
-        "explanation": "Multiple forms of evidence help distinguish guarantees from assumptions."
+        "answer": "Because the overflowing addition itself would already have undefined behaviour.",
+        "explanation": "A post-operation check cannot make an already undefined operation valid. The precondition must prove the result is representable before the addition is evaluated."
+      },
+      {
+        "id": "cl143-q4",
+        "prompt": "Before allocating count objects of type int, which check prevents overflow in the byte-size multiplication?",
+        "options": [
+          "Check `count > SIZE_MAX / sizeof(int)` before computing `count * sizeof(int)`.",
+          "Compute `count * sizeof(int)` and check whether it became negative.",
+          "Cast count to int and compare it with INT_MAX after multiplication.",
+          "Rely on malloc to detect every multiplication overflow in its argument."
+        ],
+        "answer": "Check `count > SIZE_MAX / sizeof(int)` before computing `count * sizeof(int)`.",
+        "explanation": "The division-based guard establishes that the product fits in size_t before the multiplication is evaluated. malloc receives only the already-validated byte count."
+      },
+      {
+        "id": "cl143-q5",
+        "prompt": "A function performs checked arithmetic through an output pointer. Which failure contract is safest for callers?",
+        "options": [
+          "Write a partial or wrapped value and return false.",
+          "Leave the output parameter unchanged on failure and write it only after all checks pass.",
+          "Always set the output to zero, even if the caller needs the previous value.",
+          "Return true whenever the output pointer is non-null."
+        ],
+        "answer": "Leave the output parameter unchanged on failure and write it only after all checks pass.",
+        "explanation": "Output preservation makes failure explicit and prevents callers from accidentally consuming a partial or invalid result. The caller can decide how to handle the error while retaining its prior state."
       }
     ]
   },

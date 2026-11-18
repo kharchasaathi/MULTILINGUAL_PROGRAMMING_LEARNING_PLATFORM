@@ -6,39 +6,50 @@
   "title": "C strings, character arrays and the null terminator",
   "language": "en",
   "learningObjectives": [
-    "Explain the language rule and its constraints.",
-    "Trace the example and predict its output.",
-    "Identify relevant boundary and safety cases.",
-    "Apply the concept in a tested C program."
+    "Explain the null-terminated byte-string convention used by C library functions.",
+    "Distinguish a valid C string from an arbitrary character array.",
+    "Reserve storage for the terminating null character.",
+    "Use strlen and puts with valid null-terminated strings.",
+    "Recognize that string length in bytes may differ from the number of user-perceived characters."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "C represents strings conventionally as arrays of char ending in the null character '\\0'. A character array is not necessarily a valid string unless a terminator occurs within its accessible storage.",
+      "concept": "C does not have a separate built-in string type. The standard library conventionally represents a string as a sequence of char elements ending with a null character, `\\0`. A character array is not automatically a valid string: a null terminator must occur within the accessible array. Functions such as strlen and puts rely on that terminator to determine where the string ends.",
       "whyItMatters": "This concept supports correct handling of C data and helps prevent invalid memory access or incorrect program behaviour.",
       "analogy": "Think of the construct as a precisely bounded sequence of storage and operations.",
       "analogyLimit": "The analogy does not replace C's rules for object lifetime, bounds, types or undefined behaviour."
     },
     "explain": {
-      "narrative": "C represents strings conventionally as arrays of char ending in the null character '\\0'. A character array is not necessarily a valid string unless a terminator occurs within its accessible storage.\n\nAlways check the types, object bounds and preconditions required by the operation. Compile with warnings enabled and test ordinary as well as boundary inputs.",
+      "narrative": "## 1. What is a C string?\n\nA C string is a sequence of char values followed by a null character. The null character has value zero and is written as `\\0` in source code. It is not the same as the digit character `'0'`.\n\n## 2. Character array versus string\n\n`char name[8]` is an array of eight characters, but it is not necessarily a valid string until a null character is stored within those eight elements. If the array contains no terminator, functions that expect a string may read beyond the object.\n\n## 3. Reserve terminator space\n\nTo store up to seven non-null characters as a string, an eight-element array is required so the final element can hold `\\0`. A string literal used to initialize an array includes its terminating null character in the required storage.\n\n## 4. Standard functions\n\n`strlen` counts the bytes before the first null character and does not include the terminator. `puts` writes a string and appends a newline. Both require a valid null-terminated string.\n\n## 5. Text encoding\n\nA byte-oriented C string may contain a multibyte encoding such as UTF-8. strlen reports bytes before the terminator, not necessarily visible characters or grapheme clusters. Unicode-aware text processing needs additional encoding-aware logic.",
       "examples": [
         {
-          "id": "cl45-ex1",
+          "id": "cl4.5-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "The terminator tells functions such as puts and strlen where the string ends. Storage must include the terminator in addition to visible characters.",
-          "explanation": "#include <stdio.h>\nint main(void) {\n char word[] = {'C','a','t','\\0'};\n printf(\"%s\\n\", word);\n printf(\"storage=%zu\\n\", sizeof word);\n return 0;\n}",
+          "title": "A character array initialized from a string literal",
+          "code": "#include <stdio.h>\n#include <string.h>\n\nint main(void) {\n    char language[] = \"C language\";\n    printf(\"%s has %zu bytes before the terminator\\n\",\n           language, strlen(language));\n    return 0;\n}",
+          "explanation": "The array includes storage for the null terminator. strlen counts the characters' encoded bytes before that terminator.",
+          "runnable": false
+        },
+        {
+          "id": "cl4.5-ex2",
+          "language": "en",
+          "title": "Reserve room for the null character",
+          "code": "#include <stdio.h>\n\nint main(void) {\n    char code[4] = {'C', '1', '7', '\\0'};\n    puts(code);\n    return 0;\n}",
+          "explanation": "The fourth element explicitly terminates the string. Without it, puts would not know where the string ends.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "The array contains four char elements: C, a, t and the terminating null character. Its storage size is four bytes because sizeof(char) is one byte.",
-      "independentTask": "Mark the element that terminates the string and predict what changes if it is removed.",
+      "guidedTask": "Implement a small C program demonstrating CL4.5. Identify the relevant array or string capacity, valid indices, expected results and failure cases before compiling and testing.",
+      "independentTask": "Create a second example for CL4.5 that handles a boundary case explicitly. Add tests for empty input, the smallest valid case, the largest valid case and one invalid or oversized case. Explain how your code prevents invalid access.",
       "hints": [
-        "Create a string array with capacity for a word and its terminator; explain the required capacity.",
-        "A string literal such as \"cat\" includes a terminating null character.",
-        "A char array without a terminator must not be passed to functions expecting a string."
+        "Write down the exact array length and valid index range.",
+        "Include null terminator space when working with C strings.",
+        "Check function preconditions and return values.",
+        "Pass array lengths explicitly when a function needs them.",
+        "Test exact-fit and one-past-boundary cases."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl45-q1",
-        "prompt": "Which statement best matches this lesson?",
+        "id": "cl4.5-q1",
+        "prompt": "What marks the end of a conventional C string?",
         "options": [
-          "The C rule and constraints explained in this lesson.",
-          "An unrelated HTML element.",
-          "A CSS property."
+          "The null character \\0",
+          "A newline in every case",
+          "The array's last allocated byte automatically"
         ],
-        "answer": "The C rule and constraints explained in this lesson.",
-        "explanation": "The correct choice follows the C rule and its constraints."
+        "answer": "The null character \\0",
+        "explanation": "C string functions scan until the null character."
       },
       {
-        "id": "cl45-q2",
-        "prompt": "How should a boundary-sensitive operation be checked?",
+        "id": "cl4.5-q2",
+        "prompt": "How many array elements are needed to store up to 7 visible single-byte characters as a C string?",
         "options": [
-          "Identify valid bounds and test boundary cases.",
-          "Assume C checks every array bound automatically.",
-          "Ignore compiler warnings."
+          "8",
+          "7",
+          "6"
         ],
-        "answer": "Identify valid bounds and test boundary cases.",
-        "explanation": "C requires the programmer to respect object bounds and preconditions."
+        "answer": "8",
+        "explanation": "The storage must include one additional element for the null terminator."
       },
       {
-        "id": "cl45-q3",
-        "prompt": "Why trace the example?",
+        "id": "cl4.5-q3",
+        "prompt": "What does strlen count?",
         "options": [
-          "To understand execution order and state changes.",
-          "To replace compilation.",
-          "To avoid checking input."
+          "Bytes before the first null character",
+          "The null terminator too",
+          "The number of Unicode grapheme clusters"
         ],
-        "answer": "To understand execution order and state changes.",
-        "explanation": "Tracing makes the data flow explicit; compilation and testing remain necessary."
+        "answer": "Bytes before the first null character",
+        "explanation": "strlen returns the number of char elements before the terminator."
+      },
+      {
+        "id": "cl4.5-q4",
+        "prompt": "Is every char array automatically a valid string?",
+        "options": [
+          "No; it must contain a null terminator within its accessible storage",
+          "Yes, every array is automatically terminated",
+          "Only arrays with an even length"
+        ],
+        "answer": "No; it must contain a null terminator within its accessible storage",
+        "explanation": "A character array may contain arbitrary bytes and no terminator."
+      },
+      {
+        "id": "cl4.5-q5",
+        "prompt": "Can strlen always be used to count user-perceived Unicode characters?",
+        "options": [
+          "No; multibyte encodings mean byte count can differ from character count",
+          "Yes, it counts grapheme clusters",
+          "Only for arrays with size_t"
+        ],
+        "answer": "No; multibyte encodings mean byte count can differ from character count",
+        "explanation": "strlen is byte-oriented and stops at the first null byte."
       }
     ]
   },

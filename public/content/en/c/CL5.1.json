@@ -6,39 +6,50 @@
   "title": "Reading user input and validating conversion results",
   "language": "en",
   "learningObjectives": [
-    "Explain the language rule and its constraints.",
-    "Trace the example and predict its behaviour.",
-    "Identify boundary and safety cases.",
-    "Apply the concept in a tested C program."
+    "Check scanf-family return values before using converted values.",
+    "Explain the difference between successful assignment count and valid application input.",
+    "Use fgets to read a line before parsing when robust line handling is needed.",
+    "Convert numeric text with strtol and inspect the end pointer and range errors.",
+    "Reject malformed, out-of-range and trailing unexpected input explicitly."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "Formatted input functions return the number of successful assignments. A program must check that count before using the destination objects. For robust line-oriented parsing, read a line and convert it with functions such as strtol while checking the end pointer and range.",
+      "concept": "Formatted input functions return the number of successful assignments, which must be checked before destination objects are used. A successful conversion does not prove that the entire input is valid or within the application's permitted range. For robust line-oriented parsing, read a bounded line and convert it with functions such as strtol while checking the end pointer, errno and destination range.",
       "whyItMatters": "This knowledge helps reason about C data representation, object bounds and valid memory access.",
       "analogy": "Think of memory objects as labelled storage and pointers as typed references to that storage.",
       "analogyLimit": "The analogy does not replace C's formal pointer, lifetime and object-access rules."
     },
     "explain": {
-      "narrative": "Formatted input functions return the number of successful assignments. A program must check that count before using the destination objects. For robust line-oriented parsing, read a line and convert it with functions such as strtol while checking the end pointer and range.\n\nCheck the declared types, object lifetime, valid bounds and function preconditions before using the construct. Enable compiler warnings and test edge cases.",
+      "narrative": "## 1. Check formatted input results\n\nFor `scanf`, the return value is the number of successful assignments. If one integer conversion is requested, require a return value of 1 before using the destination. A return value of 0 means the input did not match; EOF indicates an input failure or end-of-file before a conversion.\n\n## 2. Conversion is not validation\n\nA converted integer may still be outside the range allowed by the application. Check both the conversion result and the domain rule, such as an age being nonnegative and within a meaningful maximum.\n\n## 3. Prefer line-oriented parsing for robust input\n\nRead a bounded line with fgets, then parse the text. This separates reading from conversion and makes it easier to detect trailing characters, blank input and overlong lines.\n\n## 4. Use strtol carefully\n\nSet errno to zero before calling strtol. Check whether any digits were consumed by comparing the end pointer with the start. Check ERANGE and then validate the result against the destination type's limits. Skip permitted trailing whitespace and reject any other trailing characters.\n\n## 5. Define failure behavior\n\nDo not silently reuse an old variable value after conversion fails. Report invalid input, request another line or terminate according to the program's requirements. Clear the rest of an overlong input line before attempting the next read.",
       "examples": [
         {
-          "id": "cl51-ex1",
+          "id": "cl5.1-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "Input is untrusted data. A failed conversion, trailing characters or a value outside the destination type's range must not be treated as a valid number.",
-          "explanation": "#include <stdio.h>\nint main(void) {\n int age;\n printf(\"Age: \");\n if (scanf(\"%d\", &age) != 1) {\n  fputs(\"Invalid integer input\\n\", stderr);\n  return 1;\n }\n printf(\"Age entered: %d\\n\", age);\n return 0;\n}",
-          "runnable": false
+          "title": "Read a bounded token and check the scanf result",
+          "code": "#include <stdio.h>\n\nint main(void)\n{\n    char token[32];\n\n    if (scanf(\"%31s\", token) != 1) {\n        puts(\"No token was read\");\n        return 1;\n    }\n\n    printf(\"Token: %s\\n\", token);\n    return 0;\n}",
+          "explanation": "The field width limits the token to 31 bytes plus the terminating null character, and the return value confirms whether one assignment succeeded. This reads one whitespace-delimited token, not a complete line; any remaining characters stay in the input stream. For validated numeric input, use the checked strtol approach in the second example.",
+          "runnable": true
+        },
+        {
+          "id": "cl5.1-ex2",
+          "language": "en",
+          "title": "Parse an integer line with strtol",
+          "code": "#include <errno.h>\n#include <limits.h>\n#include <stdio.h>\n#include <stdlib.h>\n\nint main(void) {\n    char line[64];\n    if (fgets(line, sizeof line, stdin) == NULL) return 1;\n    errno = 0;\n    char *end;\n    long value = strtol(line, &end, 10);\n    if (end == line || errno == ERANGE || value < INT_MIN || value > INT_MAX) {\n        puts(\"Invalid or out-of-range integer\");\n        return 1;\n    }\n    while (*end == ' ' || *end == '\\t' || *end == '\\n') ++end;\n    if (*end != '\\0') {\n        puts(\"Unexpected trailing characters\");\n        return 1;\n    }\n    printf(\"Value: %ld\\n\", value);\n    return 0;\n}",
+          "explanation": "The example checks that digits were consumed, detects range errors, verifies int range and rejects non-whitespace trailing data. A production reader must also detect overlong lines. This complete program can be compiled and tested with valid, malformed, out-of-range and trailing-character input.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "scanf needs the address of age because it writes the converted value there. The return value is checked before age is read. This simple example detects failed integer conversion; production input should also define how trailing input is handled.",
-      "independentTask": "What happens if the user enters letters instead of an integer?",
+      "guidedTask": "Write a C program demonstrating CL5.1. State the relevant input, pointer or conversion contract, then compile and trace the normal and failure paths.",
+      "independentTask": "Create a second example for CL5.1 that exercises a boundary or invalid state. Add checks, document the ownership or input rules, and explain why unsafe behavior is avoided.",
       "hints": [
-        "Write an input routine that rejects invalid input and explains how it handles trailing characters and out-of-range values.",
-        "The conversion count is not the same as the number of characters consumed.",
-        "Use strtol for more controlled integer parsing and inspect errno, endptr and range before narrowing."
+        "Read the declared types carefully, including every pointer and qualifier level.",
+        "Check return values and validate inputs before use.",
+        "Keep object lifetime and ownership explicit.",
+        "Avoid dereferencing invalid or out-of-range pointers.",
+        "Test both success and failure paths."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl51-q1",
-        "prompt": "Which statement best matches this lesson?",
+        "id": "cl5.1-q1",
+        "prompt": "What does scanf return for one requested conversion that succeeds?",
         "options": [
-          "The C rule and constraints explained in this lesson.",
-          "An unrelated HTML element.",
-          "A CSS property."
+          "1",
+          "0",
+          "EOF in every case"
         ],
-        "answer": "The C rule and constraints explained in this lesson.",
-        "explanation": "The correct choice follows the C rule and its constraints."
+        "answer": "1",
+        "explanation": "The return value counts successful assignments."
       },
       {
-        "id": "cl51-q2",
-        "prompt": "What is the safest way to handle the relevant boundary or validity condition?",
+        "id": "cl5.1-q2",
+        "prompt": "Does a successful scanf conversion prove the input is within the application's allowed range?",
         "options": [
-          "Check the documented preconditions and bounds before access.",
-          "Assume C automatically checks every pointer and array access.",
-          "Ignore the result if one run appears successful."
+          "No; the program must validate the value separately",
+          "Yes, scanf enforces every application rule",
+          "Only for positive numbers"
         ],
-        "answer": "Check the documented preconditions and bounds before access.",
-        "explanation": "C programs must explicitly respect object bounds, pointer validity and conversion results."
+        "answer": "No; the program must validate the value separately",
+        "explanation": "Conversion success and domain validation are different checks."
       },
       {
-        "id": "cl51-q3",
-        "prompt": "Why should the example be traced?",
+        "id": "cl5.1-q3",
+        "prompt": "What does strtol's end pointer help identify?",
         "options": [
-          "To understand execution order and object state.",
-          "To replace compilation and tests.",
-          "To avoid checking inputs."
+          "Where numeric conversion stopped in the input text",
+          "The address of the destination variable",
+          "The number of bytes allocated"
         ],
-        "answer": "To understand execution order and object state.",
-        "explanation": "Tracing complements compilation, warnings and testing."
+        "answer": "Where numeric conversion stopped in the input text",
+        "explanation": "The end pointer makes it possible to detect no digits and trailing characters."
+      },
+      {
+        "id": "cl5.1-q4",
+        "prompt": "Why set errno to zero before strtol?",
+        "options": [
+          "To distinguish a range error reported by this conversion",
+          "To force the input to zero",
+          "To disable overflow"
+        ],
+        "answer": "To distinguish a range error reported by this conversion",
+        "explanation": "ERANGE can be used to detect a conversion outside long's range."
+      },
+      {
+        "id": "cl5.1-q5",
+        "prompt": "What should happen if conversion fails?",
+        "options": [
+          "Do not use the destination as if valid; handle the error explicitly",
+          "Assume the variable became zero",
+          "Continue with an unvalidated value"
+        ],
+        "answer": "Do not use the destination as if valid; handle the error explicitly",
+        "explanation": "A failed conversion must not be treated as valid application data."
       }
     ]
   },

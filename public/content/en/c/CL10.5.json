@@ -3,42 +3,59 @@
   "courseId": "c",
   "moduleId": "CL10",
   "topicId": "CL10.5",
-  "title": "Stack, queue and linked-list concepts",
+  "title": "Data structures and algorithm analysis introduction",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its constraints.",
-    "Trace the example and reason about its data flow.",
-    "Identify complexity, boundary or safety considerations.",
-    "Apply the concept in a tested C program."
+    "Explain what a data structure is and how it organizes values to support a defined set of operations.",
+    "Distinguish an abstract data type's behaviour from a particular in-memory representation.",
+    "Compare arrays, structures and pointer-linked nodes at a conceptual level, including contiguity and ownership.",
+    "Identify the operations a problem needs before selecting a representation.",
+    "Explain why time and auxiliary-space costs grow with input size, without confusing asymptotic growth with measured runtime.",
+    "Select a simple representation for a stated C problem and justify its trade-offs and constraints."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL4.1",
+    "CL6.1",
+    "CL10.1"
+  ],
   "stages": {
     "understand": {
-      "concept": "A stack follows last-in, first-out order; a queue follows first-in, first-out order; a linked list stores nodes connected by pointers. Each structure supports different operation patterns and has different memory and complexity trade-offs.",
-      "whyItMatters": "Choosing a structure based on required operations helps avoid inefficient or unnecessarily complex implementations.",
-      "analogy": "Treat an algorithm or data structure as a set of operations that must preserve a clearly stated contract.",
-      "analogyLimit": "The analogy does not replace formal complexity analysis, C object rules or algorithm preconditions."
+      "concept": "A data structure is a way of organizing data together with the operations used to access or modify it. An abstract data type (ADT) describes the behaviour and contract—such as push and pop—without requiring one particular memory layout. An implementation chooses concrete C objects, arrays, structures and pointers to provide that behaviour.",
+      "whyItMatters": "The same values can be stored in different ways, and each representation makes some operations simpler or more expensive. Choosing based on required operations, data size and lifetime is more reliable than choosing a structure because it is familiar.",
+      "analogy": "A set of customer records could be kept in numbered drawers, a linked chain of folders or an indexed catalogue. Each arrangement supports different ways of finding, inserting and removing records.",
+      "analogyLimit": "Physical filing analogies do not capture pointer validity, object lifetime, allocation failure, cache behaviour or the formal costs of C operations."
     },
     "explain": {
-      "narrative": "A stack follows last-in, first-out order; a queue follows first-in, first-out order; a linked list stores nodes connected by pointers. Each structure supports different operation patterns and has different memory and complexity trade-offs.\n\nBefore implementation, state input constraints, empty-case behaviour, ownership and invariants. Compile with warnings and test representative, boundary and failure cases.",
+      "narrative": "Start with the operations the program must support: access by position, search by key, insert, delete, traverse, or process in arrival order. An array stores elements contiguously and supports constant-time indexing when the index is valid, but inserting in the middle usually requires shifting elements. A linked structure connects separately stored nodes through pointers; insertion at a known link can be inexpensive, but traversal follows links and requires careful lifetime management.\\n\\nA structure groups related fields into one object. An ADT is a contract, not a memory layout: a stack can be implemented with an array or a linked list while keeping the same last-in, first-out operations. Keep this distinction clear when discussing interfaces and implementations.\\n\\nAlgorithm analysis asks how an operation's work and extra memory grow as the input size grows. Count the dominant operations and state whether the estimate is best, average or worst case. Big-O describes an asymptotic upper bound, not seconds or a hardware benchmark. Later lessons examine specific growth classes and structures in detail.",
       "examples": [
         {
           "id": "cl105-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\n#define CAPACITY 4\nint main(void) {\n int stack[CAPACITY], top = 0;\n stack[top++] = 10;\n stack[top++] = 20;\n int item = stack[--top];\n printf(\"%d\\n\", item);\n return 0;\n}",
-          "explanation": "The stack stores two values and removes the most recently added value, 20. The example uses a fixed array and an index as the stack top.",
+          "title": "An array gives indexed access",
+          "code": "#include <stddef.h>\\n\\nint main(void)\\n{\\n    const int temperatures[] = {18, 21, 19, 24};\\n    const size_t count = sizeof temperatures / sizeof temperatures[0];\\n    size_t selected = 2U;\\n\\n    if (selected >= count) {\\n        return 1;\\n    }\\n    return temperatures[selected] == 19 ? 0 : 2;\\n}",
+          "explanation": "The array elements are contiguous and the program accesses one element by index after checking the bound. The count is derived from the array object rather than hard-coded. Once the array is passed to a function as a parameter, it is a pointer parameter and sizeof no longer gives the original array length.",
+          "runnable": true
+        },
+        {
+          "id": "cl105-ex2",
+          "language": "en",
+          "title": "Separate an ADT contract from its representation",
+          "code": "/* Stack ADT contract (representation-independent):\\n   push(x): add x to the top, or report full/failure\\n   pop(out): remove the top item, or report empty/failure\\n   peek(out): read the top item without removing it\\n   is_empty(): report whether there are no items\\n\\n   Possible representations: fixed array + count,\\n   dynamically allocated array, or linked nodes. */",
+          "explanation": "The operations define observable behaviour. The implementation can change while callers continue to use the same contract, provided capacity, failure and ownership rules remain consistent.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Draw the stack after each push and pop.",
-      "independentTask": "Implement a bounded queue with front, rear and count fields. Define full and empty conditions.",
+      "guidedTask": "For a contact list, identify the operations users need: lookup by name, append, delete, iterate and access by position. Compare an array and linked list for those operations, stating what each representation makes easy or difficult.",
+      "independentTask": "Choose a data representation for a small queue of sensor readings with a known maximum capacity. State its operations, memory requirements, empty/full behaviour and why your choice fits the constraints.",
       "hints": [
-        "A stack's pop operation must check that the stack is not empty.",
-        "A queue implementation must handle wrap-around when using a circular array.",
-        "A linked list requires careful allocation and release of every node."
+        "List required operations before choosing an implementation.",
+        "An ADT describes behaviour; an array or linked list is a possible representation.",
+        "Arrays are contiguous; linked nodes are separate objects connected by pointers.",
+        "Do not assume linked lists are automatically faster than arrays.",
+        "Include memory ownership and allocation failure in the design.",
+        "Big-O describes growth, not exact execution time."
       ]
     }
   },
@@ -51,36 +68,63 @@
     "questions": [
       {
         "id": "cl105-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What does an abstract data type primarily specify?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "The operations and their behaviour contract",
+          "The exact address of every object",
+          "The compiler's memory allocator",
+          "The syntax of a C loop"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the concept and constraints described above."
+        "answer": "The operations and their behaviour contract",
+        "explanation": "An ADT describes what operations mean, not the only way to represent them."
       },
       {
         "id": "cl105-q2",
-        "prompt": "What should be checked before relying on this algorithm or structure?",
+        "prompt": "Which property is characteristic of a C array?",
         "options": [
-          "Its preconditions, invariants, bounds and failure cases.",
-          "Only the name of the data structure.",
-          "Whether one example produced an output."
+          "Its elements are stored contiguously",
+          "Every element has an independent allocation",
+          "It automatically grows when full",
+          "It stores elements of unrelated types"
         ],
-        "answer": "Its preconditions, invariants, bounds and failure cases.",
-        "explanation": "Correctness depends on maintaining the algorithm's contract."
+        "answer": "Its elements are stored contiguously",
+        "explanation": "C arrays are contiguous sequences of elements of one element type."
       },
       {
         "id": "cl105-q3",
-        "prompt": "Which practice supports reliable implementation?",
+        "prompt": "Which is a typical trade-off of a linked list compared with an array?",
         "options": [
-          "Test empty, boundary and representative inputs.",
-          "Ignore allocation failures.",
-          "Assume average complexity guarantees every operation's worst case."
+          "Traversal follows links and indexed access is not constant-time",
+          "It always uses less memory",
+          "It guarantees faster search",
+          "It cannot be dynamically allocated"
         ],
-        "answer": "Test empty, boundary and representative inputs.",
-        "explanation": "Targeted tests expose defects that ordinary examples may miss."
+        "answer": "Traversal follows links and indexed access is not constant-time",
+        "explanation": "Linked lists require pointer traversal and per-node link storage."
+      },
+      {
+        "id": "cl105-q4",
+        "prompt": "Why should required operations guide data-structure selection?",
+        "options": [
+          "Different representations have different access, update and memory costs",
+          "All structures have identical behaviour and cost",
+          "The shortest type name is always best",
+          "The choice affects only printed formatting"
+        ],
+        "answer": "Different representations have different access, update and memory costs",
+        "explanation": "A structure is useful when its operation profile matches the problem."
+      },
+      {
+        "id": "cl105-q5",
+        "prompt": "What does asymptotic analysis describe?",
+        "options": [
+          "How resource use grows as input size increases",
+          "An exact runtime in milliseconds on every machine",
+          "The number of lines in the source file",
+          "The compiler version used"
+        ],
+        "answer": "How resource use grows as input size increases",
+        "explanation": "Asymptotic analysis describes growth and abstracts away many machine-specific constants."
       }
     ]
   },

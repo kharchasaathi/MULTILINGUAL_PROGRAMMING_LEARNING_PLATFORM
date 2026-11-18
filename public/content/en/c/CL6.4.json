@@ -6,39 +6,50 @@
   "title": "Scope, lifetime, storage duration and linkage",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C language rules.",
-    "Trace the example and explain data flow.",
-    "Identify common errors and boundary conditions.",
-    "Apply the concept in a small tested program."
+    "Distinguish identifier scope from object storage duration.",
+    "Identify block, file and function prototype scopes.",
+    "Explain automatic, static and allocated storage durations.",
+    "Explain external and internal linkage at file scope.",
+    "Avoid using objects outside their lifetime and identifiers outside their scope."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "Scope describes where an identifier can be used in source code. Storage duration describes how long an object's storage exists. Linkage describes whether declarations in different scopes or translation units refer to the same entity. These are distinct properties.",
+      "concept": "Scope describes where an identifier can be used in source code. Storage duration describes the lifetime of an object's storage. Linkage describes whether declarations in different scopes or translation units refer to the same entity. These are separate properties and must not be treated as synonyms.",
       "whyItMatters": "Confusing scope with lifetime or linkage causes bugs in global state, local objects, static variables and multi-file programs.",
       "analogy": "Treat a function or pointer operation as an explicit contract between caller and callee.",
       "analogyLimit": "The analogy does not replace C's formal rules for types, object lifetime, scope and linkage."
     },
     "explain": {
-      "narrative": "Scope describes where an identifier can be used in source code. Storage duration describes how long an object's storage exists. Linkage describes whether declarations in different scopes or translation units refer to the same entity. These are distinct properties.\n\nWhen applying this concept, check declared types, preconditions, object lifetime and all control-flow paths. Compile with warnings enabled and test both typical and boundary inputs.",
+      "narrative": "## 1. Scope\n\nBlock scope begins at a declaration within a block and ends at the end of that block. File scope applies to declarations outside functions. Function prototype scope applies to parameter names in a prototype.\n\n## 2. Storage duration\n\nAutomatic objects generally exist during execution of their block. Static-storage-duration objects exist for the entire program execution. Allocated storage exists from successful allocation until it is released.\n\n## 3. Static local objects\n\nA block-scope object declared static retains its value between function calls. Its identifier still has block scope, even though its storage duration is static.\n\n## 4. Linkage\n\nExternal linkage can make the same function or object identifiable across translation units. Internal linkage, commonly specified with static at file scope, restricts the entity to the translation unit. Some identifiers have no linkage.\n\n## 5. Avoid lifetime errors\n\nA pointer does not extend an object's lifetime. Do not return or retain pointers to automatic objects after their blocks end. Release allocated storage when its owner is finished.",
       "examples": [
         {
-          "id": "cl64-ex1",
+          "id": "cl6.4-ex1",
           "language": "en",
-          "title": "Focused C example",
+          "title": "Core example",
           "code": "#include <stdio.h>\nint next_id(void) {\n static int next = 1;\n return next++;\n}\nint main(void) {\n printf(\"%d %d %d\\n\", next_id(), next_id(), next_id());\n return 0;\n}",
-          "explanation": "The variable next has block scope but static storage duration. Its value persists between calls even though its name is visible only inside next_id.",
+          "explanation": "Trace each declaration, call, expression and return. Check types and boundary conditions.",
+          "runnable": false
+        },
+        {
+          "id": "cl6.4-ex2",
+          "language": "en",
+          "title": "Apply the function contract",
+          "code": "#include <stdio.h>\nint next(void) { static int value = 1; return value++; }\nint main(void) { printf(\"%d %d\\n\", next(), next()); return 0; }",
+          "explanation": "This second example reinforces the function contract. Compile with warnings and test both valid and boundary inputs.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Compare an automatic local variable with the static local variable in this example.",
-      "independentTask": "Create a function with a static call counter and explain its scope and storage duration.",
+      "guidedTask": "Implement a focused C program demonstrating CL6.4. State the function's inputs, output, preconditions and failure behavior before coding.",
+      "independentTask": "Create a second implementation of CL6.4 with a clear interface contract. Add tests for ordinary input, boundary input and a failure or invalid case; explain the result.",
       "hints": [
-        "A block-scope identifier can designate an object with static storage duration.",
-        "extern declarations and external linkage need consistent declarations across translation units.",
-        "Prefer limited scope and avoid unnecessary mutable global state."
+        "Write the function prototype before its implementation.",
+        "Trace argument values and return paths explicitly.",
+        "Check pointer validity and object lifetime where relevant.",
+        "Use compiler warnings to catch type mismatches.",
+        "Test boundary cases and failure paths."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl64-q1",
-        "prompt": "Which statement best describes the lesson?",
+        "id": "cl6.4-q1",
+        "prompt": "What does scope describe?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "Where an identifier can be used in source code",
+          "How long allocated memory exists",
+          "Which CPU executes the program"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the C rule described above."
+        "answer": "Where an identifier can be used in source code",
+        "explanation": "Scope is a property of identifier visibility."
       },
       {
-        "id": "cl64-q2",
-        "prompt": "What should be checked before relying on this construct?",
+        "id": "cl6.4-q2",
+        "prompt": "What does storage duration describe?",
         "options": [
-          "Its type rules, preconditions and lifetime or range requirements.",
-          "Only whether the code looks short.",
-          "Whether it worked once on another machine."
+          "The lifetime of an object's storage",
+          "Where a variable name can be written",
+          "How many parameters a function has"
         ],
-        "answer": "Its type rules, preconditions and lifetime or range requirements.",
-        "explanation": "C correctness depends on the language rules and valid object use."
+        "answer": "The lifetime of an object's storage",
+        "explanation": "Storage duration describes how long storage is reserved for an object."
       },
       {
-        "id": "cl64-q3",
-        "prompt": "What is a sound verification practice?",
+        "id": "cl6.4-q3",
+        "prompt": "What does a static local variable retain between calls?",
         "options": [
-          "Compile with warnings and test representative and boundary cases.",
-          "Ignore diagnostics.",
-          "Assume one output proves all cases."
+          "Its stored value",
+          "Its block scope becomes file scope",
+          "Its address must change"
         ],
-        "answer": "Compile with warnings and test representative and boundary cases.",
-        "explanation": "Diagnostics and tests provide evidence across relevant cases."
+        "answer": "Its stored value",
+        "explanation": "Static storage duration lasts for the entire program execution."
+      },
+      {
+        "id": "cl6.4-q4",
+        "prompt": "What does static at file scope commonly specify for a function or object?",
+        "options": [
+          "Internal linkage",
+          "Automatic storage duration",
+          "Block scope"
+        ],
+        "answer": "Internal linkage",
+        "explanation": "File-scope static gives the identifier internal linkage."
+      },
+      {
+        "id": "cl6.4-q5",
+        "prompt": "Does taking an object's address extend its lifetime?",
+        "options": [
+          "No",
+          "Yes, until free is called",
+          "Only for local arrays"
+        ],
+        "answer": "No",
+        "explanation": "A pointer does not change the object's lifetime rules."
       }
     ]
   },

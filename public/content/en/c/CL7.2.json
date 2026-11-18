@@ -6,39 +6,50 @@
   "title": "Writing text and formatted data to files",
   "language": "en",
   "learningObjectives": [
-    "Explain the C concept and its rules.",
-    "Trace the example and describe data flow.",
-    "Identify relevant failure and boundary cases.",
-    "Apply the concept in a tested C program."
+    "Use fputc, fputs and fprintf for character, string and formatted output.",
+    "Check each output function's return value.",
+    "Use format specifiers that match the supplied argument types.",
+    "Understand that buffered output may fail during fflush or fclose.",
+    "Avoid writing untrusted text as a printf format string."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "A FILE stream can receive character, string and formatted output through functions such as fputc, fputs and fprintf. These functions report failures through their return values; buffered output may not reach the underlying file until a flush or close.",
+      "concept": "C streams support character, string and formatted output through fputc, fputs and fprintf. Output is commonly buffered, so a successful write call does not guarantee that data has reached the underlying file. Check the write operation and the later flush or close result. Treat format strings as trusted program data.",
       "whyItMatters": "Checking write results prevents a program from reporting success when storage is full, a device fails or the stream becomes invalid.",
       "analogy": "Treat the operation as a clearly specified contract between the program and its data.",
       "analogyLimit": "The analogy does not replace C's type, lifetime, I/O and object representation rules."
     },
     "explain": {
-      "narrative": "A FILE stream can receive character, string and formatted output through functions such as fputc, fputs and fprintf. These functions report failures through their return values; buffered output may not reach the underlying file until a flush or close.\n\nCheck all return values, object lifetimes, types and preconditions. Enable compiler warnings and test expected as well as failure paths.",
+      "narrative": "## 1. Character and string output\n\nUse fputc to write one character and fputs to write a null-terminated string. Check for EOF or the documented failure result.\n\n## 2. Formatted output\n\nfprintf writes formatted data to a stream. Its conversion specifiers must match the types of the corresponding arguments. Use `%zu` for size_t and appropriate length modifiers for other types.\n\n## 3. Buffering\n\nThe C library may buffer output. Errors can appear when the buffer is flushed explicitly or when the stream is closed. Check fflush and fclose when reliable output matters.\n\n## 4. Format-string safety\n\nDo not pass untrusted input as the format string. Use `fprintf(file, \"%s\", text)` rather than `fprintf(file, text)` when text is data.\n\n## 5. Resource handling\n\nCheck fopen, every important write, and fclose. A program should not report a successful save if the final close reports failure.",
       "examples": [
         {
-          "id": "cl72-ex1",
+          "id": "cl7.2-ex1",
           "language": "en",
-          "title": "Focused C example",
+          "title": "Core concept",
           "code": "#include <stdio.h>\nint main(void) {\n FILE *file = fopen(\"report.txt\", \"w\");\n if (file == NULL) return 1;\n int ok = fprintf(file, \"Item=%s Quantity=%d\\n\", \"Cable\", 4) >= 0;\n if (fclose(file) == EOF) ok = 0;\n return ok ? 0 : 1;\n}",
-          "explanation": "fprintf writes formatted text and returns a nonnegative count on success. fclose is checked because pending buffered output can fail during close.",
+          "explanation": "Trace the operations and check the relevant C standard library contracts and failure cases.",
+          "runnable": false
+        },
+        {
+          "id": "cl7.2-ex2",
+          "language": "en",
+          "title": "Apply the concept safely",
+          "code": "#include <stdio.h>\nint main(void) { FILE *f = fopen(\"safe.txt\", \"w\"); if (!f) return 1; const char *text = \"user supplied text\"; int ok = fprintf(f, \"%s\\n\", text) >= 0; if (fclose(f) == EOF) ok = 0; return ok ? 0 : 1; }",
+          "explanation": "This example reinforces the topic with explicit validation or resource handling. Compile with warnings and test failure paths.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Identify both possible failure points in the example.",
-      "independentTask": "Write a report containing several records. Check each output operation and the final close.",
+      "guidedTask": "Create a small C program demonstrating Writing text and formatted data to files. Write down its preconditions, expected result and failure handling before implementation.",
+      "independentTask": "Extend the example for Writing text and formatted data to files to handle a boundary case and an error case. Explain the relevant C rule and add a test for each path.",
       "hints": [
-        "Use format specifiers that match the supplied argument types.",
-        "Do not treat a successful fprintf as proof that data is safely stored on durable media.",
-        "Check the return values of writes and fclose."
+        "Read the declaration and function contract carefully.",
+        "Check all library return values before using results.",
+        "Keep object bounds, lifetime and resource ownership explicit.",
+        "Do not assume implementation-specific memory or file representations are portable.",
+        "Test both success and failure paths."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl72-q1",
-        "prompt": "Which statement best describes the lesson?",
+        "id": "cl7.2-q1",
+        "prompt": "Which function writes a null-terminated string to a stream?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "fputs",
+          "fgetc",
+          "fopen"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the C rule described in the lesson."
+        "answer": "fputs",
+        "explanation": "fputs writes a string to the selected stream."
       },
       {
-        "id": "cl72-q2",
-        "prompt": "What should be verified before using this feature?",
+        "id": "cl7.2-q2",
+        "prompt": "What should be checked after fprintf?",
         "options": [
-          "Types, preconditions, object validity and relevant return values.",
-          "Only the source file name.",
-          "Whether a single run appeared successful."
+          "Its return value for an output error",
+          "The pointer's printed address",
+          "The file's extension"
         ],
-        "answer": "Types, preconditions, object validity and relevant return values.",
-        "explanation": "C correctness depends on valid objects, correct types and checked operations."
+        "answer": "Its return value for an output error",
+        "explanation": "fprintf reports output failure through its return value."
       },
       {
-        "id": "cl72-q3",
-        "prompt": "Which practice improves reliability?",
+        "id": "cl7.2-q3",
+        "prompt": "Why can a successful write call be followed by a close failure?",
         "options": [
-          "Compile with warnings and test normal and failure paths.",
-          "Ignore I/O and compiler diagnostics.",
-          "Assume all environments behave identically."
+          "Output may be buffered until later",
+          "fclose runs the compiler",
+          "The file name changes"
         ],
-        "answer": "Compile with warnings and test normal and failure paths.",
-        "explanation": "Diagnostics and tests provide evidence for program behaviour."
+        "answer": "Output may be buffered until later",
+        "explanation": "The final flush can reveal a delayed I/O error."
+      },
+      {
+        "id": "cl7.2-q4",
+        "prompt": "Which is the safer way to write untrusted text?",
+        "options": [
+          "fprintf(file, \"%s\", text)",
+          "fprintf(file, text)",
+          "fprintf(text, file)"
+        ],
+        "answer": "fprintf(file, \"%s\", text)",
+        "explanation": "The format string remains a trusted constant; user text is treated as data."
+      },
+      {
+        "id": "cl7.2-q5",
+        "prompt": "Which format specifier is appropriate for size_t?",
+        "options": [
+          "%zu",
+          "%d",
+          "%p"
+        ],
+        "answer": "%zu",
+        "explanation": "The z length modifier is used for size_t with the u conversion."
       }
     ]
   },

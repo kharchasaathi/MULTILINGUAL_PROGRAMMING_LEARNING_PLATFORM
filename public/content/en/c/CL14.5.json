@@ -6,39 +6,67 @@
   "title": "Translation units, declarations, definitions and external linkage",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its relevant rules.",
-    "Trace the example and justify its behaviour.",
-    "Identify important assumptions and failure cases.",
-    "Apply the concept in a reviewed and tested exercise."
+    "Explain how preprocessing produces a translation unit and distinguish source files from the translation units compiled by an implementation.",
+    "Distinguish declarations, function definitions, object definitions and tentative definitions, including the role of initializers and storage allocation.",
+    "Explain scope, linkage and storage duration as separate properties and identify no linkage, internal linkage and external linkage.",
+    "Design headers containing compatible public declarations and use include guards without introducing duplicate external definitions.",
+    "Use extern and static correctly to share program-wide interfaces or restrict file-scope identifiers to one translation unit.",
+    "Diagnose common multi-file build failures such as missing definitions, multiple definitions, incompatible declarations and accidental header-defined objects."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL1.6",
+    "CL2.6",
+    "CL2.7",
+    "CL3.9",
+    "CL4.10",
+    "CL6.10",
+    "CL7.12",
+    "CL9.8",
+    "CL12.1",
+    "CL12.2",
+    "CL13.4",
+    "CL14.1",
+    "CL14.2"
+  ],
   "stages": {
     "understand": {
-      "concept": "A translation unit is the source file after preprocessing. Declarations introduce identifiers and types; definitions provide entities or storage. External linkage allows compatible declarations in different translation units to refer to the same function or object.",
-      "whyItMatters": "Multi-file programs depend on consistent declarations and exactly appropriate definitions. Linkage errors can arise from missing or duplicate definitions and inconsistent interfaces.",
-      "analogy": "Treat standards, interfaces and release steps as explicit contracts that make assumptions visible.",
-      "analogyLimit": "The analogy does not replace the C standard, implementation documentation or project-specific requirements."
+      "concept": "A multi-file C program is built from **translation units**. A translation unit is the source file after preprocessing: included header contents are expanded, macros are processed and conditional compilation is resolved. Each translation unit is compiled separately into an object file or equivalent intermediate output; the linker then combines object files and libraries to resolve references. One source file can produce a translation unit, but the preprocessed result—not merely the original text—is what the language describes as a translation unit.\n\nA **declaration** introduces an identifier and describes its type and other properties. A function prototype such as `int calculate(int value);` declares a function but does not provide its body. A **definition** is a declaration that also defines the entity: a function definition supplies its body, and an object definition causes storage to be reserved for the object. At file scope, an object declaration without an initializer and without `extern` can be a **tentative definition**; if no other definition for that identifier appears in the translation unit, it is treated as if a zero-initialized definition appeared at the end of the translation unit. A file-scope declaration such as `extern int total;` without an initializer is ordinarily only a declaration. An `extern` object declaration with an initializer is a definition.\n\nDo not confuse three independent properties:\n\n- **Scope** describes where an identifier can be used in source code: file scope, block scope, function prototype scope or function scope.\n- **Linkage** describes whether declarations in different scopes or translation units can refer to the same entity. An identifier can have no linkage, internal linkage or external linkage.\n- **Storage duration** describes the lifetime of the storage: static, thread, automatic or allocated storage duration.\n\nA file-scope function or object normally has external linkage unless it is declared `static` or another rule applies. `static` at file scope gives an identifier internal linkage: it can be used within that translation unit but is not the same externally linked name as a similarly named identifier in another translation unit. A block-scope ordinary local variable normally has no linkage and automatic storage duration. A block-scope local declared `static` still has no linkage, but its storage duration is static. Thus `static` does not always mean internal linkage; its effect depends on where it appears.\n\n**Headers describe interfaces; source files provide definitions.** A header commonly contains function prototypes, type definitions, macros and `extern` declarations for objects that are defined in one source file. Use an include guard to prevent the same header's contents from being processed repeatedly within one translation unit. An include guard does not prevent the header from being included by several different translation units, so it does not make an ordinary external object definition safe in a header. Put a shared object's single definition in one `.c` file and put an `extern` declaration in the header. Avoid defining non-static external functions or objects in headers unless a carefully designed language rule and project pattern specifically requires it.\n\n**External linkage requires compatible declarations and one program-level definition where the standard requires one.** A caller may see a compatible function prototype in a header, while one source file provides the function body. A missing definition commonly produces a linker error. Defining the same external function or object in multiple translation units commonly produces a multiple-definition linker error and may also violate C's program requirements. Declarations that disagree about parameter types, return types, qualifiers or object types can make the program invalid even if a particular linker accepts the symbol names.\n\nA file-scope `static` helper is useful for private implementation details. It prevents another translation unit from referring to that function or object by external linkage. Use it for implementation-only names, not as a substitute for a documented public interface. In C, a file-scope `const` object does not automatically acquire C++-style internal linkage; if the object should be private, declare it `static const`.\n\nThe reliable multi-file pattern is: declare a public interface once in a guarded header, include that header where the interface is used or defined, define each externally linked object or function in exactly the intended source file, and use file-scope `static` for private implementation details. Keep declarations consistent and compile every translation unit before linking.",
+      "whyItMatters": "Large C programs are split across files to separate interfaces and implementations. Correct declarations and linkage allow independently compiled modules to agree about shared functions and objects. Poor header design creates duplicate definitions, unresolved references, inconsistent types and accidental symbol exposure.",
+      "analogy": "A header is like a published interface contract, each source file is an implementation unit, and the linker connects the names that the contract says are shared. A declaration tells a caller what exists; a definition supplies the actual entity.",
+      "analogyLimit": "The analogy does not replace C's precise rules for scope, linkage, tentative definitions, inline functions or storage duration. These properties must be checked separately."
     },
     "explain": {
-      "narrative": "A translation unit is the source file after preprocessing. Declarations introduce identifiers and types; definitions provide entities or storage. External linkage allows compatible declarations in different translation units to refer to the same function or object.\n\nState assumptions and constraints, consult the applicable standard or tool documentation, and verify the result with appropriate compiler diagnostics and tests. Separate portable guarantees from implementation-specific behaviour.",
+      "narrative": "**1. Follow the build stages.** The preprocessor expands includes and macros to produce a translation unit. The compiler translates that unit into an object file. The linker combines object files and libraries. A compile error usually concerns one translation unit; an unresolved or duplicate external symbol is often discovered during linking. A successful compile of one `.c` file does not prove the complete program links.\n\n**2. Classify every declaration.** A prototype ending in a semicolon is a function declaration, not a function definition. A function body is a definition. `extern int total;` normally declares an object defined elsewhere. `int total = 0;` defines it. A file-scope `int total;` is a tentative definition; across a program, the relevant external-definition requirements still need to be satisfied. Do not place tentative or initialized external object definitions in widely included headers.\n\n**3. Keep scope, linkage and storage duration separate.** File-scope `static int cache;` has file scope, internal linkage and static storage duration. A block-scope `static int calls;` has block scope, no linkage and static storage duration. An ordinary block-scope `int temporary;` has block scope, no linkage and automatic storage duration. The word `static` does not have one universal effect independent of declaration context.\n\n**4. Build a header/source pair.** Put a public prototype and an `extern` object declaration in a guarded header. Include the header in both the implementation and caller. Define the object and function once in the implementation file. If the implementation needs a private helper, declare it `static` at file scope. This makes the interface visible while keeping private names local to that translation unit.\n\n**5. Understand include guards and their limit.** `#ifndef`, `#define` and `#endif` prevent repeated inclusion of the same header during one preprocessing run. Each `.c` file is preprocessed separately, so each translation unit still sees the header. Guards do not coordinate definitions across object files and cannot prevent a multiple-definition error caused by putting a normal external definition in a header.\n\n**6. Verify the whole build.** Compile each source file with the same language standard and compatible options, then link all required object files. Test both a successful build and intentional failures: omit a definition to observe an unresolved symbol, or define the same external object twice to observe a duplicate symbol diagnostic. Treat compiler and linker diagnostics as evidence, and keep the declarations in headers as the shared source of truth.",
       "examples": [
         {
           "id": "cl145-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "/* api.h */\nint calculate(int value);\n/* api.c */\nint calculate(int value) { return value * 2; }\n/* main.c includes api.h and calls calculate */",
-          "explanation": "The header declares the function for callers. api.c provides its definition with external linkage. The build links the translation units so the call resolves.",
+          "title": "Declaration, external definition and private static helper",
+          "code": "#include <stdio.h>\n\nint calculate(int value);       /* function declaration */\nextern int shared_total;        /* declaration; defined below */\nstatic int adjust(int value) {  /* internal linkage */\n    return value + 1;\n}\n\nint shared_total = 40;          /* external definition */\n\nint calculate(int value) {      /* external function definition */\n    return adjust(value) + shared_total;\n}\n\nint main(void) {\n    printf(\"result=%d total=%d\\n\", calculate(1), shared_total);\n    return 0;\n}",
+          "explanation": "The prototype declares calculate before its definition. The extern declaration introduces shared_total, whose initialized definition appears once in this translation unit. The file-scope static helper adjust has internal linkage and is private to this translation unit. The program is self-contained and demonstrates how a declaration can precede its definition without creating a second external entity.",
+          "runnable": true
+        },
+        {
+          "id": "cl145-ex2",
+          "language": "en",
+          "title": "A guarded public header shared by two source files",
+          "code": "/* api.h */\n#ifndef CODESAATHI_API_H\n#define CODESAATHI_API_H\n\nextern int shared_total;\nint add_to_total(int amount);\n\n#endif\n\n/* api.c */\n#include \"api.h\"\n\nint shared_total = 10;\n\nint add_to_total(int amount) {\n    shared_total += amount;\n    return shared_total;\n}\n\n/* main.c */\n#include <stdio.h>\n#include \"api.h\"\n\nint main(void) {\n    printf(\"total=%d\\n\", add_to_total(5));\n    return 0;\n}",
+          "explanation": "This is a two-translation-unit example stored together for reading. Save the api.h section as api.h, the api.c section as api.c and the main.c section as main.c in one directory. Compile and link both source files together, for example `cc -std=c11 -Wall -Wextra -Wpedantic -Werror api.c main.c -o demo`. The header provides declarations only. api.c owns the one definition of shared_total and the function body; main.c uses the shared interface. The include guard prevents repeated processing within a translation unit, not duplicate definitions across translation units.",
           "runnable": false
         }
-      ]
+      ],
+      "narrativeNote": "Example 2 is a multi-file build exercise rather than a single-file runnable snippet; its exact compile command is included in the explanation."
     },
     "practise": {
-      "guidedTask": "Distinguish a function declaration from its definition.",
-      "independentTask": "Create a two-translation-unit example with one public function and explain the linkage of each identifier.",
+      "guidedTask": "Split the second example into api.h, api.c and main.c. Compile and link the two source files in one command. Then temporarily remove the definition of shared_total and observe the linker diagnostic. Restore it and add a second external definition in another source file to observe the duplicate-definition diagnostic. Explain why the include guard does not prevent either linker error.",
+      "independentTask": "Design a small two-module library with a public header, one implementation file and one caller. Include one externally linked function, one externally linked object only if genuinely needed, and at least two file-scope static helpers. Document scope, linkage and storage duration for each identifier. Add a separate block-scope static counter and explain why it has static storage duration but no linkage. Compile each translation unit independently, link them, and record the exact commands and expected output.",
       "hints": [
-        "Include guards prevent repeated header processing within a translation unit.",
-        "Avoid defining the same external function in multiple source files.",
-        "Use static for file-scope identifiers that should have internal linkage."
+        "Preprocessing expands included headers and macros before the compiler processes a translation unit.",
+        "A function prototype declares a function; a function body defines it.",
+        "At file scope, distinguish an extern declaration, a tentative definition and an initialized object definition.",
+        "Scope, linkage and storage duration are different properties; classify each one separately.",
+        "Put public prototypes and extern object declarations in guarded headers, but put each external object definition in one source file.",
+        "File-scope static gives internal linkage, while block-scope static gives static storage duration without giving the local identifier linkage."
       ]
     }
   },
@@ -51,36 +79,63 @@
     "questions": [
       {
         "id": "cl145-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What is a translation unit in C?",
         "options": [
-          "The C or learning principle described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "Only the original source file before preprocessing.",
+          "The source file after preprocessing, including the effects of included headers and macros.",
+          "The final executable after linking.",
+          "A single function body."
         ],
-        "answer": "The C or learning principle described in this lesson.",
-        "explanation": "The correct choice follows the concept and constraints described above."
+        "answer": "The source file after preprocessing, including the effects of included headers and macros.",
+        "explanation": "A translation unit is the preprocessed source. The compiler translates translation units separately before the linker combines the resulting object files and libraries."
       },
       {
         "id": "cl145-q2",
-        "prompt": "What should be checked before applying the concept?",
+        "prompt": "Which statement about `extern int total;` at file scope is correct?",
         "options": [
-          "The exact rules, assumptions and failure cases.",
-          "Only the file name.",
-          "Whether one unrelated example runs."
+          "It always allocates a new object definition in every source file.",
+          "It is ordinarily a declaration referring to an externally linked object defined elsewhere.",
+          "It makes total a block-scope automatic variable.",
+          "It gives total internal linkage."
         ],
-        "answer": "The exact rules, assumptions and failure cases.",
-        "explanation": "Reliable C engineering depends on understanding the applicable contract."
+        "answer": "It is ordinarily a declaration referring to an externally linked object defined elsewhere.",
+        "explanation": "A file-scope extern declaration without an initializer normally declares an object whose definition is provided elsewhere. An extern declaration with an initializer is a definition."
       },
       {
         "id": "cl145-q3",
-        "prompt": "Which practice provides stronger evidence?",
+        "prompt": "What is the effect of `static` on a file-scope function?",
         "options": [
-          "Use documented standards, diagnostics and targeted tests.",
-          "Assume one compiler's behaviour is universal.",
-          "Ignore warnings and boundary cases."
+          "It gives the function internal linkage within that translation unit.",
+          "It gives the function automatic storage duration.",
+          "It makes the function visible to every translation unit.",
+          "It converts the function declaration into a macro."
         ],
-        "answer": "Use documented standards, diagnostics and targeted tests.",
-        "explanation": "Multiple forms of evidence help distinguish guarantees from assumptions."
+        "answer": "It gives the function internal linkage within that translation unit.",
+        "explanation": "A file-scope static function has internal linkage, so other translation units cannot refer to that function through the same external name."
+      },
+      {
+        "id": "cl145-q4",
+        "prompt": "Why do include guards not prevent duplicate external definitions across different .c files?",
+        "options": [
+          "Include guards are evaluated once for the entire executable.",
+          "Each source file is preprocessed separately, so the guard only prevents repeated inclusion within each translation unit.",
+          "Include guards change every function to static.",
+          "The linker ignores preprocessor directives."
+        ],
+        "answer": "Each source file is preprocessed separately, so the guard only prevents repeated inclusion within each translation unit.",
+        "explanation": "Each translation unit has its own preprocessing run. Include guards stop repeated header contents inside one run; they do not coordinate object definitions across separately compiled files."
+      },
+      {
+        "id": "cl145-q5",
+        "prompt": "Which description of a block-scope `static int calls;` is correct?",
+        "options": [
+          "It has file scope and external linkage.",
+          "It has block scope, no linkage and static storage duration.",
+          "It has block scope and automatic storage duration.",
+          "It has internal linkage because every static declaration does."
+        ],
+        "answer": "It has block scope, no linkage and static storage duration.",
+        "explanation": "At block scope, static gives the object static storage duration, but the local identifier does not acquire linkage. The effect differs from file-scope static."
       }
     ]
   },

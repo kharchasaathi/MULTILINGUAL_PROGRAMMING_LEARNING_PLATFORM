@@ -1,0 +1,128 @@
+{
+  "id": "c.cl9.14.en",
+  "courseId": "c",
+  "moduleId": "CL9",
+  "topicId": "CL9.14",
+  "title": "Compiler warnings, language standards and portability flags",
+  "language": "en",
+  "learningObjectives": [
+    "Explain that -std selects a language dialect on GCC- and Clang-like compilers and does not guarantee identical support across all toolchains.",
+    "Recognize common warning options such as -Wall, -Wextra, -Wpedantic and selected conversion diagnostics.",
+    "Distinguish a compiler warning from an error and understand why warnings should be investigated rather than blindly suppressed.",
+    "Use consistent documented compiler options for every translation unit and automated build.",
+    "Identify compiler extensions and implementation-defined behaviour that can reduce portability.",
+    "Build and test code with more than one supported compiler or target when portability is a project requirement."
+  ],
+  "prerequisites": [],
+  "stages": {
+    "understand": {
+      "concept": "C compilers offer language-standard modes and diagnostic options. On GCC- and Clang-like toolchains, -std=c17 selects a C17 language mode, while -Wall, -Wextra and -Wpedantic enable groups of diagnostics. The exact options, warning coverage and accepted language features depend on compiler and version. A warning is diagnostic evidence that code may be suspicious; it is not a formal proof of a defect or of correctness.",
+      "whyItMatters": "Explicit standards and warning policies make builds easier to reproduce and help detect suspicious conversions, missing declarations and nonportable extensions. Inconsistent flags between source files or between local and CI builds can hide defects or produce incompatible assumptions.",
+      "analogy": "Compiler flags are like a documented inspection checklist: they tell a particular tool which language rules and diagnostic categories to apply.",
+      "analogyLimit": "Different compilers implement different options and diagnostic sets. A warning-free build under one compiler does not prove portability or correctness on every implementation."
+    },
+    "explain": {
+      "narrative": "Select a language version deliberately and document it. The spelling of standard modes varies across compilers; check the toolchain documentation instead of assuming a flag is universal. Enable useful warnings and treat each diagnostic as a question to investigate. Fix the cause when possible; do not silence a warning simply to obtain a green build.\\n\\nSome diagnostics are grouped options and some are individually enabled. More warnings can reveal real defects but can also produce false positives or toolchain-specific noise. Keep the policy consistent across all translation units and CI. When a project supports multiple compilers, use a documented compiler matrix and resolve differences rather than assuming identical defaults. Avoid extensions when strict ISO C portability is required, and isolate unavoidable platform-specific code behind a clear interface.",
+      "examples": [
+        {
+          "id": "cl914-ex1",
+          "language": "en",
+          "title": "Build a small C17 program with warnings",
+          "code": "#include <stdio.h>\n\nint main(void)\n{\n    int count = 3;\n    printf(\"count=%d\\n\", count);\n    return 0;\n}\n\n/* GCC/Clang-like command:\n   cc -std=c17 -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion \\\n      -Wshadow -Wformat=2 -Werror main.c -o app\n*/",
+          "explanation": "The program is ordinary C. The commented command selects C17 and requests several diagnostic groups on GCC- and Clang-like compilers. Some flags are not portable to every compiler, so document the supported toolchain.",
+          "runnable": true
+        },
+        {
+          "id": "cl914-ex2",
+          "language": "en",
+          "title": "Use a portable interface instead of assuming an extension",
+          "code": "#include <inttypes.h>\n#include <stdint.h>\n#include <stdio.h>\n\nint main(void)\n{\n    uint32_t packet_count = UINT32_C(120);\n    printf(\"packets=%\" PRIu32 \"\\n\", packet_count);\n    return 0;\n}",
+          "explanation": "inttypes.h supplies PRIu32 so the format matches uint32_t on implementations that provide the exact-width type. stdint.h supplies uint32_t and UINT32_C. The type is optional when the implementation cannot provide an exact 32-bit unsigned integer.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Compile a small program with and without warning options. Record each diagnostic, determine whether it identifies a real risk, fix the underlying cause and explain any justified suppression.",
+      "independentTask": "Choose a small C program and build it with two supported compilers in the same standard mode. Compare diagnostics and behaviour, then document compiler versions, flags, portability issues and any extensions used.",
+      "hints": [
+        "The standard-mode option is toolchain-specific even when its spelling is familiar.",
+        "Warnings are evidence to investigate, not proof that a program is wrong or right.",
+        "Keep compiler flags consistent across every translation unit.",
+        "Do not silence warnings without understanding and documenting the reason.",
+        "Use a second compiler or target to discover assumptions hidden by one implementation.",
+        "A successful strict build does not replace boundary, invalid-input and runtime testing."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "cl914-q1",
+        "prompt": "What is the main purpose of a standard-mode option such as -std=c17?",
+        "options": [
+          "Select the C language dialect accepted by the compiler",
+          "Guarantee the same executable on every computer",
+          "Automatically test every input",
+          "Enable network access"
+        ],
+        "answer": "Select the C language dialect accepted by the compiler",
+        "explanation": "The option requests a language mode; it does not guarantee identical toolchain behaviour."
+      },
+      {
+        "id": "cl914-q2",
+        "prompt": "What does -Wall commonly do on GCC- and Clang-like compilers?",
+        "options": [
+          "Enable a commonly used group of warnings",
+          "Treat every warning as an error on every compiler",
+          "Disable all diagnostics",
+          "Select the C23 standard"
+        ],
+        "answer": "Enable a commonly used group of warnings",
+        "explanation": "-Wall enables a warning group; its exact coverage is compiler-specific."
+      },
+      {
+        "id": "cl914-q3",
+        "prompt": "What is a sound response to a new compiler warning?",
+        "options": [
+          "Understand the diagnostic and fix the underlying cause when appropriate",
+          "Suppress it immediately without review",
+          "Assume the compiler is always wrong",
+          "Delete the test suite"
+        ],
+        "answer": "Understand the diagnostic and fix the underlying cause when appropriate",
+        "explanation": "Diagnostics should be investigated; suppressions need a clear justification."
+      },
+      {
+        "id": "cl914-q4",
+        "prompt": "Does a warning-free build prove portability to every C compiler?",
+        "options": [
+          "No, diagnostics and implementation support differ",
+          "Yes, for every platform",
+          "Only if the program has comments",
+          "Yes, if the executable is small"
+        ],
+        "answer": "No, diagnostics and implementation support differ",
+        "explanation": "Portability requires standards-aware code and testing on the intended implementations."
+      },
+      {
+        "id": "cl914-q5",
+        "prompt": "Why use consistent flags for all translation units?",
+        "options": [
+          "To keep language and diagnostic assumptions aligned across the program",
+          "To make every source file identical",
+          "To remove the need for headers",
+          "To prevent the linker from running"
+        ],
+        "answer": "To keep language and diagnostic assumptions aligned across the program",
+        "explanation": "Different compilation settings can create inconsistent assumptions and weaken diagnostics."
+      }
+    ]
+  },
+  "status": "draft"
+}

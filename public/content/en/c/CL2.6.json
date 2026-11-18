@@ -6,11 +6,11 @@
   "title": "Integer Types, Ranges and Signedness",
   "language": "en",
   "learningObjectives": [
-    "Explain the central rules behind integer types, ranges and signedness in C.",
-    "Identify the relevant types, declarations, operators or library facilities.",
-    "Trace a worked example and explain its result.",
-    "Recognize common mistakes, portability concerns and unsafe assumptions.",
-    "Apply the concept in a small program and test normal and boundary cases."
+    "Identify signed and unsigned integer types and inspect their limits.",
+    "Explain the modulo behavior of unsigned integer arithmetic.",
+    "Recognize that signed integer overflow is undefined behavior.",
+    "Apply safe comparisons and loop conditions when signed and unsigned values interact.",
+    "Choose an integer type that can represent the required domain and intermediate results."
   ],
   "prerequisites": [
     "CL1.1",
@@ -18,13 +18,13 @@
   ],
   "stages": {
     "understand": {
-      "concept": "C integer types include _Bool, char, short, int, long and long long, each with signed and unsigned forms where permitted. Their ranges depend on implementation characteristics. Signed overflow is undefined behaviour; unsigned arithmetic is performed modulo one more than the maximum representable value.",
+      "concept": "C integer types include _Bool, char, short, int, long and long long, with signed and unsigned forms where permitted. Their ranges depend on implementation characteristics. Unsigned arithmetic is reduced modulo one more than the maximum representable value. Signed overflow is undefined behavior. Integer promotions and the usual arithmetic conversions can change the type used in an expression.",
       "whyItMatters": "Choosing the correct integer type requires considering range, arithmetic behaviour and interfaces. Signedness bugs can affect comparisons, loops, array indexing and input validation.",
       "analogy": "Think of a type as a contract that describes what kind of value an object can hold and which operations make sense for it.",
       "analogyLimit": "The analogy is only an introduction; C types also determine representation, conversions, alignment and constraints."
     },
     "explain": {
-      "narrative": "C integer types include _Bool, char, short, int, long and long long, each with signed and unsigned forms where permitted. Their ranges depend on implementation characteristics. Signed overflow is undefined behaviour; unsigned arithmetic is performed modulo one more than the maximum representable value.\n\nChoosing the correct integer type requires considering range, arithmetic behaviour and interfaces. Signedness bugs can affect comparisons, loops, array indexing and input validation.\n\nWhen reviewing code, identify the declared types first, then trace conversions and the exact expression being evaluated. Compile with warnings enabled and test boundary values. Do not rely on assumptions about another compiler or machine.",
+      "narrative": "## 1. Signed and unsigned values\n\nSigned integer types represent negative and nonnegative values. Unsigned integer types represent only nonnegative values and have a range determined by their width. Use limits from `<limits.h>` rather than assuming a particular range.\n\n## 2. Unsigned wraparound\n\nUnsigned arithmetic is defined modulo one more than the maximum value. For example, subtracting one from an unsigned zero produces the maximum value of that unsigned type. This behavior is defined, but accidental wraparound can still be a logic or security defect.\n\n## 3. Signed overflow\n\nIf a signed arithmetic operation produces a value outside the representable range, behavior is undefined. Do not rely on a signed integer wrapping from its maximum to its minimum. Check bounds before performing the operation.\n\n## 4. Mixed signedness\n\nWhen signed and unsigned operands are combined, integer promotions and the usual arithmetic conversions determine a common type. A negative signed value can be converted to a large unsigned value, producing surprising comparisons. Avoid mixing signed and unsigned values without a clear reason.\n\n## 5. Safer arithmetic\n\nCheck addition and multiplication bounds before computing them, use an appropriate wider or unsigned type when justified, and validate external input before conversion. Compiler warnings can help reveal suspicious signedness conversions.",
       "examples": [
         {
           "id": "cl2.6-ex1",
@@ -45,14 +45,14 @@
       ]
     },
     "practise": {
-      "guidedTask": "Use limits.h to display the ranges of int, unsigned int, long and long long. Write a checked increment function that refuses to overflow.",
-      "independentTask": "Review a loop that compares an int index with size_t length. Correct the signed/unsigned comparison and explain why the types differ.",
+      "guidedTask": "Write a small C program that demonstrates the central rules in CL2.6. Compile with warnings enabled, run it with ordinary and boundary values, and explain each result in your own words.",
+      "independentTask": "Create a second example for CL2.6 using different values and names. Include one likely mistake as a separate experiment, observe the compiler diagnostic or behavior, then correct it. Record the rule that explains the correction.",
       "hints": [
-        "Signed overflow is undefined behaviour.",
-        "Unsigned arithmetic wraps modulo the type's range plus one.",
-        "Check bounds before performing arithmetic that may overflow.",
-        "Use limits.h to inspect ranges.",
-        "Avoid mixing signed and unsigned values without an explicit reason."
+        "Start by identifying the exact type of every object and expression.",
+        "Check the C language rule before assuming a platform-specific result.",
+        "Use compiler warnings as feedback, not as proof of correctness.",
+        "Test normal values and important boundaries.",
+        "Explain why the result follows from the language rules."
       ]
     }
   },
@@ -65,58 +65,58 @@
     "questions": [
       {
         "id": "cl2.6-q1",
-        "prompt": "Which statement is correct about integer types, ranges and signedness?",
+        "prompt": "What happens when unsigned arithmetic exceeds its maximum value?",
         "options": [
-          "It follows C's type and language rules and should be checked with compiler diagnostics.",
-          "C ignores all declared types.",
-          "The browser decides its meaning."
+          "The result is reduced modulo one more than the maximum representable value",
+          "The program must terminate",
+          "The value becomes a negative number"
         ],
-        "answer": "It follows C's type and language rules and should be checked with compiler diagnostics.",
-        "explanation": "C semantics are defined by the language and implementation."
+        "answer": "The result is reduced modulo one more than the maximum representable value",
+        "explanation": "Unsigned integer arithmetic has defined modulo behavior."
       },
       {
         "id": "cl2.6-q2",
-        "prompt": "What is the safest general practice?",
+        "prompt": "What is the result of signed integer overflow in C?",
         "options": [
-          "Choose types and operations deliberately, initialize data and validate assumptions.",
-          "Ignore warnings and assume values are valid.",
-          "Use casts to silence every warning."
+          "Undefined behavior",
+          "Guaranteed wraparound",
+          "Always zero"
         ],
-        "answer": "Choose types and operations deliberately, initialize data and validate assumptions.",
-        "explanation": "Deliberate types and checks improve correctness."
+        "answer": "Undefined behavior",
+        "explanation": "C does not define signed overflow as wraparound."
       },
       {
         "id": "cl2.6-q3",
-        "prompt": "What should you do when a result is unexpected?",
+        "prompt": "Why can comparing a negative int with an unsigned value be surprising?",
         "options": [
-          "Create a small test case and inspect types, values and conversions.",
-          "Guess the result from the variable name.",
-          "Remove the test."
+          "The usual arithmetic conversions may convert the negative value to unsigned",
+          "The compiler always changes both to double",
+          "The comparison is ignored"
         ],
-        "answer": "Create a small test case and inspect types, values and conversions.",
-        "explanation": "Small reproducible tests make behaviour easier to reason about."
+        "answer": "The usual arithmetic conversions may convert the negative value to unsigned",
+        "explanation": "Mixed signedness can change the common type used by the comparison."
       },
       {
         "id": "cl2.6-q4",
-        "prompt": "Which statement about portability is accurate?",
+        "prompt": "Which header provides INT_MAX and UINT_MAX?",
         "options": [
-          "Some type sizes and ranges depend on the implementation.",
-          "All C implementations use identical type widths.",
-          "Compiler warnings change the C standard."
+          "limits.h",
+          "stdio.h",
+          "ctype.h"
         ],
-        "answer": "Some type sizes and ranges depend on the implementation.",
-        "explanation": "Use standard guarantees and inspect implementation limits."
+        "answer": "limits.h",
+        "explanation": "The limits.h header provides integer type limits."
       },
       {
         "id": "cl2.6-q5",
-        "prompt": "Which is a strong learning outcome?",
+        "prompt": "What is a safer approach before adding two signed integers?",
         "options": [
-          "Explain the rule and apply it in a tested C program.",
-          "Memorize one output only.",
-          "Copy code without checking it."
+          "Check whether the result would exceed the representable range",
+          "Assume overflow wraps safely",
+          "Cast both values to char"
         ],
-        "answer": "Explain the rule and apply it in a tested C program.",
-        "explanation": "Understanding plus testing demonstrates transferable knowledge."
+        "answer": "Check whether the result would exceed the representable range",
+        "explanation": "The program must prevent an out-of-range signed operation before evaluating it."
       }
     ]
   },

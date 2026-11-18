@@ -3,42 +3,59 @@
   "courseId": "c",
   "moduleId": "CL10",
   "topicId": "CL10.6",
-  "title": "Trees, binary search trees and traversal",
+  "title": "Searching: linear search and binary search; preconditions",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its constraints.",
-    "Trace the example and reason about its data flow.",
-    "Identify complexity, boundary or safety considerations.",
-    "Apply the concept in a tested C program."
+    "Implement linear search and explain why it works on both sorted and unsorted sequences.",
+    "Implement iterative binary search using a clearly defined half-open interval.",
+    "State and verify the sorted-input precondition required by binary search.",
+    "Compare best- and worst-case comparison counts for linear and binary search.",
+    "Handle empty arrays, absent keys, duplicate keys and index-result representation safely.",
+    "Test search functions with boundary cases and explain the meaning of a not-found result."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL4.1",
+    "CL3.9",
+    "CL10.5"
+  ],
   "stages": {
     "understand": {
-      "concept": "A tree is a hierarchical data structure made of nodes connected by edges. A binary tree gives each node at most two child links. A binary search tree maintains an ordering invariant that guides lookup and insertion; performance depends on tree shape.",
-      "whyItMatters": "Trees model hierarchical data and can support efficient operations when balanced. An unbalanced search tree can degrade toward linear-time operations.",
-      "analogy": "Treat an algorithm or data structure as a set of operations that must preserve a clearly stated contract.",
-      "analogyLimit": "The analogy does not replace formal complexity analysis, C object rules or algorithm preconditions."
+      "concept": "Searching locates a target value or determines that it is absent. Linear search checks elements one by one and works without an ordering precondition. Binary search repeatedly halves a sorted search interval, reducing the remaining candidates quickly when its sortedness precondition is satisfied.",
+      "whyItMatters": "The fastest algorithm is not useful if its preconditions are false. Linear search is simple and works on unsorted data; binary search is efficient for sorted data but can return incorrect results if the ordering assumption is not met.",
+      "analogy": "Linear search is like checking every name in a paper list. Binary search is like opening a sorted directory near the middle and deciding which half can still contain the name.",
+      "analogyLimit": "Binary search's halving strategy depends on a consistent ordering and random access to the sequence. It is not a shortcut for searching arbitrary unsorted data or a singly linked list."
     },
     "explain": {
-      "narrative": "A tree is a hierarchical data structure made of nodes connected by edges. A binary tree gives each node at most two child links. A binary search tree maintains an ordering invariant that guides lookup and insertion; performance depends on tree shape.\n\nBefore implementation, state input constraints, empty-case behaviour, ownership and invariants. Compile with warnings and test representative, boundary and failure cases.",
+      "narrative": "For linear search, begin at index zero and compare each element with the target. Stop on a match or after count elements. Its worst-case number of comparisons is proportional to n; the best case is one comparison when the first element matches. It needs no sorting.\\n\\nFor binary search, require that the array is sorted in the same order used by the comparison. Use a half-open interval [low, high): low is included and high is excluded. While low < high, compute mid = low + (high - low) / 2. If a[mid] is smaller than the target, set low = mid + 1; otherwise set high = mid. When the loop ends, low is the lower-bound insertion position; check low < count and a[low] == target before reporting a match. This form returns the first matching position when duplicates exist.\\n\\nUse size_t for array positions and a separate success result rather than narrowing an arbitrary index to int. Define the contract for a null pointer and nonzero count. Test empty, one-element, first, last, missing and duplicate targets. Binary search has logarithmic worst-case comparisons, while linear search is linear; for tiny or frequently changing data, the simpler linear approach may still be appropriate.",
       "examples": [
         {
           "id": "cl106-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "struct Node { int key; struct Node *left; struct Node *right; };\nint contains(struct Node *root, int key) {\n while (root != NULL) {\n  if (key == root->key) return 1;\n  root = key < root->key ? root->left : root->right;\n }\n return 0;\n}",
-          "explanation": "The search follows the left child for a smaller key and the right child for a larger key. The invariant must be maintained by insertion and deletion operations.",
-          "runnable": false
+          "title": "Linear search with a separate success result",
+          "code": "#include <stdbool.h>\\n#include <stddef.h>\\n\\nstatic bool linear_search(const int values[], size_t count, int target, size_t *found)\\n{\\n    if (found == NULL || (count > 0U && values == NULL)) {\\n        return false;\\n    }\\n    for (size_t i = 0; i < count; ++i) {\\n        if (values[i] == target) {\\n            *found = i;\\n            return true;\\n        }\\n    }\\n    return false;\\n}\\n\\nint main(void)\\n{\\n    const int data[] = {7, 2, 9, 2};\\n    size_t position = 0U;\\n    return linear_search(data, 4U, 9, &position) && position == 2U ? 0 : 1;\\n}",
+          "explanation": "The function scans each element and stores the matching index only on success. It returns false for an absent target or invalid output pointer. An empty array with count zero is a valid search that returns false.",
+          "runnable": true
+        },
+        {
+          "id": "cl106-ex2",
+          "language": "en",
+          "title": "Binary search returns the first matching position",
+          "code": "#include <stdbool.h>\\n#include <stddef.h>\\n\\nstatic bool binary_search_first(const int values[], size_t count, int target, size_t *found)\\n{\\n    if (found == NULL || (count > 0U && values == NULL)) return false;\\n    size_t low = 0U, high = count;\\n    while (low < high) {\\n        size_t mid = low + (high - low) / 2U;\\n        if (values[mid] < target) low = mid + 1U;\\n        else high = mid;\\n    }\\n    if (low < count && values[low] == target) {\\n        *found = low;\\n        return true;\\n    }\\n    return false;\\n}\\n\\nint main(void)\\n{\\n    const int sorted[] = {1, 3, 3, 3, 8, 10};\\n    size_t position = 0U;\\n    return binary_search_first(sorted, 6U, 3, &position) && position == 1U ? 0 : 1;\\n}",
+          "explanation": "The half-open interval shrinks until low is the first index whose value is not less than target. The final equality check confirms a match. The caller must provide an array sorted in ascending order; the function cannot verify that precondition cheaply on every call.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Trace a search through a small tree and record each visited key.",
-      "independentTask": "Implement insertion and in-order traversal for a binary search tree. Include allocation-failure and cleanup handling.",
+      "guidedTask": "Trace both algorithms on [2, 4, 7, 9, 12, 15] when searching for 9 and then 8. Record every comparison and each low/high/mid update for binary search.",
+      "independentTask": "Implement both searches for an array of integers. Test empty input, one element, duplicates, absent targets and first/last positions. Add a written precondition to the binary-search function and explain why the same code is invalid for unsorted data.",
       "hints": [
-        "An in-order traversal of a valid binary search tree visits keys in sorted order.",
-        "A plain binary search tree is not guaranteed to remain balanced.",
-        "Every allocated node needs an ownership and release strategy."
+        "Linear search does not require sorted input.",
+        "Binary search requires the data to be sorted under the comparison it uses.",
+        "A half-open interval [low, high) excludes high.",
+        "Use low + (high - low) / 2 for a safe midpoint calculation.",
+        "Do not convert size_t indices to int without a representability guarantee.",
+        "Specify whether duplicate matches return any occurrence or the first occurrence."
       ]
     }
   },
@@ -51,36 +68,63 @@
     "questions": [
       {
         "id": "cl106-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "Which algorithm can search an unsorted array without first sorting it?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "Linear search",
+          "Binary search",
+          "Both require sorted input",
+          "Neither can search an array"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the concept and constraints described above."
+        "answer": "Linear search",
+        "explanation": "Linear search checks elements without relying on an ordering."
       },
       {
         "id": "cl106-q2",
-        "prompt": "What should be checked before relying on this algorithm or structure?",
+        "prompt": "What is the essential precondition for ordinary binary search?",
         "options": [
-          "Its preconditions, invariants, bounds and failure cases.",
-          "Only the name of the data structure.",
-          "Whether one example produced an output."
+          "The sequence is sorted according to the comparison used",
+          "The array length must be a power of two",
+          "All values must be positive",
+          "The target must be present"
         ],
-        "answer": "Its preconditions, invariants, bounds and failure cases.",
-        "explanation": "Correctness depends on maintaining the algorithm's contract."
+        "answer": "The sequence is sorted according to the comparison used",
+        "explanation": "Binary search eliminates a half based on ordering; without sorted order that elimination is unsound."
       },
       {
         "id": "cl106-q3",
-        "prompt": "Which practice supports reliable implementation?",
+        "prompt": "In a half-open interval [low, high), is high a valid candidate index?",
         "options": [
-          "Test empty, boundary and representative inputs.",
-          "Ignore allocation failures.",
-          "Assume average complexity guarantees every operation's worst case."
+          "No, high is excluded",
+          "Yes, high is included",
+          "Only when count is odd",
+          "Only for an empty array"
         ],
-        "answer": "Test empty, boundary and representative inputs.",
-        "explanation": "Targeted tests expose defects that ordinary examples may miss."
+        "answer": "No, high is excluded",
+        "explanation": "The interval includes low through high - 1."
+      },
+      {
+        "id": "cl106-q4",
+        "prompt": "Why compute mid as low + (high - low) / 2?",
+        "options": [
+          "It avoids potentially overflowing the addition low + high",
+          "It sorts the array",
+          "It makes comparisons constant-time",
+          "It removes the sortedness precondition"
+        ],
+        "answer": "It avoids potentially overflowing the addition low + high",
+        "explanation": "The difference is bounded by the interval, avoiding a potentially overflowing sum."
+      },
+      {
+        "id": "cl106-q5",
+        "prompt": "A sorted array contains three copies of the target. How can binary search be designed to return the first?",
+        "options": [
+          "Continue narrowing toward the lower bound and check equality at the final position",
+          "Return immediately on the first equality encountered",
+          "Search only the last half",
+          "Remove duplicates before every comparison"
+        ],
+        "answer": "Continue narrowing toward the lower bound and check equality at the final position",
+        "explanation": "Lower-bound search continues into the left side after equality to find the first matching index."
       }
     ]
   },

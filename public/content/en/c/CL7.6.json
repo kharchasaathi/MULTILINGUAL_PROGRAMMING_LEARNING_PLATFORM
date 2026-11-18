@@ -6,39 +6,50 @@
   "title": "Structures and pointers; arrow member access",
   "language": "en",
   "learningObjectives": [
-    "Explain the C concept and its rules.",
-    "Trace the example and describe data flow.",
-    "Identify relevant failure and boundary cases.",
-    "Apply the concept in a tested C program."
+    "Declare a pointer to a structure type.",
+    "Use -> to access a member through a structure pointer.",
+    "Explain the equivalence of pointer->member and (*pointer).member.",
+    "Check pointer validity and object lifetime before member access.",
+    "Use pointer parameters to update caller-owned structure objects."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "A pointer to a structure can access a member using the -> operator. The expression pointer->member is equivalent to (*pointer).member. The pointer must designate a live structure object before member access.",
+      "concept": "A pointer to a structure stores the address of a structure object. The arrow operator selects a member through that pointer; `p->member` is equivalent to `(*p).member`. The pointer must designate a live, correctly aligned structure object before member access. A non-null pointer alone does not prove validity.",
       "whyItMatters": "Pointers avoid copying large structures and allow functions to update caller-owned records, but invalid or null pointers must not be dereferenced.",
       "analogy": "Treat the operation as a clearly specified contract between the program and its data.",
       "analogyLimit": "The analogy does not replace C's type, lifetime, I/O and object representation rules."
     },
     "explain": {
-      "narrative": "A pointer to a structure can access a member using the -> operator. The expression pointer->member is equivalent to (*pointer).member. The pointer must designate a live structure object before member access.\n\nCheck all return values, object lifetimes, types and preconditions. Enable compiler warnings and test expected as well as failure paths.",
+      "narrative": "## 1. Declare a structure pointer\n\nIf `struct Point` is a structure type, `struct Point *p` declares a pointer to such an object. Initialize it with the address of a live compatible object or a valid allocation.\n\n## 2. Use the arrow operator\n\n`p->x` accesses member x through p. It is equivalent to `(*p).x`; parentheses are needed because the dot operator binds more tightly than unary *.\n\n## 3. Update through a pointer\n\nA function can receive a structure pointer and modify members of the caller-owned object. The pointer argument itself is passed by value, but it designates the same object.\n\n## 4. Validate before access\n\nCheck whether NULL is permitted and reject it before using ->. Also ensure the object is still alive and the pointer designates the correct type.\n\n## 5. Ownership and lifetime\n\nDocument whether the function borrows the structure or owns allocated storage. Do not retain a pointer beyond the structure object's lifetime.",
       "examples": [
         {
-          "id": "cl76-ex1",
+          "id": "cl7.6-ex1",
           "language": "en",
-          "title": "Focused C example",
+          "title": "Core concept",
           "code": "#include <stdio.h>\nstruct Point { int x; int y; };\nvoid move_right(struct Point *point) {\n if (point != NULL) ++point->x;\n}\nint main(void) {\n struct Point p = {3, 4};\n move_right(&p);\n printf(\"%d,%d\\n\", p.x, p.y);\n return 0;\n}",
-          "explanation": "The function receives the address of p. point->x selects the x member of the pointed-to structure and increments it. The output is 4,4.",
+          "explanation": "Trace the operations and check the relevant C standard library contracts and failure cases.",
+          "runnable": false
+        },
+        {
+          "id": "cl7.6-ex2",
+          "language": "en",
+          "title": "Apply the concept safely",
+          "code": "#include <stdio.h>\nstruct Account { int balance; };\nvoid deposit(struct Account *account, int amount) { if (account != NULL && amount > 0) account->balance += amount; }\nint main(void) { struct Account a = {100}; deposit(&a, 25); printf(\"%d\\n\", a.balance); return 0; }",
+          "explanation": "This example reinforces the topic with explicit validation or resource handling. Compile with warnings and test failure paths.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Rewrite point->x as an equivalent expression using * and dot.",
-      "independentTask": "Write a function that receives a pointer to a structure and updates two fields after validating the pointer.",
+      "guidedTask": "Create a small C program demonstrating Structure pointers and arrow member access. Write down its preconditions, expected result and failure handling before implementation.",
+      "independentTask": "Extend the example for Structure pointers and arrow member access to handle a boundary case and an error case. Explain the relevant C rule and add a test for each path.",
       "hints": [
-        "The -> operator combines dereferencing and member selection.",
-        "A non-null structure pointer may still be dangling or invalid.",
-        "Use const struct Type * when the function should only inspect the structure."
+        "Read the declaration and function contract carefully.",
+        "Check all library return values before using results.",
+        "Keep object bounds, lifetime and resource ownership explicit.",
+        "Do not assume implementation-specific memory or file representations are portable.",
+        "Test both success and failure paths."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl76-q1",
-        "prompt": "Which statement best describes the lesson?",
+        "id": "cl7.6-q1",
+        "prompt": "What is p->x equivalent to?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "(*p).x",
+          "*p.x",
+          "&(p.x)"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the C rule described in the lesson."
+        "answer": "(*p).x",
+        "explanation": "The arrow operator dereferences the structure pointer and selects the member."
       },
       {
-        "id": "cl76-q2",
-        "prompt": "What should be verified before using this feature?",
+        "id": "cl7.6-q2",
+        "prompt": "What must p designate before p->member is evaluated?",
         "options": [
-          "Types, preconditions, object validity and relevant return values.",
-          "Only the source file name.",
-          "Whether a single run appeared successful."
+          "A live structure object",
+          "Any nonzero integer",
+          "A function"
         ],
-        "answer": "Types, preconditions, object validity and relevant return values.",
-        "explanation": "C correctness depends on valid objects, correct types and checked operations."
+        "answer": "A live structure object",
+        "explanation": "Member access requires a valid pointer to a structure object."
       },
       {
-        "id": "cl76-q3",
-        "prompt": "Which practice improves reliability?",
+        "id": "cl7.6-q3",
+        "prompt": "Why are parentheses needed in (*p).x?",
         "options": [
-          "Compile with warnings and test normal and failure paths.",
-          "Ignore I/O and compiler diagnostics.",
-          "Assume all environments behave identically."
+          "The dot operator binds more tightly than unary *",
+          "The compiler requires extra whitespace",
+          "The expression allocates memory"
         ],
-        "answer": "Compile with warnings and test normal and failure paths.",
-        "explanation": "Diagnostics and tests provide evidence for program behaviour."
+        "answer": "The dot operator binds more tightly than unary *",
+        "explanation": "Parentheses ensure dereferencing occurs before member selection."
+      },
+      {
+        "id": "cl7.6-q4",
+        "prompt": "Can a function modify a caller's structure using a pointer parameter?",
+        "options": [
+          "Yes, by assigning to members through the pointer",
+          "No, C copies the entire object every time",
+          "Only if the structure is global"
+        ],
+        "answer": "Yes, by assigning to members through the pointer",
+        "explanation": "The copied pointer value still designates the caller's structure object."
+      },
+      {
+        "id": "cl7.6-q5",
+        "prompt": "Does a non-null pointer guarantee a valid structure object?",
+        "options": [
+          "No",
+          "Yes, always",
+          "Only for malloc pointers"
+        ],
+        "answer": "No",
+        "explanation": "Lifetime, alignment and bounds still matter."
       }
     ]
   },

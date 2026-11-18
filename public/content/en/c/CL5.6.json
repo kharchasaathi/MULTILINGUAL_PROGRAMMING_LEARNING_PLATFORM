@@ -6,39 +6,50 @@
   "title": "Pointer to pointer and indirection levels",
   "language": "en",
   "learningObjectives": [
-    "Explain the language rule and its constraints.",
-    "Trace the example and predict its behaviour.",
-    "Identify boundary and safety cases.",
-    "Apply the concept in a tested C program."
+    "Declare pointer-to-pointer types such as int ** correctly.",
+    "Trace each level of indirection and identify the type after each dereference.",
+    "Use pointer-to-pointer parameters when a function must update a caller's pointer variable.",
+    "Initialize every pointer level before dereferencing it.",
+    "Distinguish an array of pointers from a pointer to pointer and from a two-dimensional array."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "A pointer to pointer stores the address of another pointer object. Each dereference removes one level of indirection: if pp has type int **, then *pp has type int * and **pp designates an int when all pointers are valid.",
+      "concept": "A pointer to pointer stores the address of another pointer object. If pp has type int **, then *pp has type int * and **pp designates an int when every pointer level is valid. Pointer-to-pointer types are useful when a function must modify a caller's pointer variable, but each level requires a valid target and appropriate lifetime.",
       "whyItMatters": "This knowledge helps reason about C data representation, object bounds and valid memory access.",
       "analogy": "Think of memory objects as labelled storage and pointers as typed references to that storage.",
       "analogyLimit": "The analogy does not replace C's formal pointer, lifetime and object-access rules."
     },
     "explain": {
-      "narrative": "A pointer to pointer stores the address of another pointer object. Each dereference removes one level of indirection: if pp has type int **, then *pp has type int * and **pp designates an int when all pointers are valid.\n\nCheck the declared types, object lifetime, valid bounds and function preconditions before using the construct. Enable compiler warnings and test edge cases.",
+      "narrative": "## 1. Read the type from right to left\n\n`int **pp` declares pp as a pointer to a pointer to int. `*pp` is an int pointer. `**pp` is the int object reached by following both pointer levels.\n\n## 2. Initialize each level\n\nIf pp is to be dereferenced twice, pp must point to a live int pointer object, and that int pointer must point to a live int object. Checking only the outer pointer is not enough if the inner pointer may be null or invalid.\n\n## 3. Modify a caller's pointer\n\nA function that receives `int **` can assign through `*out` to update the caller's int pointer, provided the argument points to a valid pointer object. This pattern is common when a function allocates storage and returns it through an output parameter.\n\n## 4. Do not confuse related declarations\n\n`int *items[3]` is an array of three int pointers. `int **p` is a pointer to an int pointer. `int matrix[2][3]` is an array of two rows, each containing three ints. These types have different layouts and pointer arithmetic.\n\n## 5. Validate output parameters\n\nCheck the outer pointer before assigning through it. Define whether the function accepts a null output pointer, and document who owns any allocated object returned through it.",
       "examples": [
         {
-          "id": "cl56-ex1",
+          "id": "cl5.6-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "Multiple indirection levels are used for modifying pointer variables through function parameters, arrays of pointers and dynamically allocated structures. Each level needs its own valid object and lifetime.",
-          "explanation": "#include <stdio.h>\nint main(void) {\n int value = 12;\n int *p = &value;\n int **pp = &p;\n **pp = 25;\n printf(\"%d\\n\", value);\n return 0;\n}",
+          "title": "Two levels of indirection",
+          "code": "#include <stdio.h>\n\nint main(void) {\n    int value = 42;\n    int *p = &value;\n    int **pp = &p;\n    printf(\"%d\\n\", **pp);\n    **pp = 50;\n    printf(\"%d\\n\", value);\n    return 0;\n}",
+          "explanation": "pp points to p, and p points to value. Two dereferences reach the int object.",
+          "runnable": false
+        },
+        {
+          "id": "cl5.6-ex2",
+          "language": "en",
+          "title": "Update a caller's pointer through an output parameter",
+          "code": "#include <stdio.h>\n#include <stdlib.h>\n\nint create_value(int **out) {\n    if (out == NULL) return 0;\n    *out = malloc(sizeof **out);\n    if (*out == NULL) return 0;\n    **out = 75;\n    return 1;\n}\n\nint main(void) {\n    int *value = NULL;\n    if (!create_value(&value)) return 1;\n    printf(\"%d\\n\", *value);\n    free(value);\n    return 0;\n}",
+          "explanation": "The function receives the address of the caller's pointer variable. It assigns the allocated address through *out, and the caller later releases the allocation.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "pp points to p; *pp accesses p; **pp accesses value. Assigning through **pp changes the original int.",
-      "independentTask": "Draw the objects value, p and pp as boxes with arrows.",
+      "guidedTask": "Write a C program demonstrating CL5.6. State the relevant input, pointer or conversion contract, then compile and trace the normal and failure paths.",
+      "independentTask": "Create a second example for CL5.6 that exercises a boundary or invalid state. Add checks, document the ownership or input rules, and explain why unsafe behavior is avoided.",
       "hints": [
-        "Write a function that receives int ** and changes the caller's pointer to refer to a valid int. Explain the lifetime requirement.",
-        "The type int ** is not interchangeable with int *.",
-        "Each dereference requires the current pointer to be valid for the object being accessed."
+        "Read the declared types carefully, including every pointer and qualifier level.",
+        "Check return values and validate inputs before use.",
+        "Keep object lifetime and ownership explicit.",
+        "Avoid dereferencing invalid or out-of-range pointers.",
+        "Test both success and failure paths."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl56-q1",
-        "prompt": "Which statement best matches this lesson?",
+        "id": "cl5.6-q1",
+        "prompt": "If pp has type int **, what is the type of *pp?",
         "options": [
-          "The C rule and constraints explained in this lesson.",
-          "An unrelated HTML element.",
-          "A CSS property."
+          "int *",
+          "int **",
+          "int"
         ],
-        "answer": "The C rule and constraints explained in this lesson.",
-        "explanation": "The correct choice follows the C rule and its constraints."
+        "answer": "int *",
+        "explanation": "One dereference removes one pointer level."
       },
       {
-        "id": "cl56-q2",
-        "prompt": "What is the safest way to handle the relevant boundary or validity condition?",
+        "id": "cl5.6-q2",
+        "prompt": "What does **pp designate when both pointer levels are valid?",
         "options": [
-          "Check the documented preconditions and bounds before access.",
-          "Assume C automatically checks every pointer and array access.",
-          "Ignore the result if one run appears successful."
+          "An int object",
+          "The address of pp itself",
+          "An array of pointers"
         ],
-        "answer": "Check the documented preconditions and bounds before access.",
-        "explanation": "C programs must explicitly respect object bounds, pointer validity and conversion results."
+        "answer": "An int object",
+        "explanation": "Two dereferences follow both pointer levels to the int."
       },
       {
-        "id": "cl56-q3",
-        "prompt": "Why should the example be traced?",
+        "id": "cl5.6-q3",
+        "prompt": "Why might a function receive int **out?",
         "options": [
-          "To understand execution order and object state.",
-          "To replace compilation and tests.",
-          "To avoid checking inputs."
+          "To modify the caller's pointer variable through its address",
+          "To receive two integers automatically",
+          "To declare an array of two ints"
         ],
-        "answer": "To understand execution order and object state.",
-        "explanation": "Tracing complements compilation, warnings and testing."
+        "answer": "To modify the caller's pointer variable through its address",
+        "explanation": "The function can assign through *out to update the caller's pointer."
+      },
+      {
+        "id": "cl5.6-q4",
+        "prompt": "Which declaration is an array of three int pointers?",
+        "options": [
+          "int *items[3];",
+          "int **items;",
+          "int items[3][3];"
+        ],
+        "answer": "int *items[3];",
+        "explanation": "The brackets bind items as an array whose elements are int pointers."
+      },
+      {
+        "id": "cl5.6-q5",
+        "prompt": "What must be true before dereferencing **pp?",
+        "options": [
+          "Both pointer levels must lead to valid objects with suitable lifetimes",
+          "Only pp must be non-null",
+          "The program must have three arrays"
+        ],
+        "answer": "Both pointer levels must lead to valid objects with suitable lifetimes",
+        "explanation": "Every dereference requires a valid pointer to a live accessible object."
       }
     ]
   },

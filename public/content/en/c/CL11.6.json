@@ -6,39 +6,62 @@
   "title": "Project 6: inventory manager with structures and file persistence",
   "language": "en",
   "learningObjectives": [
-    "Explain the topic and its C rules.",
-    "Trace the example and identify its purpose.",
-    "Identify important validation and failure cases.",
-    "Apply the concept in a tested program or reference exercise."
+    "Model products with a structure containing a unique ID, name, quantity and integer-cent unit price.",
+    "Manage a variable number of products using a dynamically resized array with separate count and capacity values.",
+    "Implement add, list, search, stock-in and stock-out operations while enforcing inventory rules.",
+    "Persist an inventory snapshot to a text file and load records with validation when the program starts.",
+    "Handle allocation failures, malformed or duplicate file records, insufficient stock and file I/O errors.",
+    "Detect low stock and prevent quantity and monetary arithmetic from overflowing their integer types."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL2.1",
+    "CL3.1",
+    "CL4.1",
+    "CL5.1",
+    "CL5.3",
+    "CL6.1",
+    "CL11.3",
+    "CL11.4",
+    "CL11.5"
+  ],
   "stages": {
     "understand": {
-      "concept": "An inventory manager tracks product identifiers, names, quantities and prices. It validates stock changes, searches records and persists data. It should prevent negative quantities and define behaviour for duplicate identifiers.",
-      "whyItMatters": "The project combines data modeling, array or dynamic collection management, file I/O and business-rule validation.",
-      "analogy": "Treat the project or language feature as a set of components with explicit interfaces and responsibilities.",
-      "analogyLimit": "The analogy does not replace C's formal language, library and resource-management rules."
+      "concept": "An inventory manager stores a changing collection of products. Each product has a unique positive ID, a name, a non-negative stock quantity and a positive unit price. The project represents each product with struct Product and stores products in a dynamically allocated array. The collection tracks count (active products) and capacity (allocated slots). It supports adding products, listing and searching, receiving stock, issuing stock, low-stock warnings, and saving/loading the collection from a text file. Money is stored as integer cents to avoid floating-point rounding in totals and displayed prices.",
+      "whyItMatters": "Inventory software combines data modeling, dynamic collections, business rules and persistent storage. It is a realistic exercise in keeping in-memory state consistent with validated data read from and written to a file.",
+      "analogy": "Think of the product array as the live stock register in a shop and the text file as its saved snapshot. Stock-in adds units; stock-out removes units only when enough are available.",
+      "analogyLimit": "A simple text file is not a database. It does not automatically provide transactions, concurrent-user safety, backups or recovery from every power failure. The program must validate records and report I/O errors."
     },
     "explain": {
-      "narrative": "An inventory manager tracks product identifiers, names, quantities and prices. It validates stock changes, searches records and persists data. It should prevent negative quantities and define behaviour for duplicate identifiers.\n\nFor a complete implementation, define input constraints, ownership, error handling and test cases before coding. Compile with warnings and verify normal, boundary and failure behaviour.",
+      "narrative": "Each struct Product contains an integer ID, a bounded name array, an integer quantity and a long long price_cents value. IDs must be positive and unique. Quantity may be zero but never negative. A price must be positive. The dynamic array grows when required: reserve_products checks the requested element count against SIZE_MAX / sizeof *items, uses realloc through a temporary pointer and updates capacity only after success. This preserves the original allocation if growth fails.\\n\\nThe business operations are separate from terminal input. Searching scans only the active range. Stock-in checks that adding a quantity cannot exceed INT_MAX. Stock-out rejects an amount larger than the available quantity. Low-stock display marks products with five or fewer units; this threshold is an explicit example rule and can be changed.\\n\\nThe file format is one record per line: id|name|quantity|price_cents. The name cannot contain the pipe delimiter. On startup, the program opens inventory.txt in read mode, parses each complete line into a temporary Product, validates all fields, and adds only valid non-duplicate records. Malformed and duplicate records are skipped and counted. An absent file is treated as a new empty inventory.\\n\\nSaving writes a complete snapshot to inventory.tmp, checks each fprintf and fclose result, then renames the temporary file to inventory.txt. The temporary file is created in the same directory so the rename can act as a replacement step on common hosted systems. C implementations may differ in how rename behaves when the destination already exists; the program reports a replacement failure rather than claiming the save succeeded. This teaching project does not implement fsync, multi-process locking or guaranteed crash durability.\\n\\nChanges made in memory are not automatically saved. Choose the Save menu option after changes. If the program exits or the machine stops before saving, unsaved changes may be lost. Before using the example with important data, keep a backup of inventory.txt. All file contents are plain text.",
       "examples": [
         {
           "id": "cl116-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\nstruct Item { int id; int quantity; double price; };\nint main(void) {\n struct Item item = {501, 8, 19.75};\n if (item.quantity < 0 || item.price < 0.0) return 1;\n printf(\"%d %d %.2f\\n\", item.id, item.quantity, item.price);\n return 0;\n}",
-          "explanation": "The structure groups the inventory fields. Validation rejects negative quantity or price in this simplified model; a complete application must also validate input and persistence errors.",
-          "runnable": false
+          "title": "Test inventory operations and stock rules",
+          "code": "#include <assert.h>\n#include <limits.h>\n#include <stdint.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n#define NAME_SIZE 48\nstruct Product { int id; char name[NAME_SIZE]; int quantity; long long price_cents; };\nstruct Inventory { struct Product *items; size_t count; size_t capacity; };\n\nstatic int valid_product(const struct Product *p) {\n    return p != NULL && p->id > 0 && p->name[0] != '\\0'\n        && strlen(p->name) < NAME_SIZE && p->quantity >= 0 && p->price_cents > 0;\n}\nstatic size_t find_product(const struct Inventory *inv, int id) {\n    size_t i;\n    for (i=0; i<inv->count; ++i) if (inv->items[i].id==id) return i;\n    return inv->count;\n}\nstatic int reserve_products(struct Inventory *inv, size_t needed) {\n    size_t cap;\n    struct Product *tmp;\n    if (needed<=inv->capacity) return 1;\n    if (needed>SIZE_MAX/sizeof *inv->items) return 0;\n    cap=inv->capacity==0U?2U:inv->capacity;\n    while(cap<needed) { if(cap>SIZE_MAX/2U){cap=needed;break;} cap*=2U; }\n    if(cap>SIZE_MAX/sizeof *inv->items) return 0;\n    tmp=realloc(inv->items,cap*sizeof *inv->items);\n    if(tmp==NULL) return 0;\n    inv->items=tmp; inv->capacity=cap; return 1;\n}\nstatic int add_product(struct Inventory *inv,const struct Product *p) {\n    if(!valid_product(p)||find_product(inv,p->id)!=inv->count||inv->count==SIZE_MAX) return 0;\n    if(!reserve_products(inv,inv->count+1U)) return 0;\n    inv->items[inv->count++]=*p; return 1;\n}\nstatic int change_stock(struct Inventory *inv,int id,int delta) {\n    size_t at=find_product(inv,id);\n    if(at==inv->count) return 0;\n    if(delta<0 && inv->items[at].quantity < -delta) return 0;\n    if(delta>0 && inv->items[at].quantity > INT_MAX-delta) return 0;\n    if(inv->items[at].quantity+delta<0) return 0;\n    inv->items[at].quantity+=delta; return 1;\n}\nstatic int update_price(struct Inventory *inv,int id,long long cents) {\n    size_t at=find_product(inv,id);\n    if(at==inv->count||cents<=0) return 0;\n    inv->items[at].price_cents=cents; return 1;\n}\nstatic int delete_product(struct Inventory *inv,int id) {\n    size_t at=find_product(inv,id),i;\n    if(at==inv->count) return 0;\n    for(i=at;i+1U<inv->count;++i) inv->items[i]=inv->items[i+1U];\n    --inv->count; return 1;\n}\nstatic void destroy_inventory(struct Inventory *inv) {\n    free(inv->items); inv->items=NULL; inv->count=0U; inv->capacity=0U;\n}\nint main(void) {\n    struct Inventory inv={NULL,0U,0U};\n    const struct Product a={101,\"USB Cable\",10,1250};\n    const struct Product b={102,\"Wireless Mouse\",5,7999};\n    const struct Product duplicate={101,\"Duplicate\",1,100};\n    const struct Product invalid={103,\"Bad Price\",1,0};\n    assert(add_product(&inv,&a)); assert(add_product(&inv,&b));\n    assert(!add_product(&inv,&duplicate)); assert(!add_product(&inv,&invalid));\n    assert(find_product(&inv,102)==1U); assert(find_product(&inv,999)==inv.count);\n    assert(change_stock(&inv,101,5)); assert(inv.items[0].quantity==15);\n    assert(!change_stock(&inv,101,-16)); assert(!change_stock(&inv,999,1));\n    assert(update_price(&inv,102,8500)); assert(!update_price(&inv,102,0));\n    assert(delete_product(&inv,101)); assert(inv.count==1U&&inv.items[0].id==102);\n    assert(!delete_product(&inv,101));\n    destroy_inventory(&inv); assert(inv.items==NULL&&inv.count==0U&&inv.capacity==0U);\n    puts(\"Inventory operation tests passed.\"); return 0;\n}\n",
+          "explanation": "This deterministic program tests dynamic allocation, product validation, duplicate-ID rejection, search, stock-in, insufficient-stock rejection, price update, deletion and cleanup. It isolates the core inventory operations from file and menu input so the business rules can be tested predictably.",
+          "runnable": true
+        },
+        {
+          "id": "cl116-ex2",
+          "language": "en",
+          "title": "Complete file-backed inventory manager",
+          "code": "#include <ctype.h>\n#include <errno.h>\n#include <limits.h>\n#include <stdint.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n#define NAME_SIZE 48\n#define LINE_SIZE 128\n#define FILE_LINE_SIZE 128\n#define DATA_FILE \"inventory.txt\"\n#define TEMP_FILE \"inventory.tmp\"\n\nstruct Product { int id; char name[NAME_SIZE]; int quantity; long long price_cents; };\nstruct Inventory { struct Product *items; size_t count; size_t capacity; };\nenum ReadResult { READ_OK, READ_END, READ_BAD };\n\nstatic char *trim(char *s) {\n    char *start=s,*end;\n    while(isspace((unsigned char)*start)) ++start;\n    end=start+strlen(start);\n    while(end>start&&isspace((unsigned char)end[-1])) --end;\n    *end='\\0'; return start;\n}\nstatic enum ReadResult read_line(const char *prompt,char *buf,size_t size) {\n    size_t n; int ch; fputs(prompt,stdout);\n    if(fgets(buf,(int)size,stdin)==NULL) return READ_END;\n    n=strlen(buf);\n    if(n>0U&&buf[n-1U]=='\\n'){buf[n-1U]='\\0';return READ_OK;}\n    ch=getchar(); if(ch=='\\n'||ch==EOF) return READ_OK;\n    while(ch!='\\n'&&ch!=EOF) ch=getchar();\n    return READ_BAD;\n}\nstatic int read_long(const char *prompt,long min,long max,long *out) {\n    char line[LINE_SIZE],*s,*end; long v; enum ReadResult r=read_line(prompt,line,sizeof line);\n    if(r!=READ_OK) return r==READ_END?0:-1;\n    s=trim(line); errno=0; v=strtol(s,&end,10);\n    while(isspace((unsigned char)*end)) ++end;\n    if(s==end||*end!='\\0'||errno==ERANGE||v<min||v>max) return -1;\n    *out=v; return 1;\n}\nstatic int read_money(const char *prompt,long long *out) {\n    char line[LINE_SIZE],*s,*p; unsigned long long whole=0ULL; unsigned int frac=0U;\n    int digits=0,decimals=0; enum ReadResult r=read_line(prompt,line,sizeof line);\n    if(r!=READ_OK) return r==READ_END?0:-1;\n    s=trim(line); p=s;\n    while(*p>='0'&&*p<='9'){\n        unsigned int d=(unsigned int)(*p-'0');\n        if(whole>((unsigned long long)LLONG_MAX/100ULL-d)/10ULL) return -1;\n        whole=whole*10ULL+d; ++digits; ++p;\n    }\n    if(*p=='.'){++p;while(*p>='0'&&*p<='9'&&decimals<2){frac=frac*10U+(unsigned int)(*p-'0');++decimals;++p;} if(decimals==0)return -1;}\n    if(*p!='\\0'||digits==0)return -1;\n    if(decimals==1)frac*=10U;\n    if(whole>(unsigned long long)LLONG_MAX/100ULL||whole*100ULL>(unsigned long long)LLONG_MAX-frac)return -1;\n    *out=(long long)(whole*100ULL+frac); return *out>0?1:-1;\n}\nstatic int read_name(char name[NAME_SIZE]) {\n    char line[LINE_SIZE],*s; size_t n; enum ReadResult r=read_line(\"Product name (no |): \",line,sizeof line);\n    if(r!=READ_OK)return r==READ_END?0:-1;\n    s=trim(line);n=strlen(s);\n    if(n==0U||n>=NAME_SIZE||strchr(s,'|')!=NULL)return -1;\n    memcpy(name,s,n+1U);return 1;\n}\nstatic size_t find_product(const struct Inventory *inv,int id) {\n    size_t i;for(i=0;i<inv->count;++i)if(inv->items[i].id==id)return i;return inv->count;\n}\nstatic int reserve_products(struct Inventory *inv,size_t needed) {\n    size_t cap;struct Product *tmp;\n    if(needed<=inv->capacity)return 1;\n    if(needed>SIZE_MAX/sizeof *inv->items)return 0;\n    cap=inv->capacity==0U?4U:inv->capacity;\n    while(cap<needed){if(cap>SIZE_MAX/2U){cap=needed;break;}cap*=2U;}\n    if(cap>SIZE_MAX/sizeof *inv->items)return 0;\n    tmp=realloc(inv->items,cap*sizeof *inv->items);if(tmp==NULL)return 0;\n    inv->items=tmp;inv->capacity=cap;return 1;\n}\nstatic int add_product(struct Inventory *inv,const struct Product *p) {\n    if(p->id<=0||p->name[0]=='\\0'||strlen(p->name)>=NAME_SIZE||p->quantity<0||p->price_cents<=0||find_product(inv,p->id)!=inv->count||inv->count==SIZE_MAX)return 0;\n    if(!reserve_products(inv,inv->count+1U))return 0;\n    inv->items[inv->count++]=*p;return 1;\n}\nstatic int save_inventory(const struct Inventory *inv) {\n    FILE *f=fopen(TEMP_FILE,\"w\");size_t i;int ok=1;\n    if(f==NULL){perror(\"Open temporary inventory file\");return 0;}\n    for(i=0;i<inv->count;++i){\n        const struct Product *p=&inv->items[i];\n        if(fprintf(f,\"%d|%s|%d|%lld\\n\",p->id,p->name,p->quantity,p->price_cents)<0){ok=0;break;}\n    }\n    if(fclose(f)==EOF)ok=0;\n    if(!ok){remove(TEMP_FILE);puts(\"Could not write inventory snapshot.\");return 0;}\n    if(rename(TEMP_FILE,DATA_FILE)!=0){perror(\"Could not replace inventory file\");remove(TEMP_FILE);return 0;}\n    return 1;\n}\nstatic int parse_record(char *line,struct Product *p) {\n    char *a,*b,*c,*end;long id,qty;long long cents;\n    size_t n=strlen(line);while(n>0U&&(line[n-1U]=='\\n'||line[n-1U]=='\\r'))line[--n]='\\0';\n    a=strchr(line,'|');if(a==NULL)return 0;*a++='\\0';\n    b=strchr(a,'|');if(b==NULL)return 0;*b++='\\0';\n    c=strchr(b,'|');if(c==NULL||strchr(c+1,'|')!=NULL)return 0;*c++='\\0';\n    errno=0;id=strtol(line,&end,10);if(errno==ERANGE||end==line||*end!='\\0'||id<1||id>INT_MAX)return 0;\n    if(a[0]=='\\0'||strlen(a)>=NAME_SIZE)return 0;\n    errno=0;qty=strtol(b,&end,10);if(errno==ERANGE||end==b||*end!='\\0'||qty<0||qty>INT_MAX)return 0;\n    errno=0;cents=strtoll(c,&end,10);if(errno==ERANGE||end==c||*end!='\\0'||cents<=0)return 0;\n    p->id=(int)id;p->quantity=(int)qty;p->price_cents=cents;\n    (void)snprintf(p->name,sizeof p->name,\"%s\",a);return 1;\n}\nstatic void load_inventory(struct Inventory *inv) {\n    FILE *f=fopen(DATA_FILE,\"r\");char line[FILE_LINE_SIZE];size_t bad=0U;\n    if(f==NULL){if(errno==ENOENT){puts(\"No saved inventory yet; starting empty.\");return;}perror(\"Open inventory file\");return;}\n    while(fgets(line,sizeof line,f)!=NULL){\n        size_t n=strlen(line);struct Product p;\n        if(n>0U&&line[n-1U]!='\\n'&&!feof(f)){int ch;while((ch=fgetc(f))!='\\n'&&ch!=EOF){};++bad;continue;}\n        if(!parse_record(line,&p)||!add_product(inv,&p)){++bad;}\n    }\n    if(ferror(f))perror(\"Read inventory file\");\n    if(fclose(f)==EOF)perror(\"Close inventory file\");\n    printf(\"Loaded %zu products; skipped %zu invalid or duplicate records.\\n\",inv->count,bad);\n}\nstatic void list_products(const struct Inventory *inv) {\n    size_t i;if(inv->count==0U){puts(\"Inventory is empty.\");return;}\n    puts(\"\\nID     PRODUCT                                  QTY      PRICE\");\n    for(i=0;i<inv->count;++i){const struct Product *p=&inv->items[i];\n        printf(\"%-6d %-40s %-8d %lld.%02lld%s\\n\",p->id,p->name,p->quantity,p->price_cents/100LL,p->price_cents%100LL,p->quantity<=5?\"  LOW STOCK\":\"\");\n    }\n}\nstatic void add_menu(struct Inventory *inv) {\n    struct Product p;long v;int r;\n    r=(int)read_long(\"Product ID: \",1L,(long)INT_MAX,&v);if(r!=1){puts(r==0?\"Input ended.\":\"Invalid ID.\");return;}p.id=(int)v;\n    if(find_product(inv,p.id)!=inv->count){puts(\"Product ID already exists.\");return;}\n    r=read_name(p.name);if(r!=1){puts(r==0?\"Input ended.\":\"Invalid product name.\");return;}\n    r=(int)read_long(\"Opening quantity: \",0L,(long)INT_MAX,&v);if(r!=1){puts(r==0?\"Input ended.\":\"Invalid quantity.\");return;}p.quantity=(int)v;\n    r=read_money(\"Unit price (e.g. 19.95): \",&p.price_cents);if(r!=1){puts(r==0?\"Input ended.\":\"Invalid price.\");return;}\n    if(!add_product(inv,&p)){puts(\"Could not add product (memory or validation failure).\");return;}\n    puts(\"Product added. Save to persist changes.\");\n}\nstatic void stock_menu(struct Inventory *inv,int add) {\n    long id,amount;int r;size_t at;\n    r=(int)read_long(\"Product ID: \",1L,(long)INT_MAX,&id);if(r!=1){puts(r==0?\"Input ended.\":\"Invalid ID.\");return;}\n    at=find_product(inv,(int)id);if(at==inv->count){puts(\"Product not found.\");return;}\n    r=(int)read_long(add?\"Quantity to add: \":\"Quantity to remove: \",1L,(long)INT_MAX,&amount);if(r!=1){puts(r==0?\"Input ended.\":\"Invalid quantity.\");return;}\n    if(add){if(inv->items[at].quantity>INT_MAX-(int)amount){puts(\"Quantity would overflow.\");return;}inv->items[at].quantity+=(int)amount;}\n    else{if(inv->items[at].quantity<(int)amount){puts(\"Insufficient stock.\");return;}inv->items[at].quantity-=(int)amount;}\n    puts(\"Stock updated. Save to persist changes.\");\n}\nstatic void search_menu(const struct Inventory *inv) {\n    long id;int r=(int)read_long(\"Product ID: \",1L,(long)INT_MAX,&id);size_t at;\n    if(r!=1){puts(r==0?\"Input ended.\":\"Invalid ID.\");return;}\n    at=find_product(inv,(int)id);if(at==inv->count)puts(\"Product not found.\");\n    else printf(\"%d | %s | quantity %d | %lld.%02lld\\n\",inv->items[at].id,inv->items[at].name,inv->items[at].quantity,inv->items[at].price_cents/100LL,inv->items[at].price_cents%100LL);\n}\nint main(void) {\n    struct Inventory inv={NULL,0U,0U};int done=0;load_inventory(&inv);\n    while(!done){\n        char line[LINE_SIZE],*s,*end;long choice;enum ReadResult rr;\n        puts(\"\\nINVENTORY MANAGER\");\n        puts(\"1 Add  2 List/low stock  3 Search  4 Stock in  5 Stock out  6 Save  0 Exit\");\n        rr=read_line(\"Choose: \",line,sizeof line);\n        if(rr==READ_END){puts(\"\\nEnd of input.\");break;}\n        if(rr!=READ_OK){puts(\"Menu input too long.\");continue;}\n        s=trim(line);errno=0;choice=strtol(s,&end,10);while(isspace((unsigned char)*end))++end;\n        if(s==end||*end!='\\0'||errno==ERANGE||choice<0||choice>6){puts(\"Choose 0 to 6.\");continue;}\n        switch(choice){\n            case 1:add_menu(&inv);break;\n            case 2:list_products(&inv);break;\n            case 3:search_menu(&inv);break;\n            case 4:stock_menu(&inv,1);break;\n            case 5:stock_menu(&inv,0);break;\n            case 6:if(save_inventory(&inv))puts(\"Inventory saved.\");break;\n            case 0:done=1;break;\n            default:break;\n        }\n    }\n    free(inv.items);inv.items=NULL;inv.count=0U;inv.capacity=0U;\n    puts(\"Inventory memory released. Goodbye.\");return 0;\n}\n",
+          "explanation": "The interactive program loads inventory.txt at startup, supports adding and searching products, lists low-stock items, receives and issues stock, and saves a validated snapshot when requested. It uses integer cents for prices, checks dynamic allocation and file operations, and frees the product array before exit. Save explicitly after changes.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Define the invariants for quantity, price and product ID.",
-      "independentTask": "Implement add stock, reduce stock, lookup and save/load. Test insufficient stock and duplicate IDs.",
+      "guidedTask": "Run the first example and trace how the inventory count and capacity change as products are added. Then trace a stock-in operation and a rejected stock-out operation. Explain why a product quantity cannot become negative.",
+      "independentTask": "Extend the inventory manager with a validated unit-price update option and a report showing the total stock value. Calculate each product's quantity multiplied by its price_cents with overflow checks, and check the sum before adding it to the report total. Test duplicate IDs, zero and negative prices, zero stock, insufficient stock, quantity overflow, malformed file lines, duplicate records in the file, an absent file, a failed save and a low-stock boundary of five versus six units.",
       "hints": [
-        "Separate business rules from terminal input and file output.",
-        "Use an integer minor currency unit if exact decimal accounting is required.",
-        "Check every file operation and validate loaded records."
+        "Keep product identity and business rules in struct Product and the inventory operation functions.",
+        "Use count for active records and capacity for allocated slots; never iterate to capacity when listing products.",
+        "Check allocation-size arithmetic before multiplying a count by sizeof an element.",
+        "Store money in integer cents and validate the input format before converting it.",
+        "Parse a file line into a temporary product and validate every field before adding it to the live inventory.",
+        "A successful in-memory change is not persistent until the save operation completes and reports success."
       ]
     }
   },
@@ -51,36 +74,58 @@
     "questions": [
       {
         "id": "cl116-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "Why does the inventory manager keep count and capacity separately?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "Count tracks active products while capacity tracks allocated array slots.",
+          "Count stores the largest product ID and capacity stores the price.",
+          "They both represent the number of bytes in the file."
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the topic and constraints described above."
+        "answer": "Count tracks active products while capacity tracks allocated array slots.",
+        "explanation": "Only the first count elements are active; capacity is the storage currently available."
       },
       {
         "id": "cl116-q2",
-        "prompt": "What is essential for a reliable implementation?",
+        "prompt": "What should happen when a stock-out request exceeds the available quantity?",
         "options": [
-          "Define the interface, validate inputs and handle failures.",
-          "Assume every input is valid.",
-          "Ignore resource ownership."
+          "Reject the operation and leave the quantity unchanged.",
+          "Allow the quantity to become negative.",
+          "Delete the product automatically."
         ],
-        "answer": "Define the interface, validate inputs and handle failures.",
-        "explanation": "Reliable C programs make assumptions and failure behaviour explicit."
+        "answer": "Reject the operation and leave the quantity unchanged.",
+        "explanation": "The inventory invariant requires every product quantity to remain non-negative."
       },
       {
         "id": "cl116-q3",
-        "prompt": "How should the work be verified?",
+        "prompt": "Why is price stored as integer cents in this project?",
         "options": [
-          "Compile with warnings and test representative and boundary cases.",
-          "Only check whether the source file exists.",
-          "Assume a single successful run proves correctness."
+          "To avoid common floating-point rounding issues in currency arithmetic.",
+          "Because printf cannot display decimal numbers.",
+          "To allow negative prices."
         ],
-        "answer": "Compile with warnings and test representative and boundary cases.",
-        "explanation": "Compilation and targeted tests provide evidence of correctness."
+        "answer": "To avoid common floating-point rounding issues in currency arithmetic.",
+        "explanation": "Integer minor units provide exact addition within the representable range, provided overflow is checked."
+      },
+      {
+        "id": "cl116-q4",
+        "prompt": "What is the safest approach when loading a product line from the file?",
+        "options": [
+          "Parse into a temporary structure, validate all fields and then add it.",
+          "Copy the line directly over an existing product.",
+          "Assume every line is correctly formatted."
+        ],
+        "answer": "Parse into a temporary structure, validate all fields and then add it.",
+        "explanation": "Validation before committing prevents malformed or duplicate file data from corrupting live state."
+      },
+      {
+        "id": "cl116-q5",
+        "prompt": "When can the program report that a snapshot save succeeded?",
+        "options": [
+          "After all records are written, the stream closes successfully and the replacement step succeeds.",
+          "As soon as fopen returns a non-null pointer.",
+          "Immediately after the first product is printed."
+        ],
+        "answer": "After all records are written, the stream closes successfully and the replacement step succeeds.",
+        "explanation": "Buffered writes and the final rename can fail, so the full save sequence must be checked."
       }
     ]
   },

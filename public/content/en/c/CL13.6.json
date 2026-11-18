@@ -6,39 +6,77 @@
   "title": "Worked examples and real-life examples for each major topic",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its relevant rules.",
-    "Trace the example and justify its behaviour.",
-    "Identify important assumptions and failure cases.",
-    "Apply the concept in a reviewed and tested exercise."
+    "Explain how a worked example connects a practical requirement to a C data model, function contracts, implementation, trace, output and tests.",
+    "Choose suitable C types and representations for real-world quantities, records, collections, text and file data while stating their limits.",
+    "Trace arrays, structures, pointers, loops and helper functions to predict results and identify the exact object being read or modified.",
+    "Apply validation, checked arithmetic, explicit ownership and failure handling to practical examples without assuming simplified code is production-ready.",
+    "Use standard input/output and file-stream operations with return-value checks, bounded buffers and clear resource cleanup.",
+    "Adapt a worked example into an independent solution by changing requirements, designing boundary tests and documenting portability and production caveats."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL1.7",
+    "CL2.6",
+    "CL3.9",
+    "CL4.10",
+    "CL5.8",
+    "CL6.10",
+    "CL7.12",
+    "CL8.5",
+    "CL10.4",
+    "CL11.1",
+    "CL11.4",
+    "CL11.6",
+    "CL13.2",
+    "CL13.3",
+    "CL13.4",
+    "CL13.5"
+  ],
   "stages": {
     "understand": {
-      "concept": "A worked example shows the problem, assumptions, code, execution trace, output and explanation of key decisions. A real-life example connects a concept to a practical domain without implying that the simplified teaching code is production-ready.",
-      "whyItMatters": "Worked examples bridge conceptual explanations and independent implementation, while explicit limitations prevent learners from copying unsafe shortcuts.",
-      "analogy": "Treat standards, interfaces and release steps as explicit contracts that make assumptions visible.",
-      "analogyLimit": "The analogy does not replace the C standard, implementation documentation or project-specific requirements."
+      "concept": "A worked example is more than source code followed by an output line. It makes the reasoning visible: the practical requirement, assumptions, data representation, function contracts, implementation, execution trace, expected result, tests and limitations. A real-life scenario gives a learner a reason to use a feature, but a teaching example is still a model of a narrow part of a real system—not a ready-made production system.\n\nChoose the C feature because the requirement needs it. Use an integer type with a documented range for counts and identifiers; use integer minor currency units rather than binary floating point for exact simple money totals; use structures to group related fields; use arrays when the collection bound is known; and use pointers when a function must inspect or modify caller-owned objects. A pointer does not carry an array length, so pass the count separately. Use a string only with a clear capacity and null-termination contract.\n\nEvery example needs a contract. State valid inputs, limits, preconditions, observable output, failure behaviour and ownership. If a function can fail, make its success/failure result explicit and define whether output parameters remain unchanged on failure. Check signed arithmetic before performing it. Validate data before storing it, not only when displaying it. Check library return values, because successful compilation does not guarantee successful input, output, allocation or file operations.\n\nA useful worked-example trace lists the relevant variables and objects after each important operation. For an array, record the index and valid range. For a pointer, record which live object it designates. For a loop, show the condition and state change. For a file operation, record whether the stream was opened, positioned, read or written successfully. This makes the reasoning reproducible and exposes hidden assumptions.\n\nReal-life examples are simplified deliberately. A small expense total does not implement accounting, tax rules, currencies or concurrent updates. An inventory array does not provide a database transaction, multi-user consistency or persistent storage. A temporary file demonstration does not define a secure storage location, permissions, crash recovery or a durable file format. State those boundaries so learners do not mistake an educational model for a production design.",
+      "whyItMatters": "Worked examples bridge concepts and independent programming. Realistic but carefully bounded scenarios show when C features are useful, while explicit assumptions and limitations teach learners not to copy a classroom shortcut into a safety-, security- or money-critical system.",
+      "analogy": "A worked example is like a guided workshop: the instructor explains the goal, shows each operation, checks the result and points out where the demonstration stops.",
+      "analogyLimit": "A guided demonstration cannot reproduce every real deployment condition. Production systems need threat modelling, requirements review, operational controls, broader testing and domain-specific rules."
     },
     "explain": {
-      "narrative": "A worked example shows the problem, assumptions, code, execution trace, output and explanation of key decisions. A real-life example connects a concept to a practical domain without implying that the simplified teaching code is production-ready.\n\nState assumptions and constraints, consult the applicable standard or tool documentation, and verify the result with appropriate compiler diagnostics and tests. Separate portable guarantees from implementation-specific behaviour.",
+      "narrative": "## 1. A repeatable worked-example method\n\nUse the same sequence for every major topic:\n\n1. **Scenario:** describe the practical task in one or two sentences.\n2. **Contract:** define input, output, valid ranges, preconditions, failure behaviour and resource ownership.\n3. **Representation:** explain why each type, structure, array, pointer or file format is appropriate.\n4. **Implementation:** separate validation, calculation and presentation into focused functions.\n5. **Trace:** follow the key statements and show how the program state changes.\n6. **Verification:** compile with a stated C standard and warnings; run normal, boundary and failure tests.\n7. **Limitations:** state what the example deliberately does not solve and what a production design would add.\n\nDo not hide important work in a magic helper. If a helper performs validation, say what it validates. If it receives a pointer and count, state the relationship between them. If it changes caller-owned data, identify that side effect. If a function returns an error, show how the caller responds.\n\n## 2. Connect examples to major C topic families\n\n| Topic family | Practical scenario | Concepts to make visible |\n|---|---|---|\n| Types, expressions and control flow | Calculate a discount or eligibility result | ranges, conversions, conditions, checked arithmetic |\n| Arrays, strings and loops | Summarise sensor readings or names | bounds, traversal, null terminators, capacity |\n| Pointers and functions | Update a caller-owned record | addresses, pointer validity, const, parameter contracts |\n| Structures and enums | Model an order, learner or device state | member access, grouped data, named states |\n| Dynamic memory | Grow a contact list | capacity/count invariants, realloc failure, ownership, free |\n| Files and standard library | Save and reload a report | stream status, bounded parsing, format validation, close errors |\n| Algorithms and testing | Search an inventory or sort results | preconditions, complexity, expected cases, reference checks |\n| Build and debugging | Investigate a failing module | compiler diagnostics, separate compilation, reproducible tests |\n\nA scenario should support the concept being taught. Do not add pointers, dynamic allocation or file I/O simply to make a short example look advanced.\n\n## 3. Worked example A: monthly expense total\n\n**Scenario:** total a small set of expenses for one month. **Contract:** each record has a non-null category label and a nonnegative amount stored in integer cents. The caller owns a fixed array and passes its count. Zero records are valid; a null array is accepted only when count is zero. The total is returned through an output parameter only after every record passes validation and the addition is representable in `long long`. The function does not allocate, free or retain the array.\n\nThe example uses a structure to group a category and amount, an array to hold records, a pointer parameter to inspect one record, and a loop to aggregate values. It stores cents as integers to avoid introducing binary floating-point rounding into this simple total. It does not implement currency conversion, tax, refunds, accounting rules or multi-user updates.\n\n**Trace:** Travel contributes 1,250 cents; Food contributes 2,899; Books contributes 1,599. The running total becomes 1,250, then 4,149, then 5,748. Expected output: `Monthly expenses: 5748 cents`.\n\n## 4. Worked example B: inventory stock update\n\n**Scenario:** receive new stock and then sell some units. **Contract:** each product has a unique identifier and a nonnegative quantity no greater than 1,000,000. The array is caller-owned and has a fixed count. A change is positive for stock-in and negative for stock-out. The function rejects a missing product, a null array with nonzero count, an invalid existing quantity, a sale larger than available stock or an update above the documented maximum. The example uses a small fixed array; a real inventory service would need persistent storage, unique-ID enforcement, transaction semantics and concurrency control.\n\n**Trace:** product 205 starts with 3 units. Receiving 4 changes it to 7. Product 101 starts with 8 units. Selling 2 changes it to 6. Product 310 remains at 0. The final listing is shown by the example output.\n\n## 5. Worked example C: write and read a small report\n\n**Scenario:** write one learner result to a temporary C stream, rewind it, and parse it back. **Contract:** the stream and output pointers must be valid; the name is a nonempty string shorter than the destination capacity and may not contain the `|` delimiter or a newline; the score is 0 through 100. The record format is `name|score` followed by a newline. The reader rejects a missing delimiter, an empty/too-long name, an invalid score, trailing non-newline text and a truncated line. It writes output values only after validation. The example uses `tmpfile`, so the C library manages a temporary stream and the program closes it on every completed path. A production file format needs explicit encoding, escaping, versioning, storage location, permissions, durability and recovery decisions.\n\n**Trace:** the program writes `Mira|86`, flushes, rewinds to the beginning, reads the line, splits at the delimiter, converts the score with `strtol`, validates it and prints `Learner: Mira, score: 86`.\n\n## 6. From teaching example to production review\n\nBefore reusing a classroom example, ask what changes when the data comes from an untrusted user, a network, a file or another process. Define the input grammar; check truncation and conversion errors; choose limits from actual requirements; protect shared updates with an appropriate transaction or synchronization design; decide how data is persisted and recovered; and test failures such as disk-full, interrupted writes and allocation failure. Review logging for sensitive data and ensure diagnostics do not expose secrets.\n\n## 7. Verification checklist\n\n- The scenario maps to a specific learning outcome.\n- Every assumption and valid range is written down.\n- The type and representation choices are justified.\n- Pointer/count and object-lifetime rules are explicit.\n- Signed arithmetic is checked before evaluation.\n- Library and file-operation results are checked.\n- Normal, empty, boundary, malformed and failure cases are tested where applicable.\n- Expected output matches the code and trace.\n- Simplifications and production caveats are visible.\n- The source compiles under the stated C standard with useful warnings.",
       "examples": [
         {
           "id": "cl136-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\nstruct Stock { int available; };\nint can_sell(const struct Stock *stock, int requested) {\n return stock != NULL && requested > 0 && requested <= stock->available;\n}\nint main(void) {\n struct Stock item = {6};\n printf(\"%s\\n\", can_sell(&item, 2) ? \"available\" : \"not available\");\n return 0;\n}",
-          "explanation": "The example applies a structure, pointer-to-const access and validation to a stock-availability question. It does not implement concurrent inventory updates or persistence.",
-          "runnable": false
+          "title": "Monthly expense aggregation using structures, arrays and checked functions",
+          "code": "#include <limits.h>\n#include <stddef.h>\n#include <stdio.h>\n\nstruct Expense {\n    const char *category;\n    long long cents;\n};\n\nstatic int add_expense(const struct Expense *expense, long long *total)\n{\n    if (expense == NULL || total == NULL || expense->category == NULL ||\n        expense->cents < 0 || *total < 0 ||\n        expense->cents > LLONG_MAX - *total) {\n        return 0;\n    }\n    *total += expense->cents;\n    return 1;\n}\n\nstatic int monthly_total(const struct Expense expenses[], size_t count,\n                         long long *total_out)\n{\n    size_t i;\n    long long total = 0;\n\n    if (total_out == NULL || (count > 0U && expenses == NULL)) {\n        return 0;\n    }\n    for (i = 0U; i < count; ++i) {\n        if (!add_expense(&expenses[i], &total)) {\n            return 0;\n        }\n    }\n    *total_out = total;\n    return 1;\n}\n\nint main(void)\n{\n    const struct Expense expenses[] = {\n        {\"Travel\", 1250}, {\"Food\", 2899}, {\"Books\", 1599}\n    };\n    long long total;\n\n    if (!monthly_total(expenses, sizeof expenses / sizeof expenses[0], &total)) {\n        fputs(\"invalid expense data\\n\", stderr);\n        return 1;\n    }\n    printf(\"Monthly expenses: %lld cents\\n\", total);\n    return 0;\n}",
+          "explanation": "`Expense` groups a category label and integer cents. `monthly_total` receives the caller-owned array and its count; `add_expense` validates one record and checks `LLONG_MAX - total` before adding. The output parameter is assigned only after the complete loop succeeds. Trace: 1250 + 2899 = 4149; 4149 + 1599 = 5748. Expected output: `Monthly expenses: 5748 cents`. The teaching model does not implement currency conversion, tax, accounting policy or concurrent updates.",
+          "runnable": true
+        },
+        {
+          "id": "cl136-ex2",
+          "language": "en",
+          "title": "Inventory stock-in and stock-out using structures and pointer-based array updates",
+          "code": "#include <stddef.h>\n#include <stdio.h>\n\nstruct Product {\n    unsigned int id;\n    int quantity;\n};\n\nstatic int change_stock(struct Product products[], size_t count,\n                        unsigned int id, int change)\n{\n    size_t i;\n\n    if (count > 0U && products == NULL) {\n        return 0;\n    }\n    for (i = 0U; i < count; ++i) {\n        if (products[i].id == id) {\n            long long updated;\n            if (products[i].quantity < 0 || products[i].quantity > 1000000) {\n                return 0;\n            }\n            updated = (long long)products[i].quantity + (long long)change;\n            if (updated < 0LL || updated > 1000000LL) {\n                return 0;\n            }\n            products[i].quantity = (int)updated;\n            return 1;\n        }\n    }\n    return 0;\n}\n\nstatic void print_stock(const struct Product products[], size_t count)\n{\n    size_t i;\n    for (i = 0U; i < count; ++i) {\n        printf(\"id=%u quantity=%d\\n\", products[i].id, products[i].quantity);\n    }\n}\n\nint main(void)\n{\n    struct Product products[] = {{101U, 8}, {205U, 3}, {310U, 0}};\n    const size_t count = sizeof products / sizeof products[0];\n\n    if (!change_stock(products, count, 205U, 4) ||\n        !change_stock(products, count, 101U, -2)) {\n        fputs(\"stock update rejected\\n\", stderr);\n        return 1;\n    }\n    print_stock(products, count);\n    return 0;\n}",
+          "explanation": "Each `Product` has an identifier and quantity. `change_stock` searches the caller-owned array and changes only the matching record after validating the requested change. Product 205 changes from 3 to 7; product 101 changes from 8 to 6; product 310 stays at 0. Expected output: `id=101 quantity=6`, `id=205 quantity=7`, `id=310 quantity=0`. This fixed-array demonstration does not provide persistence, unique-ID enforcement or concurrency control.",
+          "runnable": true
+        },
+        {
+          "id": "cl136-ex3",
+          "language": "en",
+          "title": "Write and read a learner report using standard file streams and bounded parsing",
+          "code": "#include <errno.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\nstatic int write_report(FILE *stream, const char *name, int score)\n{\n    if (stream == NULL || name == NULL || name[0] == '\\0' ||\n        strchr(name, '|') != NULL || strchr(name, '\\n') != NULL ||\n        strlen(name) >= 32U || score < 0 || score > 100) {\n        return 0;\n    }\n    if (fprintf(stream, \"%s|%d\\n\", name, score) < 0) {\n        return 0;\n    }\n    return fflush(stream) == 0;\n}\n\nstatic int read_report(FILE *stream, char name[], size_t capacity, int *score_out)\n{\n    char line[128];\n    char *separator;\n    char *end;\n    long parsed;\n\n    if (stream == NULL || name == NULL || capacity == 0U || score_out == NULL) {\n        return 0;\n    }\n    if (fgets(line, sizeof line, stream) == NULL) {\n        return 0;\n    }\n    if (strchr(line, '\\n') == NULL) {\n        return 0;\n    }\n    separator = strchr(line, '|');\n    if (separator == NULL) {\n        return 0;\n    }\n    *separator = '\\0';\n    if (line[0] == '\\0' || strlen(line) >= capacity) {\n        return 0;\n    }\n    errno = 0;\n    parsed = strtol(separator + 1, &end, 10);\n    if (separator[1] == '\\0' || end == separator + 1 ||\n        (*end != '\\n' && *end != '\\0') || errno == ERANGE ||\n        parsed < 0 || parsed > 100) {\n        return 0;\n    }\n    (void)strcpy(name, line);\n    *score_out = (int)parsed;\n    return 1;\n}\n\nint main(void)\n{\n    FILE *stream = tmpfile();\n    char name[32];\n    int score;\n\n    if (stream == NULL) {\n        fputs(\"temporary stream unavailable\\n\", stderr);\n        return 1;\n    }\n    if (!write_report(stream, \"Mira\", 86) ||\n        fseek(stream, 0L, SEEK_SET) != 0 ||\n        !read_report(stream, name, sizeof name, &score)) {\n        (void)fclose(stream);\n        fputs(\"report operation failed\\n\", stderr);\n        return 1;\n    }\n    printf(\"Learner: %s, score: %d\\n\", name, score);\n    if (fclose(stream) != 0) {\n        fputs(\"close failed\\n\", stderr);\n        return 1;\n    }\n    return 0;\n}",
+          "explanation": "The program writes one `name|score` record to a temporary stream, flushes it, rewinds, reads a bounded line, rejects a missing newline or delimiter, validates the name capacity, converts the score with `strtol`, and closes the stream. Expected output: `Learner: Mira, score: 86`. The writer rejects empty names, names of 32 bytes or more, and delimiter/newline characters that would break this simple format. `tmpfile` is used for a self-contained demonstration; production persistence needs explicit format, encoding, permissions, durability and recovery rules.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Identify the concept, assumptions and limitation in the example.",
-      "independentTask": "Write a worked example for a file-processing topic with a trace, expected output, failure path and production caveat.",
+      "guidedTask": "Choose one worked example and add a trace table with the value of every important variable before and after each operation. Add at least three tests: one ordinary case, one boundary case and one invalid or failure case. Explain which contract rule each test checks and whether the expected result is success or rejection.",
+      "independentTask": "Create a practical C example for a domain such as a library, clinic appointment list, sensor monitor or order register. State the scenario and full contract; justify types and data structures; separate validation, processing and output; include a trace, expected output, boundary/failure tests and production caveats. Keep the example small enough that a reader can verify it without hidden dependencies.",
       "hints": [
-        "Show why each important line exists, not only what it prints.",
-        "Use realistic examples but state which details are simplified.",
-        "Include at least one edge case and one failure case."
+        "Begin with a real requirement and a precise contract; do not choose language features before understanding the data and operations.",
+        "Use integer minor units for simple exact currency totals, and check the chosen integer type's range before adding or multiplying.",
+        "When a function receives an array, pass its element count separately and define whether a null pointer is valid for an empty collection.",
+        "Make ownership and side effects visible: say who owns the records, who may modify them and who releases allocated storage.",
+        "For file examples, check every relevant return value, bound every input buffer, validate parsed fields and close streams on all completed paths.",
+        "Separate the classroom model from production requirements such as persistence, concurrency, authentication, privacy, recovery and domain-specific rules."
       ]
     }
   },
@@ -51,38 +89,59 @@
     "questions": [
       {
         "id": "cl136-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What makes a worked C example more useful than source code followed by an output line?",
         "options": [
-          "The C or learning principle described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "It explains the scenario, assumptions, contracts, trace, verification and limitations",
+          "It uses as many C features as possible",
+          "It omits failure cases to keep the code short"
         ],
-        "answer": "The C or learning principle described in this lesson.",
-        "explanation": "The correct choice follows the concept and constraints described above."
+        "answer": "It explains the scenario, assumptions, contracts, trace, verification and limitations",
+        "explanation": "The reasoning and constraints let a learner understand why the program works and where its guarantees stop."
       },
       {
         "id": "cl136-q2",
-        "prompt": "What should be checked before applying the concept?",
+        "prompt": "Why does the monthly-expense example store money as integer cents?",
         "options": [
-          "The exact rules, assumptions and failure cases.",
-          "Only the file name.",
-          "Whether one unrelated example runs."
+          "It avoids binary floating-point representation for this simple exact minor-unit total",
+          "It guarantees every currency uses cents",
+          "It removes the need to check integer overflow"
         ],
-        "answer": "The exact rules, assumptions and failure cases.",
-        "explanation": "Reliable C engineering depends on understanding the applicable contract."
+        "answer": "It avoids binary floating-point representation for this simple exact minor-unit total",
+        "explanation": "Integer minor units are appropriate for this bounded example, but the chosen type still needs range checks and real systems need currency-specific rules."
       },
       {
         "id": "cl136-q3",
-        "prompt": "Which practice provides stronger evidence?",
+        "prompt": "A function receives an array pointer and a count. Which statement is correct?",
         "options": [
-          "Use documented standards, diagnostics and targeted tests.",
-          "Assume one compiler's behaviour is universal.",
-          "Ignore warnings and boundary cases."
+          "The count must describe the number of accessible elements; the pointer does not encode that length",
+          "The pointer always reveals the allocated element count",
+          "The function may ignore the count when the pointer is non-null"
         ],
-        "answer": "Use documented standards, diagnostics and targeted tests.",
-        "explanation": "Multiple forms of evidence help distinguish guarantees from assumptions."
+        "answer": "The count must describe the number of accessible elements; the pointer does not encode that length",
+        "explanation": "The pointer/count contract supplies the bounds needed for safe traversal."
+      },
+      {
+        "id": "cl136-q4",
+        "prompt": "What is the most important production caveat for the fixed-array inventory example?",
+        "options": [
+          "A real multi-user inventory needs persistence and a concurrency/transaction design",
+          "A fixed array automatically prevents duplicate identifiers",
+          "The example already guarantees durable stock updates"
+        ],
+        "answer": "A real multi-user inventory needs persistence and a concurrency/transaction design",
+        "explanation": "The example demonstrates in-memory updates only; it does not save data or coordinate concurrent changes."
+      },
+      {
+        "id": "cl136-q5",
+        "prompt": "Why does the report reader use a bounded line buffer and validate `strtol` results?",
+        "options": [
+          "To reject truncated or malformed records and values outside the permitted score range",
+          "To make all file formats portable without a specification",
+          "To guarantee that the temporary file is durable after power loss"
+        ],
+        "answer": "To reject truncated or malformed records and values outside the permitted score range",
+        "explanation": "Bounded input and conversion checks protect the parser from accepting incomplete or invalid data; they do not define a complete production storage format."
       }
     ]
-  },
-  "status": "draft"
+  }
 }

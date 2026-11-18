@@ -6,39 +6,50 @@
   "title": "Pointer declarations, initialization and dereferencing",
   "language": "en",
   "learningObjectives": [
-    "Explain the language rule and its constraints.",
-    "Trace the example and predict its behaviour.",
-    "Identify boundary and safety cases.",
-    "Apply the concept in a tested C program."
+    "Declare pointer objects using the correct pointed-to type.",
+    "Initialize pointers before reading or dereferencing them.",
+    "Use unary * to access an object designated by a valid pointer.",
+    "Explain the difference between a null pointer and an uninitialized pointer.",
+    "Recognize invalid, dangling and misaligned pointer dereferences as unsafe."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "A pointer object stores a pointer value designating another object or function, or a null pointer value. Unary * dereferences a valid pointer to access the pointed-to object. A pointer must be initialized to a valid target or null before use.",
+      "concept": "A pointer object stores a pointer value that designates another object or function, or a null pointer value. Unary * dereferences a valid pointer to access the pointed-to object. A pointer must be initialized before its value is used. Dereferencing a null, indeterminate, dangling or otherwise invalid pointer has undefined behavior.",
       "whyItMatters": "This knowledge helps reason about C data representation, object bounds and valid memory access.",
       "analogy": "Think of memory objects as labelled storage and pointers as typed references to that storage.",
       "analogyLimit": "The analogy does not replace C's formal pointer, lifetime and object-access rules."
     },
     "explain": {
-      "narrative": "A pointer object stores a pointer value designating another object or function, or a null pointer value. Unary * dereferences a valid pointer to access the pointed-to object. A pointer must be initialized to a valid target or null before use.\n\nCheck the declared types, object lifetime, valid bounds and function preconditions before using the construct. Enable compiler warnings and test edge cases.",
+      "narrative": "## 1. Declare a pointer\n\n`int *p;` declares p as a pointer to int. The declaration does not automatically make p point to a valid int object. Until it is initialized, its value must not be read.\n\n## 2. Initialize a pointer\n\nA pointer can be initialized with the address of a compatible object, with a valid pointer returned by an allocation function, or with a null pointer constant such as NULL. Choose the initialization that matches the intended ownership and lifetime.\n\n## 3. Dereference with unary *\n\nIf p points to a live int object, `*p` designates that int. Reading or assigning through *p accesses the pointed-to object. The pointer must be valid and correctly aligned for the pointed-to type.\n\n## 4. Null is not an object\n\nA null pointer represents no valid target. It can be compared with NULL, but it must not be dereferenced. A non-null pointer is not automatically valid: it may be dangling or point outside an accessible object.\n\n## 5. Keep lifetime and ownership clear\n\nDo not return the address of a local automatic object. Do not dereference memory after free. Document which part of the program owns dynamically allocated storage and which part is allowed to release it.",
       "examples": [
         {
-          "id": "cl53-ex1",
+          "id": "cl5.3-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "Pointers enable indirect access, array traversal, dynamic allocation and data structures. Dereferencing an uninitialized, null, dangling or otherwise invalid pointer is undefined behaviour.",
-          "explanation": "#include <stdio.h>\nint main(void) {\n int score = 90;\n int *ptr = &score;\n printf(\"%d\\n\", *ptr);\n *ptr = 95;\n printf(\"%d\\n\", score);\n return 0;\n}",
+          "title": "Initialize and dereference a pointer",
+          "code": "#include <stdio.h>\n\nint main(void) {\n    int temperature = 24;\n    int *p = &temperature;\n    printf(\"%d\\n\", *p);\n    *p = 26;\n    printf(\"%d\\n\", temperature);\n    return 0;\n}",
+          "explanation": "The pointer is initialized with the address of a live int. Dereferencing it reads and updates that object.",
+          "runnable": false
+        },
+        {
+          "id": "cl5.3-ex2",
+          "language": "en",
+          "title": "Check a nullable pointer before dereferencing",
+          "code": "#include <stdio.h>\n\nint main(void) {\n    int *p = NULL;\n    if (p != NULL) printf(\"%d\\n\", *p);\n    else puts(\"No target object\");\n    return 0;\n}",
+          "explanation": "The null check prevents dereferencing a pointer that has no target. It does not prove that every non-null pointer is valid.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "ptr points to score. *ptr reads the value stored in score, and assigning through *ptr changes score itself.",
-      "independentTask": "Trace score, ptr and *ptr before and after the assignment.",
+      "guidedTask": "Write a C program demonstrating CL5.3. State the relevant input, pointer or conversion contract, then compile and trace the normal and failure paths.",
+      "independentTask": "Create a second example for CL5.3 that exercises a boundary or invalid state. Add checks, document the ownership or input rules, and explain why unsafe behavior is avoided.",
       "hints": [
-        "Write a function that receives an int pointer, checks for NULL and updates the pointed-to value when valid.",
-        "The declaration int *ptr declares ptr as a pointer to int; the asterisk binds to the declarator.",
-        "A pointer's type determines the type of object accessed by dereferencing."
+        "Read the declared types carefully, including every pointer and qualifier level.",
+        "Check return values and validate inputs before use.",
+        "Keep object lifetime and ownership explicit.",
+        "Avoid dereferencing invalid or out-of-range pointers.",
+        "Test both success and failure paths."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl53-q1",
-        "prompt": "Which statement best matches this lesson?",
+        "id": "cl5.3-q1",
+        "prompt": "Does `int *p;` automatically make p point to a valid int?",
         "options": [
-          "The C rule and constraints explained in this lesson.",
-          "An unrelated HTML element.",
-          "A CSS property."
+          "No",
+          "Yes, it points to zero",
+          "It allocates an int automatically"
         ],
-        "answer": "The C rule and constraints explained in this lesson.",
-        "explanation": "The correct choice follows the C rule and its constraints."
+        "answer": "No",
+        "explanation": "The declaration alone does not initialize the pointer or allocate a target object."
       },
       {
-        "id": "cl53-q2",
-        "prompt": "What is the safest way to handle the relevant boundary or validity condition?",
+        "id": "cl5.3-q2",
+        "prompt": "What does *p mean when p is a valid pointer to int?",
         "options": [
-          "Check the documented preconditions and bounds before access.",
-          "Assume C automatically checks every pointer and array access.",
-          "Ignore the result if one run appears successful."
+          "The int object designated by p",
+          "The address of p",
+          "The size of p"
         ],
-        "answer": "Check the documented preconditions and bounds before access.",
-        "explanation": "C programs must explicitly respect object bounds, pointer validity and conversion results."
+        "answer": "The int object designated by p",
+        "explanation": "Unary * dereferences the pointer."
       },
       {
-        "id": "cl53-q3",
-        "prompt": "Why should the example be traced?",
+        "id": "cl5.3-q3",
+        "prompt": "What is a null pointer?",
         "options": [
-          "To understand execution order and object state.",
-          "To replace compilation and tests.",
-          "To avoid checking inputs."
+          "A pointer value that designates no object or function",
+          "A pointer to integer zero",
+          "A pointer with a guaranteed numeric address of zero"
         ],
-        "answer": "To understand execution order and object state.",
-        "explanation": "Tracing complements compilation, warnings and testing."
+        "answer": "A pointer value that designates no object or function",
+        "explanation": "Null pointer values are defined by the language and need not have an all-bits-zero representation."
+      },
+      {
+        "id": "cl5.3-q4",
+        "prompt": "Can a non-null pointer still be invalid?",
+        "options": [
+          "Yes; it may be dangling or otherwise not designate a valid object",
+          "No, every non-null pointer is safe",
+          "Only if its variable is global"
+        ],
+        "answer": "Yes; it may be dangling or otherwise not designate a valid object",
+        "explanation": "Non-nullness alone does not prove pointer validity."
+      },
+      {
+        "id": "cl5.3-q5",
+        "prompt": "What happens when an invalid pointer is dereferenced?",
+        "options": [
+          "The behavior is undefined",
+          "The pointer is automatically repaired",
+          "The program always prints zero"
+        ],
+        "answer": "The behavior is undefined",
+        "explanation": "Dereferencing requires a valid pointer to an accessible object."
       }
     ]
   },

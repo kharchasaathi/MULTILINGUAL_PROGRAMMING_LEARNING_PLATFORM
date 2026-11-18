@@ -6,39 +6,50 @@
   "title": "Structures, members and member access",
   "language": "en",
   "learningObjectives": [
-    "Explain the C concept and its rules.",
-    "Trace the example and describe data flow.",
-    "Identify relevant failure and boundary cases.",
-    "Apply the concept in a tested C program."
+    "Define a structure type using struct and named members.",
+    "Create and initialize structure objects.",
+    "Access members with the dot operator.",
+    "Explain structure assignment and member type constraints.",
+    "Use structures to model related data with a clear invariant."
   ],
   "prerequisites": [],
   "stages": {
     "understand": {
-      "concept": "A structure type groups named members, which may have different types, into one object. The dot operator accesses a member through a structure object. Each member has its own declared type and value.",
+      "concept": "A structure type groups named members into one object. Members can have different types, and each member is accessed through the containing structure. A structure definition describes a type; declaring an object creates storage for a value of that type. C supports structure assignment between compatible structure types but not built-in whole-structure equality comparison.",
       "whyItMatters": "Structures model records such as products, coordinates and users while keeping related fields together under one object name.",
       "analogy": "Treat the operation as a clearly specified contract between the program and its data.",
       "analogyLimit": "The analogy does not replace C's type, lifetime, I/O and object representation rules."
     },
     "explain": {
-      "narrative": "A structure type groups named members, which may have different types, into one object. The dot operator accesses a member through a structure object. Each member has its own declared type and value.\n\nCheck all return values, object lifetimes, types and preconditions. Enable compiler warnings and test expected as well as failure paths.",
+      "narrative": "## 1. Define a structure\n\nA `struct` declaration introduces a structure type and its named members. Each member has its own declared type.\n\n## 2. Declare objects\n\nDeclare structure objects using the struct tag or a typedef alias. Members can be initialized in declaration order with an initializer list.\n\n## 3. Access members\n\nUse the dot operator, as in `item.price`, to access a member through a structure object. The expression has the member's declared type.\n\n## 4. Assignment and comparison\n\nCompatible structure objects can be assigned, copying member values. C does not provide `==` for complete structure objects; compare the relevant members explicitly.\n\n## 5. Model valid data\n\nGroup values that belong together and define invariants, such as a quantity being nonnegative. Validate external data before storing it in a structure.",
       "examples": [
         {
-          "id": "cl74-ex1",
+          "id": "cl7.4-ex1",
           "language": "en",
-          "title": "Focused C example",
+          "title": "Core concept",
           "code": "#include <stdio.h>\nstruct Product { int code; double price; };\nint main(void) {\n struct Product item = {101, 49.50};\n printf(\"%d %.2f\\n\", item.code, item.price);\n return 0;\n}",
-          "explanation": "item is one structure object with an int code and double price. The dot operator selects each member for reading.",
+          "explanation": "Trace the operations and check the relevant C standard library contracts and failure cases.",
+          "runnable": false
+        },
+        {
+          "id": "cl7.4-ex2",
+          "language": "en",
+          "title": "Apply the concept safely",
+          "code": "#include <stdio.h>\nstruct Student { int id; double score; };\nint main(void) { struct Student a = {7, 92.5}; struct Student b = a; printf(\"%d %.1f\\n\", b.id, b.score); return 0; }",
+          "explanation": "This example reinforces the topic with explicit validation or resource handling. Compile with warnings and test failure paths.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Draw the structure object and label each member with its type.",
-      "independentTask": "Define a structure for a repair ticket with an identifier, status and estimated cost. Initialize and print it.",
+      "guidedTask": "Create a small C program demonstrating Structures, members and member access. Write down its preconditions, expected result and failure handling before implementation.",
+      "independentTask": "Extend the example for Structures, members and member access to handle a boundary case and an error case. Explain the relevant C rule and add a test for each path.",
       "hints": [
-        "A structure's members appear in declaration order, but padding may exist between them.",
-        "Structure assignment copies the structure value, including its members.",
-        "Do not assume a structure's byte layout is identical across compilers or platforms."
+        "Read the declaration and function contract carefully.",
+        "Check all library return values before using results.",
+        "Keep object bounds, lifetime and resource ownership explicit.",
+        "Do not assume implementation-specific memory or file representations are portable.",
+        "Test both success and failure paths."
       ]
     }
   },
@@ -50,37 +61,59 @@
   "assessment": {
     "questions": [
       {
-        "id": "cl74-q1",
-        "prompt": "Which statement best describes the lesson?",
+        "id": "cl7.4-q1",
+        "prompt": "What does a structure group?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "Named members that may have different types",
+          "Only values of one primitive type",
+          "Function bodies"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the C rule described in the lesson."
+        "answer": "Named members that may have different types",
+        "explanation": "A structure object contains its declared members."
       },
       {
-        "id": "cl74-q2",
-        "prompt": "What should be verified before using this feature?",
+        "id": "cl7.4-q2",
+        "prompt": "Which operator accesses a member through a structure object?",
         "options": [
-          "Types, preconditions, object validity and relevant return values.",
-          "Only the source file name.",
-          "Whether a single run appeared successful."
+          "Dot (.)",
+          "Arrow (->) only",
+          "Address-of (&)"
         ],
-        "answer": "Types, preconditions, object validity and relevant return values.",
-        "explanation": "C correctness depends on valid objects, correct types and checked operations."
+        "answer": "Dot (.)",
+        "explanation": "The dot operator selects a member from a structure expression."
       },
       {
-        "id": "cl74-q3",
-        "prompt": "Which practice improves reliability?",
+        "id": "cl7.4-q3",
+        "prompt": "Can compatible structure objects be assigned?",
         "options": [
-          "Compile with warnings and test normal and failure paths.",
-          "Ignore I/O and compiler diagnostics.",
-          "Assume all environments behave identically."
+          "Yes",
+          "No, never",
+          "Only with memcpy"
         ],
-        "answer": "Compile with warnings and test normal and failure paths.",
-        "explanation": "Diagnostics and tests provide evidence for program behaviour."
+        "answer": "Yes",
+        "explanation": "Structure assignment copies member values."
+      },
+      {
+        "id": "cl7.4-q4",
+        "prompt": "Does C provide == for whole structure objects?",
+        "options": [
+          "No",
+          "Yes, for every struct",
+          "Only when there are two members"
+        ],
+        "answer": "No",
+        "explanation": "Whole-structure equality operators are not provided by C."
+      },
+      {
+        "id": "cl7.4-q5",
+        "prompt": "What should be done before storing external data in a structure?",
+        "options": [
+          "Validate the values against application rules",
+          "Assume all fields are valid",
+          "Use sizeof as validation"
+        ],
+        "answer": "Validate the values against application rules",
+        "explanation": "The type does not automatically enforce application-specific invariants."
       }
     ]
   },

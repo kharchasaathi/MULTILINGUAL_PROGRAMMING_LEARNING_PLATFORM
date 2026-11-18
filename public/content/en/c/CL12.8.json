@@ -6,39 +6,65 @@
   "title": "Reading function prototypes, parameters, return types and constraints",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept or reference contract.",
-    "Trace the example and justify its behaviour.",
-    "Identify relevant assumptions and edge cases.",
-    "Apply the skill in a documented exercise."
+    "Read a function prototype and identify its return type, parameter types, parameter order and qualifiers.",
+    "Distinguish a function declaration from its definition and explain how a prototype enables compile-time argument checking.",
+    "Use library documentation to identify preconditions, valid ranges, ownership, lifetime, side effects and error-reporting conventions that a prototype alone cannot express.",
+    "Interpret pointer parameters, const qualification, output parameters and callback function-pointer parameters without assuming ownership.",
+    "Match return values and variadic format specifiers to their actual types, and handle sentinel values and error indicators correctly.",
+    "Verify a function call against the required header, language version, implementation constraints and boundary cases."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL1.1",
+    "CL1.2",
+    "CL2.1",
+    "CL3.1",
+    "CL4.1",
+    "CL5.1",
+    "CL5.3",
+    "CL6.1",
+    "CL12.1",
+    "CL12.2",
+    "CL12.3",
+    "CL12.4"
+  ],
   "stages": {
     "understand": {
-      "concept": "A library function prototype describes the function's return type and parameter types. Documentation adds preconditions, ownership, side effects, error indicators and constraints that are not always fully visible in the prototype.",
-      "whyItMatters": "Reading both declarations and contract documentation helps prevent invalid calls and incorrect assumptions about ownership or return values.",
-      "analogy": "Treat a reference or learning task as a contract that states what is expected and how success is checked.",
-      "analogyLimit": "The analogy does not replace the exact C standard or library specification."
+      "concept": "A function prototype declares a function's name, return type and parameter types so the compiler can check calls. For example, size_t strlen(const char *s); states that strlen returns size_t and accepts a pointer to const char. The declaration does not fully describe the contract: the argument must point to a valid null-terminated string, the function reads until the terminator, and the returned length excludes it. Library documentation supplies semantic requirements such as valid input ranges, pointer ownership, object lifetime, side effects, error indicators and implementation limits.",
+      "whyItMatters": "Many C defects come from making assumptions that are not encoded in a function's type. A correct-looking call can still pass a non-terminated array, use a pointer after its lifetime, ignore a sentinel return value or supply an invalid size. Reading both the prototype and the full contract helps prevent undefined behaviour and resource errors.",
+      "analogy": "A prototype is like the labelled connectors on a device: it tells you the type and order of connections. The function contract is the operating manual that explains permitted inputs, what the device changes, what it returns and what can go wrong.",
+      "analogyLimit": "The analogy does not imply that C types prove memory validity, ownership or all runtime constraints. A compiler checks many type relationships, but the programmer must still satisfy semantic preconditions and lifetime rules."
     },
     "explain": {
-      "narrative": "A library function prototype describes the function's return type and parameter types. Documentation adds preconditions, ownership, side effects, error indicators and constraints that are not always fully visible in the prototype.\n\nUse authoritative declarations and documentation, state assumptions explicitly and verify behaviour with focused examples. Where the implementation or C version matters, record it.",
+      "narrative": "## 1. Read every part of a prototype\n\nConsider `size_t strlen(const char *s);`. The return type is `size_t`; the function name is `strlen`; and the parameter is a pointer to const char. The `const` qualifier says the function must not modify the characters through this pointer. It does not prove that the pointer is non-null, points to an accessible object or refers to a null-terminated string. The caller must satisfy those requirements.\n\nA declaration ends with a semicolon and makes the function's type visible. A definition supplies the function body. Include the required standard header rather than copying a library declaration into your program: the header is the authoritative declaration for the implementation and selected C version. A prototype with `(void)` explicitly declares no parameters; in modern C, an empty parameter list in a declaration has different meaning and should not be used as a substitute for `(void)`.\n\n## 2. Parameters, pointers and qualifiers\n\nParameter types tell you what kind of values are passed and in what order. Pointer parameters may be inputs, outputs or both. A `const`-qualified pointed-to type commonly indicates read-only access through that pointer, while a non-const pointer may allow modification; neither alone describes ownership. A function may borrow a pointer only during the call, retain it, return it, or expect the caller to release a resource. Check the documentation for lifetime and ownership rules.\n\nArray parameters in function declarations are adjusted to pointer parameters. For example, `void process(int values[])` is adjusted to a pointer parameter; the function does not receive the array length automatically. Pass a separate element count when needed, and document whether the pointer may be null and what range is valid.\n\n## 3. Return types and error conventions\n\nA return type can represent a result, a status, a pointer or a special sentinel. `fopen` returns `FILE *` and uses a null pointer to report failure. `malloc` returns `void *` and returns a null pointer when allocation fails. `strtol` returns a converted `long`, while `endptr` identifies where parsing stopped and `errno` can report range errors. A function returning `size_t` is not automatically returning an error code. Read the documented convention for each function rather than assuming all failures use -1 or NULL.\n\nSome functions use output parameters to return additional information. For `strtol`, the caller passes a pointer to a `char *` variable so the function can store the first unconverted character. This is different from the function's own return value. For variadic functions such as `printf`, the prototype contains an ellipsis; the caller must ensure each conversion specifier matches the corresponding promoted argument type. A mismatch in a variadic call can cause undefined behaviour.\n\n## 4. Preconditions and constraints not visible in types\n\nA prototype cannot express every requirement. `strlen` needs a valid null-terminated string. `memcpy` requires non-overlapping source and destination regions; use `memmove` when regions may overlap. `qsort` requires a comparator that defines a consistent ordering and does not access invalid objects. `fread` and `fwrite` use element sizes and counts, and their return values count complete elements rather than bytes. Read the contract for bounds, overlap, alignment, null pointers, locale, encoding, thread-safety, side effects and resource ownership.\n\n## 5. A practical reference-reading checklist\n\nFor each function, record: required header and C version; exact return and parameter types; valid input ranges; null-pointer rules; whether data is read or modified; ownership and lifetime of pointers; side effects; success and failure indicators; buffer-size and termination rules; and any implementation-defined or unspecified behaviour. Then compile with strict warnings and test normal, boundary and failure cases. Treat documentation and the applicable C standard as the source of truth, not a remembered example.",
       "examples": [
         {
           "id": "cl128-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\n#include <string.h>\nint main(void) {\n const char *text = \"reference\";\n size_t length = strlen(text);\n printf(\"%zu\\n\", length);\n return 0;\n}",
-          "explanation": "The prototype for strlen returns size_t and accepts a pointer to const char. Its contract requires a valid null-terminated string.",
-          "runnable": false
+          "title": "Read strtol's return value, end pointer and errno contract",
+          "code": "#include <ctype.h>\n#include <errno.h>\n#include <limits.h>\n#include <stdio.h>\n#include <stdlib.h>\n\nint main(void)\n{\n    const char input[] = \"  245 items\";\n    char *end = NULL;\n    long value;\n\n    errno = 0;\n    value = strtol(input, &end, 10);\n\n    if (end == input) {\n        fputs(\"No digits were found.\\n\", stderr);\n        return 1;\n    }\n    if (errno == ERANGE || value < INT_MIN || value > INT_MAX) {\n        fputs(\"The number is outside the int range.\\n\", stderr);\n        return 1;\n    }\n    while (isspace((unsigned char)*end) != 0) {\n        ++end;\n    }\n    if (*end != '\\0') {\n        printf(\"Parsed value: %ld; remaining text: %s\\n\", value, end);\n        return 0;\n    }\n\n    printf(\"Parsed value: %ld; no remaining text\\n\", value);\n    return 0;\n}\n",
+          "explanation": "The strtol prototype returns long and accepts a string pointer, an output pointer-to-pointer and a base. Its contract is richer than the prototype: end identifies the first unconverted character, no digits are indicated when end equals the input pointer, and ERANGE reports a range error. The example checks the long-to-int range before any narrowing conversion and uses the ctype unsigned-char rule when skipping whitespace.",
+          "runnable": true
+        },
+        {
+          "id": "cl128-ex2",
+          "language": "en",
+          "title": "Use qsort and bsearch with a correctly typed comparator",
+          "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstatic int compare_ints(const void *left, const void *right)\n{\n    int a = *(const int *)left;\n    int b = *(const int *)right;\n\n    if (a < b) {\n        return -1;\n    }\n    if (a > b) {\n        return 1;\n    }\n    return 0;\n}\n\nint main(void)\n{\n    int values[] = { 42, 7, 19, 7, 31 };\n    const size_t count = sizeof values / sizeof values[0];\n    const int key = 19;\n    int *found;\n    size_t i;\n\n    qsort(values, count, sizeof values[0], compare_ints);\n\n    for (i = 0U; i < count; ++i) {\n        printf(\"%s%d\", i == 0U ? \"\" : \" \", values[i]);\n    }\n    putchar('\\n');\n\n    found = bsearch(&key, values, count, sizeof values[0], compare_ints);\n    if (found != NULL) {\n        printf(\"Found: %d\\n\", *found);\n    } else {\n        puts(\"Not found\");\n    }\n    return 0;\n}\n",
+          "explanation": "qsort and bsearch both accept a pointer to a comparator with the required int-returning, two-const-void-pointer signature. The comparator returns a negative, zero or positive result without subtracting the integers, so it cannot overflow from an extreme difference. bsearch requires the array to be sorted according to the same ordering used by its comparator. The returned pointer refers into the supplied array; it is not separately allocated and must not be freed.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Identify the return type and parameter type of strlen.",
-      "independentTask": "Choose a standard library function, find its prototype and document valid inputs, return values and failure behaviour.",
+      "guidedTask": "For each example, write down the return type and parameter types of strtol, qsort and bsearch. Identify which parameters are output or callback parameters, what each function returns on failure or no match, and which requirements are not visible in the prototype.",
+      "independentTask": "Choose a standard library function such as fopen, fread, memcpy, realloc or snprintf. Find its declaration in the correct standard header and create a contract table covering return type, each parameter, preconditions, pointer ownership and lifetime, side effects, success/failure indicators and boundary cases. Write a small C program that demonstrates both a normal call and at least one handled failure or boundary condition.",
       "hints": [
-        "A prototype may not express every semantic precondition.",
-        "Check whether a returned pointer is owned by the caller or by the library.",
-        "Match the format specifier to the returned type."
+        "Read the declaration from the correct standard header and preserve every qualifier and pointer level.",
+        "A const-qualified pointer parameter does not prove the pointer is non-null, valid or null-terminated.",
+        "Look for output parameters and callback function-pointer parameters; their meaning may not be obvious from the return type.",
+        "Check exactly how failure is reported: NULL, a sentinel, a short count, errno, a status value or another documented mechanism.",
+        "For variadic functions, match each format specifier to the actual promoted argument type.",
+        "Record ownership, lifetime, buffer capacity, overlap and valid-range rules because prototypes cannot express all of them."
       ]
     }
   },
@@ -51,36 +77,58 @@
     "questions": [
       {
         "id": "cl128-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "In the declaration size_t strlen(const char *s); what does const qualify?",
         "options": [
-          "The learning or C language principle described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "The characters accessed through s are not modified through this pointer",
+          "The pointer s itself can never point elsewhere",
+          "The string is guaranteed to be null-terminated"
         ],
-        "answer": "The learning or C language principle described in this lesson.",
-        "explanation": "The correct choice follows the concept or reference contract described above."
+        "answer": "The characters accessed through s are not modified through this pointer",
+        "explanation": "const applies to the pointed-to char type. It does not prove that the pointer is valid or that the referenced data is null-terminated."
       },
       {
         "id": "cl128-q2",
-        "prompt": "What should be checked before applying the concept?",
+        "prompt": "What does a function prototype primarily provide to the compiler?",
         "options": [
-          "Its exact requirements, assumptions and edge cases.",
-          "Only the function or topic name.",
-          "Whether an unrelated example compiles."
+          "The function's return type and parameter types for checking calls",
+          "A guarantee that every runtime precondition is satisfied",
+          "The complete ownership and lifetime rules for all pointers"
         ],
-        "answer": "Its exact requirements, assumptions and edge cases.",
-        "explanation": "Reliable use depends on understanding the actual contract."
+        "answer": "The function's return type and parameter types for checking calls",
+        "explanation": "A prototype provides the function type. Semantic preconditions and ownership rules must be learned from the function contract."
       },
       {
         "id": "cl128-q3",
-        "prompt": "Which practice best demonstrates understanding?",
+        "prompt": "What does strtol's endptr output help the caller determine?",
         "options": [
-          "Explain the reasoning and test representative and boundary cases.",
-          "Memorize an output without explanation.",
-          "Ignore invalid input."
+          "Where parsing stopped in the input string",
+          "How many bytes were allocated by the function",
+          "Whether the input pointer is owned by the caller"
         ],
-        "answer": "Explain the reasoning and test representative and boundary cases.",
-        "explanation": "Reasoning and targeted tests demonstrate transferable understanding."
+        "answer": "Where parsing stopped in the input string",
+        "explanation": "When endptr is supplied, strtol stores the address of the first character not consumed by the conversion."
+      },
+      {
+        "id": "cl128-q4",
+        "prompt": "Why should an integer comparator for qsort avoid returning a - b?",
+        "options": [
+          "The subtraction can overflow for extreme int values",
+          "qsort requires every comparator result to be exactly -1, 0 or 1",
+          "The comparator must return size_t"
+        ],
+        "answer": "The subtraction can overflow for extreme int values",
+        "explanation": "A comparator only needs a negative, zero or positive result. Relational comparisons avoid signed overflow."
+      },
+      {
+        "id": "cl128-q5",
+        "prompt": "Which item is generally not fully described by a function prototype?",
+        "options": [
+          "Whether a pointer argument must refer to a null-terminated object and how long it must remain valid",
+          "The declared return type",
+          "The declared parameter types"
+        ],
+        "answer": "Whether a pointer argument must refer to a null-terminated object and how long it must remain valid",
+        "explanation": "Prototypes express types, but semantic preconditions, ownership and lifetime requirements are documented separately."
       }
     ]
   },

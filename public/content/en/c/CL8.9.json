@@ -3,42 +3,69 @@
   "courseId": "c",
   "moduleId": "CL8",
   "topicId": "CL8.9",
-  "title": "Debugging with breakpoints, watch expressions and diagnostics",
+  "title": "Debugging C programs with breakpoints, watch expressions and diagnostics",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and its C rules.",
-    "Trace the example and identify data or control flow.",
-    "Recognize common failure and safety cases.",
-    "Apply the concept in a tested C program."
+    "Describe how a debugger starts or attaches to a program and how breakpoints pause execution at selected source locations.",
+    "Use step over, step into, continue and finish-style controls to follow execution without confusing source-level steps with machine instructions.",
+    "Inspect local variables, function parameters, pointer values and watch expressions while a program is paused, and interpret changes in program state.",
+    "Use a minimal reproducible input and an execution trace to locate the first point where observed state differs from the expected state.",
+    "Compile with debug information and use a debugger such as GDB or an IDE debugger to inspect a C program's call stack and execution path.",
+    "Combine debugger observations with compiler warnings, assertions, logs and sanitizers, then verify a fix with regression tests."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL1.7 — Compile, link and run",
+    "CL3.8 — Loop execution and control flow",
+    "CL6.1 — Functions and calls",
+    "CL8.8 — Compiler diagnostics and runtime failures"
+  ],
   "stages": {
     "understand": {
-      "concept": "A debugger can pause execution at breakpoints, step through statements, inspect local variables and evaluate expressions. Compiler diagnostics, stack traces and logs provide additional evidence about failures.",
-      "whyItMatters": "Debugging is more effective when the program is reduced to a reproducible case and each hypothesis is tested against observable state.",
-      "analogy": "Treat each resource and operation as having a clear contract, valid lifetime and failure path.",
-      "analogyLimit": "The analogy does not replace the C standard, compiler or library specifications."
+      "concept": "Debugging is a disciplined process of finding the cause of incorrect behavior. A source-level debugger can pause a running program at a breakpoint, execute one statement or function at a time, inspect variables and show the call stack. A watch expression asks the debugger to display or track a value while execution is paused or progresses. Compiler diagnostics, assertions, logs and sanitizers provide additional evidence.",
+      "whyItMatters": "A program's final output often shows where a defect became visible, not where it began. Inspecting state at carefully chosen points helps locate the first incorrect value or decision. This is especially useful for loops, pointer operations, nested function calls and input-dependent failures.",
+      "analogy": "Imagine following a parcel through a delivery system. A breakpoint is a checkpoint where movement pauses, stepping follows the next hand-off, a watch expression checks a parcel's status and the call stack shows which offices led to the current checkpoint.",
+      "analogyLimit": "A debugger observes a particular execution with a particular build and input. Optimization can change the relationship between source lines and machine instructions, and observing one run does not prove every execution path is correct."
     },
     "explain": {
-      "narrative": "A debugger can pause execution at breakpoints, step through statements, inspect local variables and evaluate expressions. Compiler diagnostics, stack traces and logs provide additional evidence about failures.\n\nCheck object bounds, lifetimes, arithmetic limits and all relevant return values. Compile with warnings enabled and test both normal and failure paths.",
+      "narrative": "## 1. Build with debug information\n\nA common GCC or Clang development build includes `-g`:\n\n```sh\ngcc -std=c11 -Wall -Wextra -Wpedantic -g main.c -o app\n```\n\nThe `-g` option asks the compiler to include debugging information. For easier source-level stepping while learning, use a low optimization level such as `-O0` if supported. Debug information does not change the C language rules and does not guarantee that every variable remains inspectable in every optimized build.\n\n## 2. Start a debugger and set a breakpoint\n\nWith GDB, a typical command-line session begins with:\n\n```sh\ngdb ./app\n(gdb) break main\n(gdb) run\n```\n\nA breakpoint tells the debugger to pause when execution reaches a selected location. You can also set a breakpoint on a function name or source line. Debugger syntax and available features vary by debugger and platform.\n\n## 3. Step through execution\n\nCommon GDB commands include:\n\n- `next` — execute the next source-level line, stepping over a function call.\n- `step` — execute the next source-level line and enter a function call when possible.\n- `continue` — resume until another breakpoint or program event stops execution.\n- `finish` — continue until the current function returns, when possible.\n- `print expression` — evaluate and display an expression in the current debugging context.\n- `backtrace` — display the active call stack.\n\nThese are source-level controls, not a promise that one command corresponds to exactly one machine instruction.\n\n## 4. Inspect variables and watch expressions\n\nAt a breakpoint, inspect relevant locals and parameters. For a loop, useful values might be the index, accumulator, current element and loop condition. A watch expression helps you observe a value as you step. Be careful: evaluating expressions in a debugger can have side effects if they call functions or otherwise modify state. Prefer simple read-only expressions.\n\n## 5. Find the first incorrect state\n\nSuppose a function returns the wrong total. First record a small input, expected result and actual result. Set a breakpoint at the function entry, inspect its arguments, then step through the loop. Compare the accumulator and index after each iteration. The first step where the state diverges from the expected trace is usually more informative than staring at the final incorrect output.\n\n## 6. Read the call stack\n\nA backtrace shows the chain of active function calls that led to the current location. It helps when a defect appears deep inside a helper function or after several layers of calls. Inspect the relevant frame and its arguments; do not assume that the function at the top of the stack is necessarily where the original defect began.\n\n## 7. Combine debugging tools\n\nUse warnings to catch suspicious source constructs before execution. Use assertions to check assumptions during development. Use logs to record important events when interactive debugging is unavailable. Use AddressSanitizer and other supported sanitizers to detect selected memory errors. A debugger helps explain the state; it does not replace tests or a review of object lifetime and ownership.\n\n## 8. Verify the repair\n\nOnce a cause is identified, make the smallest justified correction, rebuild and rerun the reproducing input. Add a regression test for that input and run related boundary cases. Remove temporary diagnostic output or keep only useful logging. A fix is not verified merely because the debugger no longer stops at the old breakpoint.",
       "examples": [
         {
           "id": "cl89-ex1",
           "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stdio.h>\nint sum_to(int n) {\n int sum = 0;\n for (int i=1; i<=n; ++i) sum += i;\n return sum;\n}\nint main(void) {\n printf(\"%d\\n\", sum_to(4));\n return 0;\n}",
-          "explanation": "A breakpoint inside the loop lets the developer inspect i and sum after each iteration. The expected final result for four is ten.",
+          "title": "Trace a loop with a breakpoint and watch the accumulator",
+          "code": "#include <stdio.h>\n\nstatic int sum_to(int limit) {\n    int sum = 0;\n    for (int value = 1; value <= limit; ++value) {\n        sum += value;\n    }\n    return sum;\n}\n\nint main(void) {\n    const int result = sum_to(4);\n    printf(\"sum=%d\\n\", result);\n    return 0;\n}",
+          "explanation": "Expected output: `sum=10`. Build with `-g -O0`, start GDB and set a breakpoint inside the loop, for example at the `sum += value` line. Inspect `value` and `sum` before and after stepping. The expected states after each addition are `(1, 1)`, `(2, 3)`, `(3, 6)` and `(4, 10)`. A watch expression for `sum` makes the accumulator changes visible. Continue after the loop to inspect the returned result.",
+          "runnable": false
+        },
+        {
+          "id": "cl89-ex2",
+          "language": "en",
+          "title": "Use a reproducible failing result to locate a logic error",
+          "code": "#include <stdio.h>\n\nstatic int count_positive(const int values[], size_t count) {\n    int total = 0;\n    for (size_t i = 0; i <= count; ++i) {\n        if (values[i] > 0) {\n            ++total;\n        }\n    }\n    return total;\n}\n\nint main(void) {\n    const int values[] = { 4, -2, 7 };\n    const size_t count = sizeof values / sizeof values[0];\n    printf(\"positive=%d\\n\", count_positive(values, count));\n    return 0;\n}",
+          "explanation": "This example intentionally contains an out-of-bounds loop condition (`i <= count`) and must not be treated as a safe program to run. Use it as a debugger/code-review exercise: set a breakpoint at the loop, inspect `i` and `count`, and notice that the final iteration attempts index `count`, which is outside the valid range `0` through `count - 1`. Correct the condition to `i < count`; the corrected program prints `positive=2`. A sanitizer build can help detect the invalid access, but the boundary reasoning identifies the defect directly.",
           "runnable": false
         }
+      ],
+      "commonMistakes": [
+        "Debugging a stale executable instead of rebuilding the source file that was just changed.",
+        "Using a highly optimized build for beginner source-level stepping and assuming every source variable or line will map cleanly to a machine operation.",
+        "Confusing `next` with `step`; the former normally steps over a function call while the latter enters it when possible.",
+        "Watching only the final result instead of identifying the first execution point where state becomes incorrect.",
+        "Evaluating complex watch expressions that call functions or modify program state.",
+        "Assuming the top stack frame is always the original source of the defect.",
+        "Treating one successful debug session as proof that all inputs and execution paths are correct."
       ]
     },
     "practise": {
-      "guidedTask": "List the values of i and sum at each loop iteration.",
-      "independentTask": "Debug a function that returns the wrong total. Record the failing input, expected result, observed result and the first incorrect state.",
+      "guidedTask": "Build the `sum_to` example with debug information and low optimization. Set a breakpoint inside the loop, inspect `value` and `sum`, step through all four iterations, and write the state trace. Continue to the return and verify that the result is ten.",
+      "independentTask": "Use the intentionally faulty `count_positive` example as a code-review exercise. Do not run the faulty version as a normal test. Predict the valid index range, identify the first invalid iteration, correct the condition, then compile the corrected version with warnings and a memory sanitizer where available. Record the failing condition, correction and regression-test result.",
       "hints": [
-        "Use a minimal reproducible input before stepping through a large program.",
-        "Watch expressions should inspect relevant state without changing it.",
-        "After a fix, add a regression test for the original failure."
+        "Rebuild with `-g`; consider `-O0` while learning source-level debugging.",
+        "Set a breakpoint near the beginning of the function whose state you need to inspect.",
+        "Use `next` to step over a call and `step` to enter a call when possible.",
+        "Watch the smallest set of variables that explain the behavior, such as an index and accumulator.",
+        "Use `backtrace` when the call path is unclear, and inspect the relevant frame and arguments.",
+        "After correcting the defect, rerun the original reproducing input and add a regression test."
       ]
     }
   },
@@ -51,36 +78,58 @@
     "questions": [
       {
         "id": "cl89-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "Which compiler option commonly includes debugging information for GDB or an IDE debugger?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "`-g`",
+          "`-E`",
+          "`-Werror`"
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct choice follows the C rule explained above."
+        "answer": "`-g`",
+        "explanation": "The `-g` option requests debugging information. It helps a debugger relate machine execution to source files, lines and variables."
       },
       {
         "id": "cl89-q2",
-        "prompt": "What is a reliable way to protect correctness?",
+        "prompt": "In a typical GDB session, what is the usual difference between `next` and `step`?",
         "options": [
-          "Validate preconditions, bounds and failure results.",
-          "Assume the operation cannot fail.",
-          "Ignore the type and lifetime rules."
+          "`next` steps over a function call, while `step` enters the called function when possible.",
+          "`next` always resumes the program to completion, while `step` exits the debugger.",
+          "They both delete the current breakpoint."
         ],
-        "answer": "Validate preconditions, bounds and failure results.",
-        "explanation": "C requires explicit handling of object validity and operation failures."
+        "answer": "`next` steps over a function call, while `step` enters the called function when possible.",
+        "explanation": "Both are source-level stepping commands. `next` normally runs the called function without entering it, while `step` attempts to enter it."
       },
       {
         "id": "cl89-q3",
-        "prompt": "How should the example be checked?",
+        "prompt": "What is a watch expression most useful for during a paused debugging session?",
         "options": [
-          "Compile with warnings and test expected and failure cases.",
-          "Ignore diagnostics and test only once.",
-          "Assume every platform behaves identically."
+          "Inspecting how a relevant value changes as execution progresses.",
+          "Automatically repairing incorrect pointer ownership.",
+          "Guaranteeing that the program has no undefined behavior."
         ],
-        "answer": "Compile with warnings and test expected and failure cases.",
-        "explanation": "Warnings and targeted tests provide evidence for correctness."
+        "answer": "Inspecting how a relevant value changes as execution progresses.",
+        "explanation": "A watch expression helps observe selected program state. It does not repair code or prove that all behavior is defined."
+      },
+      {
+        "id": "cl89-q4",
+        "prompt": "A loop processes an array with `count` elements. Which condition keeps the index within the valid range when starting at zero?",
+        "options": [
+          "`i < count`",
+          "`i <= count`",
+          "`i == count`"
+        ],
+        "answer": "`i < count`",
+        "explanation": "For a non-empty array, valid indices are zero through `count - 1`. The condition `i < count` stops before the first invalid index."
+      },
+      {
+        "id": "cl89-q5",
+        "prompt": "After finding and fixing a bug with a debugger, what is the best next step?",
+        "options": [
+          "Rebuild, rerun the reproducing input and add a regression test.",
+          "Delete the failing input so the bug cannot recur.",
+          "Assume the debugger's last displayed state proves every path is correct."
+        ],
+        "answer": "Rebuild, rerun the reproducing input and add a regression test.",
+        "explanation": "The correction must be verified against the original failure and protected by a test. Related boundary cases should also be checked."
       }
     ]
   },

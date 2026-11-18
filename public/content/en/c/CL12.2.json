@@ -6,39 +6,61 @@
   "title": "C declarations, declarators and type qualifiers reference",
   "language": "en",
   "learningObjectives": [
-    "Explain the topic and its C rules.",
-    "Trace the example and identify its purpose.",
-    "Identify important validation and failure cases.",
-    "Apply the concept in a tested program or reference exercise."
+    "Identify declaration specifiers and declarators and explain how they combine to declare an object or function.",
+    "Read pointer, array, pointer-to-array, array-of-pointers and function-pointer declarations by applying C declarator binding rules.",
+    "Explain the different meanings of const when it qualifies a pointed-to object, a pointer object, or both.",
+    "Describe the limited meaning of volatile and explain why it does not provide atomicity or thread synchronization.",
+    "Use typedef to name complex types while preserving the underlying pointer, array and qualifier semantics.",
+    "Write and compile functions that accept pointers to arrays, use arrays of function pointers and return pointers safely."
   ],
-  "prerequisites": [],
+  "prerequisites": [
+    "CL1.1",
+    "CL1.2",
+    "CL2.1",
+    "CL3.1",
+    "CL4.1",
+    "CL5.1",
+    "CL5.3",
+    "CL6.1"
+  ],
   "stages": {
     "understand": {
-      "concept": "C declarations combine declaration specifiers and declarators to describe objects, functions and types. Declarators can include pointers, arrays and function forms; qualifiers such as const and volatile affect how objects may be accessed.",
-      "whyItMatters": "Reading complex declarations correctly is essential for understanding APIs, pointer types, function pointers and object mutability.",
-      "analogy": "Treat the project or language feature as a set of components with explicit interfaces and responsibilities.",
-      "analogyLimit": "The analogy does not replace C's formal language, library and resource-management rules."
+      "concept": "A C declaration has declaration specifiers and one or more declarators. Specifiers describe storage class, base type, type qualifiers and other properties. A declarator describes the name and its relationship to pointers, arrays or functions. Parentheses can change how pointer, array and function operators bind. For example, int *items[4] is an array of four pointers to int, while int (*row)[4] is a pointer to an array of four int. Type qualifiers such as const and volatile qualify the type at the point where they appear.",
+      "whyItMatters": "Declarations are the type-level contract of a C program. Reading them accurately is necessary when using standard-library interfaces, designing APIs, handling arrays and callbacks, and reviewing pointer ownership and mutability.",
+      "analogy": "Read a complex declaration from the identifier outward, following parentheses and operators to discover what the named object is and what it points to or contains.",
+      "analogyLimit": "The identifier-outward method is a reading aid, not a replacement for C's grammar. typedef names, abstract declarators, qualifiers and function parameter adjustments can add details that must be checked against the actual type rules."
     },
     "explain": {
-      "narrative": "C declarations combine declaration specifiers and declarators to describe objects, functions and types. Declarators can include pointers, arrays and function forms; qualifiers such as const and volatile affect how objects may be accessed.\n\nFor a complete implementation, define input constraints, ownership, error handling and test cases before coding. Compile with warnings and verify normal, boundary and failure behaviour.",
+      "narrative": "**Declaration structure.** A declaration commonly contains declaration specifiers followed by declarators and a semicolon. In `const int *p`, the base type is int and const qualifies the pointed-to int. The pointer variable p itself may be assigned another address, but the pointed-to object cannot be modified through p. In `int *const p`, the pointer itself is const and must be initialized; its stored address cannot later be changed, but the int it points to may be modified. In `const int *const p`, both the pointed-to int and the pointer are const through this access path. Qualifiers do not make an object globally immutable if another valid non-const access path exists.\\n\\n**Array and pointer binding.** `int *items[4]` declares an array containing four pointers to int. `int (*row)[4]` declares a pointer to an array of four int; the parentheses bind the pointer declarator before the array suffix. `int values[4]` is an array of four int. In most expression contexts an array expression is converted to a pointer to its first element, but arrays and pointers are different types and `sizeof` an actual array gives the size of the complete array. Function parameters written as array types are adjusted to pointer types; an explicit pointer-to-array parameter, such as `const int (*matrix)[3]`, retains the row width in its pointed-to array type.\\n\\n**Function pointers.** `int (*operation)(int, int)` declares a pointer to a function that accepts two int arguments and returns int. `int *select_slot(int *values, size_t count, size_t index)` declares a function returning a pointer to int. These forms differ because the parentheses around `*operation` make it a pointer to a function, whereas the unparenthesized function declarator in select_slot describes a function whose return type is a pointer. An array of function pointers can store callbacks with the same compatible function type.\\n\\n**Type qualifiers.** const restricts modification through a qualified lvalue; it does not mean the object can never change through any other legal route. volatile tells the implementation that accesses are observable according to the language's volatile rules; it is useful in certain hardware-register and implementation-specific contexts. volatile does not make operations atomic, does not prevent data races, and is not a thread synchronization primitive. C11 also defines restrict, which gives the implementation an access-based aliasing promise for certain pointer-based accesses; violating that promise can cause undefined behaviour. Use restrict only when the program can satisfy its contract.\\n\\n**typedef.** A typedef declaration introduces an alias for an existing type. `typedef int Row4[4];` makes Row4 an alias for an array of four int. `typedef int (*BinaryOperation)(int, int);` makes BinaryOperation an alias for a pointer to a function taking two int values and returning int. typedef does not create a new distinct type and does not remove qualifiers or pointer semantics. Prefer aliases that make interfaces easier to read without concealing important ownership or mutability information.\\n\\n**Reading declarations.** Find the identifier, then read outward while respecting parentheses. For `int (*p)[4]`, p is a pointer, then the parenthesized declarator leads to an array of four, whose elements are int: p points to an array of four int. For `int *p[4]`, p is first an array of four, whose elements are pointers to int. Compile small examples and use compiler diagnostics or a carefully chosen typedef when a declaration is difficult to inspect.\n\n**C11 array-qualification detail.** In C11, adding const to the element type of a multidimensional array parameter can make an apparently harmless pointer-to-array conversion a constraint violation. For example, passing an int [2][3] object to a parameter of type const int (*)[3] is not the same as converting int * to const int *; strict pre-C23 compilers may diagnose it. Keep the pointed-to array type compatible, or design the interface around a flat const int * plus an explicit element count when read-only access is required.",
       "examples": [
         {
           "id": "cl122-ex1",
-          "language": "en",
-          "title": "Focused C example",
-          "code": "#include <stddef.h>\nint *values[4];\nint (*row)[4];\nconst int *read_only;\nint *const fixed = NULL;\nvoid visit(const int *data, size_t count);\n",
-          "explanation": "values is an array of four pointers to int. row is a pointer to an array of four int. read_only points to const int, while fixed is a const pointer to int.",
-          "runnable": false
+          "language": "c",
+          "title": "Compare arrays of pointers, pointers to arrays and const placement",
+          "code": "#include <stddef.h>\n#include <stdio.h>\n\ntypedef int Row4[4];\n\nstatic void print_values(const int *data, size_t count)\n{\n    size_t i;\n    for (i = 0U; i < count; ++i) {\n        printf(\"%d%s\", data[i], i + 1U == count ? \"\\n\" : \" \");\n    }\n}\n\nint main(void)\n{\n    int values[4] = {10, 20, 30, 40};\n    int *pointers[4] = {\n        &values[0], &values[1], &values[2], &values[3]\n    };\n    int (*row_pointer)[4] = &values;\n    const int *read_only_pointer = &values[0];\n    int *const fixed_pointer = &values[1];\n    const int *const fixed_read_only_pointer = &values[2];\n    Row4 *row_alias_pointer = &values;\n    volatile int device_status = 1;\n    size_t i;\n\n    *fixed_pointer = 25;\n    printf(\"Array through pointer-to-array: \");\n    print_values(*row_pointer, 4U);\n\n    printf(\"Array of pointers: \");\n    for (i = 0U; i < 4U; ++i) {\n        printf(\"%d%s\", *pointers[i], i == 3U ? \"\\n\" : \" \");\n    }\n\n    printf(\"Read-only view: %d\\n\", *read_only_pointer);\n    printf(\"Fixed read-only view: %d\\n\", *fixed_read_only_pointer);\n    printf(\"Typedef array view: %d\\n\", (*row_alias_pointer)[3]);\n    printf(\"Volatile status sample: %d\\n\", device_status);\n    return 0;\n}\n",
+          "explanation": "This example declares an array of four pointers, a pointer to an array of four integers, a pointer to const data, a const pointer, a pointer that is const and points to const data, and a typedef alias for an array type. It prints values through each view. The volatile variable illustrates a qualified object only; it is not a concurrency or synchronization example.",
+          "runnable": true
+        },
+        {
+          "id": "cl122-ex2",
+          "language": "c",
+          "title": "Use function pointers, a function returning a pointer and a pointer-to-array parameter",
+          "code": "#include <stddef.h>\n#include <stdio.h>\n\ntypedef int (*BinaryOperation)(int, int);\n\nstatic int add(int left, int right)\n{\n    return left + right;\n}\n\nstatic int subtract(int left, int right)\n{\n    return left - right;\n}\n\nstatic int multiply(int left, int right)\n{\n    return left * right;\n}\n\nstatic int *select_slot(int *values, size_t count, size_t index)\n{\n    if (values == NULL || index >= count) {\n        return NULL;\n    }\n    return &values[index];\n}\n\nstatic void print_matrix(size_t rows, int (*matrix)[3])\n{\n    size_t row;\n    size_t column;\n\n    for (row = 0U; row < rows; ++row) {\n        for (column = 0U; column < 3U; ++column) {\n            printf(\"%d%s\", matrix[row][column],\n                   column == 2U ? \"\\n\" : \" \");\n        }\n    }\n}\n\nint main(void)\n{\n    BinaryOperation operations[3] = {add, subtract, multiply};\n    const char *const operation_names[3] = {\"add\", \"subtract\", \"multiply\"};\n    int values[3] = {4, 5, 6};\n    int matrix[2][3] = {{1, 2, 3}, {4, 5, 6}};\n    size_t i;\n    int *selected = select_slot(values, 3U, 1U);\n    int *missing = select_slot(values, 3U, 9U);\n\n    for (i = 0U; i < 3U; ++i) {\n        printf(\"%s(9, 3) = %d\\n\",\n               operation_names[i], operations[i](9, 3));\n    }\n\n    if (selected != NULL) {\n        *selected = 50;\n    }\n    printf(\"Selected array element: %d\\n\", values[1]);\n    printf(\"Out-of-range selection: %s\\n\",\n           missing == NULL ? \"NULL\" : \"unexpected pointer\");\n\n    puts(\"Matrix passed through a pointer-to-array parameter:\");\n    print_matrix(2U, matrix);\n    return 0;\n}\n",
+          "explanation": "BinaryOperation is a typedef for a function-pointer type. An array of these pointers dispatches add, subtract and multiply callbacks. select_slot is a function returning a pointer to an array element or NULL when the index is invalid. print_matrix accepts a pointer to an array of three int values per row. Its parameter is non-const to keep the example strictly compatible with C11 when passed a mutable two-dimensional array.",
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Read each declaration from the identifier outward and state its type.",
-      "independentTask": "Write declarations for an array of function pointers, a pointer to an array and a function returning a pointer.",
+      "guidedTask": "Compile both examples. For each declaration in Example 1, state whether the identifier is an array, pointer or object and describe its element or pointed-to type. In Example 2, explain why BinaryOperation needs parentheses around * in its typedef, and why select_slot returns int * rather than int.",
+      "independentTask": "Write a function that accepts a pointer to an array of four int values and returns the sum of one row. Create an array of three function pointers for minimum, maximum and addition operations. Add a const pointer to an int and a pointer to const int, then demonstrate which assignments are permitted. Compile with GCC and Clang using strict C11 warnings. Add a short comment explaining why volatile does not make a shared counter thread-safe. As an extra type-system check, investigate why C11 does not permit every pointer-to-array qualification conversion that appears analogous to int * to const int *.",
       "hints": [
-        "Parentheses can change declarator binding and therefore the declared type.",
-        "const placement changes whether the pointed-to object or the pointer itself is qualified.",
-        "Use typedef to clarify complex types without hiding important qualifiers."
+        "Parentheses determine whether * binds to the identifier before an array or function suffix.",
+        "In const int *p, the pointed-to int is const through p; in int *const p, the pointer itself is const.",
+        "An array of pointers and a pointer to an array are different declarations even though both contain * and [].",
+        "A function pointer declaration needs parentheses around the pointer declarator, for example int (*callback)(int).",
+        "A function returning a pointer uses the function declarator first, for example int *lookup(size_t index).",
+        "volatile is not a substitute for atomic operations, mutexes or other synchronization, and typedef only aliases an existing type."
       ]
     }
   },
@@ -51,36 +73,58 @@
     "questions": [
       {
         "id": "cl122-q1",
-        "prompt": "Which statement best describes this lesson?",
+        "prompt": "What does `int *items[4]` declare?",
         "options": [
-          "The C rule and constraints described in this lesson.",
-          "An HTML tag.",
-          "A CSS selector."
+          "An array of four pointers to int.",
+          "A pointer to an array of four int.",
+          "A function returning a pointer to int."
         ],
-        "answer": "The C rule and constraints described in this lesson.",
-        "explanation": "The correct answer follows the topic and constraints described above."
+        "answer": "An array of four pointers to int.",
+        "explanation": "The array suffix binds to items first; each array element is then a pointer to int."
       },
       {
         "id": "cl122-q2",
-        "prompt": "What is essential for a reliable implementation?",
+        "prompt": "What does `int (*row)[4]` declare?",
         "options": [
-          "Define the interface, validate inputs and handle failures.",
-          "Assume every input is valid.",
-          "Ignore resource ownership."
+          "A pointer to an array of four int.",
+          "An array of four pointers to int.",
+          "A pointer to a function returning int."
         ],
-        "answer": "Define the interface, validate inputs and handle failures.",
-        "explanation": "Reliable C programs make assumptions and failure behaviour explicit."
+        "answer": "A pointer to an array of four int.",
+        "explanation": "Parentheses make *row bind to the identifier before the array suffix."
       },
       {
         "id": "cl122-q3",
-        "prompt": "How should the work be verified?",
+        "prompt": "In `const int *p`, what is qualified by const?",
         "options": [
-          "Compile with warnings and test representative and boundary cases.",
-          "Only check whether the source file exists.",
-          "Assume a single successful run proves correctness."
+          "The int object accessed through p.",
+          "The pointer variable p itself.",
+          "Both the pointer and every int in the program."
         ],
-        "answer": "Compile with warnings and test representative and boundary cases.",
-        "explanation": "Compilation and targeted tests provide evidence of correctness."
+        "answer": "The int object accessed through p.",
+        "explanation": "The pointer can be reassigned, but modification of the pointed-to object through p is not allowed."
+      },
+      {
+        "id": "cl122-q4",
+        "prompt": "What does `int (*operation)(int, int)` declare?",
+        "options": [
+          "A pointer to a function taking two int values and returning int.",
+          "A function taking two int values and returning a pointer to int.",
+          "An array of two int pointers."
+        ],
+        "answer": "A pointer to a function taking two int values and returning int.",
+        "explanation": "Parentheses around *operation make the identifier a pointer, followed by a function parameter list."
+      },
+      {
+        "id": "cl122-q5",
+        "prompt": "Which statement about volatile is correct?",
+        "options": [
+          "It does not make an operation atomic or provide thread synchronization.",
+          "It guarantees that accesses are safe between threads.",
+          "It prevents all compiler optimization in the entire program."
+        ],
+        "answer": "It does not make an operation atomic or provide thread synchronization.",
+        "explanation": "volatile has specific observable-access semantics, but it is not a synchronization primitive."
       }
     ]
   },
