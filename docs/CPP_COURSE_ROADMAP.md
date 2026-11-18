@@ -6,8 +6,8 @@
 - CPP1 currently has 20 registered lesson topics (CPP1.1–CPP1.20).
 - Proposed modules CPP2–CPP14 contain 10 planned topics each (130 additional topics).
 - **Proposed scope total: 150 topics.**
-- **Current draft-authored: 90 topics.**
-- **Remaining to author under this scope: 60 topics.**
+- **Current draft-authored: 100 topics.**
+- **Remaining to author under this scope: 50 topics.**
 - Counts can be adjusted after a curriculum audit; this roadmap should be updated when topic IDs or scope change.
 
 ## CPP1 — Foundations and First Programs (20 topics)
@@ -31,7 +31,7 @@ Already registered in curriculum index. CPP1.1–CPP1.10 were previously created
 
 ## CPP8 — Pointers, References and Memory (10 topics — drafted)\n\n**Drafted CPP8.1–CPP8.10:** pointer addresses/declarations, dereferencing/null, pointers and arrays, arithmetic/bounds, const pointer variants, references/aliasing, pointer/reference parameters, dynamic allocation/ownership, smart pointers, lifetime and dangling references.\n\n- CPP8.1: Address-of and dereference\n- CPP8.2: Pointer declarations\n- CPP8.3: Null pointers\n- CPP8.4: Reference basics\n- CPP8.5: Const pointers and pointer-to-const\n- CPP8.6: Pointer arithmetic cautions\n- CPP8.7: Array-pointer relationship\n- CPP8.8: Dynamic allocation overview\n- CPP8.9: Lifetime and dangling references\n- CPP8.10: Prefer RAII and smart pointers
 
-## CPP9 — Structs, Classes and Encapsulation (10 topics)\n- CPP9.1: struct basics\n- CPP9.2: class basics\n- CPP9.3: Members and access control\n- CPP9.4: Constructors\n- CPP9.5: Member initialization lists\n- CPP9.6: Destructors\n- CPP9.7: Encapsulation\n- CPP9.8: this pointer\n- CPP9.9: Static members\n- CPP9.10: Class invariants and design
+## CPP9 — Structs, Classes and Encapsulation (10 topics — drafted)\n\n**Drafted CPP9.1–CPP9.10:** struct definitions and objects, member access, aggregate initialization, structs with functions, composition, classes and methods, access specifiers, constructors, validation/encapsulation, and design practice.\n\n- CPP9.1: struct basics\n- CPP9.2: class basics\n- CPP9.3: Members and access control\n- CPP9.4: Constructors\n- CPP9.5: Member initialization lists\n- CPP9.6: Destructors\n- CPP9.7: Encapsulation\n- CPP9.8: this pointer\n- CPP9.9: Static members\n- CPP9.10: Class invariants and design
 
 ## CPP10 — Object-Oriented Programming (10 topics)\n- CPP10.1: Inheritance basics\n- CPP10.2: Base and derived classes\n- CPP10.3: Protected access\n- CPP10.4: Virtual functions\n- CPP10.5: Override and final\n- CPP10.6: Abstract classes\n- CPP10.7: Polymorphism\n- CPP10.8: Composition vs inheritance\n- CPP10.9: Object slicing\n- CPP10.10: OOP design and testing
 
