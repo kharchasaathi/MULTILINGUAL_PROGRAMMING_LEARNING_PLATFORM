@@ -6,11 +6,11 @@
   "title": "Reading Text Files with getline",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and purpose.",
-    "Identify the relevant C++ syntax, APIs or design rules.",
-    "Apply the topic in a small program.",
-    "Recognize common errors and safety concerns.",
-    "Evaluate a practical scenario and justify the approach."
+    "Use std::getline to read an entire line, including spaces.",
+    "Explain how getline handles the delimiter and removes it from the resulting string.",
+    "Mix line-based and token-based input safely by clearing leftover newline characters.",
+    "Validate parsed text and report malformed input.",
+    "Handle empty lines, final lines without a trailing newline, and read failures."
   ],
   "prerequisites": [
     "CPP12.1",
@@ -18,62 +18,62 @@
   ],
   "stages": {
     "understand": {
-      "concept": "Learn the core concepts, vocabulary, requirements and practical use of Reading Text Files with getline.",
-      "whyItMatters": "Reading Text Files with getline helps learners build reliable and maintainable C++ programs while understanding trade-offs and common mistakes.",
-      "explain": "Study the examples and review relevant headers, types, object lifetime, error behavior, complexity and C++ standard compatibility. Snippets are illustrative rather than complete programs. Compile and test them in the intended environment."
+      "concept": "std::getline reads characters from an input stream into a std::string until it reaches a delimiter (newline by default). The delimiter is consumed but not stored, so spaces inside a line remain. Its return value is the stream, allowing the read to be used as a loop condition.",
+      "whyItMatters": "Line-based input is useful for names, sentences, CSV-like records and text files where whitespace is meaningful. Reading with operator>> stops at whitespace, so it is not interchangeable with getline.",
+      "explain": "Include <string> and use std::getline(input, text). It returns the stream, whose state determines whether the read succeeded. A final line without a newline is still read. Empty lines produce an empty string but are successful reads. When switching from formatted extraction such as cin >> number to getline(cin, text), consume the remaining newline first with std::getline(cin, leftover) or use a carefully chosen ignore() call. Validate each record before trusting its fields."
     }
   },
   "examples": [
     {
       "id": "cpp13-2-ex1",
       "language": "en",
-      "title": "Starter example",
-      "code": "std::string line; while(std::getline(in,line)){std::cout<<line<<'\\n';}",
-      "explanation": "Illustrates Reading Text Files with getline. Check the necessary headers, declarations, standard version and expected behavior. This is a focused snippet and may need surrounding code.",
-      "runnable": false
+      "title": "Read a line from a text file",
+      "code": "#include <fstream>\n#include <iostream>\n#include <string>\nint main() {\n    std::ifstream file(\"story.txt\");\n    if (!file) return 1;\n    std::string line;\n    while (std::getline(file, line)) {\n        std::cout << line << '\\\\n';\n    }\n}",
+      "explanation": "getline keeps spaces in each line. It removes the newline delimiter, then the program adds its own newline for display.",
+      "runnable": true
     },
     {
       "id": "cpp13-2-ex2",
       "language": "en",
-      "title": "Common use",
-      "code": "std::ifstream in(\"missing.txt\"); if(!in) return 1;",
-      "explanation": "Illustrates Reading Text Files with getline. Check the necessary headers, declarations, standard version and expected behavior. This is a focused snippet and may need surrounding code.",
-      "runnable": false
+      "title": "Read a full sentence from the keyboard",
+      "code": "#include <iostream>\n#include <string>\nint main() {\n    std::string sentence;\n    std::cout << \"Enter a sentence: \";\n    std::getline(std::cin, sentence);\n    std::cout << \"You entered: \" << sentence << '\\\\n';\n}",
+      "explanation": "Unlike cin >> sentence, getline reads until Enter and preserves internal spaces.",
+      "runnable": true
     },
     {
       "id": "cpp13-2-ex3",
       "language": "en",
-      "title": "Validation or boundary",
-      "code": "std::istringstream row(\"Ada 42\"); std::string name; int age; row>>name>>age;",
-      "explanation": "Illustrates Reading Text Files with getline. Check the necessary headers, declarations, standard version and expected behavior. This is a focused snippet and may need surrounding code.",
-      "runnable": false
+      "title": "Handle formatted input followed by a line",
+      "code": "#include <iostream>\n#include <limits>\n#include <string>\nint main() {\n    int age;\n    std::string fullName;\n    std::cout << \"Age: \";\n    if (!(std::cin >> age)) return 1;\n    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\\\\n');\n    std::cout << \"Full name: \";\n    std::getline(std::cin, fullName);\n    std::cout << fullName << \" (\" << age << \")\\\\n\";\n}",
+      "explanation": "Formatted extraction leaves the Enter newline behind. ignore() consumes through that newline so getline can read the next complete line.",
+      "runnable": true
     },
     {
       "id": "cpp13-2-ex4",
       "language": "en",
-      "title": "Practical pattern",
-      "code": "if(row.fail()){}",
-      "explanation": "Illustrates Reading Text Files with getline. Check the necessary headers, declarations, standard version and expected behavior. This is a focused snippet and may need surrounding code.",
-      "runnable": false
+      "title": "Parse a line and validate the numeric field",
+      "code": "#include <iostream>\n#include <sstream>\n#include <string>\nint main() {\n    std::string record = \"Mina 28\";\n    std::istringstream row(record);\n    std::string name;\n    int age = 0;\n    if (row >> name >> age) {\n        std::cout << name << \" is \" << age << '\\\\n';\n    } else {\n        std::cerr << \"Invalid record\\\\n\";\n    }\n}",
+      "explanation": "Read the entire record as a line, then use a string stream to parse fields. Check the extraction result before using the values.",
+      "runnable": true
     },
     {
       "id": "cpp13-2-ex5",
       "language": "en",
-      "title": "Design note",
-      "code": "// validate values before use",
-      "explanation": "Illustrates Reading Text Files with getline. Check the necessary headers, declarations, standard version and expected behavior. This is a focused snippet and may need surrounding code.",
-      "runnable": false
+      "title": "Treat an empty line as valid input",
+      "code": "#include <iostream>\n#include <string>\nint main() {\n    std::string line;\n    if (std::getline(std::cin, line)) {\n        if (line.empty()) std::cout << \"Blank line received\\\\n\";\n        else std::cout << \"Text: \" << line << '\\\\n';\n    } else {\n        std::cout << \"No line was read\\\\n\";\n    }\n}",
+      "explanation": "An empty line is different from a failed read: getline succeeds and stores an empty string when the user presses Enter immediately.",
+      "runnable": true
     }
   ],
   "practise": {
-    "guidedTask": "Walk through each Reading Text Files with getline example: identify assumptions, declarations, expected behavior and one failure case.",
-    "independentTask": "Create a small program or test that demonstrates Reading Text Files with getline. Include a normal case, boundary case and invalid/failure case where applicable. Record expected results.",
+    "guidedTask": "Read a sample text file containing three lines, including one line with spaces and one blank line. Print each line with its line number. Then test a missing file and explain how the loop terminates.",
+    "independentTask": "Build a simple contact-record reader. Use getline to capture each complete line, parse the name and age with istringstream, validate the age, and skip or report malformed records. Test blank lines, names with spaces, invalid numbers and a final line without a newline.",
     "hints": [
-      "Check the headers and language standard.",
-      "Start with small test inputs.",
-      "Test boundary and invalid cases.",
-      "Avoid unsafe lifetime, ownership or range assumptions.",
-      "Compile and explain your result."
+      "getline reads through the delimiter but does not place that delimiter in the string.",
+      "Use the returned stream state as the loop condition.",
+      "When switching from cin >> value to getline, remove the leftover newline.",
+      "A blank line can be a successful read; check both read success and line.empty().",
+      "Parse into temporary values and validate before using them."
     ]
   },
   "practice": {
@@ -86,67 +86,67 @@
       {
         "id": "cpp13-2-q1",
         "language": "en",
-        "prompt": "Which approach is most reliable for this topic?",
+        "prompt": "What does std::getline(input, text) normally read up to?",
         "options": [
-          "Check requirements, validate behavior and test cases",
-          "Ignore compiler warnings",
-          "Assume the example is a complete program",
-          "Prefer shortest code over correctness"
+          "The first space character",
+          "The newline delimiter (consumed but not stored)",
+          "The end of the entire program",
+          "Exactly one character"
         ],
-        "answer": 0,
-        "explanation": "Reliable C++ programming depends on checking requirements, validating behavior and testing representative cases."
+        "answer": 1,
+        "explanation": "The default delimiter is newline; getline consumes it without storing it in the string."
       },
       {
         "id": "cpp13-2-q2",
         "language": "en",
-        "prompt": "What should a validation test include?",
+        "prompt": "Why is getline useful for reading a person's full name?",
         "options": [
-          "Check requirements, validate behavior and test cases",
-          "Ignore compiler warnings",
-          "Assume the example is a complete program",
-          "Prefer shortest code over correctness"
+          "It automatically validates names",
+          "It preserves spaces within the line",
+          "It only reads letters",
+          "It ignores all punctuation"
         ],
-        "answer": 0,
-        "explanation": "Reliable C++ programming depends on checking requirements, validating behavior and testing representative cases."
+        "answer": 1,
+        "explanation": "getline reads the whole line, so names such as 'Mary Jane' are retained."
       },
       {
         "id": "cpp13-2-q3",
         "language": "en",
-        "prompt": "What is a good error-handling practice?",
+        "prompt": "After cin >> age, why might the next getline read an empty string immediately?",
         "options": [
-          "Check requirements, validate behavior and test cases",
-          "Ignore compiler warnings",
-          "Assume the example is a complete program",
-          "Prefer shortest code over correctness"
+          "getline cannot read strings",
+          "The stream is always closed after >>",
+          "The newline left in the input buffer is consumed by getline",
+          "age was declared as an integer"
         ],
-        "answer": 0,
-        "explanation": "Reliable C++ programming depends on checking requirements, validating behavior and testing representative cases."
+        "answer": 2,
+        "explanation": "Formatted extraction leaves the Enter newline in the input buffer; consume it before the next line read."
       },
       {
         "id": "cpp13-2-q4",
         "language": "en",
-        "prompt": "Which code-quality principle applies?",
+        "prompt": "Which condition distinguishes a successful blank-line read from a failed read?",
         "options": [
-          "Check requirements, validate behavior and test cases",
-          "Ignore compiler warnings",
-          "Assume the example is a complete program",
-          "Prefer shortest code over correctness"
+          "Only line.empty()",
+          "The getline return stream state, then line.empty()",
+          "Only in.eof() before reading",
+          "Checking the string's capacity"
         ],
-        "answer": 0,
-        "explanation": "Reliable C++ programming depends on checking requirements, validating behavior and testing representative cases."
+        "answer": 1,
+        "explanation": "An empty string can be a valid line. First check whether getline succeeded, then decide how to handle empty content."
       },
       {
         "id": "cpp13-2-q5",
         "language": "en",
-        "prompt": "How should correctness be checked?",
+        "prompt": "How should a program handle a line containing a numeric field that cannot be parsed?",
         "options": [
-          "Check requirements, validate behavior and test cases",
-          "Ignore compiler warnings",
-          "Assume the example is a complete program",
-          "Prefer shortest code over correctness"
+          "Use the uninitialized number anyway",
+          "Assume it is zero without checking",
+          "Check extraction success and report or reject the record",
+          "Delete the entire input file"
         ],
-        "answer": 0,
-        "explanation": "Reliable C++ programming depends on checking requirements, validating behavior and testing representative cases."
+        "answer": 2,
+        "explanation": "Validate extraction and the resulting value before using it; malformed records should be handled explicitly."
       }
     ]
   },
