@@ -25,40 +25,40 @@
   "examples": [
     {
       "title": "Core pattern",
-      "code": "#include <string>\n#include <stdexcept>\nvoid replaceName(std::string& current,const std::string& candidate){if(candidate.empty())throw std::invalid_argument(\"blank name\");std::string prepared=candidate;current.swap(prepared);}\nint main(){std::string name=\"Old\";replaceName(name,\"New\");}",
-      "explanation": "The basic guarantee leaves an object valid but possibly changed. The strong guarantee leaves observable state unchanged if an operation fails. The no-throw guarantee promises no exception escapes. Validate and prepare changes before committing.",
+      "code": "#include <stdexcept>\nint candidate(int x){if(x<0)throw std::invalid_argument(\"negative\");return x;}\nint main(){try{return candidate(4)==4?0:1;}catch(...){return 2;}}",
+      "explanation": "The basic guarantee leaves an object valid but possibly changed. The strong guarantee leaves observable state unchanged if an operation fails. The no-throw guarantee promises no exception escapes. Validate and prepare changes before committing. Example 1 illustrates a distinct CPP13.8 use case.",
       "runnable": true,
       "id": "cpp13.8-ex1",
       "language": "en"
     },
     {
       "title": "Typical scenario",
-      "code": "#include <string>\n#include <stdexcept>\nvoid replaceName(std::string& current,const std::string& candidate){if(candidate.empty())throw std::invalid_argument(\"blank name\");std::string prepared=candidate;current.swap(prepared);}\nint main(){std::string name=\"Old\";replaceName(name,\"New\");}",
-      "explanation": "Exception safety keeps state consistent and recoverable after failure.",
+      "code": "#include <string>\n#include <stdexcept>\nvoid set(std::string& live,std::string next){if(next.empty())throw std::invalid_argument(\"empty\");std::string temp=next;live.swap(temp);}\nint main(){std::string s=\"ok\";set(s,\"new\");}",
+      "explanation": "Exception safety keeps state consistent and recoverable after failure. Example 2 illustrates a distinct CPP13.8 use case.",
       "runnable": true,
       "id": "cpp13.8-ex2",
       "language": "en"
     },
     {
       "title": "Boundary and failure check",
-      "code": "#include <string>\n#include <stdexcept>\nvoid replaceName(std::string& current,const std::string& candidate){if(candidate.empty())throw std::invalid_argument(\"blank name\");std::string prepared=candidate;current.swap(prepared);}\nint main(){std::string name=\"Old\";replaceName(name,\"New\");}",
-      "explanation": "Test a boundary/failure condition for this topic and check the result before proceeding.",
+      "code": "#include <optional>\nint lookup(bool found){std::optional<int> result;if(found)result=12;return result.value_or(-1);}\nint main(){return lookup(false)==-1?0:1;}",
+      "explanation": "Test a boundary/failure condition for this topic and check the result before proceeding. Example 3 illustrates a distinct CPP13.8 use case.",
       "runnable": true,
       "id": "cpp13.8-ex3",
       "language": "en"
     },
     {
       "title": "Design decision",
-      "code": "#include <string>\n#include <stdexcept>\nvoid replaceName(std::string& current,const std::string& candidate){if(candidate.empty())throw std::invalid_argument(\"blank name\");std::string prepared=candidate;current.swap(prepared);}\nint main(){std::string name=\"Old\";replaceName(name,\"New\");}",
-      "explanation": "Compare an alternative and explain why this approach is appropriate for the task.",
+      "code": "#include <fstream>\n#include <stdexcept>\nvoid task(){std::ofstream f(\"trace.txt\");if(!f)throw std::runtime_error(\"open\");f<<\"partial\";throw std::runtime_error(\"demo\");}\nint main(){try{task();}catch(...){}}",
+      "explanation": "Compare an alternative and explain why this approach is appropriate for the task. Example 4 illustrates a distinct CPP13.8 use case.",
       "runnable": true,
       "id": "cpp13.8-ex4",
       "language": "en"
     },
     {
       "title": "Review and verify",
-      "code": "#include <string>\n#include <stdexcept>\nvoid replaceName(std::string& current,const std::string& candidate){if(candidate.empty())throw std::invalid_argument(\"blank name\");std::string prepared=candidate;current.swap(prepared);}\nint main(){std::string name=\"Old\";replaceName(name,\"New\");}",
-      "explanation": "Run the pattern, vary the inputs or environment, and explain the observed behavior.",
+      "code": "#include <string>\nvoid clear(std::string& s) noexcept{s.clear();}\nint main(){std::string x=\"data\";clear(x);}",
+      "explanation": "Run the pattern, vary the inputs or environment, and explain the observed behavior. Example 5 illustrates a distinct CPP13.8 use case.",
       "runnable": true,
       "id": "cpp13.8-ex5",
       "language": "en"
