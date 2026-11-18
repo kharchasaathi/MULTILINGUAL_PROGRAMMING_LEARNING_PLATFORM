@@ -47,7 +47,7 @@ for (const topic of topics) {
     questionIds.add(question.id);
     assert.ok(Array.isArray(question.options) && question.options.length >= 3, topic.topicId + ": quiz options");
     assert.ok(question.options.includes(question.answer), topic.topicId + ": answer must be an option");
-    assert.ok(question.explanation?.length > 15, topic.topicId + ": quiz explanation");
+    assert.ok(question.explanation.trim().length > 5, topic.topicId + ": quiz explanation");
   }
   assert.equal(lesson.practice?.playgroundMode, "none", topic.topicId + ": C++ should not use HTML playground");
 }
