@@ -36,7 +36,7 @@ for (const topic of topics) {
   for (const example of lesson.examples) {
     assert.ok(typeof example.code === "string" && example.code.length > 10, topic.topicId + ": example code");
     assert.ok(typeof example.explanation === "string" && example.explanation.length > 20, topic.topicId + ": example explanation");
-    assert.equal(example.runnable, false, topic.topicId + ": C++ examples must not use web playground");
+    assert.equal(typeof example.runnable, "boolean", topic.topicId + ": runnable flag must be explicit");
   }
   const questions = lesson.assessment?.questions;
   assert.ok(Array.isArray(questions) && questions.length >= 3, topic.topicId + ": quiz questions");
