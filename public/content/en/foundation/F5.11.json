@@ -1,0 +1,173 @@
+{
+  "id": "foundation.f5.11.en",
+  "courseId": "foundation",
+  "moduleId": "F5",
+  "topicId": "F5.11",
+  "title": "Collection Size, Capacity, and Growth Concepts",
+  "language": "en",
+  "learningObjectives": [
+    "Distinguish collection size from capacity conceptually.",
+    "Explain why dynamic collections may allocate additional storage as they grow.",
+    "Describe the trade-off between unused reserved space and resizing work.",
+    "Recognize that capacity is implementation-specific and may not be exposed.",
+    "Choose growth strategies that preserve correctness and avoid premature optimization."
+  ],
+  "prerequisites": [
+    "F5.1",
+    "F5.2",
+    "F5.3",
+    "F5.9",
+    "F5.10"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Size describes how many elements a collection currently contains. Capacity, where applicable, describes how many elements can fit in its current allocated storage before additional storage may be needed. Some collections grow automatically; others have fixed size or expose no capacity concept. Resizing can involve allocating new storage and copying or moving elements, so implementations often grow in batches rather than on every insertion.",
+      "whyItMatters": "Understanding size and capacity helps explain why collections can accept more items than their initial allocation, why some insertions may be more expensive than others, and why reserving storage can sometimes help—but should not be used without evidence or need.",
+      "analogy": "A shelf has items on it (size) and room for additional items before you need a larger shelf (capacity). The shelf may be replaced with a bigger one when full.",
+      "analogyLimit": "Actual memory allocation, growth factors, copying, and capacity are language/runtime-specific. The analogy does not imply that every collection reserves storage or grows in the same way."
+    },
+    "explain": {
+      "narrative": "Size is the number of stored elements. Capacity is a storage-allocation concept found in some collection implementations; it may be greater than size and may be hidden from the programmer. When a dynamic array reaches its capacity, an implementation may allocate a larger backing region and move/copy elements. This occasional growth operation can be costly, while repeated additions are often efficient on average (amortized) in common dynamic-array implementations. Fixed-size arrays generally cannot grow without creating a new array or using a different structure. Avoid depending on undocumented growth factors or manually managing capacity unless the language API and workload justify it.",
+      "examples": [
+        {
+          "id": "f5.11-ex1",
+          "title": "Size means current item count",
+          "code": "const items = ['red', 'blue'];\nconsole.log(items.length);",
+          "expectedOutput": "2",
+          "explanation": "The length property reports the number of currently stored elements, not reserved storage."
+        },
+        {
+          "id": "f5.11-ex2",
+          "title": "Adding an item changes size",
+          "code": "const items = [10, 20];\nitems.push(30);console.log(items.length);",
+          "expectedOutput": "3",
+          "explanation": "Adding one element increases the current count by one. JavaScript does not expose the backing array capacity here."
+        },
+        {
+          "id": "f5.11-ex3",
+          "title": "Reserve concept in a language API",
+          "code": "// Conceptual pseudocode for a vector-like collection\nvalues.reserve(100);\nvalues.add(12);\nprint(values.size);",
+          "expectedOutput": "1",
+          "explanation": "Reserve may prepare storage for future additions, while size still counts actual elements. This is conceptual and not JavaScript Array syntax."
+        },
+        {
+          "id": "f5.11-ex4",
+          "title": "Fixed-size array needs a new structure to grow",
+          "code": "// Conceptual fixed array with three slots\nconst fixedSlots = [4, 5, 6];\n// To accommodate another value, create a larger array or use a growable collection.",
+          "expectedOutput": "No output",
+          "explanation": "The comment describes the design choice: a fixed-size structure does not automatically expand like a dynamic sequence."
+        },
+        {
+          "id": "f5.11-ex5",
+          "title": "Avoid assuming capacity exists",
+          "code": "const names = ['Ira'];\nnames.push('Dev');\nconsole.log(names.length);",
+          "expectedOutput": "2",
+          "explanation": "The visible API gives the current length. JavaScript code should not assume a standard Array capacity property exists."
+        }
+      ],
+      "commonMistakes": [
+        "Treating size and capacity as synonyms.",
+        "Assuming every collection exposes or even has a capacity property.",
+        "Assuming one insertion always reallocates or never reallocates.",
+        "Relying on undocumented growth factors.",
+        "Reserving large amounts of storage without a clear workload need.",
+        "Using capacity to infer how many valid elements can be read."
+      ]
+    },
+    "practise": {
+      "guidedTask": {
+        "title": "Guided: Explain a growing collection",
+        "instructions": "Trace a dynamic sequence as items are added, and distinguish actual elements from any implementation storage reserved behind the scenes.",
+        "steps": [
+          "Start with an empty collection and record its size.",
+          "Add three items, updating size after each operation.",
+          "Explain what capacity could mean in an implementation that exposes it, without assuming a specific value.",
+          "Describe what might happen when the backing storage is full and another item is inserted.",
+          "Compare the concept with a fixed-size array."
+        ],
+        "starterCode": "const values = [];\n// Add several items and record size after each change.\n// Discuss capacity conceptually only; JavaScript Array capacity is not exposed."
+      },
+      "independentTask": {
+        "title": "Independent: Growth strategy explanation",
+        "instructions": "Describe a collection used by an application that may grow over time, such as a log, shopping cart, or task list.",
+        "requirements": [
+          "Define size for your collection with a concrete example.",
+          "Explain whether capacity is exposed by your chosen language/structure.",
+          "Describe what happens when the structure grows beyond current storage.",
+          "Discuss one possible cost of resizing and why growth may be batched.",
+          "Explain why a developer should not reserve or optimize storage without a reason."
+        ]
+      },
+      "hints": [
+        "Size is a count of stored elements; capacity is a storage concept.",
+        "Capacity is not necessarily available through the public API.",
+        "Dynamic array growth may allocate new storage and copy/move data.",
+        "Fixed-size structures may require a replacement or a different container to grow.",
+        "Many implementations grow in batches to reduce repeated resizing costs.",
+        "Don't invent capacity numbers for a language implementation you haven't inspected."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "f5.11-en-q1",
+        "prompt": "What does collection size usually represent?",
+        "options": [
+          "The number of elements currently stored",
+          "The maximum possible number of elements for every collection",
+          "The number of bytes reserved in memory"
+        ],
+        "answer": "The number of elements currently stored",
+        "explanation": "Size is the current element count, independent of any hidden storage reservation."
+      },
+      {
+        "id": "f5.11-en-q2",
+        "prompt": "What does capacity mean for a collection implementation that exposes it?",
+        "options": [
+          "Storage available before additional allocation may be needed",
+          "The number of valid elements, always equal to size",
+          "The number of search results"
+        ],
+        "answer": "Storage available before additional allocation may be needed",
+        "explanation": "Capacity describes allocated storage slots, while size counts actual elements."
+      },
+      {
+        "id": "f5.11-en-q3",
+        "prompt": "What may happen when a dynamic array reaches its capacity and another item is added?",
+        "options": [
+          "It may allocate larger storage and copy or move elements",
+          "It always discards all previous elements",
+          "It can never accept another item"
+        ],
+        "answer": "It may allocate larger storage and copy or move elements",
+        "explanation": "Growth mechanisms are implementation-dependent, but reallocating larger storage is a common strategy."
+      },
+      {
+        "id": "f5.11-en-q4",
+        "prompt": "Which statement about JavaScript Array capacity is correct?",
+        "options": [
+          "The standard Array API does not expose a capacity property",
+          "Array capacity is always equal to length and is publicly readable",
+          "Capacity is set only with the .capacity() method"
+        ],
+        "answer": "The standard Array API does not expose a capacity property",
+        "explanation": "JavaScript exposes Array length, but backing storage capacity is not a standard user-facing property."
+      },
+      {
+        "id": "f5.11-en-q5",
+        "prompt": "When is reserving extra storage most defensible?",
+        "options": [
+          "When a known workload and API make the reservation useful",
+          "Whenever a collection is created, regardless of use",
+          "Only to make size appear larger"
+        ],
+        "answer": "When a known workload and API make the reservation useful",
+        "explanation": "Capacity planning should be based on known needs and supported APIs, not arbitrary assumptions."
+      }
+    ]
+  }
+}
