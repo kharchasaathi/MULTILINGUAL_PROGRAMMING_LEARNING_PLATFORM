@@ -1,0 +1,170 @@
+{
+  "id": "foundation.f14.12.en",
+  "courseId": "foundation",
+  "moduleId": "F14",
+  "topicId": "F14.12",
+  "title": "Designing Reliable API Consumption",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the key ideas and terminology of designing reliable api consumption.",
+    "Recognize how the concept is used in real software communication.",
+    "Identify common mistakes or risks associated with this topic.",
+    "Apply the concept to a small, fictional API scenario.",
+    "Review a communication design and justify appropriate choices."
+  ],
+  "prerequisites": [
+    "F13.12"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Reliable API consumption combines clear contracts, input and response validation, authentication handling, timeouts, retry policy, rate-limit awareness, asynchronous state management, error reporting, and observability. Clients should be resilient to missing fields and service changes while avoiding unsafe assumptions. Reliability is a design and testing practice, not a promise that networks or services never fail.",
+      "whyItMatters": "A robust API client helps users recover from failures, protects credentials and data, and avoids causing additional service problems.",
+      "analogy": "Think of a delivery process with a sender, a message, and a receiver who returns a confirmation or explanation.",
+      "analogyLimit": "Software communication may involve complex protocols, asynchronous timing, security, and partial failures that this everyday analogy cannot fully capture."
+    },
+    "explain": {
+      "narrative": "Reliable API consumption combines clear contracts, input and response validation, authentication handling, timeouts, retry policy, rate-limit awareness, asynchronous state management, error reporting, and observability. Clients should be resilient to missing fields and service changes while avoiding unsafe assumptions. Reliability is a design and testing practice, not a promise that networks or services never fail.\n\nUse the protocol and service documentation as the authoritative guide for a real API. Examples here are conceptual and intentionally do not make live network calls.",
+      "examples": [
+        {
+          "id": "f1412-ex1",
+          "title": "Check status before use",
+          "code": "const response={status:200,body:{items:[]}};\nconsole.log(response.status>=200&&response.status<300);",
+          "expectedOutput": "true",
+          "explanation": "Check outcome before assuming a usable body."
+        },
+        {
+          "id": "f1412-ex2",
+          "title": "Validate response shape",
+          "code": "const body={items:[]};\nconsole.log(Array.isArray(body.items));",
+          "expectedOutput": "true",
+          "explanation": "Check the fields your client relies on."
+        },
+        {
+          "id": "f1412-ex3",
+          "title": "Use bounded retry policy",
+          "code": "const policy={maxRetries:2,timeoutMs:4000};\nconsole.log(policy.maxRetries);",
+          "expectedOutput": "2",
+          "explanation": "A policy makes retry and timeout limits explicit."
+        },
+        {
+          "id": "f1412-ex4",
+          "title": "Represent recoverable UI states",
+          "code": "const ui=['loading','success','empty','error'];\nconsole.log(ui.length);",
+          "expectedOutput": "4",
+          "explanation": "The client should distinguish common outcomes."
+        },
+        {
+          "id": "f1412-ex5",
+          "title": "Keep sensitive data out of diagnostics",
+          "code": "const diagnostic={requestId:'req-8',status:503};\nconsole.log(diagnostic.requestId);",
+          "expectedOutput": "req-8",
+          "explanation": "Useful telemetry can be recorded without logging secrets."
+        }
+      ],
+      "commonMistakes": [
+        "Assuming every request succeeds or returns the same shape.",
+        "Treating parsing as validation or authentication as authorization.",
+        "Ignoring timeout, rate-limit, and failure responses.",
+        "Embedding secret credentials in public client code.",
+        "Retrying operations without considering duplicate side effects."
+      ]
+    },
+    "practise": {
+      "guidedTask": {
+        "title": "Guided Practice",
+        "instructions": "Review a fictional API client that assumes every request succeeds and every response contains a list. Add checks for status, parsing, shape, timeout, rate limit, retry, and user-visible error state.",
+        "steps": [
+          "Review a fictional API client that assumes every request succeeds and every response contains a list. Add checks for status, parsing, shape, timeout, rate limit, retry, and user-visible error state.",
+          "Sketch the communication sequence and identify the client/server roles.",
+          "Define expected success and failure outcomes.",
+          "Choose checks, timeout or retry behavior where appropriate.",
+          "Review your design for privacy and safe handling."
+        ],
+        "starterCode": "// Conceptual API exercise. Use fictional payloads only; no real credentials or network calls."
+      },
+      "independentTask": {
+        "title": "Independent Practice",
+        "instructions": "Build a reliability plan for an API consumer: contract, authentication, validation, timeout, rate-limit handling, retry/backoff, async states, logging, tests, and graceful recovery. Prioritize safeguards and explain trade-offs.",
+        "requirements": [
+          "Use a fictional or toy service; do not include live secrets.",
+          "Build a reliability plan for an API consumer: contract, authentication, validation, timeout, rate-limit handling, retry/backoff, async states, logging, tests, and graceful recovery. Prioritize safeguards and explain trade-offs.",
+          "Document assumptions, edge cases, and how you would test them."
+        ]
+      },
+      "hints": [
+        "Validate response status before processing body.",
+        "Check the data shape and required fields.",
+        "Set finite timeouts and retry caps.",
+        "Avoid duplicate side effects and stale responses.",
+        "Keep diagnostics useful but free of secrets and unnecessary personal data."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "f1412-q1",
+        "prompt": "What is a reliable API client expected to do?",
+        "options": [
+          "Handle success, failure, malformed data, delays, and limits deliberately",
+          "Assume every response is successful",
+          "Retry endlessly",
+          "Store credentials in logs"
+        ],
+        "answer": "Handle success, failure, malformed data, delays, and limits deliberately",
+        "explanation": "Reliability includes failure handling."
+      },
+      {
+        "id": "f1412-q2",
+        "prompt": "Why validate a response schema?",
+        "options": [
+          "The received data may be missing or unexpected",
+          "JSON guarantees all fields",
+          "It grants access",
+          "It avoids timeouts"
+        ],
+        "answer": "The received data may be missing or unexpected",
+        "explanation": "Clients need to check data before relying on it."
+      },
+      {
+        "id": "f1412-q3",
+        "prompt": "What helps avoid overloading a failing service?",
+        "options": [
+          "Limited retries, backoff, and honoring rate limits",
+          "Immediate repeated requests",
+          "No timeout",
+          "Retry every status"
+        ],
+        "answer": "Limited retries, backoff, and honoring rate limits",
+        "explanation": "Resilience should not amplify outages."
+      },
+      {
+        "id": "f1412-q4",
+        "prompt": "What should logs include when useful?",
+        "options": [
+          "Request identifiers and safe status details",
+          "Passwords and tokens",
+          "Entire private payloads",
+          "Every user secret"
+        ],
+        "answer": "Request identifiers and safe status details",
+        "explanation": "Safe observability helps troubleshooting."
+      },
+      {
+        "id": "f1412-q5",
+        "prompt": "What is the goal of graceful recovery?",
+        "options": [
+          "Give clear feedback and a safe next step when an operation fails",
+          "Hide every error",
+          "Guarantee the network is available",
+          "Disable all validation"
+        ],
+        "answer": "Give clear feedback and a safe next step when an operation fails",
+        "explanation": "Recovery supports users without unsafe assumptions."
+      }
+    ]
+  }
+}
