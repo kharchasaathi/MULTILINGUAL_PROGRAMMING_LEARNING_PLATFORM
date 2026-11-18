@@ -22,7 +22,7 @@ for (const topic of topics) {
 
   const englishPath = topic.languages?.en;
   assert.ok(typeof englishPath === "string" && englishPath.startsWith("/content/en/cpp/"), topic.topicId + ": English lesson path");
-  const absolutePath = resolve(root, "public", englishPath.replace(/^\\/+/, ""));
+  const absolutePath = resolve(root, "public", englishPath.slice(1));
   assert.ok(absolutePath.startsWith(resolve(root, "public") + "/"), topic.topicId + ": path stays in public directory");
   const lesson = await readJson(absolutePath);
   assert.equal(lesson.courseId, "cpp", topic.topicId + ": course ID");
