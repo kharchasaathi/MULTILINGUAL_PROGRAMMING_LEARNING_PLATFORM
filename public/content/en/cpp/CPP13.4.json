@@ -6,11 +6,11 @@
   "title": "Filesystem Paths and Directory Operations",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and purpose.",
-    "Identify the relevant C++ syntax, APIs or design rules.",
-    "Apply the topic in a small program.",
-    "Recognize common errors and safety concerns.",
-    "Evaluate a practical scenario and justify the approach."
+    "Explain the main rules of filesystem paths and directories.",
+    "Identify the key C++ constructs used for filesystem paths and directories.",
+    "Apply filesystem paths and directories in a small program.",
+    "Recognize common failure cases and safety concerns.",
+    "Test a practical scenario and justify the chosen approach."
   ],
   "prerequisites": [
     "CPP12.1",
@@ -18,62 +18,61 @@
   ],
   "stages": {
     "understand": {
-      "concept": "Learn the core concepts, vocabulary, requirements and practical use of Filesystem Paths and Directory Operations.",
-      "whyItMatters": "Filesystem Paths and Directory Operations helps learners build reliable and maintainable C++ programs while understanding trade-offs and common mistakes.",
-      "explain": "Study the examples and review relevant headers, types, object lifetime, error behavior, complexity and C++ standard compatibility. Snippets are illustrative rather than complete programs. Compile and test them in the intended environment."
+      "concept": "C++17 <filesystem> provides path and filesystem operations. Compose paths with path / child; inspect entries with exists/is_directory; create nested folders with create_directories. Errors may be handled with error_code or filesystem_error.",
+      "whyItMatters": "Portable path composition and error checks prevent fragile path strings and filesystem assumptions."
     }
   },
   "examples": [
     {
-      "id": "cpp13-4-ex1",
-      "language": "en",
-      "title": "Starter example",
-      "code": "namespace fs=std::filesystem;",
-      "explanation": "Illustrates Filesystem Paths and Directory Operations. Check the necessary headers, declarations, standard version and expected behavior. This is a focused snippet and may need surrounding code.",
-      "runnable": false
+      "title": "Core pattern",
+      "code": "#include <filesystem>\n#include <iostream>\nint main(){std::filesystem::path folder=\"data\";auto file=folder/\"records.txt\";std::error_code ec;std::filesystem::create_directories(folder,ec);if(ec){std::cerr<<ec.message();return 1;}std::cout<<file.string();}",
+      "explanation": "C++17 <filesystem> provides path and filesystem operations. Compose paths with path / child; inspect entries with exists/is_directory; create nested folders with create_directories. Errors may be handled with error_code or filesystem_error.",
+      "runnable": true,
+      "id": "cpp13.4-ex1",
+      "language": "en"
     },
     {
-      "id": "cpp13-4-ex2",
-      "language": "en",
-      "title": "Common use",
-      "code": "bool exists=fs::exists(\"data.txt\");",
-      "explanation": "Illustrates Filesystem Paths and Directory Operations. Check the necessary headers, declarations, standard version and expected behavior. This is a focused snippet and may need surrounding code.",
-      "runnable": false
+      "title": "Typical scenario",
+      "code": "#include <filesystem>\n#include <iostream>\nint main(){std::filesystem::path folder=\"data\";auto file=folder/\"records.txt\";std::error_code ec;std::filesystem::create_directories(folder,ec);if(ec){std::cerr<<ec.message();return 1;}std::cout<<file.string();}",
+      "explanation": "Portable path composition and error checks prevent fragile path strings and filesystem assumptions.",
+      "runnable": true,
+      "id": "cpp13.4-ex2",
+      "language": "en"
     },
     {
-      "id": "cpp13-4-ex3",
-      "language": "en",
-      "title": "Validation or boundary",
-      "code": "auto size=fs::file_size(\"data.txt\");",
-      "explanation": "Illustrates Filesystem Paths and Directory Operations. Check the necessary headers, declarations, standard version and expected behavior. This is a focused snippet and may need surrounding code.",
-      "runnable": false
+      "title": "Boundary and failure check",
+      "code": "#include <filesystem>\n#include <iostream>\nint main(){std::filesystem::path folder=\"data\";auto file=folder/\"records.txt\";std::error_code ec;std::filesystem::create_directories(folder,ec);if(ec){std::cerr<<ec.message();return 1;}std::cout<<file.string();}",
+      "explanation": "Test a boundary/failure condition for this topic and check the result before proceeding.",
+      "runnable": true,
+      "id": "cpp13.4-ex3",
+      "language": "en"
     },
     {
-      "id": "cpp13-4-ex4",
-      "language": "en",
-      "title": "Practical pattern",
-      "code": "for(const auto& p:fs::directory_iterator(\".\")){}",
-      "explanation": "Illustrates Filesystem Paths and Directory Operations. Check the necessary headers, declarations, standard version and expected behavior. This is a focused snippet and may need surrounding code.",
-      "runnable": false
+      "title": "Design decision",
+      "code": "#include <filesystem>\n#include <iostream>\nint main(){std::filesystem::path folder=\"data\";auto file=folder/\"records.txt\";std::error_code ec;std::filesystem::create_directories(folder,ec);if(ec){std::cerr<<ec.message();return 1;}std::cout<<file.string();}",
+      "explanation": "Compare an alternative and explain why this approach is appropriate for the task.",
+      "runnable": true,
+      "id": "cpp13.4-ex4",
+      "language": "en"
     },
     {
-      "id": "cpp13-4-ex5",
-      "language": "en",
-      "title": "Design note",
-      "code": "fs::path p=\"folder\"; auto file=p/\"data.txt\";",
-      "explanation": "Illustrates Filesystem Paths and Directory Operations. Check the necessary headers, declarations, standard version and expected behavior. This is a focused snippet and may need surrounding code.",
-      "runnable": false
+      "title": "Review and verify",
+      "code": "#include <filesystem>\n#include <iostream>\nint main(){std::filesystem::path folder=\"data\";auto file=folder/\"records.txt\";std::error_code ec;std::filesystem::create_directories(folder,ec);if(ec){std::cerr<<ec.message();return 1;}std::cout<<file.string();}",
+      "explanation": "Run the pattern, vary the inputs or environment, and explain the observed behavior.",
+      "runnable": true,
+      "id": "cpp13.4-ex5",
+      "language": "en"
     }
   ],
   "practise": {
-    "guidedTask": "Walk through each Filesystem Paths and Directory Operations example: identify assumptions, declarations, expected behavior and one failure case.",
-    "independentTask": "Create a small program or test that demonstrates Filesystem Paths and Directory Operations. Include a normal case, boundary case and invalid/failure case where applicable. Record expected results.",
+    "guidedTask": "Create a directory if missing, compose a path to records.txt, check it is a regular file before displaying its size, and handle errors.",
+    "independentTask": "Build a read-only directory inspector that lists entries and counts regular files. Do not delete or modify files.",
     "hints": [
-      "Check the headers and language standard.",
-      "Start with small test inputs.",
-      "Test boundary and invalid cases.",
-      "Avoid unsafe lifetime, ownership or range assumptions.",
-      "Compile and explain your result."
+      "This topic requires C++17.",
+      "Use path / child to compose components.",
+      "exists and is_directory are different checks.",
+      "Directory iteration order is unspecified.",
+      "Use error_code overloads to handle errors explicitly."
     ]
   },
   "practice": {
@@ -84,69 +83,69 @@
   "assessment": {
     "questions": [
       {
-        "id": "cpp13-4-q1",
+        "id": "cpp13.4-q1",
         "language": "en",
-        "prompt": "Which approach is most reliable for this topic?",
+        "prompt": "Which type represents paths?",
         "options": [
-          "Check requirements, validate behavior and test cases",
-          "Ignore compiler warnings",
-          "Assume the example is a complete program",
-          "Prefer shortest code over correctness"
+          "std::filesystem::path",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
         ],
         "answer": 0,
-        "explanation": "Reliable C++ programming depends on checking requirements, validating behavior and testing representative cases."
+        "explanation": "C++17 <filesystem> provides path and filesystem operations. Compose paths with path / child; inspect entries with exists/is_directory; create nested folders with create_directories. Errors may be handled with error_code or filesystem_error."
       },
       {
-        "id": "cpp13-4-q2",
+        "id": "cpp13.4-q2",
         "language": "en",
-        "prompt": "What should a validation test include?",
+        "prompt": "What does path / child do?",
         "options": [
-          "Check requirements, validate behavior and test cases",
-          "Ignore compiler warnings",
-          "Assume the example is a complete program",
-          "Prefer shortest code over correctness"
+          "Combines path components",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
         ],
         "answer": 0,
-        "explanation": "Reliable C++ programming depends on checking requirements, validating behavior and testing representative cases."
+        "explanation": "C++17 <filesystem> provides path and filesystem operations. Compose paths with path / child; inspect entries with exists/is_directory; create nested folders with create_directories. Errors may be handled with error_code or filesystem_error."
       },
       {
-        "id": "cpp13-4-q3",
+        "id": "cpp13.4-q3",
         "language": "en",
-        "prompt": "What is a good error-handling practice?",
+        "prompt": "Which function creates missing parent directories?",
         "options": [
-          "Check requirements, validate behavior and test cases",
-          "Ignore compiler warnings",
-          "Assume the example is a complete program",
-          "Prefer shortest code over correctness"
+          "create_directories",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
         ],
         "answer": 0,
-        "explanation": "Reliable C++ programming depends on checking requirements, validating behavior and testing representative cases."
+        "explanation": "C++17 <filesystem> provides path and filesystem operations. Compose paths with path / child; inspect entries with exists/is_directory; create nested folders with create_directories. Errors may be handled with error_code or filesystem_error."
       },
       {
-        "id": "cpp13-4-q4",
+        "id": "cpp13.4-q4",
         "language": "en",
-        "prompt": "Which code-quality principle applies?",
+        "prompt": "Why is exists not enough to confirm a directory?",
         "options": [
-          "Check requirements, validate behavior and test cases",
-          "Ignore compiler warnings",
-          "Assume the example is a complete program",
-          "Prefer shortest code over correctness"
+          "exists doesn't identify entry type",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
         ],
         "answer": 0,
-        "explanation": "Reliable C++ programming depends on checking requirements, validating behavior and testing representative cases."
+        "explanation": "C++17 <filesystem> provides path and filesystem operations. Compose paths with path / child; inspect entries with exists/is_directory; create nested folders with create_directories. Errors may be handled with error_code or filesystem_error."
       },
       {
-        "id": "cpp13-4-q5",
+        "id": "cpp13.4-q5",
         "language": "en",
-        "prompt": "How should correctness be checked?",
+        "prompt": "Why can the working directory vary?",
         "options": [
-          "Check requirements, validate behavior and test cases",
-          "Ignore compiler warnings",
-          "Assume the example is a complete program",
-          "Prefer shortest code over correctness"
+          "It depends on how the process is launched",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
         ],
         "answer": 0,
-        "explanation": "Reliable C++ programming depends on checking requirements, validating behavior and testing representative cases."
+        "explanation": "C++17 <filesystem> provides path and filesystem operations. Compose paths with path / child; inspect entries with exists/is_directory; create nested folders with create_directories. Errors may be handled with error_code or filesystem_error."
       }
     ]
   },
