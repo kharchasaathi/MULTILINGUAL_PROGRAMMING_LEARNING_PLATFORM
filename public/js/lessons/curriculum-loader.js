@@ -52,7 +52,7 @@
       top.append(text("span", "course-icon " + (courseId === "html" ? "icon-html" : courseId === "css" ? "icon-css" : courseId === "c" ? "icon-c" : ""), meta[3]));
       top.append(text("span", "course-number", String(items.length).padStart(2, "0") + " TOPICS"));
       card.append(top, text("h3", "", meta[0]), text("p", "", meta[2]));
-      const metaLine = text("div", "course-meta", courseId === "c" ? items.length + " authored English lesson drafts · Telugu translation pending" : items.length + " authored lesson topics · English and Telugu drafts");
+      const metaLine = text("div", "course-meta", courseId === "c" || courseId === "cpp" ? items.length + " authored English lesson drafts · Telugu translation pending" : items.length + " authored lesson topics · English and Telugu drafts");
       card.append(metaLine);
       const footer = text("div", "course-footer");
       footer.append(text("span", "course-price", "FREE PREVIEW"));
