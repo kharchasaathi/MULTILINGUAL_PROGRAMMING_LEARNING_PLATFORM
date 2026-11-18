@@ -132,7 +132,9 @@
       if (!response.ok) throw new Error("HTTP " + response.status);
       const lesson = await response.json();
       if (sequence !== loadSequence) return;
-      if (!lesson || lesson.topicId !== topic.topicId || !lesson.stages || !lesson.stages.understand || !lesson.stages.explain || !lesson.stages.practise) {
+      const hasSharedStages = lesson?.stages?.understand && lesson?.stages?.explain && lesson?.stages?.practise;
+      const hasCppStages = lesson?.courseId === "cpp" && lesson?.stages?.understand && Array.isArray(lesson.examples) && lesson.practise;
+      if (!lesson || lesson.topicId !== topic.topicId || (!hasSharedStages && !hasCppStages)) {
         throw new Error("Lesson content does not match the expected contract.");
       }
       renderLesson(lesson, actualLanguage !== language);
@@ -158,7 +160,7 @@
     // Normalize the authored C++ lesson contract (top-level examples/practice/assessment)
     // into the reusable three-stage renderer without changing source JSON files.
     const practice = lesson.stages.practise || lesson.practise || lesson.practice || {};
-    const examples = Array.isArray(explain.examples) ? explain.examples : (Array.isArray(lesson.examples) ? lesson.examples : []);
+    const examples = Array.isArray(explain?.examples) ? explain.examples : (Array.isArray(lesson.examples) ? lesson.examples : []);
     const explanationText = explain?.narrative || explain?.explain || lesson.explanation || understand.whyItMatters || understand.concept || "";
     const code = lesson.practice?.starterCode || "";
     const questions = lesson.assessment?.questions || [];
