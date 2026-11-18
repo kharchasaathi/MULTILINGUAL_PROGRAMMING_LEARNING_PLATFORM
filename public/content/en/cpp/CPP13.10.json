@@ -6,11 +6,11 @@
   "title": "Robust File and Exception Handling Practice",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and purpose.",
-    "Identify the relevant C++ syntax, APIs or design rules.",
-    "Apply the topic in a small program.",
-    "Recognize common errors and safety concerns.",
-    "Evaluate a practical scenario and justify the approach."
+    "Explain the main rules of robust file-processing workflow.",
+    "Identify the key C++ constructs used for robust file-processing workflow.",
+    "Apply robust file-processing workflow in a small program.",
+    "Recognize common failure cases and safety concerns.",
+    "Test a practical scenario and justify the chosen approach."
   ],
   "prerequisites": [
     "CPP12.1",
@@ -18,62 +18,61 @@
   ],
   "stages": {
     "understand": {
-      "concept": "Learn the core concepts, vocabulary, requirements and practical use of Robust File and Exception Handling Practice.",
-      "whyItMatters": "Robust File and Exception Handling Practice helps learners build reliable and maintainable C++ programs while understanding trade-offs and common mistakes.",
-      "explain": "Study the examples and review relevant headers, types, object lifetime, error behavior, complexity and C++ standard compatibility. Snippets are illustrative rather than complete programs. Compile and test them in the intended environment."
+      "concept": "Reliable file processing combines checked opens and reads, line-based parsing, validation, a clear skip/abort policy, exception handling and RAII. For output, write to a temporary and verify before replacing final output when supported.",
+      "whyItMatters": "Real input and I/O fail unpredictably. Robust programs preserve valid data, explain rejected records and avoid claiming incomplete output is successful."
     }
   },
   "examples": [
     {
-      "id": "cpp13-10-ex1",
-      "language": "en",
-      "title": "Starter example",
-      "code": "std::ifstream in(path); if(!in) throw std::runtime_error(\"open\");",
-      "explanation": "Illustrates Robust File and Exception Handling Practice. Check the necessary headers, declarations, standard version and expected behavior. This is a focused snippet and may need surrounding code.",
-      "runnable": false
+      "title": "Core pattern",
+      "code": "#include <fstream>\n#include <sstream>\n#include <iostream>\nint main(){std::ifstream in(\"scores.txt\");if(!in){std::cerr<<\"Missing input\\n\";return 1;}std::string line;int valid=0;while(std::getline(in,line)){std::istringstream row(line);std::string name,extra;int score;if((row>>name>>score)&&!(row>>extra)&&score>=0&&score<=100)++valid;else std::cerr<<\"Rejected record\\n\";}if(in.bad())return 2;std::ofstream out(\"summary.tmp\");if(!out)return 3;out<<\"Valid records: \"<<valid<<'\\n';out.flush();return out?0:4;}",
+      "explanation": "Reliable file processing combines checked opens and reads, line-based parsing, validation, a clear skip/abort policy, exception handling and RAII. For output, write to a temporary and verify before replacing final output when supported.",
+      "runnable": true,
+      "id": "cpp13.10-ex1",
+      "language": "en"
     },
     {
-      "id": "cpp13-10-ex2",
-      "language": "en",
-      "title": "Common use",
-      "code": "while(std::getline(in,line)){ /* validate */ }",
-      "explanation": "Illustrates Robust File and Exception Handling Practice. Check the necessary headers, declarations, standard version and expected behavior. This is a focused snippet and may need surrounding code.",
-      "runnable": false
+      "title": "Typical scenario",
+      "code": "#include <fstream>\n#include <sstream>\n#include <iostream>\nint main(){std::ifstream in(\"scores.txt\");if(!in){std::cerr<<\"Missing input\\n\";return 1;}std::string line;int valid=0;while(std::getline(in,line)){std::istringstream row(line);std::string name,extra;int score;if((row>>name>>score)&&!(row>>extra)&&score>=0&&score<=100)++valid;else std::cerr<<\"Rejected record\\n\";}if(in.bad())return 2;std::ofstream out(\"summary.tmp\");if(!out)return 3;out<<\"Valid records: \"<<valid<<'\\n';out.flush();return out?0:4;}",
+      "explanation": "Real input and I/O fail unpredictably. Robust programs preserve valid data, explain rejected records and avoid claiming incomplete output is successful.",
+      "runnable": true,
+      "id": "cpp13.10-ex2",
+      "language": "en"
     },
     {
-      "id": "cpp13-10-ex3",
-      "language": "en",
-      "title": "Validation or boundary",
-      "code": "try{ process(); }catch(const std::exception& e){ report(e); }",
-      "explanation": "Illustrates Robust File and Exception Handling Practice. Check the necessary headers, declarations, standard version and expected behavior. This is a focused snippet and may need surrounding code.",
-      "runnable": false
+      "title": "Boundary and failure check",
+      "code": "#include <fstream>\n#include <sstream>\n#include <iostream>\nint main(){std::ifstream in(\"scores.txt\");if(!in){std::cerr<<\"Missing input\\n\";return 1;}std::string line;int valid=0;while(std::getline(in,line)){std::istringstream row(line);std::string name,extra;int score;if((row>>name>>score)&&!(row>>extra)&&score>=0&&score<=100)++valid;else std::cerr<<\"Rejected record\\n\";}if(in.bad())return 2;std::ofstream out(\"summary.tmp\");if(!out)return 3;out<<\"Valid records: \"<<valid<<'\\n';out.flush();return out?0:4;}",
+      "explanation": "Test a boundary/failure condition for this topic and check the result before proceeding.",
+      "runnable": true,
+      "id": "cpp13.10-ex3",
+      "language": "en"
     },
     {
-      "id": "cpp13-10-ex4",
-      "language": "en",
-      "title": "Practical pattern",
-      "code": "// report useful, non-sensitive error details",
-      "explanation": "Illustrates Robust File and Exception Handling Practice. Check the necessary headers, declarations, standard version and expected behavior. This is a focused snippet and may need surrounding code.",
-      "runnable": false
+      "title": "Design decision",
+      "code": "#include <fstream>\n#include <sstream>\n#include <iostream>\nint main(){std::ifstream in(\"scores.txt\");if(!in){std::cerr<<\"Missing input\\n\";return 1;}std::string line;int valid=0;while(std::getline(in,line)){std::istringstream row(line);std::string name,extra;int score;if((row>>name>>score)&&!(row>>extra)&&score>=0&&score<=100)++valid;else std::cerr<<\"Rejected record\\n\";}if(in.bad())return 2;std::ofstream out(\"summary.tmp\");if(!out)return 3;out<<\"Valid records: \"<<valid<<'\\n';out.flush();return out?0:4;}",
+      "explanation": "Compare an alternative and explain why this approach is appropriate for the task.",
+      "runnable": true,
+      "id": "cpp13.10-ex4",
+      "language": "en"
     },
     {
-      "id": "cpp13-10-ex5",
-      "language": "en",
-      "title": "Design note",
-      "code": "// test missing, empty and malformed files",
-      "explanation": "Illustrates Robust File and Exception Handling Practice. Check the necessary headers, declarations, standard version and expected behavior. This is a focused snippet and may need surrounding code.",
-      "runnable": false
+      "title": "Review and verify",
+      "code": "#include <fstream>\n#include <sstream>\n#include <iostream>\nint main(){std::ifstream in(\"scores.txt\");if(!in){std::cerr<<\"Missing input\\n\";return 1;}std::string line;int valid=0;while(std::getline(in,line)){std::istringstream row(line);std::string name,extra;int score;if((row>>name>>score)&&!(row>>extra)&&score>=0&&score<=100)++valid;else std::cerr<<\"Rejected record\\n\";}if(in.bad())return 2;std::ofstream out(\"summary.tmp\");if(!out)return 3;out<<\"Valid records: \"<<valid<<'\\n';out.flush();return out?0:4;}",
+      "explanation": "Run the pattern, vary the inputs or environment, and explain the observed behavior.",
+      "runnable": true,
+      "id": "cpp13.10-ex5",
+      "language": "en"
     }
   ],
   "practise": {
-    "guidedTask": "Walk through each Robust File and Exception Handling Practice example: identify assumptions, declarations, expected behavior and one failure case.",
-    "independentTask": "Create a small program or test that demonstrates Robust File and Exception Handling Practice. Include a normal case, boundary case and invalid/failure case where applicable. Record expected results.",
+    "guidedTask": "Implement an importer that numbers lines, parses label and score, validates 0–100, collects valid rows and reports rejects. Test missing file, empty file, blank line, invalid score, extra field and valid row.",
+    "independentTask": "Build a grade report: malformed records are rejected but processing continues; missing input aborts; output is written to a temporary file and verified before considered ready. Include six tests.",
     "hints": [
-      "Check the headers and language standard.",
-      "Start with small test inputs.",
-      "Test boundary and invalid cases.",
-      "Avoid unsafe lifetime, ownership or range assumptions.",
-      "Compile and explain your result."
+      "Define the record format and failure policy first.",
+      "Check open and read failures separately.",
+      "Parse into temporary values and validate before accumulation.",
+      "Report rejected rows with line numbers.",
+      "Check output after write and flush."
     ]
   },
   "practice": {
@@ -84,69 +83,69 @@
   "assessment": {
     "questions": [
       {
-        "id": "cpp13-10-q1",
+        "id": "cpp13.10-q1",
         "language": "en",
-        "prompt": "Which approach is most reliable for this topic?",
+        "prompt": "If input cannot open, what should the program do?",
         "options": [
-          "Check requirements, validate behavior and test cases",
-          "Ignore compiler warnings",
-          "Assume the example is a complete program",
-          "Prefer shortest code over correctness"
+          "Report and stop or use a defined fallback",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
         ],
         "answer": 0,
-        "explanation": "Reliable C++ programming depends on checking requirements, validating behavior and testing representative cases."
+        "explanation": "Reliable file processing combines checked opens and reads, line-based parsing, validation, a clear skip/abort policy, exception handling and RAII. For output, write to a temporary and verify before replacing final output when supported."
       },
       {
-        "id": "cpp13-10-q2",
+        "id": "cpp13.10-q2",
         "language": "en",
-        "prompt": "What should a validation test include?",
+        "prompt": "Why parse into temporary values?",
         "options": [
-          "Check requirements, validate behavior and test cases",
-          "Ignore compiler warnings",
-          "Assume the example is a complete program",
-          "Prefer shortest code over correctness"
+          "Validate before accepting data",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
         ],
         "answer": 0,
-        "explanation": "Reliable C++ programming depends on checking requirements, validating behavior and testing representative cases."
+        "explanation": "Reliable file processing combines checked opens and reads, line-based parsing, validation, a clear skip/abort policy, exception handling and RAII. For output, write to a temporary and verify before replacing final output when supported."
       },
       {
-        "id": "cpp13-10-q3",
+        "id": "cpp13.10-q3",
         "language": "en",
-        "prompt": "What is a good error-handling practice?",
+        "prompt": "What is a reasonable policy for malformed records?",
         "options": [
-          "Check requirements, validate behavior and test cases",
-          "Ignore compiler warnings",
-          "Assume the example is a complete program",
-          "Prefer shortest code over correctness"
+          "Reject with diagnostics and continue if policy allows",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
         ],
         "answer": 0,
-        "explanation": "Reliable C++ programming depends on checking requirements, validating behavior and testing representative cases."
+        "explanation": "Reliable file processing combines checked opens and reads, line-based parsing, validation, a clear skip/abort policy, exception handling and RAII. For output, write to a temporary and verify before replacing final output when supported."
       },
       {
-        "id": "cpp13-10-q4",
+        "id": "cpp13.10-q4",
         "language": "en",
-        "prompt": "Which code-quality principle applies?",
+        "prompt": "Why check after flush?",
         "options": [
-          "Check requirements, validate behavior and test cases",
-          "Ignore compiler warnings",
-          "Assume the example is a complete program",
-          "Prefer shortest code over correctness"
+          "Buffered write errors can surface at flush",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
         ],
         "answer": 0,
-        "explanation": "Reliable C++ programming depends on checking requirements, validating behavior and testing representative cases."
+        "explanation": "Reliable file processing combines checked opens and reads, line-based parsing, validation, a clear skip/abort policy, exception handling and RAII. For output, write to a temporary and verify before replacing final output when supported."
       },
       {
-        "id": "cpp13-10-q5",
+        "id": "cpp13.10-q5",
         "language": "en",
-        "prompt": "How should correctness be checked?",
+        "prompt": "Why use a temporary output file?",
         "options": [
-          "Check requirements, validate behavior and test cases",
-          "Ignore compiler warnings",
-          "Assume the example is a complete program",
-          "Prefer shortest code over correctness"
+          "Reduce risk of partial final output",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
         ],
         "answer": 0,
-        "explanation": "Reliable C++ programming depends on checking requirements, validating behavior and testing representative cases."
+        "explanation": "Reliable file processing combines checked opens and reads, line-based parsing, validation, a clear skip/abort policy, exception handling and RAII. For output, write to a temporary and verify before replacing final output when supported."
       }
     ]
   },
