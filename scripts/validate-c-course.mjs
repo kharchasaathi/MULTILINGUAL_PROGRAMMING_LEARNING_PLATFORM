@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 
 const root = process.cwd();
-const readJson = async (path) => JSON.parse(await readFile(join(root, path), "utf8"));
+const readJson = async (path) => JSON.parse(await readFile(resolve(root, path), "utf8"));
 const index = await readJson("public/content/curriculum-index.json");
 
 assert.ok(Array.isArray(index.courses) && index.courses.includes("c"), "C course is registered");
