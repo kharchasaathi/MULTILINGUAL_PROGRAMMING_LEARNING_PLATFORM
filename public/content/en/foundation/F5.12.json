@@ -1,0 +1,176 @@
+{
+  "id": "foundation.f5.12.en",
+  "courseId": "foundation",
+  "moduleId": "F5",
+  "topicId": "F5.12",
+  "title": "Collection Boundaries and Safe Access",
+  "language": "en",
+  "learningObjectives": [
+    "Identify valid and invalid indexes in indexed collections.",
+    "Handle empty collections and missing keys without assuming a value exists.",
+    "Explain boundary and off-by-one risks in collection access.",
+    "Use validation or safe access patterns appropriate to the language.",
+    "Design tests for first, last, empty, missing, and out-of-range cases."
+  ],
+  "prerequisites": [
+    "F5.1",
+    "F5.2",
+    "F5.3",
+    "F5.6",
+    "F5.8",
+    "F5.10",
+    "F5.11",
+    "F3.9"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A collection boundary is the edge of its valid contents. For an indexed collection of length n using zero-based indexes, valid indexes are from 0 through n-1. An empty collection has no valid element index. Keyed collections may have missing keys. Safe access means checking the relevant condition or using a language-provided operation that communicates absence, rather than assuming every requested value exists.",
+      "whyItMatters": "Boundary mistakes can crash a program, produce undefined or unexpected values, read the wrong record, or cause incorrect updates. Explicit handling improves reliability and makes edge cases easier to test.",
+      "analogy": "A numbered row of lockers starts at locker zero in a zero-based system and ends at the final existing locker. Asking for the next locker beyond the row or for a locker in an empty row needs a clear response.",
+      "analogyLimit": "Languages differ in whether invalid access throws, returns a special value, or behaves another way. Never assume all languages use the same boundary behavior."
+    },
+    "explain": {
+      "narrative": "For a zero-based sequence with n elements, the last valid index is n-1. A loop condition such as i < length visits indexes 0 through length-1; using i <= length attempts one extra position. Check for empty collections before relying on first or last items. For maps/dictionaries, verify key presence or handle a missing result. Safe access operators may prevent a failure but do not replace validation when the program must distinguish a missing value from a valid value. Consider input validation, clear failure responses, and tests for boundary cases.",
+      "examples": [
+        {
+          "id": "f5.12-ex1",
+          "title": "Valid first and last indexes",
+          "code": "const values = ['x', 'y', 'z'];\nconsole.log(values[0], values[values.length - 1]);",
+          "expectedOutput": "x z",
+          "explanation": "Index zero selects the first element; length minus one selects the final valid index."
+        },
+        {
+          "id": "f5.12-ex2",
+          "title": "Avoid one-past-the-end loops",
+          "code": "const values = [2, 4, 6];\nfor (let i = 0; i < values.length; i++) console.log(values[i]);",
+          "expectedOutput": "2\\n4\\n6",
+          "explanation": "The strict less-than condition stops at index length-1, preventing an extra access."
+        },
+        {
+          "id": "f5.12-ex3",
+          "title": "Handle empty collection",
+          "code": "const items = [];\nif (items.length === 0) console.log('No items');",
+          "expectedOutput": "No items",
+          "explanation": "The code checks emptiness before attempting to read a first or last element."
+        },
+        {
+          "id": "f5.12-ex4",
+          "title": "Check a map key before use",
+          "code": "const prices = new Map([['tea', 15]]);\nif (prices.has('coffee')) console.log(prices.get('coffee'));\nelse console.log('Missing key');",
+          "expectedOutput": "Missing key",
+          "explanation": "Presence is checked explicitly so a missing entry is handled as a case rather than assumed to exist."
+        },
+        {
+          "id": "f5.12-ex5",
+          "title": "Guard a requested index",
+          "code": "const values = [11, 22];\nconst index = 4;if (index >= 0 && index < values.length) console.log(values[index]);\nelse console.log('Index out of range');",
+          "expectedOutput": "Index out of range",
+          "explanation": "Both lower and upper bounds are checked before access."
+        }
+      ],
+      "commonMistakes": [
+        "Using <= length in a zero-based loop when < length is intended.",
+        "Reading index zero without checking whether the collection is empty.",
+        "Treating a missing map key as if it always has a valid value.",
+        "Checking only the upper bound but allowing negative indexes.",
+        "Assuming safe-access syntax has identical behavior in every language.",
+        "Testing only typical values and omitting empty, first, last, and invalid cases."
+      ]
+    },
+    "practise": {
+      "guidedTask": {
+        "title": "Guided: Boundary-safe record lookup",
+        "instructions": "Write a small routine that reads a requested position from a sequence and reports clearly when the position is invalid.",
+        "steps": [
+          "Test the sequence with at least three elements.",
+          "Read the first valid index and the last valid index.",
+          "Try a negative index and an index equal to the sequence length.",
+          "Test the same logic with an empty sequence.",
+          "Describe how your language reports missing keys or invalid access and adapt the routine."
+        ],
+        "starterCode": "const records = ['A', 'B', 'C'];\nconst requestedIndex = 2;\n// Validate before access; also test empty, negative, and length-boundary cases."
+      },
+      "independentTask": {
+        "title": "Independent: Safe collection API",
+        "instructions": "Design a helper or pseudocode API for retrieving an item safely from a collection.",
+        "requirements": [
+          "Accept a collection and requested index or key.",
+          "Check collection emptiness or key presence as appropriate.",
+          "Check both index bounds when using an indexed collection.",
+          "Return or report a clear success/missing/invalid result.",
+          "Write test cases for first, last, empty, missing, negative, and one-past-end access."
+        ]
+      },
+      "hints": [
+        "For n elements and zero-based indexes, valid indexes are 0 through n-1.",
+        "The last index is length minus one, not length.",
+        "A loop that uses i < length normally avoids the one-past-end index.",
+        "Check empty collections before reading first or last.",
+        "Maps need key-presence checks; a missing key is not a real stored entry.",
+        "Different languages handle invalid access differently—confirm the behavior instead of guessing."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "f5.12-en-q1",
+        "prompt": "A zero-based sequence contains n elements. What is its final valid index?",
+        "options": [
+          "n - 1",
+          "n",
+          "n + 1"
+        ],
+        "answer": "n - 1",
+        "explanation": "Indexes start at zero, so the last position is one less than the element count."
+      },
+      {
+        "id": "f5.12-en-q2",
+        "prompt": "Why is i < collection.length commonly used in an index loop?",
+        "options": [
+          "It stops before the one-past-the-end index",
+          "It guarantees every index is negative",
+          "It includes an extra invalid index"
+        ],
+        "answer": "It stops before the one-past-the-end index",
+        "explanation": "For length n, i ranges from zero to n-1, the valid indexes."
+      },
+      {
+        "id": "f5.12-en-q3",
+        "prompt": "What should a program do before reading the first item of a collection?",
+        "options": [
+          "Check whether the collection is empty when emptiness is possible",
+          "Assume an item always exists",
+          "Read index -1"
+        ],
+        "answer": "Check whether the collection is empty when emptiness is possible",
+        "explanation": "An empty collection has no first element to read."
+      },
+      {
+        "id": "f5.12-en-q4",
+        "prompt": "How should code handle a requested map key that may not exist?",
+        "options": [
+          "Check key presence or handle the missing result",
+          "Assume every key was inserted",
+          "Use the map's element count as the key"
+        ],
+        "answer": "Check key presence or handle the missing result",
+        "explanation": "Missing keys are valid cases that must be handled explicitly."
+      },
+      {
+        "id": "f5.12-en-q5",
+        "prompt": "Which test set best covers collection boundaries?",
+        "options": [
+          "First, last, empty, missing, negative, and one-past-end cases",
+          "Only a middle element",
+          "Only a large positive index"
+        ],
+        "answer": "First, last, empty, missing, negative, and one-past-end cases",
+        "explanation": "Boundary and absence cases reveal bugs that typical middle values may not expose."
+      }
+    ]
+  }
+}
