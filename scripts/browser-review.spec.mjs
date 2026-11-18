@@ -103,7 +103,7 @@ test("all six courses render representative lessons and starter programs execute
     await expect(dialog.locator(".lesson-objectives-list li")).toHaveCount(5);
     await expect(dialog.locator(".lesson-example")).toHaveCount(course === "cpp" ? 5 : 2);
     if (course === "cpp") {
-      await expect(dialog.locator(".lesson-stage").nth(1)).toContainText("C++ is a general-purpose");
+      await expect(dialog.locator(".lesson-stage").nth(0)).toContainText("C++ is a general-purpose");
       await expect(dialog.locator(".lesson-hints li")).toHaveCount(5);
     }
     await expect(dialog.locator(".lesson-question")).toHaveCount(5);
