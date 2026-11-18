@@ -6,8 +6,8 @@
 - CPP1 currently has 20 registered lesson topics (CPP1.1–CPP1.20).
 - Proposed modules CPP2–CPP14 contain 10 planned topics each (130 additional topics).
 - **Proposed scope total: 150 topics.**
-- **Current draft-authored: 100 topics.**
-- **Remaining to author under this scope: 50 topics.**
+- **Current draft-authored: 110 topics.**
+- **Remaining to author under this scope: 40 topics.**
 - Counts can be adjusted after a curriculum audit; this roadmap should be updated when topic IDs or scope change.
 
 ## CPP1 — Foundations and First Programs (20 topics)
@@ -33,7 +33,7 @@ Already registered in curriculum index. CPP1.1–CPP1.10 were previously created
 
 ## CPP9 — Structs, Classes and Encapsulation (10 topics — drafted)\n\n**Drafted CPP9.1–CPP9.10:** struct definitions and objects, member access, aggregate initialization, structs with functions, composition, classes and methods, access specifiers, constructors, validation/encapsulation, and design practice.\n\n- CPP9.1: struct basics\n- CPP9.2: class basics\n- CPP9.3: Members and access control\n- CPP9.4: Constructors\n- CPP9.5: Member initialization lists\n- CPP9.6: Destructors\n- CPP9.7: Encapsulation\n- CPP9.8: this pointer\n- CPP9.9: Static members\n- CPP9.10: Class invariants and design
 
-## CPP10 — Object-Oriented Programming (10 topics)\n- CPP10.1: Inheritance basics\n- CPP10.2: Base and derived classes\n- CPP10.3: Protected access\n- CPP10.4: Virtual functions\n- CPP10.5: Override and final\n- CPP10.6: Abstract classes\n- CPP10.7: Polymorphism\n- CPP10.8: Composition vs inheritance\n- CPP10.9: Object slicing\n- CPP10.10: OOP design and testing
+## CPP10 — Object-Oriented Programming (10 topics — drafted)\n\n**Drafted CPP10.1–CPP10.10:** OOP principles, interface/responsibilities, object lifecycle, this pointer, static members, inheritance, access modes, overriding/virtual functions, polymorphism, and OOP design review.\n\n- CPP10.1: Inheritance basics\n- CPP10.2: Base and derived classes\n- CPP10.3: Protected access\n- CPP10.4: Virtual functions\n- CPP10.5: Override and final\n- CPP10.6: Abstract classes\n- CPP10.7: Polymorphism\n- CPP10.8: Composition vs inheritance\n- CPP10.9: Object slicing\n- CPP10.10: OOP design and testing
 
 ## CPP11 — Templates and Generic Programming (10 topics)\n- CPP11.1: Function templates\n- CPP11.2: Template type parameters\n- CPP11.3: Class templates\n- CPP11.4: Template argument deduction\n- CPP11.5: Generic algorithms\n- CPP11.6: Concepts introduction\n- CPP11.7: Constraints overview\n- CPP11.8: Compile-time polymorphism\n- CPP11.9: Template errors and diagnostics\n- CPP11.10: Reusable generic design
 
