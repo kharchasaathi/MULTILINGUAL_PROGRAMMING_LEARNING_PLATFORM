@@ -46,7 +46,7 @@ for (const topic of topics) {
     assert.ok(!questionIds.has(question.id), topic.topicId + ": duplicate question ID");
     questionIds.add(question.id);
     assert.ok(Array.isArray(question.options) && question.options.length >= 3, topic.topicId + ": quiz options");
-    assert.ok(question.options.includes(question.answer), topic.topicId + ": answer must be an option");
+    assert.ok((Number.isInteger(question.answer) && question.answer >= 0 && question.answer < question.options.length) || question.options.includes(question.answer), topic.topicId + ": answer must be a valid option or index");
     if (question.explanation !== undefined) assert.equal(typeof question.explanation, "string", topic.topicId + ": optional quiz explanation");
   }
   assert.equal(lesson.practice?.playgroundMode, "none", topic.topicId + ": C++ should not use HTML playground");
