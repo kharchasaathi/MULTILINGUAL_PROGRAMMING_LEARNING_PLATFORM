@@ -226,7 +226,7 @@ Expand the existing Programming Foundations course without replacing or renumber
 ## Summary
 - Existing topics: 14 (F0.1–F0.7 and F1.1–F1.7), preserved.
 - New planned modules: F2–F15.
-- New topic count: 148 planned topics.
-- Expanded Foundations curriculum total: 162 planned topics, before any further inventory discovery.
+- New topic count: 158 planned topics.
+- Expanded Foundations curriculum total: 172 planned topics, before any further inventory discovery.
 - This is a roadmap count, not a completed lesson count.
 - New topic files, curriculum-index entries, and learner-visible navigation should be added only as actual lessons are authored and validated.
