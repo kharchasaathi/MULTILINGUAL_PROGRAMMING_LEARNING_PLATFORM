@@ -152,3 +152,20 @@ test("all six courses render representative lessons and starter programs execute
   }
   expect(pageErrors, "browser runtime errors").toEqual([]);
 });
+
+test("C++ indexed quiz answers are mapped to the correct choice", async ({ page }) => {
+  await page.goto(baseURL, { waitUntil: "domcontentloaded" });
+  await page.locator('[data-course-nav="cpp"]').click();
+  const dialog = page.locator("#lessonDialog");
+  await expect(dialog).toBeVisible();
+  await dialog.locator('[data-topic-id="CPP12.1"]').click();
+  await expect(dialog.locator(".lesson-template-title")).toContainText("CPP12.1");
+  const response = await page.request.get(`${baseURL}/content/en/cpp/CPP12.1.json`);
+  const lesson = await response.json();
+  const firstQuestion = dialog.locator(".lesson-question").first();
+  const correctAnswer = Number.isInteger(lesson.assessment.questions[0].answer)
+    ? lesson.assessment.questions[0].options[lesson.assessment.questions[0].answer]
+    : lesson.assessment.questions[0].answer;
+  await firstQuestion.getByText(correctAnswer, { exact: true }).click();
+  await expect(firstQuestion.locator(".lesson-question-feedback")).toContainText("Correct");
+});
