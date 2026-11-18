@@ -1,0 +1,169 @@
+{
+  "id": "foundation.f6.11.en",
+  "courseId": "foundation",
+  "moduleId": "F6",
+  "topicId": "F6.11",
+  "title": "API Boundaries and Separation of Concerns",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the key boundary or design principle in this topic.",
+    "Identify a clear responsibility and interface in a code example.",
+    "Describe how a caller uses a component without depending on its internals.",
+    "Recognize duplication or cohesion problems and their trade-offs.",
+    "Apply the principle to a small program design."
+  ],
+  "prerequisites": [
+    "F6.10",
+    "F6.1",
+    "F1.4"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "An API boundary is the defined way one component communicates with another. Separation of concerns means each part of a program handles a distinct responsibility, such as data access, calculations, user interaction, or presentation. A boundary hides internal details and exposes only the capability callers need. These ideas can apply to functions, modules, services, or entire applications.",
+      "whyItMatters": "Clear boundaries reduce the number of details a component must know about, making it easier to change or test one part without rewriting everything else. Boundaries that are too rigid or too numerous can also add complexity.",
+      "analogy": "A restaurant customer orders from a menu rather than entering the kitchen and controlling every cooking step. The menu is the public boundary; the analogy does not capture all technical constraints, error handling, or data contracts.",
+      "analogyLimit": "The analogy provides a starting point but cannot replace technical contracts, runtime behavior, or project-specific design decisions."
+    },
+    "explain": {
+      "narrative": "Define the responsibility of each component and the data or operations it exposes. Keep callers dependent on the public contract rather than internal implementation. Separate presentation, business rules, and storage when that separation makes change or testing easier.",
+      "examples": [
+        {
+          "id": "f6.11-ex1",
+          "title": "Caller uses a small interface",
+          "code": "function calculateTotal(items) { return items.reduce((sum, item) => sum + item.price, 0); }\nconst items = [{price:5},{price:7}];\nconsole.log(calculateTotal(items));",
+          "expectedOutput": "12",
+          "explanation": "The caller supplies data and receives a result without knowing how summation is implemented."
+        },
+        {
+          "id": "f6.11-ex2",
+          "title": "Separate formatting from calculation",
+          "code": "function total(values) { return values.reduce((s, n) => s+n, 0); }\nfunction formatMoney(amount) { return '$' + amount.toFixed(2); }\nconsole.log(formatMoney(total([3, 4])));",
+          "expectedOutput": "$7.00",
+          "explanation": "Calculation and display formatting have distinct responsibilities."
+        },
+        {
+          "id": "f6.11-ex3",
+          "title": "Hide internal detail behind a function",
+          "code": "function isAvailable(stock) { return stock > 0; }\nconsole.log(isAvailable(2));",
+          "expectedOutput": "true",
+          "explanation": "Callers use the named rule rather than repeating the internal comparison."
+        },
+        {
+          "id": "f6.11-ex4",
+          "title": "Stable boundary",
+          "code": "function shippingCost(weight) { return weight <= 1 ? 5 : 10; }\nconsole.log(shippingCost(2));",
+          "expectedOutput": "10",
+          "explanation": "A caller depends on the function's input/output contract; implementation can be revised without changing the call shape."
+        },
+        {
+          "id": "f6.11-ex5",
+          "title": "Avoid leaking internal state",
+          "code": "const settings = { mode: 'basic' };\nfunction getMode() { return settings.mode; }\nconsole.log(getMode());",
+          "expectedOutput": "basic",
+          "explanation": "A function can expose a needed value while keeping the caller focused on the interface."
+        }
+      ],
+      "commonMistakes": [
+        "Exposing internal implementation details unnecessarily.",
+        "Combining unrelated responsibilities in one function.",
+        "Extracting abstractions that are harder to understand than the original code.",
+        "Assuming all similar-looking code has identical rules.",
+        "Changing a public contract without updating callers or tests."
+      ]
+    },
+    "practise": {
+      "guidedTask": {
+        "title": "Guided practice: API Boundaries and Separation of Concerns",
+        "instructions": "Review a small program, identify its responsibilities, and improve the boundary or cohesion without changing intended behavior.",
+        "steps": [
+          "Describe the program's intended behavior.",
+          "Identify the function or component that mixes or exposes too much.",
+          "Propose a clear interface and focused responsibility.",
+          "Make a small change and test two cases.",
+          "Explain why the new boundary is or is not an improvement."
+        ],
+        "starterCode": "// Start with a small function; separate responsibilities if doing so improves clarity."
+      },
+      "independentTask": {
+        "title": "Independent practice: maintainable component design",
+        "instructions": "Design or refactor a small workflow using focused functions and clear boundaries.",
+        "requirements": [
+          "List each function's responsibility.",
+          "Document inputs and outputs.",
+          "Reduce duplicated rules where appropriate.",
+          "Test normal and edge cases.",
+          "Explain one trade-off or limitation of the design."
+        ]
+      },
+      "hints": [
+        "Start with the caller's needs.",
+        "Keep public interfaces small and clear.",
+        "Separate calculation from effects when helpful.",
+        "Only extract stable repeated logic.",
+        "Review whether your abstraction makes the code simpler."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "f6.11-q1",
+        "prompt": "What does a clear component boundary help achieve?",
+        "options": [
+          "Limit callers to a defined interface instead of internal details",
+          "Require every caller to know implementation internals",
+          "Eliminate the need for error handling"
+        ],
+        "answer": "Limit callers to a defined interface instead of internal details",
+        "explanation": "Boundaries make dependencies clearer and can allow internal changes without changing callers."
+      },
+      {
+        "id": "f6.11-q2",
+        "prompt": "What is a sign of a cohesive function?",
+        "options": [
+          "Its statements support one focused responsibility",
+          "It performs unrelated tasks with no clear purpose",
+          "Its name does not describe its work"
+        ],
+        "answer": "Its statements support one focused responsibility",
+        "explanation": "Cohesion means related work belongs together within a focused unit."
+      },
+      {
+        "id": "f6.11-q3",
+        "prompt": "When is extracting repeated logic most useful?",
+        "options": [
+          "When the repeated behavior is stable and one shared rule improves consistency",
+          "Whenever two lines have any words in common",
+          "When abstraction is required regardless of clarity"
+        ],
+        "answer": "When the repeated behavior is stable and one shared rule improves consistency",
+        "explanation": "Reuse should reduce duplication and improve maintainability without obscuring intent."
+      },
+      {
+        "id": "f6.11-q4",
+        "prompt": "Why should similar code sometimes remain separate?",
+        "options": [
+          "It may represent different policies or requirements",
+          "Duplicated code is always preferable",
+          "Separate code cannot be tested"
+        ],
+        "answer": "It may represent different policies or requirements",
+        "explanation": "Blindly combining distinct rules can hide differences and create incorrect behavior."
+      },
+      {
+        "id": "f6.11-q5",
+        "prompt": "Which review criterion is most useful for a refactor?",
+        "options": [
+          "The code remains correct and becomes clearer or easier to change",
+          "The number of functions increases",
+          "All details are moved behind hidden names"
+        ],
+        "answer": "The code remains correct and becomes clearer or easier to change",
+        "explanation": "A refactor should preserve behavior while improving structure, clarity, or maintainability."
+      }
+    ]
+  }
+}
