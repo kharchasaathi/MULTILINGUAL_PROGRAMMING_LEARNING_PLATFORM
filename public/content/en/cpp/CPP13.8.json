@@ -6,11 +6,11 @@
   "title": "Error Handling and Exception Safety",
   "language": "en",
   "learningObjectives": [
-    "Explain the concept and purpose.",
-    "Identify the relevant C++ syntax, APIs or design rules.",
-    "Apply the topic in a small program.",
-    "Recognize common errors and safety concerns.",
-    "Evaluate a practical scenario and justify the approach."
+    "Explain the main rules of exception safety guarantees.",
+    "Identify the key C++ constructs used for exception safety guarantees.",
+    "Apply exception safety guarantees in a small program.",
+    "Recognize common failure cases and safety concerns.",
+    "Test a practical scenario and justify the chosen approach."
   ],
   "prerequisites": [
     "CPP12.1",
@@ -18,62 +18,61 @@
   ],
   "stages": {
     "understand": {
-      "concept": "Learn the core concepts, vocabulary, requirements and practical use of Error Handling and Exception Safety.",
-      "whyItMatters": "Error Handling and Exception Safety helps learners build reliable and maintainable C++ programs while understanding trade-offs and common mistakes.",
-      "explain": "Study the examples and review relevant headers, types, object lifetime, error behavior, complexity and C++ standard compatibility. Snippets are illustrative rather than complete programs. Compile and test them in the intended environment."
+      "concept": "The basic guarantee leaves an object valid but possibly changed. The strong guarantee leaves observable state unchanged if an operation fails. The no-throw guarantee promises no exception escapes. Validate and prepare changes before committing.",
+      "whyItMatters": "Exception safety keeps state consistent and recoverable after failure."
     }
   },
   "examples": [
     {
-      "id": "cpp13-8-ex1",
-      "language": "en",
-      "title": "Starter example",
-      "code": "if(!valid(x)) return false;",
-      "explanation": "Illustrates Error Handling and Exception Safety. Check the necessary headers, declarations, standard version and expected behavior. This is a focused snippet and may need surrounding code.",
-      "runnable": false
+      "title": "Core pattern",
+      "code": "#include <string>\n#include <stdexcept>\nvoid replaceName(std::string& current,const std::string& candidate){if(candidate.empty())throw std::invalid_argument(\"blank name\");std::string prepared=candidate;current.swap(prepared);}\nint main(){std::string name=\"Old\";replaceName(name,\"New\");}",
+      "explanation": "The basic guarantee leaves an object valid but possibly changed. The strong guarantee leaves observable state unchanged if an operation fails. The no-throw guarantee promises no exception escapes. Validate and prepare changes before committing.",
+      "runnable": true,
+      "id": "cpp13.8-ex1",
+      "language": "en"
     },
     {
-      "id": "cpp13-8-ex2",
-      "language": "en",
-      "title": "Common use",
-      "code": "try{load();}catch(const std::ios_base::failure& e){}",
-      "explanation": "Illustrates Error Handling and Exception Safety. Check the necessary headers, declarations, standard version and expected behavior. This is a focused snippet and may need surrounding code.",
-      "runnable": false
+      "title": "Typical scenario",
+      "code": "#include <string>\n#include <stdexcept>\nvoid replaceName(std::string& current,const std::string& candidate){if(candidate.empty())throw std::invalid_argument(\"blank name\");std::string prepared=candidate;current.swap(prepared);}\nint main(){std::string name=\"Old\";replaceName(name,\"New\");}",
+      "explanation": "Exception safety keeps state consistent and recoverable after failure.",
+      "runnable": true,
+      "id": "cpp13.8-ex2",
+      "language": "en"
     },
     {
-      "id": "cpp13-8-ex3",
-      "language": "en",
-      "title": "Validation or boundary",
-      "code": "// preserve invariants if operation fails",
-      "explanation": "Illustrates Error Handling and Exception Safety. Check the necessary headers, declarations, standard version and expected behavior. This is a focused snippet and may need surrounding code.",
-      "runnable": false
+      "title": "Boundary and failure check",
+      "code": "#include <string>\n#include <stdexcept>\nvoid replaceName(std::string& current,const std::string& candidate){if(candidate.empty())throw std::invalid_argument(\"blank name\");std::string prepared=candidate;current.swap(prepared);}\nint main(){std::string name=\"Old\";replaceName(name,\"New\");}",
+      "explanation": "Test a boundary/failure condition for this topic and check the result before proceeding.",
+      "runnable": true,
+      "id": "cpp13.8-ex3",
+      "language": "en"
     },
     {
-      "id": "cpp13-8-ex4",
-      "language": "en",
-      "title": "Practical pattern",
-      "code": "// report errors instead of silently ignoring them",
-      "explanation": "Illustrates Error Handling and Exception Safety. Check the necessary headers, declarations, standard version and expected behavior. This is a focused snippet and may need surrounding code.",
-      "runnable": false
+      "title": "Design decision",
+      "code": "#include <string>\n#include <stdexcept>\nvoid replaceName(std::string& current,const std::string& candidate){if(candidate.empty())throw std::invalid_argument(\"blank name\");std::string prepared=candidate;current.swap(prepared);}\nint main(){std::string name=\"Old\";replaceName(name,\"New\");}",
+      "explanation": "Compare an alternative and explain why this approach is appropriate for the task.",
+      "runnable": true,
+      "id": "cpp13.8-ex4",
+      "language": "en"
     },
     {
-      "id": "cpp13-8-ex5",
-      "language": "en",
-      "title": "Design note",
-      "code": "// exceptions are not routine control flow",
-      "explanation": "Illustrates Error Handling and Exception Safety. Check the necessary headers, declarations, standard version and expected behavior. This is a focused snippet and may need surrounding code.",
-      "runnable": false
+      "title": "Review and verify",
+      "code": "#include <string>\n#include <stdexcept>\nvoid replaceName(std::string& current,const std::string& candidate){if(candidate.empty())throw std::invalid_argument(\"blank name\");std::string prepared=candidate;current.swap(prepared);}\nint main(){std::string name=\"Old\";replaceName(name,\"New\");}",
+      "explanation": "Run the pattern, vary the inputs or environment, and explain the observed behavior.",
+      "runnable": true,
+      "id": "cpp13.8-ex5",
+      "language": "en"
     }
   ],
   "practise": {
-    "guidedTask": "Walk through each Error Handling and Exception Safety example: identify assumptions, declarations, expected behavior and one failure case.",
-    "independentTask": "Create a small program or test that demonstrates Error Handling and Exception Safety. Include a normal case, boundary case and invalid/failure case where applicable. Record expected results.",
+    "guidedTask": "Implement a balance transfer: validate account IDs and amount, compute temporary balances, verify sufficient funds, then commit both. A rejected transfer must leave balances unchanged.",
+    "independentTask": "Refactor an update function to provide the strong guarantee using a prepared temporary and a final commit. Describe failure cases.",
     "hints": [
-      "Check the headers and language standard.",
-      "Start with small test inputs.",
-      "Test boundary and invalid cases.",
-      "Avoid unsafe lifetime, ownership or range assumptions.",
-      "Compile and explain your result."
+      "Define object invariants first.",
+      "Validate before mutating live state.",
+      "Prepare a temporary, then commit.",
+      "RAII cleans resources during unwinding.",
+      "Use noexcept only when no exception can escape."
     ]
   },
   "practice": {
@@ -84,69 +83,69 @@
   "assessment": {
     "questions": [
       {
-        "id": "cpp13-8-q1",
+        "id": "cpp13.8-q1",
         "language": "en",
-        "prompt": "Which approach is most reliable for this topic?",
+        "prompt": "What is the basic guarantee?",
         "options": [
-          "Check requirements, validate behavior and test cases",
-          "Ignore compiler warnings",
-          "Assume the example is a complete program",
-          "Prefer shortest code over correctness"
+          "Object remains valid though its state may change",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
         ],
         "answer": 0,
-        "explanation": "Reliable C++ programming depends on checking requirements, validating behavior and testing representative cases."
+        "explanation": "The basic guarantee leaves an object valid but possibly changed. The strong guarantee leaves observable state unchanged if an operation fails. The no-throw guarantee promises no exception escapes. Validate and prepare changes before committing."
       },
       {
-        "id": "cpp13-8-q2",
+        "id": "cpp13.8-q2",
         "language": "en",
-        "prompt": "What should a validation test include?",
+        "prompt": "What defines the strong guarantee?",
         "options": [
-          "Check requirements, validate behavior and test cases",
-          "Ignore compiler warnings",
-          "Assume the example is a complete program",
-          "Prefer shortest code over correctness"
+          "Failure leaves observable state unchanged",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
         ],
         "answer": 0,
-        "explanation": "Reliable C++ programming depends on checking requirements, validating behavior and testing representative cases."
+        "explanation": "The basic guarantee leaves an object valid but possibly changed. The strong guarantee leaves observable state unchanged if an operation fails. The no-throw guarantee promises no exception escapes. Validate and prepare changes before committing."
       },
       {
-        "id": "cpp13-8-q3",
+        "id": "cpp13.8-q3",
         "language": "en",
-        "prompt": "What is a good error-handling practice?",
+        "prompt": "Why prepare updates in a temporary?",
         "options": [
-          "Check requirements, validate behavior and test cases",
-          "Ignore compiler warnings",
-          "Assume the example is a complete program",
-          "Prefer shortest code over correctness"
+          "Avoids partial mutation before success",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
         ],
         "answer": 0,
-        "explanation": "Reliable C++ programming depends on checking requirements, validating behavior and testing representative cases."
+        "explanation": "The basic guarantee leaves an object valid but possibly changed. The strong guarantee leaves observable state unchanged if an operation fails. The no-throw guarantee promises no exception escapes. Validate and prepare changes before committing."
       },
       {
-        "id": "cpp13-8-q4",
+        "id": "cpp13.8-q4",
         "language": "en",
-        "prompt": "Which code-quality principle applies?",
+        "prompt": "When is optional preferable to an exception?",
         "options": [
-          "Check requirements, validate behavior and test cases",
-          "Ignore compiler warnings",
-          "Assume the example is a complete program",
-          "Prefer shortest code over correctness"
+          "Routine result may be absent",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
         ],
         "answer": 0,
-        "explanation": "Reliable C++ programming depends on checking requirements, validating behavior and testing representative cases."
+        "explanation": "The basic guarantee leaves an object valid but possibly changed. The strong guarantee leaves observable state unchanged if an operation fails. The no-throw guarantee promises no exception escapes. Validate and prepare changes before committing."
       },
       {
-        "id": "cpp13-8-q5",
+        "id": "cpp13.8-q5",
         "language": "en",
-        "prompt": "How should correctness be checked?",
+        "prompt": "What does noexcept promise?",
         "options": [
-          "Check requirements, validate behavior and test cases",
-          "Ignore compiler warnings",
-          "Assume the example is a complete program",
-          "Prefer shortest code over correctness"
+          "No exception escapes",
+          "Ignore the issue and assume success",
+          "Choose shortest code regardless of behavior",
+          "Use unrelated functionality"
         ],
         "answer": 0,
-        "explanation": "Reliable C++ programming depends on checking requirements, validating behavior and testing representative cases."
+        "explanation": "The basic guarantee leaves an object valid but possibly changed. The strong guarantee leaves observable state unchanged if an operation fails. The no-throw guarantee promises no exception escapes. Validate and prepare changes before committing."
       }
     ]
   },
