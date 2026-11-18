@@ -1,0 +1,176 @@
+{
+  "id": "foundation.f3.9.en",
+  "courseId": "foundation",
+  "moduleId": "F3",
+  "topicId": "F3.9",
+  "title": "Off-by-One Errors and Loop Boundaries",
+  "language": "en",
+  "learningObjectives": [
+    "Explain what an off-by-one error is and how it changes the number of loop iterations.",
+    "Distinguish inclusive and exclusive loop boundaries using < and <= conditions.",
+    "Count iterations accurately when a loop starts at zero, one, or another value.",
+    "Recognize common boundary mistakes when traversing indexed collections.",
+    "Correct loop boundaries by checking the intended first and last values and testing edge cases."
+  ],
+  "prerequisites": [
+    "F3.4",
+    "F3.8",
+    "F5.2",
+    "F2.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "An off-by-one error happens when a loop repeats one time too many or one time too few because its starting value, stopping condition, or boundary is incorrect. The loop may still run and look reasonable, but its output can include an extra value, skip a needed value, or access an index outside a collection's valid range.",
+      "whyItMatters": "Boundary mistakes are common in counting, processing indexed data, drawing rows, slicing ranges, and repeating actions a fixed number of times. Checking the intended first and last values—and the number of executions—helps prevent subtle bugs.",
+      "analogy": "Think of seats numbered 0 through 4. There are five seats, not four. Counting the difference between the first and last label is not always the same as counting the items themselves.",
+      "analogyLimit": "Not every loop is about a fixed range. Some loops stop because a changing condition becomes false or because input ends. In those cases, focus on the actual stopping rule rather than assuming a fixed iteration count."
+    },
+    "explain": {
+      "narrative": "To avoid off-by-one errors, write down what value should be processed first, what value should be processed last, and how many values are expected. For a loop that should visit values 0 through 4, use a condition that allows 4 but stops before 5. For indexed collections, remember that valid indexes commonly start at 0 and end at length - 1. Test the smallest valid case, a typical case, and the boundary case. When an inclusive end is intended, make sure the condition actually includes it; when an exclusive end is intended, do not accidentally include it.",
+      "examples": [
+        {
+          "id": "f3.9-ex1",
+          "title": "One extra number from an inclusive boundary",
+          "code": "for (let i = 1; i <= 5; i++) {\\n  console.log(i);\\n}",
+          "traceTable": "Expected values: 1, 2, 3, 4, 5\\nCondition: i <= 5\\nRuns: i = 1 through 5\\nBody executions: 5",
+          "expectedOutput": "1\\n2\\n3\\n4\\n5",
+          "explanation": "This loop correctly includes 5. If the intended task were to print only 1 through 4, the boundary would need to be i < 5. Always compare the code with the intended range."
+        },
+        {
+          "id": "f3.9-ex2",
+          "title": "A missing final value with an exclusive boundary",
+          "code": "for (let i = 0; i < 5; i++) {\\n  console.log(i);\\n}",
+          "traceTable": "i values that enter body: 0, 1, 2, 3, 4\\nStop check: i = 5, condition false\\nExpected count: 5 values",
+          "expectedOutput": "0\\n1\\n2\\n3\\n4",
+          "explanation": "The exclusive condition < 5 excludes 5, but that is correct when the goal is five values starting at zero. The range and the number of iterations must be considered together."
+        },
+        {
+          "id": "f3.9-ex3",
+          "title": "Counting iterations from a non-zero start",
+          "code": "for (let n = 3; n <= 7; n++) {\\n  console.log(n);\\n}",
+          "traceTable": "Values: 3, 4, 5, 6, 7\\nCount: 7 - 3 + 1 = 5\\nThe +1 is needed because both endpoints are included.",
+          "expectedOutput": "3\\n4\\n5\\n6\\n7",
+          "explanation": "When a range includes both its first and last values, count is end - start + 1. Forgetting the +1 can make a manual iteration count incorrect."
+        },
+        {
+          "id": "f3.9-ex4",
+          "title": "Prevent an invalid array index",
+          "code": "const items = ['red', 'green', 'blue'];\\nfor (let i = 0; i < items.length; i++) {\\n  console.log(items[i]);\\n}",
+          "traceTable": "length = 3\\nValid indexes: 0, 1, 2\\nLoop indexes: 0, 1, 2\\nNext check: i = 3; 3 < 3 is false",
+          "expectedOutput": "red\\ngreen\\nblue",
+          "explanation": "Using i < items.length visits each valid index exactly once. Using i <= items.length would attempt index 3, which is beyond the last valid index."
+        },
+        {
+          "id": "f3.9-ex5",
+          "title": "Check the empty-range case",
+          "code": "const start = 4;\\nconst end = 4;\\nfor (let i = start; i < end; i++) {\\n  console.log(i);\\n}",
+          "traceTable": "Initial i = 4\\nCondition: 4 < 4 is false\\nBody executions: 0\\nThis is an empty range under the exclusive-end rule.",
+          "expectedOutput": "(no output)",
+          "explanation": "An exclusive range from 4 up to—but not including—4 contains no values. This may be correct or may reveal a wrong boundary, depending on the task's intent."
+        }
+      ],
+      "commonMistakes": [
+        "Using <= when the intended range should stop before the endpoint.",
+        "Using < when the endpoint is meant to be included.",
+        "Assuming the difference between endpoints equals the number of included values.",
+        "Using i <= collection.length and trying to access one index past the end.",
+        "Testing only a typical case and overlooking empty, single-item, or last-index cases."
+      ]
+    },
+    "practise": {
+      "guidedTask": {
+        "title": "Guided: Fix a loop that prints too many values",
+        "instructions": "A report should show five days numbered 1 through 5. The current loop prints an extra day. Trace the loop, identify the boundary error, and revise it so exactly five values appear.",
+        "steps": [
+          "Write the intended first value: 1.",
+          "Write the intended last value: 5.",
+          "Trace the original condition i <= 6 and count the values it allows.",
+          "Change the stopping condition to match the intended last value.",
+          "Check the revised loop outputs exactly five values, then explain the final false condition."
+        ],
+        "starterCode": "for (let i = 1; i <= 6; i++) {\\n  console.log(i);\\n}"
+      },
+      "independentTask": {
+        "title": "Independent: Safely traverse a collection",
+        "instructions": "Write a loop that visits every index in a collection without attempting an invalid index. Then test a collection with 3 items, 1 item, and 0 items.",
+        "requirements": [
+          "Start the index at 0.",
+          "Use the collection length as the boundary.",
+          "Show the index values visited for each test collection.",
+          "Explain why the one-item case visits index 0 exactly once.",
+          "Explain why the empty collection should execute zero times."
+        ]
+      },
+      "hints": [
+        "Write the intended first and last values before changing the condition.",
+        "Ask whether the boundary should be included or excluded.",
+        "For an inclusive range from start to end, the count is end - start + 1 when start <= end.",
+        "For zero-based collections, the last valid index is usually length - 1.",
+        "A loop condition of index < length visits valid indexes without including length itself.",
+        "Test an empty collection and a one-item collection; they expose many boundary errors."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "f3.9-en-q1",
+        "prompt": "A loop must print the numbers 1 through 5 inclusive. Which condition matches that requirement when the counter starts at 1 and increases by 1?",
+        "options": [
+          "i < 5",
+          "i <= 5",
+          "i <= 4"
+        ],
+        "answer": "i <= 5",
+        "explanation": "The inclusive condition allows the counter value 5 to execute before the next check becomes false."
+      },
+      {
+        "id": "f3.9-en-q2",
+        "prompt": "How many integers are included in the inclusive range 3 through 7?",
+        "options": [
+          "4",
+          "5",
+          "7"
+        ],
+        "answer": "5",
+        "explanation": "For an inclusive integer range, count = end - start + 1, so 7 - 3 + 1 = 5."
+      },
+      {
+        "id": "f3.9-en-q3",
+        "prompt": "An array has length 4. Which is the last valid index in a typical zero-based indexing system?",
+        "options": [
+          "4",
+          "3",
+          "5"
+        ],
+        "answer": "3",
+        "explanation": "Valid indexes are 0, 1, 2, and 3. The last index is length - 1."
+      },
+      {
+        "id": "f3.9-en-q4",
+        "prompt": "Why is i <= items.length usually incorrect for traversing a zero-based array?",
+        "options": [
+          "It skips index 0",
+          "It attempts to include the index equal to length, which is beyond the last valid index",
+          "It prevents the loop from starting"
+        ],
+        "answer": "It attempts to include the index equal to length, which is beyond the last valid index",
+        "explanation": "The valid indexes stop at length - 1, so the condition should normally be i < items.length."
+      },
+      {
+        "id": "f3.9-en-q5",
+        "prompt": "What should a loop over an empty collection do when it uses index < collection.length and starts at index 0?",
+        "options": [
+          "Execute once and then stop",
+          "Execute zero times",
+          "Execute five times"
+        ],
+        "answer": "Execute zero times",
+        "explanation": "For an empty collection, length is 0. The initial condition 0 < 0 is false, so the body is not entered."
+      }
+    ]
+  }
+}
