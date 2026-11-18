@@ -1,0 +1,145 @@
+{
+  "id": "cpp.cpp10.9.en",
+  "courseId": "cpp",
+  "moduleId": "CPP10",
+  "topicId": "CPP10.9",
+  "title": "Polymorphism Through Base References",
+  "language": "en",
+  "learningObjectives": [
+    "Explain polymorphism through base references.",
+    "Identify relevant class/object relationships and access rules.",
+    "Trace lifecycle or dynamic behavior.",
+    "Recognize design and ownership pitfalls.",
+    "Apply the OOP concept in a small design."
+  ],
+  "prerequisites": [
+    "CPP9.6",
+    "CPP9.7",
+    "CPP9.8"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Polymorphism allows code to use a base interface while the actual derived object supplies overridden behavior. References and pointers enable dynamic dispatch; object-by-value can slice derived state.",
+      "whyItMatters": "Polymorphism lets clients depend on abstractions rather than concrete types.",
+      "explain": "Use base references/pointers, avoid slicing, and ensure objects outlive the references."
+    }
+  },
+  "examples": [
+    {
+      "id": "cpp10.9-ex1",
+      "language": "en",
+      "title": "Base reference dispatch",
+      "code": "struct Animal{virtual void sound()const{std::cout<<\\\"?\\\";}virtual ~Animal()=default;};\\nstruct Cat:Animal{void sound()const override{std::cout<<\\\"Meow\\\";}};\\nCat c;Animal& a=c;a.sound();",
+      "explanation": "Reference dispatch uses the actual object type.",
+      "runnable": false
+    },
+    {
+      "id": "cpp10.9-ex2",
+      "language": "en",
+      "title": "Avoid slicing",
+      "code": "struct Base{virtual int id()const{return 1;}};\\nstruct Derived:Base{int id()const override{return 2;}};\\nDerived d;Base& ref=d;std::cout<<ref.id();",
+      "explanation": "A base reference preserves derived dynamic behavior; copying into a base value would slice.",
+      "runnable": false
+    },
+    {
+      "id": "cpp10.9-ex3",
+      "language": "en",
+      "title": "Pointer polymorphism",
+      "code": "struct Shape{virtual int sides()const=0;virtual ~Shape()=default;};\\nstruct Triangle:Shape{int sides()const override{return 3;}};",
+      "explanation": "A base pointer/reference can call a derived implementation.",
+      "runnable": false
+    },
+    {
+      "id": "cpp10.9-ex4",
+      "language": "en",
+      "title": "Interface collection",
+      "code": "std::vector<std::unique_ptr<Animal>> animals;",
+      "explanation": "Smart-pointer collection can own different derived objects through a base interface; include memory/vector.",
+      "runnable": false
+    },
+    {
+      "id": "cpp10.9-ex5",
+      "language": "en",
+      "title": "Virtual behavior test",
+      "code": "struct Base{virtual const char* name()const{return \\\"Base\\\";}virtual ~Base()=default;};\\nstruct Child:Base{const char* name()const override{return \\\"Child\\\";}};\\nChild c;Base* p=&c;std::cout<<p->name();",
+      "explanation": "The base pointer calls the overridden method.",
+      "runnable": false
+    }
+  ],
+  "practise": {
+    "guidedTask": "Analyze the five Polymorphism Through Base References examples. Identify class responsibilities, interface, object state, lifetime and dispatch behavior where relevant.",
+    "independentTask": "Design a small C++ program demonstrating polymorphism through base references in a practical domain. Use clear public operations, appropriate access control, and tests for expected behavior and edge cases.",
+    "hints": [
+      "Start by listing responsibilities and objects.",
+      "Keep internal state protected where needed.",
+      "Initialize objects deliberately and understand lifetime.",
+      "Use inheritance only for substitutable relationships.",
+      "Test behavior through the public interface."
+    ]
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "cpp10.9-q1",
+        "prompt": "Base reference to derived calls?",
+        "options": [
+          "Overridden derived method",
+          "Only base method",
+          "No function"
+        ],
+        "answer": "Overridden derived method",
+        "explanation": "Virtual dispatch uses dynamic type."
+      },
+      {
+        "id": "cpp10.9-q2",
+        "prompt": "Base object copied from derived causes?",
+        "options": [
+          "Slicing",
+          "Shared ownership",
+          "Automatic polymorphism"
+        ],
+        "answer": "Slicing",
+        "explanation": "Copying base value discards derived portion."
+      },
+      {
+        "id": "cpp10.9-q3",
+        "prompt": "Polymorphic interface uses?",
+        "options": [
+          "Base pointers or references",
+          "Base values only",
+          "Global fields"
+        ],
+        "answer": "Base pointers or references",
+        "explanation": "References/pointers preserve dynamic dispatch."
+      },
+      {
+        "id": "cpp10.9-q4",
+        "prompt": "Different derived objects can share?",
+        "options": [
+          "Common virtual interface",
+          "Only same type",
+          "No methods"
+        ],
+        "answer": "Common virtual interface",
+        "explanation": "Interface enables varying implementations."
+      },
+      {
+        "id": "cpp10.9-q5",
+        "prompt": "Base pointer calls overridden function if?",
+        "options": [
+          "Function is virtual",
+          "Function is private only",
+          "Return types differ"
+        ],
+        "answer": "Function is virtual",
+        "explanation": "Virtual functions enable dynamic dispatch."
+      }
+    ]
+  },
+  "status": "draft"
+}
