@@ -1,0 +1,171 @@
+{
+  "id": "foundation.f13.3.en",
+  "courseId": "foundation",
+  "moduleId": "F13",
+  "topicId": "F13.3",
+  "title": "Validation, Sanitization, and Encoding (Different Purposes)",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the core ideas and terminology of validation, sanitization, and encoding (different purposes).",
+    "Recognize the risks or mistakes this topic is intended to prevent.",
+    "Apply appropriate defensive practices in a beginner project.",
+    "Distinguish this topic from related security concepts and controls.",
+    "Review a simple design and justify improvements using evidence."
+  ],
+  "prerequisites": [
+    "F12.12"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Validation checks whether input meets rules; sanitization transforms input to remove or normalize unwanted parts when that transformation is appropriate; encoding represents data safely for a specific output context. These are not interchangeable. Prefer allowlists and explicit type/range checks. Output encoding must match the destination context, such as HTML text, attributes, URLs, or SQL parameters. Avoid trying to make all input 'safe' with one universal transformation.",
+      "whyItMatters": "Using the wrong technique can leave vulnerabilities or corrupt legitimate data.",
+      "analogy": "Think of a careful community space where entry, use of shared items, and privacy are guided by clear rules and appropriate checks.",
+      "analogyLimit": "Software security depends on technical boundaries, data flows, implementation details, and changing threats that this analogy cannot fully represent."
+    },
+    "explain": {
+      "narrative": "Validation checks whether input meets rules; sanitization transforms input to remove or normalize unwanted parts when that transformation is appropriate; encoding represents data safely for a specific output context. These are not interchangeable. Prefer allowlists and explicit type/range checks. Output encoding must match the destination context, such as HTML text, attributes, URLs, or SQL parameters. Avoid trying to make all input 'safe' with one universal transformation.\n\nApply these principles proportionately. Use established platform and library protections instead of improvising security-critical mechanisms. For a real application, confirm requirements and review the implementation with qualified peers.",
+      "examples": [
+        {
+          "id": "f133-ex1",
+          "title": "Validate a numeric range",
+          "code": "function validAge(n){return Number.isInteger(n)&&n>=0&&n<=120;}\nconsole.log(validAge(24), validAge(-1));",
+          "expectedOutput": "true false",
+          "explanation": "Validation accepts only values that fit the expected rule."
+        },
+        {
+          "id": "f133-ex2",
+          "title": "Allowlist a choice",
+          "code": "const allowed = ['basic','plus'];\nconsole.log(allowed.includes('basic'));",
+          "expectedOutput": "true",
+          "explanation": "An allowlist restricts choices to known permitted values."
+        },
+        {
+          "id": "f133-ex3",
+          "title": "Normalize whitespace for a label",
+          "code": "const label = '  lesson title  '.trim();\nconsole.log(label);",
+          "expectedOutput": "lesson title",
+          "explanation": "Normalization is appropriate for some fields, not every input."
+        },
+        {
+          "id": "f133-ex4",
+          "title": "Encode output for its context",
+          "code": "const text = '<hello>';\nconst htmlText = text.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');\nconsole.log(htmlText);",
+          "expectedOutput": "&lt;hello&gt;",
+          "explanation": "This illustrates HTML text encoding only; production should use context-aware platform helpers."
+        },
+        {
+          "id": "f133-ex5",
+          "title": "Keep validation distinct",
+          "code": "const raw = ' 25 ';\nconst value = Number(raw);\nconsole.log(Number.isFinite(value) && value>=0);",
+          "expectedOutput": "true",
+          "explanation": "Parsing and validation determine whether the value is acceptable; encoding happens later for output."
+        }
+      ],
+      "commonMistakes": [
+        "Assuming a feature is safe because it works in normal use.",
+        "Trusting client-side controls as the only enforcement.",
+        "Applying one generic transformation to every kind of input or output.",
+        "Exposing credentials or personal data in source, logs, or screenshots.",
+        "Skipping retesting after a change."
+      ]
+    },
+    "practise": {
+      "guidedTask": {
+        "title": "Guided Practice",
+        "instructions": "Create validation rules for a display name, age, and category. Decide which transformations are normalization, validation, and output encoding. Explain why a single function cannot safely do all three.",
+        "steps": [
+          "Create validation rules for a display name, age, and category. Decide which transformations are normalization, validation, and output encoding. Explain why a single function cannot safely do all three.",
+          "Identify the relevant assets, inputs, or permissions.",
+          "Choose a control and explain why it applies.",
+          "Check edge cases and failure behavior.",
+          "Record evidence and remaining questions."
+        ],
+        "starterCode": "// Use a small fictional example. Never paste real credentials or private data."
+      },
+      "independentTask": {
+        "title": "Independent Practice",
+        "instructions": "Design input handling for a comment form. Write an allowlist/range/length policy and describe output encoding for HTML text. Use trusted library/platform helpers in real applications.",
+        "requirements": [
+          "Use a fictional or toy project and no real secrets or personal data.",
+          "Design input handling for a comment form. Write an allowlist/range/length policy and describe output encoding for HTML text. Use trusted library/platform helpers in real applications.",
+          "Explain the decisions you made and limitations.",
+          "Identify at least one test or review step."
+        ]
+      },
+      "hints": [
+        "Validation answers 'is it allowed?'.",
+        "Sanitization transforms values; do not silently alter important data.",
+        "Encoding is specific to the output context.",
+        "Prefer parameterized queries for database values.",
+        "Use context-aware helpers rather than custom security encoders."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "f133-q1",
+        "prompt": "What does validation decide?",
+        "options": [
+          "Whether input meets defined rules",
+          "How to display input in HTML",
+          "How to store a password in a log",
+          "How to encrypt every field"
+        ],
+        "answer": "Whether input meets defined rules",
+        "explanation": "Validation accepts or rejects based on requirements."
+      },
+      {
+        "id": "f133-q2",
+        "prompt": "What is output encoding used for?",
+        "options": [
+          "Representing data safely for a specific output context",
+          "Making every input valid",
+          "Checking account permissions",
+          "Creating version numbers"
+        ],
+        "answer": "Representing data safely for a specific output context",
+        "explanation": "Encoding is context-dependent."
+      },
+      {
+        "id": "f133-q3",
+        "prompt": "Why is sanitization not a universal security solution?",
+        "options": [
+          "Different contexts require different controls and transformations",
+          "It always removes too much",
+          "It cannot change strings",
+          "It is the same as authorization"
+        ],
+        "answer": "Different contexts require different controls and transformations",
+        "explanation": "There is no one transformation that safely handles all destinations."
+      },
+      {
+        "id": "f133-q4",
+        "prompt": "Which is a suitable allowlist?",
+        "options": [
+          "A set of explicitly permitted categories",
+          "Any string that is not empty",
+          "All input except a known bad phrase",
+          "A random value"
+        ],
+        "answer": "A set of explicitly permitted categories",
+        "explanation": "Allowlisting defines accepted values."
+      },
+      {
+        "id": "f133-q5",
+        "prompt": "What is a safe database input practice?",
+        "options": [
+          "Use parameterized queries supported by the database API",
+          "Build SQL by concatenating user text",
+          "Remove every space",
+          "Hide the query in the UI"
+        ],
+        "answer": "Use parameterized queries supported by the database API",
+        "explanation": "Parameterization keeps values separate from query structure."
+      }
+    ]
+  }
+}

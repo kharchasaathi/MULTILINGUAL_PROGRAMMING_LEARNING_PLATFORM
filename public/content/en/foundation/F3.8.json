@@ -1,0 +1,181 @@
+{
+  "id": "foundation.f3.8.en",
+  "courseId": "foundation",
+  "moduleId": "F3",
+  "topicId": "F3.8",
+  "title": "Loop Tracing and Iteration Tables",
+  "language": "en",
+  "learningObjectives": [
+    "Trace a loop one iteration at a time using a consistent starting state.",
+    "Record each iteration's variable values, condition result, and output in a trace table.",
+    "Identify initialization, condition checking, body execution, and update order for common loops.",
+    "Predict when a loop stops and distinguish the final condition check from a body execution.",
+    "Use trace tables to diagnose unexpected output and loop-state mistakes."
+  ],
+  "prerequisites": [
+    "F3.1",
+    "F3.2",
+    "F3.3",
+    "F3.4",
+    "F3.5",
+    "F3.6",
+    "F3.7",
+    "F2.2",
+    "F2.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Loop tracing is a manual simulation of a loop. Start with the initial values, check the loop condition, execute the body only when the condition is true, apply the update in the correct place, and repeat. A trace table records these steps so the changing state and output are visible.",
+      "whyItMatters": "Tracing makes it easier to predict output, find incorrect updates, spot skipped or repeated values, and explain why a loop terminates. It is especially useful when a loop contains more than one changing variable or a conditional statement.",
+      "analogy": "Imagine keeping a turn-by-turn score sheet during a game: after each turn, record the current score, the decision made, and the next score.",
+      "analogyLimit": "A trace table is a simplified manual model. Real programs may also change state through function calls, input, side effects, or asynchronous events that must be included in the trace."
+    },
+    "explain": {
+      "narrative": "Use one row per body execution and record the values needed to understand the loop. For a while loop, check the condition before entering each body execution. For a for loop, note the initialization once, then the condition, body, and update in that order; after the final update, the condition is checked again and may be false without another body row. If the body changes multiple variables, record them all. Keep the trace focused: include only variables, condition results, and outputs that help explain the behaviour.",
+      "examples": [
+        {
+          "id": "f3.8-ex1",
+          "title": "Trace a simple counting loop",
+          "code": "let n = 1;\\nwhile (n <= 3) {\\n  console.log(n);\\n  n++;\\n}",
+          "traceTable": "Iteration | n at condition | Condition | Output | n after update\\n1 | 1 | true | 1 | 2\\n2 | 2 | true | 2 | 3\\n3 | 3 | true | 3 | 4\\nStop check | 4 | false | — | —",
+          "expectedOutput": "1\\n2\\n3",
+          "explanation": "The body executes three times. The update makes n equal 4; the next condition check is false, so there is no fourth body execution."
+        },
+        {
+          "id": "f3.8-ex2",
+          "title": "Trace the for-loop execution order",
+          "code": "for (let step = 0; step < 4; step += 2) {\\n  console.log(step);\\n}",
+          "traceTable": "Iteration | step at condition | Condition | Output | Update result\\n1 | 0 | true | 0 | 2\\n2 | 2 | true | 2 | 4\\nStop check | 4 | false | — | —",
+          "expectedOutput": "0\\n2",
+          "explanation": "Initialization occurs once at step = 0. Each true condition allows the body; the update adds 2. At step = 4 the condition is false and the body does not run."
+        },
+        {
+          "id": "f3.8-ex3",
+          "title": "Trace a loop with two changing variables",
+          "code": "let a = 2;\\nlet total = 0;\\nwhile (a <= 4) {\\n  total += a;\\n  console.log(total);\\n  a += 2;\\n}",
+          "traceTable": "Iteration | a before body | total before | total after | a after update\\n1 | 2 | 0 | 2 | 4\\n2 | 4 | 2 | 6 | 6\\nStop check | 6 | 6 | — | —",
+          "expectedOutput": "2\\n6",
+          "explanation": "Record both a and total because each changes. The total accumulates the current a, then a advances. The condition fails at a = 6."
+        },
+        {
+          "id": "f3.8-ex4",
+          "title": "Trace continue and skipped output",
+          "code": "for (let n = 1; n <= 4; n++) {\\n  if (n === 2) continue;\\n  console.log(n);\\n}",
+          "traceTable": "Iteration | n | Condition n===2 | Output? | Update\\n1 | 1 | false | 1 | n becomes 2\\n2 | 2 | true | skipped | n becomes 3\\n3 | 3 | false | 3 | n becomes 4\\n4 | 4 | false | 4 | n becomes 5\\nStop check | 5 | loop condition false | — | —",
+          "expectedOutput": "1\\n3\\n4",
+          "explanation": "At n = 2, continue skips the console.log statement. In this for loop, the update still happens before the next condition check."
+        },
+        {
+          "id": "f3.8-ex5",
+          "title": "Trace a post-test loop",
+          "code": "let count = 0;\\ndo {\\n  console.log(count);\\n  count++;\\n} while (count < 2);",
+          "traceTable": "Pass | count at body start | Output | count after body | Post-test\\n1 | 0 | 0 | 1 | true\\n2 | 1 | 1 | 2 | false",
+          "expectedOutput": "0\\n1",
+          "explanation": "The do...while body runs before its condition is tested. The condition is checked after each completed body; the second check is false and stops repetition."
+        }
+      ],
+      "commonMistakes": [
+        "Skipping the initial value or confusing initialization with the first update.",
+        "Checking a condition after the body when the loop is actually pre-test.",
+        "Recording an update before the body for a standard for loop.",
+        "Adding an extra output row for a final false condition check.",
+        "Ignoring a variable that changes inside the loop and affects later iterations."
+      ]
+    },
+    "practise": {
+      "guidedTask": {
+        "title": "Guided: Complete a trace table",
+        "instructions": "Trace the loop and fill in the missing values. Record i, sum, condition result, output, and sum/i changes after each body execution.",
+        "steps": [
+          "Write the initial values: i = 1 and sum = 0.",
+          "Check i <= 3 before each body execution.",
+          "Add i to sum and record the output.",
+          "Increase i by 1 after the body.",
+          "Record the final condition check when i becomes 4 and explain why the body does not run again."
+        ],
+        "starterCode": "let i = 1;\\nlet sum = 0;\\nwhile (i <= 3) {\\n  sum += i;\\n  console.log(sum);\\n  i++;\\n}"
+      },
+      "independentTask": {
+        "title": "Independent: Trace a filtered countdown",
+        "instructions": "Create a trace table for the following loop. Predict the output and show each condition, the continue decision, and the counter update.",
+        "requirements": [
+          "Use n's starting value of 6 and condition n >= 1.",
+          "Decrease n by 1 in the for-loop update.",
+          "Skip printing n when n is divisible by 2.",
+          "Record each body execution and the skipped output.",
+          "Include the final false condition check and explain the loop's termination."
+        ]
+      },
+      "hints": [
+        "Initialization is recorded once, before the first condition check.",
+        "For a pre-test loop, a false condition means the body does not execute.",
+        "In a for loop, record the update after the body or after continue.",
+        "A final false condition check is not an iteration of the body.",
+        "Track every variable that affects the condition or output.",
+        "Use one row per body execution, plus a separate stop-check row if it clarifies termination."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "f3.8-en-q1",
+        "prompt": "In a trace table for a pre-test loop, when should the condition be recorded?",
+        "options": [
+          "After the body on every pass",
+          "Before the body each time, including the final false check",
+          "Only once at initialization"
+        ],
+        "answer": "Before the body each time, including the final false check",
+        "explanation": "A pre-test loop checks its condition before every possible body execution; the last false check explains why the loop stops."
+      },
+      {
+        "id": "f3.8-en-q2",
+        "prompt": "What does a final false condition row represent?",
+        "options": [
+          "An additional body execution",
+          "A body execution that printed nothing",
+          "A condition check that stops the loop before another body execution"
+        ],
+        "answer": "A condition check that stops the loop before another body execution",
+        "explanation": "The false condition prevents another iteration's body from running."
+      },
+      {
+        "id": "f3.8-en-q3",
+        "prompt": "For a standard for loop, when should its update be recorded?",
+        "options": [
+          "Before initialization",
+          "After the body (also after continue), before the next condition check",
+          "Only if the condition is false"
+        ],
+        "answer": "After the body (also after continue), before the next condition check",
+        "explanation": "The for-loop update occurs after a completed body or continue, then the condition is checked again."
+      },
+      {
+        "id": "f3.8-en-q4",
+        "prompt": "Why should a trace table include more than one variable when necessary?",
+        "options": [
+          "To make the table longer",
+          "To show the full changing state that affects later behaviour",
+          "To avoid checking the loop condition"
+        ],
+        "answer": "To show the full changing state that affects later behaviour",
+        "explanation": "Multiple variables can influence the condition or output, so recording them reveals state changes."
+      },
+      {
+        "id": "f3.8-en-q5",
+        "prompt": "Which row should not be counted as a body iteration?",
+        "options": [
+          "A row where the body prints a value",
+          "A row where continue skips one statement",
+          "The final false condition check when the body does not run"
+        ],
+        "answer": "The final false condition check when the body does not run",
+        "explanation": "The final check stops the loop and is not another body execution."
+      }
+    ]
+  }
+}

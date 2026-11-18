@@ -1,0 +1,173 @@
+{
+  "id": "foundation.f11.3.en",
+  "courseId": "foundation",
+  "moduleId": "F11",
+  "topicId": "F11.3",
+  "title": "Comments, Documentation, and When Not to Comment",
+  "language": "en",
+  "learningObjectives": [
+    "Distinguish helpful comments from comments that restate code.",
+    "Explain when documentation should describe intent or constraints.",
+    "Write comments that remain accurate as code changes.",
+    "Recognize outdated or misleading comments.",
+    "Choose between inline comments, documentation, and clearer code."
+  ],
+  "prerequisites": [
+    "F10.11",
+    "F10.12"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Comments and documentation support understanding when they explain intent, constraints, decisions, assumptions, or non-obvious behavior. A comment that simply restates a clear line adds noise. Comments can become incorrect when code changes, so they are part of maintenance and must be reviewed. Documentation has different audiences and scope: a brief inline note helps near a decision, while README or API documentation explains usage and contracts. When code can be made self-explanatory through names or structure, prefer that over a redundant comment.",
+      "whyItMatters": "Readable, consistent code is easier to review, debug, and safely modify. These habits reduce unnecessary mental effort without replacing testing or design.",
+      "analogy": "Think of source code as instructions shared with a future teammate: clear labels and organization help them follow the route.",
+      "analogyLimit": "Analogies simplify collaboration; code still has precise rules, scope, and runtime behavior."
+    },
+    "explain": {
+      "narrative": "A useful comment answers a question the code itself cannot easily answer: why a constraint exists, why an unusual approach was chosen, or what callers must guarantee. Avoid narrating every statement. Document public interfaces, important assumptions, and setup steps. If a comment and code disagree, readers may trust the wrong one—remove or update the comment immediately.",
+      "examples": [
+        {
+          "id": "f113-ex1",
+          "title": "Comment the reason for a constraint",
+          "code": "// Keep the final slot for a summary row.\\nconst visibleRows = rows.slice(0, -1);\\nconsole.log(visibleRows.length);",
+          "expectedOutput": "Depends on rows",
+          "explanation": "The comment explains a design reason, not syntax."
+        },
+        {
+          "id": "f113-ex2",
+          "title": "Avoid restating code",
+          "code": "const retryLimit = 3;\\nconsole.log(retryLimit);",
+          "expectedOutput": "3",
+          "explanation": "A comment like 'set retryLimit to 3' would add no insight."
+        },
+        {
+          "id": "f113-ex3",
+          "title": "Document a precondition",
+          "code": "const rows = ['header', 'item', 'summary'];\n// Keep the final slot for a summary row.\nconst visibleRows = rows.slice(0, -1);\nconsole.log(visibleRows.length);",
+          "expectedOutput": "2",
+          "explanation": "The function makes an invalid condition explicit; documentation can clarify caller expectations."
+        },
+        {
+          "id": "f113-ex4",
+          "title": "Mark a non-obvious trade-off",
+          "code": "function divide(a, b) {\n  if (b === 0) throw new Error('denominator must be non-zero');\n  return a / b;\n}\nconsole.log(divide(8, 2));",
+          "expectedOutput": "4",
+          "explanation": "A concise comment preserves the reason for a choice."
+        },
+        {
+          "id": "f113-ex5",
+          "title": "Keep docs aligned with behavior",
+          "code": "const items = [{rank:2},{rank:1}];\n// Prefer stable ordering because callers display these results.\nconst sorted = items.slice().sort((a,b) => a.rank - b.rank);\nconsole.log(sorted.map(x => x.rank).join(','));",
+          "expectedOutput": "1,2",
+          "explanation": "When behavior changes, update its description and examples together."
+        }
+      ],
+      "commonMistakes": [
+        "Using short or vague names that hide intent.",
+        "Applying personal style inconsistently with the project.",
+        "Treating formatting or comments as proof of correctness.",
+        "Making broad cosmetic changes mixed with logic edits.",
+        "Leaving comments or documentation stale after behavior changes."
+      ]
+    },
+    "practise": {
+      "guidedTask": {
+        "title": "Guided Practice",
+        "instructions": "Inspect a snippet with three redundant comments and one unexplained assumption. Remove comments that merely repeat code. Add one concise note explaining the assumption or trade-off. Check whether names or structure could replace a comment. Review the final comments for accuracy and audience.",
+        "steps": [
+          "Inspect a snippet with three redundant comments and one unexplained assumption.",
+          "Remove comments that merely repeat code.",
+          "Add one concise note explaining the assumption or trade-off.",
+          "Check whether names or structure could replace a comment.",
+          "Review the final comments for accuracy and audience."
+        ],
+        "starterCode": "// Start with a small example and improve its clarity without changing behavior."
+      },
+      "independentTask": {
+        "title": "Independent Practice",
+        "instructions": "Write a small function with a public contract and one non-obvious decision. Add documentation describing inputs, output, and constraints. Include only comments that add context beyond the code. Create a redundant comment, then remove it and explain why. Recheck all notes after a small code change.",
+        "requirements": [
+          "Write a small function with a public contract and one non-obvious decision.",
+          "Add documentation describing inputs, output, and constraints.",
+          "Include only comments that add context beyond the code.",
+          "Create a redundant comment, then remove it and explain why.",
+          "Recheck all notes after a small code change."
+        ]
+      },
+      "hints": [
+        "Explain why, not what obvious syntax does.",
+        "Comments are maintenance obligations.",
+        "Keep notes close to the code they explain.",
+        "Document assumptions and public behavior.",
+        "Delete comments that no longer match implementation."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "f113-q1",
+        "prompt": "Which comment is most useful?",
+        "options": [
+          "A note explaining a non-obvious constraint",
+          "A comment repeating the next line",
+          "A comment saying 'code starts here'",
+          "A comment copied from unrelated code"
+        ],
+        "answer": "A note explaining a non-obvious constraint",
+        "explanation": "Comments add value when they provide context not visible in code."
+      },
+      {
+        "id": "f113-q2",
+        "prompt": "When is a comment redundant?",
+        "options": [
+          "When it only restates obvious code",
+          "When it documents a precondition",
+          "When it explains a design trade-off",
+          "When it clarifies public usage"
+        ],
+        "answer": "When it only restates obvious code",
+        "explanation": "Redundant comments add noise rather than insight."
+      },
+      {
+        "id": "f113-q3",
+        "prompt": "Why must comments be maintained?",
+        "options": [
+          "They can become inaccurate after code changes",
+          "They never change meaning",
+          "They execute automatically",
+          "They replace version history"
+        ],
+        "answer": "They can become inaccurate after code changes",
+        "explanation": "Stale comments can mislead readers."
+      },
+      {
+        "id": "f113-q4",
+        "prompt": "What should API documentation focus on?",
+        "options": [
+          "Usage, contract, inputs, outputs, and constraints",
+          "Every keystroke",
+          "Unrelated implementation details only",
+          "Personal opinions"
+        ],
+        "answer": "Usage, contract, inputs, outputs, and constraints",
+        "explanation": "API docs help callers use an interface correctly."
+      },
+      {
+        "id": "f113-q5",
+        "prompt": "If code can be made clear through a descriptive name, what is often preferable?",
+        "options": [
+          "Improve the code instead of adding a redundant comment",
+          "Add multiple comments",
+          "Keep the unclear name",
+          "Copy a comment from another function"
+        ],
+        "answer": "Improve the code instead of adding a redundant comment",
+        "explanation": "Self-explanatory code reduces the need for narration."
+      }
+    ]
+  }
+}

@@ -1,0 +1,171 @@
+{
+  "id": "foundation.f13.9.en",
+  "courseId": "foundation",
+  "moduleId": "F13",
+  "topicId": "F13.9",
+  "title": "Safe Error Messages and Information Disclosure",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the core ideas and terminology of safe error messages and information disclosure.",
+    "Recognize the risks or mistakes this topic is intended to prevent.",
+    "Apply appropriate defensive practices in a beginner project.",
+    "Distinguish this topic from related security concepts and controls.",
+    "Review a simple design and justify improvements using evidence."
+  ],
+  "prerequisites": [
+    "F12.12"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Errors should help users recover and help maintainers diagnose problems without revealing secrets, internal paths, database details, stack traces, tokens, or private data. User-facing messages should be understandable and non-sensitive; detailed diagnostics belong in protected logs with appropriate access and redaction. Avoid swallowing errors silently.",
+      "whyItMatters": "Error handling is part of the security boundary because failures can expose internal information or leave users confused.",
+      "analogy": "Think of a careful community space where entry, use of shared items, and privacy are guided by clear rules and appropriate checks.",
+      "analogyLimit": "Software security depends on technical boundaries, data flows, implementation details, and changing threats that this analogy cannot fully represent."
+    },
+    "explain": {
+      "narrative": "Errors should help users recover and help maintainers diagnose problems without revealing secrets, internal paths, database details, stack traces, tokens, or private data. User-facing messages should be understandable and non-sensitive; detailed diagnostics belong in protected logs with appropriate access and redaction. Avoid swallowing errors silently.\n\nApply these principles proportionately. Use established platform and library protections instead of improvising security-critical mechanisms. For a real application, confirm requirements and review the implementation with qualified peers.",
+      "examples": [
+        {
+          "id": "f139-ex1",
+          "title": "Show a safe message",
+          "code": "const message = 'Unable to save. Please try again.';\nconsole.log(message);",
+          "expectedOutput": "Unable to save. Please try again.",
+          "explanation": "A generic message gives a recovery path without revealing internals."
+        },
+        {
+          "id": "f139-ex2",
+          "title": "Log a category, not a secret",
+          "code": "const event = {type:'save_failed',code:'TIMEOUT'};\nconsole.log(event.code);",
+          "expectedOutput": "TIMEOUT",
+          "explanation": "A code helps support without logging credentials."
+        },
+        {
+          "id": "f139-ex3",
+          "title": "Separate details from user view",
+          "code": "const userView = 'Request failed';\nconst diagnostic = 'timeout after configured limit';\nconsole.log(userView);",
+          "expectedOutput": "Request failed",
+          "explanation": "Technical details can be stored in restricted diagnostics."
+        },
+        {
+          "id": "f139-ex4",
+          "title": "Redact sensitive values",
+          "code": "function redact(s){return s.replace(/[A-Za-z0-9._-]+@[^\\s]+/g,'[redacted]');}\nconsole.log(redact('contact a@example.test'));",
+          "expectedOutput": "contact [redacted]",
+          "explanation": "Redaction is illustrative; logs need careful review and controls."
+        },
+        {
+          "id": "f139-ex5",
+          "title": "Avoid silent failure",
+          "code": "const handled = true;\nconsole.log(handled ? 'record error and guide recovery' : 'ignore error');",
+          "expectedOutput": "record error and guide recovery",
+          "explanation": "Handled errors should be observable and actionable."
+        }
+      ],
+      "commonMistakes": [
+        "Assuming a feature is safe because it works in normal use.",
+        "Trusting client-side controls as the only enforcement.",
+        "Applying one generic transformation to every kind of input or output.",
+        "Exposing credentials or personal data in source, logs, or screenshots.",
+        "Skipping retesting after a change."
+      ]
+    },
+    "practise": {
+      "guidedTask": {
+        "title": "Guided Practice",
+        "instructions": "Design an error response for a failed login, failed file upload, and server timeout. For each, write a user-safe message and decide what diagnostic detail can be logged without sensitive values.",
+        "steps": [
+          "Design an error response for a failed login, failed file upload, and server timeout. For each, write a user-safe message and decide what diagnostic detail can be logged without sensitive values.",
+          "Identify the relevant assets, inputs, or permissions.",
+          "Choose a control and explain why it applies.",
+          "Check edge cases and failure behavior.",
+          "Record evidence and remaining questions."
+        ],
+        "starterCode": "// Use a small fictional example. Never paste real credentials or private data."
+      },
+      "independentTask": {
+        "title": "Independent Practice",
+        "instructions": "Create an error-handling policy for a beginner app: user messages, log levels, redaction, access to logs, retention, and recovery guidance.",
+        "requirements": [
+          "Use a fictional or toy project and no real secrets or personal data.",
+          "Create an error-handling policy for a beginner app: user messages, log levels, redaction, access to logs, retention, and recovery guidance.",
+          "Explain the decisions you made and limitations.",
+          "Identify at least one test or review step."
+        ]
+      },
+      "hints": [
+        "Do not expose stack traces to ordinary users.",
+        "Never log passwords, tokens, or unnecessary personal details.",
+        "Use consistent error codes where helpful.",
+        "Make failures observable to maintainers.",
+        "Provide a clear recovery action."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "f139-q1",
+        "prompt": "What should an ordinary user-facing error avoid?",
+        "options": [
+          "Secrets and detailed internal diagnostics",
+          "A recovery suggestion",
+          "A clear short message",
+          "A generic error identifier"
+        ],
+        "answer": "Secrets and detailed internal diagnostics",
+        "explanation": "Internal details may reveal information or aid misuse."
+      },
+      {
+        "id": "f139-q2",
+        "prompt": "Where should detailed diagnostics go?",
+        "options": [
+          "Protected logs with access controls and redaction",
+          "Public browser alerts",
+          "A public issue comment",
+          "A page visible to everyone"
+        ],
+        "answer": "Protected logs with access controls and redaction",
+        "explanation": "Diagnostics should be restricted and sanitized."
+      },
+      {
+        "id": "f139-q3",
+        "prompt": "Why avoid silent error handling?",
+        "options": [
+          "It makes failures difficult to detect and investigate",
+          "It always improves privacy",
+          "It removes the need for testing",
+          "It prevents all bugs"
+        ],
+        "answer": "It makes failures difficult to detect and investigate",
+        "explanation": "Failures should be observable to maintainers."
+      },
+      {
+        "id": "f139-q4",
+        "prompt": "What should an error message include?",
+        "options": [
+          "Useful next step without sensitive internals",
+          "A full stack trace",
+          "Database credentials",
+          "Private user records"
+        ],
+        "answer": "Useful next step without sensitive internals",
+        "explanation": "Messages should help recovery safely."
+      },
+      {
+        "id": "f139-q5",
+        "prompt": "What is redaction intended to do?",
+        "options": [
+          "Remove or mask sensitive details before exposure",
+          "Make errors disappear",
+          "Grant access to logs",
+          "Replace validation"
+        ],
+        "answer": "Remove or mask sensitive details before exposure",
+        "explanation": "Redaction reduces exposure, though it needs careful implementation."
+      }
+    ]
+  }
+}

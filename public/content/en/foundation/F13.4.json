@@ -1,0 +1,171 @@
+{
+  "id": "foundation.f13.4.en",
+  "courseId": "foundation",
+  "moduleId": "F13",
+  "topicId": "F13.4",
+  "title": "Secrets, Credentials, and Safe Configuration",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the core ideas and terminology of secrets, credentials, and safe configuration.",
+    "Recognize the risks or mistakes this topic is intended to prevent.",
+    "Apply appropriate defensive practices in a beginner project.",
+    "Distinguish this topic from related security concepts and controls.",
+    "Review a simple design and justify improvements using evidence."
+  ],
+  "prerequisites": [
+    "F12.12"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Secrets include passwords, API keys, private tokens, and signing credentials. They should not be placed in source code, client bundles, logs, screenshots, or public repositories. Configuration separates environment-specific settings from program logic. Secret storage should use protected environment configuration or a dedicated secret manager, with access restricted and credentials rotated when exposure is suspected.",
+      "whyItMatters": "Leaked credentials can allow unauthorized access even when application code is otherwise well written.",
+      "analogy": "Think of a careful community space where entry, use of shared items, and privacy are guided by clear rules and appropriate checks.",
+      "analogyLimit": "Software security depends on technical boundaries, data flows, implementation details, and changing threats that this analogy cannot fully represent."
+    },
+    "explain": {
+      "narrative": "Secrets include passwords, API keys, private tokens, and signing credentials. They should not be placed in source code, client bundles, logs, screenshots, or public repositories. Configuration separates environment-specific settings from program logic. Secret storage should use protected environment configuration or a dedicated secret manager, with access restricted and credentials rotated when exposure is suspected.\n\nApply these principles proportionately. Use established platform and library protections instead of improvising security-critical mechanisms. For a real application, confirm requirements and review the implementation with qualified peers.",
+      "examples": [
+        {
+          "id": "f134-ex1",
+          "title": "Avoid hard-coded secrets",
+          "code": "const config = {apiBase:'/api',mode:'production'};\nconsole.log(config.mode);",
+          "expectedOutput": "production",
+          "explanation": "Example configuration includes non-secret settings only."
+        },
+        {
+          "id": "f134-ex2",
+          "title": "Use an environment-provided value conceptually",
+          "code": "const secretConfigured = Boolean('provided-by-runtime');\nconsole.log(secretConfigured);",
+          "expectedOutput": "true",
+          "explanation": "The illustrative placeholder represents a protected runtime source; never paste a real key here."
+        },
+        {
+          "id": "f134-ex3",
+          "title": "Do not log credentials",
+          "code": "const logEntry = {event:'login_attempt',userId:'user-42'};\nconsole.log(logEntry.event);",
+          "expectedOutput": "login_attempt",
+          "explanation": "Logs should record useful events without sensitive values."
+        },
+        {
+          "id": "f134-ex4",
+          "title": "Scope credentials",
+          "code": "const permissions = ['read:profile'];\nconsole.log(permissions.join(','));",
+          "expectedOutput": "read:profile",
+          "explanation": "Use the minimum permissions needed; this is a fictional scope label."
+        },
+        {
+          "id": "f134-ex5",
+          "title": "Rotate after exposure",
+          "code": "const response = 'revoke and replace exposed credential';\nconsole.log(response);",
+          "expectedOutput": "revoke and replace exposed credential",
+          "explanation": "A leaked credential must be revoked and replaced, not merely deleted from the latest file."
+        }
+      ],
+      "commonMistakes": [
+        "Assuming a feature is safe because it works in normal use.",
+        "Trusting client-side controls as the only enforcement.",
+        "Applying one generic transformation to every kind of input or output.",
+        "Exposing credentials or personal data in source, logs, or screenshots.",
+        "Skipping retesting after a change."
+      ]
+    },
+    "practise": {
+      "guidedTask": {
+        "title": "Guided Practice",
+        "instructions": "Inspect a sample configuration containing public settings and fake placeholder secrets. Mark which values can be public, which belong in protected server configuration, and what steps are needed if a real credential is exposed.",
+        "steps": [
+          "Inspect a sample configuration containing public settings and fake placeholder secrets. Mark which values can be public, which belong in protected server configuration, and what steps are needed if a real credential is exposed.",
+          "Identify the relevant assets, inputs, or permissions.",
+          "Choose a control and explain why it applies.",
+          "Check edge cases and failure behavior.",
+          "Record evidence and remaining questions."
+        ],
+        "starterCode": "// Use a small fictional example. Never paste real credentials or private data."
+      },
+      "independentTask": {
+        "title": "Independent Practice",
+        "instructions": "Create a configuration checklist for a small app with development and production settings. Include safe storage, access scope, logging restrictions, and a rotation plan without writing any real secrets.",
+        "requirements": [
+          "Use a fictional or toy project and no real secrets or personal data.",
+          "Create a configuration checklist for a small app with development and production settings. Include safe storage, access scope, logging restrictions, and a rotation plan without writing any real secrets.",
+          "Explain the decisions you made and limitations.",
+          "Identify at least one test or review step."
+        ]
+      },
+      "hints": [
+        "Assume anything shipped to the browser can be inspected.",
+        "Environment variables are not automatically secure if exposed to client builds or logs.",
+        "Use the smallest permission set.",
+        "Remove secrets from logs and commits.",
+        "If exposed, revoke and rotate; history cleanup alone is not enough."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "f134-q1",
+        "prompt": "Which is a secret?",
+        "options": [
+          "A private API token",
+          "A public page title",
+          "A CSS class",
+          "A non-sensitive feature label"
+        ],
+        "answer": "A private API token",
+        "explanation": "Credentials can authorize access and must be protected."
+      },
+      {
+        "id": "f134-q2",
+        "prompt": "Where should server-side secrets generally be stored?",
+        "options": [
+          "Protected server configuration or a secrets manager",
+          "In committed frontend code",
+          "In a public README",
+          "In a browser bundle"
+        ],
+        "answer": "Protected server configuration or a secrets manager",
+        "explanation": "Protected storage should control access to credentials."
+      },
+      {
+        "id": "f134-q3",
+        "prompt": "Why avoid logging secrets?",
+        "options": [
+          "Logs may be broadly accessible or retained and expose credentials",
+          "Logs are always encrypted",
+          "Logging is required to reveal passwords",
+          "It makes errors disappear"
+        ],
+        "answer": "Logs may be broadly accessible or retained and expose credentials",
+        "explanation": "Log access and retention can create exposure."
+      },
+      {
+        "id": "f134-q4",
+        "prompt": "What should happen after a credential is exposed?",
+        "options": [
+          "Revoke it and rotate/replace it, then investigate",
+          "Only remove the latest code line",
+          "Rename the variable",
+          "Wait until it is used"
+        ],
+        "answer": "Revoke it and rotate/replace it, then investigate",
+        "explanation": "Deleting from current files does not invalidate a leaked credential."
+      },
+      {
+        "id": "f134-q5",
+        "prompt": "Why scope credentials narrowly?",
+        "options": [
+          "Limit what a compromised credential can do",
+          "Make it easier to share publicly",
+          "Avoid needing access reviews",
+          "Grant every permission by default"
+        ],
+        "answer": "Limit what a compromised credential can do",
+        "explanation": "Least privilege reduces the potential impact."
+      }
+    ]
+  }
+}

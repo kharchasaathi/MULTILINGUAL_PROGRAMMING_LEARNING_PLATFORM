@@ -1,0 +1,180 @@
+{
+  "id": "foundation.f3.10.en",
+  "courseId": "foundation",
+  "moduleId": "F3",
+  "topicId": "F3.10",
+  "title": "Choosing a Loop Strategy",
+  "language": "en",
+  "learningObjectives": [
+    "Identify whether a repetition task has a known count, a condition-based stopping point, or a guaranteed first action.",
+    "Choose a counter-controlled for loop for clear fixed-range repetition.",
+    "Choose a while loop when repetition depends on a condition checked before each pass.",
+    "Choose a do...while-style loop when an action must happen before the stopping condition is checked.",
+    "Evaluate nested loops, early exits, readability, and termination when selecting a loop."
+  ],
+  "prerequisites": [
+    "F3.1",
+    "F3.2",
+    "F3.3",
+    "F3.4",
+    "F3.7",
+    "F3.8",
+    "F3.9"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A loop strategy is the structure chosen to express repetition. The best choice makes the repetition rule easy to see: a known number of repetitions, a condition that may be false before the first pass, or an action that must happen at least once before deciding whether to repeat. Different languages provide different loop syntax, but these decision patterns are widely shared.",
+      "whyItMatters": "A suitable loop makes code easier to read, review, test, and terminate safely. A loop that hides its stopping rule can cause skipped work, extra work, or an infinite loop. Choosing a structure based on the task—not habit—reduces these risks.",
+      "analogy": "A fixed-count loop is like checking five numbered boxes on a checklist. A condition-controlled loop is like continuing to wait while a queue is not empty. A post-test loop is like asking someone to enter a PIN once and then deciding whether another attempt is needed.",
+      "analogyLimit": "Real programs may combine these patterns, and a language's exact syntax or behavior can differ. The analogy helps identify the repetition rule but does not replace checking language-specific semantics."
+    },
+    "explain": {
+      "narrative": "Start by stating what repeats and what makes repetition stop. If the number of passes is known or naturally expressed as a range, a counter loop often keeps initialization, condition, and update together. If repetition should continue only while a condition remains true and zero passes are possible, a pre-test loop makes that rule explicit. If the body must run before the first decision—such as showing a prompt before checking whether to continue—a post-test pattern fits. Use nested loops only when each level represents a distinct repetition dimension, and use early-exit controls sparingly with clear reasons. Whatever structure you choose, prove that the stopping condition can eventually be reached or that another explicit termination mechanism exists.",
+      "examples": [
+        {
+          "id": "f3.10-ex1",
+          "title": "Known count: choose a counter loop",
+          "code": "for (let lap = 1; lap <= 4; lap++) {\\n  recordLap(lap);\\n}",
+          "traceTable": "Known passes: 4\\nCounter: 1, 2, 3, 4\\nStop check: lap = 5; condition false",
+          "expectedOutput": "recordLap called 4 times",
+          "explanation": "The number of passes is known in advance. A counter loop places the start, stopping rule, and update together, making the count easy to inspect."
+        },
+        {
+          "id": "f3.10-ex2",
+          "title": "Condition may be false initially: choose a pre-test loop",
+          "code": "while (messagesRemain()) {\\n  processNextMessage();\\n}",
+          "traceTable": "Check before each pass\\nIf no messages remain initially: 0 passes\\nIf messages remain: process until condition becomes false",
+          "expectedOutput": "Messages processed until none remain",
+          "explanation": "The condition is checked before the body, so this loop can correctly execute zero times when there is no work."
+        },
+        {
+          "id": "f3.10-ex3",
+          "title": "Action must happen once before deciding: choose a post-test loop",
+          "code": "do {\\n  askForConfirmation();\\n} while (confirmationIsInvalid());",
+          "traceTable": "Pass 1 always runs\\nThen confirmationIsInvalid is checked\\nRepeat only when the result is true",
+          "expectedOutput": "At least one confirmation prompt",
+          "explanation": "The body runs before the condition. This structure is appropriate when a first attempt or prompt is required."
+        },
+        {
+          "id": "f3.10-ex4",
+          "title": "Two repetition dimensions: use nested loops",
+          "code": "for (let row = 1; row <= 3; row++) {\\n  for (let column = 1; column <= 2; column++) {\\n    placeCell(row, column);\\n  }\\n}",
+          "traceTable": "Outer passes: 3 rows\\nInner passes per outer pass: 2 columns\\nTotal body calls: 3 × 2 = 6",
+          "expectedOutput": "6 cells placed",
+          "explanation": "Each row contains a repeated column operation, so two nested counters reflect the two independent dimensions. Avoid nesting when one simple loop would be clearer."
+        },
+        {
+          "id": "f3.10-ex5",
+          "title": "Search until a match: use condition plus early exit",
+          "code": "let found = false;\\nlet i = 0;\\nwhile (i < items.length && !found) {\\n  if (matches(items[i])) found = true;\\n  else i++;\\n}",
+          "traceTable": "Stop when index reaches length or found becomes true\\nMatch found: exits early\\nNo match: index advances to end",
+          "expectedOutput": "Search stops at first match or after all items",
+          "explanation": "The stopping condition captures both exhaustion and success. For real code, choose a language's clearer search utility when appropriate; the loop is shown to illustrate the strategy."
+        }
+      ],
+      "commonMistakes": [
+        "Using a counter loop for a task whose stopping point depends on user input or changing state.",
+        "Using a pre-test loop when the first action is required even if the condition is initially false.",
+        "Choosing a post-test loop when zero iterations should be allowed.",
+        "Adding nested loops without a genuine second repetition dimension, increasing complexity.",
+        "Failing to update the condition-related state or to establish a termination guarantee.",
+        "Using break or continue to hide the main stopping rule instead of keeping the loop readable."
+      ]
+    },
+    "practise": {
+      "guidedTask": {
+        "title": "Guided: Select and justify a loop",
+        "instructions": "Choose a loop strategy for each requirement, then write pseudocode or code and explain why your choice fits.",
+        "steps": [
+          "A task must print exactly 12 numbered labels. Choose a counter-controlled loop and identify its start, condition, and update.",
+          "A task should process records while the next record exists, but may process none. Choose a pre-test condition-controlled loop.",
+          "A task must display a question at least once and repeat it only if the answer is invalid. Choose a post-test loop.",
+          "A task draws a grid with 4 rows and 5 columns. Decide whether nested loops are appropriate and calculate the total inner executions.",
+          "For each design, state the stopping rule and describe one test that would catch a boundary error."
+        ],
+        "starterCode": "// Task A: repeat a known number of times\\n// Task B: repeat while work remains\\n// Task C: run once, then repeat if input is invalid\\n// Task D: repeat across two dimensions"
+      },
+      "independentTask": {
+        "title": "Independent: Loop decision report",
+        "instructions": "Create a short decision report for a small program that includes three separate repetition needs.",
+        "requirements": [
+          "Describe one known-count repetition and implement it with a counter loop.",
+          "Describe one condition-controlled repetition that can run zero times.",
+          "Describe one repetition that must execute at least once.",
+          "Include a nested-loop example only if two independent dimensions exist.",
+          "For every loop, explain the termination mechanism, give a boundary test, and justify why another loop form would be less clear."
+        ]
+      },
+      "hints": [
+        "First write the repetition requirement in plain language without mentioning loop syntax.",
+        "If the exact count or range is known, a counter loop is often the clearest starting point.",
+        "If the condition should be checked before any action, choose a pre-test structure.",
+        "If the body must run once before checking whether to repeat, choose a post-test structure.",
+        "Nested loops multiply work; count inner passes for each outer pass.",
+        "Name the state that changes toward termination and test the case where the loop should run zero times and the case where it should run once."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "f3.10-en-q1",
+        "prompt": "A task must perform exactly 8 iterations using a counter that advances predictably. Which loop strategy is usually clearest?",
+        "options": [
+          "A counter-controlled loop",
+          "A post-test loop without a counter",
+          "An infinite loop with manual stopping"
+        ],
+        "answer": "A counter-controlled loop",
+        "explanation": "A counter-controlled loop clearly groups the start, condition, and update for a known number of passes."
+      },
+      {
+        "id": "f3.10-en-q2",
+        "prompt": "A program should process items only while items remain, and it may process zero items. Which strategy fits?",
+        "options": [
+          "A pre-test condition-controlled loop",
+          "A post-test loop that always runs once",
+          "A loop that never checks a condition"
+        ],
+        "answer": "A pre-test condition-controlled loop",
+        "explanation": "The condition is checked before the body, allowing zero executions when no items remain."
+      },
+      {
+        "id": "f3.10-en-q3",
+        "prompt": "A prompt must be displayed at least once before deciding whether to repeat it. Which loop pattern fits?",
+        "options": [
+          "Pre-test loop only",
+          "Post-test loop",
+          "Counter loop with zero passes"
+        ],
+        "answer": "Post-test loop",
+        "explanation": "A post-test pattern executes the body first, guaranteeing at least one pass."
+      },
+      {
+        "id": "f3.10-en-q4",
+        "prompt": "Why should nested loops be used only when the task has distinct repetition dimensions?",
+        "options": [
+          "They always run faster",
+          "They make code shorter in every case",
+          "They represent multiple dimensions but can multiply work and complexity"
+        ],
+        "answer": "They represent multiple dimensions but can multiply work and complexity",
+        "explanation": "Nested loops are useful for genuine multi-dimensional repetition, but unnecessary nesting obscures logic and can increase work."
+      },
+      {
+        "id": "f3.10-en-q5",
+        "prompt": "What is an important requirement when choosing any loop strategy?",
+        "options": [
+          "Avoid writing a stopping condition",
+          "Ensure the stopping rule and progress toward termination are understandable",
+          "Prefer the most complex loop form"
+        ],
+        "answer": "Ensure the stopping rule and progress toward termination are understandable",
+        "explanation": "A clear stopping condition and state change help prevent accidental infinite loops and make behavior easier to verify."
+      }
+    ]
+  }
+}

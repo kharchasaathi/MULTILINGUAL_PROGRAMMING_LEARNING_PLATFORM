@@ -1,0 +1,171 @@
+{
+  "id": "foundation.f13.5.en",
+  "courseId": "foundation",
+  "moduleId": "F13",
+  "topicId": "F13.5",
+  "title": "Authentication vs Authorization",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the core ideas and terminology of authentication vs authorization.",
+    "Recognize the risks or mistakes this topic is intended to prevent.",
+    "Apply appropriate defensive practices in a beginner project.",
+    "Distinguish this topic from related security concepts and controls.",
+    "Review a simple design and justify improvements using evidence."
+  ],
+  "prerequisites": [
+    "F12.12"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Authentication establishes who or what a requester is; authorization determines which actions that identity may perform on a particular resource. A successful login does not mean every operation is permitted. Authorization checks should be enforced on the server or trusted service, using resource ownership, roles, policies, and current state—not only hidden buttons in the interface.",
+      "whyItMatters": "Separating identity from permission prevents a common design error: treating a logged-in user as automatically entitled to every resource.",
+      "analogy": "Think of a careful community space where entry, use of shared items, and privacy are guided by clear rules and appropriate checks.",
+      "analogyLimit": "Software security depends on technical boundaries, data flows, implementation details, and changing threats that this analogy cannot fully represent."
+    },
+    "explain": {
+      "narrative": "Authentication establishes who or what a requester is; authorization determines which actions that identity may perform on a particular resource. A successful login does not mean every operation is permitted. Authorization checks should be enforced on the server or trusted service, using resource ownership, roles, policies, and current state—not only hidden buttons in the interface.\n\nApply these principles proportionately. Use established platform and library protections instead of improvising security-critical mechanisms. For a real application, confirm requirements and review the implementation with qualified peers.",
+      "examples": [
+        {
+          "id": "f135-ex1",
+          "title": "Represent authentication result",
+          "code": "const authenticated = true;\nconsole.log(authenticated);",
+          "expectedOutput": "true",
+          "explanation": "This boolean is only an illustrative identity check result."
+        },
+        {
+          "id": "f135-ex2",
+          "title": "Check authorization separately",
+          "code": "const role = 'viewer';\nconst canEdit = role === 'editor';\nconsole.log(canEdit);",
+          "expectedOutput": "false",
+          "explanation": "The user's role is distinct from whether a requested action is allowed."
+        },
+        {
+          "id": "f135-ex3",
+          "title": "Ownership policy",
+          "code": "function canRead(ownerId,userId){return ownerId===userId;}\nconsole.log(canRead('u1','u1'),canRead('u1','u2'));",
+          "expectedOutput": "true false",
+          "explanation": "A resource-specific check may consider ownership."
+        },
+        {
+          "id": "f135-ex4",
+          "title": "Deny by default",
+          "code": "const allowedActions = ['read'];\nconsole.log(allowedActions.includes('delete'));",
+          "expectedOutput": "false",
+          "explanation": "Only explicitly permitted actions should be allowed."
+        },
+        {
+          "id": "f135-ex5",
+          "title": "Apply check before operation",
+          "code": "const permitted = false;\nconsole.log(permitted ? 'perform action' : 'deny request');",
+          "expectedOutput": "deny request",
+          "explanation": "The authorization decision should precede the protected operation."
+        }
+      ],
+      "commonMistakes": [
+        "Assuming a feature is safe because it works in normal use.",
+        "Trusting client-side controls as the only enforcement.",
+        "Applying one generic transformation to every kind of input or output.",
+        "Exposing credentials or personal data in source, logs, or screenshots.",
+        "Skipping retesting after a change."
+      ]
+    },
+    "practise": {
+      "guidedTask": {
+        "title": "Guided Practice",
+        "instructions": "Model a course platform with student, instructor, and admin roles. Separate login status from allowed actions, then add a resource ownership rule for private notes.",
+        "steps": [
+          "Model a course platform with student, instructor, and admin roles. Separate login status from allowed actions, then add a resource ownership rule for private notes.",
+          "Identify the relevant assets, inputs, or permissions.",
+          "Choose a control and explain why it applies.",
+          "Check edge cases and failure behavior.",
+          "Record evidence and remaining questions."
+        ],
+        "starterCode": "// Use a small fictional example. Never paste real credentials or private data."
+      },
+      "independentTask": {
+        "title": "Independent Practice",
+        "instructions": "Build a permission matrix for a fictional library app. Include read, create, update, and delete for two roles. Explain how authentication and authorization are checked separately on server routes.",
+        "requirements": [
+          "Use a fictional or toy project and no real secrets or personal data.",
+          "Build a permission matrix for a fictional library app. Include read, create, update, and delete for two roles. Explain how authentication and authorization are checked separately on server routes.",
+          "Explain the decisions you made and limitations.",
+          "Identify at least one test or review step."
+        ]
+      },
+      "hints": [
+        "Authentication asks 'who are you?'.",
+        "Authorization asks 'may you do this here?'.",
+        "Check permission for each protected resource/action.",
+        "Do not trust role values sent by the browser.",
+        "Default to denial if permission cannot be established."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "f135-q1",
+        "prompt": "What does authentication establish?",
+        "options": [
+          "The identity of a requester",
+          "Whether an action is allowed on every resource",
+          "Whether a page is styled",
+          "Whether a database is backed up"
+        ],
+        "answer": "The identity of a requester",
+        "explanation": "Authentication verifies identity."
+      },
+      {
+        "id": "f135-q2",
+        "prompt": "What does authorization determine?",
+        "options": [
+          "Whether an identity may perform a requested action",
+          "Whether a password is typed",
+          "Whether the browser is installed",
+          "Whether a website has a title"
+        ],
+        "answer": "Whether an identity may perform a requested action",
+        "explanation": "Authorization checks permissions."
+      },
+      {
+        "id": "f135-q3",
+        "prompt": "Is a logged-in user automatically allowed to delete any record?",
+        "options": [
+          "No; permission must be checked for that resource and action",
+          "Yes, login grants every action",
+          "Only if the button is visible",
+          "Yes, if their browser is modern"
+        ],
+        "answer": "No; permission must be checked for that resource and action",
+        "explanation": "Authentication does not grant unrestricted authorization."
+      },
+      {
+        "id": "f135-q4",
+        "prompt": "Where should important authorization checks be enforced?",
+        "options": [
+          "On the trusted backend or service",
+          "Only by hiding UI controls",
+          "Only in CSS",
+          "Only in a browser form"
+        ],
+        "answer": "On the trusted backend or service",
+        "explanation": "Client-side controls can be bypassed."
+      },
+      {
+        "id": "f135-q5",
+        "prompt": "What is a sensible default when permission is unknown?",
+        "options": [
+          "Deny the protected action",
+          "Allow it temporarily",
+          "Ignore the request",
+          "Reveal the resource"
+        ],
+        "answer": "Deny the protected action",
+        "explanation": "Failing closed protects access when checks cannot be established."
+      }
+    ]
+  }
+}

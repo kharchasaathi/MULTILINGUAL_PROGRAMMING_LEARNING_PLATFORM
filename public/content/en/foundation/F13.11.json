@@ -1,0 +1,171 @@
+{
+  "id": "foundation.f13.11.en",
+  "courseId": "foundation",
+  "moduleId": "F13",
+  "topicId": "F13.11",
+  "title": "Secure Defaults and Defensive Design",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the core ideas and terminology of secure defaults and defensive design.",
+    "Recognize the risks or mistakes this topic is intended to prevent.",
+    "Apply appropriate defensive practices in a beginner project.",
+    "Distinguish this topic from related security concepts and controls.",
+    "Review a simple design and justify improvements using evidence."
+  ],
+  "prerequisites": [
+    "F12.12"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Secure defaults make the safer choice automatic: deny access unless allowed, use protected transport, limit permissions, avoid exposing data, and require explicit opt-in for risky actions. Defensive design anticipates invalid states, failures, and misuse. Convenience should not silently weaken protections, and security controls should be clear, testable, and consistent.",
+      "whyItMatters": "Users and maintainers often keep defaults; safer defaults protect people who do not know every setting.",
+      "analogy": "Think of a careful community space where entry, use of shared items, and privacy are guided by clear rules and appropriate checks.",
+      "analogyLimit": "Software security depends on technical boundaries, data flows, implementation details, and changing threats that this analogy cannot fully represent."
+    },
+    "explain": {
+      "narrative": "Secure defaults make the safer choice automatic: deny access unless allowed, use protected transport, limit permissions, avoid exposing data, and require explicit opt-in for risky actions. Defensive design anticipates invalid states, failures, and misuse. Convenience should not silently weaken protections, and security controls should be clear, testable, and consistent.\n\nApply these principles proportionately. Use established platform and library protections instead of improvising security-critical mechanisms. For a real application, confirm requirements and review the implementation with qualified peers.",
+      "examples": [
+        {
+          "id": "f1311-ex1",
+          "title": "Default to denial",
+          "code": "function allowed(flag){return flag===true;}\nconsole.log(allowed(undefined),allowed(true));",
+          "expectedOutput": "false true",
+          "explanation": "An unknown permission state does not grant access."
+        },
+        {
+          "id": "f1311-ex2",
+          "title": "Require explicit opt-in",
+          "code": "const enabled = false;\nconsole.log(enabled ? 'enabled' : 'disabled by default');",
+          "expectedOutput": "disabled by default",
+          "explanation": "Risky features should not be enabled silently."
+        },
+        {
+          "id": "f1311-ex3",
+          "title": "Bound an operation",
+          "code": "function limit(n){return Math.max(0,Math.min(n,10));}\nconsole.log(limit(50));",
+          "expectedOutput": "10",
+          "explanation": "Bounds help prevent unexpected resource use in this simple example."
+        },
+        {
+          "id": "f1311-ex4",
+          "title": "Handle missing values",
+          "code": "const displayName = null;\nconsole.log(displayName ?? 'Guest');",
+          "expectedOutput": "Guest",
+          "explanation": "A defined fallback prevents unclear behavior."
+        },
+        {
+          "id": "f1311-ex5",
+          "title": "Make a check visible",
+          "code": "const checks = [true,true,false];\nconsole.log(checks.every(Boolean));",
+          "expectedOutput": "false",
+          "explanation": "Failing a required check should be visible, not ignored."
+        }
+      ],
+      "commonMistakes": [
+        "Assuming a feature is safe because it works in normal use.",
+        "Trusting client-side controls as the only enforcement.",
+        "Applying one generic transformation to every kind of input or output.",
+        "Exposing credentials or personal data in source, logs, or screenshots.",
+        "Skipping retesting after a change."
+      ]
+    },
+    "practise": {
+      "guidedTask": {
+        "title": "Guided Practice",
+        "instructions": "Choose safer defaults for a fictional sharing feature, account settings, and file upload. Explain what is off by default, what requires permission, what limits apply, and how errors are handled.",
+        "steps": [
+          "Choose safer defaults for a fictional sharing feature, account settings, and file upload. Explain what is off by default, what requires permission, what limits apply, and how errors are handled.",
+          "Identify the relevant assets, inputs, or permissions.",
+          "Choose a control and explain why it applies.",
+          "Check edge cases and failure behavior.",
+          "Record evidence and remaining questions."
+        ],
+        "starterCode": "// Use a small fictional example. Never paste real credentials or private data."
+      },
+      "independentTask": {
+        "title": "Independent Practice",
+        "instructions": "Design a secure-default checklist for a beginner web app. Include access, configuration, transport, privacy, limits, recovery, and testing. Provide a rationale for each default.",
+        "requirements": [
+          "Use a fictional or toy project and no real secrets or personal data.",
+          "Design a secure-default checklist for a beginner web app. Include access, configuration, transport, privacy, limits, recovery, and testing. Provide a rationale for each default.",
+          "Explain the decisions you made and limitations.",
+          "Identify at least one test or review step."
+        ]
+      },
+      "hints": [
+        "If permission is unknown, do not grant it.",
+        "Avoid enabling sensitive behavior automatically.",
+        "Make limits and safe fallbacks explicit.",
+        "Protect data and access consistently.",
+        "Test failure and misuse cases, not only happy paths."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "f1311-q1",
+        "prompt": "What does a secure default do?",
+        "options": [
+          "Automatically chooses a safer setting unless a justified change is made",
+          "Enables all permissions",
+          "Hides every error",
+          "Allows unknown users"
+        ],
+        "answer": "Automatically chooses a safer setting unless a justified change is made",
+        "explanation": "Defaults strongly influence real-world configuration."
+      },
+      {
+        "id": "f1311-q2",
+        "prompt": "What is a fail-closed permission pattern?",
+        "options": [
+          "Deny when permission cannot be established",
+          "Allow when the check fails",
+          "Ignore permission errors",
+          "Show a button only"
+        ],
+        "answer": "Deny when permission cannot be established",
+        "explanation": "Uncertainty should not grant protected access."
+      },
+      {
+        "id": "f1311-q3",
+        "prompt": "Why limit input or operation size?",
+        "options": [
+          "Reduce unexpected resource use and abuse",
+          "Make data secret",
+          "Avoid documentation",
+          "Replace authentication"
+        ],
+        "answer": "Reduce unexpected resource use and abuse",
+        "explanation": "Limits can reduce resource exhaustion risk."
+      },
+      {
+        "id": "f1311-q4",
+        "prompt": "Why require opt-in for risky behavior?",
+        "options": [
+          "Avoid silently enabling actions users may not expect",
+          "It guarantees the feature is bug-free",
+          "It replaces access control",
+          "It prevents all data collection"
+        ],
+        "answer": "Avoid silently enabling actions users may not expect",
+        "explanation": "Explicit choices improve transparency and control."
+      },
+      {
+        "id": "f1311-q5",
+        "prompt": "Which is a defensive design habit?",
+        "options": [
+          "Test failures and misuse cases alongside normal cases",
+          "Only test the happy path",
+          "Ignore unknown states",
+          "Remove limits"
+        ],
+        "answer": "Test failures and misuse cases alongside normal cases",
+        "explanation": "Defensive testing considers unexpected conditions."
+      }
+    ]
+  }
+}

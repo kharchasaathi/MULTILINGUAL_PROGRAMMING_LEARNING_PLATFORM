@@ -1,0 +1,170 @@
+{
+  "id": "foundation.f14.11.en",
+  "courseId": "foundation",
+  "moduleId": "F14",
+  "topicId": "F14.11",
+  "title": "Asynchronous Communication Concepts",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the key ideas and terminology of asynchronous communication concepts.",
+    "Recognize how the concept is used in real software communication.",
+    "Identify common mistakes or risks associated with this topic.",
+    "Apply the concept to a small, fictional API scenario.",
+    "Review a communication design and justify appropriate choices."
+  ],
+  "prerequisites": [
+    "F13.12"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Asynchronous communication allows a caller to start an operation and continue or await completion without assuming an immediate result. Network calls, events, queues, and callbacks may complete later. Programs must account for pending states, ordering, cancellation, failures, and concurrency. Asynchronous does not necessarily mean parallel; the exact execution model depends on the runtime.",
+      "whyItMatters": "Network and service operations have variable duration, so asynchronous handling keeps applications responsive and makes completion explicit.",
+      "analogy": "Think of a delivery process with a sender, a message, and a receiver who returns a confirmation or explanation.",
+      "analogyLimit": "Software communication may involve complex protocols, asynchronous timing, security, and partial failures that this everyday analogy cannot fully capture."
+    },
+    "explain": {
+      "narrative": "Asynchronous communication allows a caller to start an operation and continue or await completion without assuming an immediate result. Network calls, events, queues, and callbacks may complete later. Programs must account for pending states, ordering, cancellation, failures, and concurrency. Asynchronous does not necessarily mean parallel; the exact execution model depends on the runtime.\n\nUse the protocol and service documentation as the authoritative guide for a real API. Examples here are conceptual and intentionally do not make live network calls.",
+      "examples": [
+        {
+          "id": "f1411-ex1",
+          "title": "Represent pending state",
+          "code": "const state='pending';\nconsole.log(state);",
+          "expectedOutput": "pending",
+          "explanation": "An operation may be started but not yet completed."
+        },
+        {
+          "id": "f1411-ex2",
+          "title": "Model a later completion",
+          "code": "const states=['pending','fulfilled'];\nconsole.log(states[1]);",
+          "expectedOutput": "fulfilled",
+          "explanation": "A result can arrive later."
+        },
+        {
+          "id": "f1411-ex3",
+          "title": "Handle rejection outcome",
+          "code": "const outcome='rejected';\nconsole.log(outcome);",
+          "expectedOutput": "rejected",
+          "explanation": "Asynchronous work can fail and needs an error path."
+        },
+        {
+          "id": "f1411-ex4",
+          "title": "Track operation identity",
+          "code": "const requestId='req-17';\nconsole.log(requestId);",
+          "expectedOutput": "req-17",
+          "explanation": "Identifying requests helps match responses to work."
+        },
+        {
+          "id": "f1411-ex5",
+          "title": "Consider out-of-order results",
+          "code": "const completed=['request B','request A'];\nconsole.log(completed[0]);",
+          "expectedOutput": "request B",
+          "explanation": "Completion order may differ from start order."
+        }
+      ],
+      "commonMistakes": [
+        "Assuming every request succeeds or returns the same shape.",
+        "Treating parsing as validation or authentication as authorization.",
+        "Ignoring timeout, rate-limit, and failure responses.",
+        "Embedding secret credentials in public client code.",
+        "Retrying operations without considering duplicate side effects."
+      ]
+    },
+    "practise": {
+      "guidedTask": {
+        "title": "Guided Practice",
+        "instructions": "Draw a timeline for a client making two independent API requests. Show start times, completion times, and what happens if one fails or completes first. Explain which UI state is needed.",
+        "steps": [
+          "Draw a timeline for a client making two independent API requests. Show start times, completion times, and what happens if one fails or completes first. Explain which UI state is needed.",
+          "Sketch the communication sequence and identify the client/server roles.",
+          "Define expected success and failure outcomes.",
+          "Choose checks, timeout or retry behavior where appropriate.",
+          "Review your design for privacy and safe handling."
+        ],
+        "starterCode": "// Conceptual API exercise. Use fictional payloads only; no real credentials or network calls."
+      },
+      "independentTask": {
+        "title": "Independent Practice",
+        "instructions": "Design asynchronous handling for a search screen. Include loading, success, empty, error, cancellation, and multiple rapidly changing searches. Explain how stale responses are prevented from replacing newer results.",
+        "requirements": [
+          "Use a fictional or toy service; do not include live secrets.",
+          "Design asynchronous handling for a search screen. Include loading, success, empty, error, cancellation, and multiple rapidly changing searches. Explain how stale responses are prevented from replacing newer results.",
+          "Document assumptions, edge cases, and how you would test them."
+        ]
+      },
+      "hints": [
+        "Do not assume completion is immediate.",
+        "Represent pending, success, and failure states.",
+        "Match results to the request that produced them.",
+        "Handle completion order explicitly when it matters.",
+        "Avoid blocking the interface while waiting for network work."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "f1411-q1",
+        "prompt": "What does asynchronous operation mean?",
+        "options": [
+          "Completion may occur later while the caller can continue or await it",
+          "It always runs on another CPU",
+          "It always runs in parallel",
+          "It never fails"
+        ],
+        "answer": "Completion may occur later while the caller can continue or await it",
+        "explanation": "Async behavior separates initiation from later completion."
+      },
+      {
+        "id": "f1411-q2",
+        "prompt": "Does asynchronous automatically mean parallel?",
+        "options": [
+          "No; async and parallel are different concepts",
+          "Yes, always",
+          "Only in browsers",
+          "Only for databases"
+        ],
+        "answer": "No; async and parallel are different concepts",
+        "explanation": "Execution models vary and async does not imply parallel."
+      },
+      {
+        "id": "f1411-q3",
+        "prompt": "Which states are useful for an async UI?",
+        "options": [
+          "Pending, success, and failure",
+          "Only success",
+          "Only a button state",
+          "Always loading"
+        ],
+        "answer": "Pending, success, and failure",
+        "explanation": "A UI should represent operation outcomes."
+      },
+      {
+        "id": "f1411-q4",
+        "prompt": "Why can request IDs help?",
+        "options": [
+          "Match results to the operation that started them",
+          "Encrypt response data",
+          "Change HTTP methods",
+          "Avoid all errors"
+        ],
+        "answer": "Match results to the operation that started them",
+        "explanation": "IDs help identify and correlate asynchronous work."
+      },
+      {
+        "id": "f1411-q5",
+        "prompt": "What should be considered if results complete out of order?",
+        "options": [
+          "Whether an older result should still update the current UI",
+          "Assume order is always preserved",
+          "Ignore the latest result",
+          "Retry all requests"
+        ],
+        "answer": "Whether an older result should still update the current UI",
+        "explanation": "Stale results can overwrite current state if not handled."
+      }
+    ]
+  }
+}

@@ -1,0 +1,172 @@
+{
+  "id": "foundation.f2.5.en",
+  "courseId": "foundation",
+  "moduleId": "F2",
+  "topicId": "F2.5",
+  "title": "Multiple-Branch Decisions",
+  "language": "en",
+  "learningObjectives": [
+    "Explain how a multi-branch if/else if/else decision selects one outcome.",
+    "Write a decision chain for three or more alternatives.",
+    "Trace conditions in order and identify the first matching branch.",
+    "Arrange numeric conditions to avoid unreachable branches.",
+    "Use a fallback branch thoughtfully and validate invalid input separately."
+  ],
+  "prerequisites": [
+    "F2.1",
+    "F2.2",
+    "F2.3",
+    "F2.4"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A multi-branch decision lets a program choose among several outcomes. It checks an if condition first, then each else if condition in order. The first true condition selects its block and ends the chain. An optional else handles the case where none match.",
+      "whyItMatters": "Many tasks need more than two choices, such as categorizing scores, package sizes, or statuses. A single ordered chain expresses these alternatives while guaranteeing at most one branch in the chain runs.",
+      "analogy": "A help desk checks a set of eligibility rules in order. Once one rule matches, the visitor is routed to that service.",
+      "analogyLimit": "A broad rule placed too early can match many cases and prevent more specific rules later from ever being reached."
+    },
+    "explain": {
+      "narrative": "Use if for the first condition, else if for further alternatives, and else as an optional fallback. The chain stops at the first true condition. This differs from separate if statements that can each run. For numeric bands, make boundaries clear and place high thresholds before broad thresholds. Validate invalid data independently instead of letting else silently classify it.",
+      "examples": [
+        {
+          "id": "f2.6-ex1",
+          "title": "Member then purchase threshold",
+          "code": "const isMember = true;\\nconst total = 1200;\\nif (isMember) {\\n  if (total >= 1000) {\\n    console.log('Member premium reward');\\n  } else {\\n    console.log('Member reward');\\n  }\\n} else {\\n  console.log('Guest offer');\\n}",
+          "expectedOutput": "Member premium reward",
+          "explanation": "The outer condition selects the member path; the inner condition then checks the purchase total."
+        },
+        {
+          "id": "f2.6-ex2",
+          "title": "Condition-order bug: broad branch first",
+          "code": "const hasAccount = false;\\nif (hasAccount) {\\n  if (true) console.log('Account route');\\n} else {\\n  console.log('Create account');\\n}",
+          "expectedOutput": "Create account",
+          "explanation": "This is intentionally misordered: the broad first condition matches 95, so the later >= 90 condition cannot be reached."
+        },
+        {
+          "id": "f2.6-ex3",
+          "title": "Two levels of access checks",
+          "code": "const loggedIn = true;\\nconst isAdmin = false;\\nif (loggedIn) {\\n  if (isAdmin) console.log('Admin panel');\\n  else console.log('User dashboard');\\n} else {\\n  console.log('Sign in');\\n}",
+          "expectedOutput": "User dashboard",
+          "explanation": "The outer login check passes; the inner admin check chooses the user dashboard."
+        },
+        {
+          "id": "f2.6-ex4",
+          "title": "Trace a nested discount",
+          "code": "const age = 15;\\nconst accompanied = true;\\nif (age < 18) {\\n  if (accompanied) console.log('Entry with guardian');\\n  else console.log('Guardian required');\\n} else {\\n  console.log('Standard entry');\\n}",
+          "expectedOutput": "Entry with guardian",
+          "explanation": "The outer age branch is selected, then the inner accompanied check is true."
+        },
+        {
+          "id": "f2.6-ex5",
+          "title": "Simplify a deep choice",
+          "code": "const ready = true;\\nconst hasData = true;\\nif (ready) {\\n  if (hasData) {\\n    console.log('Process');\\n  } else {\\n    console.log('Load data');\\n  }\\n} else {\\n  console.log('Wait');\\n}",
+          "expectedOutput": "Process",
+          "explanation": "Nested branches represent dependent checks. For more complex structures, a decision tree or helper function may make the paths easier to understand."
+        }
+      ],
+      "commonMistakes": [
+        "Misplacing else so it binds to an unexpected if.",
+        "Ignoring the inner condition because only the outer condition was traced.",
+        "Excessive nesting that hides the path logic.",
+        "Missing braces or inconsistent indentation.",
+        "Not testing each path, including the false path of the outer condition."
+      ]
+    },
+    "practise": {
+      "guidedTask": {
+        "title": "Guided: Performance label",
+        "instructions": "Select a label: 90 or more is Excellent; 75 or more is Good; 50 or more is Pass; otherwise Retry. Print the selected label.",
+        "steps": [
+          "Set isMember and purchaseTotal.",
+          "Write the outer membership if/else.",
+          "Inside the member branch, add the purchase threshold decision.",
+          "Indent and brace both levels carefully.",
+          "Test member and guest paths plus both inner outcomes."
+        ],
+        "starterCode": "const isMember = true;\\nconst purchaseTotal = 1200;\\nif (isMember) {\\n  if (purchaseTotal >= 1000) console.log('Premium member reward');\\n  else console.log('Member reward');\\n} else {\\n  console.log('Guest offer');\\n}"
+      },
+      "independentTask": {
+        "title": "Independent: Shipping category",
+        "instructions": "Categorize positive package weight: up to 1 kg Light; above 1 and up to 5 Standard; above 5 and up to 15 Heavy; above 15 Oversize. Validate invalid values separately.",
+        "requirements": [
+          "Use at least one nested decision.",
+          "Ensure inner conditions are evaluated only on the relevant outer path.",
+          "Make every outcome reachable and distinct.",
+          "Use braces and indentation to clarify else ownership.",
+          "Test all four paths."
+        ]
+      },
+      "hints": [
+        "Trace the outer condition first.",
+        "An inner condition runs only if its containing branch is selected.",
+        "Indent inner branches one level deeper and use braces.",
+        "Sketch a tree to enumerate all possible paths.",
+        "Test the false branch of every outer decision.",
+        "If nesting becomes deep, consider simplifying or extracting a helper."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "f2.5-en-q1",
+        "prompt": "What is a nested decision?",
+        "options": [
+          "A decision placed inside another decision branch",
+          "A loop inside a string",
+          "Two unrelated variables"
+        ],
+        "answer": "A decision placed inside another decision branch",
+        "explanation": "Nested decisions perform a more specific check after an outer branch has been selected."
+      },
+      {
+        "id": "f2.5-en-q2",
+        "prompt": "When does an inner if condition execute?",
+        "options": [
+          "Only when execution reaches its containing outer branch",
+          "Every time the file loads",
+          "Only when the outer condition is false"
+        ],
+        "answer": "Only when execution reaches its containing outer branch",
+        "explanation": "The outer condition controls whether the nested block is reached."
+      },
+      {
+        "id": "f2.5-en-q3",
+        "prompt": "What can a decision tree help you do?",
+        "options": [
+          "Visualize branches and possible paths",
+          "Automatically fix syntax errors",
+          "Replace all tests"
+        ],
+        "answer": "Visualize branches and possible paths",
+        "explanation": "A tree maps conditions and outcomes so paths can be checked."
+      },
+      {
+        "id": "f2.5-en-q4",
+        "prompt": "What makes nested if/else code easier to read?",
+        "options": [
+          "Braces and consistent indentation",
+          "Removing all spacing",
+          "Using ambiguous single-line branches"
+        ],
+        "answer": "Braces and consistent indentation",
+        "explanation": "Clear indentation and braces help identify which else belongs to which if."
+      },
+      {
+        "id": "f2.5-en-q5",
+        "prompt": "What should you consider if nesting becomes very deep?",
+        "options": [
+          "Simplify the structure or extract helper functions",
+          "Add more nesting",
+          "Skip testing inner paths"
+        ],
+        "answer": "Simplify the structure or extract helper functions",
+        "explanation": "Refactoring can reduce complexity and make decision paths easier to maintain."
+      }
+    ]
+  },
+  "status": "draft"
+}

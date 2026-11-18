@@ -1,0 +1,171 @@
+{
+  "id": "foundation.f13.6.en",
+  "courseId": "foundation",
+  "moduleId": "F13",
+  "topicId": "F13.6",
+  "title": "Least Privilege and Access Control",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the core ideas and terminology of least privilege and access control.",
+    "Recognize the risks or mistakes this topic is intended to prevent.",
+    "Apply appropriate defensive practices in a beginner project.",
+    "Distinguish this topic from related security concepts and controls.",
+    "Review a simple design and justify improvements using evidence."
+  ],
+  "prerequisites": [
+    "F12.12"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Least privilege means granting only the permissions required for a task and only for as long as needed. Access control can use roles, attributes, ownership, or policies. Permission design should limit blast radius, protect sensitive actions, and be reviewed as responsibilities change. Avoid broad administrator access for routine tasks.",
+      "whyItMatters": "Narrow permissions reduce damage from mistakes, compromised accounts, and misuse.",
+      "analogy": "Think of a careful community space where entry, use of shared items, and privacy are guided by clear rules and appropriate checks.",
+      "analogyLimit": "Software security depends on technical boundaries, data flows, implementation details, and changing threats that this analogy cannot fully represent."
+    },
+    "explain": {
+      "narrative": "Least privilege means granting only the permissions required for a task and only for as long as needed. Access control can use roles, attributes, ownership, or policies. Permission design should limit blast radius, protect sensitive actions, and be reviewed as responsibilities change. Avoid broad administrator access for routine tasks.\n\nApply these principles proportionately. Use established platform and library protections instead of improvising security-critical mechanisms. For a real application, confirm requirements and review the implementation with qualified peers.",
+      "examples": [
+        {
+          "id": "f136-ex1",
+          "title": "Use narrow permission scope",
+          "code": "const permissions = ['read:lesson'];\nconsole.log(permissions.includes('write:lesson'));",
+          "expectedOutput": "false",
+          "explanation": "A read-only scope does not imply write access."
+        },
+        {
+          "id": "f136-ex2",
+          "title": "Limit a task account",
+          "code": "const taskAccess = {canRead:true,canDelete:false};\nconsole.log(taskAccess.canDelete);",
+          "expectedOutput": "false",
+          "explanation": "A task-specific account can lack destructive permissions."
+        },
+        {
+          "id": "f136-ex3",
+          "title": "Check explicit capability",
+          "code": "function allowed(capabilities,action){return capabilities.includes(action);}\nconsole.log(allowed(['view'], 'view'));",
+          "expectedOutput": "true",
+          "explanation": "Capability checks can be explicit and narrow."
+        },
+        {
+          "id": "f136-ex4",
+          "title": "Review elevated access",
+          "code": "const needsAdmin = false;\nconsole.log(needsAdmin ? 'request elevated access' : 'use normal access');",
+          "expectedOutput": "use normal access",
+          "explanation": "Avoid elevation unless a task requires it."
+        },
+        {
+          "id": "f136-ex5",
+          "title": "Revoke unneeded access",
+          "code": "const assigned = ['read','export'];\nconst needed = ['read'];\nconsole.log(assigned.filter(p=>!needed.includes(p)).join(','));",
+          "expectedOutput": "export",
+          "explanation": "Removing unused permission reduces exposure."
+        }
+      ],
+      "commonMistakes": [
+        "Assuming a feature is safe because it works in normal use.",
+        "Trusting client-side controls as the only enforcement.",
+        "Applying one generic transformation to every kind of input or output.",
+        "Exposing credentials or personal data in source, logs, or screenshots.",
+        "Skipping retesting after a change."
+      ]
+    },
+    "practise": {
+      "guidedTask": {
+        "title": "Guided Practice",
+        "instructions": "Create a permissions list for a learner account. Start with broad permissions, then reduce it to the minimum needed to view lessons, submit practice, and manage only their own progress.",
+        "steps": [
+          "Create a permissions list for a learner account. Start with broad permissions, then reduce it to the minimum needed to view lessons, submit practice, and manage only their own progress.",
+          "Identify the relevant assets, inputs, or permissions.",
+          "Choose a control and explain why it applies.",
+          "Check edge cases and failure behavior.",
+          "Record evidence and remaining questions."
+        ],
+        "starterCode": "// Use a small fictional example. Never paste real credentials or private data."
+      },
+      "independentTask": {
+        "title": "Independent Practice",
+        "instructions": "Design access controls for a small app with regular user, support staff, and administrator roles. Document permissions, sensitive actions, and a review/revocation plan.",
+        "requirements": [
+          "Use a fictional or toy project and no real secrets or personal data.",
+          "Design access controls for a small app with regular user, support staff, and administrator roles. Document permissions, sensitive actions, and a review/revocation plan.",
+          "Explain the decisions you made and limitations.",
+          "Identify at least one test or review step."
+        ]
+      },
+      "hints": [
+        "List the exact actions each task requires.",
+        "Avoid defaulting all users to admin.",
+        "Prefer read-only access when possible.",
+        "Review access after role changes.",
+        "Remove access when it is no longer needed."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "f136-q1",
+        "prompt": "What is least privilege?",
+        "options": [
+          "Granting only necessary permissions for the required time",
+          "Giving every account administrator access",
+          "Using no accounts",
+          "Sharing credentials between users"
+        ],
+        "answer": "Granting only necessary permissions for the required time",
+        "explanation": "Narrow permissions reduce unnecessary access."
+      },
+      {
+        "id": "f136-q2",
+        "prompt": "Why reduce permissions?",
+        "options": [
+          "To limit harm from mistakes or compromised accounts",
+          "To remove all functionality",
+          "To prevent code reviews",
+          "To make permissions permanent"
+        ],
+        "answer": "To limit harm from mistakes or compromised accounts",
+        "explanation": "Restricted access reduces the possible impact."
+      },
+      {
+        "id": "f136-q3",
+        "prompt": "Which account scope is safer for viewing lessons?",
+        "options": [
+          "Read-only lesson access",
+          "Full database administrator",
+          "Global delete permission",
+          "All project secrets"
+        ],
+        "answer": "Read-only lesson access",
+        "explanation": "A viewer generally needs only read access."
+      },
+      {
+        "id": "f136-q4",
+        "prompt": "When should access be reviewed?",
+        "options": [
+          "When roles or responsibilities change and periodically",
+          "Never after account creation",
+          "Only after an incident",
+          "Only during UI updates"
+        ],
+        "answer": "When roles or responsibilities change and periodically",
+        "explanation": "Access should match current needs."
+      },
+      {
+        "id": "f136-q5",
+        "prompt": "What should happen to unneeded access?",
+        "options": [
+          "Revoke it",
+          "Keep it in case someday",
+          "Share it with others",
+          "Hide it in settings"
+        ],
+        "answer": "Revoke it",
+        "explanation": "Unused access increases risk."
+      }
+    ]
+  }
+}

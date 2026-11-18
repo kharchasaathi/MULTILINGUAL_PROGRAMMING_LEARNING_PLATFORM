@@ -1,0 +1,171 @@
+{
+  "id": "foundation.f13.7.en",
+  "courseId": "foundation",
+  "moduleId": "F13",
+  "topicId": "F13.7",
+  "title": "Common Vulnerability Concepts: Injection and Unsafe Input Handling",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the core ideas and terminology of common vulnerability concepts: injection and unsafe input handling.",
+    "Recognize the risks or mistakes this topic is intended to prevent.",
+    "Apply appropriate defensive practices in a beginner project.",
+    "Distinguish this topic from related security concepts and controls.",
+    "Review a simple design and justify improvements using evidence."
+  ],
+  "prerequisites": [
+    "F12.12"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Injection occurs when data is unintentionally interpreted as instructions by another system or component. Unsafe input handling can cause unexpected behavior, data exposure, or integrity problems. Common prevention strategies include parameterized database queries, safe APIs, context-aware output encoding, allowlist validation, and avoiding dynamic execution of untrusted strings. This lesson focuses on recognition and prevention, not exploitation.",
+      "whyItMatters": "Treating input as data rather than executable instructions is a fundamental defensive habit.",
+      "analogy": "Think of a careful community space where entry, use of shared items, and privacy are guided by clear rules and appropriate checks.",
+      "analogyLimit": "Software security depends on technical boundaries, data flows, implementation details, and changing threats that this analogy cannot fully represent."
+    },
+    "explain": {
+      "narrative": "Injection occurs when data is unintentionally interpreted as instructions by another system or component. Unsafe input handling can cause unexpected behavior, data exposure, or integrity problems. Common prevention strategies include parameterized database queries, safe APIs, context-aware output encoding, allowlist validation, and avoiding dynamic execution of untrusted strings. This lesson focuses on recognition and prevention, not exploitation.\n\nApply these principles proportionately. Use established platform and library protections instead of improvising security-critical mechanisms. For a real application, confirm requirements and review the implementation with qualified peers.",
+      "examples": [
+        {
+          "id": "f137-ex1",
+          "title": "Keep data separate from code",
+          "code": "const userText = 'search phrase';\nconsole.log(typeof userText);",
+          "expectedOutput": "string",
+          "explanation": "User-provided text should remain data."
+        },
+        {
+          "id": "f137-ex2",
+          "title": "Prefer fixed choices",
+          "code": "const sortKey = ['date','title'].includes('date') ? 'date' : 'title';\nconsole.log(sortKey);",
+          "expectedOutput": "date",
+          "explanation": "Allowlisted options reduce unsafe dynamic behavior."
+        },
+        {
+          "id": "f137-ex3",
+          "title": "Parameterized-query concept",
+          "code": "const queryPlan = {template:'SELECT * FROM items WHERE id = ?',value:12};\nconsole.log(queryPlan.template.includes('?'));",
+          "expectedOutput": "true",
+          "explanation": "A placeholder keeps values separate from SQL command text; use a database API that supports parameters."
+        },
+        {
+          "id": "f137-ex4",
+          "title": "Encode output safely",
+          "code": "const raw = 'A & B';\nconsole.log(raw.replaceAll('&','&amp;'));",
+          "expectedOutput": "A &amp; B",
+          "explanation": "Output encoding must match the destination context; use platform helpers."
+        },
+        {
+          "id": "f137-ex5",
+          "title": "Avoid dynamic evaluation",
+          "code": "const safeApproach = 'parse data, do not evaluate untrusted strings';\nconsole.log(safeApproach);",
+          "expectedOutput": "parse data, do not evaluate untrusted strings",
+          "explanation": "Dynamic code evaluation increases risk when data is untrusted."
+        }
+      ],
+      "commonMistakes": [
+        "Assuming a feature is safe because it works in normal use.",
+        "Trusting client-side controls as the only enforcement.",
+        "Applying one generic transformation to every kind of input or output.",
+        "Exposing credentials or personal data in source, logs, or screenshots.",
+        "Skipping retesting after a change."
+      ]
+    },
+    "practise": {
+      "guidedTask": {
+        "title": "Guided Practice",
+        "instructions": "Given a fictional search form, identify where user input could be interpreted by a database or page renderer. Describe safe APIs and validation without attempting attacks.",
+        "steps": [
+          "Given a fictional search form, identify where user input could be interpreted by a database or page renderer. Describe safe APIs and validation without attempting attacks.",
+          "Identify the relevant assets, inputs, or permissions.",
+          "Choose a control and explain why it applies.",
+          "Check edge cases and failure behavior.",
+          "Record evidence and remaining questions."
+        ],
+        "starterCode": "// Use a small fictional example. Never paste real credentials or private data."
+      },
+      "independentTask": {
+        "title": "Independent Practice",
+        "instructions": "Create a defensive design note for a search and comment feature. Cover database parameterization, output encoding, allowlists, input length limits, and tests for unusual values.",
+        "requirements": [
+          "Use a fictional or toy project and no real secrets or personal data.",
+          "Create a defensive design note for a search and comment feature. Cover database parameterization, output encoding, allowlists, input length limits, and tests for unusual values.",
+          "Explain the decisions you made and limitations.",
+          "Identify at least one test or review step."
+        ]
+      },
+      "hints": [
+        "Injection is about interpretation, not just unusual characters.",
+        "Keep query structure separate from user values.",
+        "Avoid eval-like dynamic execution.",
+        "Use context-aware output encoding.",
+        "Test edge cases safely in a local toy app."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "f137-q1",
+        "prompt": "What is injection in this context?",
+        "options": [
+          "Data is interpreted unexpectedly as instructions",
+          "A code comment",
+          "A harmless formatting change",
+          "A variable rename"
+        ],
+        "answer": "Data is interpreted unexpectedly as instructions",
+        "explanation": "Injection results when data and instruction contexts are confused."
+      },
+      {
+        "id": "f137-q2",
+        "prompt": "How can database query injection be prevented?",
+        "options": [
+          "Use parameterized queries",
+          "Concatenate user text into SQL",
+          "Hide the submit button",
+          "Log the full query and credentials"
+        ],
+        "answer": "Use parameterized queries",
+        "explanation": "Parameters keep user values separate from query structure."
+      },
+      {
+        "id": "f137-q3",
+        "prompt": "Why use context-aware output encoding?",
+        "options": [
+          "The correct encoding depends on where data is displayed",
+          "It makes input authorized",
+          "It removes the need for validation",
+          "It protects every possible context with one rule"
+        ],
+        "answer": "The correct encoding depends on where data is displayed",
+        "explanation": "HTML, attributes, URLs, and other contexts require different handling."
+      },
+      {
+        "id": "f137-q4",
+        "prompt": "Why avoid evaluating untrusted strings as code?",
+        "options": [
+          "It may turn data into executable behavior",
+          "It always slows a computer",
+          "It changes file names",
+          "It prevents tests"
+        ],
+        "answer": "It may turn data into executable behavior",
+        "explanation": "Dynamic evaluation can execute unintended instructions."
+      },
+      {
+        "id": "f137-q5",
+        "prompt": "Which is a defensive design choice?",
+        "options": [
+          "Validate allowed values and use safe APIs",
+          "Execute any submitted string",
+          "Trust all client-side data",
+          "Use one sanitizer for every context"
+        ],
+        "answer": "Validate allowed values and use safe APIs",
+        "explanation": "Layered safe handling reduces risk."
+      }
+    ]
+  }
+}

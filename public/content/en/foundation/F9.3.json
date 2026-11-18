@@ -1,0 +1,167 @@
+{
+  "id": "foundation.f9.3.en",
+  "courseId": "foundation",
+  "moduleId": "F9",
+  "topicId": "F9.3",
+  "title": "Handling Errors vs Hiding Errors",
+  "language": "en",
+  "learningObjectives": [
+    "Describe the main idea and its role in reliable program behavior.",
+    "Recognize the topic in code or a real-world programming scenario.",
+    "Trace the relevant behavior and identify the likely outcome.",
+    "Explain a common mistake, risk, or limitation.",
+    "Apply the concept and verify the result with a suitable check."
+  ],
+  "prerequisites": [
+    "F9.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Error handling makes failure visible, understandable, and recoverable when appropriate. Error hiding suppresses, ignores, or disguises a failure so the program appears successful or continues with invalid assumptions. Good handling may log safely, show a helpful message, retry under controlled conditions, use a fallback, or stop an operation.",
+      "whyItMatters": "Hidden failures can corrupt data, mislead users, create security gaps, and make diagnosis difficult. Appropriate handling maintains truthful state and supports safe recovery.",
+      "analogy": "If a shop cannot process a payment, a responsible cashier explains the issue and offers a safe next step. Pretending the payment succeeded would create a false record. Software should also avoid falsely reporting success.",
+      "analogyLimit": "The analogy is only a simplified comparison; software failures and recovery depend on language, runtime, system boundaries, and context."
+    },
+    "explain": {
+      "narrative": "When a failure occurs, determine whether recovery is possible. If so, use a bounded recovery or fallback and make the result explicit. If not, stop the affected operation. Record diagnostic details safely and present a user-appropriate message. Never claim success when the operation failed.",
+      "examples": [
+        {
+          "id": "f9-3-ex1",
+          "title": "Do not swallow exceptions",
+          "code": "try { JSON.parse('{bad'); } catch(e) { console.log('Could not read settings'); }",
+          "expectedOutput": "Could not read settings",
+          "explanation": "The user sees a truthful message instead of silent failure."
+        },
+        {
+          "id": "f9-3-ex2",
+          "title": "Fallback is explicit",
+          "code": "const theme='missing';\nconst chosen=['light','dark'].includes(theme)?theme:'light';\nconsole.log(chosen);",
+          "expectedOutput": "light",
+          "explanation": "A fallback is safe because it is intentional and documented."
+        },
+        {
+          "id": "f9-3-ex3",
+          "title": "Bounded retry concept",
+          "code": "let attempts=0; while(attempts<2){attempts++;}\nconsole.log(attempts);",
+          "expectedOutput": "2",
+          "explanation": "Retry limits prevent an endless retry loop; real retries should include error-specific policy."
+        },
+        {
+          "id": "f9-3-ex4",
+          "title": "False success avoided",
+          "code": "const saved=false;\nconsole.log(saved?'Saved':'Save failed');",
+          "expectedOutput": "Save failed",
+          "explanation": "UI feedback must reflect the actual outcome."
+        },
+        {
+          "id": "f9-3-ex5",
+          "title": "Safe diagnostic",
+          "code": "const detail='Request timed out';\nconsole.log('Operation failed: '+detail);",
+          "expectedOutput": "Operation failed: Request timed out",
+          "explanation": "A diagnostic message preserves actionable context without exposing secrets."
+        }
+      ],
+      "commonMistakes": [
+        "Empty catch blocks that discard errors.",
+        "Showing success UI before an operation is confirmed.",
+        "Using an unsafe fallback for data-changing operations.",
+        "Retrying forever or retrying non-retryable failures.",
+        "Exposing secrets or internal stack traces to end users."
+      ]
+    },
+    "practise": {
+      "guidedTask": {
+        "title": "Guided practice: Handling Errors vs Hiding Errors",
+        "instructions": "Investigate a small scenario that demonstrates this topic and explain how to make its behavior reliable.",
+        "steps": [
+          "Describe the expected behavior and failure condition.",
+          "Identify the code, data, or boundary involved.",
+          "Trace the behavior step by step.",
+          "Choose a handling or correction strategy and explain its trade-off.",
+          "Test normal, invalid, and boundary cases and record the result."
+        ],
+        "starterCode": "// Write a small example for this lesson topic, then test a normal and a failure case."
+      },
+      "independentTask": {
+        "title": "Independent practice: Handling Errors vs Hiding Errors",
+        "instructions": "Create a small original program or pseudocode scenario applying this topic.",
+        "requirements": [
+          "State the scenario and assumptions.",
+          "Implement the topic with clear behavior.",
+          "Include at least one normal case and one failure or edge case.",
+          "Show the observed output or test result.",
+          "Explain the design choice and one limitation."
+        ]
+      },
+      "hints": [
+        "Start by defining expected behavior precisely.",
+        "Inspect the earliest relevant failure or boundary.",
+        "Make one change at a time and retest.",
+        "Keep user-facing messages useful and safe.",
+        "Verify both normal and failure paths."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "f9-3-q1",
+        "prompt": "What is the main risk of an empty catch block?",
+        "options": [
+          "It can hide a failure and leave callers believing the operation succeeded",
+          "It guarantees recovery",
+          "It automatically logs every failure"
+        ],
+        "answer": "It can hide a failure and leave callers believing the operation succeeded",
+        "explanation": "An ignored error may leave misleading state and no diagnostic."
+      },
+      {
+        "id": "f9-3-q2",
+        "prompt": "When is a fallback appropriate?",
+        "options": [
+          "When it is deliberate, safe, documented, and does not misrepresent success",
+          "Whenever any error occurs",
+          "When it hides missing data without notice"
+        ],
+        "answer": "When it is deliberate, safe, documented, and does not misrepresent success",
+        "explanation": "Fallback behavior must be considered and transparent."
+      },
+      {
+        "id": "f9-3-q3",
+        "prompt": "Why should retries be bounded?",
+        "options": [
+          "To avoid endless attempts and worsening resource or service problems",
+          "To guarantee every request succeeds",
+          "To remove the need to check errors"
+        ],
+        "answer": "To avoid endless attempts and worsening resource or service problems",
+        "explanation": "Retries should be limited and appropriate to the failure."
+      },
+      {
+        "id": "f9-3-q4",
+        "prompt": "What should a success message reflect?",
+        "options": [
+          "The operation's confirmed outcome",
+          "The user's expectation",
+          "A request that was merely started"
+        ],
+        "answer": "The operation's confirmed outcome",
+        "explanation": "Do not show success until success is actually confirmed."
+      },
+      {
+        "id": "f9-3-q5",
+        "prompt": "What should diagnostic messages avoid exposing?",
+        "options": [
+          "Secrets and sensitive internal details",
+          "A useful failure reason",
+          "A safe operation identifier"
+        ],
+        "answer": "Secrets and sensitive internal details",
+        "explanation": "Logs and user-facing errors should protect confidential information."
+      }
+    ]
+  }
+}

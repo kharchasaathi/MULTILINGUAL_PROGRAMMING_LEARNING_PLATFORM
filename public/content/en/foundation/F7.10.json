@@ -1,0 +1,169 @@
+{
+  "id": "foundation.f7.10.en",
+  "courseId": "foundation",
+  "moduleId": "F7",
+  "topicId": "F7.10",
+  "title": "Tracing Data Flow and Diagnosing State Bugs",
+  "language": "en",
+  "learningObjectives": [
+    "Define the central safety or tracing concept.",
+    "Identify a common failure pattern or diagnostic step.",
+    "Trace a small example and explain the result.",
+    "Describe a safer or more systematic approach.",
+    "Apply the idea to a simple scenario."
+  ],
+  "prerequisites": [
+    "F7.9",
+    "F1.2",
+    "F1.4"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Data flow tracing follows how information enters a program, is transformed, passed between functions, stored, and used to produce output. State-bug diagnosis compares expected and actual values at meaningful points, then narrows down the first divergence instead of guessing at the final symptom.",
+      "whyItMatters": "Tracing data flow and state helps locate the source of a bug rather than patching symptoms. It is a practical debugging skill that supports tests, logs, and systematic reasoning.",
+      "analogy": "Follow a trail of footprints to find where the path changed; in software, values and logs are evidence but must be interpreted carefully.",
+      "analogyLimit": "This analogy is simplified; actual program behavior depends on language, runtime, and system rules."
+    },
+    "explain": {
+      "narrative": "Review the relevant data, operations, and boundary conditions. For safety topics, check whether inputs and lifetimes are valid and use safe APIs. For debugging, trace values through the program, compare expected and actual results, and identify the earliest incorrect step. Confirm a fix with tests rather than relying on one observed output.",
+      "examples": [
+        {
+          "id": "f7.10-ex1",
+          "title": "Trace values",
+          "code": "let a = 2;\nlet b = a + 3;\nlet c = b * 2;\nconsole.log(a, b, c);",
+          "expectedOutput": "2 5 10",
+          "explanation": "Following the assignments shows each transformation in the data flow."
+        },
+        {
+          "id": "f7.10-ex2",
+          "title": "Find the first divergence",
+          "code": "let price = 10;\nlet quantity = 3;\nlet subtotal = price + quantity; // bug: should multiply\nconsole.log(subtotal);",
+          "expectedOutput": "13",
+          "explanation": "Comparing the expected formula with the actual calculation reveals the earliest incorrect transformation."
+        },
+        {
+          "id": "f7.10-ex3",
+          "title": "Inspect function inputs and outputs",
+          "code": "function addTax(amount, rate) { return amount * rate; }\nconsole.log(addTax(100, 0.1));",
+          "expectedOutput": "10",
+          "explanation": "A trace of inputs and return value clarifies the function's behavior and whether it matches its intended contract."
+        },
+        {
+          "id": "f7.10-ex4",
+          "title": "State checkpoint",
+          "code": "let status = 'new';\nstatus = 'paid';\nconsole.log(status);\nstatus = 'shipped';\nconsole.log(status);",
+          "expectedOutput": "paid\nshipped",
+          "explanation": "Checkpoint output shows when the status changes and what each transition produces."
+        },
+        {
+          "id": "f7.10-ex5",
+          "title": "Narrow a suspected bug",
+          "code": "function twice(n) { return n * 2; }\nfunction plusOne(n) { return n + 1; }\nconsole.log(plusOne(twice(3)));",
+          "expectedOutput": "7",
+          "explanation": "Trace the inner result first, then follow the outer function to verify the final value."
+        }
+      ],
+      "commonMistakes": [
+        "Assuming input values or indexes are always valid.",
+        "Relying on one test case only.",
+        "Fixing the final symptom without finding the first incorrect step.",
+        "Ignoring lifetime and cleanup rules.",
+        "Changing multiple variables in a debugging experiment."
+      ]
+    },
+    "practise": {
+      "guidedTask": {
+        "title": "Guided practice: Tracing Data Flow and Diagnosing State Bugs",
+        "instructions": "Use a small example to inspect the safety boundary or trace the data flow and diagnose a problem.",
+        "steps": [
+          "State the expected behavior and constraints.",
+          "Identify the input, index, state, or transformation to inspect.",
+          "Trace values or checks in order.",
+          "Test a normal and a boundary/error case.",
+          "Explain the diagnosis and verify the corrected behavior."
+        ],
+        "starterCode": "// Write a small example with a deliberate edge case, then trace it."
+      },
+      "independentTask": {
+        "title": "Independent practice: safe and systematic debugging",
+        "instructions": "Create or review a short program and apply the lesson's safety or diagnostic technique.",
+        "requirements": [
+          "Document assumptions and expected behavior.",
+          "Include at least two test cases.",
+          "Include a boundary or error case.",
+          "Show the trace or safety check.",
+          "Explain the result and any remaining limitation."
+        ]
+      },
+      "hints": [
+        "Validate before accessing or changing data.",
+        "Trace one operation at a time.",
+        "Record intermediate values.",
+        "Find the earliest divergence from expected behavior.",
+        "Retest after changing the code."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "f7.10-q1",
+        "prompt": "What does data-flow tracing follow?",
+        "options": [
+          "How information moves and transforms through a program",
+          "Only the program's final line",
+          "The file's visual layout"
+        ],
+        "answer": "How information moves and transforms through a program",
+        "explanation": "Data flow follows inputs, transformations, calls, storage, and outputs."
+      },
+      {
+        "id": "f7.10-q2",
+        "prompt": "Where should debugging begin?",
+        "options": [
+          "Compare expected and actual behavior and find the earliest divergence",
+          "Change several unrelated lines immediately",
+          "Hide the failing test"
+        ],
+        "answer": "Compare expected and actual behavior and find the earliest divergence",
+        "explanation": "The first divergence often reveals the cause more directly than the final symptom."
+      },
+      {
+        "id": "f7.10-q3",
+        "prompt": "What is useful at a checkpoint?",
+        "options": [
+          "Record the value and the operation that produced it",
+          "Guess without examining inputs",
+          "Delete intermediate observations"
+        ],
+        "answer": "Record the value and the operation that produced it",
+        "explanation": "Checkpoint values help narrow down the transformation that went wrong."
+      },
+      {
+        "id": "f7.10-q4",
+        "prompt": "Why inspect function inputs and returns?",
+        "options": [
+          "They show what information enters and leaves a unit of code",
+          "They make tests unnecessary",
+          "They prove the entire program is correct"
+        ],
+        "answer": "They show what information enters and leaves a unit of code",
+        "explanation": "Function boundaries are useful points to trace and verify."
+      },
+      {
+        "id": "f7.10-q5",
+        "prompt": "What is a systematic debugging approach?",
+        "options": [
+          "Narrow the cause, test a hypothesis, and verify the fix",
+          "Patch the output without understanding the cause",
+          "Always rewrite the program from scratch"
+        ],
+        "answer": "Narrow the cause, test a hypothesis, and verify the fix",
+        "explanation": "Systematic debugging reduces guesswork and helps avoid introducing new faults."
+      }
+    ]
+  }
+}

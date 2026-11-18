@@ -1,0 +1,180 @@
+{
+  "id": "foundation.f11.11.en",
+  "courseId": "foundation",
+  "moduleId": "F11",
+  "topicId": "F11.11",
+  "title": "Basic Architecture: Layers and Responsibilities",
+  "language": "en",
+  "learningObjectives": [
+    "Describe architecture as organizing responsibilities and boundaries.",
+    "Explain a simple layered arrangement of user interface, logic, and data access.",
+    "Identify why layers should depend on clear interfaces.",
+    "Recognize when layering adds unnecessary complexity.",
+    "Trace a request through a simple layered design."
+  ],
+  "prerequisites": [
+    "F11.1",
+    "F11.2",
+    "F11.3",
+    "F11.4",
+    "F11.5",
+    "F11.6",
+    "F11.7",
+    "F11.8",
+    "F11.9"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Architecture organizes a system's major responsibilities and the relationships between them. A simple layered design may separate user interface, application or domain logic, and data access. The UI gathers input and presents results; logic applies rules; data access reads or writes storage. Layers communicate through defined interfaces rather than reaching into each other's internals. Small applications may not need formal layers, but boundaries become useful when complexity, change, or testing needs justify them.",
+      "whyItMatters": "Clear design boundaries and intentional development practices help teams maintain software, verify changes, and respond to real needs.",
+      "analogy": "Think of a team coordinating a shared task: clear responsibilities and feedback loops help everyone work toward the same result.",
+      "analogyLimit": "Software design includes precise technical constraints and interactions that teamwork analogies cannot fully represent."
+    },
+    "explain": {
+      "narrative": "A request can flow from UI to logic to a data adapter and return a result for display. Keeping business rules out of presentation code allows those rules to be tested without a screen. Keeping storage details behind an adapter makes it easier to replace a data source. Avoid layers that only forward calls without adding a useful boundary.",
+      "examples": [
+        {
+          "id": "f1111-ex1",
+          "title": "UI calls a logic function",
+          "code": "function calculateDiscount(price){return price*0.9;}\nconst displayed=calculateDiscount(50);\nconsole.log(displayed);",
+          "expectedOutput": "45",
+          "explanation": "The UI-facing code uses a separate calculation operation."
+        },
+        {
+          "id": "f1111-ex2",
+          "title": "Keep data access isolated",
+          "code": "function readRecord(records,id){return records.find(r=>r.id===id)||null;}\nconsole.log(readRecord([{id:1,name:'A'}],1).name);",
+          "expectedOutput": "A",
+          "explanation": "The helper encapsulates how a collection is queried."
+        },
+        {
+          "id": "f1111-ex3",
+          "title": "Logic is testable without UI",
+          "code": "function isEligible(age){return age>=18;}\nconsole.log(isEligible(17));",
+          "expectedOutput": "false",
+          "explanation": "The rule can be tested directly."
+        },
+        {
+          "id": "f1111-ex4",
+          "title": "Trace the layers",
+          "code": "function logic(value){return value+1;}\nfunction ui(input){return logic(input);}\nconsole.log(ui(4));",
+          "expectedOutput": "5",
+          "explanation": "The UI delegates work to logic and returns the result."
+        },
+        {
+          "id": "f1111-ex5",
+          "title": "Avoid a useless forwarding layer",
+          "code": "function add(a,b){return a+b;}\nconsole.log(add(2,3));",
+          "expectedOutput": "5",
+          "explanation": "Do not add layers that provide no meaningful separation or policy."
+        }
+      ],
+      "commonMistakes": [
+        "Treating design smells as automatic defects.",
+        "Overengineering small projects with unnecessary layers or patterns.",
+        "Mixing requirements, features, and refactoring without clear intent.",
+        "Ignoring tests or edge cases when changing structure.",
+        "Failing to consider project context and trade-offs."
+      ]
+    },
+    "practise": {
+      "guidedTask": {
+        "title": "Guided Practice",
+        "instructions": "Sketch a small app's UI, rules, and storage responsibilities. Trace one user action through the responsibilities. Move one rule out of presentation code if needed. Define what each layer receives and returns. Explain which boundary adds value and which would be unnecessary.",
+        "steps": [
+          "Sketch a small app's UI, rules, and storage responsibilities.",
+          "Trace one user action through the responsibilities.",
+          "Move one rule out of presentation code if needed.",
+          "Define what each layer receives and returns.",
+          "Explain which boundary adds value and which would be unnecessary."
+        ],
+        "starterCode": "// Use the lesson's design idea to improve a small example."
+      },
+      "independentTask": {
+        "title": "Independent Practice",
+        "instructions": "Plan a simple notes or expense-record app. Identify UI, logic, and data responsibilities. Draw or describe the flow for creating one record. Define one interface between logic and storage. Explain how the design supports testing and future change without excessive layers.",
+        "requirements": [
+          "Plan a simple notes or expense-record app.",
+          "Identify UI, logic, and data responsibilities.",
+          "Draw or describe the flow for creating one record.",
+          "Define one interface between logic and storage.",
+          "Explain how the design supports testing and future change without excessive layers."
+        ]
+      },
+      "hints": [
+        "Architecture is about boundaries and relationships.",
+        "Keep business rules independent of presentation where practical.",
+        "Data access hides storage-specific details.",
+        "Use layers only when they help.",
+        "Trace data through the system to reveal responsibilities."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "f1111-q1",
+        "prompt": "What is software architecture concerned with?",
+        "options": [
+          "Major responsibilities and relationships between components",
+          "Only indentation",
+          "Variable naming",
+          "The number of comments"
+        ],
+        "answer": "Major responsibilities and relationships between components",
+        "explanation": "Architecture describes the system's organization and boundaries."
+      },
+      {
+        "id": "f1111-q2",
+        "prompt": "In a layered design, where should business rules usually live?",
+        "options": [
+          "Logic/domain layer",
+          "Only in UI click handlers",
+          "Only in database filenames",
+          "In styling code"
+        ],
+        "answer": "Logic/domain layer",
+        "explanation": "Separating rules allows reuse and direct testing."
+      },
+      {
+        "id": "f1111-q3",
+        "prompt": "Why use a data-access boundary?",
+        "options": [
+          "To isolate storage details behind a clearer interface",
+          "To make every caller use raw storage internals",
+          "To avoid validation",
+          "To increase file count"
+        ],
+        "answer": "To isolate storage details behind a clearer interface",
+        "explanation": "A boundary can reduce dependence on a specific storage mechanism."
+      },
+      {
+        "id": "f1111-q4",
+        "prompt": "Are layers always necessary?",
+        "options": [
+          "No; use them when they provide useful separation",
+          "Yes, every script must have three layers",
+          "They replace functions",
+          "They eliminate bugs"
+        ],
+        "answer": "No; use them when they provide useful separation",
+        "explanation": "Architecture should match application complexity."
+      },
+      {
+        "id": "f1111-q5",
+        "prompt": "What is a typical flow through layers?",
+        "options": [
+          "UI to logic to data access, then results return for display",
+          "Data access calls UI directly for every operation",
+          "UI modifies storage internals everywhere",
+          "Layers never communicate"
+        ],
+        "answer": "UI to logic to data access, then results return for display",
+        "explanation": "A simple flow keeps responsibilities clear."
+      }
+    ]
+  }
+}

@@ -1,0 +1,175 @@
+{
+  "id": "foundation.f2.10.en",
+  "courseId": "foundation",
+  "moduleId": "F2",
+  "topicId": "F2.10",
+  "title": "Common Condition Bugs: Boundaries, Truthiness, and Incorrect Logic",
+  "language": "en",
+  "learningObjectives": [
+    "Recognize off-by-one errors caused by incorrect comparison boundaries.",
+    "Explain how truthy and falsy values can affect conditional branches in JavaScript.",
+    "Distinguish assignment, comparison, and unintended Boolean expressions.",
+    "Identify faulty AND/OR combinations and overlapping or unreachable branches.",
+    "Test conditions with boundary, typical, empty, and unexpected inputs."
+  ],
+  "prerequisites": [
+    "F2.1",
+    "F2.2",
+    "F2.3",
+    "F2.5",
+    "F2.6",
+    "F2.7",
+    "F2.9"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Condition bugs often come from a small mismatch between the intended rule and the expression written. Boundary bugs use the wrong inclusive/exclusive comparison (for example, > instead of >=). Truthiness bugs treat values such as 0, empty string, null, undefined, or NaN as false-like and other values as true-like. Logic bugs combine conditions incorrectly, reverse a comparison, or make a branch unreachable.",
+      "whyItMatters": "These mistakes can silently choose the wrong path even when code is syntactically valid. Testing boundaries and explicitly checking what a condition means makes decision code more reliable.",
+      "analogy": "Imagine a gate that admits visitors aged 18 and older. A sign that says 'older than 18' accidentally excludes people who are exactly 18. A second gate that treats an empty ticket as a valid ticket because it only checks whether the ticket variable exists has a different kind of rule mistake.",
+      "analogyLimit": "Real programs may use language-specific truthiness, type coercion, validation rules, and domain boundaries. Always confirm the exact semantics of the language and data being used."
+    },
+    "explain": {
+      "narrative": "Debug a condition by translating the intended rule into plain language, then compare it with the expression. Check the exact boundary value, whether the value can be missing or empty, and whether each Boolean operator matches the rule. In JavaScript, false, 0, -0, 0n, empty string, null, undefined, and NaN are falsy; most other values—including empty arrays and empty objects—are truthy. Do not rely on truthiness when the rule specifically asks for a number, string, or presence check. Use explicit comparisons or validation when they communicate the rule more clearly. For multi-branch decisions, check branch order and ensure conditions do not accidentally overlap or exclude intended cases.",
+      "examples": [
+        {
+          "id": "f2.10-ex1",
+          "title": "Off-by-one boundary",
+          "code": "const age = 18;\nconst canEnter = age >= 18;\nconsole.log(canEnter);",
+          "expectedOutput": "true",
+          "explanation": "If the rule includes age 18, >= is correct. Using > would incorrectly reject the boundary value."
+        },
+        {
+          "id": "f2.10-ex2",
+          "title": "Empty string and truthiness",
+          "code": "const username = '';\nif (username) console.log('Provided');\nelse console.log('Missing');",
+          "expectedOutput": "Missing",
+          "explanation": "An empty string is falsy. For a rule that requires a non-empty username, this test works, but it does not trim whitespace-only input."
+        },
+        {
+          "id": "f2.10-ex3",
+          "title": "Empty arrays are truthy",
+          "code": "const items = [];\nif (items) console.log('Has collection');\nelse console.log('No collection');",
+          "expectedOutput": "Has collection",
+          "explanation": "An empty array is truthy. To check whether it contains elements, test items.length > 0."
+        },
+        {
+          "id": "f2.10-ex4",
+          "title": "Incorrect AND/OR choice",
+          "code": "const isAdmin = false;\nconst isOwner = true;\nconst mayEdit = isAdmin || isOwner;\nconsole.log(mayEdit);",
+          "expectedOutput": "true",
+          "explanation": "If either an administrator or owner may edit, OR is the correct combination. Using AND would require both roles at once."
+        },
+        {
+          "id": "f2.10-ex5",
+          "title": "Unreachable branch due to order",
+          "code": "const score = 92;\nif (score >= 50) console.log('Pass');\nelse if (score >= 90) console.log('Excellent');",
+          "expectedOutput": "Pass",
+          "explanation": "The first condition already includes scores of 90 and above, so the Excellent branch is unreachable. Put the more specific test first."
+        }
+      ],
+      "commonMistakes": [
+        "Using > when the requirement includes the boundary value.",
+        "Assuming an empty array or object is falsy.",
+        "Using a truthy check to validate a numeric value when zero may be valid.",
+        "Choosing AND when the rule means either condition is sufficient, or OR when both are required.",
+        "Placing a broad branch before a narrower branch and making the narrower one unreachable.",
+        "Testing only typical values and missing zero, exact limits, empty, null, or unexpected inputs."
+      ]
+    },
+    "practise": {
+      "guidedTask": {
+        "title": "Guided: Fix a ticket eligibility rule",
+        "instructions": "The rule is: customers aged 16 or older with a ticket may enter. Correct the condition and test age 15, 16, and 17 with a ticket present. Then test an empty ticket.",
+        "steps": [
+          "Write the rule in plain language: age must be at least 16 and ticket must be present.",
+          "Check the boundary age 16 and decide whether the comparison includes it.",
+          "Combine the age and ticket checks using the operator that requires both.",
+          "Test ages 15, 16, and 17.",
+          "Test an empty ticket and explain the result."
+        ],
+        "starterCode": "const age = 16;\nconst ticket = 'T-204';\nconst canEnter = age > 16 || ticket;\nconsole.log(Boolean(canEnter));"
+      },
+      "independentTask": {
+        "title": "Independent: Audit a discount decision",
+        "instructions": "Review a program that applies a discount to members with purchases of $100 or more. Find and correct boundary, truthiness, and Boolean logic mistakes.",
+        "requirements": [
+          "Correctly include the $100 boundary.",
+          "Handle a missing membership value explicitly.",
+          "Use the correct Boolean combination for the business rule.",
+          "Ensure high-value purchases are not incorrectly blocked by branch order.",
+          "Test $99, $100, $120, missing membership, and an empty value."
+        ]
+      },
+      "hints": [
+        "Translate each condition into a sentence before changing it.",
+        "Test the exact boundary—not only values above and below it.",
+        "JavaScript empty arrays and empty objects are truthy.",
+        "Use === when you need a strict value comparison.",
+        "Choose && when every requirement must be true; choose || when either is sufficient.",
+        "Put specific conditions before broad ones when branch order matters."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "f2.10-en-q1",
+        "prompt": "A rule says '18 or older'. Which comparison correctly includes 18?",
+        "options": [
+          "age >= 18",
+          "age > 18",
+          "age == 19"
+        ],
+        "answer": "age >= 18",
+        "explanation": "The >= operator includes the boundary value 18."
+      },
+      {
+        "id": "f2.10-en-q2",
+        "prompt": "Which value is falsy in JavaScript?",
+        "options": [
+          "[]",
+          "{}",
+          "''"
+        ],
+        "answer": "''",
+        "explanation": "An empty string is falsy, while empty arrays and objects are truthy."
+      },
+      {
+        "id": "f2.10-en-q3",
+        "prompt": "What is the result of Boolean([]) in JavaScript?",
+        "options": [
+          "false",
+          "true",
+          "undefined"
+        ],
+        "answer": "true",
+        "explanation": "Arrays are objects and truthy, including empty arrays."
+      },
+      {
+        "id": "f2.10-en-q4",
+        "prompt": "A rule requires both 'paid' and 'verified'. Which operator expresses that?",
+        "options": [
+          "||",
+          "&&",
+          "!"
+        ],
+        "answer": "&&",
+        "explanation": "AND requires both expressions to be true."
+      },
+      {
+        "id": "f2.10-en-q5",
+        "prompt": "Why can a broad condition before a specific condition be a bug?",
+        "options": [
+          "It may select the broad branch first and make the specific branch unreachable",
+          "It always makes the program crash",
+          "It changes every variable into a string"
+        ],
+        "answer": "It may select the broad branch first and make the specific branch unreachable",
+        "explanation": "An earlier matching branch prevents later else-if conditions from being evaluated."
+      }
+    ]
+  }
+}

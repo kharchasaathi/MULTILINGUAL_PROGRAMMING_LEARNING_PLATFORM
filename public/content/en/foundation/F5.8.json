@@ -1,0 +1,173 @@
+{
+  "id": "foundation.f5.8.en",
+  "courseId": "foundation",
+  "moduleId": "F5",
+  "topicId": "F5.8",
+  "title": "Nested Collections and Multidimensional Data",
+  "language": "en",
+  "learningObjectives": [
+    "Explain nested collections as collections containing other collections.",
+    "Read and update values through multiple levels of indexing or keys.",
+    "Represent grouped and tabular data using nested structures.",
+    "Traverse nested collections with loops while respecting each level's shape.",
+    "Handle irregular or empty inner collections safely."
+  ],
+  "prerequisites": [
+    "F5.1",
+    "F5.2",
+    "F5.3",
+    "F3.5",
+    "F3.8"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A nested collection stores another collection as one of its elements or values. A list of lists can represent rows and columns, groups of records, a schedule by day, or tree-like data. To reach an inner value, select an outer item and then an item inside it. Inner collections may have equal or different lengths.",
+      "whyItMatters": "Nested data appears in seating plans, game boards, schedules, grouped messages, and tables. It preserves relationships between values rather than flattening them into unrelated items. It also requires code to track which level it is using and safely handle empty or uneven groups.",
+      "analogy": "Think of a building with floors, rooms, and occupants: first choose a floor, then a room. A nested collection similarly requires selection at each level.",
+      "analogyLimit": "Nested collections are not always rectangular tables. Inner collections may vary in size, be empty, or contain different kinds of values. Indexing and memory behavior depend on the language."
+    },
+    "explain": {
+      "narrative": "A nested collection is a structure with levels. In a JavaScript array-of-arrays, outerIndex selects a row and innerIndex selects a position in that row. For example, grid[1][2] selects the third item in the second row using zero-based indexes. Traversal commonly uses an outer loop for groups and an inner loop for each group's members. Do not assume all inner arrays have the same length: validate access at the level being selected. An empty inner array is valid and contains no items to traverse.",
+      "examples": [
+        {
+          "id": "f5.8-ex1",
+          "title": "Select an item inside a group",
+          "code": "const groups = [['pen', 'pencil'], ['book', 'notebook']];\nconsole.log(groups[0][1]);",
+          "expectedOutput": "pencil",
+          "explanation": "Index 0 selects the first group; index 1 selects its second item."
+        },
+        {
+          "id": "f5.8-ex2",
+          "title": "Represent a table",
+          "code": "const scores = [[8, 9], [7, 10], [6, 8]];\nconsole.log(scores[2][0]);",
+          "expectedOutput": "6",
+          "explanation": "The nested arrays represent rows. Index [2][0] selects row three, column one."
+        },
+        {
+          "id": "f5.8-ex3",
+          "title": "Update one nested value",
+          "code": "const seats = [['A1', 'A2'], ['B1', 'B2']];\nseats[1][0] = 'reserved';\nconsole.log(seats[1]);",
+          "expectedOutput": "['reserved', 'B2']",
+          "explanation": "The assignment changes an element inside the second inner array."
+        },
+        {
+          "id": "f5.8-ex4",
+          "title": "Traverse each group",
+          "code": "const groups = [[2, 4], [6], [8, 10]];\nfor (const group of groups) {\n  for (const value of group) console.log(value);\n}",
+          "expectedOutput": "2, 4, 6, 8, 10 (each on its own line)",
+          "explanation": "The outer loop visits each group; the inner loop visits that group's items. Different group lengths are supported."
+        },
+        {
+          "id": "f5.8-ex5",
+          "title": "Include an empty inner collection",
+          "code": "const teams = [['Asha'], [], ['Bilal', 'Chitra']];\nfor (const team of teams) console.log(team.length);",
+          "expectedOutput": "1, 0, 2",
+          "explanation": "An empty inner array has length zero, so iteration over it safely performs no inner steps."
+        }
+      ],
+      "commonMistakes": [
+        "Reversing index order and reading the wrong item.",
+        "Using an index valid for one inner collection but invalid for another.",
+        "Assuming all nested collections form a rectangular matrix.",
+        "Accidentally sharing the same mutable inner array between rows.",
+        "Confusing the outer collection's length with an inner collection's length.",
+        "Choosing deeply nested structures when a simpler representation would be clearer."
+      ]
+    },
+    "practise": {
+      "guidedTask": {
+        "title": "Guided: Inspect a weekly schedule",
+        "instructions": "Represent days as outer entries and each day's tasks as an inner collection. Trace and update tasks safely.",
+        "steps": [
+          "Create three inner arrays for three days, with different task counts.",
+          "Read a task from the first day and verify its index exists.",
+          "Add a task to the day with the fewest items.",
+          "Use nested loops to print every task with its group/day number.",
+          "Include one empty day and explain why the inner loop naturally skips it."
+        ],
+        "starterCode": "const schedule = [['study', 'walk'], ['shop'], []];\n// Safely inspect, update, and traverse the nested schedule."
+      },
+      "independentTask": {
+        "title": "Independent: Build a mini seat map",
+        "instructions": "Create a nested collection for venue seats. Track available, reserved, or occupied seats and demonstrate lookup and update.",
+        "requirements": [
+          "Represent at least three rows; rows may have different lengths or explain the rectangular layout.",
+          "Read a seat using two indexes and explain each index.",
+          "Update a seat status without replacing the entire structure.",
+          "Traverse all rows and count available seats.",
+          "Handle an empty row or an out-of-range seat request."
+        ]
+      },
+      "hints": [
+        "Read indexes from outside to inside: outer selection first, inner selection second.",
+        "JavaScript indexes start at zero.",
+        "Check the selected inner collection's length before indexed access.",
+        "Nested loops visit each group and its members.",
+        "An empty inner array is valid and runs zero inner iterations.",
+        "Initialize each row separately to avoid unintended shared-array references."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "f5.8-en-q1",
+        "prompt": "For data = [['a','b'],['c','d']], what does data[1][0] select?",
+        "options": [
+          "The second row's first item: 'c'",
+          "The first row's second item: 'b'",
+          "The whole outer array"
+        ],
+        "answer": "The second row's first item: 'c'",
+        "explanation": "Index 1 selects the second inner array; index 0 selects its first element."
+      },
+      {
+        "id": "f5.8-en-q2",
+        "prompt": "Why should code check an inner collection's length before indexed access?",
+        "options": [
+          "Inner collections may have different sizes",
+          "All inner collections always have identical sizes",
+          "Length checks turn arrays into matrices"
+        ],
+        "answer": "Inner collections may have different sizes",
+        "explanation": "A ragged nested collection can have short or empty inner arrays, so an index valid in one group may not be valid in another."
+      },
+      {
+        "id": "f5.8-en-q3",
+        "prompt": "What is the purpose of outer and inner loops when traversing nested collections?",
+        "options": [
+          "The outer loop visits groups; the inner loop visits each group's members",
+          "The inner loop always runs only once",
+          "They eliminate the need to understand the collection shape"
+        ],
+        "answer": "The outer loop visits groups; the inner loop visits each group's members",
+        "explanation": "The loops correspond to nested levels and process each member of each group."
+      },
+      {
+        "id": "f5.8-en-q4",
+        "prompt": "What happens when an inner loop iterates over an empty array?",
+        "options": [
+          "It performs zero iterations",
+          "It inserts a placeholder automatically",
+          "The entire outer collection becomes empty"
+        ],
+        "answer": "It performs zero iterations",
+        "explanation": "An empty collection contains no items, but the outer structure can still contain that empty group."
+      },
+      {
+        "id": "f5.8-en-q5",
+        "prompt": "Which approach prevents rows from sharing one mutable inner array unintentionally?",
+        "options": [
+          "Create a separate inner array for each row",
+          "Reuse the same inner array reference for every row",
+          "Represent every row as a single string"
+        ],
+        "answer": "Create a separate inner array for each row",
+        "explanation": "Independent row arrays ensure changing one row does not affect another through a shared reference."
+      }
+    ]
+  }
+}
