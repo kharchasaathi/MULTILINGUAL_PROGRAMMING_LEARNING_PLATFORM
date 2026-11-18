@@ -163,7 +163,7 @@
     const examples = Array.isArray(explain?.examples) ? explain.examples : (Array.isArray(lesson.examples) ? lesson.examples : []);
     const explanationText = explain?.narrative || explain?.explain || lesson.explanation || "";
     const code = lesson.practice?.starterCode || "";
-    const questions = lesson.assessment?.questions || [];
+    const questions = (lesson.assessment?.questions || []).map(question => ({ ...question, answer: Number.isInteger(question.answer) ? question.options?.[question.answer] : question.answer }));
     const onComplete = () => {
       saveProgress(lesson.topicId);
       const button = $("#markLesson", container);
