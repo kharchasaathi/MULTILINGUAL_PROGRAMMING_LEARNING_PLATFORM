@@ -6,8 +6,8 @@
 - CPP1 currently has 20 registered lesson topics (CPP1.1–CPP1.20).
 - Proposed modules CPP2–CPP14 contain 10 planned topics each (130 additional topics).
 - **Proposed scope total: 150 topics.**
-- **Current draft-authored: 70 topics.**
-- **Remaining to author under this scope: 80 topics.**
+- **Current draft-authored: 80 topics.**
+- **Remaining to author under this scope: 70 topics.**
 - Counts can be adjusted after a curriculum audit; this roadmap should be updated when topic IDs or scope change.
 
 ## CPP1 — Foundations and First Programs (20 topics)
@@ -25,7 +25,9 @@ Already registered in curriculum index. CPP1.1–CPP1.10 were previously created
 
 ## CPP6 — Functions and Modular Design (10 topics)\n- CPP6.1: Function declaration and definition\n- CPP6.2: Parameters and arguments\n- CPP6.3: Return values\n- CPP6.4: void functions\n- CPP6.5: Default arguments\n- CPP6.6: Overloading basics\n- CPP6.7: Scope and local variables\n- CPP6.8: Recursion introduction\n- CPP6.9: Header and source separation\n- CPP6.10: Function contracts and testing
 
-## CPP7 — Arrays, Strings and Collections (10 topics)\n- CPP7.1: C-style arrays overview\n- CPP7.2: Array initialization\n- CPP7.3: Indexing and bounds\n- CPP7.4: Traversal patterns\n- CPP7.5: Multidimensional arrays\n- CPP7.6: std::string basics\n- CPP7.7: String operations\n- CPP7.8: std::array\n- CPP7.9: std::vector basics\n- CPP7.10: Collection algorithms and iteration
+## CPP7 — Arrays, Strings and Collections (10 topics — drafted)
+
+**Drafted CPP7.1–CPP7.10:** array declaration and indexing, traversal, searching/updating, multidimensional arrays, std::array, C-style strings, std::string, string input/operations, vector, and choosing collections.\n- CPP7.1: C-style arrays overview\n- CPP7.2: Array initialization\n- CPP7.3: Indexing and bounds\n- CPP7.4: Traversal patterns\n- CPP7.5: Multidimensional arrays\n- CPP7.6: std::string basics\n- CPP7.7: String operations\n- CPP7.8: std::array\n- CPP7.9: std::vector basics\n- CPP7.10: Collection algorithms and iteration
 
 ## CPP8 — Pointers, References and Memory (10 topics)\n- CPP8.1: Address-of and dereference\n- CPP8.2: Pointer declarations\n- CPP8.3: Null pointers\n- CPP8.4: Reference basics\n- CPP8.5: Const pointers and pointer-to-const\n- CPP8.6: Pointer arithmetic cautions\n- CPP8.7: Array-pointer relationship\n- CPP8.8: Dynamic allocation overview\n- CPP8.9: Lifetime and dangling references\n- CPP8.10: Prefer RAII and smart pointers
 
