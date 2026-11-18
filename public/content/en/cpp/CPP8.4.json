@@ -1,0 +1,145 @@
+{
+  "id": "cpp.cpp8.4.en",
+  "courseId": "cpp",
+  "moduleId": "CPP8",
+  "topicId": "CPP8.4",
+  "title": "Pointer Arithmetic and Bounds",
+  "language": "en",
+  "learningObjectives": [
+    "Explain pointer arithmetic and bounds.",
+    "Describe pointer/reference or lifetime rules involved.",
+    "Trace a simple memory access or ownership operation.",
+    "Recognize common undefined behavior and safety risks.",
+    "Choose a safer approach for a practical task."
+  ],
+  "prerequisites": [
+    "CPP2.1",
+    "CPP5.3",
+    "CPP6.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Pointer arithmetic is defined within an array object and its one-past-end position. Subtracting pointers is only valid within the same array; out-of-range operations are undefined.",
+      "whyItMatters": "Pointer traversal can be efficient but is easier to misuse than indexed/container iteration.",
+      "explain": "Track the originating array and bounds; do not treat arbitrary memory as an array."
+    }
+  },
+  "examples": [
+    {
+      "id": "cpp8.4-ex1",
+      "language": "en",
+      "title": "Pointer step",
+      "code": "int a[]{10,20,30};int* p=a;p+=2;\\nstd::cout<<*p; // 30",
+      "explanation": "Pointer advances two elements within the same array.",
+      "runnable": false
+    },
+    {
+      "id": "cpp8.4-ex2",
+      "language": "en",
+      "title": "One-past-end comparison",
+      "code": "int a[3]{};int* end=a+3;\\n// compare with end; do not dereference end",
+      "explanation": "One-past-end is valid for comparison but not dereference.",
+      "runnable": false
+    },
+    {
+      "id": "cpp8.4-ex3",
+      "language": "en",
+      "title": "Pointer difference",
+      "code": "int a[]{4,8,12};int* first=&a[0];int* last=&a[2];\\nstd::ptrdiff_t distance=last-first; // 2",
+      "explanation": "Pointer difference counts elements within the same array.",
+      "runnable": false
+    },
+    {
+      "id": "cpp8.4-ex4",
+      "language": "en",
+      "title": "Wrong bounds concept",
+      "code": "int a[2]{1,2};int* p=a;\\n// p+2 is one-past-end; *(p+2) is invalid",
+      "explanation": "The one-past-end pointer must not be dereferenced.",
+      "runnable": false
+    },
+    {
+      "id": "cpp8.4-ex5",
+      "language": "en",
+      "title": "Indexed safer option",
+      "code": "std::vector<int> v{1,2,3};\\nfor(std::size_t i=0;i<v.size();++i)std::cout<<v.at(i);",
+      "explanation": "Bounds-checked at() is often easier to reason about than manual pointer math.",
+      "runnable": false
+    }
+  ],
+  "practise": {
+    "guidedTask": "Trace the five Pointer Arithmetic and Bounds examples. Mark each pointer/reference's target, object lifetime, mutability and whether dereferencing is valid.",
+    "independentTask": "Build a small C++ exercise showing pointer arithmetic and bounds. Include safe cases and deliberately describe (but do not execute) one invalid case. Demonstrate how ownership or lifetime is managed.",
+    "hints": [
+      "Draw pointer arrows to live objects.",
+      "Use nullptr for empty pointers and check before dereferencing.",
+      "Keep pointer arithmetic within one array.",
+      "Distinguish pointer constness from pointee constness.",
+      "Prefer value returns, containers and smart pointers to manual ownership."
+    ]
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "cpp8.4-q1",
+        "prompt": "Pointer arithmetic valid within?",
+        "options": [
+          "Same array object or one-past-end",
+          "Any memory",
+          "Different unrelated arrays"
+        ],
+        "answer": "Same array object or one-past-end",
+        "explanation": "C++ defines arithmetic within one array bounds."
+      },
+      {
+        "id": "cpp8.4-q2",
+        "prompt": "Dereference one-past-end?",
+        "options": [
+          "Invalid",
+          "Always safe",
+          "Returns zero"
+        ],
+        "answer": "Invalid",
+        "explanation": "One-past-end cannot be dereferenced."
+      },
+      {
+        "id": "cpp8.4-q3",
+        "prompt": "Pointer subtraction gives?",
+        "options": [
+          "Element distance",
+          "Byte distance always",
+          "Array size automatically"
+        ],
+        "answer": "Element distance",
+        "explanation": "Subtraction yields difference in elements for same array."
+      },
+      {
+        "id": "cpp8.4-q4",
+        "prompt": "Out-of-bounds access causes?",
+        "options": [
+          "Undefined behavior",
+          "Guaranteed exception",
+          "Automatic clamp"
+        ],
+        "answer": "Undefined behavior",
+        "explanation": "C++ does not guarantee a safe result."
+      },
+      {
+        "id": "cpp8.4-q5",
+        "prompt": "Safer checked collection access?",
+        "options": [
+          "at()",
+          "Raw pointer math",
+          "Unchecked dereference"
+        ],
+        "answer": "at()",
+        "explanation": "at() performs bounds checking."
+      }
+    ]
+  },
+  "status": "draft"
+}
