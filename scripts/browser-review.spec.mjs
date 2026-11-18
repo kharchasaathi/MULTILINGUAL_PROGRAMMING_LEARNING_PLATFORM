@@ -100,14 +100,23 @@ test("all six courses render representative lessons and starter programs execute
     await expect(dialog.locator(".lesson-template-title")).toContainText(topicId);
     await expect(dialog.locator(".curriculum-back")).toBeVisible();
     await expect(dialog.locator(".curriculum-draft-notice")).toHaveCount(0);
-    await expect(dialog.locator(".lesson-objectives-list li")).toHaveCount(5);
-    await expect(dialog.locator(".lesson-example")).toHaveCount(course === "cpp" ? 5 : 2);
+    const lessonResponse = await page.request.get(`${baseURL/content/en/${course/${topicId.json}`);
+    expect(lessonResponse.ok(), topicId + " lesson file").toBeTruthy();
+    const lessonData = await lessonResponse.json();
+    const expectedExamples = lessonData.examples || lessonData.stages?.explain?.examples || [];
+    const expectedQuestions = lessonData.assessment?.questions || [];
+    await expect(dialog.locator(".lesson-objectives-list li")).toHaveCount(lessonData.learningObjectives.length);
+    await expect(dialog.locator(".lesson-example")).toHaveCount(expectedExamples.length);
     if (course === "cpp") {
       await expect(dialog.locator(".lesson-stage").nth(0)).toContainText("C++ is a general-purpose");
-      await expect(dialog.locator(".lesson-hints li")).toHaveCount(5);
+      await expect(dialog.locator(".lesson-hints li")).toHaveCount(lessonData.practise.hints.length);
+      const firstQuestion = dialog.locator(".lesson-question").first();
+      const correctAnswer = Number.isInteger(expectedQuestions[0].answer) ? expectedQuestions[0].options[expectedQuestions[0].answer] : expectedQuestions[0].answer;
+      await firstQuestion.getByText(correctAnswer, { exact: true }).click();
+      await expect(firstQuestion.locator(".lesson-question-feedback")).toContainText("Correct");
     }
-    await expect(dialog.locator(".lesson-question")).toHaveCount(5);
-    await expect(dialog.locator(".lesson-answer-option")).toHaveCount(15);
+    await expect(dialog.locator(".lesson-question")).toHaveCount(expectedQuestions.length);
+    await expect(dialog.locator(".lesson-answer-option")).toHaveCount(expectedQuestions.reduce((total, question) => total + question.options.length, 0));
     await dialog.locator("#closeLesson").click();
   }
 
