@@ -1,0 +1,170 @@
+{
+  "id": "foundation.f14.7.en",
+  "courseId": "foundation",
+  "moduleId": "F14",
+  "topicId": "F14.7",
+  "title": "Serialization and Deserialization",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the key ideas and terminology of serialization and deserialization.",
+    "Recognize how the concept is used in real software communication.",
+    "Identify common mistakes or risks associated with this topic.",
+    "Apply the concept to a small, fictional API scenario.",
+    "Review a communication design and justify appropriate choices."
+  ],
+  "prerequisites": [
+    "F13.12"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Serialization converts in-memory data into a representation that can be stored or transmitted; deserialization reconstructs data from that representation. JSON is one possible format. Conversion can lose or alter information: language-specific values may not map cleanly, and serialized data should be treated as untrusted when received. Validate reconstructed data before using it.",
+      "whyItMatters": "Programs need to convert data between runtime memory and formats that files or other systems can exchange.",
+      "analogy": "Think of a delivery process with a sender, a message, and a receiver who returns a confirmation or explanation.",
+      "analogyLimit": "Software communication may involve complex protocols, asynchronous timing, security, and partial failures that this everyday analogy cannot fully capture."
+    },
+    "explain": {
+      "narrative": "Serialization converts in-memory data into a representation that can be stored or transmitted; deserialization reconstructs data from that representation. JSON is one possible format. Conversion can lose or alter information: language-specific values may not map cleanly, and serialized data should be treated as untrusted when received. Validate reconstructed data before using it.\n\nUse the protocol and service documentation as the authoritative guide for a real API. Examples here are conceptual and intentionally do not make live network calls.",
+      "examples": [
+        {
+          "id": "f147-ex1",
+          "title": "Serialize an object",
+          "code": "const value={score:8};\nconst text=JSON.stringify(value);\nconsole.log(text);",
+          "expectedOutput": "{\"score\":8}",
+          "explanation": "Serialization converts the object to JSON text."
+        },
+        {
+          "id": "f147-ex2",
+          "title": "Deserialize JSON text",
+          "code": "const text='{\"score\":8}';\nconst value=JSON.parse(text);\nconsole.log(value.score);",
+          "expectedOutput": "8",
+          "explanation": "Deserialization reconstructs a usable object."
+        },
+        {
+          "id": "f147-ex3",
+          "title": "Serialize an array",
+          "code": "console.log(JSON.stringify(['a','b']));",
+          "expectedOutput": "[\"a\",\"b\"]",
+          "explanation": "Arrays can be represented as JSON arrays."
+        },
+        {
+          "id": "f147-ex4",
+          "title": "Validate after parsing",
+          "code": "const parsed=JSON.parse('{\"count\":\"eight\"}');\nconsole.log(typeof parsed.count);",
+          "expectedOutput": "string",
+          "explanation": "Parsing succeeds, but the application may require a numeric count."
+        },
+        {
+          "id": "f147-ex5",
+          "title": "Consider unsupported values",
+          "code": "const data={ready:true,extra:undefined};\nconsole.log(JSON.stringify(data));",
+          "expectedOutput": "{\"ready\":true}",
+          "explanation": "Some runtime values may be omitted or transformed during serialization."
+        }
+      ],
+      "commonMistakes": [
+        "Assuming every request succeeds or returns the same shape.",
+        "Treating parsing as validation or authentication as authorization.",
+        "Ignoring timeout, rate-limit, and failure responses.",
+        "Embedding secret credentials in public client code.",
+        "Retrying operations without considering duplicate side effects."
+      ]
+    },
+    "practise": {
+      "guidedTask": {
+        "title": "Guided Practice",
+        "instructions": "Serialize a fictional settings object with a boolean, number, array, and nested object. Deserialize it, then write validation checks for each expected field type.",
+        "steps": [
+          "Serialize a fictional settings object with a boolean, number, array, and nested object. Deserialize it, then write validation checks for each expected field type.",
+          "Sketch the communication sequence and identify the client/server roles.",
+          "Define expected success and failure outcomes.",
+          "Choose checks, timeout or retry behavior where appropriate.",
+          "Review your design for privacy and safe handling."
+        ],
+        "starterCode": "// Conceptual API exercise. Use fictional payloads only; no real credentials or network calls."
+      },
+      "independentTask": {
+        "title": "Independent Practice",
+        "instructions": "Design a data round-trip exercise. Document the original runtime data, serialized text, reconstructed data, and any value that might be transformed or lost. Include validation for malformed and unexpected data.",
+        "requirements": [
+          "Use a fictional or toy service; do not include live secrets.",
+          "Design a data round-trip exercise. Document the original runtime data, serialized text, reconstructed data, and any value that might be transformed or lost. Include validation for malformed and unexpected data.",
+          "Document assumptions, edge cases, and how you would test them."
+        ]
+      },
+      "hints": [
+        "Serialization converts data to a format.",
+        "Deserialization parses that format back into runtime data.",
+        "Check how special or unsupported values are represented.",
+        "Do not assume received data is trusted.",
+        "Validate the shape and allowed values after parsing."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "f147-q1",
+        "prompt": "What does serialization do?",
+        "options": [
+          "Converts runtime data into a storable or transmissible representation",
+          "Checks login",
+          "Deletes a database",
+          "Displays a screen"
+        ],
+        "answer": "Converts runtime data into a storable or transmissible representation",
+        "explanation": "Serialization prepares data for exchange or storage."
+      },
+      {
+        "id": "f147-q2",
+        "prompt": "What does deserialization do?",
+        "options": [
+          "Reconstructs runtime data from a representation",
+          "Always encrypts the data",
+          "Verifies permissions",
+          "Compresses every file"
+        ],
+        "answer": "Reconstructs runtime data from a representation",
+        "explanation": "Deserialization reads encoded structure."
+      },
+      {
+        "id": "f147-q3",
+        "prompt": "What can happen during serialization?",
+        "options": [
+          "Some values may be transformed, omitted, or unsupported",
+          "Every runtime value is preserved exactly",
+          "Data is always encrypted",
+          "It grants API access"
+        ],
+        "answer": "Some values may be transformed, omitted, or unsupported",
+        "explanation": "Formats have limits and conversion rules."
+      },
+      {
+        "id": "f147-q4",
+        "prompt": "Why validate after deserializing?",
+        "options": [
+          "Parsed data may be malformed for the app or untrusted",
+          "Parsing guarantees authorization",
+          "It removes all errors",
+          "It changes the network method"
+        ],
+        "answer": "Parsed data may be malformed for the app or untrusted",
+        "explanation": "Syntax-valid data may violate app requirements."
+      },
+      {
+        "id": "f147-q5",
+        "prompt": "Is serialization the same as encryption?",
+        "options": [
+          "No; serialization changes representation but does not inherently protect confidentiality",
+          "Yes, always",
+          "Only for JSON",
+          "Only for files"
+        ],
+        "answer": "No; serialization changes representation but does not inherently protect confidentiality",
+        "explanation": "Serialization does not provide secrecy."
+      }
+    ]
+  }
+}
