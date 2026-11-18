@@ -3,14 +3,14 @@
   "courseId": "foundation",
   "moduleId": "F2",
   "topicId": "F2.6",
-  "title": "Multi-Branch Decisions with if, else if, and else",
+  "title": "Nested Decisions and Decision Trees",
   "language": "en",
   "learningObjectives": [
-    "Explain sequential evaluation in an if/else if/else chain.",
-    "Write multi-branch decisions using if, else if, and else.",
-    "Predict which branch runs when multiple conditions could be true.",
-    "Order conditions to avoid broad rules blocking specific cases.",
-    "Identify missing coverage, unreachable branches, and condition-order mistakes."
+    "Explain how one decision can contain another decision.",
+    "Trace nested if/else structures and identify which inner block is reached.",
+    "Represent nested decisions as a simple decision tree.",
+    "Avoid ambiguous else placement by using braces and indentation.",
+    "Refactor overly deep nesting when a clearer structure is possible."
   ],
   "prerequisites": [
     "F2.2",
@@ -20,89 +20,89 @@
   ],
   "stages": {
     "understand": {
-      "concept": "A multi-branch decision checks conditions in sequence. The first true condition selects its branch and skips the remaining branches in the chain. An optional else handles the case where none of the earlier conditions is true.",
-      "whyItMatters": "Programs often need to choose one result from several categories. A single decision chain makes those alternatives clear and prevents multiple branches from running when only one outcome is intended.",
-      "analogy": "A service desk checks a queue of rules from top to bottom. When a rule matches, it directs the visitor to one service and the remaining rules are not checked.",
-      "analogyLimit": "Unlike a real queue, code evaluates Boolean expressions. A broad early condition can capture cases meant for a later, more specific condition, so rule order matters."
+      "concept": "A nested decision is an if or else structure placed inside another decision's branch. The outer condition determines which section of code is reached; then an inner condition can make a more specific choice. A decision tree is a diagram of these possible paths.",
+      "whyItMatters": "Some decisions depend on more than one level of eligibility or state. For example, a user may first qualify as a member, then receive a different offer based on purchase amount. Nested decisions model such dependent choices.",
+      "analogy": "At a venue, the first check asks whether a visitor has a ticket. Only ticket holders go to the next check for seat type. Each check opens a smaller decision.",
+      "analogyLimit": "Real programs may have many possible paths and conditions that change over time. A tree is a simplification; always trace actual code and validate the conditions."
     },
     "explain": {
-      "narrative": "Use if for the first condition, else if for additional alternatives, and optionally else for a fallback. Conditions are checked in order and the chain stops after the first true condition. This differs from separate if statements, where multiple blocks may execute. For numeric bands, order thresholds carefully and use clear boundaries. Validate invalid inputs separately when needed; an else branch should not silently treat invalid data as valid. Use braces and indentation to make branch ownership visible.",
+      "narrative": "Nested decisions place a second if/else inside an outer branch. The inner condition is evaluated only when execution reaches it. Indent clearly and use braces to make each else belong to its intended if. Draw a decision tree to list paths, and consider reducing deep nesting with early returns, helper functions, or a multi-branch chain when appropriate.",
       "examples": [
         {
           "id": "f2.6-ex1",
-          "title": "Score classification",
-          "code": "const score = 82;\\nif (score >= 90) {\\n console.log('Excellent');\\n} else if (score >= 75) {\\n console.log('Good');\\n} else if (score >= 50) {\\n console.log('Pass');\\n} else {\\n console.log('Retry');\\n}",
-          "expectedOutput": "Good",
-          "explanation": "The first condition is false; score >= 75 is true, so that branch runs and the rest are skipped."
+          "title": "Member then purchase threshold",
+          "code": "const isMember = true;\\nconst total = 1200;\\nif (isMember) {\\n  if (total >= 1000) {\\n    console.log('Member premium reward');\\n  } else {\\n    console.log('Member reward');\\n  }\\n} else {\\n  console.log('Guest offer');\\n}",
+          "expectedOutput": "Member premium reward",
+          "explanation": "The outer condition selects the member path; the inner condition then checks the purchase total."
         },
         {
           "id": "f2.6-ex2",
-          "title": "A broad rule can hide a later rule",
-          "code": "const points = 95;\\nif (points >= 50) {\\n console.log('At least 50');\\n} else if (points >= 90) {\\n console.log('At least 90');\\n}",
-          "expectedOutput": "At least 50",
-          "explanation": "The first condition matches, so the later 90-point branch is unreachable in this chain. This is intentionally misordered."
+          "title": "Nested path when outer condition is false",
+          "code": "const hasAccount = false;\\nif (hasAccount) {\\n  if (true) console.log('Account route');\\n} else {\\n  console.log('Create account');\\n}",
+          "expectedOutput": "Create account",
+          "explanation": "Because the outer condition is false, the inner if is never reached."
         },
         {
           "id": "f2.6-ex3",
-          "title": "Delivery state",
-          "code": "const status = 'in-transit';\\nif (status === 'delivered') {\\n console.log('Complete');\\n} else if (status === 'in-transit') {\\n console.log('On the way');\\n} else if (status === 'cancelled') {\\n console.log('Cancelled');\\n} else {\\n console.log('Status unavailable');\\n}",
-          "expectedOutput": "On the way",
-          "explanation": "The chain checks the known states and chooses the matching branch."
+          "title": "Two levels of access checks",
+          "code": "const loggedIn = true;\\nconst isAdmin = false;\\nif (loggedIn) {\\n  if (isAdmin) console.log('Admin panel');\\n  else console.log('User dashboard');\\n} else {\\n  console.log('Sign in');\\n}",
+          "expectedOutput": "User dashboard",
+          "explanation": "The outer login check passes; the inner admin check chooses the user dashboard."
         },
         {
           "id": "f2.6-ex4",
-          "title": "Fallback branch",
-          "code": "const method = 'cash';\\nif (method === 'card') {\\n console.log('Card payment');\\n} else if (method === 'upi') {\\n console.log('UPI payment');\\n} else {\\n console.log('Other payment method');\\n}",
-          "expectedOutput": "Other payment method",
-          "explanation": "Neither preceding condition matches, so the else fallback runs."
+          "title": "Trace a nested discount",
+          "code": "const age = 15;\\nconst accompanied = true;\\nif (age < 18) {\\n  if (accompanied) console.log('Entry with guardian');\\n  else console.log('Guardian required');\\n} else {\\n  console.log('Standard entry');\\n}",
+          "expectedOutput": "Entry with guardian",
+          "explanation": "The outer age branch is selected, then the inner accompanied check is true."
         },
         {
           "id": "f2.6-ex5",
-          "title": "Separate if statements",
-          "code": "const temperature = 35;\\nif (temperature > 30) console.log('Hot');\\nif (temperature > 20) console.log('Above 20');",
-          "expectedOutput": "Hot\\nAbove 20",
-          "explanation": "These are independent conditions; both are true and both execute, unlike one if/else if chain."
+          "title": "Simplify a deep choice",
+          "code": "const ready = true;\\nconst hasData = true;\\nif (ready) {\\n  if (hasData) {\\n    console.log('Process');\\n  } else {\\n    console.log('Load data');\\n  }\\n} else {\\n  console.log('Wait');\\n}",
+          "expectedOutput": "Process",
+          "explanation": "Nested branches represent dependent checks. For more complex structures, a decision tree or helper function may make the paths easier to understand."
         }
       ],
       "commonMistakes": [
-        "Using separate if statements when only one outcome should be selected.",
-        "Putting a broad condition before a narrower condition, making later branches unreachable.",
-        "Forgetting a required fallback or using else to accept invalid input silently.",
-        "Using assignment instead of comparison in a condition.",
-        "Overlapping numeric ranges without tracing order."
+        "Misplacing else so it binds to an unexpected if.",
+        "Ignoring the inner condition because only the outer condition was traced.",
+        "Excessive nesting that hides the path logic.",
+        "Missing braces or inconsistent indentation.",
+        "Not testing each path, including the false path of the outer condition."
       ]
     },
     "practise": {
       "guidedTask": {
-        "title": "Guided: Performance label",
-        "instructions": "Select a label: 90+ is Excellent; 75+ is Good; 50+ is Pass; otherwise Retry. Print the label.",
+        "title": "Guided: Membership reward decision",
+        "instructions": "First check membership. If the person is a member, check whether the purchase total is at least 1000 and print the appropriate member reward. Otherwise print the guest message.",
         "steps": [
-          "Create a score variable.",
-          "Check the highest threshold first.",
-          "Add else if branches for the next thresholds.",
-          "Use else for the remaining lower scores.",
-          "Test 95, 80, 60, and 40."
+          "Set isMember and purchaseTotal.",
+          "Write the outer membership if/else.",
+          "Inside the member branch, add the purchase threshold decision.",
+          "Indent and brace both levels carefully.",
+          "Test member and guest paths plus both inner outcomes."
         ],
-        "starterCode": "const score = 80;\\nif (score >= 90) console.log('Excellent');\\nelse if (score >= 75) console.log('Good');\\nelse if (score >= 50) console.log('Pass');\\nelse console.log('Retry');"
+        "starterCode": "const isMember = true;\\nconst purchaseTotal = 1200;\\nif (isMember) {\\n  if (purchaseTotal >= 1000) console.log('Premium member reward');\\n  else console.log('Member reward');\\n} else {\\n  console.log('Guest offer');\\n}"
       },
       "independentTask": {
-        "title": "Independent: Shipping category",
-        "instructions": "Categorize positive numeric package weight: up to 1 kg Light; over 1 and up to 5 Standard; over 5 and up to 15 Heavy; over 15 Oversize. Reject or separately handle zero, negative, or non-numeric input.",
+        "title": "Independent: Account access decision tree",
+        "instructions": "Model access decisions: if signed out, show Sign in; if signed in but not verified, show Verify account; if verified but not admin, show User dashboard; if verified admin, show Admin dashboard. Create a decision tree sketch before coding.",
         "requirements": [
-          "Validate input as numeric and positive first.",
-          "Use if/else if/else for four categories.",
-          "Make boundaries clear and avoid overlaps.",
-          "Produce one category for valid weights.",
-          "Test 1, 1.01, 5, 5.01, 15, 15.01 and invalid inputs."
+          "Use at least one nested decision.",
+          "Ensure inner conditions are evaluated only on the relevant outer path.",
+          "Make every outcome reachable and distinct.",
+          "Use braces and indentation to clarify else ownership.",
+          "Test all four paths."
         ]
       },
       "hints": [
-        "The chain stops after the first true condition.",
-        "Put priority or narrow threshold rules before broad ones.",
-        "Descending numeric thresholds can prevent an early broad match.",
-        "Decide explicitly what the else branch represents.",
-        "Test exact boundaries and values just above/below them.",
-        "Separate if statements may run multiple times; a chain selects at most one branch."
+        "Trace the outer condition first.",
+        "An inner condition runs only if its containing branch is selected.",
+        "Indent inner branches one level deeper and use braces.",
+        "Sketch a tree to enumerate all possible paths.",
+        "Test the false branch of every outer decision.",
+        "If nesting becomes deep, consider simplifying or extracting a helper."
       ]
     }
   },
@@ -113,58 +113,58 @@
     "questions": [
       {
         "id": "f2.6-en-q1",
-        "prompt": "What happens after one condition is true in an if/else if chain?",
+        "prompt": "What is a nested decision?",
         "options": [
-          "That branch runs and the rest of the chain is skipped",
-          "All later branches are evaluated",
-          "Else always runs too"
+          "A decision placed inside another decision branch",
+          "A loop inside a string",
+          "Two unrelated variables"
         ],
-        "answer": "That branch runs and the rest of the chain is skipped",
-        "explanation": "A chain selects the first matching branch and then exits the chain."
+        "answer": "A decision placed inside another decision branch",
+        "explanation": "Nested decisions perform a more specific check after an outer branch has been selected."
       },
       {
         "id": "f2.6-en-q2",
-        "prompt": "Why should a broad threshold not come before a narrower threshold?",
+        "prompt": "When does an inner if condition execute?",
         "options": [
-          "It may match first and make the narrower branch unreachable",
-          "JavaScript requires ascending order",
-          "It causes every branch to run"
+          "Only when execution reaches its containing outer branch",
+          "Every time the file loads",
+          "Only when the outer condition is false"
         ],
-        "answer": "It may match first and make the narrower branch unreachable",
-        "explanation": "Conditions are checked in order, so an early broad condition can capture later cases."
+        "answer": "Only when execution reaches its containing outer branch",
+        "explanation": "The outer condition controls whether the nested block is reached."
       },
       {
         "id": "f2.6-en-q3",
-        "prompt": "What is the purpose of an optional else?",
+        "prompt": "What can a decision tree help you do?",
         "options": [
-          "Handle cases when none of the earlier conditions match",
-          "Repeat the first condition",
-          "Force all conditions to become true"
+          "Visualize branches and possible paths",
+          "Automatically fix syntax errors",
+          "Replace all tests"
         ],
-        "answer": "Handle cases when none of the earlier conditions match",
-        "explanation": "Else is the fallback path for the chain."
+        "answer": "Visualize branches and possible paths",
+        "explanation": "A tree maps conditions and outcomes so paths can be checked."
       },
       {
         "id": "f2.6-en-q4",
-        "prompt": "How do separate if statements differ from a single if/else if chain?",
+        "prompt": "What makes nested if/else code easier to read?",
         "options": [
-          "Separate if statements may each execute; a chain selects at most one branch",
-          "They are always equivalent",
-          "Separate if statements cannot contain comparisons"
+          "Braces and consistent indentation",
+          "Removing all spacing",
+          "Using ambiguous single-line branches"
         ],
-        "answer": "Separate if statements may each execute; a chain selects at most one branch",
-        "explanation": "Each independent if is checked separately, but a chain stops at the first true condition."
+        "answer": "Braces and consistent indentation",
+        "explanation": "Clear indentation and braces help identify which else belongs to which if."
       },
       {
         "id": "f2.6-en-q5",
-        "prompt": "What is a good way to test multi-branch decisions?",
+        "prompt": "What should you consider if nesting becomes very deep?",
         "options": [
-          "Test each outcome and values at numeric boundaries",
-          "Test only one typical input",
-          "Skip the fallback branch"
+          "Simplify the structure or extract helper functions",
+          "Add more nesting",
+          "Skip testing inner paths"
         ],
-        "answer": "Test each outcome and values at numeric boundaries",
-        "explanation": "Boundary tests reveal ordering and off-by-one errors; every branch should have coverage."
+        "answer": "Simplify the structure or extract helper functions",
+        "explanation": "Refactoring can reduce complexity and make decision paths easier to maintain."
       }
     ]
   },
