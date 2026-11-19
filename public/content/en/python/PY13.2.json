@@ -1,0 +1,156 @@
+{
+  "id": "python.py13.2.en",
+  "courseId": "python",
+  "moduleId": "PY13",
+  "topicId": "PY13.2",
+  "title": "Using iter(), next() and StopIteration",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the main ideas in using iter(), next() and stopiteration.",
+    "Use the relevant iterator or generator protocol correctly.",
+    "Trace values and state across successive iteration steps.",
+    "Recognize exhaustion, lazy evaluation and relevant edge cases.",
+    "Apply the concept to a practical sequence-processing task."
+  ],
+  "prerequisites": [
+    "PY6.2",
+    "PY7.1",
+    "PY8.1",
+    "PY12.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "iter() obtains an iterator from an iterable, and next() requests its next value. When the iterator is exhausted, next() raises StopIteration unless a default value is supplied. These operations expose the mechanics normally handled automatically by a for loop.",
+      "whyItMatters": "Manual iteration is useful when a program needs controlled, step-by-step consumption, lookahead patterns or a clear understanding of lazy data sources.",
+      "analogy": "iter() gives you a numbered ticket dispenser, and next() requests the next ticket in sequence.",
+      "analogyLimit": "The ticket analogy does not imply random access or guaranteed finite data. An iterator may be infinite, may perform work when advanced, and may have side effects."
+    },
+    "explain": {
+      "narrative": "## Obtain and advance an iterator\nCall `iterator = iter(iterable)` to obtain an iterator. Each call to `next(iterator)` requests one item and advances the iterator. The iterator stores its own progress; calling `next()` again does not return the same item unless the iterator is explicitly designed to do so.\n\n## Handle exhaustion\nWhen no item remains, `next(iterator)` raises `StopIteration`. You can provide a default: `next(iterator, default)` returns that default instead of raising when the iterator is exhausted. A for loop handles StopIteration internally, so application code usually does not need to catch it for ordinary loops.\n\n## One-pass caution\nDo not assume an iterator can be rewound. If you need another pass, keep the original reusable iterable or create a new iterator from it.",
+      "examples": [
+        {
+          "id": "py13.2-ex1",
+          "language": "en",
+          "title": "Read values one at a time",
+          "code": "items = ['A', 'B', 'C']\nit = iter(items)\nprint(next(it))\nprint(next(it))",
+          "expectedOutput": "A\nB",
+          "explanation": "Each next call returns one value and moves the iterator forward."
+        },
+        {
+          "id": "py13.2-ex2",
+          "language": "en",
+          "title": "Use a default at exhaustion",
+          "code": "it = iter([10])\nprint(next(it, 0))\nprint(next(it, 0))",
+          "expectedOutput": "10\n0",
+          "explanation": "The first call returns the item; the second returns the supplied default instead of raising StopIteration."
+        },
+        {
+          "id": "py13.2-ex3",
+          "language": "en",
+          "title": "Consume the remaining values",
+          "code": "it = iter([2, 4, 6, 8])\nprint(next(it))\nprint(list(it))",
+          "expectedOutput": "2\n[4, 6, 8]",
+          "explanation": "After next consumes 2, converting the remaining iterator to a list consumes only the unvisited values."
+        },
+        {
+          "id": "py13.2-ex4",
+          "language": "en",
+          "title": "Show an iterator is one-pass",
+          "code": "it = iter(('red', 'blue'))\nprint(list(it))\nprint(list(it))",
+          "expectedOutput": "['red', 'blue']\n[]",
+          "explanation": "The first list conversion exhausts the iterator; the second sees no remaining values."
+        },
+        {
+          "id": "py13.2-ex5",
+          "language": "en",
+          "title": "Use a for loop instead of manual next calls",
+          "code": "it = iter([3, 6, 9])\nfor value in it:\n    print(value)",
+          "expectedOutput": "3\n6\n9",
+          "explanation": "The for loop repeatedly advances the iterator and handles StopIteration automatically."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Write a small program that demonstrates using iter(), next() and stopiteration. Show at least two iteration steps and explain how the state changes.",
+      "independentTask": "Build a reusable or one-pass sequence processor using this topic. Test normal input, an empty or exhausted case, and describe when each value is calculated.",
+      "hints": [
+        "Identify whether the object is an iterable, an iterator or both.",
+        "Write down the state before and after each next() call.",
+        "Use StopIteration as the normal completion signal.",
+        "Test an empty input and an already exhausted iterator.",
+        "Choose a list only when repeated access or storage is required."
+      ],
+      "challenge": "Process a larger sequence incrementally and compare the memory and reuse trade-offs with building a list first."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py13.2-q1",
+        "prompt": "What does next(it) do?",
+        "answer": "Returns the next item and advances the iterator",
+        "options": [
+          "Returns the next item and advances the iterator",
+          "Restarts the iterator",
+          "Returns the first item every time",
+          "Copies the remaining values"
+        ],
+        "explanation": "next requests one item from the iterator's current position."
+      },
+      {
+        "id": "py13.2-q2",
+        "prompt": "What happens when next(it) is called on an exhausted iterator without a default?",
+        "answer": "StopIteration is raised",
+        "options": [
+          "StopIteration is raised",
+          "None is always returned",
+          "The iterator restarts",
+          "The last value is repeated"
+        ],
+        "explanation": "StopIteration signals that there are no more items."
+      },
+      {
+        "id": "py13.2-q3",
+        "prompt": "What does next(it, 'done') return after exhaustion?",
+        "answer": "done",
+        "options": [
+          "done",
+          "StopIteration",
+          "The previous item",
+          "An empty list"
+        ],
+        "explanation": "The optional default is returned instead of raising StopIteration."
+      },
+      {
+        "id": "py13.2-q4",
+        "prompt": "After list(it) consumes an iterator, what will another list(it) normally produce?",
+        "answer": "An empty list",
+        "options": [
+          "An empty list",
+          "A duplicate of the first list",
+          "The iterator itself",
+          "A TypeError"
+        ],
+        "explanation": "The first conversion exhausts the iterator, leaving no values for the second conversion."
+      },
+      {
+        "id": "py13.2-q5",
+        "prompt": "Which construct normally handles iterator exhaustion automatically?",
+        "answer": "for loop",
+        "options": [
+          "for loop",
+          "if statement",
+          "assignment statement",
+          "class definition"
+        ],
+        "explanation": "A for loop stops cleanly when the iterator raises StopIteration."
+      }
+    ]
+  },
+  "status": "draft"
+}
