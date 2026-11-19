@@ -1,0 +1,155 @@
+{
+  "id": "python.py14.7.en",
+  "courseId": "python",
+  "moduleId": "PY14",
+  "topicId": "PY14.7",
+  "title": "Exception Chaining and Error-Handling Best Practices",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the principles of exception chaining and error-handling best practices.",
+    "Write correct Python syntax for the exception-handling construct covered.",
+    "Predict which handler or cleanup block executes in common scenarios.",
+    "Distinguish recoverable errors, programming defects and internal assertions.",
+    "Apply safe and specific error handling to a realistic program."
+  ],
+  "prerequisites": [
+    "PY7.1",
+    "PY10.1",
+    "PY13.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Exception chaining preserves the relationship between a higher-level failure and the lower-level exception that caused it. Using raise NewError(...) from original_error sets an explicit cause, helping callers understand both the domain-level problem and its technical origin.",
+      "whyItMatters": "Layered applications often translate low-level failures into meaningful domain errors. Preserving the cause improves debugging without forcing every caller to understand implementation details.",
+      "analogy": "Exception chaining is like attaching the original incident report to an escalation summary so the next person can see both the impact and the cause.",
+      "analogyLimit": "A chained traceback may contain sensitive details. Logs and user-facing messages should be designed separately, with secrets and private data excluded."
+    },
+    "explain": {
+      "narrative": "## Preserve the original cause\nWhen converting one exception into a more meaningful application exception, use `raise DomainError(...) from error`. Python records the original exception as `__cause__` and displays the chain in a traceback. Use `raise ... from None` only when deliberately suppressing the displayed context.\n\n## Choose a handling boundary\nCatch exceptions where the program can take a meaningful action: retry, use a safe fallback, report a validation problem or add domain context. Let unexpected exceptions propagate to a boundary that can log and report them.\n\n## Best practices\nCatch specific exception types, keep try suites small, avoid silently passing, preserve causes when translating errors, and do not expose raw tracebacks or secrets to end users. Use context managers for resource cleanup and structured logging for diagnostics.",
+      "examples": [
+        {
+          "id": "py14.7-ex1",
+          "language": "en",
+          "title": "Translate a low-level exception with its cause",
+          "code": "class ConfigError(Exception):\n    pass\ndef load_port(text):\n    try:\n        return int(text)\n    except ValueError as error:\n        raise ConfigError('port must be an integer') from error\ntry:\n    load_port('web')\nexcept ConfigError as error:\n    print(type(error).__name__)\n    print(type(error.__cause__).__name__)",
+          "expectedOutput": "ConfigError\nValueError",
+          "explanation": "The domain-level ConfigError preserves the original ValueError in __cause__."
+        },
+        {
+          "id": "py14.7-ex2",
+          "language": "en",
+          "title": "Inspect the original cause",
+          "code": "try:\n    try:\n        int('invalid')\n    except ValueError as error:\n        raise RuntimeError('could not load setting') from error\nexcept RuntimeError as error:\n    print(str(error))\n    print(type(error.__cause__).__name__)",
+          "expectedOutput": "could not load setting\nValueError",
+          "explanation": "The higher-level message is useful to callers while the cause retains the conversion failure."
+        },
+        {
+          "id": "py14.7-ex3",
+          "language": "en",
+          "title": "Suppress displayed exception context deliberately",
+          "code": "try:\n    try:\n        int('bad')\n    except ValueError:\n        raise RuntimeError('configuration rejected') from None\nexcept RuntimeError as error:\n    print(str(error))\n    print(error.__cause__)",
+          "expectedOutput": "configuration rejected\nNone",
+          "explanation": "from None suppresses the displayed implicit context and leaves __cause__ as None."
+        },
+        {
+          "id": "py14.7-ex4",
+          "language": "en",
+          "title": "Keep the try suite narrow",
+          "code": "def parse(text):\n    try:\n        value = int(text)\n    except ValueError:\n        return None\n    return value * 10\nprint(parse('4'))\nprint(parse('x'))",
+          "expectedOutput": "40\nNone",
+          "explanation": "Only conversion is inside try; the later calculation is not accidentally classified as a conversion failure."
+        },
+        {
+          "id": "py14.7-ex5",
+          "language": "en",
+          "title": "Do not silently swallow unexpected errors",
+          "code": "try:\n    1 / 0\nexcept ZeroDivisionError:\n    print('Cannot calculate this result')\nprint('application continues')",
+          "expectedOutput": "Cannot calculate this result\napplication continues",
+          "explanation": "The handler provides a clear recovery action instead of silently discarding the failure."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a small program demonstrating exception chaining and error-handling best practices. Trigger one expected failure, handle it appropriately, and explain the resulting control flow.",
+      "independentTask": "Build a small input-processing function with explicit validation and a clear error-handling policy. Test one valid input, one expected invalid input and one unexpected failure; explain which layer should handle each.",
+      "hints": [
+        "Identify the exact operation that can fail before writing the try block.",
+        "Catch only exception types that have a meaningful recovery action.",
+        "Keep normal success logic outside the protected suite when possible.",
+        "Preserve the original exception when adding higher-level context.",
+        "Never rely on assert for required user-input or security validation."
+      ],
+      "challenge": "Design a small application boundary that translates a low-level exception into a domain-specific error, preserves the cause and produces a safe user-facing message."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py14.7-q1",
+        "prompt": "What does raise NewError(...) from error set?",
+        "answer": "The original exception as __cause__",
+        "options": [
+          "The original exception as __cause__",
+          "The new exception's return value",
+          "The global exception handler",
+          "The traceback to None"
+        ],
+        "explanation": "Explicit exception chaining records the supplied exception as the new exception's cause."
+      },
+      {
+        "id": "py14.7-q2",
+        "prompt": "Where should an exception usually be caught?",
+        "answer": "Where the program can take a meaningful recovery or reporting action",
+        "options": [
+          "Where the program can take a meaningful recovery or reporting action",
+          "Around every line regardless of need",
+          "Only at the top of every function",
+          "Inside every class constructor"
+        ],
+        "explanation": "A handler is useful when it can recover, add context or report the problem appropriately."
+      },
+      {
+        "id": "py14.7-q3",
+        "prompt": "What does raise NewError(...) from None do?",
+        "answer": "Suppresses the displayed implicit exception context",
+        "options": [
+          "Suppresses the displayed implicit exception context",
+          "Deletes the original exception from memory",
+          "Disables all exceptions",
+          "Converts the error into a warning"
+        ],
+        "explanation": "from None suppresses the implicit context display; it should be used deliberately."
+      },
+      {
+        "id": "py14.7-q4",
+        "prompt": "Why should raw tracebacks not be shown to ordinary users?",
+        "answer": "They may expose internal paths, implementation details or sensitive data",
+        "options": [
+          "They may expose internal paths, implementation details or sensitive data",
+          "They are always inaccurate",
+          "They cannot be displayed in browsers",
+          "They prevent Python from continuing"
+        ],
+        "explanation": "Tracebacks are valuable for diagnostics but may disclose information inappropriate for user-facing messages."
+      },
+      {
+        "id": "py14.7-q5",
+        "prompt": "Which practice improves reliable exception handling?",
+        "answer": "Catch specific errors and preserve useful diagnostic context",
+        "options": [
+          "Catch specific errors and preserve useful diagnostic context",
+          "Use bare except and ignore every error",
+          "Put the whole program in one try block",
+          "Return from finally to hide errors"
+        ],
+        "explanation": "Specific handlers and preserved context make failures easier to understand and recover from."
+      }
+    ]
+  },
+  "status": "draft"
+}
