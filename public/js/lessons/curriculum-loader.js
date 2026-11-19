@@ -161,7 +161,7 @@
     // into the reusable three-stage renderer without changing source JSON files.
     const practice = lesson.stages.practise || lesson.practise || lesson.practice || {};
     const examples = Array.isArray(explain?.examples) ? explain.examples : (Array.isArray(lesson.examples) ? lesson.examples : []);
-    const explanationText = explain?.narrative || explain?.explain || lesson.explanation || "";
+    const explanationText = explain?.narrative || explain?.explain || understand?.explain || lesson.explanation || "";
     const code = lesson.practice?.starterCode || "";
     const questions = (lesson.assessment?.questions || []).map(question => ({ ...question, answer: Number.isInteger(question.answer) ? question.options?.[question.answer] : question.answer }));
     const onComplete = () => {
@@ -180,7 +180,7 @@
       examples,
       code,
       practice: "Guided: " + (practice.guidedTask || "") + "\n\nIndependent: " + (practice.independentTask || ""),
-      hints: practice.hints || lesson.hints || [],
+      hints: practice.hints || [],
       questions,
       onComplete
     });
