@@ -1,0 +1,161 @@
+{
+  "id": "python.py17.6.en",
+  "courseId": "python",
+  "moduleId": "PY17",
+  "topicId": "PY17.6",
+  "title": "Date Arithmetic with timedelta and Time Zones",
+  "language": "en",
+  "learningObjectives": [
+    "Explain date arithmetic, durations and UTC offsets and its role in Python applications.",
+    "Choose appropriate datetime classes and methods for date arithmetic, durations and UTC offsets.",
+    "Predict the output of representative PY17.6 operations.",
+    "Identify invalid values, formatting ambiguity or timezone risks related to date arithmetic, durations and UTC offsets.",
+    "Apply date arithmetic, durations and UTC offsets in a small, deterministic Python program."
+  ],
+  "prerequisites": [
+    "PY16.1",
+    "PY14.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A timedelta represents a duration that can be added to or subtracted from dates and datetimes. Timezone-aware datetimes represent instants with an offset, while naive datetimes do not. For cross-region systems, store or exchange UTC-aware values and convert to a user's timezone for display.",
+      "whyItMatters": "Deadlines, booking windows and elapsed-time calculations require reliable date arithmetic. Timezone awareness prevents common errors when systems operate across regions or daylight-saving transitions.",
+      "analogy": "Date-time values are like entries on a calendar plus the hands on a clock; a duration measures the distance between two entries.",
+      "analogyLimit": "Real calendars include leap years, time zones and daylight-saving transitions that a simple wall calendar analogy does not fully model.",
+      "summary": "Date Arithmetic with timedelta and Time Zones teaches reliable representation and manipulation of Python date-time values."
+    },
+    "explain": {
+      "narrative": "## Add and subtract durations\nCreate `timedelta(days=..., hours=..., minutes=...)`, then add or subtract it from a date or datetime. Subtracting two dates or datetimes produces a timedelta.\n\n## Understand duration values\nUse `.days`, `.seconds` and `.total_seconds()` as appropriate. `total_seconds()` returns the full duration as a number of seconds, including days.\n\n## Timezone-aware values\nUse `datetime.timezone.utc` for UTC-aware values. `astimezone()` converts an aware datetime to another timezone. A fixed offset is not a full daylight-saving timezone rule; use `zoneinfo.ZoneInfo` for named regions when needed.\n\n## Safe practices\nDo not attach a timezone blindly to a value whose original timezone is unknown. Define whether incoming timestamps are UTC, local or offset-aware, and preserve that meaning through storage and comparisons.",
+      "examples": [
+        {
+          "id": "py17.6-ex1",
+          "language": "en",
+          "title": "Add days to a date",
+          "code": "from datetime import date, timedelta\nstart = date(2026, 11, 19)\nprint(start + timedelta(days=10))",
+          "expectedOutput": "2026-11-29",
+          "explanation": "Adding a timedelta returns a new date."
+        },
+        {
+          "id": "py17.6-ex2",
+          "language": "en",
+          "title": "Subtract two dates",
+          "code": "from datetime import date\nstart = date(2026, 5, 1)\nend = date(2026, 5, 12)\nprint((end - start).days)",
+          "expectedOutput": "11",
+          "explanation": "Subtracting dates produces a timedelta whose days attribute gives the day difference."
+        },
+        {
+          "id": "py17.6-ex3",
+          "language": "en",
+          "title": "Add hours to a datetime",
+          "code": "from datetime import datetime, timedelta\nstart = datetime(2026, 1, 1, 22, 30)\nprint(start + timedelta(hours=3))",
+          "expectedOutput": "2026-01-02 01:30:00",
+          "explanation": "Duration arithmetic can cross midnight and month boundaries."
+        },
+        {
+          "id": "py17.6-ex4",
+          "language": "en",
+          "title": "Get total seconds from a duration",
+          "code": "from datetime import timedelta\nduration = timedelta(days=1, hours=2, minutes=30)\nprint(duration.total_seconds())",
+          "expectedOutput": "95400.0",
+          "explanation": "total_seconds includes the complete duration, not only the seconds field."
+        },
+        {
+          "id": "py17.6-ex5",
+          "language": "en",
+          "title": "Create a UTC-aware datetime",
+          "code": "from datetime import datetime, timezone\nmoment = datetime(2026, 11, 19, 9, 0, tzinfo=timezone.utc)\nprint(moment.isoformat())\nprint(moment.utcoffset())",
+          "expectedOutput": "2026-11-19T09:00:00+00:00\n0:00:00",
+          "explanation": "UTC-aware timestamps include an explicit zero offset."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a deterministic program demonstrating date arithmetic, durations and UTC offsets. Predict the result first, run the code, then explain the date-time values and operations used.",
+      "independentTask": "Build a small scheduling or reporting utility using date arithmetic, durations and UTC offsets. Include a valid case, a boundary case and an explanation of how invalid or ambiguous input is handled.",
+      "hints": [
+        "Use date, time, datetime or timedelta according to the value you need to represent.",
+        "Prefer explicit constructors and ISO-formatted input for predictable examples.",
+        "Check calendar boundaries and invalid values instead of assuming every date exists.",
+        "Use documented format directives and distinguish formatting from parsing.",
+        "Make timezone assumptions explicit whenever a value represents a real-world instant."
+      ],
+      "challenge": "Extend the examples into a small appointment scheduler that validates dates, calculates durations and formats output without relying on the machine's current clock.",
+      "validationCriteria": [
+        "The program uses the appropriate datetime class or method.",
+        "The expected output matches the actual result.",
+        "Invalid or boundary values are handled deliberately.",
+        "Timezone assumptions are explicit where relevant."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py17.6-q1",
+        "prompt": "Which type is added to a date to move it forward by days?",
+        "answer": "timedelta",
+        "options": [
+          "timedelta",
+          "time",
+          "timezone",
+          "strptime"
+        ],
+        "explanation": "timedelta represents the duration to add."
+      },
+      {
+        "id": "py17.6-q2",
+        "prompt": "What does subtracting two date objects produce?",
+        "answer": "A timedelta",
+        "options": [
+          "A timedelta",
+          "A string",
+          "A time object",
+          "A module"
+        ],
+        "explanation": "Date subtraction returns a timedelta."
+      },
+      {
+        "id": "py17.6-q3",
+        "prompt": "What does total_seconds() include?",
+        "answer": "The complete duration in seconds",
+        "options": [
+          "The complete duration in seconds",
+          "Only the seconds field below one minute",
+          "Only the days field",
+          "The timezone offset only"
+        ],
+        "explanation": "total_seconds converts the full duration to seconds."
+      },
+      {
+        "id": "py17.6-q4",
+        "prompt": "What distinguishes an aware datetime?",
+        "answer": "It has usable timezone information",
+        "options": [
+          "It has usable timezone information",
+          "It has no clock fields",
+          "It is always in the local timezone",
+          "It is stored only as a string"
+        ],
+        "explanation": "An aware datetime has timezone information and an offset."
+      },
+      {
+        "id": "py17.6-q5",
+        "prompt": "Which timezone is suitable for a standard UTC timestamp?",
+        "answer": "timezone.utc",
+        "options": [
+          "timezone.utc",
+          "timezone.local",
+          "timedelta.utc",
+          "date.utc"
+        ],
+        "explanation": "timezone.utc provides the UTC timezone."
+      }
+    ]
+  },
+  "status": "draft"
+}
