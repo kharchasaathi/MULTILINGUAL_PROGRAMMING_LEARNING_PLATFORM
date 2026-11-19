@@ -1,0 +1,161 @@
+{
+  "id": "python.py17.2.en",
+  "courseId": "python",
+  "moduleId": "PY17",
+  "topicId": "PY17.2",
+  "title": "Creating Python Date Objects",
+  "language": "en",
+  "learningObjectives": [
+    "Explain constructing and parsing calendar dates and its role in Python applications.",
+    "Choose appropriate datetime classes and methods for constructing and parsing calendar dates.",
+    "Predict the output of representative PY17.2 operations.",
+    "Identify invalid values, formatting ambiguity or timezone risks related to constructing and parsing calendar dates.",
+    "Apply constructing and parsing calendar dates in a small, deterministic Python program."
+  ],
+  "prerequisites": [
+    "PY16.1",
+    "PY14.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A date object represents a valid calendar day using year, month and day fields. Construct it with `date(year, month, day)` or parse an ISO date string with `date.fromisoformat()`. Invalid calendar values raise ValueError instead of silently rolling into another month.",
+      "whyItMatters": "Validated date objects make comparisons and date calculations safer than comparing unvalidated strings.",
+      "analogy": "Date-time values are like entries on a calendar plus the hands on a clock; a duration measures the distance between two entries.",
+      "analogyLimit": "Real calendars include leap years, time zones and daylight-saving transitions that a simple wall calendar analogy does not fully model.",
+      "summary": "Creating Python Date Objects teaches reliable representation and manipulation of Python date-time values."
+    },
+    "explain": {
+      "narrative": "## Construct a date\nUse `datetime.date(year, month, day)`. The constructor validates the calendar fields, including month length and leap years.\n\n## Parse ISO dates\n`date.fromisoformat('YYYY-MM-DD')` converts a standard ISO date string to a date object. Validate external input and handle ValueError when the string is malformed or represents an impossible date.\n\n## Read and replace fields\nThe `year`, `month` and `day` attributes expose the components. `replace()` returns a new date with selected fields changed; date objects are immutable.\n\n## Keep data types consistent\nCompare date objects with date objects, not with arbitrary strings. Convert input at the boundary, then perform date logic using the date API.",
+      "examples": [
+        {
+          "id": "py17.2-ex1",
+          "language": "en",
+          "title": "Construct a date explicitly",
+          "code": "from datetime import date\nlaunch = date(2025, 4, 12)\nprint(launch.year, launch.month, launch.day)",
+          "expectedOutput": "2025 4 12",
+          "explanation": "The constructor accepts year, month and day as integer arguments."
+        },
+        {
+          "id": "py17.2-ex2",
+          "language": "en",
+          "title": "Parse an ISO date string",
+          "code": "from datetime import date\nvalue = date.fromisoformat('2024-02-29')\nprint(value)\nprint(value.year)",
+          "expectedOutput": "2024-02-29\n2024",
+          "explanation": "ISO parsing validates leap-day dates."
+        },
+        {
+          "id": "py17.2-ex3",
+          "language": "en",
+          "title": "Reject an impossible date",
+          "code": "from datetime import date\ntry:\n    date(2025, 2, 29)\nexcept ValueError as error:\n    print(type(error).__name__)",
+          "expectedOutput": "ValueError",
+          "explanation": "2025 is not a leap year, so February 29 is invalid."
+        },
+        {
+          "id": "py17.2-ex4",
+          "language": "en",
+          "title": "Replace one date field",
+          "code": "from datetime import date\noriginal = date(2026, 3, 14)\nchanged = original.replace(year=2027)\nprint(original)\nprint(changed)",
+          "expectedOutput": "2026-03-14\n2027-03-14",
+          "explanation": "replace returns a new date and leaves the original unchanged."
+        },
+        {
+          "id": "py17.2-ex5",
+          "language": "en",
+          "title": "Compare two dates",
+          "code": "from datetime import date\nfirst = date(2026, 1, 10)\nsecond = date(2026, 1, 15)\nprint(first < second)\nprint((second - first).days)",
+          "expectedOutput": "True\n5",
+          "explanation": "Date ordering and subtraction are supported directly."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a deterministic program demonstrating constructing and parsing calendar dates. Predict the result first, run the code, then explain the date-time values and operations used.",
+      "independentTask": "Build a small scheduling or reporting utility using constructing and parsing calendar dates. Include a valid case, a boundary case and an explanation of how invalid or ambiguous input is handled.",
+      "hints": [
+        "Use date, time, datetime or timedelta according to the value you need to represent.",
+        "Prefer explicit constructors and ISO-formatted input for predictable examples.",
+        "Check calendar boundaries and invalid values instead of assuming every date exists.",
+        "Use documented format directives and distinguish formatting from parsing.",
+        "Make timezone assumptions explicit whenever a value represents a real-world instant."
+      ],
+      "challenge": "Extend the examples into a small appointment scheduler that validates dates, calculates durations and formats output without relying on the machine's current clock.",
+      "validationCriteria": [
+        "The program uses the appropriate datetime class or method.",
+        "The expected output matches the actual result.",
+        "Invalid or boundary values are handled deliberately.",
+        "Timezone assumptions are explicit where relevant."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py17.2-q1",
+        "prompt": "Which constructor creates a date object?",
+        "answer": "date(year, month, day)",
+        "options": [
+          "date(year, month, day)",
+          "date(hour, minute, second)",
+          "time(year, month, day)",
+          "datetime(month, day)"
+        ],
+        "explanation": "date takes year, month and day."
+      },
+      {
+        "id": "py17.2-q2",
+        "prompt": "What does date.fromisoformat parse?",
+        "answer": "An ISO-formatted date string",
+        "options": [
+          "An ISO-formatted date string",
+          "A Python source file",
+          "A time zone database",
+          "A duration in seconds"
+        ],
+        "explanation": "fromisoformat parses supported ISO date text."
+      },
+      {
+        "id": "py17.2-q3",
+        "prompt": "What happens when an impossible date is constructed?",
+        "answer": "ValueError is raised",
+        "options": [
+          "ValueError is raised",
+          "The date silently moves to the next month",
+          "It returns None",
+          "The year is changed"
+        ],
+        "explanation": "Invalid calendar fields are rejected."
+      },
+      {
+        "id": "py17.2-q4",
+        "prompt": "What does replace() return on a date object?",
+        "answer": "A new date with selected fields changed",
+        "options": [
+          "A new date with selected fields changed",
+          "The original date is mutated",
+          "A string only",
+          "A timedelta"
+        ],
+        "explanation": "Date objects are immutable; replace creates a new value."
+      },
+      {
+        "id": "py17.2-q5",
+        "prompt": "Can two date objects be compared with < ?",
+        "answer": "Yes",
+        "options": [
+          "Yes",
+          "No, only strings can be compared",
+          "Only if they are the same day",
+          "Only with timestamps"
+        ],
+        "explanation": "Date objects support ordering comparisons."
+      }
+    ]
+  },
+  "status": "draft"
+}
