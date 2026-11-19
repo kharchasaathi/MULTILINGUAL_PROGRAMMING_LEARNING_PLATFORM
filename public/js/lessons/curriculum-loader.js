@@ -35,7 +35,8 @@
     css: ["CSS", "PRESENTATION", "Control layout, typography, colour and responsive design.", "CSS"],
     javascript: ["JavaScript", "INTERACTION", "Build interactive behaviour, logic and dynamic web experiences.", "JS"],
     c: ["C Programming", "SYSTEMS PROGRAMMING", "Learn C syntax, memory, functions, files and data structures.", "C"],
-    cpp: ["C++ Programming", "MODERN SYSTEMS & OBJECT-ORIENTED PROGRAMMING", "Learn modern C++ fundamentals, classes, templates, standard-library tools and safe resource management.", "C++"]
+    cpp: ["C++ Programming", "MODERN SYSTEMS & OBJECT-ORIENTED PROGRAMMING", "Learn modern C++ fundamentals, classes, templates, standard-library tools and safe resource management.", "C++"],
+    python: ["Python Programming", "GENERAL-PURPOSE PROGRAMMING", "Learn Python fundamentals, automation, data handling, object-oriented programming and practical application development.", "PY"]
   };
 
   function renderCourseCards() {
