@@ -28,9 +28,7 @@ function blockNetworkApis() {
 }
 async function initialize() {
   const pyodide = await loadPyodide({
-    stdin: readInput,
-    stdout: undefined,
-    stderr: undefined
+    stdin: readInput
   });
   pyodide.setStdout({ write(buffer) {
     const text = stdoutDecoder.decode(buffer, { stream: true });
