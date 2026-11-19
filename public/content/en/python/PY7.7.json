@@ -1,0 +1,158 @@
+{
+  "id": "python.py7.7.en",
+  "courseId": "python",
+  "moduleId": "PY7",
+  "topicId": "PY7.7",
+  "title": "Python Variable Scope: Local and Global",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the behavior of python variable scope: local and global.",
+    "Write and call functions using appropriate parameter forms.",
+    "Predict argument binding, scope and return behavior.",
+    "Choose suitable function constructs for a practical task.",
+    "Apply readable function design and avoid common pitfalls."
+  ],
+  "prerequisites": [
+    "PY1.6",
+    "PY3.1",
+    "PY3.4",
+    "PY5.1",
+    "PY6.1",
+    "PY6.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A variable's scope determines where its name can be accessed. A name assigned inside a function is local by default. A name defined at module level is global to that module. The global statement allows a function to rebind a module-level name; nonlocal is used for a binding in an enclosing function scope. Prefer passing values and returning results over unnecessary global state.",
+      "whyItMatters": "Understanding scope prevents accidental name conflicts and makes dependencies between functions easier to understand.",
+      "analogy": "Scope is like a set of rooms: a local name belongs to one room, while a module-level name is available throughout its module under normal lookup rules.",
+      "analogyLimit": "Python's LEGB name resolution and closures add nuance beyond this introductory local/global distinction."
+    },
+    "explain": {
+      "narrative": "## 1. Local variables\n\nA name assigned inside a function is local unless declared global or nonlocal. It is normally available only during that function call.\n\n## 2. Global names\n\nA function can read a module-level name. To rebind it inside the function, declare it with `global`.\n\n## 3. Prefer explicit data flow\n\nPassing arguments and returning values usually makes code easier to test than changing global state.",
+      "examples": [
+        {
+          "id": "py7.7-ex1",
+          "language": "en",
+          "title": "Create a local variable",
+          "code": "def show_total():\n    total = 25\n    print(total)\n\nshow_total()",
+          "expectedOutput": "25",
+          "explanation": "The variable total is local to the function."
+        },
+        {
+          "id": "py7.7-ex2",
+          "language": "en",
+          "title": "Read a global variable",
+          "code": "rate = 5\n\ndef show_rate():\n    print(rate)\n\nshow_rate()",
+          "expectedOutput": "5",
+          "explanation": "The function can read the module-level name because no local assignment shadows it."
+        },
+        {
+          "id": "py7.7-ex3",
+          "language": "en",
+          "title": "Rebind a global with global",
+          "code": "count = 0\n\ndef increase():\n    global count\n    count += 1\n\nincrease()\nprint(count)",
+          "expectedOutput": "1",
+          "explanation": "The global declaration tells Python that count refers to the module-level binding."
+        },
+        {
+          "id": "py7.7-ex4",
+          "language": "en",
+          "title": "Local name shadows global",
+          "code": "message = 'Outside'\n\ndef show_message():\n    message = 'Inside'\n    print(message)\n\nshow_message()\nprint(message)",
+          "expectedOutput": "Inside\nOutside",
+          "explanation": "The local assignment creates a separate local binding and leaves the global name unchanged."
+        },
+        {
+          "id": "py7.7-ex5",
+          "language": "en",
+          "title": "Prefer parameters and return",
+          "code": "def add_tax(price, rate):\n    return price * (1 + rate)\n\nprint(add_tax(100, 0.1))",
+          "expectedOutput": "110.00000000000001",
+          "explanation": "Passing the rate explicitly avoids relying on mutable global state; floating-point output is approximate."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Define a module-level value, read it inside a function, and create a separate local variable with the same name to observe shadowing.",
+      "independentTask": "Refactor a function that reads a global tax rate so the rate is passed as a parameter and the total is returned.",
+      "hints": [
+        "Assignments inside functions create local names by default.",
+        "Functions can read module-level names.",
+        "Use global only when rebinding a module-level name is necessary.",
+        "A local name can shadow a global name.",
+        "Prefer parameters and return values for clear data flow."
+      ],
+      "challenge": "Compare a function that changes a global counter with one that accepts and returns a counter value. Explain the testability trade-off."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py7.7-q1",
+        "prompt": "Where is a variable assigned inside a function local by default?",
+        "options": [
+          "Inside that function",
+          "Every module",
+          "Every Python process",
+          "Only in imported files"
+        ],
+        "answer": "Inside that function",
+        "explanation": "Assignments inside a function create local bindings by default."
+      },
+      {
+        "id": "py7.7-q2",
+        "prompt": "What does global allow inside a function?",
+        "options": [
+          "Rebinding a module-level name",
+          "Creating a new module",
+          "Making a list immutable",
+          "Exiting the program"
+        ],
+        "answer": "Rebinding a module-level name",
+        "explanation": "The global statement declares that assignments refer to the module-level binding."
+      },
+      {
+        "id": "py7.7-q3",
+        "prompt": "Can a function read a module-level variable?",
+        "options": [
+          "Yes, if it is not shadowed by a local binding",
+          "No, never",
+          "Only with nonlocal",
+          "Only when it is a string"
+        ],
+        "answer": "Yes, if it is not shadowed by a local binding",
+        "explanation": "Name lookup can find a module-level name when no local binding takes precedence."
+      },
+      {
+        "id": "py7.7-q4",
+        "prompt": "What does a local assignment with the same name as a global usually do?",
+        "options": [
+          "Creates a local binding",
+          "Changes the global automatically",
+          "Deletes both names",
+          "Raises SyntaxError always"
+        ],
+        "answer": "Creates a local binding",
+        "explanation": "The local name shadows the global within the function."
+      },
+      {
+        "id": "py7.7-q5",
+        "prompt": "What is usually preferable to unnecessary global state?",
+        "options": [
+          "Pass arguments and return results",
+          "Change every global directly",
+          "Use mutable defaults",
+          "Avoid function parameters"
+        ],
+        "answer": "Pass arguments and return results",
+        "explanation": "Explicit inputs and outputs make dependencies easier to understand and test."
+      }
+    ]
+  },
+  "status": "draft"
+}
