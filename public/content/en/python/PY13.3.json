@@ -1,0 +1,156 @@
+{
+  "id": "python.py13.3.en",
+  "courseId": "python",
+  "moduleId": "PY13",
+  "topicId": "PY13.3",
+  "title": "The Python Iterator Protocol and StopIteration",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the main ideas in the python iterator protocol and stopiteration.",
+    "Use the relevant iterator or generator protocol correctly.",
+    "Trace values and state across successive iteration steps.",
+    "Recognize exhaustion, lazy evaluation and relevant edge cases.",
+    "Apply the concept to a practical sequence-processing task."
+  ],
+  "prerequisites": [
+    "PY6.2",
+    "PY7.1",
+    "PY8.1",
+    "PY12.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "The iterator protocol requires __iter__() to return an iterator and __next__() to return the next value or raise StopIteration. A well-behaved iterator returns itself from __iter__(). StopIteration is the defined end-of-iteration signal, not an ordinary error to leak from a loop body.",
+      "whyItMatters": "Understanding the protocol helps developers create interoperable data sources and diagnose iteration bugs in custom classes and libraries.",
+      "analogy": "The protocol is like an agreed interface between a dispenser and a person collecting items: one operation provides the dispenser, and another advances it.",
+      "analogyLimit": "The analogy does not cover Python's special-method lookup rules, generator semantics or resource cleanup. Custom iterators must also consider re-entrancy and whether they are reusable."
+    },
+    "explain": {
+      "narrative": "## Two special methods\nAn iterator implements `__iter__()` and `__next__()`. The `__iter__()` method returns the iterator itself. The `__next__()` method returns the next available item. When no item remains, it raises `StopIteration` rather than returning a sentinel that could also be valid data.\n\n## Why StopIteration matters\nPython's iteration machinery recognizes StopIteration as normal completion. A for loop catches this signal and exits. A custom iterator should raise it only when the sequence is exhausted. Do not use `return None` to signal completion if None could be a legitimate item.\n\n## Robust protocol design\nDefine exactly when the iterator is exhausted and keep its state consistent. If the iterator owns external resources, design a separate context-management or close mechanism; iteration completion alone is not a universal resource-cleanup guarantee.",
+      "examples": [
+        {
+          "id": "py13.3-ex1",
+          "language": "en",
+          "title": "Check that iter returns the iterator",
+          "code": "values = iter([1, 2])\nprint(iter(values) is values)",
+          "expectedOutput": "True",
+          "explanation": "An iterator's __iter__ method returns the iterator object itself."
+        },
+        {
+          "id": "py13.3-ex2",
+          "language": "en",
+          "title": "Catch StopIteration explicitly",
+          "code": "it = iter([7])\nprint(next(it))\ntry:\n    next(it)\nexcept StopIteration:\n    print('finished')",
+          "expectedOutput": "7\nfinished",
+          "explanation": "The second next call signals normal exhaustion with StopIteration."
+        },
+        {
+          "id": "py13.3-ex3",
+          "language": "en",
+          "title": "Use a default instead of try/except",
+          "code": "it = iter([])\nvalue = next(it, None)\nprint(value is None)",
+          "expectedOutput": "True",
+          "explanation": "A default avoids an exception when the iterator is empty, provided the default is distinguishable from valid values."
+        },
+        {
+          "id": "py13.3-ex4",
+          "language": "en",
+          "title": "None can be a real iterator item",
+          "code": "it = iter([None, 'ready'])\nprint(next(it))\nprint(next(it))",
+          "expectedOutput": "None\nready",
+          "explanation": "Returning None is not the iterator completion protocol; StopIteration is the dedicated signal."
+        },
+        {
+          "id": "py13.3-ex5",
+          "language": "en",
+          "title": "A loop ends on StopIteration",
+          "code": "for number in iter([4, 5]):\n    print(number)\nprint('loop ended')",
+          "expectedOutput": "4\n5\nloop ended",
+          "explanation": "The for statement handles StopIteration internally and continues after the loop."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Write a small program that demonstrates the python iterator protocol and stopiteration. Show at least two iteration steps and explain how the state changes.",
+      "independentTask": "Build a reusable or one-pass sequence processor using this topic. Test normal input, an empty or exhausted case, and describe when each value is calculated.",
+      "hints": [
+        "Identify whether the object is an iterable, an iterator or both.",
+        "Write down the state before and after each next() call.",
+        "Use StopIteration as the normal completion signal.",
+        "Test an empty input and an already exhausted iterator.",
+        "Choose a list only when repeated access or storage is required."
+      ],
+      "challenge": "Process a larger sequence incrementally and compare the memory and reuse trade-offs with building a list first."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py13.3-q1",
+        "prompt": "What should __iter__() return on an iterator object?",
+        "answer": "The iterator itself",
+        "options": [
+          "The iterator itself",
+          "The next value",
+          "A Boolean",
+          "Always a new list"
+        ],
+        "explanation": "The iterator protocol requires an iterator's __iter__ method to return itself."
+      },
+      {
+        "id": "py13.3-q2",
+        "prompt": "What should __next__() do when no values remain?",
+        "answer": "Raise StopIteration",
+        "options": [
+          "Raise StopIteration",
+          "Return None in every case",
+          "Return the last item again",
+          "Raise IndexError"
+        ],
+        "explanation": "StopIteration is the protocol-defined signal for normal iteration completion."
+      },
+      {
+        "id": "py13.3-q3",
+        "prompt": "Why is None not a reliable universal end marker?",
+        "answer": "None may be a valid item",
+        "options": [
+          "None may be a valid item",
+          "None is not a Python object",
+          "None cannot be printed",
+          "None is always false in a loop"
+        ],
+        "explanation": "An iterator may legitimately contain None, so exhaustion needs its own signal."
+      },
+      {
+        "id": "py13.3-q4",
+        "prompt": "Which method advances an iterator?",
+        "answer": "__next__()",
+        "options": [
+          "__next__()",
+          "__iter__()",
+          "__repr__()",
+          "__len__()"
+        ],
+        "explanation": "__next__ returns and advances to the next item."
+      },
+      {
+        "id": "py13.3-q5",
+        "prompt": "Does a for loop normally expose StopIteration to the loop body?",
+        "answer": "No, it handles the signal and ends the loop",
+        "options": [
+          "No, it handles the signal and ends the loop",
+          "Yes, after every item",
+          "Only for lists",
+          "Only when the loop uses break"
+        ],
+        "explanation": "The for statement manages iterator exhaustion internally."
+      }
+    ]
+  },
+  "status": "draft"
+}
