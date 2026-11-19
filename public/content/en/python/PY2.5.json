@@ -1,0 +1,154 @@
+{
+  "id": "python.py2.5.en",
+  "courseId": "python",
+  "moduleId": "PY2",
+  "topicId": "PY2.5",
+  "title": "Validating User Input",
+  "language": "en",
+  "learningObjectives": [
+    "Explain why input must be validated before it is trusted.",
+    "Check required text fields and basic length constraints.",
+    "Validate numeric values against application-defined ranges.",
+    "Use simple allowlists for constrained choices.",
+    "Combine conversion, validation and clear feedback in a reusable function."
+  ],
+  "prerequisites": [
+    "PY2.1",
+    "PY2.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Input validation checks whether received data meets the requirements of a program before it is used. Validation may check presence, type, length, allowed choices and numeric ranges. It should happen close to the point where untrusted data enters the program, and important rules should also be enforced by any trusted server or database layer. A value being syntactically valid does not automatically make it safe or appropriate.",
+      "whyItMatters": "Validation prevents incorrect records, calculation mistakes and many avoidable application failures. It also improves usability by telling people what needs to be corrected.",
+      "analogy": "Validation is like an entry checkpoint: it checks whether information meets the stated conditions before allowing it to proceed.",
+      "analogyLimit": "Validation is not a complete security boundary. Client-side checks can be bypassed, and a valid-looking string may still be dangerous in a different context. Use context-appropriate security controls as well."
+    },
+    "explain": {
+      "narrative": "## 1. Validate required text\n\nCheck whether a required field is empty after trimming whitespace. You may also enforce a minimum or maximum length when the task requires it. Do not silently alter data unless normalization is part of the stated rule.\n\n## 2. Validate numeric ranges\n\nFirst convert the text, handling ValueError. Then check the resulting number against the allowed range. For example, a percentage may need to be between 0 and 100 inclusive.\n\n## 3. Validate choices with an allowlist\n\nWhen only specific options are permitted, compare the supplied value with a known collection of allowed choices. This is clearer and safer than trying to blacklist every possible unwanted value.\n\n## 4. Reuse validation logic\n\nA function can accept raw text, perform checks and return a clear result. Keep conversion errors distinct from rule violations so callers can give useful feedback.\n\n## 5. Validation is not sanitization or authorization\n\nValidation checks whether data meets expected rules. It does not replace output encoding, parameterized SQL, access control or server-side checks. Never rely only on browser-side validation for important rules.",
+      "examples": [
+        {
+          "id": "py2.5-ex1",
+          "language": "en",
+          "title": "Require a non-empty name",
+          "code": "name = '   '\nif not name.strip():\n    print('Name is required')\nelse:\n    print(f'Hello, {name.strip()}')",
+          "expectedOutput": "Name is required",
+          "explanation": "The program rejects a value containing only whitespace after trimming it for the presence check."
+        },
+        {
+          "id": "py2.5-ex2",
+          "language": "en",
+          "title": "Check a numeric range",
+          "code": "score = 105\nif 0 <= score <= 100:\n    print('Score accepted')\nelse:\n    print('Score must be from 0 to 100')",
+          "expectedOutput": "Score must be from 0 to 100",
+          "explanation": "The chained comparison checks both boundaries and rejects a score outside the permitted range."
+        },
+        {
+          "id": "py2.5-ex3",
+          "language": "en",
+          "title": "Use an allowlist of choices",
+          "code": "choice = 'medium'\nallowed = {'small', 'medium', 'large'}\nif choice in allowed:\n    print('Choice accepted')\nelse:\n    print('Choose small, medium or large')",
+          "expectedOutput": "Choice accepted",
+          "explanation": "Membership testing verifies that the value belongs to the explicitly permitted set."
+        },
+        {
+          "id": "py2.5-ex4",
+          "language": "en",
+          "title": "Validate text length",
+          "code": "username = 'sam'\nif 3 <= len(username) <= 12:\n    print('Username length accepted')\nelse:\n    print('Username must contain 3 to 12 characters')",
+          "expectedOutput": "Username length accepted",
+          "explanation": "len() measures the string length, and the chained comparison checks the inclusive minimum and maximum."
+        },
+        {
+          "id": "py2.5-ex5",
+          "language": "en",
+          "title": "Combine conversion and range checks",
+          "code": "def parse_percentage(text):\n    try:\n        value = float(text)\n    except ValueError:\n        return None, 'Enter a number'\n    if not 0 <= value <= 100:\n        return None, 'Enter a value from 0 to 100'\n    return value, None\n\nvalue, error = parse_percentage('125')\nprint(error)",
+          "expectedOutput": "Enter a value from 0 to 100",
+          "explanation": "The function first converts the text and then enforces the percentage range. It returns either a value or an explanatory error."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Validate a size choice against small, medium and large. Then add a numeric check for a percentage between zero and one hundred.",
+      "independentTask": "Write a registration-data validator for a display name and age. Require a non-empty name of an allowed length, convert age safely and enforce an application-defined range. Return clear error messages.",
+      "hints": [
+        "Check required text after strip().",
+        "Convert numeric text before comparing numeric ranges.",
+        "Use an allowlist set for permitted choices.",
+        "Keep parsing errors separate from business-rule errors.",
+        "Client-side validation does not replace server-side validation."
+      ],
+      "challenge": "Create a reusable validation module with functions for a required text field, a positive quantity and an allowed category. Write tests for valid, invalid, boundary and whitespace-only values."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2.5-q1",
+        "prompt": "What is the main purpose of input validation?",
+        "options": [
+          "Check that data meets the program's requirements before use",
+          "Encrypt every input automatically",
+          "Convert every string to an integer",
+          "Replace all exception handling"
+        ],
+        "answer": "Check that data meets the program's requirements before use",
+        "explanation": "Validation checks presence, format, length, allowed values and other application rules."
+      },
+      {
+        "id": "py2.5-q2",
+        "prompt": "Which is an allowlist?",
+        "options": [
+          "A set of explicitly permitted choices",
+          "A list of every possible unwanted value",
+          "A random string generator",
+          "A traceback display"
+        ],
+        "answer": "A set of explicitly permitted choices",
+        "explanation": "An allowlist defines the values that are accepted."
+      },
+      {
+        "id": "py2.5-q3",
+        "prompt": "When should a numeric range check normally occur?",
+        "options": [
+          "After successful numeric conversion",
+          "Before reading any input",
+          "Only after saving to a database",
+          "Instead of converting the text"
+        ],
+        "answer": "After successful numeric conversion",
+        "explanation": "The program needs a numeric value before it can reliably apply numeric range rules."
+      },
+      {
+        "id": "py2.5-q4",
+        "prompt": "Does browser-side validation alone secure important application data?",
+        "options": [
+          "No, important rules must also be enforced by trusted server-side components",
+          "Yes, it cannot be bypassed",
+          "Yes, it replaces authentication",
+          "No, because Python cannot validate strings"
+        ],
+        "answer": "No, important rules must also be enforced by trusted server-side components",
+        "explanation": "Client-side checks can be bypassed and do not replace server-side validation or context-specific security controls."
+      },
+      {
+        "id": "py2.5-q5",
+        "prompt": "Which check detects a whitespace-only required field?",
+        "options": [
+          "if not value.strip():",
+          "if value == 0:",
+          "if type(value) == int:",
+          "if len(value) < 0:"
+        ],
+        "answer": "if not value.strip():",
+        "explanation": "strip() removes surrounding whitespace, allowing an empty result to identify blank input."
+      }
+    ]
+  },
+  "status": "draft"
+}
