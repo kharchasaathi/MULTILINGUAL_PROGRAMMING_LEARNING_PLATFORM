@@ -1,0 +1,160 @@
+{
+  "id": "python.py15.4.en",
+  "courseId": "python",
+  "moduleId": "PY15",
+  "topicId": "PY15.4",
+  "title": "Writing and Appending Python Files",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and practical uses of writing and appending python files.",
+    "Choose appropriate Python standard-library APIs and syntax for writing and appending python files.",
+    "Predict the behaviour of representative PY15.4 operations and their outputs.",
+    "Identify common mistakes, edge cases and failure conditions in writing and appending python files.",
+    "Apply safe, readable writing and appending python files techniques in a small program."
+  ],
+  "prerequisites": [
+    "PY14.1",
+    "PY14.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Writing sends text or bytes from a program to a writable file object. In text mode, `write()` accepts a string and returns the number of characters written. `writelines()` writes each supplied string as-is and does not insert newline characters automatically. Opening a real file with `w` truncates existing content; `a` preserves it and writes at the end.",
+      "whyItMatters": "Programs use writing to save reports, generated data and application state. Understanding truncation, append behaviour and explicit newlines prevents data loss and malformed output.",
+      "analogy": "Working with a file is like borrowing a labelled record from a filing room: you identify its location, choose whether to read or update it, and return the resource when finished.",
+      "analogyLimit": "A real filesystem has permissions, concurrent changes, encoding rules and failure modes that a physical filing-room analogy cannot fully represent.",
+      "summary": "Writing and Appending Python Files relies on explicit paths, correct modes, deliberate resource management and validation of data."
+    },
+    "explain": {
+      "narrative": "## Core idea\nWriting sends text or bytes from a program to a writable file object. In text mode, `write()` accepts a string and returns the number of characters written. `writelines()` writes each supplied string as-is and does not insert newline characters automatically. Opening a real file with `w` truncates existing content; `a` preserves it and writes at the end.\n\n## Syntax and behaviour\nUse `file.write(text)` for one string and `file.writelines(iterable_of_strings)` for multiple strings. Add `\\n` where line breaks are required. For disk files, prefer `with open(path, 'w', encoding='utf-8') as file:` or append mode when preserving prior content is required.\n\n## Rules and practical guidance\nDo not use `w` when existing content must be preserved. `writelines()` does not add separators. Binary streams require bytes. Flush/close is handled by the context manager; avoid assuming data is durable before the stream is closed.\n\n## Example walkthroughs\nThe five examples below use deterministic in-memory streams or automatically cleaned temporary directories. Their outputs are designed to be reproducible in the course validator.\n\n## Common mistakes\n- Choosing a destructive mode when existing content must be preserved.\n- Assuming paths are relative to the script file rather than the process working directory.\n- Forgetting that text and binary streams accept different data types.\n- Building CSV or JSON by manually concatenating strings.\n- Ignoring exceptions caused by missing paths, permissions, invalid encodings or malformed data.\n\n## Best practices\nUse the standard library, explicit UTF-8 for text, context managers for resources, narrow exception handling and validation at application boundaries. Keep untrusted input within an explicitly approved data area.",
+      "examples": [
+        {
+          "id": "py15.4-ex1",
+          "language": "en",
+          "title": "Write one string to a text stream",
+          "code": "from io import StringIO\nwith StringIO() as file:\n    count = file.write('Hello Python')\n    print(count)\n    print(file.getvalue())",
+          "expectedOutput": "12\nHello Python",
+          "explanation": "write returns the number of characters written and stores the supplied string."
+        },
+        {
+          "id": "py15.4-ex2",
+          "language": "en",
+          "title": "Write multiple lines explicitly",
+          "code": "from io import StringIO\nwith StringIO() as file:\n    file.writelines(['first\\n', 'second\\n'])\n    print(repr(file.getvalue()))",
+          "expectedOutput": "'first\\nsecond\\n'",
+          "explanation": "writelines writes each string exactly; newline characters must be included by the caller."
+        },
+        {
+          "id": "py15.4-ex3",
+          "language": "en",
+          "title": "Append to the end of an existing stream",
+          "code": "from io import StringIO\nfile = StringIO('existing')\nfile.seek(0, 2)\nfile.write(' + more')\nprint(file.getvalue())",
+          "expectedOutput": "existing + more",
+          "explanation": "Moving to the end before writing demonstrates the essential append behaviour."
+        },
+        {
+          "id": "py15.4-ex4",
+          "language": "en",
+          "title": "Write a report in a temporary directory",
+          "code": "from pathlib import Path\nfrom tempfile import TemporaryDirectory\nwith TemporaryDirectory() as folder:\n    path = Path(folder) / 'report.txt'\n    with path.open('w', encoding='utf-8') as file:\n        file.write('Total: 3\\n')\n        file.write('Status: ready\\n')\n    print(path.read_text(encoding='utf-8').strip())",
+          "expectedOutput": "Total: 3\nStatus: ready",
+          "explanation": "The context manager closes the file before it is read back. The temporary directory is automatically removed."
+        },
+        {
+          "id": "py15.4-ex5",
+          "language": "en",
+          "title": "Append a second record",
+          "code": "from pathlib import Path\nfrom tempfile import TemporaryDirectory\nwith TemporaryDirectory() as folder:\n    path = Path(folder) / 'events.txt'\n    path.write_text('start\\n', encoding='utf-8')\n    with path.open('a', encoding='utf-8') as file:\n        file.write('finish\\n')\n    print(path.read_text(encoding='utf-8').strip())",
+          "expectedOutput": "start\nfinish",
+          "explanation": "Append mode retains the original line and adds new content at the end."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a small writing and appending python files demonstration using a temporary directory or an in-memory stream. Run it, compare the output with your prediction and explain each operation.",
+      "independentTask": "Build a mini record-processing utility that applies writing and appending python files to a small, known dataset. Include one valid case, one edge case and a clear response to an expected failure.",
+      "hints": [
+        "Start with the smallest possible file or stream and state what result you expect.",
+        "Choose the mode and encoding before writing the operation.",
+        "Use a context manager whenever a resource must be closed.",
+        "Test an empty input and an invalid or missing value.",
+        "Keep user-controlled paths and parsed external data within explicit validation rules."
+      ],
+      "challenge": "Extend the example into a reusable helper that validates inputs, handles one expected error and leaves resources in a predictable state.",
+      "validationCriteria": [
+        "The program uses the appropriate standard-library API.",
+        "The expected output matches the actual result.",
+        "Resources are closed or cleaned up reliably.",
+        "At least one edge case is handled explicitly."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py15.4-q1",
+        "prompt": "What does write() return for a text stream?",
+        "answer": "The number of characters written",
+        "options": [
+          "The number of characters written",
+          "The number of files created",
+          "The final file size in bytes always",
+          "A list of lines"
+        ],
+        "explanation": "Text write returns the number of characters accepted."
+      },
+      {
+        "id": "py15.4-q2",
+        "prompt": "Does writelines() add newline characters automatically?",
+        "answer": "No",
+        "options": [
+          "No",
+          "Yes, after every string",
+          "Only for the first string",
+          "Only in binary mode"
+        ],
+        "explanation": "writelines writes strings as supplied and does not insert separators."
+      },
+      {
+        "id": "py15.4-q3",
+        "prompt": "Which mode preserves old content and writes at the end?",
+        "answer": "a",
+        "options": [
+          "a",
+          "w",
+          "r",
+          "x"
+        ],
+        "explanation": "Append mode retains existing content and positions writes at the end."
+      },
+      {
+        "id": "py15.4-q4",
+        "prompt": "What happens when a real file is opened with w?",
+        "answer": "Existing content is truncated",
+        "options": [
+          "Existing content is truncated",
+          "The file is read-only",
+          "Writes are always rejected",
+          "The file is automatically compressed"
+        ],
+        "explanation": "Write mode truncates an existing file before writing."
+      },
+      {
+        "id": "py15.4-q5",
+        "prompt": "What type is required by a binary stream's write()?",
+        "answer": "bytes",
+        "options": [
+          "bytes",
+          "str",
+          "int",
+          "dict"
+        ],
+        "explanation": "Binary streams accept bytes-like data rather than text strings."
+      }
+    ]
+  }
+}
