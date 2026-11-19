@@ -1,0 +1,155 @@
+{
+  "id": "python.py14.4.en",
+  "courseId": "python",
+  "moduleId": "PY14",
+  "topicId": "PY14.4",
+  "title": "Python try else and finally Blocks",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the principles of python try else and finally blocks.",
+    "Write correct Python syntax for the exception-handling construct covered.",
+    "Predict which handler or cleanup block executes in common scenarios.",
+    "Distinguish recoverable errors, programming defects and internal assertions.",
+    "Apply safe and specific error handling to a realistic program."
+  ],
+  "prerequisites": [
+    "PY7.1",
+    "PY10.1",
+    "PY13.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "The else suite runs only when the try suite completes without an exception. The finally suite runs as control leaves the construct, whether an exception occurred or not, making it suitable for cleanup that must happen on both success and failure.",
+      "whyItMatters": "Separating success logic from error handling and cleanup makes resource management more reliable and prevents normal processing from accidentally running after a failed operation.",
+      "analogy": "else is the success lane after a checkpoint; finally is the cleanup step performed before leaving the area regardless of the route taken.",
+      "analogyLimit": "finally does not guarantee execution after abrupt process termination or power loss. Context managers are usually preferable for standard resources such as files and locks."
+    },
+    "explain": {
+      "narrative": "## The else suite\n`else` runs only if the try suite raises no exception. Put code that depends on successful completion there. This keeps the protected operation narrow and avoids accidentally catching errors raised by success-processing code.\n\n## The finally suite\n`finally` runs whether the try suite succeeds or a handled or unhandled exception leaves the construct. It is commonly used for cleanup. A return or exception raised from finally can override earlier control flow, so avoid returning or raising from cleanup blocks unless that behaviour is deliberate.\n\n## Prefer context managers for resources\nFor files, use `with open(...) as file:` so the file is closed when the block exits. finally is useful for understanding cleanup mechanics and for resources that do not expose a context manager, but `with` is clearer for standard resource lifecycles.",
+      "examples": [
+        {
+          "id": "py14.4-ex1",
+          "language": "en",
+          "title": "Run else after successful work",
+          "code": "try:\n    result = 6 * 7\nexcept ArithmeticError:\n    print('Calculation failed')\nelse:\n    print(result)",
+          "expectedOutput": "42",
+          "explanation": "The try suite completes without an exception, so the else suite runs."
+        },
+        {
+          "id": "py14.4-ex2",
+          "language": "en",
+          "title": "Skip else when an exception occurs",
+          "code": "try:\n    value = int('bad')\nexcept ValueError:\n    print('Invalid input')\nelse:\n    print('Accepted')",
+          "expectedOutput": "Invalid input",
+          "explanation": "Because conversion raises ValueError, the else suite is skipped."
+        },
+        {
+          "id": "py14.4-ex3",
+          "language": "en",
+          "title": "Run finally after success",
+          "code": "try:\n    print('work')\nfinally:\n    print('cleanup')",
+          "expectedOutput": "work\ncleanup",
+          "explanation": "finally runs as control leaves the try statement, even when no exception occurs."
+        },
+        {
+          "id": "py14.4-ex4",
+          "language": "en",
+          "title": "Run finally after a handled exception",
+          "code": "try:\n    1 / 0\nexcept ZeroDivisionError:\n    print('handled')\nfinally:\n    print('cleanup')",
+          "expectedOutput": "handled\ncleanup",
+          "explanation": "The exception handler runs, and finally then performs the cleanup step."
+        },
+        {
+          "id": "py14.4-ex5",
+          "language": "en",
+          "title": "Use a context manager for a file",
+          "code": "from io import StringIO\nwith StringIO('hello') as file:\n    print(file.read())\nprint(file.closed)",
+          "expectedOutput": "hello\nTrue",
+          "explanation": "The with statement closes the in-memory file-like object automatically when its block exits."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a small program demonstrating python try else and finally blocks. Trigger one expected failure, handle it appropriately, and explain the resulting control flow.",
+      "independentTask": "Build a small input-processing function with explicit validation and a clear error-handling policy. Test one valid input, one expected invalid input and one unexpected failure; explain which layer should handle each.",
+      "hints": [
+        "Identify the exact operation that can fail before writing the try block.",
+        "Catch only exception types that have a meaningful recovery action.",
+        "Keep normal success logic outside the protected suite when possible.",
+        "Preserve the original exception when adding higher-level context.",
+        "Never rely on assert for required user-input or security validation."
+      ],
+      "challenge": "Design a small application boundary that translates a low-level exception into a domain-specific error, preserves the cause and produces a safe user-facing message."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py14.4-q1",
+        "prompt": "When does the try else suite run?",
+        "answer": "Only when the try suite completes without an exception",
+        "options": [
+          "Only when the try suite completes without an exception",
+          "Whenever an exception is caught",
+          "Only after finally",
+          "Before the try suite"
+        ],
+        "explanation": "else is the success-only branch of a try statement."
+      },
+      {
+        "id": "py14.4-q2",
+        "prompt": "When does finally run?",
+        "answer": "As control leaves the try construct in normal exception flow",
+        "options": [
+          "As control leaves the try construct in normal exception flow",
+          "Only when an exception occurs",
+          "Only when no exception occurs",
+          "Only when the else suite exists"
+        ],
+        "explanation": "finally is intended for actions that must run on both success and failure paths."
+      },
+      {
+        "id": "py14.4-q3",
+        "prompt": "Which construct is generally preferred for closing files?",
+        "answer": "with",
+        "options": [
+          "with",
+          "assert",
+          "raise",
+          "global"
+        ],
+        "explanation": "A file object used with a context manager is closed when the with block exits."
+      },
+      {
+        "id": "py14.4-q4",
+        "prompt": "Can a return in finally override a prior return?",
+        "answer": "Yes",
+        "options": [
+          "Yes",
+          "No, finally is ignored",
+          "Only in Python 2",
+          "Only for generators"
+        ],
+        "explanation": "Control flow initiated in finally can override an earlier return or exception, which is why return in finally is discouraged."
+      },
+      {
+        "id": "py14.4-q5",
+        "prompt": "Does finally guarantee cleanup after the operating system forcibly terminates the process?",
+        "answer": "No",
+        "options": [
+          "No",
+          "Yes, always",
+          "Only when the file is open",
+          "Only on Windows"
+        ],
+        "explanation": "Abrupt termination or power loss can prevent Python cleanup code from running."
+      }
+    ]
+  },
+  "status": "draft"
+}
