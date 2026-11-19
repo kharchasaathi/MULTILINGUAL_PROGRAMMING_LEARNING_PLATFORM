@@ -1,0 +1,160 @@
+{
+  "id": "python.py15.7.en",
+  "courseId": "python",
+  "moduleId": "PY15",
+  "topicId": "PY15.7",
+  "title": "Reading and Writing CSV Files in Python",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and practical uses of reading and writing csv files in python.",
+    "Choose appropriate Python standard-library APIs and syntax for reading and writing csv files in python.",
+    "Predict the behaviour of representative PY15.7 operations and their outputs.",
+    "Identify common mistakes, edge cases and failure conditions in reading and writing csv files in python.",
+    "Apply safe, readable reading and writing csv files in python techniques in a small program."
+  ],
+  "prerequisites": [
+    "PY14.1",
+    "PY14.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "CSV (comma-separated values) is a common text format for tabular data. Python's csv module handles quoting, delimiters and newline conventions more reliably than manually splitting lines. A reader yields rows, while DictReader maps column headings to values. Writers serialize rows and dictionaries into CSV records.",
+      "whyItMatters": "CSV files exchange data between spreadsheets, reports and applications. Using the standard library avoids errors when fields contain commas, quotes or line breaks.",
+      "analogy": "Working with a file is like borrowing a labelled record from a filing room: you identify its location, choose whether to read or update it, and return the resource when finished.",
+      "analogyLimit": "A real filesystem has permissions, concurrent changes, encoding rules and failure modes that a physical filing-room analogy cannot fully represent.",
+      "summary": "Reading and Writing CSV Files in Python relies on explicit paths, correct modes, deliberate resource management and validation of data."
+    },
+    "explain": {
+      "narrative": "## Core idea\nCSV (comma-separated values) is a common text format for tabular data. Python's csv module handles quoting, delimiters and newline conventions more reliably than manually splitting lines. A reader yields rows, while DictReader maps column headings to values. Writers serialize rows and dictionaries into CSV records.\n\n## Syntax and behaviour\nOpen CSV text files with `newline=''` and an explicit encoding, then use `csv.reader`, `csv.DictReader`, `csv.writer` or `csv.DictWriter`. Use `writeheader()` for dictionary writers and `writerow()`/`writerows()` to add records.\n\n## Rules and practical guidance\nCSV values are text when read; convert numeric fields explicitly and validate them. Column order and header names matter. Do not build CSV by joining values with commas because quoting and embedded delimiters require escaping.\n\n## Example walkthroughs\nThe five examples below use deterministic in-memory streams or automatically cleaned temporary directories. Their outputs are designed to be reproducible in the course validator.\n\n## Common mistakes\n- Choosing a destructive mode when existing content must be preserved.\n- Assuming paths are relative to the script file rather than the process working directory.\n- Forgetting that text and binary streams accept different data types.\n- Building CSV or JSON by manually concatenating strings.\n- Ignoring exceptions caused by missing paths, permissions, invalid encodings or malformed data.\n\n## Best practices\nUse the standard library, explicit UTF-8 for text, context managers for resources, narrow exception handling and validation at application boundaries. Keep untrusted input within an explicitly approved data area.",
+      "examples": [
+        {
+          "id": "py15.7-ex1",
+          "language": "en",
+          "title": "Read CSV rows from memory",
+          "code": "import csv\nfrom io import StringIO\nsource = StringIO('name,score\\nAva,91\\nNoah,84\\n')\nfor row in csv.reader(source):\n    print(row)",
+          "expectedOutput": "['name', 'score']\n['Ava', '91']\n['Noah', '84']",
+          "explanation": "csv.reader parses each record into a list of strings."
+        },
+        {
+          "id": "py15.7-ex2",
+          "language": "en",
+          "title": "Read records by column name",
+          "code": "import csv\nfrom io import StringIO\nsource = StringIO('name,score\\nAva,91\\n')\nfor row in csv.DictReader(source):\n    print(row['name'], row['score'])",
+          "expectedOutput": "Ava 91",
+          "explanation": "DictReader uses the first row as field names and returns each record as a dictionary."
+        },
+        {
+          "id": "py15.7-ex3",
+          "language": "en",
+          "title": "Write CSV rows",
+          "code": "import csv\nfrom io import StringIO\noutput = StringIO(newline='')\nwriter = csv.writer(output)\nwriter.writerow(['item', 'quantity'])\nwriter.writerow(['blue pen', 3])\nprint(output.getvalue().strip())",
+          "expectedOutput": "item,quantity\nblue pen,3",
+          "explanation": "csv.writer handles the serialization of values into CSV records."
+        },
+        {
+          "id": "py15.7-ex4",
+          "language": "en",
+          "title": "Quote a field containing a comma",
+          "code": "import csv\nfrom io import StringIO\noutput = StringIO(newline='')\nwriter = csv.writer(output)\nwriter.writerow(['Mandapeta, AP', 'India'])\nprint(output.getvalue().strip())",
+          "expectedOutput": "\"Mandapeta, AP\",India",
+          "explanation": "The CSV writer quotes a field containing a delimiter so it remains one value when read back."
+        },
+        {
+          "id": "py15.7-ex5",
+          "language": "en",
+          "title": "Convert validated numeric text",
+          "code": "import csv\nfrom io import StringIO\nsource = StringIO('name,score\\nAva,91\\n')\nrow = next(csv.DictReader(source))\nscore = int(row['score'])\nprint(score + 9)",
+          "expectedOutput": "100",
+          "explanation": "CSV readers return strings; convert fields to the type required by the application after validating them."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a small reading and writing csv files in python demonstration using a temporary directory or an in-memory stream. Run it, compare the output with your prediction and explain each operation.",
+      "independentTask": "Build a mini record-processing utility that applies reading and writing csv files in python to a small, known dataset. Include one valid case, one edge case and a clear response to an expected failure.",
+      "hints": [
+        "Start with the smallest possible file or stream and state what result you expect.",
+        "Choose the mode and encoding before writing the operation.",
+        "Use a context manager whenever a resource must be closed.",
+        "Test an empty input and an invalid or missing value.",
+        "Keep user-controlled paths and parsed external data within explicit validation rules."
+      ],
+      "challenge": "Extend the example into a reusable helper that validates inputs, handles one expected error and leaves resources in a predictable state.",
+      "validationCriteria": [
+        "The program uses the appropriate standard-library API.",
+        "The expected output matches the actual result.",
+        "Resources are closed or cleaned up reliably.",
+        "At least one edge case is handled explicitly."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py15.7-q1",
+        "prompt": "Which module provides CSV readers and writers?",
+        "answer": "csv",
+        "options": [
+          "csv",
+          "json",
+          "pathlib",
+          "re"
+        ],
+        "explanation": "The standard-library csv module handles CSV parsing and writing."
+      },
+      {
+        "id": "py15.7-q2",
+        "prompt": "What does DictReader use as keys by default?",
+        "answer": "The first row's column headings",
+        "options": [
+          "The first row's column headings",
+          "The file name",
+          "The row numbers",
+          "The Python variable names"
+        ],
+        "explanation": "DictReader uses the header row to map each record to field names."
+      },
+      {
+        "id": "py15.7-q3",
+        "prompt": "What type are CSV fields returned as?",
+        "answer": "Strings",
+        "options": [
+          "Strings",
+          "Integers automatically",
+          "Booleans automatically",
+          "Tuples only"
+        ],
+        "explanation": "CSV parsing returns textual field values; applications convert them explicitly."
+      },
+      {
+        "id": "py15.7-q4",
+        "prompt": "Why use csv.writer instead of joining values with commas?",
+        "answer": "It handles quoting and delimiters correctly",
+        "options": [
+          "It handles quoting and delimiters correctly",
+          "It automatically encrypts files",
+          "It validates business rules",
+          "It removes duplicate rows"
+        ],
+        "explanation": "The CSV writer correctly quotes fields containing commas, quotes and newlines."
+      },
+      {
+        "id": "py15.7-q5",
+        "prompt": "Why open CSV files with newline=''?",
+        "answer": "To let the csv module manage newline handling",
+        "options": [
+          "To let the csv module manage newline handling",
+          "To force UTF-16",
+          "To skip the header",
+          "To convert all values to numbers"
+        ],
+        "explanation": "The csv documentation recommends newline='' so the module can handle record newlines itself."
+      }
+    ]
+  }
+}
