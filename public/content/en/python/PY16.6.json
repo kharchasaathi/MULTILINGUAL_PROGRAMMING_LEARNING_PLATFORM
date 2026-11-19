@@ -1,0 +1,161 @@
+{
+  "id": "python.py16.6.en",
+  "courseId": "python",
+  "moduleId": "PY16",
+  "topicId": "PY16.6",
+  "title": "Exploring Module Contents with dir()",
+  "language": "en",
+  "learningObjectives": [
+    "Explain dir and module introspection and where it is useful in Python programs.",
+    "Choose correct Python syntax for dir and module introspection.",
+    "Predict the result of representative PY16.6 operations.",
+    "Identify namespace, import and maintenance risks related to dir and module introspection.",
+    "Apply dir and module introspection in a small, readable Python program."
+  ],
+  "prerequisites": [
+    "PY7.1",
+    "PY13.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "The built-in `dir()` function returns a list of names available on an object. When passed a module, it helps explore the module's attributes, including functions, constants and metadata. The exact list can vary by Python version, so filter for names relevant to the task rather than relying on a fixed full listing.",
+      "whyItMatters": "Introspection helps learners discover APIs and inspect objects, but reliable programs should use documented members rather than depend on incidental implementation details.",
+      "analogy": "A module is like a labelled toolbox: related tools are stored together and another program can request the tools it needs.",
+      "analogyLimit": "A real Python module also has import rules, namespaces, execution behaviour and caching that a physical toolbox does not represent.",
+      "summary": "Exploring Module Contents with dir() teaches how Python organizes and reuses related code."
+    },
+    "explain": {
+      "narrative": "## Inspect a module\nCall `dir(module)` to obtain a list of attribute names. The list includes public members and names used internally by Python.\n\n## Filter useful names\nA comprehension can select names that match a prefix or naming rule. This is more stable than copying the entire output of dir(), which can change between versions.\n\n## Documentation and help\n`help(object)` displays documentation in an interactive Python environment. In automated programs, prefer official documentation and inspect `__doc__` when a concise docstring is useful.\n\n## Avoid assumptions\nAn attribute appearing in dir() does not guarantee it is appropriate for application use. Underscore-prefixed names are often implementation details.",
+      "examples": [
+        {
+          "id": "py16.6-ex1",
+          "language": "en",
+          "title": "List names from a module",
+          "code": "import math\nnames = dir(math)\nprint('sqrt' in names)\nprint('pi' in names)",
+          "expectedOutput": "True\nTrue",
+          "explanation": "dir returns attribute names and membership tests can check for selected entries."
+        },
+        {
+          "id": "py16.6-ex2",
+          "language": "en",
+          "title": "Filter names with a prefix",
+          "code": "import math\nnames = [name for name in dir(math) if name.startswith('is')]\nprint(names)",
+          "expectedOutput": "['isclose', 'isfinite', 'isinf', 'isnan']",
+          "explanation": "Filtering produces a focused view of related functions; ordering is alphabetical."
+        },
+        {
+          "id": "py16.6-ex3",
+          "language": "en",
+          "title": "Inspect a function's documentation",
+          "code": "import math\nprint(math.sqrt.__doc__.split('.')[0])",
+          "expectedOutput": "Return the square root of x",
+          "explanation": "A function's docstring can provide a short description; full help is available interactively."
+        },
+        {
+          "id": "py16.6-ex4",
+          "language": "en",
+          "title": "Check for an expected attribute",
+          "code": "import statistics\nprint(hasattr(statistics, 'median'))\nprint(callable(statistics.median))",
+          "expectedOutput": "True\nTrue",
+          "explanation": "hasattr checks presence and callable checks whether the object can be called."
+        },
+        {
+          "id": "py16.6-ex5",
+          "language": "en",
+          "title": "Compare public-looking and internal names",
+          "code": "import math\nnames = dir(math)\nprint('pi' in names)\nprint(any(name.startswith('_') for name in names))",
+          "expectedOutput": "True\nTrue",
+          "explanation": "Modules may expose underscore-prefixed implementation or metadata names as well."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a small demonstration of dir and module introspection. Run each step, compare the output with your prediction and explain how Python resolves the names involved.",
+      "independentTask": "Build a small reusable utility that applies dir and module introspection. Include a normal case, a namespace or import edge case, and a short explanation of your design.",
+      "hints": [
+        "Write down the names that should exist before importing or executing code.",
+        "Use explicit imports and qualified names when they improve clarity.",
+        "Keep import-time behaviour small and predictable.",
+        "Test the normal path and one missing-name or collision case.",
+        "Prefer documented public APIs over implementation details."
+      ],
+      "challenge": "Turn the demonstration into a small reusable module interface and explain how another file would import it.",
+      "validationCriteria": [
+        "The program uses valid Python syntax and the intended import form.",
+        "The output matches the expected result.",
+        "Names are accessed from the correct namespace.",
+        "The example avoids unnecessary import-time side effects."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py16.6-q1",
+        "prompt": "What does dir(math) return?",
+        "answer": "A list of attribute names",
+        "options": [
+          "A list of attribute names",
+          "The source code of math",
+          "Only syntax errors",
+          "A list of installed applications"
+        ],
+        "explanation": "dir lists names available on the object."
+      },
+      {
+        "id": "py16.6-q2",
+        "prompt": "Why filter dir() output?",
+        "answer": "The full list can include many internal names and vary by version",
+        "options": [
+          "The full list can include many internal names and vary by version",
+          "Filtering changes the Python version",
+          "dir only returns numbers",
+          "Filtering installs modules"
+        ],
+        "explanation": "Focused filtering is more useful and avoids depending on a complete version-specific list."
+      },
+      {
+        "id": "py16.6-q3",
+        "prompt": "Which built-in checks whether an attribute exists?",
+        "answer": "hasattr",
+        "options": [
+          "hasattr",
+          "isfile",
+          "isdir",
+          "contains_module"
+        ],
+        "explanation": "hasattr checks whether an object has the named attribute."
+      },
+      {
+        "id": "py16.6-q4",
+        "prompt": "What does callable(obj) test?",
+        "answer": "Whether obj can be called",
+        "options": [
+          "Whether obj can be called",
+          "Whether obj is a path",
+          "Whether obj is imported",
+          "Whether obj is a string"
+        ],
+        "explanation": "callable returns whether an object appears callable."
+      },
+      {
+        "id": "py16.6-q5",
+        "prompt": "Should programs rely on every name returned by dir()?",
+        "answer": "No, use documented public members",
+        "options": [
+          "No, use documented public members",
+          "Yes, every name is a stable public API",
+          "Only underscore names",
+          "Only names at the end"
+        ],
+        "explanation": "Introspection reveals names but does not guarantee public API stability."
+      }
+    ]
+  },
+  "status": "draft"
+}
