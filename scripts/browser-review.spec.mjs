@@ -7,7 +7,8 @@ const groups = {
   html: ["H16.1","H16.2","H16.3","H16.4","H16.5","H16.6","H16.7","H16.8","H16.9","H16.10"],
   css: ["C22.1","C22.2","C22.3","C22.4","C22.5","C22.6"],
   javascript: ["J24.1","J24.2","J24.3","J24.4","J24.5","J24.6","J24.7","J24.8","J24.9"],
-  c: ["CL1.1","CL1.2","CL1.3","CL1.4","CL1.5","CL1.6","CL2.1","CL2.2","CL2.3","CL2.4","CL2.5","CL2.6","CL2.7","CL2.8","CL2.9","CL2.10"]
+  c: ["CL1.1","CL1.2","CL1.3","CL1.4","CL1.5","CL1.6","CL2.1","CL2.2","CL2.3","CL2.4","CL2.5","CL2.6","CL2.7","CL2.8","CL2.9","CL2.10"],
+  python: ["PY1.1"]
 };
 
 test("homepage and lesson dialog have no serious or critical WCAG axe violations", async ({ page }) => {
@@ -84,7 +85,7 @@ test("keyboard users can open and dismiss the curriculum dialog", async ({ page 
   await expect(page.locator("#lessonDialog")).not.toBeVisible();
 });
 
-test("all six courses render representative lessons and starter programs execute in Chromium", async ({ page }) => {
+test("all seven courses render representative lessons and starter programs execute in Chromium", async ({ page }) => {
   test.setTimeout(180000);
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
@@ -92,7 +93,7 @@ test("all six courses render representative lessons and starter programs execute
   await expect(page.locator("#courseGrid .course-card")).toHaveCount(await page.evaluate(async () => (await fetch("/content/curriculum-index.json")).json().then(data => data.courses.length)));
 
   // Exercise the shared lesson renderer and modal with one representative lesson per course.
-  for (const [course, topicId] of [["foundation","F0.1"],["html","H16.1"],["css","C22.1"],["javascript","J24.1"],["c","CL1.1"],["cpp","CPP1.1"]]) {
+  for (const [course, topicId] of [["foundation","F0.1"],["html","H16.1"],["css","C22.1"],["javascript","J24.1"],["c","CL1.1"],["cpp","CPP1.1"],["python","PY1.1"]]) {
     await page.locator(`[data-course-nav="${course}"]`).click();
     const dialog = page.locator("#lessonDialog");
     await expect(dialog).toBeVisible();
