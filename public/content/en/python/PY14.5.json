@@ -1,0 +1,155 @@
+{
+  "id": "python.py14.5.en",
+  "courseId": "python",
+  "moduleId": "PY14",
+  "topicId": "PY14.5",
+  "title": "Raising and Creating Custom Python Exceptions",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the principles of raising and creating custom python exceptions.",
+    "Write correct Python syntax for the exception-handling construct covered.",
+    "Predict which handler or cleanup block executes in common scenarios.",
+    "Distinguish recoverable errors, programming defects and internal assertions.",
+    "Apply safe and specific error handling to a realistic program."
+  ],
+  "prerequisites": [
+    "PY7.1",
+    "PY10.1",
+    "PY13.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "The raise statement signals that an operation cannot proceed under the current conditions. Programs can raise built-in exception classes or define custom exception classes, usually derived from Exception or a more specific built-in subclass.",
+      "whyItMatters": "Explicit exceptions make invalid states and violated application rules visible to callers, who can then handle them at an appropriate level.",
+      "analogy": "Raising an exception is like formally escalating a request that cannot be completed under the current rules.",
+      "analogyLimit": "An exception is not a substitute for ordinary branching. Use exceptions for exceptional or invalid conditions, and choose a type that communicates the problem accurately."
+    },
+    "explain": {
+      "narrative": "## Raise built-in exceptions\nUse `raise ValueError('message')` when an argument has an inappropriate value, or `TypeError` when an operation receives an incompatible type. Choose the most specific suitable exception so callers can respond predictably.\n\n## Define a custom exception\nCreate a class that inherits from `Exception` or a suitable subclass. A custom exception type gives callers a stable way to distinguish a domain-specific failure. Keep the class simple unless extra structured data is genuinely useful.\n\n## Re-raise and preserve context\nInside an except block, bare `raise` re-raises the currently handled exception while preserving its traceback. Avoid replacing an informative exception with a generic message unless you preserve the original cause or add useful context.",
+      "examples": [
+        {
+          "id": "py14.5-ex1",
+          "language": "en",
+          "title": "Raise ValueError for an invalid amount",
+          "code": "def set_quantity(value):\n    if value < 0:\n        raise ValueError('quantity cannot be negative')\n    return value\ntry:\n    set_quantity(-2)\nexcept ValueError as error:\n    print(type(error).__name__)",
+          "expectedOutput": "ValueError",
+          "explanation": "The function rejects a domain-invalid quantity by raising ValueError."
+        },
+        {
+          "id": "py14.5-ex2",
+          "language": "en",
+          "title": "Raise TypeError for an incompatible input",
+          "code": "def label(value):\n    if not isinstance(value, str):\n        raise TypeError('label must be text')\n    return value.upper()\ntry:\n    label(10)\nexcept TypeError as error:\n    print(str(error))",
+          "expectedOutput": "label must be text",
+          "explanation": "The function requires a string and raises TypeError when given an integer."
+        },
+        {
+          "id": "py14.5-ex3",
+          "language": "en",
+          "title": "Define a domain-specific exception",
+          "code": "class OutOfStockError(Exception):\n    pass\ndef reserve(stock):\n    if stock == 0:\n        raise OutOfStockError('no units available')\ntry:\n    reserve(0)\nexcept OutOfStockError:\n    print('Reservation unavailable')",
+          "expectedOutput": "Reservation unavailable",
+          "explanation": "A custom exception class lets callers identify an out-of-stock condition separately from unrelated failures."
+        },
+        {
+          "id": "py14.5-ex4",
+          "language": "en",
+          "title": "Re-raise the current exception",
+          "code": "try:\n    int('x')\nexcept ValueError:\n    print('record rejected')\n    try:\n        raise\n    except ValueError:\n        print('original error preserved')",
+          "expectedOutput": "record rejected\noriginal error preserved",
+          "explanation": "Bare raise re-raises the active exception rather than creating an unrelated new one."
+        },
+        {
+          "id": "py14.5-ex5",
+          "language": "en",
+          "title": "Catch a custom exception by its base class",
+          "code": "class PaymentError(Exception):\n    pass\nclass CardDeclinedError(PaymentError):\n    pass\ntry:\n    raise CardDeclinedError()\nexcept PaymentError:\n    print('Payment could not be completed')",
+          "expectedOutput": "Payment could not be completed",
+          "explanation": "A handler for the custom base class also matches its subclass."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a small program demonstrating raising and creating custom python exceptions. Trigger one expected failure, handle it appropriately, and explain the resulting control flow.",
+      "independentTask": "Build a small input-processing function with explicit validation and a clear error-handling policy. Test one valid input, one expected invalid input and one unexpected failure; explain which layer should handle each.",
+      "hints": [
+        "Identify the exact operation that can fail before writing the try block.",
+        "Catch only exception types that have a meaningful recovery action.",
+        "Keep normal success logic outside the protected suite when possible.",
+        "Preserve the original exception when adding higher-level context.",
+        "Never rely on assert for required user-input or security validation."
+      ],
+      "challenge": "Design a small application boundary that translates a low-level exception into a domain-specific error, preserves the cause and produces a safe user-facing message."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py14.5-q1",
+        "prompt": "Which exception is usually suitable for a negative quantity value?",
+        "answer": "ValueError",
+        "options": [
+          "ValueError",
+          "KeyError",
+          "IndexError",
+          "ImportError"
+        ],
+        "explanation": "The type may be correct, but the value violates the function's accepted range."
+      },
+      {
+        "id": "py14.5-q2",
+        "prompt": "What should a custom exception normally inherit from?",
+        "answer": "Exception",
+        "options": [
+          "Exception",
+          "str",
+          "list",
+          "None"
+        ],
+        "explanation": "Custom application exceptions normally derive from Exception or a relevant subclass."
+      },
+      {
+        "id": "py14.5-q3",
+        "prompt": "What does bare raise do inside an except block?",
+        "answer": "Re-raises the currently handled exception",
+        "options": [
+          "Re-raises the currently handled exception",
+          "Creates a new NameError",
+          "Returns None",
+          "Suppresses the exception"
+        ],
+        "explanation": "Bare raise preserves and propagates the active exception."
+      },
+      {
+        "id": "py14.5-q4",
+        "prompt": "Why create a custom exception class?",
+        "answer": "To identify a domain-specific failure with a distinct type",
+        "options": [
+          "To identify a domain-specific failure with a distinct type",
+          "To avoid all validation",
+          "To make every error a SyntaxError",
+          "To replace every built-in exception"
+        ],
+        "explanation": "A distinct type gives callers a clear and stable way to handle a particular application condition."
+      },
+      {
+        "id": "py14.5-q5",
+        "prompt": "Can an except handler for a custom base exception catch its subclass?",
+        "answer": "Yes",
+        "options": [
+          "Yes",
+          "No, subclasses are unrelated",
+          "Only if the subclass has no methods",
+          "Only in Python 2"
+        ],
+        "explanation": "Exception matching follows class inheritance, so a base-class handler catches subclass instances."
+      }
+    ]
+  },
+  "status": "draft"
+}
