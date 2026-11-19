@@ -1,0 +1,161 @@
+{
+  "id": "python.py16.7.en",
+  "courseId": "python",
+  "moduleId": "PY16",
+  "topicId": "PY16.7",
+  "title": "Module Variables, Functions and the __name__ Guard",
+  "language": "en",
+  "learningObjectives": [
+    "Explain module namespace and main guard and where it is useful in Python programs.",
+    "Choose correct Python syntax for module namespace and main guard.",
+    "Predict the result of representative PY16.7 operations.",
+    "Identify namespace, import and maintenance risks related to module namespace and main guard.",
+    "Apply module namespace and main guard in a small, readable Python program."
+  ],
+  "prerequisites": [
+    "PY7.1",
+    "PY13.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A module can define constants, functions and classes in its global namespace. Python sets `__name__` to the module's import name when imported, and to `__main__` when a file is run as the program's entry point. An `if __name__ == '__main__':` guard keeps demonstration or command-line code from running merely because another module imports the file.",
+      "whyItMatters": "The main guard allows one file to work both as an importable library and as a directly executable program.",
+      "analogy": "A module is like a labelled toolbox: related tools are stored together and another program can request the tools it needs.",
+      "analogyLimit": "A real Python module also has import rules, namespaces, execution behaviour and caching that a physical toolbox does not represent.",
+      "summary": "Module Variables, Functions and the __name__ Guard teaches how Python organizes and reuses related code."
+    },
+    "explain": {
+      "narrative": "## Names stored in a module\nFunctions, classes and variables defined at the top level become attributes of the module. Other code can access them with a qualified name after import.\n\n## The __name__ variable\nPython assigns a special `__name__` value. A module imported by another module normally receives its import name; the entry-point file receives `__main__`.\n\n## Protect entry-point behaviour\nPlace command-line startup code inside `if __name__ == '__main__':`. Keep reusable functions outside the guard so they remain importable.\n\n## Test the distinction\nThe examples simulate separate module namespaces with dictionaries and `exec`, making the two `__name__` values visible without creating project files.",
+      "examples": [
+        {
+          "id": "py16.7-ex1",
+          "language": "en",
+          "title": "Read the current module name",
+          "code": "print(__name__ == '__main__')",
+          "expectedOutput": "True",
+          "explanation": "When the validator executes a lesson as a script, its main module name is __main__."
+        },
+        {
+          "id": "py16.7-ex2",
+          "language": "en",
+          "title": "Define module-level reusable names",
+          "code": "course = 'Python'\ndef describe():\n    return f'Learning {course}'\nprint(describe())",
+          "expectedOutput": "Learning Python",
+          "explanation": "Top-level variables and functions become names in the module namespace."
+        },
+        {
+          "id": "py16.7-ex3",
+          "language": "en",
+          "title": "Simulate importing a module namespace",
+          "code": "namespace = {'__name__': 'score_tools'}\nexec(\"LIMIT = 100\\ndef clamp(value):\\n    return min(value, LIMIT)\", namespace)\nprint(namespace['__name__'])\nprint(namespace['clamp'](120))",
+          "expectedOutput": "score_tools\n100",
+          "explanation": "A module namespace stores its module name and definitions."
+        },
+        {
+          "id": "py16.7-ex4",
+          "language": "en",
+          "title": "Run entry-point code only for __main__",
+          "code": "def run():\n    print('application started')\nfor module_name in ('__main__', 'helper'):\n    namespace = {'__name__': module_name, 'run': run}\n    if namespace['__name__'] == '__main__':\n        namespace['run']()\n    else:\n        print('imported')",
+          "expectedOutput": "application started\nimported",
+          "explanation": "The guard runs startup behaviour only when the module is the program entry point."
+        },
+        {
+          "id": "py16.7-ex5",
+          "language": "en",
+          "title": "Keep definitions separate from startup",
+          "code": "def add(a, b):\n    return a + b\nif __name__ == '__main__':\n    print(add(4, 6))\nprint(add(2, 3))",
+          "expectedOutput": "10\n5",
+          "explanation": "Reusable definitions remain available whether the file is imported or run directly."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a small demonstration of module namespace and main guard. Run each step, compare the output with your prediction and explain how Python resolves the names involved.",
+      "independentTask": "Build a small reusable utility that applies module namespace and main guard. Include a normal case, a namespace or import edge case, and a short explanation of your design.",
+      "hints": [
+        "Write down the names that should exist before importing or executing code.",
+        "Use explicit imports and qualified names when they improve clarity.",
+        "Keep import-time behaviour small and predictable.",
+        "Test the normal path and one missing-name or collision case.",
+        "Prefer documented public APIs over implementation details."
+      ],
+      "challenge": "Turn the demonstration into a small reusable module interface and explain how another file would import it.",
+      "validationCriteria": [
+        "The program uses valid Python syntax and the intended import form.",
+        "The output matches the expected result.",
+        "Names are accessed from the correct namespace.",
+        "The example avoids unnecessary import-time side effects."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py16.7-q1",
+        "prompt": "What value does __name__ normally have in a directly executed entry-point file?",
+        "answer": "__main__",
+        "options": [
+          "__main__",
+          "main.py",
+          "python",
+          "None"
+        ],
+        "explanation": "Python sets __name__ to __main__ for the program entry point."
+      },
+      {
+        "id": "py16.7-q2",
+        "prompt": "What does the main guard look like?",
+        "answer": "if __name__ == '__main__':",
+        "options": [
+          "if __name__ == '__main__':",
+          "if main == __name__:",
+          "when __main__:",
+          "import __main__"
+        ],
+        "explanation": "The comparison protects entry-point-only code."
+      },
+      {
+        "id": "py16.7-q3",
+        "prompt": "Where should reusable functions usually be defined?",
+        "answer": "Outside the main guard",
+        "options": [
+          "Outside the main guard",
+          "Only inside the main guard",
+          "Inside a comment",
+          "After sys.exit always"
+        ],
+        "explanation": "Definitions outside the guard remain available when the module is imported."
+      },
+      {
+        "id": "py16.7-q4",
+        "prompt": "What happens to __name__ when a module is imported under its own name?",
+        "answer": "It normally contains the module's import name",
+        "options": [
+          "It normally contains the module's import name",
+          "It always becomes __main__",
+          "It is deleted",
+          "It becomes the filename extension"
+        ],
+        "explanation": "Imported modules receive their module name in __name__."
+      },
+      {
+        "id": "py16.7-q5",
+        "prompt": "Why use a main guard?",
+        "answer": "To prevent entry-point actions from running during import",
+        "options": [
+          "To prevent entry-point actions from running during import",
+          "To disable imports",
+          "To hide every function",
+          "To make variables immutable"
+        ],
+        "explanation": "The guard separates reusable definitions from direct-execution behaviour."
+      }
+    ]
+  },
+  "status": "draft"
+}
