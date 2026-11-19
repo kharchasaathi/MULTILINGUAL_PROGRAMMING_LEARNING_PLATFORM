@@ -1,0 +1,155 @@
+{
+  "id": "python.py14.2.en",
+  "courseId": "python",
+  "moduleId": "PY14",
+  "topicId": "PY14.2",
+  "title": "Python try and except Blocks",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the principles of python try and except blocks.",
+    "Write correct Python syntax for the exception-handling construct covered.",
+    "Predict which handler or cleanup block executes in common scenarios.",
+    "Distinguish recoverable errors, programming defects and internal assertions.",
+    "Apply safe and specific error handling to a realistic program."
+  ],
+  "prerequisites": [
+    "PY7.1",
+    "PY10.1",
+    "PY13.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A try statement marks code that may raise an exception, and an except clause handles a matching exception type. The handler can bind the exception object with as so a program can inspect its message or record diagnostic information.",
+      "whyItMatters": "Controlled exception handling lets a program recover from expected failures, present useful feedback and continue with safe alternative behaviour.",
+      "analogy": "A try/except structure is like a planned fallback procedure: attempt the normal action, then follow a defined recovery path if a known problem occurs.",
+      "analogyLimit": "A fallback does not make an operation succeed or repair all state. Catch only failures the program can handle and preserve enough diagnostic detail for debugging."
+    },
+    "explain": {
+      "narrative": "## Basic structure\nPlace the operation that may fail inside `try`. Add one or more `except ExceptionType` clauses for failures the program can handle. Python selects the first matching handler. Code after the try statement continues when a handler completes normally.\n\n## Bind the exception\nUse `except ValueError as error` to access the exception object. Its string representation often contains a useful message. Avoid showing internal details to end users when those details expose paths, secrets or implementation information.\n\n## Be precise\nPrefer specific exception types. A bare `except:` catches exceptions outside the ordinary Exception hierarchy too, including KeyboardInterrupt and SystemExit. Catching `Exception` is broader but still normally allows process-control exceptions through. Do not use exception handling as a substitute for ordinary input checks.",
+      "examples": [
+        {
+          "id": "py14.2-ex1",
+          "language": "en",
+          "title": "Handle a conversion error",
+          "code": "raw = '42x'\ntry:\n    number = int(raw)\nexcept ValueError:\n    print('Enter a whole number')",
+          "expectedOutput": "Enter a whole number",
+          "explanation": "int raises ValueError for text that is not a valid integer literal."
+        },
+        {
+          "id": "py14.2-ex2",
+          "language": "en",
+          "title": "Bind and display a safe message",
+          "code": "try:\n    amount = int('many')\nexcept ValueError as error:\n    print(type(error).__name__)\n    print('Invalid amount')",
+          "expectedOutput": "ValueError\nInvalid amount",
+          "explanation": "The as clause binds the exception object; the example displays its type while giving the user a concise message."
+        },
+        {
+          "id": "py14.2-ex3",
+          "language": "en",
+          "title": "Continue after a handled failure",
+          "code": "for raw in ['8', 'bad', '5']:\n    try:\n        print(int(raw) * 2)\n    except ValueError:\n        print('Skipped invalid input')",
+          "expectedOutput": "16\nSkipped invalid input\n10",
+          "explanation": "Each iteration handles its own conversion failure, so later values are still processed."
+        },
+        {
+          "id": "py14.2-ex4",
+          "language": "en",
+          "title": "Use a fallback value",
+          "code": "def read_score(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0\nprint(read_score('7'))\nprint(read_score('unknown'))",
+          "expectedOutput": "7\n0",
+          "explanation": "The function returns a defined fallback for the expected conversion failure."
+        },
+        {
+          "id": "py14.2-ex5",
+          "language": "en",
+          "title": "Catch only the expected type",
+          "code": "try:\n    print([1, 2][5])\nexcept IndexError:\n    print('No item at that position')",
+          "expectedOutput": "No item at that position",
+          "explanation": "The handler names IndexError, so unrelated exception types are not silently treated as the same problem."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a small program demonstrating python try and except blocks. Trigger one expected failure, handle it appropriately, and explain the resulting control flow.",
+      "independentTask": "Build a small input-processing function with explicit validation and a clear error-handling policy. Test one valid input, one expected invalid input and one unexpected failure; explain which layer should handle each.",
+      "hints": [
+        "Identify the exact operation that can fail before writing the try block.",
+        "Catch only exception types that have a meaningful recovery action.",
+        "Keep normal success logic outside the protected suite when possible.",
+        "Preserve the original exception when adding higher-level context.",
+        "Never rely on assert for required user-input or security validation."
+      ],
+      "challenge": "Design a small application boundary that translates a low-level exception into a domain-specific error, preserves the cause and produces a safe user-facing message."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py14.2-q1",
+        "prompt": "Which block contains code that may raise an exception?",
+        "answer": "try",
+        "options": [
+          "try",
+          "except",
+          "else",
+          "finally"
+        ],
+        "explanation": "The try suite is the protected operation being attempted."
+      },
+      {
+        "id": "py14.2-q2",
+        "prompt": "What does except ValueError as error provide?",
+        "answer": "A reference to the caught exception object",
+        "options": [
+          "A reference to the caught exception object",
+          "A new ValueError automatically",
+          "The program's return value",
+          "A copy of the source file"
+        ],
+        "explanation": "The as target is bound to the exception instance caught by that handler."
+      },
+      {
+        "id": "py14.2-q3",
+        "prompt": "Why prefer a specific except type?",
+        "answer": "It avoids treating unrelated failures as the same recoverable condition",
+        "options": [
+          "It avoids treating unrelated failures as the same recoverable condition",
+          "It makes every exception disappear",
+          "It prevents all runtime errors",
+          "It converts exceptions into warnings"
+        ],
+        "explanation": "Precise handlers make recovery intentional and leave unexpected failures visible."
+      },
+      {
+        "id": "py14.2-q4",
+        "prompt": "Which exceptions are not subclasses of Exception?",
+        "answer": "KeyboardInterrupt and SystemExit",
+        "options": [
+          "KeyboardInterrupt and SystemExit",
+          "ValueError and TypeError",
+          "KeyError and IndexError",
+          "ZeroDivisionError and NameError"
+        ],
+        "explanation": "KeyboardInterrupt and SystemExit inherit directly from BaseException rather than Exception."
+      },
+      {
+        "id": "py14.2-q5",
+        "prompt": "What happens after a matching except handler completes normally?",
+        "answer": "Execution continues after the try statement",
+        "options": [
+          "Execution continues after the try statement",
+          "The interpreter restarts the program",
+          "The exception is raised again automatically",
+          "The function always returns None"
+        ],
+        "explanation": "A handled exception does not automatically propagate after its handler finishes."
+      }
+    ]
+  },
+  "status": "draft"
+}
