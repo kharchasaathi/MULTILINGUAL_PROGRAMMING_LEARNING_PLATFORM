@@ -1,0 +1,155 @@
+{
+  "id": "python.py14.3.en",
+  "courseId": "python",
+  "moduleId": "PY14",
+  "topicId": "PY14.3",
+  "title": "Handling Multiple Python Exceptions",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the principles of handling multiple python exceptions.",
+    "Write correct Python syntax for the exception-handling construct covered.",
+    "Predict which handler or cleanup block executes in common scenarios.",
+    "Distinguish recoverable errors, programming defects and internal assertions.",
+    "Apply safe and specific error handling to a realistic program."
+  ],
+  "prerequisites": [
+    "PY7.1",
+    "PY10.1",
+    "PY13.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A try statement can have multiple except clauses to handle different exception types differently. Related exception types can be grouped in a tuple. Handler order matters because Python chooses the first matching clause, so broad handlers should follow more specific ones.",
+      "whyItMatters": "Different failures often need different recovery actions. Handling them separately keeps validation feedback accurate and makes the code easier to maintain.",
+      "analogy": "Multiple handlers are like different service desks: each desk is responsible for a particular category of issue.",
+      "analogyLimit": "Exception inheritance means categories can overlap. A broad parent class may match a child exception, so the order of handlers changes which block runs."
+    },
+    "explain": {
+      "narrative": "## Multiple handlers\nWrite multiple except clauses after one try suite. Python checks them in order and runs the first compatible handler. Put specific exception types before their broader base classes.\n\n## Group related types\nAn except clause can name a tuple, such as `except (ValueError, TypeError)`. Use this when the same recovery action is appropriate for both exceptions. If the recovery differs, keep separate clauses.\n\n## Avoid catch-all logic\nA final `except Exception` can be appropriate at an application boundary for logging and controlled reporting, but it should not silently discard unexpected failures. Preserve diagnostic context and avoid catching BaseException unless process-control behaviour is explicitly intended.",
+      "examples": [
+        {
+          "id": "py14.3-ex1",
+          "language": "en",
+          "title": "Handle two types separately",
+          "code": "try:\n    print(int('x') / 0)\nexcept ValueError:\n    print('Conversion failed')\nexcept ZeroDivisionError:\n    print('Division failed')",
+          "expectedOutput": "Conversion failed",
+          "explanation": "int('x') raises ValueError first, so division is never attempted."
+        },
+        {
+          "id": "py14.3-ex2",
+          "language": "en",
+          "title": "Group related exception types",
+          "code": "def parse_count(value):\n    try:\n        return int(value)\n    except (TypeError, ValueError):\n        return None\nprint(parse_count('12'))\nprint(parse_count(None))",
+          "expectedOutput": "12\nNone",
+          "explanation": "Both an incompatible type and invalid numeric text use the same fallback, so a tuple handler is suitable."
+        },
+        {
+          "id": "py14.3-ex3",
+          "language": "en",
+          "title": "Put a specific handler before a broad one",
+          "code": "try:\n    {}['missing']\nexcept KeyError:\n    print('Key not found')\nexcept LookupError:\n    print('Other lookup problem')",
+          "expectedOutput": "Key not found",
+          "explanation": "KeyError is a subclass of LookupError, so the specific handler must come first to receive it."
+        },
+        {
+          "id": "py14.3-ex4",
+          "language": "en",
+          "title": "Use a broad handler only as a final boundary",
+          "code": "try:\n    value = int('nope')\nexcept ValueError:\n    print('Invalid number')\nexcept Exception:\n    print('Unexpected application error')",
+          "expectedOutput": "Invalid number",
+          "explanation": "The ValueError handler catches the expected problem before the broader Exception handler."
+        },
+        {
+          "id": "py14.3-ex5",
+          "language": "en",
+          "title": "Inspect the caught exception type",
+          "code": "try:\n    [][0]\nexcept (IndexError, KeyError) as error:\n    print(type(error).__name__)",
+          "expectedOutput": "IndexError",
+          "explanation": "The tuple matches either type and the as clause binds the actual exception instance."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a small program demonstrating handling multiple python exceptions. Trigger one expected failure, handle it appropriately, and explain the resulting control flow.",
+      "independentTask": "Build a small input-processing function with explicit validation and a clear error-handling policy. Test one valid input, one expected invalid input and one unexpected failure; explain which layer should handle each.",
+      "hints": [
+        "Identify the exact operation that can fail before writing the try block.",
+        "Catch only exception types that have a meaningful recovery action.",
+        "Keep normal success logic outside the protected suite when possible.",
+        "Preserve the original exception when adding higher-level context.",
+        "Never rely on assert for required user-input or security validation."
+      ],
+      "challenge": "Design a small application boundary that translates a low-level exception into a domain-specific error, preserves the cause and produces a safe user-facing message."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py14.3-q1",
+        "prompt": "Which except clause is checked first?",
+        "answer": "The first matching clause in source order",
+        "options": [
+          "The first matching clause in source order",
+          "The broadest clause",
+          "The last clause",
+          "A random clause"
+        ],
+        "explanation": "Python checks handlers in order and executes the first one that matches."
+      },
+      {
+        "id": "py14.3-q2",
+        "prompt": "How can one handler catch ValueError and TypeError?",
+        "answer": "except (ValueError, TypeError):",
+        "options": [
+          "except (ValueError, TypeError):",
+          "except ValueError or TypeError:",
+          "except [ValueError, TypeError]:",
+          "except ValueError + TypeError:"
+        ],
+        "explanation": "A tuple of exception classes is the supported syntax for matching either type."
+      },
+      {
+        "id": "py14.3-q3",
+        "prompt": "Why put KeyError before LookupError?",
+        "answer": "KeyError is a subclass of LookupError",
+        "options": [
+          "KeyError is a subclass of LookupError",
+          "LookupError is a subclass of KeyError",
+          "The names must be alphabetical",
+          "KeyError is not an exception"
+        ],
+        "explanation": "The specific subclass must appear before its base class or the base handler would catch it first."
+      },
+      {
+        "id": "py14.3-q4",
+        "prompt": "When is except Exception most appropriate?",
+        "answer": "At a deliberate application boundary with logging and controlled reporting",
+        "options": [
+          "At a deliberate application boundary with logging and controlled reporting",
+          "Around every single statement without logging",
+          "To hide all programming bugs",
+          "To catch KeyboardInterrupt"
+        ],
+        "explanation": "Broad handling can be useful at a boundary, but unexpected failures should remain diagnosable."
+      },
+      {
+        "id": "py14.3-q5",
+        "prompt": "What is the benefit of separate handlers when recovery differs?",
+        "answer": "Each exception can receive an appropriate response",
+        "options": [
+          "Each exception can receive an appropriate response",
+          "It makes the try block run twice",
+          "It removes the exception hierarchy",
+          "It prevents exceptions from being created"
+        ],
+        "explanation": "Separate handlers make failure-specific recovery explicit."
+      }
+    ]
+  },
+  "status": "draft"
+}
