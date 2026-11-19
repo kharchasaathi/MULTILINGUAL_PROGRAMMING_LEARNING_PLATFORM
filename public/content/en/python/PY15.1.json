@@ -1,0 +1,160 @@
+{
+  "id": "python.py15.1.en",
+  "courseId": "python",
+  "moduleId": "PY15",
+  "topicId": "PY15.1",
+  "title": "Python File Handling Fundamentals and Paths",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and practical uses of python file handling fundamentals and paths.",
+    "Choose appropriate Python standard-library APIs and syntax for python file handling fundamentals and paths.",
+    "Predict the behaviour of representative PY15.1 operations and their outputs.",
+    "Identify common mistakes, edge cases and failure conditions in python file handling fundamentals and paths.",
+    "Apply safe, readable python file handling fundamentals and paths techniques in a small program."
+  ],
+  "prerequisites": [
+    "PY14.1",
+    "PY14.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "File handling lets a program read persistent information from a file and write results for later use. A path identifies a file location; a relative path is interpreted from the process working directory, while an absolute path identifies a location from the filesystem root. File operations should be deliberate: choose a mode, specify an encoding for text, handle expected errors and close resources reliably.",
+      "whyItMatters": "Files allow programs to retain settings, reports and user-created data after a process ends. Understanding paths and resource ownership prevents accidental overwrites, missing-file errors and leaked handles.",
+      "analogy": "Working with a file is like borrowing a labelled record from a filing room: you identify its location, choose whether to read or update it, and return the resource when finished.",
+      "analogyLimit": "A real filesystem has permissions, concurrent changes, encoding rules and failure modes that a physical filing-room analogy cannot fully represent.",
+      "summary": "Python File Handling Fundamentals and Paths relies on explicit paths, correct modes, deliberate resource management and validation of data."
+    },
+    "explain": {
+      "narrative": "## Core idea\nFile handling lets a program read persistent information from a file and write results for later use. A path identifies a file location; a relative path is interpreted from the process working directory, while an absolute path identifies a location from the filesystem root. File operations should be deliberate: choose a mode, specify an encoding for text, handle expected errors and close resources reliably.\n\n## Syntax and behaviour\nA typical text-file workflow is `open(path, mode, encoding='utf-8')`, use the returned file object, then close it. Prefer `with open(...) as file:` because the context manager closes the file even when an exception occurs. Paths can be represented by strings or by `pathlib.Path` objects.\n\n## Rules and practical guidance\nRelative paths depend on the current working directory. Text encoding should be explicit when portability matters. Opening with `w` truncates an existing file; `a` appends; `x` creates only if absent. Do not assume a path exists or that a program has permission to access it.\n\n## Example walkthroughs\nThe five examples below use deterministic in-memory streams or automatically cleaned temporary directories. Their outputs are designed to be reproducible in the course validator.\n\n## Common mistakes\n- Choosing a destructive mode when existing content must be preserved.\n- Assuming paths are relative to the script file rather than the process working directory.\n- Forgetting that text and binary streams accept different data types.\n- Building CSV or JSON by manually concatenating strings.\n- Ignoring exceptions caused by missing paths, permissions, invalid encodings or malformed data.\n\n## Best practices\nUse the standard library, explicit UTF-8 for text, context managers for resources, narrow exception handling and validation at application boundaries. Keep untrusted input within an explicitly approved data area.",
+      "examples": [
+        {
+          "id": "py15.1-ex1",
+          "language": "en",
+          "title": "Inspect a path without opening a file",
+          "code": "from pathlib import Path\npath = Path('reports') / 'summary.txt'\nprint(path.name)\nprint(path.suffix)\nprint(path.parent)",
+          "expectedOutput": "summary.txt\n.txt\nreports",
+          "explanation": "Path composition uses the platform-aware path API; these properties inspect the path text without touching the file."
+        },
+        {
+          "id": "py15.1-ex2",
+          "language": "en",
+          "title": "Resolve a path relative to the working directory",
+          "code": "from pathlib import Path\npath = Path('data') / 'scores.csv'\nprint(path.is_absolute())\nprint(path.parts)",
+          "expectedOutput": "False\n('data', 'scores.csv')",
+          "explanation": "A relative path is interpreted from the process working directory. Its parts expose its components."
+        },
+        {
+          "id": "py15.1-ex3",
+          "language": "en",
+          "title": "Use an in-memory text stream as a file object",
+          "code": "from io import StringIO\nwith StringIO('first\\nsecond\\n') as file:\n    print(file.readline().strip())\n    print(file.readline().strip())",
+          "expectedOutput": "first\nsecond",
+          "explanation": "StringIO follows the text file object's read interface and is useful for deterministic examples without creating a disk file."
+        },
+        {
+          "id": "py15.1-ex4",
+          "language": "en",
+          "title": "Check whether a path exists",
+          "code": "from pathlib import Path\npath = Path('definitely_missing_demo.txt')\nprint(path.exists())\nprint(path.is_file())",
+          "expectedOutput": "False\nFalse",
+          "explanation": "Existence checks are useful for decisions, but the file can change before a later operation; still handle exceptions from the operation itself."
+        },
+        {
+          "id": "py15.1-ex5",
+          "language": "en",
+          "title": "Create a safe temporary file",
+          "code": "from pathlib import Path\nfrom tempfile import TemporaryDirectory\nwith TemporaryDirectory() as folder:\n    path = Path(folder) / 'note.txt'\n    path.write_text('CodeSaathi', encoding='utf-8')\n    print(path.read_text(encoding='utf-8'))\nprint(path.exists())",
+          "expectedOutput": "CodeSaathi\nFalse",
+          "explanation": "TemporaryDirectory provides a controlled location and cleans it up on exit, making the example repeatable."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a small python file handling fundamentals and paths demonstration using a temporary directory or an in-memory stream. Run it, compare the output with your prediction and explain each operation.",
+      "independentTask": "Build a mini record-processing utility that applies python file handling fundamentals and paths to a small, known dataset. Include one valid case, one edge case and a clear response to an expected failure.",
+      "hints": [
+        "Start with the smallest possible file or stream and state what result you expect.",
+        "Choose the mode and encoding before writing the operation.",
+        "Use a context manager whenever a resource must be closed.",
+        "Test an empty input and an invalid or missing value.",
+        "Keep user-controlled paths and parsed external data within explicit validation rules."
+      ],
+      "challenge": "Extend the example into a reusable helper that validates inputs, handles one expected error and leaves resources in a predictable state.",
+      "validationCriteria": [
+        "The program uses the appropriate standard-library API.",
+        "The expected output matches the actual result.",
+        "Resources are closed or cleaned up reliably.",
+        "At least one edge case is handled explicitly."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py15.1-q1",
+        "prompt": "What does a relative path depend on?",
+        "answer": "The process working directory",
+        "options": [
+          "The process working directory",
+          "The Python language version",
+          "The file extension only",
+          "The user's display resolution"
+        ],
+        "explanation": "Relative paths are interpreted from the process working directory."
+      },
+      {
+        "id": "py15.1-q2",
+        "prompt": "Which object represents paths in pathlib?",
+        "answer": "Path",
+        "options": [
+          "Path",
+          "File",
+          "Directory",
+          "Location"
+        ],
+        "explanation": "Path is the pathlib class for filesystem paths."
+      },
+      {
+        "id": "py15.1-q3",
+        "prompt": "What does StringIO provide?",
+        "answer": "An in-memory text stream with a file-like interface",
+        "options": [
+          "An in-memory text stream with a file-like interface",
+          "A network socket",
+          "A binary executable",
+          "A permanent disk file"
+        ],
+        "explanation": "StringIO provides a text stream in memory."
+      },
+      {
+        "id": "py15.1-q4",
+        "prompt": "Why should file operations still handle exceptions after exists()?",
+        "answer": "The filesystem can change or deny access before the operation",
+        "options": [
+          "The filesystem can change or deny access before the operation",
+          "exists() always deletes the file",
+          "Path objects cannot open files",
+          "Python ignores file permissions"
+        ],
+        "explanation": "A check and a later operation are separate events; permissions and concurrent changes can affect the operation."
+      },
+      {
+        "id": "py15.1-q5",
+        "prompt": "Which practice is most appropriate for temporary examples?",
+        "answer": "Use TemporaryDirectory for automatic cleanup",
+        "options": [
+          "Use TemporaryDirectory for automatic cleanup",
+          "Write to the filesystem root",
+          "Assume the current directory is empty",
+          "Disable file permissions"
+        ],
+        "explanation": "TemporaryDirectory scopes temporary files and removes them when its context exits."
+      }
+    ]
+  }
+}
