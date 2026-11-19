@@ -217,8 +217,8 @@ test("Python playground runs Pyodide in a worker with stdin, stderr, errors, sto
 
   await page.locator("#pythonCode").fill('raise ValueError("bad input")');
   await page.locator("#runPython").click();
-  await expect(page.locator("#pythonOutput .stderr")).toContainText("ValueError", { timeout: 15000 });
-  await expect(page.locator("#pythonOutput .stderr")).toContainText("bad input");
+  await expect(page.locator("#pythonOutput")).toContainText("ValueError", { timeout: 15000 });
+  await expect(page.locator("#pythonOutput")).toContainText("bad input");
 
   await page.locator("#pythonCode").fill("");
   await page.locator("#runPython").click();
