@@ -63,6 +63,11 @@
         runButton.disabled = running;
         return;
       }
+      if (message.type === "init-error") {
+        setStatus("Python runtime failed to load: " + message.message, "error");
+        runButton.disabled = true;
+        return;
+      }
       if (message.runId !== runId) return;
       if (message.type === "stdout") appendOutput(message.text);
       if (message.type === "stderr") appendOutput(message.text, "stderr");
@@ -74,10 +79,6 @@
         clearTimeout(watchdog);
         watchdog = null;
         setRunning(false);
-      }
-      if (message.type === "init-error") {
-        setStatus("Python runtime failed to load: " + message.message, "error");
-        runButton.disabled = true;
       }
     };
     worker.onerror = (event) => {
