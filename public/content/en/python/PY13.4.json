@@ -1,0 +1,156 @@
+{
+  "id": "python.py13.4.en",
+  "courseId": "python",
+  "moduleId": "PY13",
+  "topicId": "PY13.4",
+  "title": "Creating Custom Python Iterators",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the main ideas in creating custom python iterators.",
+    "Use the relevant iterator or generator protocol correctly.",
+    "Trace values and state across successive iteration steps.",
+    "Recognize exhaustion, lazy evaluation and relevant edge cases.",
+    "Apply the concept to a practical sequence-processing task."
+  ],
+  "prerequisites": [
+    "PY6.2",
+    "PY7.1",
+    "PY8.1",
+    "PY12.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A custom iterator class can define __iter__() and __next__() to generate a sequence on demand. The object stores the state needed to determine the next value and raises StopIteration when its stopping condition is reached.",
+      "whyItMatters": "Custom iterators are useful for domain-specific sequences, controlled data access and teaching how Python's for loop interacts with objects.",
+      "analogy": "A custom iterator is like a counter that remembers its current number and knows the limit at which it should stop.",
+      "analogyLimit": "A counter is much simpler than many real iterators. Production iterators may need validation, independent iterator instances, resource handling and protection against accidental shared state."
+    },
+    "explain": {
+      "narrative": "## Design the state\nStore the current position and any required limit on the iterator object. `__iter__()` should initialize state only when that is the intended contract and return self. `__next__()` checks whether a value remains, updates state, and returns the value. If the stop condition is met, it raises StopIteration.\n\n## Reusable iterable versus one-shot iterator\nA class that is both its own iterable and iterator is usually one-shot: iterating it again may continue from its existing state. If you want each `for` loop to start from the beginning, make the container's `__iter__()` create and return a separate iterator object.\n\n## Keep state transitions clear\nCheck the termination condition before returning a value. Update state exactly once per successful next call. Avoid an iterator that can run forever accidentally when a finite result is expected.",
+      "examples": [
+        {
+          "id": "py13.4-ex1",
+          "language": "en",
+          "title": "Create a bounded counter iterator",
+          "code": "class Counter:\n    def __init__(self, stop):\n        self.current = 1\n        self.stop = stop\n    def __iter__(self):\n        return self\n    def __next__(self):\n        if self.current > self.stop:\n            raise StopIteration\n        value = self.current\n        self.current += 1\n        return value\nprint(list(Counter(3)))",
+          "expectedOutput": "[1, 2, 3]",
+          "explanation": "The object stores its current value and limit; it raises StopIteration after returning the final allowed number."
+        },
+        {
+          "id": "py13.4-ex2",
+          "language": "en",
+          "title": "Generate even numbers with an iterator",
+          "code": "class Evens:\n    def __init__(self, count):\n        self.value = 0\n        self.count = count\n    def __iter__(self):\n        return self\n    def __next__(self):\n        if self.count == 0:\n            raise StopIteration\n        result = self.value\n        self.value += 2\n        self.count -= 1\n        return result\nprint(list(Evens(4)))",
+          "expectedOutput": "[0, 2, 4, 6]",
+          "explanation": "The remaining count provides a finite stopping condition while the current value advances by two."
+        },
+        {
+          "id": "py13.4-ex3",
+          "language": "en",
+          "title": "Consume a custom iterator step by step",
+          "code": "class Steps:\n    def __init__(self):\n        self.values = ['start', 'middle', 'end']\n        self.index = 0\n    def __iter__(self):\n        return self\n    def __next__(self):\n        if self.index >= len(self.values):\n            raise StopIteration\n        item = self.values[self.index]\n        self.index += 1\n        return item\nit = Steps()\nprint(next(it))\nprint(next(it))",
+          "expectedOutput": "start\nmiddle",
+          "explanation": "Each call returns the value at the current index and advances the stored index."
+        },
+        {
+          "id": "py13.4-ex4",
+          "language": "en",
+          "title": "Use a custom iterator in a for loop",
+          "code": "class Countdown:\n    def __init__(self, start):\n        self.value = start\n    def __iter__(self):\n        return self\n    def __next__(self):\n        if self.value < 1:\n            raise StopIteration\n        result = self.value\n        self.value -= 1\n        return result\nfor n in Countdown(3):\n    print(n)",
+          "expectedOutput": "3\n2\n1",
+          "explanation": "The for loop consumes the custom iterator until its __next__ method raises StopIteration."
+        },
+        {
+          "id": "py13.4-ex5",
+          "language": "en",
+          "title": "Return an independent iterator from a container",
+          "code": "class RangeBox:\n    def __init__(self, stop):\n        self.stop = stop\n    def __iter__(self):\n        return iter(range(self.stop))\nbox = RangeBox(2)\nprint(list(box))\nprint(list(box))",
+          "expectedOutput": "[0, 1]\n[0, 1]",
+          "explanation": "The container creates a fresh range iterator on each iter call, so it can be traversed repeatedly."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Write a small program that demonstrates creating custom python iterators. Show at least two iteration steps and explain how the state changes.",
+      "independentTask": "Build a reusable or one-pass sequence processor using this topic. Test normal input, an empty or exhausted case, and describe when each value is calculated.",
+      "hints": [
+        "Identify whether the object is an iterable, an iterator or both.",
+        "Write down the state before and after each next() call.",
+        "Use StopIteration as the normal completion signal.",
+        "Test an empty input and an already exhausted iterator.",
+        "Choose a list only when repeated access or storage is required."
+      ],
+      "challenge": "Process a larger sequence incrementally and compare the memory and reuse trade-offs with building a list first."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py13.4-q1",
+        "prompt": "Which method stores or initializes iterator state?",
+        "answer": "__init__()",
+        "options": [
+          "__init__()",
+          "__next__() only",
+          "__str__()",
+          "__eq__()"
+        ],
+        "explanation": "A class commonly initializes its state in __init__, while __next__ advances it."
+      },
+      {
+        "id": "py13.4-q2",
+        "prompt": "What should a finite custom iterator do after its final item?",
+        "answer": "Raise StopIteration",
+        "options": [
+          "Raise StopIteration",
+          "Repeat the final item forever",
+          "Return False",
+          "Reset automatically"
+        ],
+        "explanation": "StopIteration signals that the iterator is exhausted."
+      },
+      {
+        "id": "py13.4-q3",
+        "prompt": "Why should __next__ update its state?",
+        "answer": "So the following call can produce the following item",
+        "options": [
+          "So the following call can produce the following item",
+          "To sort the original collection",
+          "To make the object immutable",
+          "To create a new class"
+        ],
+        "explanation": "An iterator must remember progress and advance after each successful call."
+      },
+      {
+        "id": "py13.4-q4",
+        "prompt": "What makes RangeBox reusable in the example?",
+        "answer": "Its __iter__ creates a fresh iterator each time",
+        "options": [
+          "Its __iter__ creates a fresh iterator each time",
+          "Its __next__ returns the same value",
+          "It inherits from list",
+          "It catches every exception"
+        ],
+        "explanation": "The container itself is reusable because each iter call creates a new range iterator."
+      },
+      {
+        "id": "py13.4-q5",
+        "prompt": "What is a risk of making a container its own iterator?",
+        "answer": "A second traversal may continue from the previous position",
+        "options": [
+          "A second traversal may continue from the previous position",
+          "It cannot be used in a for loop",
+          "It cannot store values",
+          "It always raises TypeError"
+        ],
+        "explanation": "An object that is its own iterator carries consumed state between traversals."
+      }
+    ]
+  },
+  "status": "draft"
+}
