@@ -1,0 +1,161 @@
+{
+  "id": "python.py2.2.en",
+  "courseId": "python",
+  "moduleId": "PY2",
+  "topicId": "PY2.2",
+  "title": "Reading Multiple Inputs and Splitting Text",
+  "language": "en",
+  "learningObjectives": [
+    "Read multiple values from one input line.",
+    "Use str.split() to separate a line into tokens.",
+    "Unpack a known number of tokens into named variables.",
+    "Convert individual tokens to numeric types when required.",
+    "Handle incorrect token counts and invalid numeric text safely."
+  ],
+  "prerequisites": [
+    "PY1.1",
+    "PY1.2",
+    "PY1.3",
+    "PY1.4",
+    "PY1.5",
+    "PY1.6",
+    "PY1.7",
+    "PY1.8",
+    "PY1.9"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A single input() call reads one line as a string. The string split() method can divide that line into tokens using whitespace or a chosen separator. When the expected number of tokens is known, sequence unpacking can assign them to separate names. Each token remains a string until explicitly converted. Programs should check token counts and handle conversion failures rather than assuming every line is valid.",
+      "whyItMatters": "Many command-line exercises accept several values on one line. Splitting and validating the input makes those programs concise while teaching learners to handle untrusted text carefully.",
+      "analogy": "A line of input is like a sentence containing several fields; split() separates the fields so the program can examine each one.",
+      "analogyLimit": "Splitting on whitespace is not a complete CSV parser. Values containing spaces, quoted delimiters or complex escaping need a format-aware parser such as the standard-library csv module."
+    },
+    "explain": {
+      "narrative": "## 1. One line, several tokens\\n\\n`input()` returns one string. Calling `.split()` with no argument separates it on runs of whitespace and ignores leading or trailing whitespace. Calling `.split(',')` uses a comma as the separator.\\n\\n## 2. Unpack tokens\\n\\nIf the input is expected to contain exactly two tokens, `first, second = line.split()` assigns them to two names. Too few or too many tokens raises `ValueError`. For variable-length input, store the result in a list and check its length.\\n\\n## 3. Convert each token\\n\\nTokens are strings. Convert numeric values with `int()` or `float()` only after validating the expected format. Invalid numeric text raises `ValueError`.\\n\\n## 4. Validate the structure\\n\\nCheck the number of fields before unpacking. Handle conversion errors and enforce application-specific ranges after conversion. For CSV files, use `csv.reader` rather than assuming that a simple split handles quoted commas correctly.",
+      "examples": [
+        {
+          "id": "py2.2-ex1",
+          "language": "en",
+          "title": "Split two words",
+          "code": "line = 'Asha Python'\nname, course = line.split()\nprint(name)\nprint(course)",
+          "expectedOutput": "Asha\nPython",
+          "explanation": "split() separates the line on whitespace, and unpacking assigns the two tokens to names."
+        },
+        {
+          "id": "py2.2-ex2",
+          "language": "en",
+          "title": "Split and convert two integers",
+          "code": "line = '12 8'\nleft_text, right_text = line.split()\nleft = int(left_text)\nright = int(right_text)\nprint(left + right)",
+          "expectedOutput": "20",
+          "explanation": "The tokens are strings until int() converts them into integers."
+        },
+        {
+          "id": "py2.2-ex3",
+          "language": "en",
+          "title": "Use a chosen separator",
+          "code": "line = 'red,green,blue'\ncolours = line.split(',')\nprint(len(colours))\nprint(colours[1])",
+          "expectedOutput": "3\ngreen",
+          "explanation": "Passing a comma to split() separates the text at commas rather than whitespace."
+        },
+        {
+          "id": "py2.2-ex4",
+          "language": "en",
+          "title": "Check the number of tokens",
+          "code": "line = 'Asha Python beginner'\nparts = line.split()\nif len(parts) == 3:\n    print('Three fields received')\nelse:\n    print('Unexpected field count')",
+          "expectedOutput": "Three fields received",
+          "explanation": "Checking the token count before unpacking prevents an unexpected number of values from causing an unpacking error."
+        },
+        {
+          "id": "py2.2-ex5",
+          "language": "en",
+          "title": "Handle invalid numeric tokens",
+          "code": "line = '12x 8'\nparts = line.split()\ntry:\n    first = int(parts[0])\n    second = int(parts[1])\nexcept (ValueError, IndexError):\n    print('Enter two whole numbers')",
+          "expectedOutput": "Enter two whole numbers",
+          "explanation": "The first token cannot be converted to int, so the except block handles the invalid input."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Split a line containing a first name and course name. Then split two numeric tokens, convert them to integers and calculate their sum.",
+      "independentTask": "Write a program that receives three space-separated item quantities, checks that exactly three values were supplied, converts them to integers and prints their total. Handle invalid numbers and incorrect field counts.",
+      "hints": [
+        "input() reads one line as a string.",
+        "split() without an argument separates on whitespace.",
+        "Tokens remain strings until converted.",
+        "Check len(parts) before unpacking when the field count may vary.",
+        "Use csv.reader for actual CSV data with quoted fields."
+      ],
+      "challenge": "Design a robust parser for a line containing a product code and two numeric quantities. Validate the field count, convert the numbers, reject negative quantities and display a helpful error message without crashing."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2.2-q1",
+        "prompt": "What does 'red green blue'.split() return?",
+        "options": [
+          "['red', 'green', 'blue']",
+          "'redgreenblue'",
+          "('red', 'green', 'blue')",
+          "['red green blue']"
+        ],
+        "answer": "['red', 'green', 'blue']",
+        "explanation": "split() without a separator splits on whitespace and returns a list of strings."
+      },
+      {
+        "id": "py2.2-q2",
+        "prompt": "What type are the items returned by split()?",
+        "options": [
+          "Strings",
+          "Integers",
+          "Booleans",
+          "Tuples"
+        ],
+        "answer": "Strings",
+        "explanation": "split() returns a list whose tokens are strings."
+      },
+      {
+        "id": "py2.2-q3",
+        "prompt": "What happens when two names unpack a list containing three values?",
+        "options": [
+          "A ValueError is raised",
+          "The third value is silently ignored",
+          "The names become a list",
+          "The first name receives all values"
+        ],
+        "answer": "A ValueError is raised",
+        "explanation": "Unpacking requires the number of values to match the number of targets unless starred unpacking is used."
+      },
+      {
+        "id": "py2.2-q4",
+        "prompt": "Which method separates text at commas?",
+        "options": [
+          "split(',')",
+          "join(',')",
+          "replace(',')",
+          "strip(',')"
+        ],
+        "answer": "split(',')",
+        "explanation": "Passing a comma as the separator splits the string at comma characters."
+      },
+      {
+        "id": "py2.2-q5",
+        "prompt": "Why should a program check token count before unpacking?",
+        "options": [
+          "To handle missing or extra fields safely",
+          "To convert strings into floats automatically",
+          "To sort the tokens",
+          "To remove all punctuation"
+        ],
+        "answer": "To handle missing or extra fields safely",
+        "explanation": "Checking the number of tokens prevents unpacking errors and supports clear input validation."
+      }
+    ]
+  },
+  "status": "draft"
+}
