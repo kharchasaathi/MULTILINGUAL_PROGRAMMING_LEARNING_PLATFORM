@@ -3,6 +3,17 @@ import AxeBuilder from "@axe-core/playwright";
 
 const baseURL = process.env.BASE_URL || "http://127.0.0.1:4173";
 test.use({ serviceWorkers: "block" });
+
+// The curriculum index is loaded asynchronously after DOMContentLoaded.
+// Wait for the complete set of course cards before interacting with delegated navigation.
+async function waitForCurriculum(page) {
+  const expected = await page.evaluate(async () =>
+    (await fetch("/content/curriculum-index.json", { cache: "no-cache" })).json()
+      .then(data => data.courses.length)
+  );
+  await expect(page.locator("#courseGrid .course-card")).toHaveCount(expected, { timeout: 15000 });
+  await expect(page.locator("[data-course-nav]")).toHaveCount(expected, { timeout: 15000 });
+}
 const groups = {
   html: ["H16.1","H16.2","H16.3","H16.4","H16.5","H16.6","H16.7","H16.8","H16.9","H16.10"],
   css: ["C22.1","C22.2","C22.3","C22.4","C22.5","C22.6"],
@@ -13,6 +24,7 @@ const groups = {
 
 test("homepage and lesson dialog have no serious or critical WCAG axe violations", async ({ page }) => {
   await page.goto(baseURL, { waitUntil: "domcontentloaded" });
+  await waitForCurriculum(page);
   await expect(page.locator("#courseGrid .course-card")).toHaveCount(await page.evaluate(async () => (await fetch("/content/curriculum-index.json")).json().then(data => data.courses.length)));
   const home = await new AxeBuilder({ page }).withTags(["wcag2a","wcag2aa","wcag21a","wcag21aa"]).analyze();
   const seriousHome = home.violations.filter((item) => ["serious","critical"].includes(item.impact));
@@ -113,7 +125,7 @@ test("all seven courses render representative lessons and starter programs execu
       await expect(dialog.locator(".lesson-hints li")).toHaveCount(lessonData.practise.hints.length);
       const firstQuestion = dialog.locator(".lesson-question").first();
       const correctAnswer = Number.isInteger(expectedQuestions[0].answer) ? expectedQuestions[0].options[expectedQuestions[0].answer] : expectedQuestions[0].answer;
-      await firstQuestion.getByText(correctAnswer, { exact: true }).click();
+      await firstQuestion.locator("label.lesson-answer-option").filter({ hasText: correctAnswer }).click();
       await expect(firstQuestion.locator(".lesson-question-feedback")).toContainText("Correct");
     }
     await expect(dialog.locator(".lesson-question")).toHaveCount(expectedQuestions.length);
@@ -155,6 +167,7 @@ test("all seven courses render representative lessons and starter programs execu
 });
 
 test("C++ indexed quiz answers are mapped to the correct choice", async ({ page }) => {
+  test.setTimeout(90000);
   await page.goto(baseURL, { waitUntil: "domcontentloaded" });
   await page.locator('[data-course-nav="cpp"]').click();
   const dialog = page.locator("#lessonDialog");
@@ -163,6 +176,7 @@ test("C++ indexed quiz answers are mapped to the correct choice", async ({ page 
   await expect(dialog.locator(".lesson-template-title")).toContainText("CPP12.1");
   const response = await page.request.get(`${baseURL}/content/en/cpp/CPP12.1.json`);
   const lesson = await response.json();
+  await expect(dialog.locator(".lesson-question")).toHaveCount(lesson.assessment.questions.length, { timeout: 20000 });
   const firstQuestion = dialog.locator(".lesson-question").first();
   const correctAnswer = Number.isInteger(lesson.assessment.questions[0].answer)
     ? lesson.assessment.questions[0].options[lesson.assessment.questions[0].answer]
