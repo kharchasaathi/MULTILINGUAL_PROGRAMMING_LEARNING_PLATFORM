@@ -206,12 +206,12 @@ test("Python playground runs Pyodide in a worker with stdin, stderr, errors, sto
   await page.locator("#runPython").click();
   await expect(page.locator("#pythonOutput")).toContainText("worker output works", { timeout: 15000 });
 
-  await page.locator("#pythonCode").fill('name = input("Name: ")\\nscore = int(input("Score: "))\\nprint(f"{name}: {score + 1}")');
-  await page.locator("#pythonStdin").fill("Asha\\n8");
+  await page.locator("#pythonCode").fill('name = input("Name: ")\nscore = int(input("Score: "))\nprint(f"{name}: {score + 1}")');
+  await page.locator("#pythonStdin").fill("Asha\n8");
   await page.locator("#runPython").click();
   await expect(page.locator("#pythonOutput")).toContainText("Asha: 9", { timeout: 15000 });
 
-  await page.locator("#pythonCode").fill('import sys\\nprint("warning stream", file=sys.stderr)');
+  await page.locator("#pythonCode").fill('import sys\nprint("warning stream", file=sys.stderr)');
   await page.locator("#runPython").click();
   await expect(page.locator("#pythonOutput .stderr")).toContainText("warning stream", { timeout: 15000 });
 
@@ -224,14 +224,14 @@ test("Python playground runs Pyodide in a worker with stdin, stderr, errors, sto
   await page.locator("#runPython").click();
   await expect(page.locator("#pythonOutput")).toContainText("Enter some Python code");
 
-  await page.locator("#pythonCode").fill("while True:\\n    pass");
+  await page.locator("#pythonCode").fill("while True:\n    pass");
   await page.locator("#runPython").click();
   await expect(page.locator("#stopPython")).toBeEnabled();
   await page.locator("#stopPython").click();
   await expect(page.locator("#runtimeStatus")).toHaveAttribute("data-state", "ready", { timeout: 60000 });
   await expect(page.locator("#pythonOutput")).toContainText("stopped by the learner");
 
-  await page.locator("#pythonCode").fill("while True:\\n    pass");
+  await page.locator("#pythonCode").fill("while True:\n    pass");
   await page.locator("#runPython").click();
   await expect(page.locator("#runState")).toHaveText("Timed out", { timeout: 20000 });
   await expect(page.locator("#runtimeStatus")).toHaveAttribute("data-state", "ready", { timeout: 60000 });
@@ -239,7 +239,7 @@ test("Python playground runs Pyodide in a worker with stdin, stderr, errors, sto
   await page.locator("#resetPython").click();
   await expect(page.locator("#pythonCode")).toHaveValue('print("Hello, CodeSaathi!")');
   await page.locator("#pythonExample").selectOption("input");
-  await expect(page.locator("#pythonStdin")).toHaveValue("Asha\\n25");
+  await expect(page.locator("#pythonStdin")).toHaveValue("Asha\n25");
   await page.locator("#restorePython").click();
   await expect(page.locator("#pythonCode")).toHaveValue('print("Hello, CodeSaathi!")');
   await page.locator("#clearPythonOutput").click();
