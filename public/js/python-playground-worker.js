@@ -3,6 +3,7 @@ import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v314.0.8/full/pyod
 let pyodidePromise;
 let inputLines = [];
 let inputIndex = 0;
+let activeRunId = 0;
 let stdoutDecoder = new TextDecoder();
 let stderrDecoder = new TextDecoder();
 
@@ -28,17 +29,19 @@ function blockNetworkApis() {
 async function initialize() {
   const pyodide = await loadPyodide({
     stdin: readInput,
-    stdout: { write(buffer) {
-      const text = stdoutDecoder.decode(buffer, { stream: true });
-      if (text) send("stdout", { text });
-      return buffer.length;
-    } },
-    stderr: { write(buffer) {
-      const text = stderrDecoder.decode(buffer, { stream: true });
-      if (text) send("stderr", { text });
-      return buffer.length;
-    } }
+    stdout: undefined,
+    stderr: undefined
   });
+  pyodide.setStdout({ write(buffer) {
+    const text = stdoutDecoder.decode(buffer, { stream: true });
+    if (text) send("stdout", { runId: activeRunId, text });
+    return buffer.length;
+  } });
+  pyodide.setStderr({ write(buffer) {
+    const text = stderrDecoder.decode(buffer, { stream: true });
+    if (text) send("stderr", { runId: activeRunId, text });
+    return buffer.length;
+  } });
   blockNetworkApis();
   const pythonVersion = pyodide.runPython("import sys; sys.version.split()[0]");
   return { pyodide, pythonVersion };
@@ -51,6 +54,7 @@ self.addEventListener("message", async (event) => {
   const message = event.data || {};
   if (message.type !== "run") return;
   const { runId, code } = message;
+  activeRunId = runId;
   try {
     const { pyodide } = await pyodidePromise;
     inputLines = String(message.stdin || "").replace(/\r/g, "").split("\n");
@@ -60,8 +64,8 @@ self.addEventListener("message", async (event) => {
     await pyodide.runPythonAsync(String(code), { filename: "codesaathi_playground.py" });
     const stdoutTail = stdoutDecoder.decode();
     const stderrTail = stderrDecoder.decode();
-    if (stdoutTail) send("stdout", { runId, text: stdoutTail });
-    if (stderrTail) send("stderr", { runId, text: stderrTail });
+    if (stdoutTail) send("stdout", { runId: activeRunId, text: stdoutTail });
+    if (stderrTail) send("stderr", { runId: activeRunId, text: stderrTail });
   } catch (error) {
     send("error", { runId, message: error?.message || String(error), stack: error?.stack || "" });
   } finally {
