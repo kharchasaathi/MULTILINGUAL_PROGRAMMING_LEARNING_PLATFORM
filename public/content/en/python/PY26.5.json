@@ -1,0 +1,160 @@
+{
+  "id": "python.py26.5.en",
+  "courseId": "python",
+  "moduleId": "PY26",
+  "topicId": "PY26.5",
+  "title": "Python Instance Methods, Class Methods and Static Methods",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the core concepts of Python Instance Methods, Class Methods and Static Methods.",
+    "Choose an appropriate object-oriented design for a small Python problem.",
+    "Trace object state and method calls accurately.",
+    "Apply Python class features with correct method and attribute behavior.",
+    "Recognize design trade-offs, edge cases and maintainability concerns."
+  ],
+  "prerequisites": [
+    "PY26.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Instance methods receive self and operate on one object. Class methods use @classmethod and receive cls, making them suitable for alternate constructors or class-level operations. Static methods use @staticmethod and receive no automatic first argument; they group utility behavior with a class namespace.",
+      "whyItMatters": "The method type communicates which state a function needs and avoids using global state or awkward helper functions.",
+      "analogy": "An instance method serves one account, a class method works with the whole account type, and a static method is a related calculator that needs neither account.",
+      "summary": "Python Instance Methods, Class Methods and Static Methods introduces a focused part of Python's object model and its practical use."
+    },
+    "explain": {
+      "narrative": "Study the concept, trace the receiver and state for each operation, then run the examples. Pay attention to Python's conventions and documented protocol behavior rather than assuming that class syntax provides strict access control.",
+      "examples": [
+        {
+          "id": "py2605-ex1",
+          "language": "en",
+          "title": "Instance method",
+          "code": "class Cart:\\n    def __init__(self): self.total = 0\\n    def add(self, price): self.total += price\\nc = Cart(); c.add(12)\\nprint(c.total)",
+          "expectedOutput": "12",
+          "explanation": "An instance method updates the receiver's state."
+        },
+        {
+          "id": "py2605-ex2",
+          "language": "en",
+          "title": "Class method as alternate constructor",
+          "code": "class User:\\n    def __init__(self, name): self.name = name\\n    @classmethod\\n    def from_email(cls, email): return cls(email.split('@')[0])\\nprint(User.from_email('sam@example.com').name)",
+          "expectedOutput": "sam",
+          "explanation": "cls constructs an instance of the class that receives the method call."
+        },
+        {
+          "id": "py2605-ex3",
+          "language": "en",
+          "title": "Class method reads class state",
+          "code": "class Counter:\\n    created = 0\\n    def __init__(self): type(self).created += 1\\n    @classmethod\\n    def count(cls): return cls.created\\nCounter(); Counter()\\nprint(Counter.count())",
+          "expectedOutput": "2",
+          "explanation": "A class method can expose class-level information."
+        },
+        {
+          "id": "py2605-ex4",
+          "language": "en",
+          "title": "Static utility method",
+          "code": "class Tax:\\n    @staticmethod\\n    def add_rate(amount, rate): return amount * (1 + rate)\\nprint(Tax.add_rate(100, .1))",
+          "expectedOutput": "110.00000000000001",
+          "explanation": "A static method is namespaced in the class but receives no implicit self or cls."
+        },
+        {
+          "id": "py2605-ex5",
+          "language": "en",
+          "title": "Compare method binding",
+          "code": "class Demo:\\n    def instance(self): return 'instance'\\n    @classmethod\\n    def klass(cls): return cls.__name__\\n    @staticmethod\\n    def utility(): return 'utility'\\nd = Demo()\\nprint(d.instance(), d.klass(), d.utility())",
+          "expectedOutput": "instance Demo utility",
+          "explanation": "The decorators determine which implicit argument, if any, is supplied."
+        }
+      ]
+    }
+  },
+  "practise": {
+    "guidedTask": "Build a small program that demonstrates python instance methods, class methods and static methods. Write down the object types, relevant attributes, method calls and expected state changes before running it.",
+    "independentTask": "Extend the example into a small domain model of your choice. Add validation, clear method names, boundary tests and a short explanation of why your design uses classes rather than simpler functions or data structures.",
+    "hints": [
+      "Identify which object owns each piece of state.",
+      "Trace the first argument supplied to every bound method.",
+      "Prefer explicit invariants and small public interfaces.",
+      "Test at least one boundary or unsupported input.",
+      "Use composition when it models the relationship more accurately than inheritance."
+    ],
+    "challenge": "Refactor the model into a testable design with clear responsibilities, documented public behavior and tests for normal, boundary and invalid cases.",
+    "validationCriteria": [
+      "All five examples execute on the supported Python version and match their outputs.",
+      "The implementation follows Python's documented class and special-method semantics.",
+      "State changes are scoped to the intended object or class.",
+      "Unsupported inputs produce a deliberate result or a clear exception.",
+      "The design avoids unnecessary inheritance, shared mutable defaults and misleading private-access claims."
+    ]
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2605-q1",
+        "prompt": "Which method receives self?",
+        "answer": "An instance method",
+        "options": [
+          "A static method",
+          "An instance method",
+          "A module function",
+          "A property setter only"
+        ],
+        "explanation": "Instance methods receive the bound instance as their first argument."
+      },
+      {
+        "id": "py2605-q2",
+        "prompt": "Which decorator creates a class method?",
+        "answer": "@classmethod",
+        "options": [
+          "@staticmethod",
+          "@property",
+          "@classmethod",
+          "@dataclass"
+        ],
+        "explanation": "classmethod binds the method to the class and supplies cls."
+      },
+      {
+        "id": "py2605-q3",
+        "prompt": "What does a class method receive automatically?",
+        "answer": "cls",
+        "options": [
+          "self",
+          "cls",
+          "None",
+          "the module"
+        ],
+        "explanation": "The class object is passed as cls."
+      },
+      {
+        "id": "py2605-q4",
+        "prompt": "Does a static method receive self automatically?",
+        "answer": "No",
+        "options": [
+          "Yes",
+          "No",
+          "Only from an instance",
+          "Only in subclasses"
+        ],
+        "explanation": "staticmethod does not receive an implicit receiver."
+      },
+      {
+        "id": "py2605-q5",
+        "prompt": "Which is a common use for class methods?",
+        "answer": "Alternate constructors",
+        "options": [
+          "Alternate constructors",
+          "Reading a file line",
+          "Loop termination",
+          "Memory allocation"
+        ],
+        "explanation": "Class methods can construct instances using cls."
+      }
+    ]
+  },
+  "status": "draft"
+}
