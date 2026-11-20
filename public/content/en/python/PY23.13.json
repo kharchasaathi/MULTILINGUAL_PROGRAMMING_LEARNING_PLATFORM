@@ -1,0 +1,164 @@
+{
+  "id": "python.py23.13.en",
+  "courseId": "python",
+  "moduleId": "PY23",
+  "topicId": "PY23.13",
+  "title": "Modular Application Architecture and Separation of Concerns",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of Modular Application Architecture and Separation of Concerns.",
+    "Choose an appropriate modular application architecture and separation of concerns technique for a Python application.",
+    "Interpret representative code and output involving modular application architecture and separation of concerns.",
+    "Identify limitations and failure modes for modular application architecture and separation of concerns.",
+    "Apply the concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY11.1",
+    "PY14.1",
+    "PY20.1",
+    "PY21.7",
+    "PY23.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Application architecture separates responsibilities so that domain rules, data access, user interaction and external integrations can evolve independently. Modules should expose small, intentional interfaces and avoid circular dependencies. A clear dependency direction keeps core business rules independent of infrastructure details.",
+      "whyItMatters": "A modular design makes changes safer, tests more focused and code easier for multiple developers to understand.",
+      "analogy": "A well-run workshop has separate stations for design, assembly, inspection and shipping, with clear handoffs.",
+      "analogyLimit": "Dividing code into many files does not automatically create good architecture; boundaries must reflect real responsibilities.",
+      "summary": "Modular Application Architecture and Separation of Concerns develops practical application engineering skills for Python projects."
+    },
+    "explain": {
+      "narrative": "## Organize around responsibilities\nSeparate domain logic from input/output. Keep functions that calculate or decide business rules independent of HTTP, database and UI details. Put persistence behind a repository interface and external services behind adapters. Avoid circular imports and avoid modules that do too many unrelated jobs. Start with a simple structure and introduce additional layers only when they solve a real coupling or testing problem.",
+      "examples": [
+        {
+          "id": "py2313-ex1",
+          "language": "en",
+          "title": "Separate a calculation from output",
+          "code": "def line_total(price: float, quantity: int) -> float:\n    return price * quantity\nresult = line_total(12.5, 3)\nprint(result)",
+          "expectedOutput": "37.5",
+          "explanation": "The calculation has no dependency on a terminal, database or web framework."
+        },
+        {
+          "id": "py2313-ex2",
+          "language": "en",
+          "title": "Represent a domain value",
+          "code": "from dataclasses import dataclass\n@dataclass(frozen=True)\nclass Money:\n    amount: int\n    currency: str\nprice = Money(1250, 'INR')\nprint(price.currency, price.amount)",
+          "expectedOutput": "INR 1250",
+          "explanation": "A domain record captures a concept independently of persistence."
+        },
+        {
+          "id": "py2313-ex3",
+          "language": "en",
+          "title": "Keep presentation outside a rule",
+          "code": "def discount(price: float, rate: float) -> float:\n    return price * (1 - rate)\nprint(f'Total: {discount(100, 0.1):.2f}')",
+          "expectedOutput": "Total: 90.00",
+          "explanation": "The rule returns a value; presentation formats it separately."
+        },
+        {
+          "id": "py2313-ex4",
+          "language": "en",
+          "title": "Expose a small module interface",
+          "code": "__all__ = ['calculate_tax']\ndef calculate_tax(amount: int) -> int:\n    return amount // 10\nprint(calculate_tax(250))",
+          "expectedOutput": "25",
+          "explanation": "An explicit export list documents the intended public interface."
+        },
+        {
+          "id": "py2313-ex5",
+          "language": "en",
+          "title": "Compose independent steps",
+          "code": "def normalize(name: str) -> str: return name.strip().title()\ndef make_label(name: str) -> str: return f'Customer: {normalize(name)}'\nprint(make_label('  asha '))",
+          "expectedOutput": "Customer: Asha",
+          "explanation": "Small functions can be composed into a workflow while retaining distinct responsibilities."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Split a small order-processing example into domain calculation, repository interface and presentation. Keep business rules free of database imports.",
+      "independentTask": "Draw module dependencies for a CLI inventory app and identify any circular or inward infrastructure dependency.",
+      "hints": [
+        "Keep core business rules independent of I/O.",
+        "Use modules to group related responsibilities.",
+        "Prefer small public interfaces.",
+        "Avoid circular imports.",
+        "Do not add layers without a concrete reason."
+      ],
+      "challenge": "Refactor a monolithic expense-report script into domain, repository, service and CLI modules with tests for the domain layer.",
+      "validationCriteria": [
+        "The concept and intended use are accurately explained.",
+        "All examples execute with the documented output on Python 3.13.",
+        "Application boundaries and dependency responsibilities are correctly identified.",
+        "Limitations and operational or security implications are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2313-q1",
+        "prompt": "What is separation of concerns?",
+        "answer": "Assigning distinct responsibilities to parts of a system",
+        "options": [
+          "Assigning distinct responsibilities to parts of a system",
+          "Putting all code in one file",
+          "Duplicating every function",
+          "Making every class global"
+        ],
+        "explanation": "Distinct responsibilities reduce coupling and clarify change boundaries."
+      },
+      {
+        "id": "py2313-q2",
+        "prompt": "Where should core business rules ideally live?",
+        "answer": "In code independent of infrastructure details",
+        "options": [
+          "In code independent of infrastructure details",
+          "Inside HTTP handlers only",
+          "Inside SQL strings",
+          "Inside a logging formatter"
+        ],
+        "explanation": "Core rules should not require a specific database or web framework."
+      },
+      {
+        "id": "py2313-q3",
+        "prompt": "What is a circular import?",
+        "answer": "Two modules depend on each other during import",
+        "options": [
+          "Two modules depend on each other during import",
+          "A function calls itself",
+          "A list contains itself",
+          "A package has no init file"
+        ],
+        "explanation": "Circular module dependencies can cause partially initialized imports."
+      },
+      {
+        "id": "py2313-q4",
+        "prompt": "Why keep module interfaces small?",
+        "answer": "To reduce coupling and clarify supported use",
+        "options": [
+          "To reduce coupling and clarify supported use",
+          "To prevent all reuse",
+          "To increase file size",
+          "To hide test failures"
+        ],
+        "explanation": "Small interfaces are easier to understand and replace."
+      },
+      {
+        "id": "py2313-q5",
+        "prompt": "Does splitting code into many files guarantee good architecture?",
+        "answer": "No",
+        "options": [
+          "No",
+          "Yes",
+          "Only with dataclasses",
+          "Only when using SQLite"
+        ],
+        "explanation": "Good architecture depends on meaningful responsibility boundaries, not file count."
+      }
+    ]
+  },
+  "status": "draft"
+}
