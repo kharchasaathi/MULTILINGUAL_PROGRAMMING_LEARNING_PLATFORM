@@ -5,10 +5,10 @@ Reference: [W3Schools Python Syllabus](https://www.w3schools.com/python/python_s
 
 ## Baseline
 
-- Curriculum index: **270 English Python lesson entries** across PY1–PY33.
-- Source inventory: reconciled to **270 Python rows** by adding the previously missing PY31–PY33 entries.
-- Progress tracker: reconciled to **270 Python rows**.
-- Five worked examples and five topic-specific MCQs are the authoring target per lesson (1,350 expected each at this baseline); CI execution is the authority for validated counts.
+- Curriculum index: **280 English Python lesson entries** across PY1–PY33.
+- Source inventory: reconciled to **280 Python rows** by adding the previously missing PY31–PY33 entries.
+- Progress tracker: reconciled to **280 Python rows**.
+- Five worked examples and five topic-specific MCQs are the authoring target per lesson (1,400 expected each at this baseline); CI execution is the authority for validated counts.
 - All lessons remain draft. Telugu translation and lesson-renderer/playground integration remain pending.
 
 ## W3Schools 8-chapter / 45-module mapping
@@ -56,7 +56,7 @@ Reference: [W3Schools Python Syllabus](https://www.w3schools.com/python/python_s
 | 8 Data science and web libraries | Python Pandas | PY25; PY32 | Mapped; subtopic review pending |
 | 8 Data science and web libraries | Python SciPy | PY33 | Mapped; dependency-backed CI verification pending |
 | 8 Data science and web libraries | Python Django | Separate Django Tutorial tab/course | Not authored yet |
-| 8 Data science and web libraries | Python Matplotlib | PY25.7; PY28 | **Partial — core plotting lessons missing** |
+| 8 Data science and web libraries | Python Matplotlib | PY25.7; PY28; PY34.1–PY34.10 | **Core W3Schools sequence now authored; CI/content review pending** |
 | 8 Data science and web libraries | Python Machine Learning | Separate Machine Learning Tutorial tab/course | Not authored yet |
 | 8 Data science and web libraries | Python MySQL | Separate MySQL Tutorial tab/course; Python connector integration | Not authored yet |
 | 8 Data science and web libraries | Python MongoDB | Separate MongoDB Tutorial tab/course; Python driver integration | Not authored yet |
@@ -72,7 +72,7 @@ W3Schools also lists Django, MySQL, MongoDB and Machine Learning as distinct tut
 
 ## Confirmed gaps / next work
 
-1. Expand Matplotlib from the existing histogram, pie-chart and subplot coverage to the complete W3Schools sequence: Intro, Get Started, Pyplot, Plotting, Markers, Line, Labels, Grid, Scatter and Bars. Existing Histograms and Pie Charts remain in place.
+1. Validate the new PY34.1–PY34.10 Matplotlib lessons (50 examples and 50 MCQs) and review the broader Matplotlib subtopic coverage. Existing Histograms, Pie Charts and Subplots remain in place.
 2. Run a detailed subtopic-level check for every one of the 45 W3Schools syllabus modules; the mapping above is a navigation map, not proof that every page subtopic is complete.
 3. Verify NumPy, Pandas and SciPy examples against the pinned CI environment. The Python workflow now installs SciPy explicitly for PY33.
 4. Build separate Django, Machine Learning, MySQL and MongoDB course tabs/curricula; do not duplicate their full content inside Python.
