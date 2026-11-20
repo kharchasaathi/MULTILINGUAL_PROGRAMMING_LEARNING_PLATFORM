@@ -1,0 +1,163 @@
+{
+  "id": "python.py30.1.en",
+  "courseId": "python",
+  "moduleId": "PY30",
+  "topicId": "PY30.1",
+  "title": "NumPy Random Generators and Reproducible Sampling",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the concepts behind numpy random generators and reproducible sampling.",
+    "Choose an appropriate NumPy random generator method and its parameters.",
+    "Use seeded generators for reproducible examples and tests.",
+    "Validate sample shape, range and data type.",
+    "Describe the assumptions and limitations of a finite random sample."
+  ],
+  "prerequisites": [
+    "PY25.9",
+    "PY25.10",
+    "PY25.12",
+    "PY29.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "NumPy's random module provides Generator objects for drawing pseudo-random values. Create a generator with default_rng and an optional seed to make a sequence reproducible. A seed initializes the generator; it does not make every call return the same value. Reproducibility also depends on the same generator algorithm, call order and compatible library behavior.",
+      "whyItMatters": "Reproducible random sampling makes experiments, simulations, tests and data workflows easier to debug and compare.",
+      "analogy": "A random generator is like a repeatable deck-shuffling machine: a starting seed and the sequence of operations determine the generated sequence.",
+      "summary": "NumPy's random module provides Generator objects for drawing pseudo-random values. Create a generator with default_rng and an optional seed to make a sequence reproducible. A seed initializes the generator; it does not make every call return the same value. Reproducibility also depends on the same generator algorithm, call order and compatible library behavior."
+    },
+    "explain": {
+      "narrative": "Run the examples and inspect the sample properties. A random sample is not a promise of exact theoretical frequencies; tests should focus on stable properties such as shape, valid range and reproducibility. NumPy's random module provides Generator objects for drawing pseudo-random values. Create a generator with default_rng and an optional seed to make a sequence reproducible. A seed initializes the generator; it does not make every call return the same value. Reproducibility also depends on the same generator algorithm, call order and compatible library behavior.",
+      "examples": [
+        {
+          "id": "py301-ex1",
+          "language": "en",
+          "title": "Create a seeded generator",
+          "code": "import numpy as np\nrng = np.random.default_rng(42)\nprint(rng.integers(0, 10, size=5).shape)",
+          "expectedOutput": "(5)",
+          "explanation": "This example demonstrates create a seeded generator with a seeded NumPy random generator so the validation is deterministic."
+        },
+        {
+          "id": "py301-ex2",
+          "language": "en",
+          "title": "Repeat a seeded sequence",
+          "code": "import numpy as np\na = np.random.default_rng(7).integers(0, 100, size=8)\nb = np.random.default_rng(7).integers(0, 100, size=8)\nprint(np.array_equal(a, b))",
+          "expectedOutput": "True",
+          "explanation": "This example demonstrates repeat a seeded sequence with a seeded NumPy random generator so the validation is deterministic."
+        },
+        {
+          "id": "py301-ex3",
+          "language": "en",
+          "title": "Generate floating-point samples",
+          "code": "import numpy as np\nrng = np.random.default_rng(5)\nx = rng.random(100)\nprint(x.shape, bool(np.all((x >= 0) & (x < 1))))",
+          "expectedOutput": "(100,) True",
+          "explanation": "This example demonstrates generate floating-point samples with a seeded NumPy random generator so the validation is deterministic."
+        },
+        {
+          "id": "py301-ex4",
+          "language": "en",
+          "title": "Generate bounded integers",
+          "code": "import numpy as np\nrng = np.random.default_rng(3)\nx = rng.integers(2, 8, size=50)\nprint(int(x.min()) >= 2, int(x.max()) < 8)",
+          "expectedOutput": "True True",
+          "explanation": "This example demonstrates generate bounded integers with a seeded NumPy random generator so the validation is deterministic."
+        },
+        {
+          "id": "py301-ex5",
+          "language": "en",
+          "title": "Choose values from a population",
+          "code": "import numpy as np\nrng = np.random.default_rng(11)\nx = rng.choice(['red', 'green', 'blue'], size=4)\nprint(x.shape, bool(np.isin(x, ['red', 'green', 'blue']).all()))",
+          "expectedOutput": "(4,) True",
+          "explanation": "This example demonstrates choose values from a population with a seeded NumPy random generator so the validation is deterministic."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Use a seeded NumPy Generator to create a sample relevant to numpy random generators and reproducible sampling. Print its shape and verify the model's required range or count constraints.",
+      "independentTask": "Write a small simulation using an appropriate distribution. Explain the model parameters, state the assumptions and add deterministic tests using a fixed seed.",
+      "hints": [
+        "Prefer np.random.default_rng over the legacy global random state.",
+        "Use a fixed seed in lessons and tests, not necessarily in production simulations.",
+        "Check parameter constraints before generating samples.",
+        "Distinguish theoretical properties from observed sample statistics.",
+        "Use a larger sample only when it serves a clear statistical purpose."
+      ],
+      "challenge": "Compare two appropriate distributions with the same sample size, summarize their assumptions and create a reproducible validation routine.",
+      "validationCriteria": [
+        "All five examples execute with the pinned NumPy version and match expected output.",
+        "A Generator is used rather than relying on global random state.",
+        "Distribution parameters are interpreted correctly.",
+        "Tests check deterministic properties without claiming exact sample statistics.",
+        "The learner explains the model assumptions and limits."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py301-q1",
+        "prompt": "What does a seeded NumPy Generator provide?",
+        "answer": "A reproducible pseudo-random sequence when the generator and call sequence are the same.",
+        "options": [
+          "A truly random sequence that can never repeat.",
+          "A reproducible pseudo-random sequence when the generator and call sequence are the same.",
+          "A guarantee of exact theoretical frequencies.",
+          "A generator that ignores its parameters."
+        ],
+        "explanation": "A seed initializes a deterministic pseudo-random process."
+      },
+      {
+        "id": "py301-q2",
+        "prompt": "Why should distribution parameters be chosen carefully?",
+        "answer": "They encode the assumptions and scale of the model.",
+        "options": [
+          "They encode the assumptions and scale of the model.",
+          "They only change the printed format.",
+          "They guarantee a fixed sample mean.",
+          "They remove the need to validate data."
+        ],
+        "explanation": "Parameters define the distribution being modeled."
+      },
+      {
+        "id": "py301-q3",
+        "prompt": "Which check is generally robust for a generated sample?",
+        "answer": "Check its shape and valid range.",
+        "options": [
+          "Require the sample mean to equal the theoretical mean exactly.",
+          "Check its shape and valid range.",
+          "Assume every generated value is unique.",
+          "Expect the same values from different seeds."
+        ],
+        "explanation": "Shape and support constraints are stable properties."
+      },
+      {
+        "id": "py301-q4",
+        "prompt": "What does sampling without replacement mean?",
+        "answer": "The same population item cannot be selected more than once in that sample.",
+        "options": [
+          "The same population item cannot be selected more than once in that sample.",
+          "Every possible item must be selected.",
+          "The sample must be sorted.",
+          "The generator cannot use a seed."
+        ],
+        "explanation": "Without replacement, selected population members are not repeated."
+      },
+      {
+        "id": "py301-q5",
+        "prompt": "What is an important limitation of a finite random sample?",
+        "answer": "Observed frequencies and statistics can differ from theoretical values.",
+        "options": [
+          "It always contains invalid values.",
+          "Observed frequencies and statistics can differ from theoretical values.",
+          "It cannot be reproduced with a seed.",
+          "It must have a normal distribution."
+        ],
+        "explanation": "Finite samples naturally vary around theoretical expectations."
+      }
+    ]
+  },
+  "status": "draft"
+}
