@@ -1,0 +1,169 @@
+{
+  "id": "python.py22.15.en",
+  "courseId": "python",
+  "moduleId": "PY22",
+  "topicId": "PY22.15",
+  "title": "Concurrent Futures and Executor Patterns",
+  "language": "en",
+  "learningObjectives": [
+    "Explain Executor, submit, map, Future, result, exceptions and shutdown.",
+    "Select a suitable concurrency or performance technique for PY22.15.",
+    "Interpret task, thread, process or profiling results correctly.",
+    "Identify limitations and risks when applying PY22.15.",
+    "Apply PY22.15 concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY8.1",
+    "PY11.1",
+    "PY14.1",
+    "PY21.7",
+    "PY22.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "concurrent.futures provides a high-level interface for asynchronous execution using thread or process pools. An Executor submits work and returns Future objects representing eventual results. Calling result waits for completion and re-raises worker exceptions. The executor context manager shuts down the pool after submitted work completes.",
+      "whyItMatters": "Executors simplify task submission and result collection without manually managing every thread or process.",
+      "analogy": "An executor is a dispatch desk that assigns jobs to workers and returns a ticket that can later be used to collect each result.",
+      "analogyLimit": "Submitting too many tasks can consume memory and overload services; choose thread or process executors based on workload and bound the amount of outstanding work.",
+      "summary": "Concurrent Futures and Executor Patterns develops advanced concurrency and performance skills."
+    },
+    "explain": {
+      "narrative": "## Submit work and collect results\nUse `ThreadPoolExecutor` for I/O-bound tasks and `ProcessPoolExecutor` for suitable CPU-bound tasks. `submit()` returns a Future; `future.result()` waits for completion and returns the value or raises the worker exception. `map()` applies a function across inputs and yields results in input order.\n\nUse the executor as a context manager for orderly shutdown. Handle exceptions from results and avoid waiting on a future from a worker in a way that can exhaust the pool and deadlock.",
+      "examples": [
+        {
+          "id": "py2215-ex1",
+          "language": "en",
+          "title": "Submit a task to a thread pool",
+          "code": "from concurrent.futures import ThreadPoolExecutor\nwith ThreadPoolExecutor(max_workers=2) as executor:\n    future = executor.submit(sum, [2, 3, 4])\n    print(future.result())",
+          "expectedOutput": "9",
+          "explanation": "submit schedules work and result retrieves its completed value."
+        },
+        {
+          "id": "py2215-ex2",
+          "language": "en",
+          "title": "Map a function over inputs",
+          "code": "from concurrent.futures import ThreadPoolExecutor\nwith ThreadPoolExecutor(max_workers=2) as executor:\n    results = list(executor.map(lambda value: value * 2, [1, 2, 3]))\nprint(results)",
+          "expectedOutput": "[2, 4, 6]",
+          "explanation": "map applies the callable to each input and yields results in input order."
+        },
+        {
+          "id": "py2215-ex3",
+          "language": "en",
+          "title": "Check future completion",
+          "code": "from concurrent.futures import ThreadPoolExecutor\nwith ThreadPoolExecutor() as executor:\n    future = executor.submit(lambda: 'ok')\n    print(future.result(), future.done())",
+          "expectedOutput": "ok True",
+          "explanation": "A completed future exposes its result and done state."
+        },
+        {
+          "id": "py2215-ex4",
+          "language": "en",
+          "title": "Handle a worker exception",
+          "code": "from concurrent.futures import ThreadPoolExecutor\nwith ThreadPoolExecutor() as executor:\n    future = executor.submit(lambda: 1 / 0)\n    try: future.result()\n    except ZeroDivisionError as error: print(type(error).__name__)",
+          "expectedOutput": "ZeroDivisionError",
+          "explanation": "Calling result re-raises an exception produced by the worker."
+        },
+        {
+          "id": "py2215-ex5",
+          "language": "en",
+          "title": "Use as_completed for completion order",
+          "code": "from concurrent.futures import ThreadPoolExecutor, as_completed\nwith ThreadPoolExecutor(max_workers=2) as executor:\n    futures = [executor.submit(lambda value=value: value) for value in [1, 2]]\n    results = [future.result() for future in as_completed(futures)]\nprint(sorted(results))",
+          "expectedOutput": "[1, 2]",
+          "explanation": "as_completed yields futures as they finish; sorting makes this example's output deterministic."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Use ThreadPoolExecutor to submit several deterministic calculations, collect results in order and handle an exception from a deliberately failing task.",
+      "independentTask": "Select submit, map, as_completed and an executor type for several concurrent-work scenarios.",
+      "hints": [
+        "submit returns a Future.",
+        "result waits and may raise a worker exception.",
+        "map yields results in input order.",
+        "Use a with block for executor shutdown.",
+        "Avoid unbounded task submission."
+      ],
+      "challenge": "Design a resilient executor workflow with bounded work submission, result collection, error reporting and graceful shutdown.",
+      "validationCriteria": [
+        "The concurrency or performance concept is accurately explained.",
+        "Examples execute with the documented output.",
+        "Synchronization, scheduling or profiling behaviour is correct.",
+        "Limitations and appropriate use cases are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2215-q1",
+        "prompt": "What does Executor.submit return?",
+        "answer": "A Future",
+        "options": [
+          "A Future",
+          "A thread name",
+          "A Future",
+          "A list of all results",
+          "A Python module"
+        ],
+        "explanation": "submit returns a Future representing the scheduled operation."
+      },
+      {
+        "id": "py2215-q2",
+        "prompt": "What does Future.result do?",
+        "answer": "Waits for completion and returns the result or raises its exception",
+        "options": [
+          "Waits for completion and returns the result or raises its exception",
+          "Cancels every task",
+          "Waits for completion and returns the result or raises its exception",
+          "Starts the event loop",
+          "Creates a process"
+        ],
+        "explanation": "result waits for the future and propagates worker exceptions."
+      },
+      {
+        "id": "py2215-q3",
+        "prompt": "Which executor is commonly suitable for I/O-bound work?",
+        "answer": "ThreadPoolExecutor",
+        "options": [
+          "ThreadPoolExecutor",
+          "ThreadPoolExecutor",
+          "ProcessPoolExecutor only",
+          "ASTExecutor",
+          "CacheExecutor"
+        ],
+        "explanation": "Threads can overlap I/O waiting and are commonly used for I/O-bound work."
+      },
+      {
+        "id": "py2215-q4",
+        "prompt": "What order does Executor.map provide?",
+        "answer": "Input order",
+        "options": [
+          "Input order",
+          "Completion order always",
+          "Input order",
+          "Alphabetical order",
+          "Random order"
+        ],
+        "explanation": "map yields results corresponding to the original input order."
+      },
+      {
+        "id": "py2215-q5",
+        "prompt": "Why use an executor context manager?",
+        "answer": "To shut down the pool cleanly",
+        "options": [
+          "To shut down the pool cleanly",
+          "To disable exceptions",
+          "To shut down the pool cleanly",
+          "To install dependencies",
+          "To create a virtual environment"
+        ],
+        "explanation": "The context manager waits for submitted work and shuts down the executor."
+      }
+    ]
+  },
+  "status": "draft"
+}
