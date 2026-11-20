@@ -8,7 +8,7 @@ Reference: [W3Schools Python Syllabus](https://www.w3schools.com/python/python_s
 - Curriculum index: **284 English Python lesson entries** across PY1–PY34.
 - Source inventory: reconciled to **284 Python rows**, including PY8.9 list methods, PY9.7 tuple methods, PY11.8 frozenset and PY15.9 file deletion.
 - Progress tracker: reconciled to **284 Python rows**.
-- Five worked examples and five topic-specific MCQs are the authoring target per lesson (1,427 expected across the current lessons, including additional examples and questions in selected lessons); CI execution is the authority for validated counts.
+- Five worked examples and five topic-specific MCQs are the authoring target per lesson (1,428 executed examples and 1,428 topic-specific MCQs were validated in the latest successful Python CI run #777); CI execution is the authority for validated counts.
 - All lessons remain draft. Telugu translation and lesson-renderer/playground integration remain pending.
 
 ## W3Schools 8-chapter / 45-module mapping
