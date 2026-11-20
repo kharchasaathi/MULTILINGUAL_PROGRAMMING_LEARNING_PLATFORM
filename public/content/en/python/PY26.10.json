@@ -1,0 +1,160 @@
+{
+  "id": "python.py26.10.en",
+  "courseId": "python",
+  "moduleId": "PY26",
+  "topicId": "PY26.10",
+  "title": "Python Inner Classes and Nested Class Design",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the core concepts of Python Inner Classes and Nested Class Design.",
+    "Choose an appropriate object-oriented design for a small Python problem.",
+    "Trace object state and method calls accurately.",
+    "Apply Python class features with correct method and attribute behavior.",
+    "Recognize design trade-offs, edge cases and maintainability concerns."
+  ],
+  "prerequisites": [
+    "PY26.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "An inner class is a class defined inside another class. It is still a separate class object and does not automatically capture an outer instance. Nested classes can group tightly related types, but they should be used only when the nesting clarifies ownership or namespace; otherwise, a module-level class is often simpler.",
+      "whyItMatters": "Understanding nested classes prevents the mistaken assumption that an inner instance automatically has access to an outer object's state.",
+      "analogy": "A nested class is like a named component type placed inside a larger design document; the placement groups related concepts but does not physically connect each instance.",
+      "summary": "Python Inner Classes and Nested Class Design introduces a focused part of Python's object model and its practical use."
+    },
+    "explain": {
+      "narrative": "Study the concept, trace the receiver and state for each operation, then run the examples. Pay attention to Python's conventions and documented protocol behavior rather than assuming that class syntax provides strict access control.",
+      "examples": [
+        {
+          "id": "py2610-ex1",
+          "language": "en",
+          "title": "Define and instantiate an inner class",
+          "code": "class Computer:\\n    class CPU:\\n        def label(self): return 'processor'\\nchip = Computer.CPU()\\nprint(chip.label())",
+          "expectedOutput": "processor",
+          "explanation": "The inner class is accessed through the outer class namespace."
+        },
+        {
+          "id": "py2610-ex2",
+          "language": "en",
+          "title": "Outer and inner instances are separate",
+          "code": "class School:\\n    class Room: pass\\ns = School(); r = School.Room()\\nprint(isinstance(r, School.Room), isinstance(s, School.Room))",
+          "expectedOutput": "True False",
+          "explanation": "An inner class instance is not an instance of the outer class."
+        },
+        {
+          "id": "py2610-ex3",
+          "language": "en",
+          "title": "Pass outer state explicitly",
+          "code": "class Order:\\n    def __init__(self, code): self.code = code\\n    class Receipt:\\n        def __init__(self, order): self.order = order\\norder = Order('A7')\\nreceipt = Order.Receipt(order)\\nprint(receipt.order.code)",
+          "expectedOutput": "A7",
+          "explanation": "An inner class must receive an outer instance explicitly if it needs that instance's data."
+        },
+        {
+          "id": "py2610-ex4",
+          "language": "en",
+          "title": "Use nested types as namespaces",
+          "code": "class Parser:\\n    class Result:\\n        def __init__(self, ok): self.ok = ok\\nresult = Parser.Result(True)\\nprint(result.ok)",
+          "expectedOutput": "True",
+          "explanation": "Nesting can communicate that Result is closely associated with Parser."
+        },
+        {
+          "id": "py2610-ex5",
+          "language": "en",
+          "title": "Prefer a top-level class when clearer",
+          "code": "class Address:\\n    def __init__(self, city): self.city = city\\nclass Customer:\\n    def __init__(self, address): self.address = address\\nc = Customer(Address('Pune'))\\nprint(c.address.city)",
+          "expectedOutput": "Pune",
+          "explanation": "Composition with a separate class is often clearer than nesting when the type is reusable."
+        }
+      ]
+    }
+  },
+  "practise": {
+    "guidedTask": "Build a small program that demonstrates python inner classes and nested class design. Write down the object types, relevant attributes, method calls and expected state changes before running it.",
+    "independentTask": "Extend the example into a small domain model of your choice. Add validation, clear method names, boundary tests and a short explanation of why your design uses classes rather than simpler functions or data structures.",
+    "hints": [
+      "Identify which object owns each piece of state.",
+      "Trace the first argument supplied to every bound method.",
+      "Prefer explicit invariants and small public interfaces.",
+      "Test at least one boundary or unsupported input.",
+      "Use composition when it models the relationship more accurately than inheritance."
+    ],
+    "challenge": "Refactor the model into a testable design with clear responsibilities, documented public behavior and tests for normal, boundary and invalid cases.",
+    "validationCriteria": [
+      "All five examples execute on the supported Python version and match their outputs.",
+      "The implementation follows Python's documented class and special-method semantics.",
+      "State changes are scoped to the intended object or class.",
+      "Unsupported inputs produce a deliberate result or a clear exception.",
+      "The design avoids unnecessary inheritance, shared mutable defaults and misleading private-access claims."
+    ]
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2610-q1",
+        "prompt": "How is a nested class accessed?",
+        "answer": "Through the outer class namespace",
+        "options": [
+          "Through the outer class namespace",
+          "Only through an instance attribute",
+          "Through sys.path",
+          "It cannot be accessed"
+        ],
+        "explanation": "A nested class is an attribute of the outer class object."
+      },
+      {
+        "id": "py2610-q2",
+        "prompt": "Does an inner class automatically capture an outer instance?",
+        "answer": "No",
+        "options": [
+          "Yes",
+          "No",
+          "Only with __init__",
+          "Only with super"
+        ],
+        "explanation": "Nesting is namespace organization and does not create an implicit closure over an outer instance."
+      },
+      {
+        "id": "py2610-q3",
+        "prompt": "How can an inner object use an outer instance?",
+        "answer": "Pass the outer instance explicitly",
+        "options": [
+          "Assume self points to the outer instance",
+          "Pass the outer instance explicitly",
+          "Use global variables only",
+          "Call __name__"
+        ],
+        "explanation": "Explicit references make ownership and dependencies clear."
+      },
+      {
+        "id": "py2610-q4",
+        "prompt": "When is a nested class useful?",
+        "answer": "When it clearly groups a closely related type",
+        "options": [
+          "Whenever any class is created",
+          "When it clearly groups a closely related type",
+          "Only for inheritance",
+          "Only for database models"
+        ],
+        "explanation": "Nesting should improve conceptual grouping."
+      },
+      {
+        "id": "py2610-q5",
+        "prompt": "What is often clearer for a reusable related type?",
+        "answer": "A separate module-level class",
+        "options": [
+          "A deeply nested class in every case",
+          "A separate module-level class",
+          "A global mutable dictionary",
+          "A lambda"
+        ],
+        "explanation": "A top-level class can be reused and tested independently."
+      }
+    ]
+  },
+  "status": "draft"
+}
