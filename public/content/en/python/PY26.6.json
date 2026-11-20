@@ -1,0 +1,160 @@
+{
+  "id": "python.py26.6.en",
+  "courseId": "python",
+  "moduleId": "PY26",
+  "topicId": "PY26.6",
+  "title": "Python Magic Methods and Operator Overloading",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the core concepts of Python Magic Methods and Operator Overloading.",
+    "Choose an appropriate object-oriented design for a small Python problem.",
+    "Trace object state and method calls accurately.",
+    "Apply Python class features with correct method and attribute behavior.",
+    "Recognize design trade-offs, edge cases and maintainability concerns."
+  ],
+  "prerequisites": [
+    "PY26.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Special methods (often called magic or dunder methods) let user-defined objects participate in Python protocols. __str__ provides readable text, __repr__ provides a developer-oriented representation, __eq__ defines equality, __len__ supports len(), and arithmetic methods such as __add__ define supported operators. Implement only coherent behavior and follow each method's contract.",
+      "whyItMatters": "Special methods allow custom types to work naturally with built-in syntax and functions without inventing unrelated APIs.",
+      "analogy": "A standard plug fits a standard socket because both follow an agreed interface; special methods let custom objects follow Python's built-in protocols.",
+      "summary": "Python Magic Methods and Operator Overloading introduces a focused part of Python's object model and its practical use."
+    },
+    "explain": {
+      "narrative": "Study the concept, trace the receiver and state for each operation, then run the examples. Pay attention to Python's conventions and documented protocol behavior rather than assuming that class syntax provides strict access control.",
+      "examples": [
+        {
+          "id": "py2606-ex1",
+          "language": "en",
+          "title": "Readable string with __str__",
+          "code": "class Product:\\n    def __init__(self, name): self.name = name\\n    def __str__(self): return self.name\\nprint(str(Product('Notebook')))",
+          "expectedOutput": "Notebook",
+          "explanation": "str() calls __str__ for a user-facing representation."
+        },
+        {
+          "id": "py2606-ex2",
+          "language": "en",
+          "title": "Developer representation with __repr__",
+          "code": "class Point:\\n    def __init__(self, x, y): self.x, self.y = x, y\\n    def __repr__(self): return f'Point({self.x}, {self.y})'\\nprint(repr(Point(2, 5)))",
+          "expectedOutput": "Point(2, 5)",
+          "explanation": "repr() should ideally be unambiguous and useful for debugging."
+        },
+        {
+          "id": "py2606-ex3",
+          "language": "en",
+          "title": "Define equality",
+          "code": "class Badge:\\n    def __init__(self, code): self.code = code\\n    def __eq__(self, other):\\n        if not isinstance(other, Badge): return NotImplemented\\n        return self.code == other.code\\nprint(Badge('X') == Badge('X'))",
+          "expectedOutput": "True",
+          "explanation": "Returning NotImplemented for unsupported types lets Python try the reflected comparison."
+        },
+        {
+          "id": "py2606-ex4",
+          "language": "en",
+          "title": "Support len()",
+          "code": "class Shelf:\\n    def __init__(self, items): self.items = items\\n    def __len__(self): return len(self.items)\\nprint(len(Shelf(['a', 'b'])))",
+          "expectedOutput": "2",
+          "explanation": "__len__ supplies the length protocol used by len()."
+        },
+        {
+          "id": "py2606-ex5",
+          "language": "en",
+          "title": "Overload addition",
+          "code": "class Money:\\n    def __init__(self, amount): self.amount = amount\\n    def __add__(self, other):\\n        if not isinstance(other, Money): return NotImplemented\\n        return Money(self.amount + other.amount)\\nprint((Money(5) + Money(7)).amount)",
+          "expectedOutput": "12",
+          "explanation": "Operator overloads should preserve clear domain meaning and return a suitable result."
+        }
+      ]
+    }
+  },
+  "practise": {
+    "guidedTask": "Build a small program that demonstrates python magic methods and operator overloading. Write down the object types, relevant attributes, method calls and expected state changes before running it.",
+    "independentTask": "Extend the example into a small domain model of your choice. Add validation, clear method names, boundary tests and a short explanation of why your design uses classes rather than simpler functions or data structures.",
+    "hints": [
+      "Identify which object owns each piece of state.",
+      "Trace the first argument supplied to every bound method.",
+      "Prefer explicit invariants and small public interfaces.",
+      "Test at least one boundary or unsupported input.",
+      "Use composition when it models the relationship more accurately than inheritance."
+    ],
+    "challenge": "Refactor the model into a testable design with clear responsibilities, documented public behavior and tests for normal, boundary and invalid cases.",
+    "validationCriteria": [
+      "All five examples execute on the supported Python version and match their outputs.",
+      "The implementation follows Python's documented class and special-method semantics.",
+      "State changes are scoped to the intended object or class.",
+      "Unsupported inputs produce a deliberate result or a clear exception.",
+      "The design avoids unnecessary inheritance, shared mutable defaults and misleading private-access claims."
+    ]
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2606-q1",
+        "prompt": "Which special method is used by str(obj)?",
+        "answer": "__str__",
+        "options": [
+          "__repr__",
+          "__len__",
+          "__str__",
+          "__add__"
+        ],
+        "explanation": "str() uses __str__ for a readable representation."
+      },
+      {
+        "id": "py2606-q2",
+        "prompt": "Which special method supports len(obj)?",
+        "answer": "__len__",
+        "options": [
+          "__len__",
+          "__call__",
+          "__eq__",
+          "__init__"
+        ],
+        "explanation": "__len__ implements the length protocol."
+      },
+      {
+        "id": "py2606-q3",
+        "prompt": "What should __eq__ return for an unsupported type?",
+        "answer": "NotImplemented",
+        "options": [
+          "False in every possible case",
+          "NotImplemented",
+          "None always",
+          "The other object's class"
+        ],
+        "explanation": "NotImplemented allows Python to try the reflected comparison."
+      },
+      {
+        "id": "py2606-q4",
+        "prompt": "What is operator overloading?",
+        "answer": "Defining special methods for supported operators",
+        "options": [
+          "Changing Python grammar",
+          "Defining special methods for supported operators",
+          "Renaming a variable",
+          "Importing a package"
+        ],
+        "explanation": "Special methods connect objects to built-in operations."
+      },
+      {
+        "id": "py2606-q5",
+        "prompt": "Should __add__ have a coherent domain meaning?",
+        "answer": "Yes",
+        "options": [
+          "No",
+          "Yes",
+          "Only for integers",
+          "Only for strings"
+        ],
+        "explanation": "Operator overloads should be predictable and semantically meaningful."
+      }
+    ]
+  },
+  "status": "draft"
+}
