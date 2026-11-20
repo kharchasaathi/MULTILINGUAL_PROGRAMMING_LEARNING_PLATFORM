@@ -251,3 +251,23 @@ test("Python playground runs Pyodide in a worker with stdin, stderr, errors, sto
   expect(hasHorizontalOverflow, "mobile page should not overflow horizontally").toBe(false);
   expect(nonGetRequests, "learner code should not be sent using a non-GET request").toEqual([]);
 });
+
+test("Python lesson practice link opens its dedicated playground with the first lesson example", async ({ page }) => {
+  await page.goto(baseURL, { waitUntil: "domcontentloaded" });
+  await waitForCurriculum(page);
+  await page.locator('[data-course-nav="python"]').click();
+  const dialog = page.locator("#lessonDialog");
+  await expect(dialog).toBeVisible();
+  await dialog.locator('[data-topic-id="PY1.1"]').click();
+  const lessonResponse = await page.request.get(`${baseURL}/content/en/python/PY1.1.json`);
+  expect(lessonResponse.ok()).toBeTruthy();
+  const lesson = await lessonResponse.json();
+  const expectedCode = lesson.stages.explain.examples[0].code;
+  const link = dialog.locator(".lesson-practice-link");
+  await expect(link).toHaveAttribute("href", /python-playground\.html\?topic=PY1\.1/);
+  await expect(link).toContainText("Python Playground");
+  const [playground] = await Promise.all([page.waitForEvent("popup"), link.click()]);
+  await expect(playground.locator("#pythonCode")).toHaveValue(expectedCode);
+  await expect(playground.locator("#runtimeStatus")).toHaveAttribute("data-state", "ready", { timeout: 180000 });
+  await playground.close();
+});
