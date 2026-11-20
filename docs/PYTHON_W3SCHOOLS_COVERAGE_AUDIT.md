@@ -5,10 +5,10 @@ Reference: [W3Schools Python Syllabus](https://www.w3schools.com/python/python_s
 
 ## Baseline
 
-- Curriculum index: **282 English Python lesson entries** across PY1–PY34.
-- Source inventory: reconciled to **282 Python rows**, including PY15.9 file deletion and PY9.7 tuple methods.
-- Progress tracker: reconciled to **282 Python rows**.
-- Five worked examples and five topic-specific MCQs are the authoring target per lesson (1,410 expected each at this baseline); CI execution is the authority for validated counts.
+- Curriculum index: **283 English Python lesson entries** across PY1–PY34.
+- Source inventory: reconciled to **283 Python rows**, including PY15.9 file deletion, PY9.7 tuple methods and PY11.8 frozenset.
+- Progress tracker: reconciled to **283 Python rows**.
+- Five worked examples and five topic-specific MCQs are the authoring target per lesson (1,415 expected each at this baseline); CI execution is the authority for validated counts.
 - All lessons remain draft. Telugu translation and lesson-renderer/playground integration remain pending.
 
 ## W3Schools 8-chapter / 45-module mapping
@@ -29,7 +29,7 @@ Reference: [W3Schools Python Syllabus](https://www.w3schools.com/python/python_s
 | 2 Variables and data types | Python Operators | PY4 | Mapped; subtopic review pending |
 | 3 Collections | Python Lists | PY8 | Mapped; subtopic review pending |
 | 3 Collections | Python Tuples | PY9.1–PY9.7 | Tuple construction, access, update patterns, unpacking, iteration, joining, count() and index() mapped; broader exercise-level review pending |
-| 3 Collections | Python Sets | PY11 | Mapped; subtopic review pending |
+| 3 Collections | Python Sets | PY11.1–PY11.8 | Set creation, operations, methods and immutable frozenset mapped; detailed subtopic review pending |
 | 3 Collections | Python Dictionaries | PY10 | Mapped; subtopic review pending |
 | 4 Control flow and functions | Python If...Else | PY5 | Mapped; subtopic review pending |
 | 4 Control flow and functions | Python While Loops | PY6.1 | Mapped; subtopic review pending |
@@ -80,4 +80,4 @@ W3Schools also lists Django, MySQL, MongoDB and Machine Learning as distinct tut
 
 ## Important counting rule
 
-The 282 figure is the current indexed English lesson count, **not** a percentage-complete claim. A defensible overall percentage requires the page/subtopic inventory to be fully enumerated, deduplicated and mapped. The 45-module W3Schools syllabus and its deeper page subtopics must not be treated as 45 lessons.
+The 283 figure is the current indexed English lesson count, **not** a percentage-complete claim. A defensible overall percentage requires the page/subtopic inventory to be fully enumerated, deduplicated and mapped. The 45-module W3Schools syllabus and its deeper page subtopics must not be treated as 45 lessons.
