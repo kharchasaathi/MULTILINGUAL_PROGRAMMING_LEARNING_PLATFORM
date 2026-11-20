@@ -1,0 +1,169 @@
+{
+  "id": "python.py22.12.en",
+  "courseId": "python",
+  "moduleId": "PY22",
+  "topicId": "PY22.12",
+  "title": "Threading and I/O-Bound Concurrency",
+  "language": "en",
+  "learningObjectives": [
+    "Explain Thread, start, join, shared state and I/O-bound workloads.",
+    "Select a suitable concurrency or performance technique for PY22.12.",
+    "Interpret task, thread, process or profiling results correctly.",
+    "Identify limitations and risks when applying PY22.12.",
+    "Apply PY22.12 concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY8.1",
+    "PY11.1",
+    "PY14.1",
+    "PY21.7",
+    "PY22.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "The threading module runs multiple threads within one process. Threads are useful for overlapping I/O-bound operations that spend time waiting. start begins a thread and join waits for it to finish. Threads share process memory, so shared mutable state must be protected when concurrent access can cause inconsistent results.",
+      "whyItMatters": "Threading can improve responsiveness and throughput for workloads dominated by waiting on I/O.",
+      "analogy": "Threads are several workers sharing one workshop, each able to make progress while another waits for a delivery.",
+      "analogyLimit": "In standard CPython builds, the GIL traditionally limits parallel execution of Python bytecode in threads; threads are not a general solution for CPU-bound speedups, and free-threaded builds have different characteristics.",
+      "summary": "Threading and I/O-Bound Concurrency develops advanced concurrency and performance skills."
+    },
+    "explain": {
+      "narrative": "## Coordinate threads safely\nCreate a `threading.Thread` with a target function, call `start()` and then `join()` when the result is needed. Threads share memory, so protect shared mutable state with locks or use thread-safe queues. Prefer high-level executors for many independent tasks.\n\nThreads are commonly useful for I/O-bound tasks. For CPU-bound workloads, evaluate multiprocessing or other approaches based on the Python build and workload. Avoid relying on incidental execution order between threads.",
+      "examples": [
+        {
+          "id": "py2212-ex1",
+          "language": "en",
+          "title": "Create and join a thread",
+          "code": "import threading\nresults = []\ndef work(): results.append('done')\nthread = threading.Thread(target=work)\nthread.start(); thread.join()\nprint(results)",
+          "expectedOutput": "['done']",
+          "explanation": "join ensures the worker has finished before the main thread reads results."
+        },
+        {
+          "id": "py2212-ex2",
+          "language": "en",
+          "title": "Inspect thread identity",
+          "code": "import threading\nprint(threading.current_thread().name == 'MainThread')",
+          "expectedOutput": "True",
+          "explanation": "The main program runs in the main thread."
+        },
+        {
+          "id": "py2212-ex3",
+          "language": "en",
+          "title": "Protect a counter with a lock",
+          "code": "import threading\ncounter = 0\nlock = threading.Lock()\ndef increment():\n    global counter\n    with lock: counter += 1\nthreads = [threading.Thread(target=increment) for _ in range(5)]\nfor thread in threads: thread.start()\nfor thread in threads: thread.join()\nprint(counter)",
+          "expectedOutput": "5",
+          "explanation": "A lock protects the shared counter update from concurrent access."
+        },
+        {
+          "id": "py2212-ex4",
+          "language": "en",
+          "title": "Check a thread's completion state",
+          "code": "import threading\nthread = threading.Thread(target=lambda: None)\nthread.start(); thread.join()\nprint(thread.is_alive())",
+          "expectedOutput": "False",
+          "explanation": "is_alive reports whether the thread is still running."
+        },
+        {
+          "id": "py2212-ex5",
+          "language": "en",
+          "title": "Use a thread name",
+          "code": "import threading\nthread = threading.Thread(target=lambda: None, name='worker-1')\nprint(thread.name)",
+          "expectedOutput": "worker-1",
+          "explanation": "Named threads are easier to identify in diagnostics."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create two threads that append distinct results to a shared list, start them and join both before checking the results. Then explain why output order should not be assumed.",
+      "independentTask": "Choose between threading, asyncio and sequential execution for a set of I/O-bound and CPU-bound scenarios.",
+      "hints": [
+        "start begins thread execution.",
+        "join waits for a thread to finish.",
+        "Threads share memory within a process.",
+        "Use locks for shared mutable state.",
+        "Thread scheduling order is not guaranteed."
+      ],
+      "challenge": "Design a threaded I/O worker pool that bounds concurrent requests, protects shared state and shuts down cleanly.",
+      "validationCriteria": [
+        "The concurrency or performance concept is accurately explained.",
+        "Examples execute with the documented output.",
+        "Synchronization, scheduling or profiling behaviour is correct.",
+        "Limitations and appropriate use cases are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2212-q1",
+        "prompt": "Which method begins a thread?",
+        "answer": "start",
+        "options": [
+          "start",
+          "run only",
+          "start",
+          "join",
+          "close"
+        ],
+        "explanation": "start schedules the thread's target for execution."
+      },
+      {
+        "id": "py2212-q2",
+        "prompt": "What does join do?",
+        "answer": "Waits for a thread to finish",
+        "options": [
+          "Waits for a thread to finish",
+          "Starts a second process",
+          "Waits for a thread to finish",
+          "Deletes the thread",
+          "Locks every variable"
+        ],
+        "explanation": "join blocks the caller until the selected thread completes."
+      },
+      {
+        "id": "py2212-q3",
+        "prompt": "Why protect shared mutable state?",
+        "answer": "To prevent inconsistent concurrent updates",
+        "options": [
+          "To prevent inconsistent concurrent updates",
+          "To make threads execute on separate computers",
+          "To prevent inconsistent concurrent updates",
+          "To increase source file size",
+          "To disable I/O"
+        ],
+        "explanation": "Locks or other synchronization primitives coordinate access to shared state."
+      },
+      {
+        "id": "py2212-q4",
+        "prompt": "Which workload is commonly suitable for threading?",
+        "answer": "I/O-bound work",
+        "options": [
+          "I/O-bound work",
+          "I/O-bound work",
+          "Every CPU-heavy calculation",
+          "Only syntax parsing",
+          "Only list comprehensions"
+        ],
+        "explanation": "Threads can overlap waiting on I/O operations."
+      },
+      {
+        "id": "py2212-q5",
+        "prompt": "Should code assume a fixed execution order between threads?",
+        "answer": "No",
+        "options": [
+          "No",
+          "Yes",
+          "No",
+          "Only with print statements",
+          "Only on Linux"
+        ],
+        "explanation": "Thread scheduling is nondeterministic and order must be coordinated explicitly."
+      }
+    ]
+  },
+  "status": "draft"
+}
