@@ -16,7 +16,7 @@ for (const name of files) {
   assert.ok(["draft", "published"].includes(lesson.status), name + ": unexpected editorial status");
   if (lesson.status !== "published") {
     lesson.status = "published";
-    await writeFile(path, JSON.stringify(lesson, null, 2) + "\\n");
+    await writeFile(path, JSON.stringify(lesson, null, 2) + "\n");
     changed++;
   }
 }
