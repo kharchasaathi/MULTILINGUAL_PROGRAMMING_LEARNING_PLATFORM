@@ -17,13 +17,13 @@
   ],
   "stages": {
     "understand": {
-      "concept": "Special methods (often called magic or dunder methods) let user-defined objects participate in Python protocols. __str__ provides readable text, __repr__ provides a developer-oriented representation, __eq__ defines equality, __len__ supports len(), and arithmetic methods such as __add__ define supported operators. Implement only coherent behavior and follow each method's contract.",
+      "concept": "Special methods (often called magic or dunder methods) let user-defined objects participate in Python protocols. __str__ provides readable text, __repr__ provides a developer-oriented representation, __eq__ defines equality, __len__ supports len(), and arithmetic methods such as __add__ define supported operators. Implement only coherent behavior and follow each method's contract. The less-than protocol uses `__lt__`, membership tests use `__contains__`, and calling an instance like a function uses `__call__`.",
       "whyItMatters": "Special methods allow custom types to work naturally with built-in syntax and functions without inventing unrelated APIs.",
       "analogy": "A standard plug fits a standard socket because both follow an agreed interface; special methods let custom objects follow Python's built-in protocols.",
       "summary": "Python Magic Methods and Operator Overloading introduces a focused part of Python's object model and its practical use."
     },
     "explain": {
-      "narrative": "Study the concept, trace the receiver and state for each operation, then run the examples. Pay attention to Python's conventions and documented protocol behavior rather than assuming that class syntax provides strict access control.",
+      "narrative": "Study the concept, trace the receiver and state for each operation, then run the examples. Pay attention to Python's conventions and documented protocol behavior rather than assuming that class syntax provides strict access control.\n\n## Additional protocols\n`__lt__(other)` defines the less-than comparison and can support sorting. `__contains__(item)` defines membership checks with `in`. `__call__(*args, **kwargs)` makes an instance callable like a function. Return values should follow each protocol's expected contract.",
       "examples": [
         {
           "id": "py2606-ex1",
@@ -64,6 +64,30 @@
           "code": "class Money:\n    def __init__(self, amount): self.amount = amount\n    def __add__(self, other):\n        if not isinstance(other, Money): return NotImplemented\n        return Money(self.amount + other.amount)\nprint((Money(5) + Money(7)).amount)",
           "expectedOutput": "12",
           "explanation": "Operator overloads should preserve clear domain meaning and return a suitable result."
+        },
+        {
+          "id": "py26.6-ex6",
+          "language": "en",
+          "title": "Define ordering with __lt__",
+          "code": "class Task:\n    def __init__(self, priority): self.priority = priority\n    def __lt__(self, other): return self.priority < other.priority\ntasks = sorted([Task(3), Task(1), Task(2)])\nprint([task.priority for task in tasks])",
+          "expectedOutput": "[1, 2, 3]",
+          "explanation": "sorted uses the less-than comparison protocol to order Task instances by priority."
+        },
+        {
+          "id": "py26.6-ex7",
+          "language": "en",
+          "title": "Define membership with __contains__",
+          "code": "class Team:\n    def __init__(self, members): self.members = members\n    def __contains__(self, name): return name in self.members\nteam = Team(['Asha', 'Ravi'])\nprint('Asha' in team)\nprint('Mina' in team)",
+          "expectedOutput": "True\nFalse",
+          "explanation": "The in operator delegates to __contains__ when the object defines that protocol."
+        },
+        {
+          "id": "py26.6-ex8",
+          "language": "en",
+          "title": "Make an instance callable with __call__",
+          "code": "class Multiplier:\n    def __init__(self, factor): self.factor = factor\n    def __call__(self, value): return self.factor * value\ndouble = Multiplier(2)\nprint(double(6))",
+          "expectedOutput": "12",
+          "explanation": "Defining __call__ allows an instance to be invoked using function-call syntax."
         }
       ]
     },
@@ -83,7 +107,8 @@
         "The implementation follows Python's documented class and special-method semantics.",
         "State changes are scoped to the intended object or class.",
         "Unsupported inputs produce a deliberate result or a clear exception.",
-        "The design avoids unnecessary inheritance, shared mutable defaults and misleading private-access claims."
+        "The design avoids unnecessary inheritance, shared mutable defaults and misleading private-access claims.",
+        "The __lt__, __contains__ and __call__ protocols are demonstrated with coherent return values."
       ]
     }
   },
@@ -153,6 +178,42 @@
           "Only for strings"
         ],
         "explanation": "Operator overloads should be predictable and semantically meaningful."
+      },
+      {
+        "id": "py26.6-q6",
+        "prompt": "Which special method controls the less-than operator for custom objects?",
+        "answer": "__lt__",
+        "options": [
+          "__lt__",
+          "__eq__",
+          "__len__",
+          "__str__"
+        ],
+        "explanation": "__lt__ implements the less-than comparison protocol."
+      },
+      {
+        "id": "py26.6-q7",
+        "prompt": "Which special method controls the in operator for a custom object?",
+        "answer": "__contains__",
+        "options": [
+          "__contains__",
+          "__add__",
+          "__repr__",
+          "__init__"
+        ],
+        "explanation": "__contains__ defines the membership test used by in."
+      },
+      {
+        "id": "py26.6-q8",
+        "prompt": "Which special method makes an instance callable like a function?",
+        "answer": "__call__",
+        "options": [
+          "__call__",
+          "__iter__",
+          "__str__",
+          "__len__"
+        ],
+        "explanation": "Python invokes __call__ when an instance is called with parentheses."
       }
     ]
   },
