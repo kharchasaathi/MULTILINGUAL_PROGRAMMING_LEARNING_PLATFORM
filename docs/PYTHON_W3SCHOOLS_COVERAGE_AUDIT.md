@@ -5,10 +5,10 @@ Reference: [W3Schools Python Syllabus](https://www.w3schools.com/python/python_s
 
 ## Baseline
 
-- Curriculum index: **283 English Python lesson entries** across PY1–PY34.
-- Source inventory: reconciled to **283 Python rows**, including PY15.9 file deletion, PY9.7 tuple methods and PY11.8 frozenset.
-- Progress tracker: reconciled to **283 Python rows**.
-- Five worked examples and five topic-specific MCQs are the authoring target per lesson (1,415 expected each at this baseline); CI execution is the authority for validated counts.
+- Curriculum index: **284 English Python lesson entries** across PY1–PY34.
+- Source inventory: reconciled to **284 Python rows**, including PY8.9 list methods, PY9.7 tuple methods, PY11.8 frozenset and PY15.9 file deletion.
+- Progress tracker: reconciled to **284 Python rows**.
+- Five worked examples and five topic-specific MCQs are the authoring target per lesson (1,420 expected at five examples and five MCQs per lesson, plus additional examples and questions added to selected OOP lessons); CI execution is the authority for validated counts.
 - All lessons remain draft. Telugu translation and lesson-renderer/playground integration remain pending.
 
 ## W3Schools 8-chapter / 45-module mapping
@@ -27,7 +27,7 @@ Reference: [W3Schools Python Syllabus](https://www.w3schools.com/python/python_s
 | 2 Variables and data types | Python Strings | PY12 | Mapped; subtopic review pending |
 | 2 Variables and data types | Python Booleans | PY3.4 | Mapped; subtopic review pending |
 | 2 Variables and data types | Python Operators | PY4 | Mapped; subtopic review pending |
-| 3 Collections | Python Lists | PY8 | Mapped; subtopic review pending |
+| 3 Collections | Python Lists | PY8.1–PY8.9 | Access, update, add/remove, loops, comprehensions, sort, copy, join, count(), index() and reverse() mapped; detailed exercise review pending |
 | 3 Collections | Python Tuples | PY9.1–PY9.7 | Tuple construction, access, update patterns, unpacking, iteration, joining, count() and index() mapped; broader exercise-level review pending |
 | 3 Collections | Python Sets | PY11.1–PY11.8 | Set creation, operations, methods and immutable frozenset mapped; detailed subtopic review pending |
 | 3 Collections | Python Dictionaries | PY10 | Mapped; subtopic review pending |
@@ -70,14 +70,23 @@ W3Schools also lists Django, MySQL, MongoDB and Machine Learning as distinct tut
 - MongoDB → separate MongoDB course, with Python driver integration lessons where appropriate
 - Machine Learning → separate Machine Learning course, with Python/NumPy/Pandas/Matplotlib prerequisites
 
-## Confirmed gaps / next work
+## Subtopic-level findings and remaining work
 
-1. Validate the new PY34.1–PY34.10 Matplotlib lessons (50 examples and 50 MCQs) and review the broader Matplotlib subtopic coverage. Existing Histograms, Pie Charts and Subplots remain in place.
-2. Run a detailed subtopic-level check for every one of the 45 W3Schools syllabus modules; the mapping above is a navigation map, not proof that every page subtopic is complete.
-3. Verify NumPy, Pandas and SciPy examples against the pinned CI environment. The Python workflow now installs SciPy explicitly for PY33.
-4. Build separate Django, Machine Learning, MySQL and MongoDB course tabs/curricula; do not duplicate their full content inside Python.
-5. Keep lessons in draft until CI, editorial review, translation, renderer integration and release checks pass.
+The following explicit W3Schools page-level items were identified during the subtopic spot-check and added to CodeSaathi:
+
+- File deletion: PY15.9 covers os.remove(), Path.unlink(), os.rmdir() and Path.rmdir() using temporary-directory examples.
+- Tuple methods: PY9.7 covers count(), index(), bounded searches and ValueError handling.
+- Set immutability: PY11.8 covers frozenset creation, operations and hashability.
+- List methods: PY8.9 covers count(), bounded index() and in-place reverse().
+- Magic methods: PY26.6 covers __str__, __repr__, __eq__, __add__, __len__, __lt__, __contains__ and __call__.
+- Class object/method deletion: PY26.2 and PY26.5 explain del name-binding and method-attribute deletion accurately.
+
+Remaining release gates:
+1. Complete the detailed subtopic-level audit for every one of the 45 syllabus modules and linked library tutorials. This audit document currently provides the module map and records the explicit gaps found in spot-checking; it is not yet proof that every W3Schools page detail or exercise has been mapped.
+2. Confirm the latest-head Python CI and browser review after the additional lessons and OOP example updates.
+3. Keep Django, Machine Learning, MySQL and MongoDB as separate course tabs/curricula, as requested; they are not part of this Python-only PR.
+4. Keep lessons in draft until editorial review, Telugu translation, lesson-renderer/playground integration and release checks pass.
 
 ## Important counting rule
 
-The 283 figure is the current indexed English lesson count, **not** a percentage-complete claim. A defensible overall percentage requires the page/subtopic inventory to be fully enumerated, deduplicated and mapped. The 45-module W3Schools syllabus and its deeper page subtopics must not be treated as 45 lessons.
+The 284 figure is the current indexed English lesson count, **not** a percentage-complete claim. A defensible overall percentage requires the page/subtopic inventory to be fully enumerated, deduplicated and mapped. The 45-module W3Schools syllabus and its deeper page subtopics must not be treated as 45 lessons.
