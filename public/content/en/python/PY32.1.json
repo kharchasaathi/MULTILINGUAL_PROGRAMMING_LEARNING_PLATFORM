@@ -1,0 +1,163 @@
+{
+  "id": "python.py321.en",
+  "courseId": "python",
+  "moduleId": "PY32",
+  "topicId": "PY32.1",
+  "title": "Reading JSON Data with Pandas",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose of reading json data with pandas.",
+    "Choose Pandas APIs and parameters that match the input structure.",
+    "Apply the operations to deterministic Series and DataFrames.",
+    "Validate output shape, schema, data types and missing values.",
+    "Recognize edge cases and data-quality risks."
+  ],
+  "prerequisites": [
+    "PY25.13",
+    "PY25.14",
+    "PY25.15",
+    "PY25.16"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Pandas read_json loads records-oriented, column-oriented and line-delimited JSON into labeled data structures. Its orient and lines options must match the source layout. json_normalize flattens nested records. Inspect source shape and inferred dtypes after parsing.",
+      "whyItMatters": "Reliable data workflows ingest, combine, analyze and publish structured information. Correct parsing and transformations prevent silent data loss and misleading conclusions.",
+      "analogy": "A DataFrame workflow is like organizing labeled records: labels and matching rules determine how records are connected.",
+      "summary": "Pandas read_json loads records-oriented, column-oriented and line-delimited JSON into labeled data structures. Its orient and lines options must match the source layout. json_normalize flattens nested records. Inspect source shape and inferred dtypes after parsing."
+    },
+    "explain": {
+      "narrative": "This lesson explores reading json data with pandas with small reproducible datasets. Inspect input structure before selecting parsing, join, time-frequency or export options. Validate resulting columns, row counts, index, dtypes and missing values. Pandas read_json loads records-oriented, column-oriented and line-delimited JSON into labeled data structures. Its orient and lines options must match the source layout. json_normalize flattens nested records. Inspect source shape and inferred dtypes after parsing.",
+      "examples": [
+        {
+          "id": "py321-ex1",
+          "language": "en",
+          "title": "Records JSON",
+          "code": "import pandas as pd\nfrom io import StringIO\ns=StringIO('[{\"name\":\"Ari\",\"score\":8},{\"name\":\"Bea\",\"score\":9}]')\ndf=pd.read_json(s)\nprint(df.score.tolist())",
+          "expectedOutput": "[8, 9]",
+          "explanation": "This deterministic example demonstrates records json. Compare the output with the expected result and inspect the resulting data structure."
+        },
+        {
+          "id": "py321-ex2",
+          "language": "en",
+          "title": "Column JSON",
+          "code": "import pandas as pd\nfrom io import StringIO\ns=StringIO('{\"score\":{\"0\":8,\"1\":9}}')\ndf=pd.read_json(s, orient='columns')\nprint(df.score.tolist())",
+          "expectedOutput": "[8, 9]",
+          "explanation": "This deterministic example demonstrates column json. Compare the output with the expected result and inspect the resulting data structure."
+        },
+        {
+          "id": "py321-ex3",
+          "language": "en",
+          "title": "JSON lines",
+          "code": "import pandas as pd\nfrom io import StringIO\ns=StringIO('{\"id\":1}\\n{\"id\":2}')\ndf=pd.read_json(s, lines=True)\nprint(df.id.tolist())",
+          "expectedOutput": "[1, 2]",
+          "explanation": "This deterministic example demonstrates json lines. Compare the output with the expected result and inspect the resulting data structure."
+        },
+        {
+          "id": "py321-ex4",
+          "language": "en",
+          "title": "Flatten nested records",
+          "code": "import pandas as pd\nrows=[{'id':1,'profile':{'city':'Kakinada'}},{'id':2,'profile':{'city':'Vizag'}}]\ndf=pd.json_normalize(rows)\nprint(df['profile.city'].tolist())",
+          "expectedOutput": "['Kakinada', 'Vizag']",
+          "explanation": "This deterministic example demonstrates flatten nested records. Compare the output with the expected result and inspect the resulting data structure."
+        },
+        {
+          "id": "py321-ex5",
+          "language": "en",
+          "title": "Check required columns",
+          "code": "import pandas as pd\nfrom io import StringIO\ns=StringIO('[{\"id\":1,\"score\":8}]')\ndf=pd.read_json(s)\nprint({'id','score'}.issubset(df.columns), len(df))",
+          "expectedOutput": "True 1",
+          "explanation": "This deterministic example demonstrates check required columns. Compare the output with the expected result and inspect the resulting data structure."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a small DataFrame and complete a task related to reading json data with pandas. Print the result and verify its schema, row count and data types.",
+      "independentTask": "Build a mini workflow with synthetic records. Include an edge case such as malformed input, an unmatched key, an ambiguous date or a downstream export requirement, then validate the expected result.",
+      "hints": [
+        "Start with a small in-memory dataset.",
+        "Inspect columns, index and dtypes before transforming.",
+        "Make parsing, join type, time frequency or export orientation explicit.",
+        "Check row counts and duplicate keys.",
+        "Validate serialized output or read it back when practical."
+      ],
+      "challenge": "Add an invalid or unmatched record, handle it deliberately, and write assertions for the expected schema and row count.",
+      "validationCriteria": [
+        "All five examples execute in the pinned Pandas environment.",
+        "The selected API and parameters match the input structure.",
+        "Output schema, row count and data types are checked.",
+        "At least one edge case is handled explicitly.",
+        "Assumptions and potential data-loss risks are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py321-q1",
+        "prompt": "Which approach is appropriate for this topic?",
+        "answer": "Choose Pandas operations and parameters that match the input structure and required output.",
+        "options": [
+          "Use one fixed option for every dataset.",
+          "Choose Pandas operations and parameters that match the input structure and required output.",
+          "Drop every column before processing.",
+          "Assume all indexes and keys are unique."
+        ],
+        "explanation": "The operation must match the input structure and its result should be checked against explicit expectations."
+      },
+      {
+        "id": "py321-q2",
+        "prompt": "Why inspect a DataFrame after transformation?",
+        "answer": "To verify its schema, row count, data types and missing values.",
+        "options": [
+          "To guarantee correctness without tests.",
+          "To verify its schema, row count, data types and missing values.",
+          "To automatically repair every source-data problem.",
+          "To hide unmatched records."
+        ],
+        "explanation": "The operation must match the input structure and its result should be checked against explicit expectations."
+      },
+      {
+        "id": "py321-q3",
+        "prompt": "What is a reliable first step when importing structured data?",
+        "answer": "Inspect the source format and select parsing options deliberately.",
+        "options": [
+          "Assume every JSON document has the same orientation.",
+          "Inspect the source format and select parsing options deliberately.",
+          "Convert every field to text immediately.",
+          "Discard nested fields without review."
+        ],
+        "explanation": "The operation must match the input structure and its result should be checked against explicit expectations."
+      },
+      {
+        "id": "py321-q4",
+        "prompt": "What can happen when duplicate join keys exist on both sides of a merge?",
+        "answer": "A many-to-many merge can multiply matching rows.",
+        "options": [
+          "The result is always empty.",
+          "A many-to-many merge can multiply matching rows.",
+          "Pandas automatically makes every key unique.",
+          "The input DataFrames are deleted."
+        ],
+        "explanation": "The operation must match the input structure and its result should be checked against explicit expectations."
+      },
+      {
+        "id": "py321-q5",
+        "prompt": "Which practice makes exported or transformed data more reliable?",
+        "answer": "Validate the output schema, row count and representation.",
+        "options": [
+          "Rely on defaults without checking the consumer.",
+          "Validate the output schema, row count and representation.",
+          "Assume every date format is universal.",
+          "Export only the first row."
+        ],
+        "explanation": "The operation must match the input structure and its result should be checked against explicit expectations."
+      }
+    ]
+  },
+  "status": "draft"
+}
