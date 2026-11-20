@@ -8,7 +8,7 @@ Reference: [W3Schools Python Syllabus](https://www.w3schools.com/python/python_s
 - Curriculum index: **284 English Python lesson entries** across PY1–PY34.
 - Source inventory: reconciled to **284 Python rows**, including PY8.9 list methods, PY9.7 tuple methods, PY11.8 frozenset and PY15.9 file deletion.
 - Progress tracker: reconciled to **284 Python rows**.
-- Five worked examples and five topic-specific MCQs are the authoring target per lesson (1,420 expected at five examples and five MCQs per lesson, plus additional examples and questions added to selected OOP lessons); CI execution is the authority for validated counts.
+- Five worked examples and five topic-specific MCQs are the authoring target per lesson (1,427 expected across the current lessons, including additional examples and questions in selected lessons); CI execution is the authority for validated counts.
 - All lessons remain draft. Telugu translation and lesson-renderer/playground integration remain pending.
 
 ## W3Schools 8-chapter / 45-module mapping
@@ -76,7 +76,8 @@ The following explicit W3Schools page-level items were identified during the sub
 
 - File deletion: PY15.9 covers os.remove(), Path.unlink(), os.rmdir() and Path.rmdir() using temporary-directory examples.
 - Tuple methods: PY9.7 covers count(), index(), bounded searches and ValueError handling.
-- Set immutability: PY11.8 covers frozenset creation, operations and hashability.
+- Set immutability and copying: PY11.8 covers frozenset creation, operations and hashability; PY11.6 also covers copy().
+- Dictionary construction: PY10.4 covers dict.fromkeys() in addition to setdefault() and update().
 - List methods: PY8.9 covers count(), bounded index() and in-place reverse().
 - Magic methods: PY26.6 covers __str__, __repr__, __eq__, __add__, __len__, __lt__, __contains__ and __call__.
 - Class object/method deletion: PY26.2 and PY26.5 explain del name-binding and method-attribute deletion accurately.
