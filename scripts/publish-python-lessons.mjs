@@ -3,7 +3,7 @@ import { join } from "node:path";
 import assert from "node:assert/strict";
 
 const directory = "public/content/en/python";
-const files = (await readdir(directory)).filter(name => /^PY\\d+\\.\\d+\\.json$/.test(name)).sort();
+const files = (await readdir(directory)).filter(name => name.startsWith("PY") && name.endsWith(".json")).sort();
 assert.equal(files.length, 284, "Expected exactly 284 indexed English Python lesson files");
 
 let changed = 0;
