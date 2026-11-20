@@ -76,7 +76,7 @@ The following explicit W3Schools page-level items were identified during the sub
 
 - File deletion: PY15.9 covers os.remove(), Path.unlink(), os.rmdir() and Path.rmdir() using temporary-directory examples.
 - Tuple methods: PY9.7 covers count(), index(), bounded searches and ValueError handling.
-- Set immutability and copying: PY11.8 covers frozenset creation, operations and hashability; PY11.6 also covers copy().
+- Set immutability and copying: PY11.8 covers frozenset creation, operations and hashability; PY11.6 covers copy(), symmetric_difference() and symmetric_difference_update().
 - Dictionary construction: PY10.4 covers dict.fromkeys() in addition to setdefault() and update().
 - List methods: PY8.9 covers count(), bounded index() and in-place reverse().
 - Magic methods: PY26.6 covers __str__, __repr__, __eq__, __add__, __len__, __lt__, __contains__ and __call__.
