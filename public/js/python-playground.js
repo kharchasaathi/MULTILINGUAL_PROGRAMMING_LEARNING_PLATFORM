@@ -163,5 +163,24 @@
     clearTimeout(watchdog);
     if (worker) worker.terminate();
   });
+  async function loadLinkedLessonExample() {
+    const params = new URLSearchParams(window.location.search);
+    const topicId = params.get("topic");
+    if (!topicId || !/^PY\\d+\\.\\d+$/.test(topicId)) return;
+    try {
+      const response = await fetch("/content/en/python/" + topicId + ".json", { cache: "no-cache" });
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      const lesson = await response.json();
+      if (lesson.courseId !== "python" || lesson.topicId !== topicId) throw new Error("Lesson identity mismatch");
+      const example = lesson.stages?.explain?.examples?.[0];
+      if (typeof example?.code !== "string" || !example.code.trim()) throw new Error("No runnable lesson example is available");
+      editor.value = example.code;
+      runState.textContent = topicId + " example loaded";
+      document.title = topicId + " Python Playground — CodeSaathi";
+    } catch (error) {
+      appendOutput("Could not load the lesson example: " + error.message, "system");
+    }
+  }
+  loadLinkedLessonExample();
   bootWorker();
 })();
