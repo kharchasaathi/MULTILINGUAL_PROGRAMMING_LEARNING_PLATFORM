@@ -5,10 +5,10 @@ Reference: [W3Schools Python Syllabus](https://www.w3schools.com/python/python_s
 
 ## Baseline
 
-- Curriculum index: **280 English Python lesson entries** across PY1–PY33.
-- Source inventory: reconciled to **280 Python rows** by adding the previously missing PY31–PY33 entries.
-- Progress tracker: reconciled to **280 Python rows**.
-- Five worked examples and five topic-specific MCQs are the authoring target per lesson (1,400 expected each at this baseline); CI execution is the authority for validated counts.
+- Curriculum index: **281 English Python lesson entries** across PY1–PY34.
+- Source inventory: reconciled to **281 Python rows**, including the newly added PY15.9 file-deletion lesson.
+- Progress tracker: reconciled to **281 Python rows**.
+- Five worked examples and five topic-specific MCQs are the authoring target per lesson (1,405 expected each at this baseline); CI execution is the authority for validated counts.
 - All lessons remain draft. Telugu translation and lesson-renderer/playground integration remain pending.
 
 ## W3Schools 8-chapter / 45-module mapping
@@ -51,12 +51,12 @@ Reference: [W3Schools Python Syllabus](https://www.w3schools.com/python/python_s
 | 7 Errors, input and files | Python Try...Except | PY14 | Mapped; subtopic review pending |
 | 7 Errors, input and files | Python User Input | PY2 | Mapped; subtopic review pending |
 | 7 Errors, input and files | Python String Formatting | PY12.5 | Mapped; subtopic review pending |
-| 7 Errors, input and files | Python File Handling | PY15 | Mapped; subtopic review pending |
+| 7 Errors, input and files | Python File Handling | PY15.1–PY15.9 | File read/write/CSV/JSON and Delete Files mapped; detailed subtopic review pending |
 | 8 Data science and web libraries | Python NumPy | PY29–PY31; related PY25 coverage | Mapped; subtopic review pending |
 | 8 Data science and web libraries | Python Pandas | PY25; PY32 | Mapped; subtopic review pending |
-| 8 Data science and web libraries | Python SciPy | PY33 | Mapped; dependency-backed CI verification pending |
+| 8 Data science and web libraries | Python SciPy | PY33 | Mapped; pinned-dependency example execution passed in Python CI |
 | 8 Data science and web libraries | Python Django | Separate Django Tutorial tab/course | Not authored yet |
-| 8 Data science and web libraries | Python Matplotlib | PY25.7; PY28; PY34.1–PY34.10 | **Core W3Schools sequence now authored; CI/content review pending** |
+| 8 Data science and web libraries | Python Matplotlib | PY25.7; PY28; PY34.1–PY34.10 | **Core sequence authored; pinned-dependency example execution passed in Python CI** |
 | 8 Data science and web libraries | Python Machine Learning | Separate Machine Learning Tutorial tab/course | Not authored yet |
 | 8 Data science and web libraries | Python MySQL | Separate MySQL Tutorial tab/course; Python connector integration | Not authored yet |
 | 8 Data science and web libraries | Python MongoDB | Separate MongoDB Tutorial tab/course; Python driver integration | Not authored yet |
@@ -80,4 +80,4 @@ W3Schools also lists Django, MySQL, MongoDB and Machine Learning as distinct tut
 
 ## Important counting rule
 
-The 270 figure is the current indexed English lesson count, **not** a percentage-complete claim. A defensible overall percentage requires the page/subtopic inventory to be fully enumerated, deduplicated and mapped. The 45-module W3Schools syllabus and its deeper page subtopics must not be treated as 45 lessons.
+The 281 figure is the current indexed English lesson count, **not** a percentage-complete claim. A defensible overall percentage requires the page/subtopic inventory to be fully enumerated, deduplicated and mapped. The 45-module W3Schools syllabus and its deeper page subtopics must not be treated as 45 lessons.
