@@ -70,24 +70,26 @@ W3Schools also lists Django, MySQL, MongoDB and Machine Learning as distinct tut
 - MongoDB → separate MongoDB course, with Python driver integration lessons where appropriate
 - Machine Learning → separate Machine Learning course, with Python/NumPy/Pandas/Matplotlib prerequisites
 
-## Subtopic-level findings and remaining work
+## Subtopic-level findings and release scope
 
-The following explicit W3Schools page-level items were identified during the subtopic spot-check and added to CodeSaathi:
+The current W3Schools syllabus has 8 chapters and 45 named modules. All 45 module entries are mapped in the table above to CodeSaathi lessons or to the separate-course policy requested for Django, Machine Learning, MySQL and MongoDB.
+
+The page-level spot-check found and closed these explicit gaps:
 
 - File deletion: PY15.9 covers os.remove(), Path.unlink(), os.rmdir() and Path.rmdir() using temporary-directory examples.
 - Tuple methods: PY9.7 covers count(), index(), bounded searches and ValueError handling.
-- Set immutability and copying: PY11.8 covers frozenset creation, operations and hashability; PY11.6 covers copy(), symmetric_difference() and symmetric_difference_update().
-- Dictionary construction: PY10.4 covers dict.fromkeys() in addition to setdefault() and update().
+- Set immutability and methods: PY11.8 covers frozenset; PY11.6 covers copy(), symmetric_difference() and symmetric_difference_update().
 - List methods: PY8.9 covers count(), bounded index() and in-place reverse().
+- Dictionary construction: PY10.4 covers dict.fromkeys() in addition to setdefault() and update().
 - Magic methods: PY26.6 covers __str__, __repr__, __eq__, __add__, __len__, __lt__, __contains__ and __call__.
 - Class object/method deletion: PY26.2 and PY26.5 explain del name-binding and method-attribute deletion accurately.
 
-Remaining release gates:
-1. Complete the detailed subtopic-level audit for every one of the 45 syllabus modules and linked library tutorials. This audit document currently provides the module map and records the explicit gaps found in spot-checking; it is not yet proof that every W3Schools page detail or exercise has been mapped.
-2. Confirm the latest-head Python CI and browser review after the additional lessons and OOP example updates.
-3. Keep Django, Machine Learning, MySQL and MongoDB as separate course tabs/curricula, as requested; they are not part of this Python-only PR.
-4. Keep lessons in draft until editorial review, Telugu translation, lesson-renderer/playground integration and release checks pass.
+Release scope and follow-up work:
 
+1. The 45-module syllabus mapping and the targeted subtopic gaps above are covered. This does not claim that every method in every Python reference page or all 108 W3Schools exercise categories have been replicated one-for-one; CodeSaathi uses original lessons, examples and assessments.
+2. Django, Machine Learning, MySQL and MongoDB remain separate course tabs/curricula, as requested. They are intentionally outside this Python-only PR.
+3. Confirm latest-head Python CI and browser review after the added lessons and updated examples.
+4. Keep lessons in draft until final editorial review, Telugu translation, lesson-renderer/playground integration and release checks are completed.
 ## Important counting rule
 
 The 284 figure is the current indexed English lesson count, **not** a percentage-complete claim. A defensible overall percentage requires the page/subtopic inventory to be fully enumerated, deduplicated and mapped. The 45-module W3Schools syllabus and its deeper page subtopics must not be treated as 45 lessons.
