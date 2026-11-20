@@ -1,0 +1,169 @@
+{
+  "id": "python.py21.14.en",
+  "courseId": "python",
+  "moduleId": "PY21",
+  "topicId": "PY21.14",
+  "title": "Application Logging with Python logging",
+  "language": "en",
+  "learningObjectives": [
+    "Explain loggers, levels, handlers, formatters, exception logging and safe messages.",
+    "Select a suitable testing or code-quality technique for PY21.14.",
+    "Interpret test, diagnostic and quality-tool output correctly.",
+    "Identify limitations and risks when applying PY21.14.",
+    "Apply PY21.14 concepts in a maintainable Python workflow."
+  ],
+  "prerequisites": [
+    "PY8.1",
+    "PY11.1",
+    "PY14.1",
+    "PY20.1",
+    "PY21.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "The logging module records diagnostic events with severity levels and configurable destinations. A logger creates records, a handler sends them to a destination and a formatter controls their presentation. Levels include DEBUG, INFO, WARNING, ERROR and CRITICAL. Logging is preferable to scattered print statements for applications that need configurable diagnostics.",
+      "whyItMatters": "Structured, appropriately levelled logs help developers understand application behaviour without exposing sensitive information or changing program output.",
+      "analogy": "Logging is a flight recorder that records important events with a level and context for later investigation.",
+      "analogyLimit": "Logs can expose sensitive data and create storage or performance costs; choose fields and levels carefully and configure retention.",
+      "summary": "Application Logging with Python logging develops reliable testing and code-quality skills for Python projects."
+    },
+    "explain": {
+      "narrative": "## Configure useful logs\nUse `logging.getLogger(__name__)` to obtain a named logger. Configure handlers and formatters at the application boundary, not repeatedly inside reusable library functions. Use DEBUG for detailed diagnostic information, INFO for normal milestones, WARNING for unexpected but recoverable conditions, ERROR for failures and CRITICAL for severe problems.\n\nUse parameterized logging such as `logger.info('Loaded %s records', count)`. Avoid logging passwords, tokens, personal information or complete secret-bearing objects. `logger.exception()` records exception details when called inside an exception handler.",
+      "examples": [
+        {
+          "id": "py2114-ex1",
+          "language": "en",
+          "title": "Capture a simple log message",
+          "code": "import io, logging\nstream = io.StringIO()\nlogger = logging.getLogger('codesaathi_py2114_capture')\nlogger.handlers.clear(); logger.propagate = False; logger.setLevel(logging.INFO)\nhandler = logging.StreamHandler(stream); logger.addHandler(handler)\nlogger.info('service ready')\nprint(stream.getvalue().strip())",
+          "expectedOutput": "service ready",
+          "explanation": "A stream handler sends formatted log records to the configured stream."
+        },
+        {
+          "id": "py2114-ex2",
+          "language": "en",
+          "title": "List standard logging levels",
+          "code": "import logging\nlevels = [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR, logging.CRITICAL]\nprint([logging.getLevelName(level) for level in levels])",
+          "expectedOutput": "['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']",
+          "explanation": "Logging levels indicate the severity of an event."
+        },
+        {
+          "id": "py2114-ex3",
+          "language": "en",
+          "title": "Use parameterized logging",
+          "code": "import io, logging\nstream = io.StringIO()\nlogger = logging.getLogger('codesaathi_py2114_parameterized')\nlogger.handlers.clear(); logger.propagate = False; logger.setLevel(logging.INFO)\nlogger.addHandler(logging.StreamHandler(stream))\nlogger.info('Loaded %s records', 4)\nprint(stream.getvalue().strip())",
+          "expectedOutput": "Loaded 4 records",
+          "explanation": "Parameterized messages defer interpolation until the record is processed."
+        },
+        {
+          "id": "py2114-ex4",
+          "language": "en",
+          "title": "Capture an exception class in a log",
+          "code": "import io, logging\nstream = io.StringIO()\nlogger = logging.getLogger('codesaathi_py2114_exception')\nlogger.handlers.clear(); logger.propagate = False; logger.setLevel(logging.ERROR)\nlogger.addHandler(logging.StreamHandler(stream))\ntry:\n    1 / 0\nexcept ZeroDivisionError:\n    logger.exception('calculation failed')\nprint('ZeroDivisionError' in stream.getvalue())",
+          "expectedOutput": "True",
+          "explanation": "logger.exception includes exception information when called inside an exception handler."
+        },
+        {
+          "id": "py2114-ex5",
+          "language": "en",
+          "title": "Check logger and handler types",
+          "code": "import logging\nlogger = logging.getLogger('codesaathi_py2114_types')\nhandler = logging.NullHandler()\nprint(type(logger).__name__, type(handler).__name__)",
+          "expectedOutput": "Logger NullHandler",
+          "explanation": "A logger creates records and a handler determines how they are handled."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Configure a logger with a StringIO stream handler and formatter. Emit one INFO and one WARNING message, then inspect the captured output.",
+      "independentTask": "Design a logging policy for a small service with level choices, message fields, retention and secret-redaction rules.",
+      "hints": [
+        "Use getLogger to obtain a named logger.",
+        "Handlers decide where log records go.",
+        "Formatters control the displayed record layout.",
+        "Choose a level that matches event severity.",
+        "Never log passwords, tokens or sensitive personal data."
+      ],
+      "challenge": "Create a safe logging design for a user-registration service that supports debugging while redacting credentials and limiting unnecessary personal data.",
+      "validationCriteria": [
+        "The testing or quality objective is clearly stated.",
+        "Examples execute with the documented output.",
+        "Test setup, cleanup and dependency boundaries are accurate.",
+        "Tool limitations and appropriate use cases are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2114-q1",
+        "prompt": "Which module provides Python's standard logging framework?",
+        "answer": "logging",
+        "options": [
+          "logging",
+          "print",
+          "logging",
+          "traceback only",
+          "pdb"
+        ],
+        "explanation": "The logging module provides configurable application logging."
+      },
+      {
+        "id": "py2114-q2",
+        "prompt": "What does a handler determine?",
+        "answer": "Where log records are sent",
+        "options": [
+          "Where log records are sent",
+          "Where log records are sent",
+          "The Python syntax version",
+          "Which tests are discovered",
+          "Which package is installed"
+        ],
+        "explanation": "Handlers route records to streams, files or other destinations."
+      },
+      {
+        "id": "py2114-q3",
+        "prompt": "Which level is generally more severe than WARNING?",
+        "answer": "ERROR",
+        "options": [
+          "ERROR",
+          "DEBUG",
+          "INFO",
+          "ERROR",
+          "NOTSET"
+        ],
+        "explanation": "ERROR represents a more severe event than WARNING."
+      },
+      {
+        "id": "py2114-q4",
+        "prompt": "Why use parameterized logging messages?",
+        "answer": "They defer formatting and support structured message arguments",
+        "options": [
+          "They defer formatting and support structured message arguments",
+          "They disable log levels",
+          "They defer formatting and support structured message arguments",
+          "They automatically redact every secret",
+          "They replace exception handling"
+        ],
+        "explanation": "Parameterized logging avoids unnecessary interpolation when a message is filtered."
+      },
+      {
+        "id": "py2114-q5",
+        "prompt": "What should not be written to logs?",
+        "answer": "Passwords and access tokens",
+        "options": [
+          "Passwords and access tokens",
+          "A non-sensitive event count",
+          "Passwords and access tokens",
+          "A generic service status",
+          "A test run identifier"
+        ],
+        "explanation": "Credentials and other sensitive data should not be logged."
+      }
+    ]
+  },
+  "status": "draft"
+}
