@@ -1,0 +1,168 @@
+{
+  "id": "python.py22.2.en",
+  "courseId": "python",
+  "moduleId": "PY22",
+  "topicId": "PY22.2",
+  "title": "Generators and the yield Statement",
+  "language": "en",
+  "learningObjectives": [
+    "Explain generator functions, yield, lazy evaluation and generator state.",
+    "Select a suitable advanced Python technique for PY22.2.",
+    "Interpret iterator and callable behaviour correctly.",
+    "Identify limitations and risks when applying PY22.2.",
+    "Apply PY22.2 concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY8.1",
+    "PY11.1",
+    "PY14.1",
+    "PY21.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A generator function contains yield and returns a generator object when called. Each next request runs the function until its next yield, preserving local state between requests. Generators produce values lazily, which can reduce memory use when processing large or unbounded sequences.",
+      "whyItMatters": "Generators make it practical to process streams and large datasets without building every result in memory at once.",
+      "analogy": "A generator is a cook who prepares one dish whenever the next order arrives rather than preparing the entire menu in advance.",
+      "analogyLimit": "A generator is usually single-use and its body does not run until values are requested; side effects therefore occur during iteration.",
+      "summary": "Generators and the yield Statement develops advanced Python programming skills."
+    },
+    "explain": {
+      "narrative": "## Produce values on demand\nA function with `yield` is a generator function. Calling it creates a generator; execution begins when iteration requests a value. `yield` pauses the function and preserves local variables. A generator can use a loop to produce a sequence without storing the entire sequence in a list.\n\nUse `yield` for streaming transformations and potentially large sequences. Convert to a list only when the complete result is small and needs to be retained. Remember that a generator is consumed as it is iterated.",
+      "examples": [
+        {
+          "id": "py222-ex1",
+          "language": "en",
+          "title": "Create a generator function",
+          "code": "def count_up_to(limit):\n    for number in range(limit):\n        yield number\nprint(list(count_up_to(4)))",
+          "expectedOutput": "[0, 1, 2, 3]",
+          "explanation": "yield pauses the function and supplies one value at a time."
+        },
+        {
+          "id": "py222-ex2",
+          "language": "en",
+          "title": "Observe lazy execution",
+          "code": "def values():\n    print('started')\n    yield 7\ngenerator = values()\nprint('created')\nprint(next(generator))",
+          "expectedOutput": "created\nstarted\n7",
+          "explanation": "The generator body starts only when a value is requested."
+        },
+        {
+          "id": "py222-ex3",
+          "language": "en",
+          "title": "Preserve generator local state",
+          "code": "def pair():\n    current = 1\n    yield current\n    current += 1\n    yield current\ng = pair()\nprint(next(g), next(g))",
+          "expectedOutput": "1 2",
+          "explanation": "Execution resumes after the previous yield with local variables preserved."
+        },
+        {
+          "id": "py222-ex4",
+          "language": "en",
+          "title": "Use a generator expression",
+          "code": "squares = (number * number for number in range(4))\nprint(next(squares), next(squares))",
+          "expectedOutput": "0 1",
+          "explanation": "A generator expression lazily yields values from an expression."
+        },
+        {
+          "id": "py222-ex5",
+          "language": "en",
+          "title": "Stop after generator exhaustion",
+          "code": "g = (x for x in [5])\nprint(next(g))\ntry:\n    next(g)\nexcept StopIteration:\n    print('done')",
+          "expectedOutput": "5\ndone",
+          "explanation": "A generator signals completion through StopIteration."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Write a generator that yields the squares of integers from zero up to a supplied limit. Consume it once with a for loop and once after converting a fresh generator to a list.",
+      "independentTask": "Compare a list-producing function and a generator for a large sequence, including memory and reuse trade-offs.",
+      "hints": [
+        "A generator function contains yield.",
+        "Calling it returns a generator object.",
+        "Execution advances when next is called.",
+        "Local state is preserved between yields.",
+        "A consumed generator does not automatically restart."
+      ],
+      "challenge": "Create a generator that reads records from a source one at a time, filters invalid records and yields normalized values without storing all records.",
+      "validationCriteria": [
+        "The advanced Python concept is accurately explained.",
+        "Examples execute with the documented output.",
+        "Iterator, scope or callable behaviour is correct.",
+        "Limitations and suitable use cases are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py222-q1",
+        "prompt": "What does calling a generator function return?",
+        "answer": "A generator object",
+        "options": [
+          "A generator object",
+          "A completed list",
+          "A generator object",
+          "A tuple",
+          "A coroutine always"
+        ],
+        "explanation": "Calling a generator function creates a generator object without running its body to completion."
+      },
+      {
+        "id": "py222-q2",
+        "prompt": "What does yield do?",
+        "answer": "Produces a value and suspends generator execution",
+        "options": [
+          "Produces a value and suspends generator execution",
+          "Deletes local variables",
+          "Produces a value and suspends generator execution",
+          "Ends the Python process",
+          "Creates a new thread"
+        ],
+        "explanation": "yield returns a value while preserving execution state."
+      },
+      {
+        "id": "py222-q3",
+        "prompt": "When does a generator function body begin executing?",
+        "answer": "When iteration requests a value",
+        "options": [
+          "When iteration requests a value",
+          "When the function is defined",
+          "When iteration requests a value",
+          "When Python starts",
+          "When the file is imported in every case"
+        ],
+        "explanation": "The generator body runs as next or iteration requests values."
+      },
+      {
+        "id": "py222-q4",
+        "prompt": "Why are generators useful for large streams?",
+        "answer": "They can produce values lazily without storing all results",
+        "options": [
+          "They can produce values lazily without storing all results",
+          "They always run in parallel",
+          "They can produce values lazily without storing all results",
+          "They automatically cache every value",
+          "They remove exceptions"
+        ],
+        "explanation": "Lazy production can reduce memory usage."
+      },
+      {
+        "id": "py222-q5",
+        "prompt": "What happens after a generator is exhausted?",
+        "answer": "It remains exhausted",
+        "options": [
+          "It remains exhausted",
+          "It restarts from the beginning",
+          "It remains exhausted",
+          "It returns its last value forever",
+          "It becomes a list"
+        ],
+        "explanation": "A completed generator does not automatically restart."
+      }
+    ]
+  },
+  "status": "draft"
+}
