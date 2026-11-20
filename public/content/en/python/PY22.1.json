@@ -1,0 +1,168 @@
+{
+  "id": "python.py22.1.en",
+  "courseId": "python",
+  "moduleId": "PY22",
+  "topicId": "PY22.1",
+  "title": "Python Iterators and the Iterator Protocol",
+  "language": "en",
+  "learningObjectives": [
+    "Explain iterables, iterators, __iter__, __next__ and StopIteration.",
+    "Select a suitable advanced Python technique for PY22.1.",
+    "Interpret iterator and callable behaviour correctly.",
+    "Identify limitations and risks when applying PY22.1.",
+    "Apply PY22.1 concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY8.1",
+    "PY11.1",
+    "PY14.1",
+    "PY21.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "An iterable is an object from which an iterator can be created. An iterator returns itself from __iter__ and produces values through __next__. When no values remain, __next__ raises StopIteration. A for loop obtains an iterator and handles this stopping condition automatically.",
+      "whyItMatters": "Understanding the iterator protocol explains how loops, collections and lazy data pipelines work in Python.",
+      "analogy": "An iterator is a ticket dispenser that provides one item at a time until the supply is empty.",
+      "analogyLimit": "A one-pass iterator is consumed as it advances; create a new iterator when a second traversal is required.",
+      "summary": "Python Iterators and the Iterator Protocol develops advanced Python programming skills."
+    },
+    "explain": {
+      "narrative": "## Iterable versus iterator\nLists, tuples, strings and dictionaries are iterable. Calling `iter(value)` obtains an iterator, and `next(iterator)` requests the next value. Iterators are stateful and usually move forward only. A custom iterator implements `__iter__()` and `__next__()` and raises `StopIteration` when exhausted.\n\nA for loop performs this protocol for you. Prefer standard iterables and generators unless a custom iterator provides a clear benefit. Avoid manually calling next without handling exhaustion when the number of values is not known.",
+      "examples": [
+        {
+          "id": "py221-ex1",
+          "language": "en",
+          "title": "Obtain an iterator from a list",
+          "code": "values = [10, 20]\niterator = iter(values)\nprint(next(iterator), next(iterator))",
+          "expectedOutput": "10 20",
+          "explanation": "iter creates an iterator and next retrieves items in order."
+        },
+        {
+          "id": "py221-ex2",
+          "language": "en",
+          "title": "Observe iterator exhaustion",
+          "code": "items = iter([1])\nprint(next(items))\ntry:\n    next(items)\nexcept StopIteration:\n    print('finished')",
+          "expectedOutput": "1\nfinished",
+          "explanation": "An exhausted iterator signals completion with StopIteration."
+        },
+        {
+          "id": "py221-ex3",
+          "language": "en",
+          "title": "Check an iterator protocol method",
+          "code": "iterator = iter((3, 4))\nprint(iter(iterator) is iterator)",
+          "expectedOutput": "True",
+          "explanation": "An iterator's __iter__ method returns the iterator itself."
+        },
+        {
+          "id": "py221-ex4",
+          "language": "en",
+          "title": "Consume an iterator with a loop",
+          "code": "iterator = iter('cat')\nprint(''.join(letter.upper() for letter in iterator))",
+          "expectedOutput": "CAT",
+          "explanation": "A for loop or generator expression consumes iterator values sequentially."
+        },
+        {
+          "id": "py221-ex5",
+          "language": "en",
+          "title": "Build a minimal custom iterator",
+          "code": "class CountTwo:\n    def __init__(self): self.value = 0\n    def __iter__(self): return self\n    def __next__(self):\n        if self.value == 2: raise StopIteration\n        self.value += 1\n        return self.value\nprint(list(CountTwo()))",
+          "expectedOutput": "[1, 2]",
+          "explanation": "The custom class implements both required iterator methods."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a custom iterator that returns a short sequence of values and raises StopIteration after the final value. Then consume it with a for loop.",
+      "independentTask": "Explain the difference between an iterable and an iterator using a list, an iterator created from that list and a custom iterator.",
+      "hints": [
+        "iter() obtains an iterator from an iterable.",
+        "next() requests the next item.",
+        "An iterator returns itself from __iter__.",
+        "Raise StopIteration when no items remain.",
+        "An iterator may be exhausted after one traversal."
+      ],
+      "challenge": "Implement an iterator over a range of values with a configurable step and test empty, single-item and exhausted cases.",
+      "validationCriteria": [
+        "The advanced Python concept is accurately explained.",
+        "Examples execute with the documented output.",
+        "Iterator, scope or callable behaviour is correct.",
+        "Limitations and suitable use cases are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py221-q1",
+        "prompt": "What does iter() return for an iterable?",
+        "answer": "An iterator",
+        "options": [
+          "An iterator",
+          "A list copy",
+          "An iterator",
+          "A generator function",
+          "A file handle"
+        ],
+        "explanation": "iter obtains an iterator from an iterable object."
+      },
+      {
+        "id": "py221-q2",
+        "prompt": "Which exception signals that an iterator has no more values?",
+        "answer": "StopIteration",
+        "options": [
+          "StopIteration",
+          "ValueError",
+          "StopIteration",
+          "IndexError",
+          "RuntimeError"
+        ],
+        "explanation": "StopIteration tells iteration machinery that the iterator is exhausted."
+      },
+      {
+        "id": "py221-q3",
+        "prompt": "What should an iterator's __iter__ method return?",
+        "answer": "The iterator itself",
+        "options": [
+          "The iterator itself",
+          "A new list every time",
+          "The iterator itself",
+          "None",
+          "A string"
+        ],
+        "explanation": "The iterator protocol requires __iter__ to return an iterator."
+      },
+      {
+        "id": "py221-q4",
+        "prompt": "Are all iterables iterators?",
+        "answer": "No",
+        "options": [
+          "No",
+          "Yes",
+          "No",
+          "Only strings",
+          "Only dictionaries"
+        ],
+        "explanation": "An iterable can produce an iterator; it need not itself implement the iterator state protocol."
+      },
+      {
+        "id": "py221-q5",
+        "prompt": "What happens when next() is called on an exhausted iterator?",
+        "answer": "It raises StopIteration",
+        "options": [
+          "It raises StopIteration",
+          "It restarts automatically",
+          "It raises StopIteration",
+          "It returns the first item",
+          "It returns False"
+        ],
+        "explanation": "Exhausted iterators continue to raise StopIteration."
+      }
+    ]
+  },
+  "status": "draft"
+}
