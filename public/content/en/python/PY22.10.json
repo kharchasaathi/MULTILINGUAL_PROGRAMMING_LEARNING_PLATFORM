@@ -1,0 +1,169 @@
+{
+  "id": "python.py22.10.en",
+  "courseId": "python",
+  "moduleId": "PY22",
+  "topicId": "PY22.10",
+  "title": "asyncio Tasks, gather and Concurrent Coroutines",
+  "language": "en",
+  "learningObjectives": [
+    "Explain create_task, gather, task lifecycle and concurrent waiting.",
+    "Select a suitable concurrency or performance technique for PY22.10.",
+    "Interpret task, thread, process or profiling results correctly.",
+    "Identify limitations and risks when applying PY22.10.",
+    "Apply PY22.10 concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY8.1",
+    "PY11.1",
+    "PY14.1",
+    "PY21.7",
+    "PY22.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "asyncio tasks schedule coroutines to run concurrently on an event loop. create_task schedules a coroutine so it can progress while the current coroutine awaits. gather waits for multiple awaitables and collects their results. Concurrency here is cooperative: tasks share an event-loop thread and switch at await points.",
+      "whyItMatters": "Scheduling independent I/O tasks together can reduce total waiting time compared with awaiting each operation sequentially.",
+      "analogy": "A coordinator starts several requests and collects their replies as each request finishes, rather than waiting for each one before starting the next.",
+      "analogyLimit": "Tasks do not execute Python CPU instructions in parallel on one event-loop thread; cancellation and exceptions must be handled deliberately.",
+      "summary": "asyncio Tasks, gather and Concurrent Coroutines develops advanced concurrency and performance skills."
+    },
+    "explain": {
+      "narrative": "## Schedule independent work\nUse `asyncio.create_task(coro)` to schedule a coroutine to run soon. Await the task to obtain its result. `asyncio.gather()` runs multiple awaitables concurrently and returns results in input order. Tasks can be cancelled, and cancellation should generally be allowed to propagate after cleanup.\n\nAvoid creating unbounded numbers of tasks for huge input collections. Use a semaphore or bounded queue to limit concurrency when the service or system has finite capacity.",
+      "examples": [
+        {
+          "id": "py2210-ex1",
+          "language": "en",
+          "title": "Run two coroutines with gather",
+          "code": "import asyncio\nasync def value(number):\n    await asyncio.sleep(0)\n    return number\nasync def main():\n    return await asyncio.gather(value(2), value(3))\nprint(asyncio.run(main()))",
+          "expectedOutput": "[2, 3]",
+          "explanation": "gather schedules awaitables and returns their results in the supplied order."
+        },
+        {
+          "id": "py2210-ex2",
+          "language": "en",
+          "title": "Schedule a task explicitly",
+          "code": "import asyncio\nasync def work(): return 'finished'\nasync def main():\n    task = asyncio.create_task(work())\n    return await task\nprint(asyncio.run(main()))",
+          "expectedOutput": "finished",
+          "explanation": "create_task schedules a coroutine as a Task on the running event loop."
+        },
+        {
+          "id": "py2210-ex3",
+          "language": "en",
+          "title": "Inspect task completion",
+          "code": "import asyncio\nasync def main():\n    task = asyncio.create_task(asyncio.sleep(0))\n    await task\n    return task.done()\nprint(asyncio.run(main()))",
+          "expectedOutput": "True",
+          "explanation": "A task's done method reports whether it has completed."
+        },
+        {
+          "id": "py2210-ex4",
+          "language": "en",
+          "title": "Collect results in input order",
+          "code": "import asyncio\nasync def echo(value):\n    await asyncio.sleep(0)\n    return value\nasync def main(): return await asyncio.gather(echo('a'), echo('b'))\nprint(asyncio.run(main()))",
+          "expectedOutput": "['a', 'b']",
+          "explanation": "gather returns results in the order of the awaitables passed to it."
+        },
+        {
+          "id": "py2210-ex5",
+          "language": "en",
+          "title": "Limit concurrency with a semaphore",
+          "code": "import asyncio\nasync def main():\n    semaphore = asyncio.Semaphore(2)\n    async with semaphore:\n        return semaphore.locked()\nprint(asyncio.run(main()))",
+          "expectedOutput": "False",
+          "explanation": "A semaphore controls how many tasks may enter a protected section concurrently."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create two coroutines that await different short delays. Schedule them with create_task or gather and collect their results.",
+      "independentTask": "Design a bounded asynchronous request pattern that limits the number of simultaneous operations and handles cancellation.",
+      "hints": [
+        "create_task schedules a coroutine.",
+        "Await a task to retrieve its result.",
+        "gather waits for multiple awaitables.",
+        "Task concurrency is cooperative on the event loop.",
+        "Limit task creation for large workloads."
+      ],
+      "challenge": "Build a bounded asynchronous worker design with a maximum concurrency limit, cancellation handling and deterministic result collection.",
+      "validationCriteria": [
+        "The concurrency or performance concept is accurately explained.",
+        "Examples execute with the documented output.",
+        "Synchronization, scheduling or profiling behaviour is correct.",
+        "Limitations and appropriate use cases are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2210-q1",
+        "prompt": "What does asyncio.create_task do?",
+        "answer": "Schedules a coroutine as a Task",
+        "options": [
+          "Schedules a coroutine as a Task",
+          "Starts a process",
+          "Schedules a coroutine as a Task",
+          "Converts a coroutine to a list",
+          "Runs a shell command"
+        ],
+        "explanation": "create_task schedules the coroutine on the running event loop."
+      },
+      {
+        "id": "py2210-q2",
+        "prompt": "What does asyncio.gather return?",
+        "answer": "Results from multiple awaitables in input order",
+        "options": [
+          "Results from multiple awaitables in input order",
+          "Only the first result",
+          "Results from multiple awaitables in input order",
+          "A new operating system thread",
+          "A source-code string"
+        ],
+        "explanation": "gather collects results in the order of its awaitable arguments."
+      },
+      {
+        "id": "py2210-q3",
+        "prompt": "Does asyncio task concurrency imply parallel CPU execution?",
+        "answer": "No",
+        "options": [
+          "No",
+          "Yes",
+          "No",
+          "Only with gather",
+          "Only on Windows"
+        ],
+        "explanation": "Tasks on one event loop cooperate and do not execute Python CPU instructions in parallel."
+      },
+      {
+        "id": "py2210-q4",
+        "prompt": "What is a semaphore useful for?",
+        "answer": "Limiting simultaneous access to a resource",
+        "options": [
+          "Limiting simultaneous access to a resource",
+          "Formatting logs",
+          "Limiting simultaneous access to a resource",
+          "Parsing syntax",
+          "Caching function results"
+        ],
+        "explanation": "A semaphore limits how many tasks can enter a protected region at once."
+      },
+      {
+        "id": "py2210-q5",
+        "prompt": "What should a task's cancellation handling consider?",
+        "answer": "Cleanup and allowing cancellation to propagate appropriately",
+        "options": [
+          "Cleanup and allowing cancellation to propagate appropriately",
+          "Ignoring cancellation always",
+          "Cleanup and allowing cancellation to propagate appropriately",
+          "Restarting the interpreter",
+          "Converting cancellation to success"
+        ],
+        "explanation": "Cancellation should be handled deliberately so resources are cleaned up."
+      }
+    ]
+  },
+  "status": "draft"
+}
