@@ -1,0 +1,168 @@
+{
+  "id": "python.py22.5.en",
+  "courseId": "python",
+  "moduleId": "PY22",
+  "topicId": "PY22.5",
+  "title": "Closures and Enclosing Scope",
+  "language": "en",
+  "learningObjectives": [
+    "Explain nested functions, free variables, nonlocal and closure state.",
+    "Select a suitable advanced Python technique for PY22.5.",
+    "Interpret iterator and callable behaviour correctly.",
+    "Identify limitations and risks when applying PY22.5.",
+    "Apply PY22.5 concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY8.1",
+    "PY11.1",
+    "PY14.1",
+    "PY21.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A closure is a function that retains access to variables from its enclosing lexical scope after the outer function has returned. Nested functions can read enclosing variables; the nonlocal statement allows rebinding a variable in the nearest enclosing function scope. Closures can encapsulate small pieces of state without defining a class.",
+      "whyItMatters": "Closures support callbacks, function factories and decorators while keeping related state local to a returned function.",
+      "analogy": "A closure is a small toolbox that travels with a function, carrying the tools it needs from the place where it was created.",
+      "analogyLimit": "Hidden mutable closure state can make behaviour difficult to inspect; use a class when state and operations become extensive.",
+      "summary": "Closures and Enclosing Scope develops advanced Python programming skills."
+    },
+    "explain": {
+      "narrative": "## Retain state with closures\nA nested function can refer to variables in its enclosing function. When the nested function is returned, those referenced values remain available through the closure. Use `nonlocal` when the inner function must assign to a binding in an enclosing function scope. It is different from `global`, which refers to module-level names.\n\nClosures are useful for small function factories and callbacks. If the state model grows or needs several named operations, a class may be easier to understand and maintain.",
+      "examples": [
+        {
+          "id": "py225-ex1",
+          "language": "en",
+          "title": "Return a closure",
+          "code": "def make_greeter(name):\n    def greet(): return 'Hello ' + name\n    return greet\nhello = make_greeter('Ada')\nprint(hello())",
+          "expectedOutput": "Hello Ada",
+          "explanation": "The inner function retains access to name after make_greeter returns."
+        },
+        {
+          "id": "py225-ex2",
+          "language": "en",
+          "title": "Update an enclosing variable with nonlocal",
+          "code": "def make_counter():\n    count = 0\n    def increment():\n        nonlocal count\n        count += 1\n        return count\n    return increment\ncounter = make_counter()\nprint(counter(), counter())",
+          "expectedOutput": "1 2",
+          "explanation": "nonlocal allows the nested function to rebind the enclosing count variable."
+        },
+        {
+          "id": "py225-ex3",
+          "language": "en",
+          "title": "Create independent closure state",
+          "code": "def make_counter():\n    value = 0\n    def next_value():\n        nonlocal value\n        value += 1\n        return value\n    return next_value\na, b = make_counter(), make_counter()\nprint(a(), a(), b())",
+          "expectedOutput": "1 2 1",
+          "explanation": "Each call to make_counter creates a separate enclosing scope."
+        },
+        {
+          "id": "py225-ex4",
+          "language": "en",
+          "title": "Inspect closure variables",
+          "code": "def outer(value):\n    def inner(): return value\n    return inner\nfunction = outer(9)\nprint(function.__closure__[0].cell_contents)",
+          "expectedOutput": "9",
+          "explanation": "The closure cell retains the referenced enclosing value."
+        },
+        {
+          "id": "py225-ex5",
+          "language": "en",
+          "title": "Distinguish global and nonlocal keywords",
+          "code": "keywords = ['global', 'nonlocal']\nprint(', '.join(keywords))",
+          "expectedOutput": "global, nonlocal",
+          "explanation": "global targets module scope, while nonlocal targets an enclosing function scope."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a function factory that returns a counter function. Use nonlocal to update the counter and demonstrate that two counters maintain independent state.",
+      "independentTask": "Compare a closure-based counter with a class-based counter and explain when each design is clearer.",
+      "hints": [
+        "Nested functions can access enclosing variables.",
+        "Returned functions can retain enclosing state.",
+        "Use nonlocal to rebind an enclosing function variable.",
+        "global refers to module-level scope.",
+        "Use a class when state and operations grow complex."
+      ],
+      "challenge": "Implement a configurable function factory whose returned closure tracks calls and can be tested independently from another instance.",
+      "validationCriteria": [
+        "The advanced Python concept is accurately explained.",
+        "Examples execute with the documented output.",
+        "Iterator, scope or callable behaviour is correct.",
+        "Limitations and suitable use cases are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py225-q1",
+        "prompt": "What is a closure?",
+        "answer": "A function that retains access to enclosing-scope variables",
+        "options": [
+          "A function that retains access to enclosing-scope variables",
+          "A class with no methods",
+          "A function that retains access to enclosing-scope variables",
+          "A package installer",
+          "A Python syntax error"
+        ],
+        "explanation": "A closure retains referenced values from its enclosing lexical scope."
+      },
+      {
+        "id": "py225-q2",
+        "prompt": "What does nonlocal do?",
+        "answer": "Allows rebinding a variable in an enclosing function scope",
+        "options": [
+          "Allows rebinding a variable in an enclosing function scope",
+          "Declares a module variable",
+          "Allows rebinding a variable in an enclosing function scope",
+          "Imports a package",
+          "Creates a new thread"
+        ],
+        "explanation": "nonlocal refers to a binding in the nearest enclosing function scope."
+      },
+      {
+        "id": "py225-q3",
+        "prompt": "What does global refer to?",
+        "answer": "A module-level name",
+        "options": [
+          "A module-level name",
+          "A module-level name",
+          "A variable in the nearest loop",
+          "A closure cell only",
+          "A class instance"
+        ],
+        "explanation": "global declares that a name refers to module scope."
+      },
+      {
+        "id": "py225-q4",
+        "prompt": "Why can two closure counters be independent?",
+        "answer": "Each factory call creates its own enclosing scope",
+        "options": [
+          "Each factory call creates its own enclosing scope",
+          "They share one global variable",
+          "Each factory call creates its own enclosing scope",
+          "Closures always reset state",
+          "The interpreter duplicates all code"
+        ],
+        "explanation": "Each returned function retains the state from its own invocation."
+      },
+      {
+        "id": "py225-q5",
+        "prompt": "When may a class be clearer than a closure?",
+        "answer": "When state and related operations become extensive",
+        "options": [
+          "When state and related operations become extensive",
+          "When state and related operations become extensive",
+          "When a function returns one value",
+          "When a list is iterable",
+          "When no state is needed"
+        ],
+        "explanation": "A class provides an explicit structure for more complex state and behaviour."
+      }
+    ]
+  },
+  "status": "draft"
+}
