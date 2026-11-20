@@ -1,0 +1,171 @@
+{
+  "id": "python.py25.22.en",
+  "courseId": "python",
+  "moduleId": "PY25",
+  "topicId": "PY25.22",
+  "title": "End-to-End Data Analysis Project with Python",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and core concepts of End-to-End Data Analysis Project with Python.",
+    "Select appropriate Python library operations for the analytical question.",
+    "Inspect inputs, data types and intermediate results before interpreting output.",
+    "Validate calculations and communicate results with suitable evidence.",
+    "Identify assumptions, edge cases and limitations in the analysis."
+  ],
+  "prerequisites": [
+    "PY25.1",
+    "PY25.2",
+    "PY25.3",
+    "PY25.4",
+    "PY25.5",
+    "PY25.6",
+    "PY25.7",
+    "PY25.8",
+    "PY25.13",
+    "PY25.14",
+    "PY25.15",
+    "PY25.16"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A reproducible analysis connects data loading, validation, cleaning, transformation, aggregation, statistical interpretation and visualization. Each step should have an explicit purpose and produce inspectable outputs. Preserve raw input, document assumptions, validate record counts and totals, and make charts consistent with the analytical question.",
+      "whyItMatters": "Reliable data analysis requires choosing operations that match the question and checking how transformations affect the evidence. Clear methods make results easier to reproduce, explain and review.",
+      "analogy": "Think of an analysis as preparing a carefully labeled report: organize the records, calculate the measures, and present the evidence. The analogy is limited because real data requires explicit validation and statistical judgment.",
+      "summary": "End-to-End Data Analysis Project with Python extends the Python data-analysis workflow with practical, reproducible techniques."
+    },
+    "explain": {
+      "narrative": "Begin with a question and a data dictionary. Load a bounded dataset, inspect shape and dtypes, validate required columns, clean according to documented rules, derive metrics, summarize groups, and create a chart. Separate reusable functions from execution, keep the raw dataset unchanged, and report limitations such as missing records, small samples and non-causal associations.",
+      "examples": [
+        {
+          "id": "py2522-ex1",
+          "language": "en",
+          "title": "Load and profile a small dataset",
+          "code": "import pandas as pd\nfrom io import StringIO\ncsv = 'region,sales\\nEast,10\\nWest,15\\nEast,5\\n'\ndf = pd.read_csv(StringIO(csv))\nprint(df.shape, df['sales'].sum())",
+          "expectedOutput": "(3, 2) 30",
+          "explanation": "A first profile checks dimensions and a key total before deeper analysis."
+        },
+        {
+          "id": "py2522-ex2",
+          "language": "en",
+          "title": "Validate required columns",
+          "code": "import pandas as pd\ndf = pd.DataFrame({'region': ['East'], 'sales': [10]})\nrequired = {'region', 'sales'}\nprint(required.issubset(df.columns))",
+          "expectedOutput": "True",
+          "explanation": "Schema checks fail early when required fields are absent."
+        },
+        {
+          "id": "py2522-ex3",
+          "language": "en",
+          "title": "Create a derived metric",
+          "code": "import pandas as pd\ndf = pd.DataFrame({'sales': [100, 200], 'orders': [2, 4]})\ndf['average_order'] = df['sales'] / df['orders']\nprint(df['average_order'].tolist())",
+          "expectedOutput": "[50.0, 50.0]",
+          "explanation": "Derived metrics should have explicit definitions and guard against zero denominators in real datasets."
+        },
+        {
+          "id": "py2522-ex4",
+          "language": "en",
+          "title": "Summarize by region",
+          "code": "import pandas as pd\ndf = pd.DataFrame({'region': ['East', 'West', 'East'], 'sales': [10, 15, 5]})\nsummary = df.groupby('region')['sales'].sum().sort_index()\nprint(summary.to_dict())",
+          "expectedOutput": "{'East': 15, 'West': 15}",
+          "explanation": "Grouped summaries answer category-level questions and should reconcile with source totals."
+        },
+        {
+          "id": "py2522-ex5",
+          "language": "en",
+          "title": "Plot and export a summary",
+          "code": "import matplotlib\nmatplotlib.use('Agg')\nimport matplotlib.pyplot as plt\nfrom io import BytesIO\nfig, ax = plt.subplots()\nax.bar(['East', 'West'], [15, 15])\nax.set(title='Sales by region', xlabel='Region', ylabel='Sales')\nbuf = BytesIO()\nfig.savefig(buf, format='png')\nprint(len(ax.patches), buf.getvalue()[:4] == b'\\x89PNG')\nplt.close(fig)",
+          "expectedOutput": "2 True",
+          "explanation": "The chart is built from a validated summary and exported as an image artifact."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Complete a small end-to-end analysis: define a business question, load CSV data, validate the schema, inspect missing values, clean with documented rules, calculate derived metrics, aggregate by category, produce a chart and write a concise findings report.",
+      "independentTask": "Choose a small public or synthetic dataset. Submit the question, data dictionary, reproducible Python script or notebook, validation checks, cleaned-data policy, summary table, chart and limitations section.",
+      "hints": [
+        "Write the analytical question before choosing operations.",
+        "Preserve the raw dataset and validate required columns.",
+        "Record row counts and missingness before and after cleaning.",
+        "Check aggregate totals against the source data.",
+        "Explain uncertainty and avoid causal claims from descriptive results."
+      ],
+      "challenge": "Turn the workflow into a reusable analysis pipeline that returns a validation report, cleaned DataFrame, summary table and saved chart, with clear errors for invalid input.",
+      "validationCriteria": [
+        "Required third-party dependencies are installed in the active environment.",
+        "Every example executes on the CI-supported Python version and matches its expected output.",
+        "Data types, missing values, indexes and aggregation rules are handled deliberately.",
+        "The analysis states assumptions and checks relevant edge cases.",
+        "Raw data is preserved and conclusions do not exceed the evidence."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2522-q1",
+        "prompt": "What should happen before cleaning?",
+        "answer": "Inspect schema, missingness and data quality",
+        "options": [
+          "Inspect schema, missingness and data quality",
+          "Delete the raw file",
+          "Create a chart without checking values",
+          "Assume every column has the correct type"
+        ],
+        "explanation": "Profiling establishes what cleaning is needed and what assumptions are safe."
+      },
+      {
+        "id": "py2522-q2",
+        "prompt": "Why preserve raw input?",
+        "answer": "To keep an auditable source for comparison and recovery",
+        "options": [
+          "To keep an auditable source for comparison and recovery",
+          "To avoid validating results",
+          "To make files larger",
+          "To prevent summary calculations"
+        ],
+        "explanation": "Keeping raw input supports reproducibility and traceability."
+      },
+      {
+        "id": "py2522-q3",
+        "prompt": "What does a schema validation check?",
+        "answer": "That required fields and expected structure are present",
+        "options": [
+          "That required fields and expected structure are present",
+          "That every value is causal",
+          "That all charts use the same color",
+          "That the dataset has no limitations"
+        ],
+        "explanation": "Schema checks catch missing or unexpected columns before analysis proceeds."
+      },
+      {
+        "id": "py2522-q4",
+        "prompt": "Why reconcile grouped totals?",
+        "answer": "To detect lost, duplicated or excluded records",
+        "options": [
+          "To detect lost, duplicated or excluded records",
+          "To prove a correlation is causal",
+          "To choose a plotting backend",
+          "To change the Python interpreter"
+        ],
+        "explanation": "Reconciliation is a practical check that transformations preserve intended totals."
+      },
+      {
+        "id": "py2522-q5",
+        "prompt": "What belongs in a responsible findings report?",
+        "answer": "Methods, assumptions, results and limitations",
+        "options": [
+          "Methods, assumptions, results and limitations",
+          "Only the largest number",
+          "Unexplained charts",
+          "Causal claims from correlation alone"
+        ],
+        "explanation": "A report should let readers understand how results were produced and what they cannot establish."
+      }
+    ]
+  },
+  "status": "draft"
+}
