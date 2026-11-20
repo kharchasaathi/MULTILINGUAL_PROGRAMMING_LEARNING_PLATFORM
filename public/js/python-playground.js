@@ -166,7 +166,7 @@
   async function loadLinkedLessonExample() {
     const params = new URLSearchParams(window.location.search);
     const topicId = params.get("topic");
-    if (!topicId || !/^PY\\d+\\.\\d+$/.test(topicId)) return;
+    if (!topicId || !/^PY\d+\.\d+$/.test(topicId)) return;
     try {
       const response = await fetch("/content/en/python/" + topicId + ".json", { cache: "no-cache" });
       if (!response.ok) throw new Error("HTTP " + response.status);
