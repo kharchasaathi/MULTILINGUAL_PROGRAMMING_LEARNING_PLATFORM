@@ -1,0 +1,162 @@
+{
+  "id": "python.py19.6.en",
+  "courseId": "python",
+  "moduleId": "PY19",
+  "topicId": "PY19.6",
+  "title": "Regex Flags, Full-Input Validation and Safe Pattern Design",
+  "language": "en",
+  "learningObjectives": [
+    "Explain IGNORECASE, MULTILINE, DOTALL, VERBOSE, fullmatch() and predictable matching and where they are useful.",
+    "Select the correct regex syntax or re function for IGNORECASE, MULTILINE, DOTALL, VERBOSE, fullmatch() and predictable matching.",
+    "Predict the output of representative PY19.6 expressions.",
+    "Identify matching, validation and performance risks related to IGNORECASE, MULTILINE, DOTALL, VERBOSE, fullmatch() and predictable matching.",
+    "Apply IGNORECASE, MULTILINE, DOTALL, VERBOSE, fullmatch() and predictable matching in a small, deterministic Python program."
+  ],
+  "prerequisites": [
+    "PY7.1",
+    "PY13.1",
+    "PY14.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Regex flags change how a pattern is interpreted. IGNORECASE removes case distinctions, MULTILINE changes line-anchor behaviour, DOTALL lets dot match newline characters, and VERBOSE allows readable whitespace and comments. For validating a complete input, fullmatch is clearer than a loose substring search. Pattern design should avoid excessive backtracking on untrusted input.",
+      "whyItMatters": "Flags make patterns adaptable, while full-input validation and bounded patterns reduce accidental acceptance and performance risks.",
+      "analogy": "Flags are operating settings for a search tool; they change how the same pattern reads the text.",
+      "analogyLimit": "Regex validation cannot replace semantic checks, and a pattern that is safe on short sample text may behave poorly on very long or adversarial input.",
+      "summary": "Regex Flags, Full-Input Validation and Safe Pattern Design teaches readable and predictable pattern matching with Python's re module."
+    },
+    "explain": {
+      "narrative": "## Flags and safer validation\nPass flags such as `re.IGNORECASE`, `re.MULTILINE`, `re.DOTALL` or `re.VERBOSE` to a regex operation or compile call. Combine flags with bitwise OR when needed. VERBOSE patterns can include whitespace and comments to make complex expressions maintainable.\n\nUse `fullmatch()` when the entire input must satisfy a format. Keep quantifiers bounded where possible, avoid ambiguous nested repetition, and limit input length before matching untrusted data. A regex is not a complete validator for domain rules such as whether a date actually exists.",
+      "examples": [
+        {
+          "id": "py196-ex1",
+          "language": "en",
+          "title": "Ignore letter case",
+          "code": "import re\nprint(bool(re.search(r'python', 'PYTHON', flags=re.IGNORECASE)))",
+          "expectedOutput": "True",
+          "explanation": "IGNORECASE makes matching independent of letter case."
+        },
+        {
+          "id": "py196-ex2",
+          "language": "en",
+          "title": "Use multiline anchors",
+          "code": "import re\ntext = 'alpha\\nbeta'\nprint(re.findall(r'^\\w+', text, flags=re.MULTILINE))",
+          "expectedOutput": "['alpha', 'beta']",
+          "explanation": "MULTILINE makes ^ match the beginning of each line."
+        },
+        {
+          "id": "py196-ex3",
+          "language": "en",
+          "title": "Let dot include newlines",
+          "code": "import re\ntext = 'start\\nmiddle\\nend'\nprint(bool(re.search(r'start.*end', text, flags=re.DOTALL)))",
+          "expectedOutput": "True",
+          "explanation": "DOTALL allows dot to match newline characters."
+        },
+        {
+          "id": "py196-ex4",
+          "language": "en",
+          "title": "Write a readable verbose pattern",
+          "code": "import re\npattern = re.compile(r'''\\d{4}  # year\n    -\\d{2} # month''', re.VERBOSE)\nprint(bool(pattern.fullmatch('2026-11')))",
+          "expectedOutput": "True",
+          "explanation": "VERBOSE ignores unescaped pattern whitespace and comments outside character classes."
+        },
+        {
+          "id": "py196-ex5",
+          "language": "en",
+          "title": "Validate a complete bounded code",
+          "code": "import re\npattern = re.compile(r'[A-Z]{2}-\\d{4}')\nprint(bool(pattern.fullmatch('AB-2048')))\nprint(bool(pattern.fullmatch('AB-2048-extra')))",
+          "expectedOutput": "True\nFalse",
+          "explanation": "fullmatch rejects trailing text instead of accepting only a valid substring."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a case-insensitive whole-input validator for a fixed reference format. Add a maximum input length and explain which semantic rules still need separate checks.",
+      "independentTask": "Use MULTILINE and DOTALL in separate examples. Then rewrite a complex pattern with VERBOSE and compare its readability.",
+      "hints": [
+        "Use fullmatch for complete input validation.",
+        "IGNORECASE changes letter-case handling.",
+        "MULTILINE changes ^ and $ behaviour.",
+        "DOTALL changes how dot treats newline characters.",
+        "Limit untrusted input length and avoid nested ambiguous repetition."
+      ],
+      "challenge": "Review a proposed user-input regex for clarity and performance. Replace unbounded ambiguous repetition with a simpler bounded pattern and document remaining validation steps.",
+      "validationCriteria": [
+        "The regular expression expresses the stated pattern without accidental substring acceptance.",
+        "The code uses raw string literals where backslashes are present.",
+        "Match results are checked before accessing Match methods.",
+        "Examples execute with the expected output and input edge cases are considered."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py196-q1",
+        "prompt": "Which flag makes matching case-insensitive?",
+        "answer": "re.IGNORECASE",
+        "options": [
+          "re.MULTILINE",
+          "re.DOTALL",
+          "re.IGNORECASE",
+          "re.VERBOSE"
+        ],
+        "explanation": "IGNORECASE ignores case differences during matching."
+      },
+      {
+        "id": "py196-q2",
+        "prompt": "What does MULTILINE change?",
+        "answer": "The behaviour of ^ and $ across lines",
+        "options": [
+          "The behaviour of ^ and $ across lines",
+          "Whether digits match",
+          "Whether dot matches newlines",
+          "The replacement count"
+        ],
+        "explanation": "MULTILINE makes line anchors operate at each line boundary."
+      },
+      {
+        "id": "py196-q3",
+        "prompt": "Which flag lets dot match newline characters?",
+        "answer": "re.DOTALL",
+        "options": [
+          "re.IGNORECASE",
+          "re.DOTALL",
+          "re.ASCII",
+          "re.VERBOSE"
+        ],
+        "explanation": "DOTALL changes dot so it matches newline characters too."
+      },
+      {
+        "id": "py196-q4",
+        "prompt": "Which method is clearest for validating the entire input?",
+        "answer": "fullmatch()",
+        "options": [
+          "search()",
+          "findall()",
+          "fullmatch()",
+          "split()"
+        ],
+        "explanation": "fullmatch requires the complete string to match."
+      },
+      {
+        "id": "py196-q5",
+        "prompt": "What is a safer approach for untrusted long input?",
+        "answer": "Bound input length and avoid ambiguous nested repetition",
+        "options": [
+          "Use any pattern without testing",
+          "Bound input length and avoid ambiguous nested repetition",
+          "Always enable DOTALL",
+          "Remove all anchors"
+        ],
+        "explanation": "Input limits and predictable patterns reduce regex performance risks."
+      }
+    ]
+  },
+  "status": "draft"
+}
