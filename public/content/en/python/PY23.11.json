@@ -1,0 +1,163 @@
+{
+  "id": "python.py23.11.en",
+  "courseId": "python",
+  "moduleId": "PY23",
+  "topicId": "PY23.11",
+  "title": "Python Project Packaging, Modules and Entry Points",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of Python Project Packaging, Modules and Entry Points.",
+    "Choose an appropriate python project packaging, modules and entry points technique for an application.",
+    "Interpret representative code and output involving python project packaging, modules and entry points.",
+    "Identify limitations and failure modes for python project packaging, modules and entry points.",
+    "Apply the concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY11.1",
+    "PY14.1",
+    "PY20.1",
+    "PY21.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A Python project should separate importable application code from command-line startup, tests and project metadata. Packages organize modules into a stable namespace. A pyproject.toml file describes build-system and project metadata for modern packaging workflows. A console script entry point exposes a command that invokes a Python function after installation.",
+      "whyItMatters": "Consistent project structure makes applications easier to install, test, reuse and distribute.",
+      "analogy": "A package is a well-organized toolbox with labels and an instruction card explaining how to use it.",
+      "analogyLimit": "A directory layout and metadata do not guarantee good API design, dependency safety or compatibility across platforms.",
+      "summary": "Python Project Packaging, Modules and Entry Points develops practical application engineering skills for Python projects."
+    },
+    "explain": {
+      "narrative": "## Organize code for reuse and distribution\nKeep application logic in importable modules and put command-line parsing in a thin entry point. Use `pyproject.toml` for project metadata and build configuration. A `src/` layout can prevent accidental imports from the repository root during tests. Define dependencies explicitly, choose a supported Python range and build artifacts in a clean environment. Do not execute application work merely because a module is imported; protect startup with a main guard.",
+      "examples": [
+        {
+          "id": "py2311-ex1",
+          "language": "en",
+          "title": "Separate the entry point",
+          "code": "def main() -> int:\n    print('Application started')\n    return 0\nif __name__ == '__main__':\n    raise SystemExit(main())",
+          "expectedOutput": "Application started",
+          "explanation": "The main guard runs the entry point only when the module is executed as a script."
+        },
+        {
+          "id": "py2311-ex2",
+          "language": "en",
+          "title": "Represent a package path",
+          "code": "parts = ['src', 'shop_app', '__init__.py']\nprint('/'.join(parts))",
+          "expectedOutput": "src/shop_app/__init__.py",
+          "explanation": "A package layout gives modules a predictable import namespace."
+        },
+        {
+          "id": "py2311-ex3",
+          "language": "en",
+          "title": "Inspect project metadata fields",
+          "code": "metadata = {'name': 'shop-app', 'version': '1.0.0', 'requires-python': '>=3.10'}\nprint(metadata['name'], metadata['version'])",
+          "expectedOutput": "shop-app 1.0.0",
+          "explanation": "Project metadata records identity and compatibility requirements."
+        },
+        {
+          "id": "py2311-ex4",
+          "language": "en",
+          "title": "Keep startup logic callable",
+          "code": "def run_report() -> str:\n    return 'report ready'\nprint(run_report())",
+          "expectedOutput": "report ready",
+          "explanation": "A callable entry function can be tested without launching a command process."
+        },
+        {
+          "id": "py2311-ex5",
+          "language": "en",
+          "title": "Describe a console entry point",
+          "code": "entry = 'shop_app.cli:main'\nmodule, function = entry.split(':')\nprint(module, function)",
+          "expectedOutput": "shop_app.cli main",
+          "explanation": "A console script maps a command name to an importable function."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Sketch a src-layout project with a core module, CLI module, tests folder and pyproject.toml. Keep the main function import-safe.",
+      "independentTask": "Write project metadata for a command-line tool and list steps to build and test an installable artifact in a clean environment.",
+      "hints": [
+        "Keep importable logic separate from startup code.",
+        "Use a main guard for script execution.",
+        "Document Python version and runtime dependencies.",
+        "Keep tests outside the application package unless needed.",
+        "Build and install in a clean environment to test packaging."
+      ],
+      "challenge": "Design an installable command-line expense tracker with a package API, CLI entry point, tests and versioned project metadata.",
+      "validationCriteria": [
+        "The concept and intended use are accurately explained.",
+        "All examples execute with the documented output on Python 3.13.",
+        "External input, failure handling and dependency boundaries are treated appropriately.",
+        "Limitations and security implications are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2311-q1",
+        "prompt": "What is pyproject.toml used for?",
+        "answer": "Modern Python project and build configuration",
+        "options": [
+          "Modern Python project and build configuration",
+          "Storing runtime passwords",
+          "Replacing all Python modules",
+          "Holding SQLite database rows"
+        ],
+        "explanation": "pyproject.toml is the standard configuration file used by modern Python packaging tools."
+      },
+      {
+        "id": "py2311-q2",
+        "prompt": "Why keep application logic separate from the CLI?",
+        "answer": "To make it reusable and easier to test",
+        "options": [
+          "To make it reusable and easier to test",
+          "To prevent functions from returning values",
+          "To remove all dependencies",
+          "To force global variables"
+        ],
+        "explanation": "Separating logic from startup makes functions easier to import and test."
+      },
+      {
+        "id": "py2311-q3",
+        "prompt": "What does a console script entry point identify?",
+        "answer": "An importable function to invoke as a command",
+        "options": [
+          "An importable function to invoke as a command",
+          "A database password",
+          "A CSS file",
+          "A Python bytecode format"
+        ],
+        "explanation": "The entry point maps a command to a module and callable."
+      },
+      {
+        "id": "py2311-q4",
+        "prompt": "Why use a main guard?",
+        "answer": "To avoid running script startup code on import",
+        "options": [
+          "To avoid running script startup code on import",
+          "To disable package imports",
+          "To compile the source automatically",
+          "To enforce static typing"
+        ],
+        "explanation": "The guard distinguishes direct execution from import."
+      },
+      {
+        "id": "py2311-q5",
+        "prompt": "Why test an installed package in a clean environment?",
+        "answer": "To verify declared metadata and dependencies are sufficient",
+        "options": [
+          "To verify declared metadata and dependencies are sufficient",
+          "To increase the source file count",
+          "To skip the test suite",
+          "To avoid version constraints"
+        ],
+        "explanation": "A clean installation catches missing package files and undeclared dependencies."
+      }
+    ]
+  },
+  "status": "draft"
+}

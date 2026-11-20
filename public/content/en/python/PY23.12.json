@@ -1,0 +1,163 @@
+{
+  "id": "python.py23.12.en",
+  "courseId": "python",
+  "moduleId": "PY23",
+  "topicId": "PY23.12",
+  "title": "Application Configuration, Environment Variables and Secrets",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of Application Configuration, Environment Variables and Secrets.",
+    "Choose an appropriate application configuration, environment variables and secrets technique for an application.",
+    "Interpret representative code and output involving application configuration, environment variables and secrets.",
+    "Identify limitations and failure modes for application configuration, environment variables and secrets.",
+    "Apply the concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY11.1",
+    "PY14.1",
+    "PY20.1",
+    "PY21.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Configuration controls environment-specific behaviour such as service URLs, feature flags and database locations. Environment variables can supply configuration without hard-coding deployment-specific values. Secrets such as passwords and API tokens require protected storage and careful access control. Configuration parsing should validate required values and avoid printing sensitive data.",
+      "whyItMatters": "Externalized configuration allows the same application code to run in development, testing and production without committing credentials.",
+      "analogy": "Configuration is a set of adjustable controls for the same machine in different operating environments.",
+      "analogyLimit": "Environment variables are not automatically encrypted; their security depends on how the operating system, deployment platform and process environment are managed.",
+      "summary": "Application Configuration, Environment Variables and Secrets develops practical application engineering skills for Python projects."
+    },
+    "explain": {
+      "narrative": "## Separate settings from source code\nRead environment variables with `os.environ` or `os.getenv`. Provide safe defaults only for non-sensitive settings. Fail clearly when required secrets are missing rather than silently substituting weak values. Do not commit `.env` files containing real credentials, expose them in logs or place them in URLs. Use a dedicated secret manager in production where available, restrict permissions and rotate compromised credentials. Validate configuration at startup.",
+      "examples": [
+        {
+          "id": "py2312-ex1",
+          "language": "en",
+          "title": "Read a non-secret setting",
+          "code": "import os\nmode = os.getenv('APP_MODE', 'development')\nprint(mode in {'development', 'test', 'production'})",
+          "expectedOutput": "True",
+          "explanation": "A default is reasonable for a non-sensitive mode setting."
+        },
+        {
+          "id": "py2312-ex2",
+          "language": "en",
+          "title": "Detect a missing required secret",
+          "code": "def require_secret(env: dict[str, str], key: str) -> str:\n    value = env.get(key)\n    if not value: raise RuntimeError('required secret is missing')\n    return value\ntry:\n    require_secret({}, 'SERVICE_TOKEN')\nexcept RuntimeError as error:\n    print(str(error))",
+          "expectedOutput": "required secret is missing",
+          "explanation": "The application fails clearly rather than inventing a credential."
+        },
+        {
+          "id": "py2312-ex3",
+          "language": "en",
+          "title": "Parse a numeric configuration value",
+          "code": "raw = '30'\ntimeout = int(raw)\nprint(timeout > 0)",
+          "expectedOutput": "True",
+          "explanation": "Configuration values arrive as strings and should be parsed and validated."
+        },
+        {
+          "id": "py2312-ex4",
+          "language": "en",
+          "title": "Redact a secret for diagnostics",
+          "code": "token = 'private-value'\nprint('token=' + ('[REDACTED]' if token else '[MISSING]'))",
+          "expectedOutput": "token=[REDACTED]",
+          "explanation": "Diagnostics should report presence without revealing the secret."
+        },
+        {
+          "id": "py2312-ex5",
+          "language": "en",
+          "title": "Allowlist deployment modes",
+          "code": "mode = 'production'\nallowed = {'development', 'test', 'production'}\nprint(mode in allowed)",
+          "expectedOutput": "True",
+          "explanation": "An allowlist prevents unknown configuration modes from being accepted silently."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a startup configuration loader that reads a mode and required service token, validates them and returns settings without printing secrets.",
+      "independentTask": "Write a secrets-handling checklist for local development, CI and production deployment, including rotation and log redaction.",
+      "hints": [
+        "Environment variables are strings.",
+        "Use defaults only for safe non-secret settings.",
+        "Fail fast when a required secret is missing.",
+        "Never print or commit real credentials.",
+        "Use platform secret management and least privilege in production."
+      ],
+      "challenge": "Design a typed Settings object with validated timeouts, allowed environment names and required credentials; test it using an injected environment mapping.",
+      "validationCriteria": [
+        "The concept and intended use are accurately explained.",
+        "All examples execute with the documented output on Python 3.13.",
+        "External input, failure handling and dependency boundaries are treated appropriately.",
+        "Limitations and security implications are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2312-q1",
+        "prompt": "Why use environment variables for configuration?",
+        "answer": "To keep deployment-specific settings outside source code",
+        "options": [
+          "To keep deployment-specific settings outside source code",
+          "To encrypt every value automatically",
+          "To replace Python imports",
+          "To store database tables"
+        ],
+        "explanation": "Environment variables let the same code run with different deployment settings."
+      },
+      {
+        "id": "py2312-q2",
+        "prompt": "Are environment variables automatically encrypted?",
+        "answer": "No",
+        "options": [
+          "No",
+          "Yes, always",
+          "Only on Linux",
+          "Only when read with getenv"
+        ],
+        "explanation": "Their confidentiality depends on the operating system and deployment environment."
+      },
+      {
+        "id": "py2312-q3",
+        "prompt": "What should happen when a required secret is missing?",
+        "answer": "Fail clearly without substituting a weak default",
+        "options": [
+          "Fail clearly without substituting a weak default",
+          "Print the expected secret",
+          "Use an empty password",
+          "Commit a placeholder credential"
+        ],
+        "explanation": "Failing clearly avoids insecure or confusing runtime behaviour."
+      },
+      {
+        "id": "py2312-q4",
+        "prompt": "What should logs do with secret values?",
+        "answer": "Redact them",
+        "options": [
+          "Redact them",
+          "Print them for debugging",
+          "Encode them in Base64",
+          "Add them to exception messages"
+        ],
+        "explanation": "Logs should not expose credentials."
+      },
+      {
+        "id": "py2312-q5",
+        "prompt": "What does least privilege mean?",
+        "answer": "Grant only the access needed for the task",
+        "options": [
+          "Grant only the access needed for the task",
+          "Give every service administrator rights",
+          "Share one token across all users",
+          "Disable access controls"
+        ],
+        "explanation": "Least privilege limits the impact of compromised processes or credentials."
+      }
+    ]
+  },
+  "status": "draft"
+}
