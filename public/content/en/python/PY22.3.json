@@ -1,0 +1,168 @@
+{
+  "id": "python.py22.3.en",
+  "courseId": "python",
+  "moduleId": "PY22",
+  "topicId": "PY22.3",
+  "title": "Generator Expressions and Lazy Pipelines",
+  "language": "en",
+  "learningObjectives": [
+    "Explain generator expressions, lazy transformations, pipeline composition and consumption.",
+    "Select a suitable advanced Python technique for PY22.3.",
+    "Interpret iterator and callable behaviour correctly.",
+    "Identify limitations and risks when applying PY22.3.",
+    "Apply PY22.3 concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY8.1",
+    "PY11.1",
+    "PY14.1",
+    "PY21.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A generator expression uses parentheses around an expression and for clauses to produce values lazily. It can be chained with other iterables to build a processing pipeline. Values are calculated as the consumer requests them, so intermediate results need not be stored in full.",
+      "whyItMatters": "Lazy pipelines are useful for processing large collections and composing transformations with low intermediate memory use.",
+      "analogy": "A pipeline is an assembly line where each station processes an item only when the next station is ready.",
+      "analogyLimit": "Lazy pipelines can be harder to inspect and are consumed once; debugging may require materializing a small sample or naming intermediate steps.",
+      "summary": "Generator Expressions and Lazy Pipelines develops advanced Python programming skills."
+    },
+    "explain": {
+      "narrative": "## Compose lazy transformations\nA generator expression such as `(x * 2 for x in values)` creates an iterator rather than a list. You can pass it directly to functions such as `sum`, `any` and `all`, or compose it with another generator expression. The pipeline runs as values are requested.\n\nUse clear variable names and avoid building a deeply nested expression that obscures the transformation. If a result must be traversed multiple times, materialize it deliberately or recreate the pipeline from its source.",
+      "examples": [
+        {
+          "id": "py223-ex1",
+          "language": "en",
+          "title": "Create a lazy generator expression",
+          "code": "values = (number * 2 for number in range(4))\nprint(type(values).__name__)",
+          "expectedOutput": "generator",
+          "explanation": "A generator expression returns a generator object."
+        },
+        {
+          "id": "py223-ex2",
+          "language": "en",
+          "title": "Filter and transform lazily",
+          "code": "numbers = [1, -2, 3, -4]\nresult = (number * number for number in numbers if number > 0)\nprint(list(result))",
+          "expectedOutput": "[1, 9]",
+          "explanation": "The filter and transformation are evaluated during consumption."
+        },
+        {
+          "id": "py223-ex3",
+          "language": "en",
+          "title": "Aggregate without an intermediate list",
+          "code": "numbers = range(1, 5)\ntotal = sum(number * number for number in numbers)\nprint(total)",
+          "expectedOutput": "30",
+          "explanation": "sum consumes values produced by the generator expression."
+        },
+        {
+          "id": "py223-ex4",
+          "language": "en",
+          "title": "Short-circuit an iterable",
+          "code": "values = (number > 5 for number in [2, 4, 8, 10])\nprint(any(values))",
+          "expectedOutput": "True",
+          "explanation": "any stops once it encounters a true value."
+        },
+        {
+          "id": "py223-ex5",
+          "language": "en",
+          "title": "Show one-pass consumption",
+          "code": "items = (x for x in [3, 4])\nfirst = list(items)\nsecond = list(items)\nprint(first, second)",
+          "expectedOutput": "[3, 4] []",
+          "explanation": "The first conversion consumes the generator, leaving no values for the second."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Build a pipeline that filters positive numbers, squares them and sums the results without creating intermediate lists.",
+      "independentTask": "Compare list comprehensions and generator expressions for repeated iteration, memory use and readability.",
+      "hints": [
+        "Parentheses create a generator expression.",
+        "Values are produced when consumed.",
+        "sum, any and all can consume iterables.",
+        "Each generator is generally one-pass.",
+        "Materialize only when reuse or random access is needed."
+      ],
+      "challenge": "Design a lazy pipeline for a large stream of records that filters, transforms and aggregates values while documenting where consumption occurs.",
+      "validationCriteria": [
+        "The advanced Python concept is accurately explained.",
+        "Examples execute with the documented output.",
+        "Iterator, scope or callable behaviour is correct.",
+        "Limitations and suitable use cases are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py223-q1",
+        "prompt": "Which delimiters create a generator expression?",
+        "answer": "Parentheses",
+        "options": [
+          "Parentheses",
+          "Square brackets",
+          "Curly braces",
+          "Parentheses",
+          "Angle brackets"
+        ],
+        "explanation": "Generator expressions use parentheses around the expression and clauses."
+      },
+      {
+        "id": "py223-q2",
+        "prompt": "When are generator expression values calculated?",
+        "answer": "As the generator is consumed",
+        "options": [
+          "As the generator is consumed",
+          "All at creation time",
+          "As the generator is consumed",
+          "Only after conversion to a tuple",
+          "During module import only"
+        ],
+        "explanation": "Generator expressions are lazy and calculate values on demand."
+      },
+      {
+        "id": "py223-q3",
+        "prompt": "Which function can consume a generator and stop at the first true item?",
+        "answer": "any",
+        "options": [
+          "any",
+          "list",
+          "any",
+          "sorted",
+          "tuple"
+        ],
+        "explanation": "any short-circuits when it encounters a truthy value."
+      },
+      {
+        "id": "py223-q4",
+        "prompt": "What happens when a generator is consumed once?",
+        "answer": "It is generally exhausted",
+        "options": [
+          "It is generally exhausted",
+          "It becomes reusable automatically",
+          "It is generally exhausted",
+          "It changes into a list",
+          "It rewinds"
+        ],
+        "explanation": "Generator iterators are normally single-pass."
+      },
+      {
+        "id": "py223-q5",
+        "prompt": "When is materializing a generator useful?",
+        "answer": "When repeated traversal or random access is required",
+        "options": [
+          "When repeated traversal or random access is required",
+          "Always, before any processing",
+          "When repeated traversal or random access is required",
+          "To enable lazy evaluation",
+          "To avoid storing values"
+        ],
+        "explanation": "A list or tuple stores the produced values for reuse."
+      }
+    ]
+  },
+  "status": "draft"
+}
