@@ -1,0 +1,168 @@
+{
+  "id": "python.py21.5.en",
+  "courseId": "python",
+  "moduleId": "PY21",
+  "topicId": "PY21.5",
+  "title": "Breakpoints, Stepping and Inspecting Program State",
+  "language": "en",
+  "learningObjectives": [
+    "Explain breakpoints, stepping into and over calls, stack inspection and variable state.",
+    "Select a suitable debugging or testing technique for PY21.5.",
+    "Interpret diagnostic information and test results correctly.",
+    "Identify limitations and risks when applying PY21.5.",
+    "Apply PY21.5 concepts in a maintainable Python workflow."
+  ],
+  "prerequisites": [
+    "PY8.1",
+    "PY11.1",
+    "PY14.1",
+    "PY20.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A breakpoint pauses execution at a chosen location. Stepping controls how execution advances: stepping over executes a called function as one operation, while stepping into enters the called function. Inspecting local variables and the call stack helps explain how the current state was reached. Good breakpoints are placed near the first incorrect state, not scattered randomly through a program.",
+      "whyItMatters": "Controlled pauses and focused inspection make complex call paths easier to understand and reduce the need for excessive print statements.",
+      "analogy": "Breakpoints are checkpoints on a route; stepping lets you choose whether to inspect the next street or enter a building.",
+      "analogyLimit": "Breakpoints can affect timing and are usually disabled or removed before a production release; debugger support varies by environment.",
+      "summary": "Breakpoints, Stepping and Inspecting Program State develops reliable debugging and software verification skills."
+    },
+    "explain": {
+      "narrative": "## Control execution deliberately\nIn pdb, `b` sets a breakpoint, `n` moves to the next line without entering a called function, `s` steps into a call, `r` continues until the current function returns, `where` displays the stack and `p name` inspects a value. `breakpoint()` enters the configured debugger at the point where it executes.\n\nPlace a breakpoint before the operation suspected of producing the wrong value. Inspect arguments and local state, then step through only the relevant path. Avoid leaving interactive breakpoints in code that runs in automated or production environments.",
+      "examples": [
+        {
+          "id": "py215-ex1",
+          "language": "en",
+          "title": "Inspect a call stack with inspect",
+          "code": "import inspect\ndef outer():\n    return len(inspect.stack()) >= 2\nprint(outer())",
+          "expectedOutput": "True",
+          "explanation": "inspect.stack returns frame information for the active call stack."
+        },
+        {
+          "id": "py215-ex2",
+          "language": "en",
+          "title": "Track a function's arguments explicitly",
+          "code": "def calculate(quantity, unit_price):\n    return quantity * unit_price\nprint(calculate(3, 7))",
+          "expectedOutput": "21",
+          "explanation": "Knowing the arguments at a function boundary is a useful first debugging check."
+        },
+        {
+          "id": "py215-ex3",
+          "language": "en",
+          "title": "Model stepping decisions",
+          "code": "steps = ['next: stay in current function', 'step: enter called function', 'return: run until current function returns']\nprint(len(steps))",
+          "expectedOutput": "3",
+          "explanation": "The labels summarize common debugger stepping controls."
+        },
+        {
+          "id": "py215-ex4",
+          "language": "en",
+          "title": "Inspect local variables in a helper",
+          "code": "def inspect_value(value):\n    local_state = {'value': value, 'valid': value >= 0}\n    return local_state['valid']\nprint(inspect_value(4))",
+          "expectedOutput": "True",
+          "explanation": "A debugger can inspect the same local state while execution is paused."
+        },
+        {
+          "id": "py215-ex5",
+          "language": "en",
+          "title": "Record a breakpoint location as metadata",
+          "code": "breakpoint_line = 8\nprint(breakpoint_line > 0)",
+          "expectedOutput": "True",
+          "explanation": "A breakpoint is associated with a source location where execution should pause."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Use a breakpoint in a nested function. Inspect one argument, step into a helper, step over a simple call and use where to explain the call stack.",
+      "independentTask": "Write a debugging walkthrough showing where to place two breakpoints and when to use next, step, return and continue.",
+      "hints": [
+        "Place a breakpoint just before the first incorrect result.",
+        "Use n to move over a call and s to enter it.",
+        "Use where to inspect the call stack.",
+        "Inspect arguments and locals at the pause point.",
+        "Remove or disable interactive breakpoints before unattended runs."
+      ],
+      "challenge": "Investigate a nested calculation with an incorrect intermediate value. Document the breakpoint locations, observed state and exact line where the value first becomes incorrect.",
+      "validationCriteria": [
+        "The debugging or testing objective is clearly stated.",
+        "Examples execute with the documented output.",
+        "Test expectations and exception behaviour are accurate.",
+        "Limitations and appropriate use cases are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py215-q1",
+        "prompt": "What is the main purpose of a breakpoint?",
+        "answer": "Pause execution at a selected location",
+        "options": [
+          "Pause execution at a selected location",
+          "Format source code",
+          "Pause execution at a selected location",
+          "Install a package",
+          "Delete a traceback"
+        ],
+        "explanation": "A breakpoint pauses the program so the current state can be inspected."
+      },
+      {
+        "id": "py215-q2",
+        "prompt": "Which pdb command steps into a called function?",
+        "answer": "s",
+        "options": [
+          "s",
+          "n",
+          "s",
+          "c",
+          "q"
+        ],
+        "explanation": "s or step enters the function called by the current line."
+      },
+      {
+        "id": "py215-q3",
+        "prompt": "Which pdb command moves to the next line without stepping into a called function?",
+        "answer": "n",
+        "options": [
+          "n",
+          "s",
+          "n",
+          "r",
+          "w"
+        ],
+        "explanation": "n or next advances in the current function."
+      },
+      {
+        "id": "py215-q4",
+        "prompt": "Which command displays the current call stack?",
+        "answer": "where",
+        "options": [
+          "where",
+          "where",
+          "p",
+          "c",
+          "q"
+        ],
+        "explanation": "where displays the stack of frames."
+      },
+      {
+        "id": "py215-q5",
+        "prompt": "Where is a useful place for a breakpoint?",
+        "answer": "Near the first operation suspected of producing incorrect state",
+        "options": [
+          "Near the first operation suspected of producing incorrect state",
+          "At every line in every file",
+          "Near the first operation suspected of producing incorrect state",
+          "Only at the end of the program",
+          "Inside every package"
+        ],
+        "explanation": "A focused breakpoint reduces noise and helps identify the first incorrect state."
+      }
+    ]
+  },
+  "status": "draft"
+}
