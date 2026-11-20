@@ -1,0 +1,169 @@
+{
+  "id": "python.py22.13.en",
+  "courseId": "python",
+  "moduleId": "PY22",
+  "topicId": "PY22.13",
+  "title": "Thread Synchronization with Locks and Queues",
+  "language": "en",
+  "learningObjectives": [
+    "Explain Lock, RLock, Event, Queue and producer-consumer coordination.",
+    "Select a suitable concurrency or performance technique for PY22.13.",
+    "Interpret task, thread, process or profiling results correctly.",
+    "Identify limitations and risks when applying PY22.13.",
+    "Apply PY22.13 concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY8.1",
+    "PY11.1",
+    "PY14.1",
+    "PY21.7",
+    "PY22.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Thread synchronization coordinates access to shared resources and communication between threads. Lock protects a critical section, RLock allows the owning thread to acquire the same lock recursively, Event signals a condition and Queue safely transfers items between producers and consumers. Use the simplest primitive that matches the coordination requirement.",
+      "whyItMatters": "Correct synchronization prevents race conditions, lost updates and unsafe shared-state access.",
+      "analogy": "A lock is a single key to a shared room; a queue is a handoff tray where one worker leaves tasks for another.",
+      "analogyLimit": "Incorrect lock ordering can cause deadlocks, and holding locks during slow operations can reduce concurrency.",
+      "summary": "Thread Synchronization with Locks and Queues develops advanced concurrency and performance skills."
+    },
+    "explain": {
+      "narrative": "## Coordinate shared work\nUse `threading.Lock` around short critical sections that access shared state. `RLock` supports recursive acquisition by the same thread. `Event` lets one thread signal another, and `queue.Queue` provides thread-safe producer-consumer communication.\n\nKeep lock scopes small, release locks using a with statement and avoid acquiring multiple locks in inconsistent orders. Prefer queues for passing work rather than sharing complex mutable objects between threads.",
+      "examples": [
+        {
+          "id": "py2213-ex1",
+          "language": "en",
+          "title": "Use a lock context manager",
+          "code": "import threading\nlock = threading.Lock()\nwith lock:\n    acquired = lock.locked()\nprint(acquired, lock.locked())",
+          "expectedOutput": "True False",
+          "explanation": "The with statement releases the lock when the block exits."
+        },
+        {
+          "id": "py2213-ex2",
+          "language": "en",
+          "title": "Transfer items through a queue",
+          "code": "import queue\nitems = queue.Queue()\nitems.put('task-1')\nprint(items.get())",
+          "expectedOutput": "task-1",
+          "explanation": "Queue provides synchronized producer-consumer communication."
+        },
+        {
+          "id": "py2213-ex3",
+          "language": "en",
+          "title": "Signal an event",
+          "code": "import threading\nevent = threading.Event()\nprint(event.is_set())\nevent.set()\nprint(event.is_set())",
+          "expectedOutput": "False\nTrue",
+          "explanation": "Event stores a flag that other threads can wait for."
+        },
+        {
+          "id": "py2213-ex4",
+          "language": "en",
+          "title": "Check recursive lock type",
+          "code": "import threading\nlock = threading.RLock()\nwith lock:\n    with lock: result = lock._is_owned()\nprint(result)",
+          "expectedOutput": "True",
+          "explanation": "RLock permits the owning thread to acquire the same lock recursively."
+        },
+        {
+          "id": "py2213-ex5",
+          "language": "en",
+          "title": "Mark queue work as complete",
+          "code": "import queue\nitems = queue.Queue()\nitems.put(1)\nvalue = items.get()\nitems.task_done()\nitems.join()\nprint(value)",
+          "expectedOutput": "1",
+          "explanation": "task_done and join track completion of queued tasks."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a producer and consumer using queue.Queue. Send a few values and a sentinel indicating completion, then join the worker thread.",
+      "independentTask": "Choose Lock, RLock, Event or Queue for four coordination scenarios and explain the deadlock risks.",
+      "hints": [
+        "Lock protects a critical section.",
+        "RLock supports recursive acquisition by its owner.",
+        "Event communicates a signal between threads.",
+        "Queue safely transfers work items.",
+        "Use with to release locks reliably."
+      ],
+      "challenge": "Design a bounded producer-consumer pipeline with orderly shutdown, exception reporting and no busy-wait loops.",
+      "validationCriteria": [
+        "The concurrency or performance concept is accurately explained.",
+        "Examples execute with the documented output.",
+        "Synchronization, scheduling or profiling behaviour is correct.",
+        "Limitations and appropriate use cases are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2213-q1",
+        "prompt": "What does a Lock protect?",
+        "answer": "A critical section accessing shared state",
+        "options": [
+          "A critical section accessing shared state",
+          "A Python package",
+          "A critical section accessing shared state",
+          "A generator expression",
+          "A source repository"
+        ],
+        "explanation": "A lock coordinates access to shared resources."
+      },
+      {
+        "id": "py2213-q2",
+        "prompt": "What is special about RLock?",
+        "answer": "The owning thread may acquire it recursively",
+        "options": [
+          "The owning thread may acquire it recursively",
+          "It never blocks",
+          "The owning thread may acquire it recursively",
+          "It starts a process",
+          "It stores log messages"
+        ],
+        "explanation": "RLock tracks ownership and recursive acquisition depth."
+      },
+      {
+        "id": "py2213-q3",
+        "prompt": "What does threading.Event provide?",
+        "answer": "A signal flag that threads can wait for",
+        "options": [
+          "A signal flag that threads can wait for",
+          "A file iterator",
+          "A signal flag that threads can wait for",
+          "A package cache",
+          "A test fixture"
+        ],
+        "explanation": "Event communicates that a condition or signal has occurred."
+      },
+      {
+        "id": "py2213-q4",
+        "prompt": "Why use queue.Queue between threads?",
+        "answer": "It provides thread-safe item transfer",
+        "options": [
+          "It provides thread-safe item transfer",
+          "It sorts source files",
+          "It provides thread-safe item transfer",
+          "It creates a coroutine",
+          "It disables locks"
+        ],
+        "explanation": "Queue supports safe producer-consumer communication."
+      },
+      {
+        "id": "py2213-q5",
+        "prompt": "What can cause a deadlock?",
+        "answer": "Threads waiting indefinitely for locks held by one another",
+        "options": [
+          "Threads waiting indefinitely for locks held by one another",
+          "Using a queue",
+          "Threads waiting indefinitely for locks held by one another",
+          "Naming threads",
+          "Joining a completed thread"
+        ],
+        "explanation": "Inconsistent lock acquisition can leave threads waiting forever."
+      }
+    ]
+  },
+  "status": "draft"
+}
