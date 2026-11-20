@@ -1,0 +1,163 @@
+{
+  "id": "python.py23.1.en",
+  "courseId": "python",
+  "moduleId": "PY23",
+  "topicId": "PY23.1",
+  "title": "Type Annotations, Optional Values and Union Types",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of Type Annotations, Optional Values and Union Types.",
+    "Choose an appropriate type annotations, optional values and union types technique for a Python application.",
+    "Interpret representative code and output involving type annotations, optional values and union types.",
+    "Identify limitations and failure modes for type annotations, optional values and union types.",
+    "Apply type annotations, optional values and union types concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY11.1",
+    "PY14.1",
+    "PY20.1",
+    "PY21.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Type annotations document the values a function or variable is intended to use. They help readers, IDEs and static type checkers reason about a program, but Python does not automatically enforce ordinary annotations at runtime. Use `str | None` for an optional string and `int | str` for a value that may have either type. Validate untrusted runtime data separately.",
+      "whyItMatters": "Clear contracts make larger applications easier to understand and maintain without pretending annotations replace runtime validation.",
+      "analogy": "Annotations are labels on storage containers that tell a team what belongs there.",
+      "analogyLimit": "A label does not stop someone from placing the wrong object in the container; runtime checks and validation are separate.",
+      "summary": "Type Annotations, Optional Values and Union Types develops practical application engineering skills for Python projects."
+    },
+    "explain": {
+      "narrative": "## Annotate contracts, then validate data\nUse built-in types such as `str`, `int`, `list[str]` and unions such as `str | None` (Python 3.10+). Annotate parameters and return values to communicate intent. A static type checker can report incompatible calls before execution, but the interpreter normally does not reject a value just because it conflicts with an annotation. At external boundaries, parse and validate actual values. Prefer precise types over `Any`, and keep annotations aligned with implementation.",
+      "examples": [
+        {
+          "id": "py231-ex1",
+          "language": "en",
+          "title": "Annotate a function",
+          "code": "def subtotal(price: float, quantity: int) -> float:\n    return price * quantity\nprint(subtotal(2.5, 4))",
+          "expectedOutput": "10.0",
+          "explanation": "The signature documents expected inputs and return type."
+        },
+        {
+          "id": "py231-ex2",
+          "language": "en",
+          "title": "Represent an optional value",
+          "code": "def display_name(name: str | None) -> str:\n    return name if name is not None else 'Guest'\nprint(display_name(None))",
+          "expectedOutput": "Guest",
+          "explanation": "The union includes None and the function handles it explicitly."
+        },
+        {
+          "id": "py231-ex3",
+          "language": "en",
+          "title": "Accept two input forms",
+          "code": "def normalize_id(value: int | str) -> str:\n    return str(value).strip()\nprint(normalize_id(42), normalize_id(' A7 '))",
+          "expectedOutput": "42 A7",
+          "explanation": "A union annotation documents supported alternatives."
+        },
+        {
+          "id": "py231-ex4",
+          "language": "en",
+          "title": "Inspect annotations",
+          "code": "def area(width: float, height: float) -> float:\n    return width * height\nprint(area.__annotations__['return'].__name__)",
+          "expectedOutput": "float",
+          "explanation": "Annotations are available for introspection; they are not automatic enforcement."
+        },
+        {
+          "id": "py231-ex5",
+          "language": "en",
+          "title": "Use a typed collection",
+          "code": "scores: list[int] = [8, 9, 10]\nprint(sum(scores), len(scores))",
+          "expectedOutput": "27 3",
+          "explanation": "Parameterized built-in collection types express element intent."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Annotate a function that accepts a product name and optional stock count. Handle None explicitly and return a readable status.",
+      "independentTask": "Add parameter and return annotations to a calculator module. Identify which inputs still need runtime validation.",
+      "hints": [
+        "Use -> None when a function intentionally returns nothing.",
+        "Use T | None for an optional value (Python 3.10+).",
+        "Annotations describe intent; they do not coerce values.",
+        "Validate values read from JSON, forms or files.",
+        "Keep annotations consistent with every return path."
+      ],
+      "challenge": "Design typed interfaces for an inventory service, including optional SKU values and a lookup that returns a record or None.",
+      "validationCriteria": [
+        "The concept and intended use are accurately explained.",
+        "All examples execute with the documented output on Python 3.13.",
+        "External input, failure handling and dependency boundaries are treated appropriately.",
+        "Limitations and version requirements are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py231-q1",
+        "prompt": "What do ordinary type annotations primarily provide?",
+        "answer": "Documentation and static-analysis information",
+        "options": [
+          "Documentation and static-analysis information",
+          "Automatic runtime conversion",
+          "Database constraints",
+          "Memory isolation"
+        ],
+        "explanation": "The interpreter generally does not enforce ordinary annotations."
+      },
+      {
+        "id": "py231-q2",
+        "prompt": "Which annotation means a string or None?",
+        "answer": "str | None",
+        "options": [
+          "str | None",
+          "str & None",
+          "Optional[str, None]",
+          "None[str]"
+        ],
+        "explanation": "The union operator combines str and NoneType."
+      },
+      {
+        "id": "py231-q3",
+        "prompt": "When should external input be validated?",
+        "answer": "At the boundary where untrusted data enters",
+        "options": [
+          "At the boundary where untrusted data enters",
+          "Only after deployment",
+          "Never when annotations exist",
+          "Only inside print()"
+        ],
+        "explanation": "Annotations do not validate JSON, user input or network responses."
+      },
+      {
+        "id": "py231-q4",
+        "prompt": "What does list[int] express?",
+        "answer": "A list intended to contain integers",
+        "options": [
+          "A list intended to contain integers",
+          "A list converted automatically",
+          "A fixed-size integer array",
+          "A database table"
+        ],
+        "explanation": "Parameterized built-in collection types describe element types."
+      },
+      {
+        "id": "py231-q5",
+        "prompt": "Which tool checks annotations before runtime?",
+        "answer": "A static type checker",
+        "options": [
+          "A static type checker",
+          "The garbage collector",
+          "The JSON encoder",
+          "The package installer"
+        ],
+        "explanation": "Static type checkers analyze code and report type inconsistencies."
+      }
+    ]
+  },
+  "status": "draft"
+}

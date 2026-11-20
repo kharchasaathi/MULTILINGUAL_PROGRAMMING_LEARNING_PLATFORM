@@ -1,0 +1,163 @@
+{
+  "id": "python.py23.9.en",
+  "courseId": "python",
+  "moduleId": "PY23",
+  "topicId": "PY23.9",
+  "title": "SQLite Database Fundamentals and Connection Management",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of SQLite Database Fundamentals and Connection Management.",
+    "Choose an appropriate sqlite database fundamentals and connection management technique for an application.",
+    "Interpret representative code and output involving sqlite database fundamentals and connection management.",
+    "Identify limitations and failure modes for sqlite database fundamentals and connection management.",
+    "Apply the concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY11.1",
+    "PY14.1",
+    "PY20.1",
+    "PY21.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "SQLite is a lightweight relational database stored in a file or in memory. Python's sqlite3 module provides DB-API access to create connections, execute SQL and fetch rows. A connection manages database interaction, while cursors execute statements and retrieve results. Applications should close resources predictably and understand transaction boundaries.",
+      "whyItMatters": "A relational database provides structured, queryable persistence for applications that need more than plain files.",
+      "analogy": "A database is an organized register with tables, columns and searchable records.",
+      "analogyLimit": "A local SQLite database is not automatically suitable for every multi-user, high-write or distributed workload.",
+      "summary": "SQLite Database Fundamentals and Connection Management develops practical application engineering skills for Python projects."
+    },
+    "explain": {
+      "narrative": "## Connect and query safely\nUse `sqlite3.connect` to open a database and a cursor or connection `execute` method to run SQL. Create tables with explicit constraints and use `?` placeholders for values. Fetch rows with `fetchone` or `fetchall`. A connection context manager commits or rolls back a transaction, but it does not itself close the connection; close it explicitly or use `contextlib.closing` when that lifecycle is desired. Keep database access behind a repository or data-access layer.",
+      "examples": [
+        {
+          "id": "py239-ex1",
+          "language": "en",
+          "title": "Create an in-memory database",
+          "code": "import sqlite3\nconnection = sqlite3.connect(':memory:')\nprint(connection.execute('SELECT 2 + 3').fetchone()[0])\nconnection.close()",
+          "expectedOutput": "5",
+          "explanation": ":memory: creates a temporary database for this connection."
+        },
+        {
+          "id": "py239-ex2",
+          "language": "en",
+          "title": "Create a table and inspect it",
+          "code": "import sqlite3\ncon = sqlite3.connect(':memory:')\ncon.execute('CREATE TABLE learner (id INTEGER PRIMARY KEY, name TEXT NOT NULL)')\nprint(con.execute(\"SELECT name FROM sqlite_master WHERE type='table'\").fetchone()[0])\ncon.close()",
+          "expectedOutput": "learner",
+          "explanation": "SQLite stores schema metadata in sqlite_master."
+        },
+        {
+          "id": "py239-ex3",
+          "language": "en",
+          "title": "Insert and retrieve a row",
+          "code": "import sqlite3\ncon = sqlite3.connect(':memory:')\ncon.execute('CREATE TABLE item (name TEXT, quantity INTEGER)')\ncon.execute('INSERT INTO item VALUES (?, ?)', ('pen', 4))\nprint(con.execute('SELECT quantity FROM item WHERE name = ?', ('pen',)).fetchone()[0])\ncon.close()",
+          "expectedOutput": "4",
+          "explanation": "Question-mark placeholders bind values separately from SQL text."
+        },
+        {
+          "id": "py239-ex4",
+          "language": "en",
+          "title": "Use an aggregate query",
+          "code": "import sqlite3\ncon = sqlite3.connect(':memory:')\ncon.execute('CREATE TABLE score (value INTEGER)')\ncon.executemany('INSERT INTO score VALUES (?)', [(7,), (9,), (8,)])\nprint(con.execute('SELECT AVG(value) FROM score').fetchone()[0])\ncon.close()",
+          "expectedOutput": "8.0",
+          "explanation": "SQL aggregation computes a result over matching rows."
+        },
+        {
+          "id": "py239-ex5",
+          "language": "en",
+          "title": "Read column names from cursor metadata",
+          "code": "import sqlite3\ncon = sqlite3.connect(':memory:')\ncur = con.execute('SELECT 1 AS total, 2 AS count')\nprint([column[0] for column in cur.description])\ncon.close()",
+          "expectedOutput": "['total', 'count']",
+          "explanation": "Cursor description exposes result column metadata."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create an in-memory database with a products table. Insert two rows with placeholders and query the product with the lowest price.",
+      "independentTask": "Plan a small SQLite persistence layer with connection lifecycle, schema creation, CRUD operations and transaction handling.",
+      "hints": [
+        "Use :memory: for isolated examples and tests.",
+        "Bind values with placeholders; do not concatenate them into SQL.",
+        "Use explicit column names in INSERT statements.",
+        "Fetch only the rows needed by the application.",
+        "Close connections when their lifecycle ends."
+      ],
+      "challenge": "Implement a repository interface for inventory records and test it against an in-memory SQLite database.",
+      "validationCriteria": [
+        "The concept and intended use are accurately explained.",
+        "All examples execute with the documented output on Python 3.13.",
+        "External input, failure handling and dependency boundaries are treated appropriately.",
+        "Limitations and security implications are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py239-q1",
+        "prompt": "Which standard-library module provides SQLite support?",
+        "answer": "sqlite3",
+        "options": [
+          "sqlite3",
+          "json",
+          "typing",
+          "urllib"
+        ],
+        "explanation": "sqlite3 implements Python's DB-API interface for SQLite."
+      },
+      {
+        "id": "py239-q2",
+        "prompt": "What does sqlite3.connect(':memory:') create?",
+        "answer": "An in-memory database",
+        "options": [
+          "An in-memory database",
+          "A permanent file named memory",
+          "A remote database",
+          "A JSON document"
+        ],
+        "explanation": "The special :memory: name creates a database held in memory."
+      },
+      {
+        "id": "py239-q3",
+        "prompt": "What is a cursor used for?",
+        "answer": "Executing SQL and fetching result rows",
+        "options": [
+          "Executing SQL and fetching result rows",
+          "Formatting Python code",
+          "Validating type hints",
+          "Sending HTTP requests"
+        ],
+        "explanation": "A cursor executes statements and exposes query results."
+      },
+      {
+        "id": "py239-q4",
+        "prompt": "What is a safe way to provide SQL values?",
+        "answer": "Use parameter placeholders and a separate values sequence",
+        "options": [
+          "Use parameter placeholders and a separate values sequence",
+          "Concatenate user input into SQL",
+          "Format values with f-strings",
+          "Put values in SQL comments"
+        ],
+        "explanation": "Parameter binding keeps values separate from SQL syntax."
+      },
+      {
+        "id": "py239-q5",
+        "prompt": "Does a connection context manager automatically close the connection?",
+        "answer": "No",
+        "options": [
+          "No",
+          "Yes, always",
+          "Only for in-memory databases",
+          "Only after SELECT"
+        ],
+        "explanation": "The connection context manager handles transaction commit or rollback; close lifecycle separately."
+      }
+    ]
+  },
+  "status": "draft"
+}

@@ -1,0 +1,161 @@
+{
+  "id": "python.py15.6.en",
+  "courseId": "python",
+  "moduleId": "PY15",
+  "topicId": "PY15.6",
+  "title": "Python File Paths and pathlib",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and practical uses of python file paths and pathlib.",
+    "Choose appropriate Python standard-library APIs and syntax for python file paths and pathlib.",
+    "Predict the behaviour of representative PY15.6 operations and their outputs.",
+    "Identify common mistakes, edge cases and failure conditions in python file paths and pathlib.",
+    "Apply safe, readable python file paths and pathlib techniques in a small program."
+  ],
+  "prerequisites": [
+    "PY14.1",
+    "PY14.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "The pathlib module represents filesystem paths as Path objects and provides readable, platform-aware operations. It supports path composition, inspection, reading and writing text, directory creation and iteration. A path object is a description of a location; operations on it can still fail because of permissions, missing parents or concurrent filesystem changes.",
+      "whyItMatters": "Pathlib reduces fragile string concatenation and makes filesystem code easier to read across operating systems. Safe path handling also helps prevent accidental access outside an application's intended data directory.",
+      "analogy": "Working with a file is like borrowing a labelled record from a filing room: you identify its location, choose whether to read or update it, and return the resource when finished.",
+      "analogyLimit": "A real filesystem has permissions, concurrent changes, encoding rules and failure modes that a physical filing-room analogy cannot fully represent.",
+      "summary": "Python File Paths and pathlib relies on explicit paths, correct modes, deliberate resource management and validation of data."
+    },
+    "explain": {
+      "narrative": "## Core idea\nThe pathlib module represents filesystem paths as Path objects and provides readable, platform-aware operations. It supports path composition, inspection, reading and writing text, directory creation and iteration. A path object is a description of a location; operations on it can still fail because of permissions, missing parents or concurrent filesystem changes.\n\n## Syntax and behaviour\nCreate paths with `Path('folder') / 'file.txt'`. Use `exists()`, `is_file()`, `is_dir()`, `name`, `suffix`, `parent`, `mkdir()` and `iterdir()` as appropriate. For user-controlled names, validate the name and resolve it beneath an approved base directory before using it.\n\n## Rules and practical guidance\nDo not concatenate path strings with hard-coded separators. Existence checks are not a substitute for handling operation errors. Avoid blindly trusting user-supplied path components such as `..`. Do not recursively delete directories or operate on arbitrary paths without a clear allow-list and user intent.\n\n## Example walkthroughs\nThe five examples below use deterministic in-memory streams or automatically cleaned temporary directories. Their outputs are designed to be reproducible in the course validator.\n\n## Common mistakes\n- Choosing a destructive mode when existing content must be preserved.\n- Assuming paths are relative to the script file rather than the process working directory.\n- Forgetting that text and binary streams accept different data types.\n- Building CSV or JSON by manually concatenating strings.\n- Ignoring exceptions caused by missing paths, permissions, invalid encodings or malformed data.\n\n## Best practices\nUse the standard library, explicit UTF-8 for text, context managers for resources, narrow exception handling and validation at application boundaries. Keep untrusted input within an explicitly approved data area.",
+      "examples": [
+        {
+          "id": "py15.6-ex1",
+          "language": "en",
+          "title": "Join path components",
+          "code": "from pathlib import Path\npath = Path('data') / '2026' / 'records.csv'\nprint(path.as_posix())\nprint(path.name)",
+          "expectedOutput": "data/2026/records.csv\nrecords.csv",
+          "explanation": "The division operator joins path components using the platform's path rules."
+        },
+        {
+          "id": "py15.6-ex2",
+          "language": "en",
+          "title": "Inspect a path's parts",
+          "code": "from pathlib import Path\npath = Path('archive/report.txt')\nprint(path.parent)\nprint(path.stem)\nprint(path.suffix)",
+          "expectedOutput": "archive\nreport\n.txt",
+          "explanation": "Path properties expose the parent directory, filename without suffix and suffix."
+        },
+        {
+          "id": "py15.6-ex3",
+          "language": "en",
+          "title": "Create and inspect a directory safely",
+          "code": "from pathlib import Path\nfrom tempfile import TemporaryDirectory\nwith TemporaryDirectory() as folder:\n    child = Path(folder) / 'exports'\n    child.mkdir()\n    print(child.is_dir())",
+          "expectedOutput": "True",
+          "explanation": "mkdir creates the requested directory. The temporary parent controls cleanup for this example."
+        },
+        {
+          "id": "py15.6-ex4",
+          "language": "en",
+          "title": "List immediate directory entries",
+          "code": "from pathlib import Path\nfrom tempfile import TemporaryDirectory\nwith TemporaryDirectory() as folder:\n    base = Path(folder)\n    (base / 'a.txt').write_text('A', encoding='utf-8')\n    (base / 'b.txt').write_text('B', encoding='utf-8')\n    print(sorted(p.name for p in base.iterdir()))",
+          "expectedOutput": "['a.txt', 'b.txt']",
+          "explanation": "iterdir yields the immediate entries; sorting makes the displayed order deterministic."
+        },
+        {
+          "id": "py15.6-ex5",
+          "language": "en",
+          "title": "Keep a candidate path under an approved base",
+          "code": "from pathlib import Path\nbase = Path('/safe/data').resolve()\ncandidate = (base / 'reports' / 'daily.txt').resolve()\nprint(candidate.is_relative_to(base))",
+          "expectedOutput": "True",
+          "explanation": "Resolving and checking containment is one part of path validation. Real applications must also consider symlinks, race conditions and filesystem permissions."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a small python file paths and pathlib demonstration using a temporary directory or an in-memory stream. Run it, compare the output with your prediction and explain each operation.",
+      "independentTask": "Build a mini record-processing utility that applies python file paths and pathlib to a small, known dataset. Include one valid case, one edge case and a clear response to an expected failure.",
+      "hints": [
+        "Start with the smallest possible file or stream and state what result you expect.",
+        "Choose the mode and encoding before writing the operation.",
+        "Use a context manager whenever a resource must be closed.",
+        "Test an empty input and an invalid or missing value.",
+        "Keep user-controlled paths and parsed external data within explicit validation rules."
+      ],
+      "challenge": "Extend the example into a reusable helper that validates inputs, handles one expected error and leaves resources in a predictable state.",
+      "validationCriteria": [
+        "The program uses the appropriate standard-library API.",
+        "The expected output matches the actual result.",
+        "Resources are closed or cleaned up reliably.",
+        "At least one edge case is handled explicitly."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py15.6-q1",
+        "prompt": "How should path components be joined with pathlib?",
+        "answer": "Use the / operator",
+        "options": [
+          "Use the / operator",
+          "Concatenate with a colon",
+          "Use a comma",
+          "Use string multiplication"
+        ],
+        "explanation": "Path / component joins path parts using platform-aware rules."
+      },
+      {
+        "id": "py15.6-q2",
+        "prompt": "What does Path.suffix return for report.txt?",
+        "answer": ".txt",
+        "options": [
+          ".txt",
+          "report",
+          "report.txt",
+          "txt/report"
+        ],
+        "explanation": "suffix returns the extension including its leading dot."
+      },
+      {
+        "id": "py15.6-q3",
+        "prompt": "What does Path.iterdir() yield?",
+        "answer": "Immediate directory entries",
+        "options": [
+          "Immediate directory entries",
+          "All files on the computer",
+          "Only file contents",
+          "A CSV reader"
+        ],
+        "explanation": "iterdir iterates over entries directly inside that directory."
+      },
+      {
+        "id": "py15.6-q4",
+        "prompt": "Why validate user-supplied path components?",
+        "answer": "To prevent unintended traversal outside an allowed directory",
+        "options": [
+          "To prevent unintended traversal outside an allowed directory",
+          "To speed up integer arithmetic",
+          "To change file encodings",
+          "To guarantee a file exists"
+        ],
+        "explanation": "Untrusted path components can include traversal or unexpected locations."
+      },
+      {
+        "id": "py15.6-q5",
+        "prompt": "Does exists() guarantee the next filesystem operation succeeds?",
+        "answer": "No",
+        "options": [
+          "No",
+          "Yes, always",
+          "Only on Windows",
+          "Only for directories"
+        ],
+        "explanation": "Permissions, concurrent changes and other errors can still make the later operation fail."
+      }
+    ]
+  },
+  "status": "draft"
+}

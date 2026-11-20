@@ -1,0 +1,164 @@
+{
+  "id": "python.py23.14.en",
+  "courseId": "python",
+  "moduleId": "PY23",
+  "topicId": "PY23.14",
+  "title": "Dependency Injection and Testable Service Boundaries",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of Dependency Injection and Testable Service Boundaries.",
+    "Choose an appropriate dependency injection and testable service boundaries technique for a Python application.",
+    "Interpret representative code and output involving dependency injection and testable service boundaries.",
+    "Identify limitations and failure modes for dependency injection and testable service boundaries.",
+    "Apply the concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY11.1",
+    "PY14.1",
+    "PY20.1",
+    "PY21.7",
+    "PY23.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Dependency injection supplies a component's collaborators from outside rather than constructing concrete dependencies inside the component. Dependencies may be passed as function arguments or constructor parameters. This makes services easier to test with fakes and easier to adapt when infrastructure changes. Dependency injection is a design technique, not a requirement to use a large framework.",
+      "whyItMatters": "Injectable dependencies reduce hidden coupling and make tests deterministic without databases, clocks or network services.",
+      "analogy": "A technician uses interchangeable tools supplied for the job instead of building a new tool inside every repair.",
+      "analogyLimit": "Too much indirection can make a small program harder to follow; inject only dependencies that benefit from replacement or isolation.",
+      "summary": "Dependency Injection and Testable Service Boundaries develops practical application engineering skills for Python projects."
+    },
+    "explain": {
+      "narrative": "## Supply collaborators explicitly\nPass a repository, clock, notifier or transport into the function or service that needs it. Define a small Protocol when multiple implementations should satisfy the same interface. In tests, provide a fake with predictable behaviour. Avoid global mutable service objects and avoid creating a new database connection inside every domain function. Keep construction at the application boundary, where concrete implementations are selected.",
+      "examples": [
+        {
+          "id": "py2314-ex1",
+          "language": "en",
+          "title": "Inject a calculation policy",
+          "code": "def quote(amount: int, tax_rate: float) -> float:\n    return amount * (1 + tax_rate)\nprint(quote(100, 0.05))",
+          "expectedOutput": "105.0",
+          "explanation": "The policy value is passed in, so callers can choose a different rate."
+        },
+        {
+          "id": "py2314-ex2",
+          "language": "en",
+          "title": "Inject a repository fake",
+          "code": "class MemoryStore:\n    def __init__(self): self.values = []\n    def save(self, value): self.values.append(value)\ndef register(store, name): store.save(name.strip())\nstore = MemoryStore(); register(store, ' Asha ')\nprint(store.values)",
+          "expectedOutput": "['Asha']",
+          "explanation": "The service receives a store rather than constructing a database dependency."
+        },
+        {
+          "id": "py2314-ex3",
+          "language": "en",
+          "title": "Inject a clock",
+          "code": "def expiry_days(clock, days: int) -> str:\n    return f'{clock()} + {days} days'\nfixed_clock = lambda: '2026-11-20'\nprint(expiry_days(fixed_clock, 7))",
+          "expectedOutput": "2026-11-20 + 7 days",
+          "explanation": "A fixed clock makes time-dependent logic predictable in tests."
+        },
+        {
+          "id": "py2314-ex4",
+          "language": "en",
+          "title": "Inject a notification function",
+          "code": "def complete_order(order_id: int, notify):\n    notify(f'Order {order_id} completed')\nmessages = []\ncomplete_order(42, messages.append)\nprint(messages[0])",
+          "expectedOutput": "Order 42 completed",
+          "explanation": "A callback is a simple dependency that can be replaced during testing."
+        },
+        {
+          "id": "py2314-ex5",
+          "language": "en",
+          "title": "Select an implementation at the boundary",
+          "code": "def build_service(use_memory: bool):\n    return 'memory' if use_memory else 'sqlite'\nprint(build_service(True), build_service(False))",
+          "expectedOutput": "memory sqlite",
+          "explanation": "The composition boundary selects the concrete adapter."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a report service that accepts a repository and clock. Test it using an in-memory repository and fixed clock.",
+      "independentTask": "Identify three hidden dependencies in an application and redesign its constructor or functions to receive them explicitly.",
+      "hints": [
+        "Inject only dependencies that need replacement or isolation.",
+        "Pass collaborators as arguments or constructor parameters.",
+        "Use Protocol to describe stable capabilities when helpful.",
+        "Fakes should be deterministic and minimal.",
+        "Choose concrete implementations at the application boundary."
+      ],
+      "challenge": "Design an order service that receives repository, payment gateway and notifier dependencies, then test success and failure paths with fakes.",
+      "validationCriteria": [
+        "The concept and intended use are accurately explained.",
+        "All examples execute with the documented output on Python 3.13.",
+        "Application boundaries and dependency responsibilities are correctly identified.",
+        "Limitations and operational or security implications are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2314-q1",
+        "prompt": "What is dependency injection?",
+        "answer": "Supplying collaborators from outside a component",
+        "options": [
+          "Supplying collaborators from outside a component",
+          "Installing packages at runtime",
+          "Importing every module globally",
+          "Creating database tables automatically"
+        ],
+        "explanation": "Dependencies are provided to the component rather than hidden inside it."
+      },
+      {
+        "id": "py2314-q2",
+        "prompt": "What is a common benefit of injecting a fake repository?",
+        "answer": "Tests can run without a real database",
+        "options": [
+          "Tests can run without a real database",
+          "The application becomes encrypted",
+          "Python skips type checking",
+          "The repository is deployed automatically"
+        ],
+        "explanation": "A fake repository provides controlled behaviour for tests."
+      },
+      {
+        "id": "py2314-q3",
+        "prompt": "Where should concrete implementations usually be selected?",
+        "answer": "At the application composition boundary",
+        "options": [
+          "At the application composition boundary",
+          "Inside every domain calculation",
+          "Inside every MCQ",
+          "In a SQL WHERE clause"
+        ],
+        "explanation": "The outer boundary wires the application's concrete adapters."
+      },
+      {
+        "id": "py2314-q4",
+        "prompt": "What is a risk of excessive dependency injection?",
+        "answer": "Unnecessary indirection and complexity",
+        "options": [
+          "Unnecessary indirection and complexity",
+          "Automatic SQL injection",
+          "Loss of all Python types",
+          "Mandatory network access"
+        ],
+        "explanation": "Only useful seams should be abstracted."
+      },
+      {
+        "id": "py2314-q5",
+        "prompt": "Which dependency is useful to inject for deterministic time tests?",
+        "answer": "A clock function or clock interface",
+        "options": [
+          "A clock function or clock interface",
+          "A CSS stylesheet",
+          "A package index",
+          "A compiler binary"
+        ],
+        "explanation": "A fixed clock removes dependence on wall-clock time."
+      }
+    ]
+  },
+  "status": "draft"
+}

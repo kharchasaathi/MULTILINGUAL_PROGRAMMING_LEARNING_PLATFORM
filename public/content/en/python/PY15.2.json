@@ -1,0 +1,161 @@
+{
+  "id": "python.py15.2.en",
+  "courseId": "python",
+  "moduleId": "PY15",
+  "topicId": "PY15.2",
+  "title": "Python open() Function and File Modes",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and practical uses of python open() function and file modes.",
+    "Choose appropriate Python standard-library APIs and syntax for python open() function and file modes.",
+    "Predict the behaviour of representative PY15.2 operations and their outputs.",
+    "Identify common mistakes, edge cases and failure conditions in python open() function and file modes.",
+    "Apply safe, readable python open() function and file modes techniques in a small program."
+  ],
+  "prerequisites": [
+    "PY14.1",
+    "PY14.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "The built-in open() function creates a file object connected to a path. Its mode controls whether the program reads, writes, appends or creates a file, and whether operations use text or bytes. Text mode is the default; binary mode is used for non-text data. Selecting the wrong mode can destroy existing content or reject a valid operation.",
+      "whyItMatters": "A file mode is a safety decision. Correct mode selection prevents accidental truncation, supports binary data accurately and makes program behaviour predictable.",
+      "analogy": "Working with a file is like borrowing a labelled record from a filing room: you identify its location, choose whether to read or update it, and return the resource when finished.",
+      "analogyLimit": "A real filesystem has permissions, concurrent changes, encoding rules and failure modes that a physical filing-room analogy cannot fully represent.",
+      "summary": "Python open() Function and File Modes relies on explicit paths, correct modes, deliberate resource management and validation of data."
+    },
+    "explain": {
+      "narrative": "## Core idea\nThe built-in open() function creates a file object connected to a path. Its mode controls whether the program reads, writes, appends or creates a file, and whether operations use text or bytes. Text mode is the default; binary mode is used for non-text data. Selecting the wrong mode can destroy existing content or reject a valid operation.\n\n## Syntax and behaviour\nCommon modes are `r` (read), `w` (write and truncate/create), `a` (append/create), `x` (exclusive create), `b` (binary) and `t` (text). Modes can be combined, such as `rb` or `w+b`. Use `encoding='utf-8'` for text; do not pass text encodings for binary mode.\n\n## Rules and practical guidance\n`r` requires an existing file. `w` truncates an existing file. `a` writes at the end. `x` fails if the path already exists. Binary streams read and write bytes, not strings. The `+` modifier enables both reading and writing, subject to the mode's positioning and truncation semantics.\n\n## Example walkthroughs\nThe five examples below use deterministic in-memory streams or automatically cleaned temporary directories. Their outputs are designed to be reproducible in the course validator.\n\n## Common mistakes\n- Choosing a destructive mode when existing content must be preserved.\n- Assuming paths are relative to the script file rather than the process working directory.\n- Forgetting that text and binary streams accept different data types.\n- Building CSV or JSON by manually concatenating strings.\n- Ignoring exceptions caused by missing paths, permissions, invalid encodings or malformed data.\n\n## Best practices\nUse the standard library, explicit UTF-8 for text, context managers for resources, narrow exception handling and validation at application boundaries. Keep untrusted input within an explicitly approved data area.",
+      "examples": [
+        {
+          "id": "py15.2-ex1",
+          "language": "en",
+          "title": "Read text from an in-memory stream",
+          "code": "from io import StringIO\nwith StringIO('alpha') as file:\n    print(file.read())\n    print(file.closed)",
+          "expectedOutput": "alpha\nFalse",
+          "explanation": "The stream remains open inside the with block; it is closed automatically when execution leaves the block."
+        },
+        {
+          "id": "py15.2-ex2",
+          "language": "en",
+          "title": "Append text using a file-like stream",
+          "code": "from io import StringIO\nfile = StringIO('start')\nfile.seek(0, 2)\nfile.write('-end')\nprint(file.getvalue())",
+          "expectedOutput": "start-end",
+          "explanation": "Seeking to the end before writing models append positioning without modifying a real file."
+        },
+        {
+          "id": "py15.2-ex3",
+          "language": "en",
+          "title": "Understand binary mode values",
+          "code": "from io import BytesIO\nwith BytesIO(b'ABC') as file:\n    data = file.read()\n    print(data)\n    print(type(data).__name__)",
+          "expectedOutput": "b'ABC'\nbytes",
+          "explanation": "Binary streams return bytes objects; they do not decode content automatically."
+        },
+        {
+          "id": "py15.2-ex4",
+          "language": "en",
+          "title": "Use exclusive creation safely in a temporary directory",
+          "code": "from pathlib import Path\nfrom tempfile import TemporaryDirectory\nwith TemporaryDirectory() as folder:\n    path = Path(folder) / 'new.txt'\n    with path.open('x', encoding='utf-8') as file:\n        file.write('created')\n    print(path.read_text(encoding='utf-8'))",
+          "expectedOutput": "created",
+          "explanation": "Exclusive creation succeeds for a new path. A second x-mode open would raise FileExistsError."
+        },
+        {
+          "id": "py15.2-ex5",
+          "language": "en",
+          "title": "Distinguish write and append effects",
+          "code": "from io import StringIO\nfile = StringIO('old data')\nfile.seek(0)\nfile.write('new')\nprint(file.getvalue())\nfile.seek(0, 2)\nfile.write('!')\nprint(file.getvalue())",
+          "expectedOutput": "new data\nnew data!",
+          "explanation": "Writing at position zero replaces characters at that position; writing at the end appends. Real w mode additionally truncates the file when opened."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a small python open() function and file modes demonstration using a temporary directory or an in-memory stream. Run it, compare the output with your prediction and explain each operation.",
+      "independentTask": "Build a mini record-processing utility that applies python open() function and file modes to a small, known dataset. Include one valid case, one edge case and a clear response to an expected failure.",
+      "hints": [
+        "Start with the smallest possible file or stream and state what result you expect.",
+        "Choose the mode and encoding before writing the operation.",
+        "Use a context manager whenever a resource must be closed.",
+        "Test an empty input and an invalid or missing value.",
+        "Keep user-controlled paths and parsed external data within explicit validation rules."
+      ],
+      "challenge": "Extend the example into a reusable helper that validates inputs, handles one expected error and leaves resources in a predictable state.",
+      "validationCriteria": [
+        "The program uses the appropriate standard-library API.",
+        "The expected output matches the actual result.",
+        "Resources are closed or cleaned up reliably.",
+        "At least one edge case is handled explicitly."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py15.2-q1",
+        "prompt": "Which mode truncates an existing file when opened for writing?",
+        "answer": "w",
+        "options": [
+          "w",
+          "a",
+          "r",
+          "x"
+        ],
+        "explanation": "w creates or truncates the file."
+      },
+      {
+        "id": "py15.2-q2",
+        "prompt": "Which mode fails if the target path already exists?",
+        "answer": "x",
+        "options": [
+          "x",
+          "a",
+          "w",
+          "r"
+        ],
+        "explanation": "Exclusive creation mode x refuses to overwrite an existing path."
+      },
+      {
+        "id": "py15.2-q3",
+        "prompt": "What does binary mode return when reading?",
+        "answer": "bytes",
+        "options": [
+          "bytes",
+          "str",
+          "dict",
+          "list"
+        ],
+        "explanation": "Binary streams work with bytes rather than decoded text strings."
+      },
+      {
+        "id": "py15.2-q4",
+        "prompt": "Which argument selects a text encoding?",
+        "answer": "encoding",
+        "options": [
+          "encoding",
+          "newline",
+          "buffer",
+          "errors_only"
+        ],
+        "explanation": "The encoding argument controls text decoding and encoding."
+      },
+      {
+        "id": "py15.2-q5",
+        "prompt": "What does a mode such as rb mean?",
+        "answer": "Read binary data",
+        "options": [
+          "Read binary data",
+          "Rewrite text data",
+          "Append text data",
+          "Create a new text file"
+        ],
+        "explanation": "r selects reading and b selects binary mode."
+      }
+    ]
+  },
+  "status": "draft"
+}

@@ -1,0 +1,156 @@
+{
+  "id": "python.py13.6.en",
+  "courseId": "python",
+  "moduleId": "PY13",
+  "topicId": "PY13.6",
+  "title": "Generator Expressions and Lazy Evaluation",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the main ideas in generator expressions and lazy evaluation.",
+    "Use the relevant iterator or generator protocol correctly.",
+    "Trace values and state across successive iteration steps.",
+    "Recognize exhaustion, lazy evaluation and relevant edge cases.",
+    "Apply the concept to a practical sequence-processing task."
+  ],
+  "prerequisites": [
+    "PY6.2",
+    "PY7.1",
+    "PY8.1",
+    "PY12.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A generator expression uses parentheses around an expression and for clauses to create a generator iterator. It computes each result as requested instead of constructing a complete list immediately. Lazy evaluation can reduce intermediate storage, but the generator is generally consumed once.",
+      "whyItMatters": "Generator expressions are concise for streaming transformations and aggregation, especially when a consumer such as sum(), any(), all() or a for loop can process values one at a time.",
+      "analogy": "A list comprehension is like preparing every parcel in advance; a generator expression prepares the next parcel only when it is requested.",
+      "analogyLimit": "Lazy evaluation does not guarantee low total memory use if the consumer stores all values. It also means exceptions and side effects can occur later, during iteration, rather than at generator creation."
+    },
+    "explain": {
+      "narrative": "## Generator expression syntax\nA generator expression resembles a comprehension but uses parentheses: `(expression for item in iterable if condition)`. It returns a generator object rather than a list. The expression is evaluated as each item is requested.\n\n## Lazy consumption\nConsumers such as `sum()`, `min()`, `max()`, `any()` and `all()` can process generator values incrementally. A generator is normally exhausted after one complete pass. If you need repeated traversal or random access, create a list or retain a reusable iterable instead.\n\n## Choose the right representation\nUse a list comprehension when you need all results available, indexed or reused. Use a generator expression when values can be processed sequentially and you do not need to keep the entire result. Lazy execution can defer exceptions and side effects until iteration.",
+      "examples": [
+        {
+          "id": "py13.6-ex1",
+          "language": "en",
+          "title": "Create a generator expression",
+          "code": "squares = (n * n for n in range(4))\nprint(type(squares).__name__)\nprint(list(squares))",
+          "expectedOutput": "generator\n[0, 1, 4, 9]",
+          "explanation": "Parentheses create a generator expression; list consumes it and collects its generated values."
+        },
+        {
+          "id": "py13.6-ex2",
+          "language": "en",
+          "title": "Sum values lazily",
+          "code": "total = sum(n * n for n in range(1, 5))\nprint(total)",
+          "expectedOutput": "30",
+          "explanation": "sum consumes each generated square and accumulates the total without requiring a separate list."
+        },
+        {
+          "id": "py13.6-ex3",
+          "language": "en",
+          "title": "Use any with a generator expression",
+          "code": "values = [3, 7, 12, 5]\nprint(any(value > 10 for value in values))",
+          "expectedOutput": "True",
+          "explanation": "any stops as soon as it finds a true result, so later values need not be evaluated."
+        },
+        {
+          "id": "py13.6-ex4",
+          "language": "en",
+          "title": "Compare list and generator types",
+          "code": "list_values = [n + 1 for n in range(3)]\ngen_values = (n + 1 for n in range(3))\nprint(type(list_values).__name__)\nprint(type(gen_values).__name__)",
+          "expectedOutput": "list\ngenerator",
+          "explanation": "Square brackets build a list immediately; parentheses create a lazy generator object."
+        },
+        {
+          "id": "py13.6-ex5",
+          "language": "en",
+          "title": "A generator is consumed once",
+          "code": "gen = (n for n in range(3))\nprint(sum(gen))\nprint(list(gen))",
+          "expectedOutput": "3\n[]",
+          "explanation": "sum consumes the generator completely, so no values remain for the later list conversion."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Write a small program that demonstrates generator expressions and lazy evaluation. Show at least two iteration steps and explain how the state changes.",
+      "independentTask": "Build a reusable or one-pass sequence processor using this topic. Test normal input, an empty or exhausted case, and describe when each value is calculated.",
+      "hints": [
+        "Identify whether the object is an iterable, an iterator or both.",
+        "Write down the state before and after each next() call.",
+        "Use StopIteration as the normal completion signal.",
+        "Test an empty input and an already exhausted iterator.",
+        "Choose a list only when repeated access or storage is required."
+      ],
+      "challenge": "Process a larger sequence incrementally and compare the memory and reuse trade-offs with building a list first."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py13.6-q1",
+        "prompt": "Which delimiters create a generator expression?",
+        "answer": "Parentheses",
+        "options": [
+          "Parentheses",
+          "Square brackets",
+          "Curly braces with a colon",
+          "Angle brackets"
+        ],
+        "explanation": "A generator expression uses parentheses around its expression and iteration clauses."
+      },
+      {
+        "id": "py13.6-q2",
+        "prompt": "When are generator expression values computed?",
+        "answer": "As the iterator is consumed",
+        "options": [
+          "As the iterator is consumed",
+          "All at generator creation",
+          "Only when sorted",
+          "When the module is imported"
+        ],
+        "explanation": "Generator expressions evaluate lazily as values are requested."
+      },
+      {
+        "id": "py13.6-q3",
+        "prompt": "Which consumer can process a generator incrementally?",
+        "answer": "sum()",
+        "options": [
+          "sum()",
+          "len()",
+          "sorted() always without storing",
+          "indexing with [0]"
+        ],
+        "explanation": "sum iterates through the values and accumulates a total."
+      },
+      {
+        "id": "py13.6-q4",
+        "prompt": "What is a trade-off of lazy evaluation?",
+        "answer": "Errors and side effects may occur later during iteration",
+        "options": [
+          "Errors and side effects may occur later during iteration",
+          "A generator always stores all values",
+          "A generator supports random indexing",
+          "A generator can never be exhausted"
+        ],
+        "explanation": "The generator body runs as it is consumed, so work and errors can be deferred."
+      },
+      {
+        "id": "py13.6-q5",
+        "prompt": "When is a list comprehension a better choice?",
+        "answer": "When results must be indexed or reused",
+        "options": [
+          "When results must be indexed or reused",
+          "When only one sequential pass is needed and storage should be avoided",
+          "When no values should be computed",
+          "When an infinite stream is required"
+        ],
+        "explanation": "Lists support repeated traversal and indexing; generators are better for one-pass lazy processing."
+      }
+    ]
+  },
+  "status": "draft"
+}

@@ -1,0 +1,168 @@
+{
+  "id": "python.py22.4.en",
+  "courseId": "python",
+  "moduleId": "PY22",
+  "topicId": "PY22.4",
+  "title": "Decorators and Function Wrapping",
+  "language": "en",
+  "learningObjectives": [
+    "Explain decorator functions, closures, @ syntax, wrapper functions and functools.wraps.",
+    "Select a suitable advanced Python technique for PY22.4.",
+    "Interpret iterator and callable behaviour correctly.",
+    "Identify limitations and risks when applying PY22.4.",
+    "Apply PY22.4 concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY8.1",
+    "PY11.1",
+    "PY14.1",
+    "PY21.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A decorator is a callable that takes a function or class and returns a replacement or enhanced callable. The @decorator syntax applies the decorator when the function is defined. A common decorator defines an inner wrapper that performs work before or after calling the original function. functools.wraps preserves useful metadata from the wrapped function.",
+      "whyItMatters": "Decorators support reusable cross-cutting behaviour such as timing, logging, validation and access checks without duplicating code in every function.",
+      "analogy": "A decorator is a reusable protective cover placed around a tool while keeping the tool's main job intact.",
+      "analogyLimit": "Decorators can make control flow less obvious and may affect signatures or debugging unless metadata is preserved and behaviour remains simple.",
+      "summary": "Decorators and Function Wrapping develops advanced Python programming skills."
+    },
+    "explain": {
+      "narrative": "## Wrap behaviour without rewriting functions\nA decorator accepts a callable and returns a callable. The wrapper can inspect arguments, call the original function and process its result. `functools.wraps` copies metadata such as the original function name and docstring to the wrapper.\n\nDecorators are applied at function definition time. Use them for consistent behaviour shared across functions, not for hiding complicated business logic. Test both the decorated behaviour and the original function's public interface.",
+      "examples": [
+        {
+          "id": "py224-ex1",
+          "language": "en",
+          "title": "Create a basic decorator",
+          "code": "def announce(function):\n    def wrapper():\n        return 'start ' + function()\n    return wrapper\n@announce\ndef greet(): return 'hello'\nprint(greet())",
+          "expectedOutput": "start hello",
+          "explanation": "The decorator returns a wrapper that calls the original function."
+        },
+        {
+          "id": "py224-ex2",
+          "language": "en",
+          "title": "Preserve wrapped function metadata",
+          "code": "from functools import wraps\ndef label(function):\n    @wraps(function)\n    def wrapper(*args, **kwargs): return function(*args, **kwargs)\n    return wrapper\n@label\ndef add(a, b): return a + b\nprint(add.__name__, add(2, 3))",
+          "expectedOutput": "add 5",
+          "explanation": "wraps preserves the original function metadata."
+        },
+        {
+          "id": "py224-ex3",
+          "language": "en",
+          "title": "Pass arguments through a wrapper",
+          "code": "def trace(function):\n    def wrapper(*args, **kwargs): return function(*args, **kwargs)\n    return wrapper\n@trace\ndef multiply(a, b): return a * b\nprint(multiply(3, 4))",
+          "expectedOutput": "12",
+          "explanation": "The wrapper forwards positional and keyword arguments."
+        },
+        {
+          "id": "py224-ex4",
+          "language": "en",
+          "title": "Return the wrapped result",
+          "code": "def double_result(function):\n    def wrapper(*args, **kwargs): return function(*args, **kwargs) * 2\n    return wrapper\n@double_result\ndef value(): return 5\nprint(value())",
+          "expectedOutput": "10",
+          "explanation": "A decorator can transform a function's return value."
+        },
+        {
+          "id": "py224-ex5",
+          "language": "en",
+          "title": "Check a decorated callable",
+          "code": "def identity_decorator(function):\n    return function\n@identity_decorator\ndef ready(): return True\nprint(callable(ready), ready())",
+          "expectedOutput": "True True",
+          "explanation": "A decorator can return the original callable unchanged."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Write a decorator that prints a short message before and after a function call. Apply it with @ syntax and preserve metadata with functools.wraps.",
+      "independentTask": "Explain how a decorator transforms a function and identify cases where a helper function is clearer than a decorator.",
+      "hints": [
+        "A decorator receives a callable.",
+        "A wrapper calls the original function.",
+        "Return the wrapper from the decorator.",
+        "Use functools.wraps to preserve metadata.",
+        "The @ syntax applies a decorator at definition time."
+      ],
+      "challenge": "Create a reusable timing decorator that preserves function metadata and returns the wrapped function's original result.",
+      "validationCriteria": [
+        "The advanced Python concept is accurately explained.",
+        "Examples execute with the documented output.",
+        "Iterator, scope or callable behaviour is correct.",
+        "Limitations and suitable use cases are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py224-q1",
+        "prompt": "What does a decorator commonly receive?",
+        "answer": "A function or other callable",
+        "options": [
+          "A function or other callable",
+          "Only a string",
+          "A function or other callable",
+          "Only a list",
+          "A Python interpreter"
+        ],
+        "explanation": "A decorator is a callable that commonly accepts and returns a callable."
+      },
+      {
+        "id": "py224-q2",
+        "prompt": "What does @ syntax do?",
+        "answer": "Applies a decorator when a function or class is defined",
+        "options": [
+          "Applies a decorator when a function or class is defined",
+          "Runs a function repeatedly",
+          "Applies a decorator when a function or class is defined",
+          "Creates a virtual environment",
+          "Starts a thread"
+        ],
+        "explanation": "The decorator syntax assigns the decorated result to the function name."
+      },
+      {
+        "id": "py224-q3",
+        "prompt": "What is the purpose of functools.wraps?",
+        "answer": "Preserve metadata from the wrapped function",
+        "options": [
+          "Preserve metadata from the wrapped function",
+          "Cache every function call",
+          "Preserve metadata from the wrapped function",
+          "Create a generator",
+          "Catch every exception"
+        ],
+        "explanation": "wraps copies metadata such as name and docstring."
+      },
+      {
+        "id": "py224-q4",
+        "prompt": "Why does a wrapper often accept *args and **kwargs?",
+        "answer": "To forward flexible positional and keyword arguments",
+        "options": [
+          "To forward flexible positional and keyword arguments",
+          "To disable arguments",
+          "To forward flexible positional and keyword arguments",
+          "To return a tuple only",
+          "To stop recursion"
+        ],
+        "explanation": "The wrapper can pass through the original function's call arguments."
+      },
+      {
+        "id": "py224-q5",
+        "prompt": "When are decorators applied with @ syntax?",
+        "answer": "When the function or class definition is executed",
+        "options": [
+          "When the function or class definition is executed",
+          "Only when the function is called the first time",
+          "When the function or class definition is executed",
+          "After the program exits",
+          "Only during testing"
+        ],
+        "explanation": "Decorator application occurs during definition."
+      }
+    ]
+  },
+  "status": "draft"
+}

@@ -1,0 +1,163 @@
+{
+  "id": "python.py312.en",
+  "courseId": "python",
+  "moduleId": "PY31",
+  "topicId": "PY31.2",
+  "title": "Creating Custom NumPy Universal Functions",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behavior of creating custom numpy universal functions.",
+    "Select an appropriate NumPy operation and interpret its parameters.",
+    "Apply the operation to arrays and reason about element-wise behavior or reductions.",
+    "Predict output shape, values and relevant data-type behavior.",
+    "Validate results and recognize domain, precision or overflow limitations."
+  ],
+  "prerequisites": [
+    "PY25.9",
+    "PY25.10",
+    "PY25.12",
+    "PY29.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "np.frompyfunc can adapt a Python callable into a ufunc-like object that operates element by element on arrays. It is useful for learning the element-wise interface and for object-oriented results, but it does not compile Python code into a fast native NumPy loop. For numeric performance, prefer built-in NumPy ufuncs or a specialized compilation tool when justified.",
+      "whyItMatters": "Array operations are central to efficient numerical computing, data preparation and scientific workflows. Understanding their semantics helps avoid slow Python loops and subtle numeric errors.",
+      "analogy": "Think of an array operation as a carefully designed machine that applies the same rule to each matching input position.",
+      "summary": "np.frompyfunc can adapt a Python callable into a ufunc-like object that operates element by element on arrays. It is useful for learning the element-wise interface and for object-oriented results, but it does not compile Python code into a fast native NumPy loop. For numeric performance, prefer built-in NumPy ufuncs or a specialized compilation tool when justified."
+    },
+    "explain": {
+      "narrative": "This lesson develops creating custom numpy universal functions through small reproducible examples. NumPy operations act on arrays and may use broadcasting, reductions or specialized numeric rules. Inspect both values and data types, and validate assumptions before using results in a larger analysis. np.frompyfunc can adapt a Python callable into a ufunc-like object that operates element by element on arrays. It is useful for learning the element-wise interface and for object-oriented results, but it does not compile Python code into a fast native NumPy loop. For numeric performance, prefer built-in NumPy ufuncs or a specialized compilation tool when justified.",
+      "examples": [
+        {
+          "id": "py312-ex1",
+          "language": "en",
+          "title": "Create a custom square operation",
+          "code": "import numpy as np\nsquare = np.frompyfunc(lambda x: x * x, 1, 1)\nprint(square(np.array([2, 3, 4])))",
+          "expectedOutput": "[4 9 16]",
+          "explanation": "This example demonstrates create a custom square operation. It uses a small deterministic input so you can compare the operation's behavior with its exact output."
+        },
+        {
+          "id": "py312-ex2",
+          "language": "en",
+          "title": "A two-input custom operation",
+          "code": "import numpy as np\ncombine = np.frompyfunc(lambda a, b: a + 2 * b, 2, 1)\nprint(combine(np.array([1, 2]), np.array([3, 4])))",
+          "expectedOutput": "[7 10]",
+          "explanation": "This example demonstrates a two-input custom operation. It uses a small deterministic input so you can compare the operation's behavior with its exact output."
+        },
+        {
+          "id": "py312-ex3",
+          "language": "en",
+          "title": "Convert text values to uppercase",
+          "code": "import numpy as np\nupper = np.frompyfunc(str.upper, 1, 1)\nprint(upper(np.array(['north', 'south'])))",
+          "expectedOutput": "['NORTH' 'SOUTH']",
+          "explanation": "This example demonstrates convert text values to uppercase. It uses a small deterministic input so you can compare the operation's behavior with its exact output."
+        },
+        {
+          "id": "py312-ex4",
+          "language": "en",
+          "title": "Inspect ufunc arity",
+          "code": "import numpy as np\nadd_one = np.frompyfunc(lambda x: x + 1, 1, 1)\nprint(add_one.nin, add_one.nout)",
+          "expectedOutput": "1 1",
+          "explanation": "This example demonstrates inspect ufunc arity. It uses a small deterministic input so you can compare the operation's behavior with its exact output."
+        },
+        {
+          "id": "py312-ex5",
+          "language": "en",
+          "title": "Convert object results explicitly",
+          "code": "import numpy as np\nhalf = np.frompyfunc(lambda x: x / 2, 1, 1)\nresult = half(np.array([2, 4, 6])).astype(float)\nprint(result, result.dtype)",
+          "expectedOutput": "[1. 2. 3.] float64",
+          "explanation": "This example demonstrates convert object results explicitly. It uses a small deterministic input so you can compare the operation's behavior with its exact output."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a small NumPy array and use an operation related to creating custom numpy universal functions. Print the result and verify its values, shape and data type.",
+      "independentTask": "Design a short numerical workflow using at least two related operations. Include an edge case, explain the expected behavior and validate the result with NumPy testing or explicit assertions.",
+      "hints": [
+        "Start with a small array whose result can be calculated by hand.",
+        "Check whether the operation is element-wise, broadcasting or a reduction.",
+        "Use explicit integer or floating-point inputs when dtype matters.",
+        "Test a boundary or negative-value case where relevant.",
+        "Use np.allclose for floating-point comparisons when exact equality is inappropriate."
+      ],
+      "challenge": "Extend the examples to a two-dimensional array, document the axis or broadcasting behavior, and add a validation check for the expected shape and numeric result.",
+      "validationCriteria": [
+        "All examples execute with the pinned NumPy version and match expected output.",
+        "The chosen operation and parameters match the stated task.",
+        "Array shape and dtype behavior are explained accurately.",
+        "At least one edge case or limitation is tested.",
+        "The learner justifies the operation selected for the scenario."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py312-q1",
+        "prompt": "Which statement best describes creating custom numpy universal functions?",
+        "answer": "It applies a defined numerical or array operation according to NumPy's documented semantics.",
+        "options": [
+          "It always converts arrays to Python lists.",
+          "It applies a defined numerical or array operation according to NumPy's documented semantics.",
+          "It guarantees exact results for every floating-point calculation.",
+          "It automatically downloads every optional package."
+        ],
+        "explanation": "NumPy operations have defined behavior for inputs, shapes and dtypes; they do not remove numerical limitations."
+      },
+      {
+        "id": "py312-q2",
+        "prompt": "Why should array shape and dtype be checked?",
+        "answer": "They affect broadcasting, output structure and numeric behavior.",
+        "options": [
+          "They only change variable names.",
+          "They affect broadcasting, output structure and numeric behavior.",
+          "They guarantee that all values are unique.",
+          "They prevent every possible runtime warning."
+        ],
+        "explanation": "Shape and dtype determine how arrays interact and how values are represented."
+      },
+      {
+        "id": "py312-q3",
+        "prompt": "What is a sound way to validate a numerical result?",
+        "answer": "Use a small known case and test the expected values and shape.",
+        "options": [
+          "Assume the first output is correct.",
+          "Use a small known case and test the expected values and shape.",
+          "Compare unrelated arrays of different sizes.",
+          "Ignore warnings and non-finite values."
+        ],
+        "explanation": "Small deterministic cases make operation semantics and errors easier to inspect."
+      },
+      {
+        "id": "py312-q4",
+        "prompt": "When should a learner consult the operation's documentation?",
+        "answer": "When parameter rules, supported dtypes, axes or edge cases matter.",
+        "options": [
+          "Only after deleting the source array.",
+          "When parameter rules, supported dtypes, axes or edge cases matter.",
+          "Never, because all NumPy functions behave identically.",
+          "Only when the code contains a syntax error."
+        ],
+        "explanation": "NumPy functions differ in domain, dtype, axis and parameter behavior."
+      },
+      {
+        "id": "py312-q5",
+        "prompt": "Which practice improves reliable numerical code?",
+        "answer": "Test boundary cases and explain precision or domain assumptions.",
+        "options": [
+          "Rely on one random output.",
+          "Test boundary cases and explain precision or domain assumptions.",
+          "Convert every array to strings before calculation.",
+          "Assume floating-point values are always exact."
+        ],
+        "explanation": "Numerical reliability depends on explicit assumptions and tests for edge conditions."
+      }
+    ]
+  },
+  "status": "draft"
+}

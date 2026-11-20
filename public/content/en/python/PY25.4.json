@@ -1,0 +1,164 @@
+{
+  "id": "python.py25.4.en",
+  "courseId": "python",
+  "moduleId": "PY25",
+  "topicId": "PY25.4",
+  "title": "Cleaning Missing and Invalid Data",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose of Cleaning Missing and Invalid Data.",
+    "Apply Cleaning Missing and Invalid Data to a realistic Python data task.",
+    "Choose suitable Python structures and standard-library tools for the task.",
+    "Identify data-quality, correctness and interpretation risks.",
+    "Build a small reproducible analysis artifact using Cleaning Missing and Invalid Data."
+  ],
+  "prerequisites": [
+    "PY15.1",
+    "PY21.7",
+    "PY23.5",
+    "PY24.11"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Real datasets can contain missing cells, whitespace, invalid numbers, duplicate records and inconsistent categories. Cleaning means applying explicit, documented rules; it does not mean deleting every inconvenient value. Represent missingness consistently, preserve the original records and distinguish a genuine zero from an unknown value.",
+      "whyItMatters": "Reliable analysis depends on transparent decisions about data meaning, quality and interpretation—not merely on producing a number or chart.",
+      "analogy": "A data analyst is like a careful investigator who checks the evidence, records each transformation and explains how a conclusion was reached.",
+      "analogyLimit": "Datasets are not always complete or representative, and a neat summary cannot remove bias or prove causation.",
+      "summary": "Cleaning Missing and Invalid Data provides a practical foundation for trustworthy Python data analysis."
+    },
+    "explain": {
+      "narrative": "Normalize text carefully, map known missing markers to None, validate required fields, and convert values with explicit error reporting. Decide whether to reject, retain, impute or investigate missing observations based on the question and domain. Avoid replacing missing numeric values with zero unless zero is genuinely the correct meaning. Track how many records were changed or rejected.",
+      "examples": [
+        {
+          "id": "py254-ex1",
+          "language": "en",
+          "title": "Normalize whitespace",
+          "code": "raw = '  Asha  '\nclean = raw.strip()\nprint(clean)",
+          "expectedOutput": "Asha",
+          "explanation": "strip() removes leading and trailing whitespace."
+        },
+        {
+          "id": "py254-ex2",
+          "language": "en",
+          "title": "Map a blank to None",
+          "code": "raw = '   '\nvalue = raw.strip() or None\nprint(value is None)",
+          "expectedOutput": "True",
+          "explanation": "A blank string can be normalized to an explicit missing marker."
+        },
+        {
+          "id": "py254-ex3",
+          "language": "en",
+          "title": "Parse safely",
+          "code": "raw = '12.5'\ntry:\n    value = float(raw)\nexcept ValueError:\n    value = None\nprint(value)",
+          "expectedOutput": "12.5",
+          "explanation": "Targeted conversion handling prevents invalid values from crashing the whole import."
+        },
+        {
+          "id": "py254-ex4",
+          "language": "en",
+          "title": "Keep zero distinct from missing",
+          "code": "values = [0, None, 5]\nknown = [value for value in values if value is not None]\nprint(known)",
+          "expectedOutput": "[0, 5]",
+          "explanation": "An explicit None check preserves valid zero values."
+        },
+        {
+          "id": "py254-ex5",
+          "language": "en",
+          "title": "Count missing values",
+          "code": "rows = [{'x': 1}, {'x': None}, {'x': 3}]\nprint(sum(row['x'] is None for row in rows))",
+          "expectedOutput": "1",
+          "explanation": "A missingness count helps describe the cleaning impact."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Clean a list of records by trimming names, converting blank amounts to None and collecting invalid numeric values into a separate error list.",
+      "independentTask": "Define and document cleaning rules for a synthetic customer-orders dataset. Include how you treat missing names, zero quantities, duplicate IDs and invalid dates.",
+      "hints": [
+        "Do not use `if value` when zero is valid.",
+        "Normalize only known missing markers.",
+        "Preserve original data before cleaning.",
+        "Count and report rejected rows.",
+        "Document imputation assumptions."
+      ],
+      "challenge": "Build a cleaning function that returns cleaned rows plus counts for missing, invalid and duplicate records.",
+      "validationCriteria": [
+        "The data question and input assumptions are explicit.",
+        "All examples execute and match their expected output on Python 3.13.",
+        "Missing, invalid and boundary cases are handled deliberately.",
+        "The analysis preserves units and documents limitations.",
+        "The solution is reproducible and does not expose private data."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py254-q1",
+        "prompt": "Should a missing amount automatically become zero?",
+        "answer": "No; only if the domain defines it that way",
+        "options": [
+          "No; only if the domain defines it that way",
+          "Yes, in every dataset",
+          "Only when the file is CSV",
+          "Only for integer columns"
+        ],
+        "explanation": "Unknown and zero are different meanings."
+      },
+      {
+        "id": "py254-q2",
+        "prompt": "Which check preserves a valid numeric zero?",
+        "answer": "value is not None",
+        "options": [
+          "value is not None",
+          "if value",
+          "value or 0",
+          "bool(value)"
+        ],
+        "explanation": "An explicit None check does not discard zero."
+      },
+      {
+        "id": "py254-q3",
+        "prompt": "What is a good cleaning practice?",
+        "answer": "Keep raw data and document transformations",
+        "options": [
+          "Keep raw data and document transformations",
+          "Overwrite the source immediately",
+          "Delete all unusual values",
+          "Hide rejected-row counts"
+        ],
+        "explanation": "Reproducibility requires traceable transformations."
+      },
+      {
+        "id": "py254-q4",
+        "prompt": "What does strip() do?",
+        "answer": "Removes leading and trailing whitespace",
+        "options": [
+          "Removes leading and trailing whitespace",
+          "Removes all internal spaces",
+          "Converts text to lowercase",
+          "Parses a float"
+        ],
+        "explanation": "strip() trims whitespace at the ends of a string."
+      },
+      {
+        "id": "py254-q5",
+        "prompt": "How should conversion failures be handled?",
+        "answer": "Record the failure with row context",
+        "options": [
+          "Record the failure with row context",
+          "Silently substitute zero",
+          "Stop without explanation",
+          "Treat every invalid string as a date"
+        ],
+        "explanation": "Actionable diagnostics help fix source data."
+      }
+    ]
+  },
+  "status": "draft"
+}

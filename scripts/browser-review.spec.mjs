@@ -190,3 +190,84 @@ test("C++ indexed quiz answers are mapped to the correct choice", async ({ page 
   await firstQuestion.locator("label.lesson-answer-option").filter({ hasText: correctAnswer }).click();
   await expect(firstQuestion.locator(".lesson-question-feedback")).toContainText("Correct");
 });
+
+
+test("Python playground runs Pyodide in a worker with stdin, stderr, errors, stop and timeout", async ({ page }) => {
+  test.setTimeout(240000);
+  const nonGetRequests = [];
+  page.on("request", request => {
+    if (request.method() !== "GET" && request.method() !== "HEAD") nonGetRequests.push(request.url());
+  });
+  await page.goto(`${baseURL}/python-playground.html`, { waitUntil: "domcontentloaded" });
+  await expect(page.locator("#runtimeStatus")).toHaveAttribute("data-state", "ready", { timeout: 180000 });
+  await expect(page.locator("#pythonVersion")).toContainText("Python 3.14");
+
+  await page.locator("#pythonCode").fill('print("worker output works")');
+  await page.locator("#runPython").click();
+  await expect(page.locator("#pythonOutput")).toContainText("worker output works", { timeout: 15000 });
+
+  await page.locator("#pythonCode").fill('name = input("Name: ")\nscore = int(input("Score: "))\nprint(f"{name}: {score + 1}")');
+  await page.locator("#pythonStdin").fill("Asha\n8");
+  await page.locator("#runPython").click();
+  await expect(page.locator("#pythonOutput")).toContainText("Asha: 9", { timeout: 15000 });
+
+  await page.locator("#pythonCode").fill('import sys\nprint("warning stream", file=sys.stderr)');
+  await page.locator("#runPython").click();
+  await expect(page.locator("#pythonOutput .stderr")).toContainText("warning stream", { timeout: 15000 });
+
+  await page.locator("#pythonCode").fill('raise ValueError("bad input")');
+  await page.locator("#runPython").click();
+  await expect(page.locator("#pythonOutput")).toContainText("ValueError", { timeout: 15000 });
+  await expect(page.locator("#pythonOutput")).toContainText("bad input");
+
+  await page.locator("#pythonCode").fill("");
+  await page.locator("#runPython").click();
+  await expect(page.locator("#pythonOutput")).toContainText("Enter some Python code");
+
+  await page.locator("#pythonCode").fill("while True:\n    pass");
+  await page.locator("#runPython").click();
+  await expect(page.locator("#stopPython")).toBeEnabled();
+  await page.locator("#stopPython").click();
+  await expect(page.locator("#runtimeStatus")).toHaveAttribute("data-state", "ready", { timeout: 60000 });
+  await expect(page.locator("#pythonOutput")).toContainText("stopped by the learner");
+
+  await page.locator("#pythonCode").fill("while True:\n    pass");
+  await page.locator("#runPython").click();
+  await expect(page.locator("#runState")).toHaveText("Timed out", { timeout: 20000 });
+  await expect(page.locator("#runtimeStatus")).toHaveAttribute("data-state", "ready", { timeout: 60000 });
+
+  await page.locator("#resetPython").click();
+  await expect(page.locator("#pythonCode")).toHaveValue('print("Hello, CodeSaathi!")');
+  await page.locator("#pythonExample").selectOption("input");
+  await expect(page.locator("#pythonStdin")).toHaveValue("Asha\n25");
+  await page.locator("#restorePython").click();
+  await expect(page.locator("#pythonCode")).toHaveValue('print("Hello, CodeSaathi!")');
+  await page.locator("#clearPythonOutput").click();
+  await expect(page.locator("#pythonOutput")).toHaveText("Output will appear here.");
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.locator("#pythonCode")).toBeVisible();
+  const hasHorizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+  expect(hasHorizontalOverflow, "mobile page should not overflow horizontally").toBe(false);
+  expect(nonGetRequests, "learner code should not be sent using a non-GET request").toEqual([]);
+});
+
+test("Python lesson practice link opens its dedicated playground with the first lesson example", async ({ page }) => {
+  await page.goto(baseURL, { waitUntil: "domcontentloaded" });
+  await waitForCurriculum(page);
+  await page.locator('[data-course-nav="python"]').click();
+  const dialog = page.locator("#lessonDialog");
+  await expect(dialog).toBeVisible();
+  await dialog.locator('[data-topic-id="PY1.1"]').click();
+  const lessonResponse = await page.request.get(`${baseURL}/content/en/python/PY1.1.json`);
+  expect(lessonResponse.ok()).toBeTruthy();
+  const lesson = await lessonResponse.json();
+  const expectedCode = lesson.stages.explain.examples[0].code;
+  const link = dialog.locator(".lesson-practice-link");
+  await expect(link).toHaveAttribute("href", /python-playground\.html\?topic=PY1\.1/);
+  await expect(link).toContainText("Python Playground");
+  const [playground] = await Promise.all([page.waitForEvent("popup"), link.click()]);
+  await expect(playground.locator("#pythonCode")).toHaveValue(expectedCode);
+  await expect(playground.locator("#runtimeStatus")).toHaveAttribute("data-state", "ready", { timeout: 180000 });
+  await playground.close();
+});

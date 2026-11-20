@@ -195,7 +195,12 @@
       }
     }
 const link = $(".lesson-practice-link", container);
-    if (link) {
+    if (link && lesson.courseId === "python") {
+      link.href = "/python-playground.html?topic=" + encodeURIComponent(lesson.topicId);
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = "Open this lesson's code in Python Playground ↗";
+    } else if (link) {
       link.addEventListener("click", event => {
         event.preventDefault();
         if (code) {

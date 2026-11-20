@@ -1,0 +1,169 @@
+{
+  "id": "python.py21.13.en",
+  "courseId": "python",
+  "moduleId": "PY21",
+  "topicId": "PY21.13",
+  "title": "Testing Examples with doctest",
+  "language": "en",
+  "learningObjectives": [
+    "Explain doctest examples, docstrings, expected output and test discovery.",
+    "Select a suitable testing or code-quality technique for PY21.13.",
+    "Interpret test, diagnostic and quality-tool output correctly.",
+    "Identify limitations and risks when applying PY21.13.",
+    "Apply PY21.13 concepts in a maintainable Python workflow."
+  ],
+  "prerequisites": [
+    "PY8.1",
+    "PY11.1",
+    "PY14.1",
+    "PY20.1",
+    "PY21.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "doctest searches docstrings and text for interactive Python examples and checks whether their output matches the expected text. It helps keep simple examples in documentation accurate. doctest is part of the standard library and can be run from Python code or the command line. Examples should be deterministic and avoid output that changes across platforms or versions.",
+      "whyItMatters": "Executable documentation reduces the risk that examples become outdated or teach behaviour that no longer matches the code.",
+      "analogy": "doctest is a proofreader that runs the examples printed in a guide and checks their results.",
+      "analogyLimit": "doctest compares displayed output and is best for concise deterministic examples; it is not a replacement for a full unit-testing framework.",
+      "summary": "Testing Examples with doctest develops reliable testing and code-quality skills for Python projects."
+    },
+    "explain": {
+      "narrative": "## Keep documentation examples executable\nAn interactive doctest example uses the `>>>` prompt and expected output on following lines. `doctest.testmod()` checks examples in a module's docstrings, while `doctest.testfile()` checks a text file. The `DocTestParser` can parse examples without executing them.\n\nKeep examples short and stable. Avoid including unpredictable object representations, temporary paths or platform-specific output unless the test is configured to handle them. Use unit tests for complex behaviour and doctest for concise documentation examples.",
+      "examples": [
+        {
+          "id": "py2113-ex1",
+          "language": "en",
+          "title": "Parse an interactive doctest example",
+          "code": "import doctest\ndoc = '>>> 2 + 3\\n5\\n'\nexamples = doctest.DocTestParser().get_examples(doc)\nprint(len(examples), examples[0].want.strip())",
+          "expectedOutput": "1 5",
+          "explanation": "DocTestParser extracts interactive examples and their expected output."
+        },
+        {
+          "id": "py2113-ex2",
+          "language": "en",
+          "title": "Inspect parsed source code",
+          "code": "import doctest\ndoc = '>>> len([1, 2])\\n2\\n'\nexample = doctest.DocTestParser().get_examples(doc)[0]\nprint(example.source.strip())",
+          "expectedOutput": "len([1, 2])",
+          "explanation": "The parsed example exposes the Python source that doctest will execute."
+        },
+        {
+          "id": "py2113-ex3",
+          "language": "en",
+          "title": "Count examples in a docstring",
+          "code": "import doctest\ndoc = '>>> 1 + 1\\n2\\n>>> 3 * 3\\n9\\n'\nprint(len(doctest.DocTestParser().get_examples(doc)))",
+          "expectedOutput": "2",
+          "explanation": "A docstring can contain multiple independently checked examples."
+        },
+        {
+          "id": "py2113-ex4",
+          "language": "en",
+          "title": "Run a stable doctest example",
+          "code": "import doctest\ndoc = '>>> sum((2, 3))\\n5\\n'\nrunner = doctest.DocTestRunner()\ntest = doctest.DocTestParser().get_doctest(doc, {}, 'sample', 'sample.py', 0)\nrunner.run(test)\nprint(runner.summarize(verbose=False).failed)",
+          "expectedOutput": "0",
+          "explanation": "DocTestRunner executes parsed examples and reports failure counts."
+        },
+        {
+          "id": "py2113-ex5",
+          "language": "en",
+          "title": "Describe the command-line runner",
+          "code": "command = 'python -m doctest -v example.py'\nprint(command.endswith('example.py'))",
+          "expectedOutput": "True",
+          "explanation": "The doctest module provides a command-line interface for checking examples."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Add a docstring with two interactive examples to a function. Run python -m doctest -v your_file.py and fix any output mismatch.",
+      "independentTask": "Review a documentation page and identify which examples are suitable for doctest and which require a conventional unit test.",
+      "hints": [
+        "Use >>> to begin an interactive example.",
+        "Expected output follows the prompt line.",
+        "doctest.testmod checks examples in module docstrings.",
+        "Use python -m doctest to run file examples.",
+        "Keep expected output deterministic."
+      ],
+      "challenge": "Create a documentation quality workflow that runs doctest examples and unit tests while keeping platform-dependent output out of fragile examples.",
+      "validationCriteria": [
+        "The testing or quality objective is clearly stated.",
+        "Examples execute with the documented output.",
+        "Test setup, cleanup and dependency boundaries are accurate.",
+        "Tool limitations and appropriate use cases are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2113-q1",
+        "prompt": "What does doctest compare?",
+        "answer": "The output of interactive examples with expected text",
+        "options": [
+          "The output of interactive examples with expected text",
+          "Package versions with requirements",
+          "The output of interactive examples with expected text",
+          "Source code with a formatter",
+          "Network responses with a cache"
+        ],
+        "explanation": "doctest executes examples and checks their displayed output."
+      },
+      {
+        "id": "py2113-q2",
+        "prompt": "Which prompt commonly begins a doctest example?",
+        "answer": " >>> ",
+        "options": [
+          " >>> ",
+          "###",
+          " >>> ",
+          "$ pip",
+          "...:"
+        ],
+        "explanation": "The interactive Python prompt >>> introduces a doctest statement."
+      },
+      {
+        "id": "py2113-q3",
+        "prompt": "Which function checks examples in a module's docstrings?",
+        "answer": "doctest.testmod",
+        "options": [
+          "doctest.testmod",
+          "doctest.testmod",
+          "unittest.mock",
+          "logging.basicConfig",
+          "pdb.set_trace"
+        ],
+        "explanation": "testmod discovers and runs doctest examples in a module."
+      },
+      {
+        "id": "py2113-q4",
+        "prompt": "When is doctest especially useful?",
+        "answer": "For concise deterministic documentation examples",
+        "options": [
+          "For concise deterministic documentation examples",
+          "For every performance benchmark",
+          "For concise deterministic documentation examples",
+          "For replacing all integration tests",
+          "For installing packages"
+        ],
+        "explanation": "doctest helps ensure simple documented examples still behave as shown."
+      },
+      {
+        "id": "py2113-q5",
+        "prompt": "Why avoid unpredictable output in doctests?",
+        "answer": "Expected output must be stable for reliable comparison",
+        "options": [
+          "Expected output must be stable for reliable comparison",
+          "doctest cannot run functions",
+          "Expected output must be stable for reliable comparison",
+          "Python ignores docstrings",
+          "It disables assertions"
+        ],
+        "explanation": "Platform- or run-dependent output can cause fragile tests."
+      }
+    ]
+  },
+  "status": "draft"
+}

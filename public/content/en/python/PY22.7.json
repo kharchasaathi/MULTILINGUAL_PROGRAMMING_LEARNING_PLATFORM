@@ -1,0 +1,168 @@
+{
+  "id": "python.py22.7.en",
+  "courseId": "python",
+  "moduleId": "PY22",
+  "topicId": "PY22.7",
+  "title": "functools for Functional Programming",
+  "language": "en",
+  "learningObjectives": [
+    "Explain partial, lru_cache, cache, reduce and wraps.",
+    "Select a suitable advanced Python technique for PY22.7.",
+    "Interpret iterator and callable behaviour correctly.",
+    "Identify limitations and risks when applying PY22.7.",
+    "Apply PY22.7 concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY8.1",
+    "PY11.1",
+    "PY14.1",
+    "PY21.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "functools provides higher-order function utilities. partial creates a new callable with some arguments pre-filled. lru_cache memoizes results for repeated calls with hashable arguments. wraps preserves metadata in decorators, while reduce combines an iterable into one accumulated value. These tools can reduce boilerplate when their behaviour is clear.",
+      "whyItMatters": "The functools module provides reusable building blocks for function composition, caching and decorators.",
+      "analogy": "functools is a toolbox for adapting functions so they can be reused in different tasks without rewriting their core logic.",
+      "analogyLimit": "Caching consumes memory and may return stale results for functions whose outputs depend on changing external state; reduce can be less readable than a loop for complex logic.",
+      "summary": "functools for Functional Programming develops advanced Python programming skills."
+    },
+    "explain": {
+      "narrative": "## Adapt and reuse callables\n`functools.partial(function, ...)` returns a callable with some arguments fixed. `lru_cache` caches results based on function arguments and requires hashable cache keys. `cache` provides an unbounded cache. `reduce` repeatedly combines items using a two-argument function, though built-in operations such as sum are often clearer for simple cases.\n\nCache only functions whose results are safe to reuse. Do not cache functions with important side effects or hidden dependencies unless the cache is deliberately invalidated. Use wraps when writing decorators.",
+      "examples": [
+        {
+          "id": "py227-ex1",
+          "language": "en",
+          "title": "Create a specialized function with partial",
+          "code": "from functools import partial\ndef power(base, exponent): return base ** exponent\nsquare = partial(power, exponent=2)\nprint(square(5))",
+          "expectedOutput": "25",
+          "explanation": "partial fixes the exponent argument and returns a new callable."
+        },
+        {
+          "id": "py227-ex2",
+          "language": "en",
+          "title": "Memoize repeated calls",
+          "code": "from functools import lru_cache\n@lru_cache(maxsize=None)\ndef square(value): return value * value\nprint(square(4), square.cache_info().hits)",
+          "expectedOutput": "16 0",
+          "explanation": "The first call computes and stores the result; a later identical call can reuse it."
+        },
+        {
+          "id": "py227-ex3",
+          "language": "en",
+          "title": "Observe a cache hit",
+          "code": "from functools import lru_cache\n@lru_cache(maxsize=4)\ndef cube(value): return value ** 3\ncube(3); cube(3)\nprint(cube.cache_info().hits)",
+          "expectedOutput": "1",
+          "explanation": "The second call with the same hashable argument is served from the cache."
+        },
+        {
+          "id": "py227-ex4",
+          "language": "en",
+          "title": "Combine values with reduce",
+          "code": "from functools import reduce\nproduct = reduce(lambda total, value: total * value, [2, 3, 4], 1)\nprint(product)",
+          "expectedOutput": "24",
+          "explanation": "reduce applies the combining function across the iterable."
+        },
+        {
+          "id": "py227-ex5",
+          "language": "en",
+          "title": "Clear a cached function",
+          "code": "from functools import lru_cache\n@lru_cache(maxsize=2)\ndef double(value): return value * 2\ndouble(2); double.cache_clear()\nprint(double.cache_info().currsize)",
+          "expectedOutput": "0",
+          "explanation": "cache_clear removes stored entries."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Use partial to create a specialized function, lru_cache to memoize a recursive calculation and reduce to combine a short sequence.",
+      "independentTask": "Choose between a loop, sum, reduce, partial and lru_cache for several small programming scenarios and justify each choice.",
+      "hints": [
+        "partial fixes selected function arguments.",
+        "lru_cache stores results for repeated hashable arguments.",
+        "cache has no maximum size limit.",
+        "reduce combines values using an accumulator function.",
+        "Avoid caching results that depend on changing external state."
+      ],
+      "challenge": "Design a safe memoization strategy for an expensive pure function, including cache size, cache clearing and test cases.",
+      "validationCriteria": [
+        "The advanced Python concept is accurately explained.",
+        "Examples execute with the documented output.",
+        "Iterator, scope or callable behaviour is correct.",
+        "Limitations and suitable use cases are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py227-q1",
+        "prompt": "What does functools.partial create?",
+        "answer": "A callable with some arguments pre-filled",
+        "options": [
+          "A callable with some arguments pre-filled",
+          "A Python package",
+          "A callable with some arguments pre-filled",
+          "A new thread",
+          "A generator expression"
+        ],
+        "explanation": "partial returns a new callable with selected arguments fixed."
+      },
+      {
+        "id": "py227-q2",
+        "prompt": "What does lru_cache do?",
+        "answer": "Caches results of function calls",
+        "options": [
+          "Caches results of function calls",
+          "Formats source code",
+          "Caches results of function calls",
+          "Creates temporary files",
+          "Runs code in parallel"
+        ],
+        "explanation": "lru_cache stores results for repeated calls with the same hashable arguments."
+      },
+      {
+        "id": "py227-q3",
+        "prompt": "Why should cached function arguments generally be hashable?",
+        "answer": "Cache keys use argument values for lookup",
+        "options": [
+          "Cache keys use argument values for lookup",
+          "Because all functions return strings",
+          "Cache keys use argument values for lookup",
+          "To enable file access",
+          "To prevent recursion"
+        ],
+        "explanation": "The cache uses hashable call arguments to identify stored results."
+      },
+      {
+        "id": "py227-q4",
+        "prompt": "What does reduce do?",
+        "answer": "Combines an iterable into one accumulated result",
+        "options": [
+          "Combines an iterable into one accumulated result",
+          "Creates a virtual environment",
+          "Combines an iterable into one accumulated result",
+          "Formats a traceback",
+          "Sorts a dictionary"
+        ],
+        "explanation": "reduce repeatedly applies a two-argument function to an accumulator and items."
+      },
+      {
+        "id": "py227-q5",
+        "prompt": "When is caching a poor fit?",
+        "answer": "When results depend on changing external state without invalidation",
+        "options": [
+          "When results depend on changing external state without invalidation",
+          "For a pure expensive calculation",
+          "When results depend on changing external state without invalidation",
+          "When arguments are stable",
+          "When repeated calls are expected"
+        ],
+        "explanation": "Stale cached values can be incorrect when hidden dependencies change."
+      }
+    ]
+  },
+  "status": "draft"
+}

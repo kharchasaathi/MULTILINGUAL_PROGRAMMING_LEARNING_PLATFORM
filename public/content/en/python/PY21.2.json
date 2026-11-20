@@ -1,0 +1,168 @@
+{
+  "id": "python.py21.2.en",
+  "courseId": "python",
+  "moduleId": "PY21",
+  "topicId": "PY21.2",
+  "title": "Reading Tracebacks and Diagnosing Exceptions",
+  "language": "en",
+  "learningObjectives": [
+    "Explain traceback frames, exception types, messages, causes and traceback module.",
+    "Select a suitable debugging or testing technique for PY21.2.",
+    "Interpret diagnostic information and test results correctly.",
+    "Identify limitations and risks when applying PY21.2.",
+    "Apply PY21.2 concepts in a maintainable Python workflow."
+  ],
+  "prerequisites": [
+    "PY8.1",
+    "PY11.1",
+    "PY14.1",
+    "PY20.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A traceback shows the call path that led to an unhandled exception. Read it from the final exception line to identify the exception type and message, then inspect the listed frames from the bottom upward to locate the failing operation and the calls that led there. The final line is important, but the first application frame often identifies the useful code location.",
+      "whyItMatters": "Interpreting tracebacks accurately helps distinguish the location where an error surfaced from the earlier decision that caused it.",
+      "analogy": "A traceback is a route history showing which functions were visited before the program stopped.",
+      "analogyLimit": "A traceback identifies the execution path, not necessarily the root cause; the incorrect value may have been produced earlier or by external input.",
+      "summary": "Reading Tracebacks and Diagnosing Exceptions develops reliable debugging and software verification skills."
+    },
+    "explain": {
+      "narrative": "## Read the traceback systematically\nA traceback lists frames in the call chain, source locations and finally the exception class and message. Common examples include `ValueError`, `TypeError`, `KeyError` and `FileNotFoundError`. Inspect the values passed into the failing operation and follow the relevant caller frames.\n\nPython's `traceback` module can format exception information for diagnostics. Preserve useful exception context when re-raising. Do not expose sensitive values, access tokens or personal data in logs or bug reports.",
+      "examples": [
+        {
+          "id": "py212-ex1",
+          "language": "en",
+          "title": "Inspect an exception type and message",
+          "code": "try:\n    int('not-a-number')\nexcept ValueError as error:\n    print(type(error).__name__)\n    print(str(error))",
+          "expectedOutput": "ValueError\ninvalid literal for int() with base 10: 'not-a-number'",
+          "explanation": "The exception class and message describe the failed conversion."
+        },
+        {
+          "id": "py212-ex2",
+          "language": "en",
+          "title": "Format a caught traceback",
+          "code": "import traceback\ntry:\n    1 / 0\nexcept ZeroDivisionError as error:\n    rendered = ''.join(traceback.format_exception(type(error), error, error.__traceback__))\n    print('ZeroDivisionError' in rendered)",
+          "expectedOutput": "True",
+          "explanation": "traceback.format_exception returns formatted traceback text for an exception."
+        },
+        {
+          "id": "py212-ex3",
+          "language": "en",
+          "title": "Inspect exception arguments",
+          "code": "try:\n    raise ValueError('invalid quantity', 0)\nexcept ValueError as error:\n    print(error.args)",
+          "expectedOutput": "('invalid quantity', 0)",
+          "explanation": "The args tuple contains the values supplied when the exception was created."
+        },
+        {
+          "id": "py212-ex4",
+          "language": "en",
+          "title": "Preserve an explicit exception cause",
+          "code": "try:\n    try:\n        int('x')\n    except ValueError as cause:\n        raise RuntimeError('conversion failed') from cause\nexcept RuntimeError as error:\n    print(type(error.__cause__).__name__)",
+          "expectedOutput": "ValueError",
+          "explanation": "The __cause__ attribute preserves the original exception when using raise from."
+        },
+        {
+          "id": "py212-ex5",
+          "language": "en",
+          "title": "Inspect a traceback frame count",
+          "code": "import traceback\ntry:\n    def fail():\n        raise LookupError('missing item')\n    fail()\nexcept LookupError as error:\n    print(len(traceback.extract_tb(error.__traceback__)) >= 1)",
+          "expectedOutput": "True",
+          "explanation": "extract_tb returns summaries for the frames in the traceback."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run a short program that raises a ValueError from a nested function. Read the traceback, identify the failing line and explain how the call chain reached it.",
+      "independentTask": "Prepare a traceback diagnosis for a hypothetical KeyError. Distinguish the failing lookup, the caller and the likely source of the missing key.",
+      "hints": [
+        "Read the exception type and message at the end.",
+        "Inspect the frame where the failing operation occurs.",
+        "Follow caller frames to understand how the value arrived.",
+        "A traceback is evidence, not automatically the root cause.",
+        "Remove secrets before sharing logs."
+      ],
+      "challenge": "Write a safe diagnostic helper that formats exception type and traceback information while ensuring known secret values are not included in the report.",
+      "validationCriteria": [
+        "The debugging or testing objective is clearly stated.",
+        "Examples execute with the documented output.",
+        "Test expectations and exception behaviour are accurate.",
+        "Limitations and appropriate use cases are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py212-q1",
+        "prompt": "Where is the exception type and message normally shown in a traceback?",
+        "answer": "At the end of the traceback",
+        "options": [
+          "At the end of the traceback",
+          "At the beginning of the source file",
+          "At the end of the traceback",
+          "Only in the operating system log",
+          "In the Python prompt history"
+        ],
+        "explanation": "The final traceback line reports the exception class and message."
+      },
+      {
+        "id": "py212-q2",
+        "prompt": "What does a traceback frame identify?",
+        "answer": "A location in the call path, including source information",
+        "options": [
+          "A location in the call path, including source information",
+          "A package version",
+          "A location in the call path, including source information",
+          "A test coverage percentage",
+          "A virtual environment"
+        ],
+        "explanation": "Frames show the functions and source locations involved in the failing call chain."
+      },
+      {
+        "id": "py212-q3",
+        "prompt": "Which module formats traceback information?",
+        "answer": "traceback",
+        "options": [
+          "traceback",
+          "random",
+          "traceback",
+          "pathlib",
+          "decimal"
+        ],
+        "explanation": "The traceback module provides helpers for extracting and formatting traceback data."
+      },
+      {
+        "id": "py212-q4",
+        "prompt": "What does exception chaining with raise from preserve?",
+        "answer": "The original exception as the explicit cause",
+        "options": [
+          "The original exception as the explicit cause",
+          "The original exception as the explicit cause",
+          "The entire computer memory",
+          "A package installation",
+          "The source repository"
+        ],
+        "explanation": "Explicit chaining stores the original exception in __cause__."
+      },
+      {
+        "id": "py212-q5",
+        "prompt": "Does a traceback always identify the root cause?",
+        "answer": "No",
+        "options": [
+          "No",
+          "Yes",
+          "No",
+          "Only for ValueError",
+          "Only in debug mode"
+        ],
+        "explanation": "It shows the execution path; the root cause may be an earlier incorrect value or decision."
+      }
+    ]
+  },
+  "status": "draft"
+}

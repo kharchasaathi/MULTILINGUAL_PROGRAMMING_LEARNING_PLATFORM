@@ -1,0 +1,161 @@
+{
+  "id": "python.py15.8.en",
+  "courseId": "python",
+  "moduleId": "PY15",
+  "topicId": "PY15.8",
+  "title": "Working with JSON Files in Python",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and practical uses of working with json files in python.",
+    "Choose appropriate Python standard-library APIs and syntax for working with json files in python.",
+    "Predict the behaviour of representative PY15.8 operations and their outputs.",
+    "Identify common mistakes, edge cases and failure conditions in working with json files in python.",
+    "Apply safe, readable working with json files in python techniques in a small program."
+  ],
+  "prerequisites": [
+    "PY14.1",
+    "PY14.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "JSON is a text format for structured data such as objects, arrays, strings, numbers, booleans and null. Python's json module converts between JSON text and Python values: `loads()` parses a string, `dumps()` creates a string, while `load()` and `dump()` work with file-like objects.",
+      "whyItMatters": "JSON is widely used for configuration files, saved application data and web APIs. Correct serialization preserves structure and avoids brittle manual string construction.",
+      "analogy": "Working with a file is like borrowing a labelled record from a filing room: you identify its location, choose whether to read or update it, and return the resource when finished.",
+      "analogyLimit": "A real filesystem has permissions, concurrent changes, encoding rules and failure modes that a physical filing-room analogy cannot fully represent.",
+      "summary": "Working with JSON Files in Python relies on explicit paths, correct modes, deliberate resource management and validation of data."
+    },
+    "explain": {
+      "narrative": "## Core idea\nJSON is a text format for structured data such as objects, arrays, strings, numbers, booleans and null. Python's json module converts between JSON text and Python values: `loads()` parses a string, `dumps()` creates a string, while `load()` and `dump()` work with file-like objects.\n\n## Syntax and behaviour\nUse `json.loads(text)` and `json.dumps(value)` for strings; use `json.load(file)` and `json.dump(value, file)` for file objects. `indent` makes output readable, `sort_keys` can make key ordering stable, and `ensure_ascii=False` preserves non-ASCII characters in the output text.\n\n## Rules and practical guidance\nJSON object keys are strings. Tuples serialize as arrays and become lists when parsed. Unsupported Python objects need an explicit conversion strategy. Treat external JSON as untrusted input: validate required keys, types, ranges and size before using it.\n\n## Example walkthroughs\nThe five examples below use deterministic in-memory streams or automatically cleaned temporary directories. Their outputs are designed to be reproducible in the course validator.\n\n## Common mistakes\n- Choosing a destructive mode when existing content must be preserved.\n- Assuming paths are relative to the script file rather than the process working directory.\n- Forgetting that text and binary streams accept different data types.\n- Building CSV or JSON by manually concatenating strings.\n- Ignoring exceptions caused by missing paths, permissions, invalid encodings or malformed data.\n\n## Best practices\nUse the standard library, explicit UTF-8 for text, context managers for resources, narrow exception handling and validation at application boundaries. Keep untrusted input within an explicitly approved data area.",
+      "examples": [
+        {
+          "id": "py15.8-ex1",
+          "language": "en",
+          "title": "Parse JSON text into Python values",
+          "code": "import json\ntext = '{\"name\":\"Ava\",\"active\":true,\"score\":91}'\ndata = json.loads(text)\nprint(data['name'])\nprint(data['active'])",
+          "expectedOutput": "Ava\nTrue",
+          "explanation": "loads parses JSON text into a Python dictionary with the corresponding Python value types."
+        },
+        {
+          "id": "py15.8-ex2",
+          "language": "en",
+          "title": "Serialize a dictionary as JSON",
+          "code": "import json\ndata = {'course': 'Python', 'lessons': 8}\ntext = json.dumps(data, sort_keys=True)\nprint(text)",
+          "expectedOutput": "{\"course\": \"Python\", \"lessons\": 8}",
+          "explanation": "dumps returns JSON text. sort_keys makes the key order deterministic for this example."
+        },
+        {
+          "id": "py15.8-ex3",
+          "language": "en",
+          "title": "Format JSON for humans",
+          "code": "import json\ndata = {'items': ['pen', 'book']}\nprint(json.dumps(data, indent=2))",
+          "expectedOutput": "{\n  \"items\": [\n    \"pen\",\n    \"book\"\n  ]\n}",
+          "explanation": "The indent option adds whitespace and line breaks without changing the represented data."
+        },
+        {
+          "id": "py15.8-ex4",
+          "language": "en",
+          "title": "Write and read JSON through a file-like object",
+          "code": "import json\nfrom io import StringIO\nstream = StringIO()\njson.dump({'ready': True, 'count': 2}, stream)\nstream.seek(0)\ndata = json.load(stream)\nprint(data['ready'], data['count'])",
+          "expectedOutput": "True 2",
+          "explanation": "dump writes JSON to a file-like object and load reads it back after the stream is repositioned."
+        },
+        {
+          "id": "py15.8-ex5",
+          "language": "en",
+          "title": "Handle malformed JSON explicitly",
+          "code": "import json\ntry:\n    json.loads('{bad json}')\nexcept json.JSONDecodeError as error:\n    print(type(error).__name__)\n    print(error.msg)",
+          "expectedOutput": "JSONDecodeError\nExpecting property name enclosed in double quotes",
+          "explanation": "Malformed JSON raises JSONDecodeError; callers should report or recover from invalid input rather than assuming parsing succeeds."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a small working with json files in python demonstration using a temporary directory or an in-memory stream. Run it, compare the output with your prediction and explain each operation.",
+      "independentTask": "Build a mini record-processing utility that applies working with json files in python to a small, known dataset. Include one valid case, one edge case and a clear response to an expected failure.",
+      "hints": [
+        "Start with the smallest possible file or stream and state what result you expect.",
+        "Choose the mode and encoding before writing the operation.",
+        "Use a context manager whenever a resource must be closed.",
+        "Test an empty input and an invalid or missing value.",
+        "Keep user-controlled paths and parsed external data within explicit validation rules."
+      ],
+      "challenge": "Extend the example into a reusable helper that validates inputs, handles one expected error and leaves resources in a predictable state.",
+      "validationCriteria": [
+        "The program uses the appropriate standard-library API.",
+        "The expected output matches the actual result.",
+        "Resources are closed or cleaned up reliably.",
+        "At least one edge case is handled explicitly."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py15.8-q1",
+        "prompt": "Which function parses JSON text?",
+        "answer": "json.loads()",
+        "options": [
+          "json.loads()",
+          "json.dumps()",
+          "json.dump()",
+          "json.write()"
+        ],
+        "explanation": "loads parses a JSON string into Python values."
+      },
+      {
+        "id": "py15.8-q2",
+        "prompt": "Which function serializes a Python value to a JSON string?",
+        "answer": "json.dumps()",
+        "options": [
+          "json.dumps()",
+          "json.loads()",
+          "json.load()",
+          "json.parsefile()"
+        ],
+        "explanation": "dumps returns a JSON-formatted string."
+      },
+      {
+        "id": "py15.8-q3",
+        "prompt": "Which Python type represents a JSON object after parsing?",
+        "answer": "dict",
+        "options": [
+          "dict",
+          "set",
+          "bytes",
+          "complex"
+        ],
+        "explanation": "A JSON object maps to a Python dictionary."
+      },
+      {
+        "id": "py15.8-q4",
+        "prompt": "Which exception indicates malformed JSON input?",
+        "answer": "JSONDecodeError",
+        "options": [
+          "JSONDecodeError",
+          "KeyError",
+          "StopIteration",
+          "IndexError"
+        ],
+        "explanation": "json parsing raises JSONDecodeError for invalid JSON syntax."
+      },
+      {
+        "id": "py15.8-q5",
+        "prompt": "Why validate parsed external JSON?",
+        "answer": "Its structure and values may not meet application requirements",
+        "options": [
+          "Its structure and values may not meet application requirements",
+          "JSON is always encrypted",
+          "Parsing removes all invalid values",
+          "Python dictionaries cannot contain strings"
+        ],
+        "explanation": "Syntactically valid JSON can still have missing keys, wrong types or unsafe values."
+      }
+    ]
+  },
+  "status": "draft"
+}

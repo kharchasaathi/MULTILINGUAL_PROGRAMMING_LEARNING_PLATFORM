@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101828">
+  <meta name="description" content="Write and run Python in your browser with the CodeSaathi Python Playground.">
+  <title>Python Playground — CodeSaathi</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .python-page{width:min(1320px,calc(100% - 40px));margin:30px auto 56px}
+    .python-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap;margin-bottom:18px}
+    .python-heading h1{font:700 clamp(28px,4vw,42px)/1.15 "Space Grotesk",sans-serif;letter-spacing:-1px;margin:8px 0}
+    .python-heading p{max-width:780px;color:#667085;line-height:1.7;margin:8px 0}
+    .python-back{display:inline-flex;align-items:center;gap:8px;color:#4437b5;font-weight:700;text-decoration:none}
+    .python-status{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:14px 0;padding:11px 14px;border:1px solid #e4e7ec;border-radius:12px;color:#475467;font-size:13px}
+    .python-status-dot{width:8px;height:8px;border-radius:50%;background:#98a2b3}
+    .python-status[data-state="ready"] .python-status-dot{background:#12b76a}
+    .python-status[data-state="error"] .python-status-dot{background:#f04438}
+    .python-version{margin-left:auto;font-weight:700;color:#344054}
+    .python-workspace{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);gap:16px;align-items:stretch}
+    .python-panel{min-width:0;border:1px solid #30384a;border-radius:14px;overflow:hidden;background:#111827;color:#e6edf7}
+    .python-toolbar{min-height:48px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 12px;background:#202a3b;border-bottom:1px solid #344054}
+    .python-toolbar strong{font-size:12px;margin-right:auto}
+    .python-toolbar button,.python-toolbar select{border:1px solid #475467;border-radius:8px;padding:8px 10px;background:#273449;color:#f8fafc;font-size:12px;font-weight:700}
+    .python-toolbar button:disabled{opacity:.45;cursor:not-allowed}
+    .python-run{background:#176b4a!important;border-color:#1a8f63!important}
+    .python-stop{background:#7a271a!important;border-color:#b42318!important}
+    .python-editor{display:block;width:100%;min-height:430px;resize:vertical;border:0;outline:0;padding:18px;background:#111827;color:#e6edf7;font:14px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;tab-size:4;white-space:pre;overflow:auto}
+    .python-editor:focus-visible{outline:2px solid #8b80ff;outline-offset:-3px}
+    .python-output-wrap{display:flex;flex-direction:column;min-height:100%}
+    .python-output{flex:1;min-height:250px;max-height:510px;overflow:auto;margin:0;padding:18px;background:#0b1220;color:#d1fae5;white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace}
+    .python-output .stderr{color:#fda29b}
+    .python-output .system{color:#98a2b3}
+    .python-io{display:grid;grid-template-columns:1fr;gap:8px;margin:16px 0}
+    .python-io label{font-size:12px;font-weight:700;color:#344054}
+    .python-io textarea{width:100%;min-height:82px;border:1px solid #d0d5dd;border-radius:9px;padding:10px;font:12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;resize:vertical}
+    .python-note{margin:16px 0;padding:14px 16px;border:1px solid #e4e7ec;border-radius:12px;background:#f8f9fc;color:#475467;font-size:13px;line-height:1.7}
+    .python-note strong{color:#101828}
+    .python-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .python-actions button{border:1px solid #d0d5dd;border-radius:8px;padding:8px 11px;background:#fff;color:#344054;font-size:12px;font-weight:700}
+    button:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid #8175ed;outline-offset:2px}
+    @media(max-width:850px){.python-workspace{grid-template-columns:1fr}.python-editor{min-height:340px}.python-output{min-height:220px;max-height:360px}}
+    @media(max-width:600px){.python-page{width:calc(100% - 20px);margin:18px auto 32px}.python-toolbar{gap:6px}.python-toolbar button,.python-toolbar select{padding:8px}.python-editor{min-height:300px;font-size:13px}.python-version{margin-left:0;width:100%}}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="CodeSaathi home"><span class="brand-mark">C</span><span>Code<span class="brand-accent">Saathi</span></span></a>
+    <nav class="desktop-nav" aria-label="Python playground navigation"><a href="/#courses">Courses</a><a href="/master-curriculum.html">Curriculum</a><a href="/c-compiler.html">C Compiler</a></nav>
+  </header>
+  <main class="python-page">
+    <div class="python-heading">
+      <div>
+        <a class="python-back" href="/#courses">← Back to courses</a>
+        <div class="eyebrow">PYTHON PROGRAMMING · BROWSER RUNTIME</div>
+        <h1>Python Playground</h1>
+        <p>Write Python, provide standard input, run your program and inspect output or errors. Execution happens in a dedicated browser worker; your source code is not uploaded to a CodeSaathi execution server.</p>
+      </div>
+    </div>
+    <div class="python-status" id="runtimeStatus" data-state="loading" role="status" aria-live="polite">
+      <span class="python-status-dot" aria-hidden="true"></span><span id="runtimeStatusText">Loading Python runtime…</span><span class="python-version" id="pythonVersion">Python version: loading</span>
+    </div>
+    <section class="python-workspace" aria-label="Python editor and output">
+      <div class="python-panel">
+        <div class="python-toolbar">
+          <strong>main.py</strong>
+          <label class="sr-only" for="pythonExample">Example program</label>
+          <select id="pythonExample" aria-label="Choose an example">
+            <option value="hello">Hello world</option>
+            <option value="input">Read input</option>
+            <option value="loop">Loop and calculate</option>
+            <option value="function">Define a function</option>
+            <option value="error">Handle an error</option>
+          </select>
+          <button class="python-run" id="runPython" type="button" disabled>▶ Run</button>
+          <button class="python-stop" id="stopPython" type="button" disabled>■ Stop</button>
+        </div>
+        <textarea class="python-editor" id="pythonCode" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="Python code editor">print("Hello, CodeSaathi!")</textarea>
+        <div class="python-toolbar">
+          <button id="resetPython" type="button">Reset</button>
+          <button id="restorePython" type="button">Restore starter</button>
+          <button id="copyPython" type="button">Copy code</button>
+          <button id="clearPythonOutput" type="button">Clear output</button>
+        </div>
+      </div>
+      <div class="python-panel python-output-wrap">
+        <div class="python-toolbar"><strong>Program output</strong><span id="runState" aria-live="polite">Waiting</span></div>
+        <pre class="python-output" id="pythonOutput" aria-live="polite">Output will appear here.</pre>
+      </div>
+    </section>
+    <section class="python-io" aria-labelledby="stdinHeading">
+      <label id="stdinHeading" for="pythonStdin">Standard input (stdin) — enter one line per input() call</label>
+      <textarea id="pythonStdin" placeholder="Example:&#10;Asha&#10;25" aria-label="Standard input lines"></textarea>
+    </section>
+    <div class="python-note">
+      <strong>Runtime and safety notes:</strong> This playground uses the pinned Pyodide 314.0.8 WebAssembly runtime in a module Web Worker. The worker can be terminated to stop a running program; doing so restarts the runtime for the next run. A 10-second execution watchdog is applied. The Python virtual filesystem is in-memory and does not grant direct access to your device's files. This is not a hardened security boundary: browser-side Python code may still access capabilities exposed by the runtime, and browser memory is not capped by this page. Do not run code you do not trust or enter passwords, API keys or private data. Only standard-library examples are included; external package installation is not enabled.
+    </div>
+  </main>
+  <script src="/js/python-playground.js" defer></script>
+</body>
+</html>

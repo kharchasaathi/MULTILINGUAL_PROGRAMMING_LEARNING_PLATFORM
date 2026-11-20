@@ -1,0 +1,164 @@
+{
+  "id": "python.py23.15.en",
+  "courseId": "python",
+  "moduleId": "PY23",
+  "topicId": "PY23.15",
+  "title": "Integrating API Data with Database Application Services",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of Integrating API Data with Database Application Services.",
+    "Choose an appropriate integrating api data with database application services technique for a Python application.",
+    "Interpret representative code and output involving integrating api data with database application services.",
+    "Identify limitations and failure modes for integrating api data with database application services.",
+    "Apply the concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY11.1",
+    "PY14.1",
+    "PY20.1",
+    "PY21.7",
+    "PY23.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "An application service coordinates validated input, external API responses, domain rules and persistence. Each boundary has a distinct responsibility: transport retrieves bytes, parsing decodes a format, validation checks the shape, domain logic applies rules and a repository persists trusted records. Coordinating these steps explicitly makes failures easier to handle and test.",
+      "whyItMatters": "Real applications combine multiple technologies; clear orchestration prevents transport details and database code from leaking into business rules.",
+      "analogy": "A logistics coordinator receives a shipment, checks its contents, records it and routes it to the correct destination.",
+      "analogyLimit": "A sequence of functions is not automatically a reliable workflow; partial failure, retries, transactions and idempotency still need deliberate design.",
+      "summary": "Integrating API Data with Database Application Services develops practical application engineering skills for Python projects."
+    },
+    "explain": {
+      "narrative": "## Coordinate boundaries without mixing them\nKeep network access behind a client, convert external payloads into validated domain values, then pass those values to a repository. Do not write raw unvalidated API dictionaries directly to the database. Use transactions for related persistence changes. Make external operations idempotent where possible and record enough context to diagnose failures without logging secrets. The examples simulate external responses locally so they are deterministic.",
+      "examples": [
+        {
+          "id": "py2315-ex1",
+          "language": "en",
+          "title": "Map an external payload to a domain value",
+          "code": "payload = {'external_id': 'X7', 'name': 'Pen'}\nrecord = {'code': payload['external_id'], 'label': payload['name'].strip()}\nprint(record)",
+          "expectedOutput": "{'code': 'X7', 'label': 'Pen'}",
+          "explanation": "Mapping creates an internal representation rather than passing the external shape everywhere."
+        },
+        {
+          "id": "py2315-ex2",
+          "language": "en",
+          "title": "Validate before storing",
+          "code": "payload = {'name': 'Notebook', 'qty': 3}\nvalid = isinstance(payload.get('name'), str) and type(payload.get('qty')) is int and payload['qty'] >= 0\nprint(valid)",
+          "expectedOutput": "True",
+          "explanation": "Validation checks the payload before persistence."
+        },
+        {
+          "id": "py2315-ex3",
+          "language": "en",
+          "title": "Persist a validated record",
+          "code": "import sqlite3\ncon = sqlite3.connect(':memory:')\ncon.execute('CREATE TABLE product (code TEXT, name TEXT)')\nrecord = ('P1', 'Pen')\ncon.execute('INSERT INTO product VALUES (?, ?)', record)\nprint(con.execute('SELECT name FROM product').fetchone()[0])\ncon.close()",
+          "expectedOutput": "Pen",
+          "explanation": "The repository operation binds validated values as SQL parameters."
+        },
+        {
+          "id": "py2315-ex4",
+          "language": "en",
+          "title": "Coordinate pure steps",
+          "code": "def parse(raw): return {'amount': int(raw)}\ndef apply(data): return data['amount'] * 2\nprint(apply(parse('21')))",
+          "expectedOutput": "42",
+          "explanation": "Parsing and domain calculation are separate steps that can be tested independently."
+        },
+        {
+          "id": "py2315-ex5",
+          "language": "en",
+          "title": "Represent a failed boundary clearly",
+          "code": "def decode_response(text):\n    import json\n    try: return json.loads(text)\n    except json.JSONDecodeError: return None\nprint(decode_response('{bad}') is None)",
+          "expectedOutput": "True",
+          "explanation": "A parsing failure is handled before later application steps proceed."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Design a workflow that fetches a JSON payload through an injected client, validates it, maps it to a domain record and persists it using a repository.",
+      "independentTask": "Write failure cases for API timeout, malformed JSON, invalid fields, duplicate records and database rollback. State which layer handles each.",
+      "hints": [
+        "Keep transport, parsing, validation and persistence separate.",
+        "Do not trust external API fields without checking them.",
+        "Use parameterized SQL for database values.",
+        "Wrap related writes in a transaction.",
+        "Avoid repeating non-idempotent external operations blindly."
+      ],
+      "challenge": "Build a testable import service that processes a batch of simulated API records, skips invalid rows with diagnostics and commits valid records atomically.",
+      "validationCriteria": [
+        "The concept and intended use are accurately explained.",
+        "All examples execute with the documented output on Python 3.13.",
+        "Application boundaries and dependency responsibilities are correctly identified.",
+        "Limitations and operational or security implications are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2315-q1",
+        "prompt": "What should happen before external API data is persisted?",
+        "answer": "Decode, validate and map it to an internal model",
+        "options": [
+          "Decode, validate and map it to an internal model",
+          "Insert the raw response without inspection",
+          "Print the response and trust it",
+          "Disable database constraints"
+        ],
+        "explanation": "External data should cross explicit parsing and validation boundaries."
+      },
+      {
+        "id": "py2315-q2",
+        "prompt": "Which layer should own HTTP transport details?",
+        "answer": "The API client or adapter",
+        "options": [
+          "The API client or adapter",
+          "The domain entity",
+          "The database schema",
+          "The presentation template"
+        ],
+        "explanation": "Transport details should remain isolated from core business rules."
+      },
+      {
+        "id": "py2315-q3",
+        "prompt": "Why use a transaction for related database writes?",
+        "answer": "To commit them together or roll them back",
+        "options": [
+          "To commit them together or roll them back",
+          "To retry an HTTP request automatically",
+          "To encrypt the JSON payload",
+          "To enforce Python annotations"
+        ],
+        "explanation": "Transactions protect consistency across related persistence changes."
+      },
+      {
+        "id": "py2315-q4",
+        "prompt": "What should be logged when an API import fails?",
+        "answer": "Useful error context without secrets or sensitive payloads",
+        "options": [
+          "Useful error context without secrets or sensitive payloads",
+          "Access tokens and passwords",
+          "Every private response field",
+          "Only the raw response body"
+        ],
+        "explanation": "Diagnostics should support investigation without leaking confidential data."
+      },
+      {
+        "id": "py2315-q5",
+        "prompt": "What is idempotency useful for?",
+        "answer": "Making repeated operations avoid unintended duplicate effects",
+        "options": [
+          "Making repeated operations avoid unintended duplicate effects",
+          "Converting JSON to tuples",
+          "Creating package entry points",
+          "Sorting SQL results"
+        ],
+        "explanation": "Idempotency matters when retries or repeated requests can occur."
+      }
+    ]
+  },
+  "status": "draft"
+}

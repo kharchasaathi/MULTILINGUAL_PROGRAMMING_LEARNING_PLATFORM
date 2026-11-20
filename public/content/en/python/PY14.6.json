@@ -1,0 +1,155 @@
+{
+  "id": "python.py14.6.en",
+  "courseId": "python",
+  "moduleId": "PY14",
+  "topicId": "PY14.6",
+  "title": "Python Assertions and assert Statements",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the principles of python assertions and assert statements.",
+    "Write correct Python syntax for the exception-handling construct covered.",
+    "Predict which handler or cleanup block executes in common scenarios.",
+    "Distinguish recoverable errors, programming defects and internal assertions.",
+    "Apply safe and specific error handling to a realistic program."
+  ],
+  "prerequisites": [
+    "PY7.1",
+    "PY10.1",
+    "PY13.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "An assert statement checks a condition that should be true if the program's internal assumptions are correct. If the condition is false, Python raises AssertionError and can include an optional diagnostic message. Assertions are intended for debugging and internal invariants, not for validating untrusted user input.",
+      "whyItMatters": "Assertions help developers detect broken assumptions close to where they occur, making defects easier to locate during development and testing.",
+      "analogy": "An assertion is like a checkpoint in a process that verifies an internal condition before moving on.",
+      "analogyLimit": "Assertions can be disabled when Python runs with optimization, so they must not enforce security checks, access control or required input validation."
+    },
+    "explain": {
+      "narrative": "## assert syntax\nWrite `assert condition` or `assert condition, message`. If the condition is true, execution continues. If false, Python raises AssertionError and includes the optional message.\n\n## Use assertions for invariants\nAn invariant is a condition that should hold because of the program's own logic. Assertions are useful for checking such assumptions during development and testing. They should not replace explicit validation of external input.\n\n## Optimization caveat\nPython can omit assert statements when run with optimization (`-O`). Therefore, never rely on assert to prevent invalid user data, enforce permissions or protect sensitive operations. Use explicit if statements and raise an appropriate exception for required checks.",
+      "examples": [
+        {
+          "id": "py14.6-ex1",
+          "language": "en",
+          "title": "Check an internal assumption",
+          "code": "total = 12\nassert total >= 0\nprint('total accepted')",
+          "expectedOutput": "total accepted",
+          "explanation": "The condition is true, so execution continues after the assertion."
+        },
+        {
+          "id": "py14.6-ex2",
+          "language": "en",
+          "title": "Show a failed assertion message",
+          "code": "balance = -5\ntry:\n    assert balance >= 0, 'balance invariant failed'\nexcept AssertionError as error:\n    print(str(error))",
+          "expectedOutput": "balance invariant failed",
+          "explanation": "The false condition raises AssertionError and the optional message becomes its diagnostic text."
+        },
+        {
+          "id": "py14.6-ex3",
+          "language": "en",
+          "title": "Assert a function invariant",
+          "code": "def average(total, count):\n    assert count > 0, 'count must be positive'\n    return total / count\nprint(average(20, 4))",
+          "expectedOutput": "5.0",
+          "explanation": "The assertion checks an internal precondition before calculating the average."
+        },
+        {
+          "id": "py14.6-ex4",
+          "language": "en",
+          "title": "Use explicit validation for external input",
+          "code": "def parse_age(raw):\n    age = int(raw)\n    if age < 0:\n        raise ValueError('age cannot be negative')\n    return age\ntry:\n    parse_age('-1')\nexcept ValueError as error:\n    print(str(error))",
+          "expectedOutput": "age cannot be negative",
+          "explanation": "Explicit validation remains active in optimized execution, unlike assert."
+        },
+        {
+          "id": "py14.6-ex5",
+          "language": "en",
+          "title": "Catch AssertionError in a test-like check",
+          "code": "try:\n    assert 2 + 2 == 5\nexcept AssertionError:\n    print('check failed')",
+          "expectedOutput": "check failed",
+          "explanation": "A failed assertion raises AssertionError, which can be caught for a controlled demonstration."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a small program demonstrating python assertions and assert statements. Trigger one expected failure, handle it appropriately, and explain the resulting control flow.",
+      "independentTask": "Build a small input-processing function with explicit validation and a clear error-handling policy. Test one valid input, one expected invalid input and one unexpected failure; explain which layer should handle each.",
+      "hints": [
+        "Identify the exact operation that can fail before writing the try block.",
+        "Catch only exception types that have a meaningful recovery action.",
+        "Keep normal success logic outside the protected suite when possible.",
+        "Preserve the original exception when adding higher-level context.",
+        "Never rely on assert for required user-input or security validation."
+      ],
+      "challenge": "Design a small application boundary that translates a low-level exception into a domain-specific error, preserves the cause and produces a safe user-facing message."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py14.6-q1",
+        "prompt": "What exception does a failed assert raise?",
+        "answer": "AssertionError",
+        "options": [
+          "AssertionError",
+          "ValueError",
+          "TypeError",
+          "KeyError"
+        ],
+        "explanation": "A false assertion condition raises AssertionError."
+      },
+      {
+        "id": "py14.6-q2",
+        "prompt": "What is an appropriate use of assert?",
+        "answer": "Checking an internal invariant during development",
+        "options": [
+          "Checking an internal invariant during development",
+          "Validating every untrusted password",
+          "Enforcing authorization in production",
+          "Replacing all input checks"
+        ],
+        "explanation": "Assertions are intended to detect broken internal assumptions, not enforce external security requirements."
+      },
+      {
+        "id": "py14.6-q3",
+        "prompt": "Can Python optimization remove assert statements?",
+        "answer": "Yes",
+        "options": [
+          "Yes",
+          "No",
+          "Only inside classes",
+          "Only on Windows"
+        ],
+        "explanation": "Running Python with optimization can omit assert statements."
+      },
+      {
+        "id": "py14.6-q4",
+        "prompt": "How should required user-input validation be implemented?",
+        "answer": "With explicit conditions and appropriate exceptions",
+        "options": [
+          "With explicit conditions and appropriate exceptions",
+          "With assert only",
+          "With comments",
+          "With print statements only"
+        ],
+        "explanation": "Explicit validation is not removed by optimization and communicates the required failure behaviour."
+      },
+      {
+        "id": "py14.6-q5",
+        "prompt": "What does assert condition, message do when condition is false?",
+        "answer": "Raises AssertionError with the message",
+        "options": [
+          "Raises AssertionError with the message",
+          "Returns the message",
+          "Prints the message and continues",
+          "Raises SyntaxError"
+        ],
+        "explanation": "The optional message is attached to the AssertionError raised for a failed condition."
+      }
+    ]
+  },
+  "status": "draft"
+}

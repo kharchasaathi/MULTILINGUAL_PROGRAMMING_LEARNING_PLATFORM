@@ -1,0 +1,169 @@
+{
+  "id": "python.py22.14.en",
+  "courseId": "python",
+  "moduleId": "PY22",
+  "topicId": "PY22.14",
+  "title": "Multiprocessing and CPU-Bound Workloads",
+  "language": "en",
+  "learningObjectives": [
+    "Explain Process, Pool, ProcessPoolExecutor, pickling and process boundaries.",
+    "Select a suitable concurrency or performance technique for PY22.14.",
+    "Interpret task, thread, process or profiling results correctly.",
+    "Identify limitations and risks when applying PY22.14.",
+    "Apply PY22.14 concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY8.1",
+    "PY11.1",
+    "PY14.1",
+    "PY21.7",
+    "PY22.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "The multiprocessing module creates separate processes with independent memory spaces. Processes can run Python code on multiple CPU cores, which can help CPU-bound workloads. Data passed between processes must be transferred, commonly through serialization, and process startup and communication have costs.",
+      "whyItMatters": "Multiprocessing can use multiple CPU cores for suitable CPU-heavy tasks when the work is large enough to justify process overhead.",
+      "analogy": "Multiprocessing is several independent workshops, each with its own tools and memory, coordinating by sending work orders and results.",
+      "analogyLimit": "Process creation and data transfer can be expensive; platform start methods differ, and process code must be structured safely behind the main-module guard in scripts.",
+      "summary": "Multiprocessing and CPU-Bound Workloads develops advanced concurrency and performance skills."
+    },
+    "explain": {
+      "narrative": "## Use processes for suitable CPU work\n`multiprocessing` provides process-based parallelism. `concurrent.futures.ProcessPoolExecutor` offers a higher-level interface for submitting work and collecting results. Worker functions and arguments generally need to be serializable. On platforms using spawn, protect process startup with `if __name__ == '__main__':` in scripts.\n\nMeasure the complete workload, including startup and data-transfer costs. Do not pass huge objects between processes unnecessarily. For I/O-bound tasks, threads or asyncio may be simpler.",
+      "examples": [
+        {
+          "id": "py2214-ex1",
+          "language": "en",
+          "title": "Inspect available CPU count",
+          "code": "import multiprocessing\nprint(multiprocessing.cpu_count() >= 1)",
+          "expectedOutput": "True",
+          "explanation": "cpu_count reports the number of CPUs the runtime can detect."
+        },
+        {
+          "id": "py2214-ex2",
+          "language": "en",
+          "title": "Check a process executor class",
+          "code": "from concurrent.futures import ProcessPoolExecutor\nprint(ProcessPoolExecutor.__name__)",
+          "expectedOutput": "ProcessPoolExecutor",
+          "explanation": "The executor API manages a pool of worker processes."
+        },
+        {
+          "id": "py2214-ex3",
+          "language": "en",
+          "title": "Describe the main-module guard",
+          "code": "guard = \"if __name__ == '__main__':\"\nprint(guard.startswith('if __name__'))",
+          "expectedOutput": "True",
+          "explanation": "The guard prevents child processes from re-running top-level process-starting code under spawn."
+        },
+        {
+          "id": "py2214-ex4",
+          "language": "en",
+          "title": "Check process start methods",
+          "code": "import multiprocessing\nprint('spawn' in multiprocessing.get_all_start_methods())",
+          "expectedOutput": "True",
+          "explanation": "The available start methods depend on platform and Python configuration."
+        },
+        {
+          "id": "py2214-ex5",
+          "language": "en",
+          "title": "Explain serialization requirement",
+          "code": "import pickle\nvalue = {'task': 3}\nprint(pickle.loads(pickle.dumps(value)) == value)",
+          "expectedOutput": "True",
+          "explanation": "Pickle demonstrates serialization of a simple object that could be transferred between processes."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Write a guarded script that uses ProcessPoolExecutor to calculate squares for a small list of integers and collects results in input order.",
+      "independentTask": "Compare multiprocessing, threading and asyncio for CPU-heavy, I/O-heavy and mixed workloads.",
+      "hints": [
+        "Processes have separate memory spaces.",
+        "ProcessPoolExecutor provides a high-level API.",
+        "Worker inputs and outputs need to be serializable.",
+        "Use the main-module guard in executable scripts.",
+        "Measure process overhead as well as computation time."
+      ],
+      "challenge": "Design a process pool for independent CPU-heavy tasks with bounded submissions, graceful shutdown and a benchmark against sequential execution.",
+      "validationCriteria": [
+        "The concurrency or performance concept is accurately explained.",
+        "Examples execute with the documented output.",
+        "Synchronization, scheduling or profiling behaviour is correct.",
+        "Limitations and appropriate use cases are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2214-q1",
+        "prompt": "What is a key difference between multiprocessing and threading?",
+        "answer": "Processes have separate memory spaces",
+        "options": [
+          "Processes have separate memory spaces",
+          "Processes share exactly one Python stack",
+          "Processes have separate memory spaces",
+          "Processes cannot run Python code",
+          "Threads always use multiple CPU cores"
+        ],
+        "explanation": "Each process has its own memory space and interpreter state."
+      },
+      {
+        "id": "py2214-q2",
+        "prompt": "Which workload may benefit from multiprocessing?",
+        "answer": "CPU-bound independent tasks",
+        "options": [
+          "CPU-bound independent tasks",
+          "CPU-bound independent tasks",
+          "A function waiting for a web response only",
+          "A single print statement",
+          "A small string formatting operation"
+        ],
+        "explanation": "Processes can execute CPU-heavy Python work across multiple cores."
+      },
+      {
+        "id": "py2214-q3",
+        "prompt": "What is ProcessPoolExecutor used for?",
+        "answer": "Managing a pool of worker processes",
+        "options": [
+          "Managing a pool of worker processes",
+          "Formatting code",
+          "Managing a pool of worker processes",
+          "Creating a virtual environment",
+          "Parsing tracebacks"
+        ],
+        "explanation": "ProcessPoolExecutor provides a high-level process pool interface."
+      },
+      {
+        "id": "py2214-q4",
+        "prompt": "Why is the main-module guard important?",
+        "answer": "It prevents unintended recursive process startup on spawn-based systems",
+        "options": [
+          "It prevents unintended recursive process startup on spawn-based systems",
+          "It changes Python syntax",
+          "It prevents unintended recursive process startup on spawn-based systems",
+          "It disables pickling",
+          "It increases CPU count"
+        ],
+        "explanation": "Child processes may import the main module, so process creation should be protected."
+      },
+      {
+        "id": "py2214-q5",
+        "prompt": "What cost should be considered in multiprocessing?",
+        "answer": "Process startup and data-transfer overhead",
+        "options": [
+          "Process startup and data-transfer overhead",
+          "Only variable naming",
+          "Process startup and data-transfer overhead",
+          "Only comments",
+          "The colour of the editor"
+        ],
+        "explanation": "Parallel execution has overhead that may outweigh benefits for small tasks."
+      }
+    ]
+  },
+  "status": "draft"
+}

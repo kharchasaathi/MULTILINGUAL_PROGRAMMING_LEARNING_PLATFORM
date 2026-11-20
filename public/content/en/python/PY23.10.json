@@ -1,0 +1,163 @@
+{
+  "id": "python.py23.10.en",
+  "courseId": "python",
+  "moduleId": "PY23",
+  "topicId": "PY23.10",
+  "title": "SQL CRUD, Parameterized Queries and Transactions",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of SQL CRUD, Parameterized Queries and Transactions.",
+    "Choose an appropriate sql crud, parameterized queries and transactions technique for an application.",
+    "Interpret representative code and output involving sql crud, parameterized queries and transactions.",
+    "Identify limitations and failure modes for sql crud, parameterized queries and transactions.",
+    "Apply the concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY11.1",
+    "PY14.1",
+    "PY20.1",
+    "PY21.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "CRUD means create, read, update and delete records. SQL parameters bind values safely and prevent user data from being interpreted as SQL syntax. Transactions group related operations so they commit together or roll back after failure. Constraints such as PRIMARY KEY, NOT NULL and UNIQUE protect data integrity at the database level.",
+      "whyItMatters": "Correct query parameterization and transaction design protect data integrity and reduce SQL injection risk.",
+      "analogy": "A transaction is like a multi-step bank transfer that either completes as one unit or is reversed.",
+      "analogyLimit": "A transaction does not replace authorization, input validation or backups; database constraints cannot express every business rule.",
+      "summary": "SQL CRUD, Parameterized Queries and Transactions develops practical application engineering skills for Python projects."
+    },
+    "explain": {
+      "narrative": "## Make database changes atomic\nUse placeholders for every untrusted value. Never interpolate user-controlled strings into SQL statements. Use explicit transactions for multi-step changes and roll back if any step fails. Constraints provide a final integrity boundary even when multiple parts of an application write to the database. Use `rowcount` carefully because its meaning depends on the statement and driver. Schema migrations should be versioned and tested.",
+      "examples": [
+        {
+          "id": "py2310-ex1",
+          "language": "en",
+          "title": "Update a row with a parameter",
+          "code": "import sqlite3\ncon = sqlite3.connect(':memory:')\ncon.execute('CREATE TABLE stock (sku TEXT PRIMARY KEY, qty INTEGER)')\ncon.execute('INSERT INTO stock VALUES (?, ?)', ('A1', 5))\ncon.execute('UPDATE stock SET qty = ? WHERE sku = ?', (8, 'A1'))\nprint(con.execute('SELECT qty FROM stock').fetchone()[0])\ncon.close()",
+          "expectedOutput": "8",
+          "explanation": "The UPDATE values are bound independently from the SQL statement."
+        },
+        {
+          "id": "py2310-ex2",
+          "language": "en",
+          "title": "Delete a matching record",
+          "code": "import sqlite3\ncon = sqlite3.connect(':memory:')\ncon.execute('CREATE TABLE task (id INTEGER PRIMARY KEY, title TEXT)')\ncon.execute('INSERT INTO task (title) VALUES (?)', ('draft',))\ncon.execute('DELETE FROM task WHERE title = ?', ('draft',))\nprint(con.execute('SELECT COUNT(*) FROM task').fetchone()[0])\ncon.close()",
+          "expectedOutput": "0",
+          "explanation": "DELETE removes only rows matching the parameterized predicate."
+        },
+        {
+          "id": "py2310-ex3",
+          "language": "en",
+          "title": "Rollback a failed transaction",
+          "code": "import sqlite3\ncon = sqlite3.connect(':memory:')\ncon.execute('CREATE TABLE account (balance INTEGER)')\ncon.execute('INSERT INTO account VALUES (100)')\ncon.commit()\ntry:\n    con.execute('UPDATE account SET balance = balance - 30')\n    raise ValueError('cancel')\nexcept ValueError:\n    con.rollback()\nprint(con.execute('SELECT balance FROM account').fetchone()[0])\ncon.close()",
+          "expectedOutput": "100",
+          "explanation": "Rollback discards uncommitted changes in the current transaction."
+        },
+        {
+          "id": "py2310-ex4",
+          "language": "en",
+          "title": "Enforce a uniqueness constraint",
+          "code": "import sqlite3\ncon = sqlite3.connect(':memory:')\ncon.execute('CREATE TABLE user_account (email TEXT UNIQUE)')\ncon.execute('INSERT INTO user_account VALUES (?)', ('a@example.test',))\ntry:\n    con.execute('INSERT INTO user_account VALUES (?)', ('a@example.test',))\nexcept sqlite3.IntegrityError:\n    print('duplicate rejected')\ncon.close()",
+          "expectedOutput": "duplicate rejected",
+          "explanation": "A UNIQUE constraint is enforced by SQLite even if application validation misses a duplicate."
+        },
+        {
+          "id": "py2310-ex5",
+          "language": "en",
+          "title": "Group changes and commit",
+          "code": "import sqlite3\ncon = sqlite3.connect(':memory:')\ncon.execute('CREATE TABLE ledger (amount INTEGER)')\ncon.execute('INSERT INTO ledger VALUES (?)', (10,))\ncon.commit()\nprint(con.execute('SELECT SUM(amount) FROM ledger').fetchone()[0])\ncon.close()",
+          "expectedOutput": "10",
+          "explanation": "commit makes the transaction's changes durable in the database."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Implement a transfer between two in-memory accounts. Validate sufficient funds, update both rows in one transaction and roll back if either update fails.",
+      "independentTask": "Review a CRUD module and identify every place where SQL injection, partial updates or missing constraints could occur.",
+      "hints": [
+        "Bind all user-provided values with placeholders.",
+        "Use constraints for uniqueness and required values.",
+        "Use one transaction for related writes.",
+        "Roll back after an exception before reusing the connection.",
+        "Authorization must be checked separately from SQL parameterization."
+      ],
+      "challenge": "Create an atomic inventory adjustment operation that records a stock change and audit row together, with rollback tests.",
+      "validationCriteria": [
+        "The concept and intended use are accurately explained.",
+        "All examples execute with the documented output on Python 3.13.",
+        "External input, failure handling and dependency boundaries are treated appropriately.",
+        "Limitations and security implications are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2310-q1",
+        "prompt": "What does CRUD stand for?",
+        "answer": "Create, Read, Update, Delete",
+        "options": [
+          "Create, Read, Update, Delete",
+          "Compile, Run, Undo, Debug",
+          "Connect, Retry, Update, Deploy",
+          "Create, Render, Upload, Download"
+        ],
+        "explanation": "CRUD names the four basic data operations."
+      },
+      {
+        "id": "py2310-q2",
+        "prompt": "What is the purpose of SQL parameter binding?",
+        "answer": "Keep values separate from SQL syntax",
+        "options": [
+          "Keep values separate from SQL syntax",
+          "Automatically authorize users",
+          "Encrypt the database file",
+          "Create database backups"
+        ],
+        "explanation": "Binding values prevents them from being parsed as SQL commands."
+      },
+      {
+        "id": "py2310-q3",
+        "prompt": "What does rollback do?",
+        "answer": "Discards uncommitted transaction changes",
+        "options": [
+          "Discards uncommitted transaction changes",
+          "Deletes the database schema",
+          "Commits every update",
+          "Closes the Python interpreter"
+        ],
+        "explanation": "Rollback restores the transaction to its prior committed state."
+      },
+      {
+        "id": "py2310-q4",
+        "prompt": "Which constraint prevents duplicate values in a column?",
+        "answer": "UNIQUE",
+        "options": [
+          "UNIQUE",
+          "ORDER BY",
+          "LIMIT",
+          "AS"
+        ],
+        "explanation": "UNIQUE enforces uniqueness in the database."
+      },
+      {
+        "id": "py2310-q5",
+        "prompt": "Does parameterized SQL replace authorization checks?",
+        "answer": "No",
+        "options": [
+          "No",
+          "Yes",
+          "Only for SELECT",
+          "Only for SQLite memory databases"
+        ],
+        "explanation": "SQL safety and user authorization are separate responsibilities."
+      }
+    ]
+  },
+  "status": "draft"
+}

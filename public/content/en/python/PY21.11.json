@@ -1,0 +1,169 @@
+{
+  "id": "python.py21.11.en",
+  "courseId": "python",
+  "moduleId": "PY21",
+  "topicId": "PY21.11",
+  "title": "Mocking Dependencies with unittest.mock",
+  "language": "en",
+  "learningObjectives": [
+    "Explain Mock, patch, return_value, side_effect and call assertions.",
+    "Select a suitable testing or code-quality technique for PY21.11.",
+    "Interpret test, diagnostic and quality-tool output correctly.",
+    "Identify limitations and risks when applying PY21.11.",
+    "Apply PY21.11 concepts in a maintainable Python workflow."
+  ],
+  "prerequisites": [
+    "PY8.1",
+    "PY11.1",
+    "PY14.1",
+    "PY20.1",
+    "PY21.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Mocking replaces or simulates a dependency during a test so the code under test can be checked without relying on a real external service or slow resource. unittest.mock is part of the standard library. Mock objects can return configured values, raise exceptions with side_effect and record how they were called. Patch the name where the code under test looks it up.",
+      "whyItMatters": "Mocking isolates a unit from external systems and makes tests faster and more predictable when used at the correct boundary.",
+      "analogy": "A mock is a practice partner that imitates a real service so a function can be tested without contacting the actual service.",
+      "analogyLimit": "Over-mocking can make tests verify implementation details rather than meaningful behaviour; mocks do not prove that the real integration works.",
+      "summary": "Mocking Dependencies with unittest.mock develops reliable testing and code-quality skills for Python projects."
+    },
+    "explain": {
+      "narrative": "## Isolate dependencies with mocks\nUse `unittest.mock.Mock` to create a mock object and configure `return_value` for a predictable response. `side_effect` can provide a sequence of values or raise an exception. Use `assert_called_once_with()` and `call_count` to inspect interactions.\n\nThe `patch()` helper temporarily replaces a name during a test. Patch the symbol in the namespace where the code under test uses it, not automatically where it was originally defined. Keep at least some integration tests that exercise the real boundary.",
+      "examples": [
+        {
+          "id": "py2111-ex1",
+          "language": "en",
+          "title": "Configure a mock return value",
+          "code": "from unittest.mock import Mock\nservice = Mock()\nservice.fetch_status.return_value = 'ready'\nprint(service.fetch_status())",
+          "expectedOutput": "ready",
+          "explanation": "return_value configures the value returned by a mock method."
+        },
+        {
+          "id": "py2111-ex2",
+          "language": "en",
+          "title": "Inspect a mock call",
+          "code": "from unittest.mock import Mock\nsender = Mock()\nsender.send('hello')\nprint(sender.send.call_count)\nprint(sender.send.call_args.args[0])",
+          "expectedOutput": "1\nhello",
+          "explanation": "Mock records calls and their arguments."
+        },
+        {
+          "id": "py2111-ex3",
+          "language": "en",
+          "title": "Assert a call with arguments",
+          "code": "from unittest.mock import Mock\nworker = Mock()\nworker.process('job-7')\nworker.process.assert_called_once_with('job-7')\nprint('verified')",
+          "expectedOutput": "verified",
+          "explanation": "assert_called_once_with checks both call count and argument values."
+        },
+        {
+          "id": "py2111-ex4",
+          "language": "en",
+          "title": "Simulate a dependency exception",
+          "code": "from unittest.mock import Mock\nreader = Mock(side_effect=OSError('unavailable'))\ntry:\n    reader()\nexcept OSError as error:\n    print(type(error).__name__)",
+          "expectedOutput": "OSError",
+          "explanation": "side_effect can raise an exception to simulate a failing dependency."
+        },
+        {
+          "id": "py2111-ex5",
+          "language": "en",
+          "title": "Return a sequence of responses",
+          "code": "from unittest.mock import Mock\nclock = Mock(side_effect=[10, 20, 30])\nprint(clock(), clock(), clock())",
+          "expectedOutput": "10 20 30",
+          "explanation": "An iterable side_effect supplies successive values for successive calls."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Write a function that calls a small service object. Replace that service with Mock, configure its return value and assert it was called with the expected arguments.",
+      "independentTask": "Plan mock-based tests for a function that sends a notification. Identify what to mock, what behaviour to assert and which real integration test is still required.",
+      "hints": [
+        "Use unittest.mock.Mock for a mock object.",
+        "Set return_value for a predictable response.",
+        "Use side_effect to simulate an exception.",
+        "Check interactions with assert_called_once_with.",
+        "Patch the name where the tested code looks it up."
+      ],
+      "challenge": "Design a test suite for a payment-status adapter using mocks for network boundaries and a separate integration test for the adapter contract; never use real payment credentials.",
+      "validationCriteria": [
+        "The testing or quality objective is clearly stated.",
+        "Examples execute with the documented output.",
+        "Test setup, cleanup and dependency boundaries are accurate.",
+        "Tool limitations and appropriate use cases are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2111-q1",
+        "prompt": "Why use a mock in a unit test?",
+        "answer": "To replace a dependency and control its behaviour",
+        "options": [
+          "To replace a dependency and control its behaviour",
+          "To prove every external system works",
+          "To replace a dependency and control its behaviour",
+          "To permanently replace production code",
+          "To disable all assertions"
+        ],
+        "explanation": "Mocks isolate code from dependencies and provide controlled responses."
+      },
+      {
+        "id": "py2111-q2",
+        "prompt": "Which attribute configures a mock's normal return value?",
+        "answer": "return_value",
+        "options": [
+          "return_value",
+          "call_count",
+          "return_value",
+          "__file__",
+          "sys.path"
+        ],
+        "explanation": "return_value defines what the mock returns when called."
+      },
+      {
+        "id": "py2111-q3",
+        "prompt": "What can side_effect do?",
+        "answer": "Raise an exception or provide successive results",
+        "options": [
+          "Raise an exception or provide successive results",
+          "Only format source code",
+          "Raise an exception or provide successive results",
+          "Install packages",
+          "Create a venv"
+        ],
+        "explanation": "side_effect can be an exception, callable or iterable."
+      },
+      {
+        "id": "py2111-q4",
+        "prompt": "What does assert_called_once_with verify?",
+        "answer": "One call occurred with the specified arguments",
+        "options": [
+          "One call occurred with the specified arguments",
+          "The mock was never called",
+          "One call occurred with the specified arguments",
+          "Every method was patched",
+          "A network request succeeded"
+        ],
+        "explanation": "It checks both the number of calls and their arguments."
+      },
+      {
+        "id": "py2111-q5",
+        "prompt": "Where should patch usually replace a symbol?",
+        "answer": "Where the code under test looks up that symbol",
+        "options": [
+          "Where the code under test looks up that symbol",
+          "Only in the original package source",
+          "Where the code under test looks up that symbol",
+          "In every Python module",
+          "In the operating system"
+        ],
+        "explanation": "Patching the lookup namespace ensures the tested code uses the replacement."
+      }
+    ]
+  },
+  "status": "draft"
+}

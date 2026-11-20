@@ -1,0 +1,161 @@
+{
+  "id": "python.py15.5.en",
+  "courseId": "python",
+  "moduleId": "PY15",
+  "topicId": "PY15.5",
+  "title": "The with Statement and File Context Managers",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and practical uses of the with statement and file context managers.",
+    "Choose appropriate Python standard-library APIs and syntax for the with statement and file context managers.",
+    "Predict the behaviour of representative PY15.5 operations and their outputs.",
+    "Identify common mistakes, edge cases and failure conditions in the with statement and file context managers.",
+    "Apply safe, readable the with statement and file context managers techniques in a small program."
+  ],
+  "prerequisites": [
+    "PY14.1",
+    "PY14.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A context manager defines setup and cleanup around a block of code. The `with` statement enters the context before the block and exits it afterward, including when the block raises an exception. File objects implement this protocol so their resources are closed reliably.",
+      "whyItMatters": "Explicitly closing every file on every control-flow path is error-prone. Context managers make resource lifetime visible and dependable, improving reliability when exceptions or early returns occur.",
+      "analogy": "Working with a file is like borrowing a labelled record from a filing room: you identify its location, choose whether to read or update it, and return the resource when finished.",
+      "analogyLimit": "A real filesystem has permissions, concurrent changes, encoding rules and failure modes that a physical filing-room analogy cannot fully represent.",
+      "summary": "The with Statement and File Context Managers relies on explicit paths, correct modes, deliberate resource management and validation of data."
+    },
+    "explain": {
+      "narrative": "## Core idea\nA context manager defines setup and cleanup around a block of code. The `with` statement enters the context before the block and exits it afterward, including when the block raises an exception. File objects implement this protocol so their resources are closed reliably.\n\n## Syntax and behaviour\nUse `with open(path, 'r', encoding='utf-8') as file:` and place file operations inside the indented block. Multiple context managers can be listed in one with statement, separated by commas. Custom context managers can implement `__enter__` and `__exit__` or use `contextlib`.\n\n## Rules and practical guidance\nThe variable bound by `as` is available inside the block. The file is closed when the block exits, even if an exception propagates. Do not try to use a closed file afterward. A context manager does not automatically make arbitrary operations safe; exceptions still need appropriate handling.\n\n## Example walkthroughs\nThe five examples below use deterministic in-memory streams or automatically cleaned temporary directories. Their outputs are designed to be reproducible in the course validator.\n\n## Common mistakes\n- Choosing a destructive mode when existing content must be preserved.\n- Assuming paths are relative to the script file rather than the process working directory.\n- Forgetting that text and binary streams accept different data types.\n- Building CSV or JSON by manually concatenating strings.\n- Ignoring exceptions caused by missing paths, permissions, invalid encodings or malformed data.\n\n## Best practices\nUse the standard library, explicit UTF-8 for text, context managers for resources, narrow exception handling and validation at application boundaries. Keep untrusted input within an explicitly approved data area.",
+      "examples": [
+        {
+          "id": "py15.5-ex1",
+          "language": "en",
+          "title": "Check that a stream closes after the block",
+          "code": "from io import StringIO\nfile = StringIO('hello')\nwith file as stream:\n    print(stream.read())\nprint(file.closed)",
+          "expectedOutput": "hello\nTrue",
+          "explanation": "The stream is closed automatically after leaving the with block."
+        },
+        {
+          "id": "py15.5-ex2",
+          "language": "en",
+          "title": "Cleanup still occurs when an exception is raised",
+          "code": "from io import StringIO\nfile = StringIO('data')\ntry:\n    with file as stream:\n        stream.read()\n        raise ValueError('demo')\nexcept ValueError:\n    print('handled')\nprint(file.closed)",
+          "expectedOutput": "handled\nTrue",
+          "explanation": "The context manager's exit method runs while the exception propagates, so the stream is closed."
+        },
+        {
+          "id": "py15.5-ex3",
+          "language": "en",
+          "title": "Use nested context managers",
+          "code": "from io import StringIO\nwith StringIO('left') as left, StringIO('right') as right:\n    print(left.read() + '-' + right.read())",
+          "expectedOutput": "left-right",
+          "explanation": "A single with statement can manage more than one resource; both are exited when the block ends."
+        },
+        {
+          "id": "py15.5-ex4",
+          "language": "en",
+          "title": "Use a context manager for a temporary file",
+          "code": "from pathlib import Path\nfrom tempfile import TemporaryDirectory\nwith TemporaryDirectory() as folder:\n    path = Path(folder) / 'data.txt'\n    with path.open('w', encoding='utf-8') as file:\n        file.write('saved')\n    print(path.read_text(encoding='utf-8'))",
+          "expectedOutput": "saved",
+          "explanation": "The file context closes the handle before the temporary directory context removes its contents."
+        },
+        {
+          "id": "py15.5-ex5",
+          "language": "en",
+          "title": "Observe a closed stream cannot be reused",
+          "code": "from io import StringIO\nwith StringIO('x') as file:\n    print(file.read())\ntry:\n    file.read()\nexcept ValueError as error:\n    print(type(error).__name__)",
+          "expectedOutput": "x\nValueError",
+          "explanation": "Using a closed file-like object raises ValueError, which is why resource use should stay within its context."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a small the with statement and file context managers demonstration using a temporary directory or an in-memory stream. Run it, compare the output with your prediction and explain each operation.",
+      "independentTask": "Build a mini record-processing utility that applies the with statement and file context managers to a small, known dataset. Include one valid case, one edge case and a clear response to an expected failure.",
+      "hints": [
+        "Start with the smallest possible file or stream and state what result you expect.",
+        "Choose the mode and encoding before writing the operation.",
+        "Use a context manager whenever a resource must be closed.",
+        "Test an empty input and an invalid or missing value.",
+        "Keep user-controlled paths and parsed external data within explicit validation rules."
+      ],
+      "challenge": "Extend the example into a reusable helper that validates inputs, handles one expected error and leaves resources in a predictable state.",
+      "validationCriteria": [
+        "The program uses the appropriate standard-library API.",
+        "The expected output matches the actual result.",
+        "Resources are closed or cleaned up reliably.",
+        "At least one edge case is handled explicitly."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py15.5-q1",
+        "prompt": "When does a file context manager close its file?",
+        "answer": "When execution leaves the with block",
+        "options": [
+          "When execution leaves the with block",
+          "Only when the whole Python process exits",
+          "Only after a manual close call",
+          "Before the first read"
+        ],
+        "explanation": "The context manager exits and closes the file when the block ends."
+      },
+      {
+        "id": "py15.5-q2",
+        "prompt": "Does cleanup run if an exception leaves a with block?",
+        "answer": "Yes",
+        "options": [
+          "Yes",
+          "No",
+          "Only for ValueError",
+          "Only when the exception is caught inside the block"
+        ],
+        "explanation": "The context manager exit protocol runs during exception propagation."
+      },
+      {
+        "id": "py15.5-q3",
+        "prompt": "Which methods form the basic context-manager protocol?",
+        "answer": "__enter__ and __exit__",
+        "options": [
+          "__enter__ and __exit__",
+          "__init__ and __del__",
+          "open and close",
+          "read and write"
+        ],
+        "explanation": "A context manager implements __enter__ and __exit__."
+      },
+      {
+        "id": "py15.5-q4",
+        "prompt": "What happens when reading a closed StringIO object?",
+        "answer": "It raises ValueError",
+        "options": [
+          "It raises ValueError",
+          "It returns an empty list",
+          "It reopens itself",
+          "It returns None"
+        ],
+        "explanation": "Operations on a closed stream raise ValueError."
+      },
+      {
+        "id": "py15.5-q5",
+        "prompt": "What is a key benefit of with?",
+        "answer": "Reliable resource cleanup",
+        "options": [
+          "Reliable resource cleanup",
+          "Automatic validation of all data",
+          "Prevention of every exception",
+          "Unlimited memory"
+        ],
+        "explanation": "with provides structured entry and cleanup around a block."
+      }
+    ]
+  },
+  "status": "draft"
+}

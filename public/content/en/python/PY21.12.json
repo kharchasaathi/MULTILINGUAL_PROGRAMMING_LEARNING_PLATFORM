@@ -1,0 +1,169 @@
+{
+  "id": "python.py21.12.en",
+  "courseId": "python",
+  "moduleId": "PY21",
+  "topicId": "PY21.12",
+  "title": "Integration Testing with Temporary Files and Resources",
+  "language": "en",
+  "learningObjectives": [
+    "Explain integration boundaries, tempfile, pathlib, end-to-end component checks and cleanup.",
+    "Select a suitable testing or code-quality technique for PY21.12.",
+    "Interpret test, diagnostic and quality-tool output correctly.",
+    "Identify limitations and risks when applying PY21.12.",
+    "Apply PY21.12 concepts in a maintainable Python workflow."
+  ],
+  "prerequisites": [
+    "PY8.1",
+    "PY11.1",
+    "PY14.1",
+    "PY20.1",
+    "PY21.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "An integration test checks whether multiple components work together across a defined boundary. For example, a function may serialize data, write it to a file and read it back. Integration tests should use controlled resources such as temporary directories and files so they do not modify a developer's real data or depend on production services.",
+      "whyItMatters": "Unit tests can verify components independently, while integration tests reveal problems in how those components connect.",
+      "analogy": "Unit tests inspect individual instruments; integration tests check whether the whole orchestra plays together.",
+      "analogyLimit": "Integration tests can be slower and more environment-sensitive than unit tests, so keep their scope controlled and isolate external services where possible.",
+      "summary": "Integration Testing with Temporary Files and Resources develops reliable testing and code-quality skills for Python projects."
+    },
+    "explain": {
+      "narrative": "## Test component boundaries safely\nUse `tempfile.TemporaryDirectory()` or `NamedTemporaryFile()` to create disposable resources. Use `pathlib.Path` to read and write files clearly. A useful integration test exercises a meaningful path across components and checks the resulting behaviour, not merely that each helper returns a value.\n\nKeep tests away from real user files and production credentials. Use test databases or isolated service instances for database integration, and make cleanup automatic with context managers.",
+      "examples": [
+        {
+          "id": "py2112-ex1",
+          "language": "en",
+          "title": "Write and read JSON in a temporary directory",
+          "code": "import json, tempfile\nfrom pathlib import Path\ndata = {'name': 'Ada', 'active': True}\nwith tempfile.TemporaryDirectory() as folder:\n    path = Path(folder) / 'data.json'\n    path.write_text(json.dumps(data), encoding='utf-8')\n    restored = json.loads(path.read_text(encoding='utf-8'))\n    print(restored == data)",
+          "expectedOutput": "True",
+          "explanation": "A temporary directory isolates the file operation and is removed when the context exits."
+        },
+        {
+          "id": "py2112-ex2",
+          "language": "en",
+          "title": "Check a file exists during a test",
+          "code": "import tempfile\nfrom pathlib import Path\nwith tempfile.TemporaryDirectory() as folder:\n    path = Path(folder) / 'report.txt'\n    path.write_text('complete', encoding='utf-8')\n    print(path.exists())",
+          "expectedOutput": "True",
+          "explanation": "The test checks the filesystem result while keeping the file inside a disposable directory."
+        },
+        {
+          "id": "py2112-ex3",
+          "language": "en",
+          "title": "Integrate CSV writing and reading",
+          "code": "import csv, tempfile\nfrom pathlib import Path\nwith tempfile.TemporaryDirectory() as folder:\n    path = Path(folder) / 'items.csv'\n    with path.open('w', newline='', encoding='utf-8') as file:\n        writer = csv.writer(file); writer.writerow(['id', 'name']); writer.writerow([1, 'pen'])\n    with path.open(newline='', encoding='utf-8') as file:\n        rows = list(csv.reader(file))\n    print(rows[1])",
+          "expectedOutput": "['1', 'pen']",
+          "explanation": "The test crosses the CSV writer and reader boundary using a temporary file."
+        },
+        {
+          "id": "py2112-ex4",
+          "language": "en",
+          "title": "Verify cleanup after context exit",
+          "code": "import tempfile\nfrom pathlib import Path\nwith tempfile.TemporaryDirectory() as folder:\n    path = Path(folder)\n    exists_inside = path.exists()\nprint(exists_inside, path.exists())",
+          "expectedOutput": "True False",
+          "explanation": "TemporaryDirectory removes its directory after the context exits."
+        },
+        {
+          "id": "py2112-ex5",
+          "language": "en",
+          "title": "Check a serialization round trip",
+          "code": "import json\nvalue = {'count': 3, 'tags': ['a', 'b']}\nencoded = json.dumps(value)\ndecoded = json.loads(encoded)\nprint(decoded == value)",
+          "expectedOutput": "True",
+          "explanation": "A round-trip check verifies that serialization and parsing preserve the expected data."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Write an integration test that serializes a dictionary to JSON in a temporary directory, reads it back and compares the restored data with the original.",
+      "independentTask": "Design a small integration test plan for a file import workflow, identifying component boundaries, temporary resources and cleanup strategy.",
+      "hints": [
+        "Use tempfile for disposable test resources.",
+        "Use a context manager to ensure cleanup.",
+        "Use pathlib.Path for filesystem paths.",
+        "Exercise the full component boundary being tested.",
+        "Never write test data into real user files."
+      ],
+      "challenge": "Create an isolated integration test plan for a report export pipeline that writes a file, validates its content and cleans up even when an assertion fails.",
+      "validationCriteria": [
+        "The testing or quality objective is clearly stated.",
+        "Examples execute with the documented output.",
+        "Test setup, cleanup and dependency boundaries are accurate.",
+        "Tool limitations and appropriate use cases are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2112-q1",
+        "prompt": "What does an integration test primarily check?",
+        "answer": "Whether multiple components work together across a boundary",
+        "options": [
+          "Whether multiple components work together across a boundary",
+          "Only the spelling of variable names",
+          "Whether multiple components work together across a boundary",
+          "Only one isolated expression",
+          "The package index availability"
+        ],
+        "explanation": "Integration tests exercise interactions between components."
+      },
+      {
+        "id": "py2112-q2",
+        "prompt": "Why use TemporaryDirectory in file tests?",
+        "answer": "It isolates files and cleans them up automatically",
+        "options": [
+          "It isolates files and cleans them up automatically",
+          "It permanently stores test output",
+          "It isolates files and cleans them up automatically",
+          "It changes Python versions",
+          "It disables file permissions"
+        ],
+        "explanation": "The context manager creates a disposable directory and removes it on exit."
+      },
+      {
+        "id": "py2112-q3",
+        "prompt": "Which module provides TemporaryDirectory?",
+        "answer": "tempfile",
+        "options": [
+          "tempfile",
+          "pathlib",
+          "tempfile",
+          "logging",
+          "unittest.mock"
+        ],
+        "explanation": "tempfile provides temporary files and directories."
+      },
+      {
+        "id": "py2112-q4",
+        "prompt": "What should integration tests avoid using?",
+        "answer": "Real user files and production credentials",
+        "options": [
+          "Real user files and production credentials",
+          "Temporary test data",
+          "Real user files and production credentials",
+          "A test database",
+          "A controlled local service"
+        ],
+        "explanation": "Tests should isolate side effects and never modify real user data or use production secrets."
+      },
+      {
+        "id": "py2112-q5",
+        "prompt": "Why are integration tests often slower than unit tests?",
+        "answer": "They exercise more components and boundaries",
+        "options": [
+          "They exercise more components and boundaries",
+          "They exercise more components and boundaries",
+          "They always run on a GPU",
+          "They skip all code",
+          "They cannot use Python"
+        ],
+        "explanation": "More components and I/O often increase setup and execution cost."
+      }
+    ]
+  },
+  "status": "draft"
+}

@@ -1,0 +1,162 @@
+{
+  "id": "python.py19.4.en",
+  "courseId": "python",
+  "moduleId": "PY19",
+  "topicId": "PY19.4",
+  "title": "Regex Groups, Named Groups and Alternation",
+  "language": "en",
+  "learningObjectives": [
+    "Explain capturing groups, non-capturing groups, named groups and | alternation and where they are useful.",
+    "Select the correct regex syntax or re function for capturing groups, non-capturing groups, named groups and | alternation.",
+    "Predict the output of representative PY19.4 expressions.",
+    "Identify matching, validation and performance risks related to capturing groups, non-capturing groups, named groups and | alternation.",
+    "Apply capturing groups, non-capturing groups, named groups and | alternation in a small, deterministic Python program."
+  ],
+  "prerequisites": [
+    "PY7.1",
+    "PY13.1",
+    "PY14.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Parentheses group parts of a pattern and can capture matched text for later use. Named groups give captures descriptive identifiers. Alternation uses the vertical bar to select one of several alternatives, and grouping controls the scope of that choice.",
+      "whyItMatters": "Groups make complex patterns easier to read and let programs extract meaningful fields such as a year, month or identifier prefix.",
+      "analogy": "Groups are labelled compartments in a matched record; alternation is a choice between allowed forms.",
+      "analogyLimit": "Capturing groups change the shape of findall results, and alternation order can affect which alternative is selected first.",
+      "summary": "Regex Groups, Named Groups and Alternation teaches readable and predictable pattern matching with Python's re module."
+    },
+    "explain": {
+      "narrative": "## Capture and organize matches\nParentheses create capturing groups. Match objects expose captures through `.group(1)`, `.groups()` and `.groupdict()`. A named group uses `(?P<name>...)` and can be retrieved by its name. A non-capturing group `(?:...)` groups alternatives without adding a capture.\n\nThe `|` operator means OR. Use parentheses to make its scope explicit, for example `(?:cat|dog)s?`. Prefer clear, bounded patterns over deeply nested expressions.",
+      "examples": [
+        {
+          "id": "py194-ex1",
+          "language": "en",
+          "title": "Capture two parts of a code",
+          "code": "import re\nmatch = re.fullmatch(r'([A-Z]{2})-(\\d{3})', 'AB-204')\nprint(match.group(1))\nprint(match.group(2))",
+          "expectedOutput": "AB\n204",
+          "explanation": "The first and second capturing groups return the prefix and numeric portion."
+        },
+        {
+          "id": "py194-ex2",
+          "language": "en",
+          "title": "Use a named group",
+          "code": "import re\nmatch = re.fullmatch(r'(?P<year>\\d{4})-(?P<month>\\d{2})', '2026-11')\nprint(match.group('year'))\nprint(match.groupdict())",
+          "expectedOutput": "2026\n{'year': '2026', 'month': '11'}",
+          "explanation": "Named groups make extracted fields easier to understand."
+        },
+        {
+          "id": "py194-ex3",
+          "language": "en",
+          "title": "Choose between alternatives",
+          "code": "import re\npattern = r'cat|dog'\nprint(re.findall(pattern, 'cat dog bird'))",
+          "expectedOutput": "['cat', 'dog']",
+          "explanation": "The vertical bar matches either alternative."
+        },
+        {
+          "id": "py194-ex4",
+          "language": "en",
+          "title": "Group alternatives with a shared suffix",
+          "code": "import re\npattern = r'(?:cat|dog)s?'\nprint(re.findall(pattern, 'cat cats dog dogs'))",
+          "expectedOutput": "['cat', 'cats', 'dog', 'dogs']",
+          "explanation": "The group selects cat or dog and the optional s applies to either choice."
+        },
+        {
+          "id": "py194-ex5",
+          "language": "en",
+          "title": "Use a non-capturing group",
+          "code": "import re\nprint(re.findall(r'(?:red|blue)-\\d+', 'red-1 blue-2'))",
+          "expectedOutput": "['red-1', 'blue-2']",
+          "explanation": "The non-capturing group organizes alternatives without changing the returned full matches."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Extract a year and month from a YYYY-MM value using named groups. Reject extra characters and print a dictionary of the captured fields.",
+      "independentTask": "Create a pattern that recognizes two alternative product prefixes followed by a bounded number. Use a non-capturing group if the prefix itself is not needed.",
+      "hints": [
+        "Capturing groups can be read by number or name.",
+        "Use (?P<name>...) for a named capture.",
+        "Use (?:...) when grouping without capturing.",
+        "Use | for alternatives and parentheses to control scope.",
+        "Check for a successful match before reading groups."
+      ],
+      "challenge": "Parse a structured record into named fields and explain why each group is capturing or non-capturing.",
+      "validationCriteria": [
+        "The regular expression expresses the stated pattern without accidental substring acceptance.",
+        "The code uses raw string literals where backslashes are present.",
+        "Match results are checked before accessing Match methods.",
+        "Examples execute with the expected output and input edge cases are considered."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py194-q1",
+        "prompt": "Which syntax creates a named capture called year?",
+        "answer": "(?P<year>...)",
+        "options": [
+          "(?<year>...)",
+          "(?P<year>...)",
+          "(year:...)",
+          "[P<year>]"
+        ],
+        "explanation": "Python's named group syntax uses (?P<name>...)."
+      },
+      {
+        "id": "py194-q2",
+        "prompt": "How do you access all named captures as a dictionary?",
+        "answer": "groupdict()",
+        "options": [
+          "groups()",
+          "groupdict()",
+          "span()",
+          "start()"
+        ],
+        "explanation": "groupdict returns a mapping of named groups to their matched strings."
+      },
+      {
+        "id": "py194-q3",
+        "prompt": "What does | mean in a regex?",
+        "answer": "Alternation (OR)",
+        "options": [
+          "Repetition",
+          "Alternation (OR)",
+          "End of line",
+          "A literal space"
+        ],
+        "explanation": "The vertical bar selects between alternative patterns."
+      },
+      {
+        "id": "py194-q4",
+        "prompt": "What does (?:...) create?",
+        "answer": "A non-capturing group",
+        "options": [
+          "A named capture",
+          "A non-capturing group",
+          "A lookbehind only",
+          "A character class"
+        ],
+        "explanation": "The ?: extension groups the expression without capturing its text."
+      },
+      {
+        "id": "py194-q5",
+        "prompt": "Why group alternatives with parentheses?",
+        "answer": "To control which part the alternation applies to",
+        "options": [
+          "To make all characters optional",
+          "To control which part the alternation applies to",
+          "To force case sensitivity",
+          "To remove anchors"
+        ],
+        "explanation": "Parentheses make the scope of alternatives explicit."
+      }
+    ]
+  },
+  "status": "draft"
+}

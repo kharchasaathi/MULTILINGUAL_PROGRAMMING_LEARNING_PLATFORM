@@ -1,0 +1,161 @@
+{
+  "id": "python.py16.2.en",
+  "courseId": "python",
+  "moduleId": "PY16",
+  "topicId": "PY16.2",
+  "title": "Creating a Reusable Python Module",
+  "language": "en",
+  "learningObjectives": [
+    "Explain creating and loading a custom module and where it is useful in Python programs.",
+    "Choose correct Python syntax for creating and loading a custom module.",
+    "Predict the result of representative PY16.2 operations.",
+    "Identify namespace, import and maintenance risks related to creating and loading a custom module.",
+    "Apply creating and loading a custom module in a small, readable Python program."
+  ],
+  "prerequisites": [
+    "PY7.1",
+    "PY13.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A custom module can be written as a `.py` file containing related definitions and then imported by another file. In a constrained single-file example, `types.ModuleType` can model a module object, but real projects normally keep the module in its own source file.",
+      "whyItMatters": "Creating a module turns a collection of definitions into a reusable component with a stable name and interface.",
+      "analogy": "A module is like a labelled toolbox: related tools are stored together and another program can request the tools it needs.",
+      "analogyLimit": "A real Python module also has import rules, namespaces, execution behaviour and caching that a physical toolbox does not represent.",
+      "summary": "Creating a Reusable Python Module teaches how Python organizes and reuses related code."
+    },
+    "explain": {
+      "narrative": "## Create a module file\nSave related functions, classes and constants in a file such as `price_tools.py`. Keep the filename a valid import name and avoid spaces or names that shadow standard-library modules.\n\n## Import and use it\nAn importing program can use `import price_tools` and then call `price_tools.discount(...)`. The module prefix makes the origin of each name explicit.\n\n## Testable demonstration\nThe examples use `types.ModuleType` and `sys.modules` to construct a temporary in-memory module. This demonstrates import mechanics without writing outside the learner's workspace. It is not a replacement for creating a real `.py` file in a project.",
+      "examples": [
+        {
+          "id": "py16.2-ex1",
+          "language": "en",
+          "title": "Build an in-memory module",
+          "code": "import types\nmodule = types.ModuleType('price_tools')\nmodule.tax_rate = 0.05\nprint(module.__name__)\nprint(module.tax_rate)",
+          "expectedOutput": "price_tools\n0.05",
+          "explanation": "ModuleType creates a module object to which attributes can be assigned."
+        },
+        {
+          "id": "py16.2-ex2",
+          "language": "en",
+          "title": "Add a function to a module",
+          "code": "import types\nmodule = types.ModuleType('greetings')\nexec('def greet(name):\\n    return f\"Hello, {name}!\"', module.__dict__)\nprint(module.greet('Asha'))",
+          "expectedOutput": "Hello, Asha!",
+          "explanation": "A module namespace stores functions just as a source file's global namespace does."
+        },
+        {
+          "id": "py16.2-ex3",
+          "language": "en",
+          "title": "Register and import a module object",
+          "code": "import importlib\nimport sys\nimport types\nmodule = types.ModuleType('demo_tools')\nmodule.answer = 42\nsys.modules['demo_tools'] = module\nloaded = importlib.import_module('demo_tools')\nprint(loaded.answer)",
+          "expectedOutput": "42",
+          "explanation": "Registering a module object in sys.modules lets the import system return it by name."
+        },
+        {
+          "id": "py16.2-ex4",
+          "language": "en",
+          "title": "Keep module constants with its functions",
+          "code": "import types\nmodule = types.ModuleType('geometry_tools')\nmodule.PI = 3.14159\nmodule.area = lambda radius: module.PI * radius ** 2\nprint(round(module.area(2), 2))",
+          "expectedOutput": "12.57",
+          "explanation": "A module can group constants and functions that belong to the same domain."
+        },
+        {
+          "id": "py16.2-ex5",
+          "language": "en",
+          "title": "Avoid repeating a calculation",
+          "code": "import types\nmodule = types.ModuleType('conversions')\nmodule.km_to_miles = lambda km: km * 0.621371\nprint(round(module.km_to_miles(10), 2))",
+          "expectedOutput": "6.21",
+          "explanation": "A reusable function belongs in a focused module when multiple parts of a program need it."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a small demonstration of creating and loading a custom module. Run each step, compare the output with your prediction and explain how Python resolves the names involved.",
+      "independentTask": "Build a small reusable utility that applies creating and loading a custom module. Include a normal case, a namespace or import edge case, and a short explanation of your design.",
+      "hints": [
+        "Write down the names that should exist before importing or executing code.",
+        "Use explicit imports and qualified names when they improve clarity.",
+        "Keep import-time behaviour small and predictable.",
+        "Test the normal path and one missing-name or collision case.",
+        "Prefer documented public APIs over implementation details."
+      ],
+      "challenge": "Turn the demonstration into a small reusable module interface and explain how another file would import it.",
+      "validationCriteria": [
+        "The program uses valid Python syntax and the intended import form.",
+        "The output matches the expected result.",
+        "Names are accessed from the correct namespace.",
+        "The example avoids unnecessary import-time side effects."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py16.2-q1",
+        "prompt": "What file extension is normally used for a Python source module?",
+        "answer": ".py",
+        "options": [
+          ".py",
+          ".txt",
+          ".html",
+          ".exe"
+        ],
+        "explanation": "Python source modules are commonly stored in .py files."
+      },
+      {
+        "id": "py16.2-q2",
+        "prompt": "Which object can create a module dynamically in memory?",
+        "answer": "types.ModuleType",
+        "options": [
+          "types.ModuleType",
+          "pathlib.Path",
+          "io.StringIO",
+          "csv.writer"
+        ],
+        "explanation": "ModuleType constructs a module object."
+      },
+      {
+        "id": "py16.2-q3",
+        "prompt": "What does sys.modules store?",
+        "answer": "Loaded module objects by import name",
+        "options": [
+          "Loaded module objects by import name",
+          "Only source file text",
+          "Only syntax errors",
+          "User input history"
+        ],
+        "explanation": "The import system consults sys.modules to reuse loaded modules."
+      },
+      {
+        "id": "py16.2-q4",
+        "prompt": "Which syntax imports a custom module by its name?",
+        "answer": "import price_tools",
+        "options": [
+          "import price_tools",
+          "load price_tools()",
+          "module price_tools",
+          "include price_tools"
+        ],
+        "explanation": "The import statement loads the named module."
+      },
+      {
+        "id": "py16.2-q5",
+        "prompt": "Why are in-memory ModuleType examples used in this lesson?",
+        "answer": "To demonstrate import concepts without creating files",
+        "options": [
+          "To demonstrate import concepts without creating files",
+          "To permanently install packages",
+          "To bypass Python syntax",
+          "To access the network"
+        ],
+        "explanation": "The examples stay deterministic and do not write outside a temporary workspace."
+      }
+    ]
+  },
+  "status": "draft"
+}

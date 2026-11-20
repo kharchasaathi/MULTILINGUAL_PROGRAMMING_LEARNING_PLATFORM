@@ -1,0 +1,158 @@
+{
+  "id": "python.py3.3.en",
+  "courseId": "python",
+  "moduleId": "PY3",
+  "topicId": "PY3.3",
+  "title": "Python Object Identity and id()",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the difference between object identity and value equality.",
+    "Use is and is not to test whether two names refer to the same object.",
+    "Use == to compare values for equality.",
+    "Describe the purpose and limitations of id().",
+    "Avoid relying on object identity when value comparison is intended."
+  ],
+  "prerequisites": [
+    "PY1.6",
+    "PY1.7",
+    "PY1.8",
+    "PY1.9",
+    "PY3.1",
+    "PY3.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Object identity answers whether two references point to the same object. Value equality answers whether two objects compare as equal. Python uses `is` and `is not` for identity tests, while `==` and `!=` compare values according to the object's equality implementation. The built-in id() returns an identity value that is unique and constant for an object's lifetime; its exact representation is implementation-dependent and should not be treated as a portable memory address.",
+      "whyItMatters": "Confusing identity and equality can create subtle bugs, especially with strings, numbers, collections and sentinel values. Understanding the distinction makes comparisons intentional and reliable.",
+      "analogy": "Value equality asks whether two books have the same text. Identity asks whether they are the very same physical copy of the book.",
+      "analogyLimit": "An object's id() is not a portable memory address and may be reused after the object is no longer alive. Never use numeric id values as permanent identifiers."
+    },
+    "explain": {
+      "narrative": "## 1. Equality compares values\n\nUse `==` to ask whether two objects compare equal. Two separate lists can contain the same elements and therefore compare equal even though they are different objects.\n\n## 2. Identity compares object references\n\nUse `is` to test whether two names refer to the same object. Use `is not` for the opposite test. Identity is commonly appropriate when checking against the singleton `None`.\n\n## 3. The id() function\n\n`id(value)` returns an integer identifying the object during its lifetime. The value is guaranteed to be unique among simultaneously existing objects, but its exact form depends on the Python implementation. It is not a stable database key or permanent identifier.\n\n## 4. Do not use identity for ordinary value checks\n\nUse `==` when comparing text, numbers or collection contents. Do not depend on implementation optimizations such as string interning or small-integer caching to make identity comparisons appear to work.\n\n## 5. Compare with None correctly\n\nUse `value is None` or `value is not None`. This expresses an identity check against Python's None singleton and is the recommended style.",
+      "examples": [
+        {
+          "id": "py3.3-ex1",
+          "language": "en",
+          "title": "Equal lists are not necessarily identical",
+          "code": "first = [1, 2]\nsecond = [1, 2]\nprint(first == second)\nprint(first is second)",
+          "expectedOutput": "True\nFalse",
+          "explanation": "The lists contain equal values, but they are two separately created list objects."
+        },
+        {
+          "id": "py3.3-ex2",
+          "language": "en",
+          "title": "Two names refer to one object",
+          "code": "first = [3, 6]\nsecond = first\nprint(first is second)\nprint(first == second)",
+          "expectedOutput": "True\nTrue",
+          "explanation": "Both names refer to the same list, so identity and value equality are both true."
+        },
+        {
+          "id": "py3.3-ex3",
+          "language": "en",
+          "title": "Inspect an object's identity",
+          "code": "value = {'course': 'Python'}\nprint(isinstance(id(value), int))",
+          "expectedOutput": "True",
+          "explanation": "id() returns an integer identity value. Its exact numeric value is implementation-dependent and should not be hard-coded."
+        },
+        {
+          "id": "py3.3-ex4",
+          "language": "en",
+          "title": "Use identity for None",
+          "code": "result = None\nprint(result is None)\nprint(result is not None)",
+          "expectedOutput": "True\nFalse",
+          "explanation": "None is a singleton, so identity comparison is the recommended way to check for it."
+        },
+        {
+          "id": "py3.3-ex5",
+          "language": "en",
+          "title": "Avoid identity for string values",
+          "code": "left = ''.join(['Py', 'thon'])\nright = 'Python'\nprint(left == right)",
+          "expectedOutput": "True",
+          "explanation": "Value equality is the correct test for text content. The example does not depend on whether the implementation interns either string."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create two equal lists independently and compare them with == and is. Then assign one list to a second name and compare again.",
+      "independentTask": "Write a program that receives a value from a function which may return None. Use `is None` to handle the missing result and `==` to compare ordinary values.",
+      "hints": [
+        "Use == for value equality.",
+        "Use is for object identity.",
+        "Use is None to test for None.",
+        "id() is only meaningful as an identity value during an object's lifetime.",
+        "Do not rely on string interning or integer caching."
+      ],
+      "challenge": "Create two separate dictionaries with equal contents and show that == and is give different results. Then create an alias and explain why the identity result changes."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py3.3-q1",
+        "prompt": "Which operator compares whether two names refer to the same object?",
+        "options": [
+          "is",
+          "==",
+          "=",
+          "!="
+        ],
+        "answer": "is",
+        "explanation": "The is operator tests object identity."
+      },
+      {
+        "id": "py3.3-q2",
+        "prompt": "What does == normally test?",
+        "options": [
+          "Value equality",
+          "Object identity only",
+          "Variable declaration",
+          "Memory allocation size"
+        ],
+        "answer": "Value equality",
+        "explanation": "The equality operator compares values according to the object's equality behaviour."
+      },
+      {
+        "id": "py3.3-q3",
+        "prompt": "What is the recommended way to check whether value is None?",
+        "options": [
+          "value is None",
+          "value == False",
+          "id(value) == 0",
+          "type(value) == str"
+        ],
+        "answer": "value is None",
+        "explanation": "None is a singleton, and identity comparison is the recommended check."
+      },
+      {
+        "id": "py3.3-q4",
+        "prompt": "What does id(obj) provide?",
+        "options": [
+          "An identity value unique while the object exists",
+          "A permanent database identifier",
+          "The object's source-code line number",
+          "The number of attributes"
+        ],
+        "answer": "An identity value unique while the object exists",
+        "explanation": "id() returns an integer that is unique among simultaneously existing objects during their lifetime."
+      },
+      {
+        "id": "py3.3-q5",
+        "prompt": "Why should strings normally be compared with == rather than is?",
+        "options": [
+          "Equal strings may be distinct objects",
+          "is always converts strings to integers",
+          "== changes the original string",
+          "Strings cannot be compared"
+        ],
+        "answer": "Equal strings may be distinct objects",
+        "explanation": "Identity is not the same as value equality, and string interning is an implementation detail."
+      }
+    ]
+  },
+  "status": "draft"
+}

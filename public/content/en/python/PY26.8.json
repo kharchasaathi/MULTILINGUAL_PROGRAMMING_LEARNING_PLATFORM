@@ -1,0 +1,160 @@
+{
+  "id": "python.py26.8.en",
+  "courseId": "python",
+  "moduleId": "PY26",
+  "topicId": "PY26.8",
+  "title": "Python Polymorphism and Duck Typing",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the core concepts of Python Polymorphism and Duck Typing.",
+    "Choose an appropriate object-oriented design for a small Python problem.",
+    "Trace object state and method calls accurately.",
+    "Apply Python class features with correct method and attribute behavior.",
+    "Recognize design trade-offs, edge cases and maintainability concerns."
+  ],
+  "prerequisites": [
+    "PY26.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Polymorphism allows different object types to be used through a common operation. Python often uses duck typing: code relies on the behavior an object provides rather than requiring a particular class. Inheritance-based overriding is one way to achieve polymorphism, but unrelated classes can also share an informal protocol.",
+      "whyItMatters": "Behavior-focused interfaces make functions reusable across different implementations and reduce unnecessary coupling to concrete classes.",
+      "analogy": "A media player can play different formats when each provides a compatible play operation; the caller cares about the capability, not the object's family tree.",
+      "summary": "Python Polymorphism and Duck Typing introduces a focused part of Python's object model and its practical use."
+    },
+    "explain": {
+      "narrative": "Study the concept, trace the receiver and state for each operation, then run the examples. Pay attention to Python's conventions and documented protocol behavior rather than assuming that class syntax provides strict access control.",
+      "examples": [
+        {
+          "id": "py2608-ex1",
+          "language": "en",
+          "title": "Same method name across classes",
+          "code": "class Dog:\n    def speak(self): return 'woof'\nclass Cat:\n    def speak(self): return 'meow'\nfor pet in (Dog(), Cat()): print(pet.speak())",
+          "expectedOutput": "woof\nmeow",
+          "explanation": "The caller uses the same operation on different object types."
+        },
+        {
+          "id": "py2608-ex2",
+          "language": "en",
+          "title": "Duck typing without inheritance",
+          "code": "class TextSource:\n    def read(self): return 'text'\nclass NumberSource:\n    def read(self): return 42\ndef show(source): print(source.read())\nshow(TextSource()); show(NumberSource())",
+          "expectedOutput": "text\n42",
+          "explanation": "The function depends on the read capability, not a shared base class."
+        },
+        {
+          "id": "py2608-ex3",
+          "language": "en",
+          "title": "Polymorphic function",
+          "code": "class Circle:\n    def area(self): return 12\nclass Square:\n    def area(self): return 9\ndef total_area(shapes): return sum(s.area() for s in shapes)\nprint(total_area([Circle(), Square()]))",
+          "expectedOutput": "21",
+          "explanation": "A common method contract allows aggregation across implementations."
+        },
+        {
+          "id": "py2608-ex4",
+          "language": "en",
+          "title": "Use a protocol-like iterable",
+          "code": "def describe(values):\n    return list(values)\nprint(describe((1, 2, 3)))",
+          "expectedOutput": "[1, 2, 3]",
+          "explanation": "The function accepts any iterable rather than requiring a list."
+        },
+        {
+          "id": "py2608-ex5",
+          "language": "en",
+          "title": "Handle unsupported behavior explicitly",
+          "code": "def export(item):\n    method = getattr(item, 'to_csv', None)\n    if method is None: return 'unsupported'\n    return method()\nclass Note: pass\nprint(export(Note()))",
+          "expectedOutput": "unsupported",
+          "explanation": "Capability checks should have a clear fallback or raise a meaningful error."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Build a small program that demonstrates python polymorphism and duck typing. Write down the object types, relevant attributes, method calls and expected state changes before running it.",
+      "independentTask": "Extend the example into a small domain model of your choice. Add validation, clear method names, boundary tests and a short explanation of why your design uses classes rather than simpler functions or data structures.",
+      "hints": [
+        "Identify which object owns each piece of state.",
+        "Trace the first argument supplied to every bound method.",
+        "Prefer explicit invariants and small public interfaces.",
+        "Test at least one boundary or unsupported input.",
+        "Use composition when it models the relationship more accurately than inheritance."
+      ],
+      "challenge": "Refactor the model into a testable design with clear responsibilities, documented public behavior and tests for normal, boundary and invalid cases.",
+      "validationCriteria": [
+        "All five examples execute on the supported Python version and match their outputs.",
+        "The implementation follows Python's documented class and special-method semantics.",
+        "State changes are scoped to the intended object or class.",
+        "Unsupported inputs produce a deliberate result or a clear exception.",
+        "The design avoids unnecessary inheritance, shared mutable defaults and misleading private-access claims."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2608-q1",
+        "prompt": "What is polymorphism?",
+        "answer": "Different types supporting a common operation",
+        "options": [
+          "Different types supporting a common operation",
+          "One variable having no type",
+          "A class without methods",
+          "A Python installation"
+        ],
+        "explanation": "Polymorphism allows a common interface across implementations."
+      },
+      {
+        "id": "py2608-q2",
+        "prompt": "What is duck typing based on?",
+        "answer": "Available behavior rather than declared class identity",
+        "options": [
+          "Exact class names only",
+          "Available behavior rather than declared class identity",
+          "File extensions",
+          "Inheritance depth"
+        ],
+        "explanation": "Duck typing focuses on the operations an object supports."
+      },
+      {
+        "id": "py2608-q3",
+        "prompt": "Must two duck-typed objects share a base class?",
+        "answer": "No",
+        "options": [
+          "Yes",
+          "No",
+          "Only built-in classes",
+          "Only dataclasses"
+        ],
+        "explanation": "Unrelated objects can support the same operation."
+      },
+      {
+        "id": "py2608-q4",
+        "prompt": "Why use a common method contract?",
+        "answer": "To write reusable behavior across implementations",
+        "options": [
+          "To prevent all errors",
+          "To write reusable behavior across implementations",
+          "To force global variables",
+          "To disable composition"
+        ],
+        "explanation": "A shared capability reduces coupling to concrete types."
+      },
+      {
+        "id": "py2608-q5",
+        "prompt": "What should happen when a required capability is missing?",
+        "answer": "Use a documented fallback or raise a clear error",
+        "options": [
+          "Silently return random data",
+          "Use a documented fallback or raise a clear error",
+          "Assume the method exists",
+          "Modify the object's class"
+        ],
+        "explanation": "Capability failures should be explicit and understandable."
+      }
+    ]
+  },
+  "status": "draft"
+}

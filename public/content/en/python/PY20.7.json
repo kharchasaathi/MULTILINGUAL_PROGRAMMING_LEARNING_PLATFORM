@@ -1,0 +1,162 @@
+{
+  "id": "python.py20.7.en",
+  "courseId": "python",
+  "moduleId": "PY20",
+  "topicId": "PY20.7",
+  "title": "Reproducible Python Environments and Dependency Best Practices",
+  "language": "en",
+  "learningObjectives": [
+    "Explain dependency snapshots, clean installs, .gitignore, package trust and environment recreation.",
+    "Choose the appropriate package or environment workflow for PY20.7.",
+    "Interpret package-management and interpreter information correctly.",
+    "Identify dependency, isolation and reproducibility risks.",
+    "Apply the concepts in a safe Python project workflow."
+  ],
+  "prerequisites": [
+    "PY11.1",
+    "PY14.1",
+    "PY15.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A reproducible environment can be recreated from documented dependencies and a known Python version. Requirements files and resolved snapshots help, but platform, interpreter, package indexes, build tools and transitive dependencies also matter.",
+      "whyItMatters": "Documented environments make collaboration, testing and deployment predictable.",
+      "analogy": "A reproducible environment is a build recipe for another developer.",
+      "analogyLimit": "A requirements file alone may not guarantee identical environments across platforms or future package indexes.",
+      "summary": "Reproducible Python Environments and Dependency Best Practices teaches maintainable dependency management and environment setup."
+    },
+    "explain": {
+      "narrative": "Create a fresh venv, install reviewed requirements, run tests and record the Python version. A curated requirements file communicates direct dependencies; pip freeze captures the installed set. Ignore `.venv/`. Never commit credentials or private index tokens. Review package sources and updates; use hashes or lockfile workflows where stronger reproducibility is required. Rebuild from scratch periodically.",
+      "examples": [
+        {
+          "id": "py207-ex1",
+          "language": "en",
+          "title": "Ignore environment folder",
+          "code": "rule = '.venv/'\nprint(rule.endswith('/'))",
+          "expectedOutput": "True",
+          "explanation": "Ignoring the venv avoids committing machine-specific installed packages."
+        },
+        {
+          "id": "py207-ex2",
+          "language": "en",
+          "title": "Describe setup sequence",
+          "code": "steps = ['create venv', 'install requirements', 'run tests']\nprint(' -> '.join(steps))",
+          "expectedOutput": "create venv -> install requirements -> run tests",
+          "explanation": "A repeatable setup isolates, installs and verifies."
+        },
+        {
+          "id": "py207-ex3",
+          "language": "en",
+          "title": "Compare dependency records",
+          "code": "direct = ['requests>=2.31,<3']\nresolved = ['requests==2.32.0', 'urllib3==2.2.1']\nprint(len(direct), len(resolved))",
+          "expectedOutput": "1 2",
+          "explanation": "Resolved records can include transitive dependencies."
+        },
+        {
+          "id": "py207-ex4",
+          "language": "en",
+          "title": "Check a dependency line for obvious credential markers",
+          "code": "line = 'requests==2.32.0'\nprint('token=' not in line.lower() and 'password=' not in line.lower())",
+          "expectedOutput": "True",
+          "explanation": "Dependency files should not contain credentials."
+        },
+        {
+          "id": "py207-ex5",
+          "language": "en",
+          "title": "Verify setup checklist",
+          "code": "checks = {'python_recorded': True, 'requirements_reviewed': True, 'tests_passed': True}\nprint(all(checks.values()))",
+          "expectedOutput": "True",
+          "explanation": "A setup is verified by rebuilding and testing, not assumed."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a clean venv from a requirements file, run tests, record Python and dependency versions and add .venv/ to .gitignore.",
+      "independentTask": "Draft a team policy covering direct requirements, resolved snapshots, trusted sources, secret handling and clean rebuilds.",
+      "hints": [
+        "Keep direct dependency intent separate from freeze snapshots.",
+        "Record the supported Python version.",
+        "Ignore .venv rather than committing it.",
+        "Review dependency source and version changes.",
+        "Recreate the environment to test setup instructions."
+      ],
+      "challenge": "Design a release checklist that rebuilds dependencies, runs tests and checks no credentials or local environment files are committed.",
+      "validationCriteria": [
+        "The selected interpreter and target environment are identified explicitly.",
+        "Package commands are used in the appropriate terminal and environment.",
+        "Version constraints and dependency records are interpreted correctly.",
+        "Examples execute with the expected output and limitations are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py207-q1",
+        "prompt": "What should usually be excluded from version control?",
+        "answer": "The local .venv directory",
+        "options": [
+          "Source code",
+          "The local .venv directory",
+          "README",
+          "Curated requirements file"
+        ],
+        "explanation": "A venv contains machine-specific files and installed packages."
+      },
+      {
+        "id": "py207-q2",
+        "prompt": "What does a curated requirements file express?",
+        "answer": "Project dependency requirements",
+        "options": [
+          "All computer files",
+          "Project dependency requirements",
+          "Python grammar",
+          "OS drivers"
+        ],
+        "explanation": "It records dependencies the project needs."
+      },
+      {
+        "id": "py207-q3",
+        "prompt": "What can pip freeze capture?",
+        "answer": "Resolved installed distribution versions",
+        "options": [
+          "Only source imports",
+          "Resolved installed distribution versions",
+          "OS version",
+          "Commit history"
+        ],
+        "explanation": "pip freeze reports installed distributions and versions."
+      },
+      {
+        "id": "py207-q4",
+        "prompt": "Should credentials be committed in dependency files?",
+        "answer": "No",
+        "options": [
+          "Yes",
+          "No",
+          "Only public repositories",
+          "Only development"
+        ],
+        "explanation": "Secrets should be managed outside committed dependency records."
+      },
+      {
+        "id": "py207-q5",
+        "prompt": "How verify environment instructions?",
+        "answer": "Rebuild a clean environment and run tests",
+        "options": [
+          "Assume developer machine is correct",
+          "Rebuild a clean environment and run tests",
+          "Skip installation",
+          "Copy site-packages"
+        ],
+        "explanation": "A clean rebuild verifies documented setup is sufficient."
+      }
+    ]
+  },
+  "status": "draft"
+}

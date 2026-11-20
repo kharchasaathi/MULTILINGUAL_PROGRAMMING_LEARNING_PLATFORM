@@ -1,0 +1,163 @@
+{
+  "id": "python.py23.3.en",
+  "courseId": "python",
+  "moduleId": "PY23",
+  "topicId": "PY23.3",
+  "title": "Protocols and Structural Typing",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of Protocols and Structural Typing.",
+    "Choose an appropriate protocols and structural typing technique for a Python application.",
+    "Interpret representative code and output involving protocols and structural typing.",
+    "Identify limitations and failure modes for protocols and structural typing.",
+    "Apply protocols and structural typing concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY11.1",
+    "PY14.1",
+    "PY20.1",
+    "PY21.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A Protocol describes an interface by the operations an object provides rather than requiring inheritance from a particular base class. This is structural typing: an object is suitable when it has the required members with compatible types. Protocols support flexible APIs, adapters and test doubles. runtime_checkable enables limited member-presence checks, not full behavioural verification.",
+      "whyItMatters": "Protocols let components depend on capabilities instead of concrete implementations, reducing coupling.",
+      "analogy": "A power plug works with any compatible socket standard, regardless of manufacturer.",
+      "analogyLimit": "A compatible-looking object may still behave incorrectly; a protocol describes shape, not full behavioural guarantees.",
+      "summary": "Protocols and Structural Typing develops practical application engineering skills for Python projects."
+    },
+    "explain": {
+      "narrative": "## Program to capabilities\nDefine a protocol with the methods or attributes a consumer needs. A class can satisfy it without explicitly inheriting from it. Use protocols for service boundaries such as storage, clocks or notification senders. Keep protocols small and focused. Runtime protocol checks inspect member presence rather than fully verifying signatures or semantics, so use static checking and tests for stronger confidence.",
+      "examples": [
+        {
+          "id": "py233-ex1",
+          "language": "en",
+          "title": "Define a small protocol",
+          "code": "from typing import Protocol\nclass HasName(Protocol):\n    name: str\nclass User:\n    def __init__(self, name: str): self.name = name\ndef label(item: HasName) -> str:\n    return item.name.upper()\nprint(label(User('Mina')))",
+          "expectedOutput": "MINA",
+          "explanation": "User satisfies the required attribute without inheriting HasName."
+        },
+        {
+          "id": "py233-ex2",
+          "language": "en",
+          "title": "Use a protocol method",
+          "code": "from typing import Protocol\nclass Writer(Protocol):\n    def write(self, text: str) -> int: ...\nclass ConsoleWriter:\n    def write(self, text: str) -> int:\n        print(text)\n        return len(text)\nprint(ConsoleWriter().write('saved'))",
+          "expectedOutput": "saved\n5",
+          "explanation": "The implementation provides the method expected by the protocol."
+        },
+        {
+          "id": "py233-ex3",
+          "language": "en",
+          "title": "Supply a test double",
+          "code": "from typing import Protocol\nclass Clock(Protocol):\n    def now(self) -> str: ...\nclass FixedClock:\n    def now(self) -> str: return '2026-11-20'\ndef stamp(clock: Clock) -> str: return clock.now()\nprint(stamp(FixedClock()))",
+          "expectedOutput": "2026-11-20",
+          "explanation": "A deterministic fake can replace a real clock in tests."
+        },
+        {
+          "id": "py233-ex4",
+          "language": "en",
+          "title": "Keep a protocol focused",
+          "code": "from typing import Protocol\nclass Closeable(Protocol):\n    def close(self) -> None: ...\nclass Resource:\n    def close(self) -> None: print('closed')\nresource: Closeable = Resource()\nresource.close()",
+          "expectedOutput": "closed",
+          "explanation": "The consumer needs only the close capability."
+        },
+        {
+          "id": "py233-ex5",
+          "language": "en",
+          "title": "Inspect a protocol declaration",
+          "code": "from typing import Protocol\nclass Identified(Protocol):\n    id: int\nprint(Identified.__name__)",
+          "expectedOutput": "Identified",
+          "explanation": "A protocol is a class declaration with structural typing semantics."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Define a Notifier protocol with send(message: str) -> None. Implement console and in-memory versions and pass both to one function.",
+      "independentTask": "Choose one dependency in an application and define the smallest protocol needed to replace it during testing.",
+      "hints": [
+        "Protocols describe required attributes or methods.",
+        "Implementations need not explicitly inherit from a protocol.",
+        "Prefer small interfaces with one responsibility.",
+        "Runtime-checkable protocols provide limited checks only.",
+        "Use tests to verify behaviour, not just member presence."
+      ],
+      "challenge": "Refactor a report service to depend on a storage protocol, then provide in-memory and file-backed adapters.",
+      "validationCriteria": [
+        "The concept and intended use are accurately explained.",
+        "All examples execute with the documented output on Python 3.13.",
+        "External input, failure handling and dependency boundaries are treated appropriately.",
+        "Limitations and version requirements are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py233-q1",
+        "prompt": "What is structural typing based on?",
+        "answer": "Whether an object provides the required members",
+        "options": [
+          "Whether an object provides the required members",
+          "Whether it inherits from one exact base class",
+          "Whether its module is installed",
+          "Whether its source file is named correctly"
+        ],
+        "explanation": "Structural typing checks the available interface rather than explicit ancestry."
+      },
+      {
+        "id": "py233-q2",
+        "prompt": "Must a class explicitly inherit from a Protocol to satisfy it?",
+        "answer": "No",
+        "options": [
+          "No",
+          "Yes, always",
+          "Only for built-in classes",
+          "Only at runtime"
+        ],
+        "explanation": "A compatible class can satisfy a protocol implicitly."
+      },
+      {
+        "id": "py233-q3",
+        "prompt": "What does a protocol primarily describe?",
+        "answer": "A required interface or capability",
+        "options": [
+          "A required interface or capability",
+          "A database schema",
+          "A serialization format",
+          "A thread scheduler"
+        ],
+        "explanation": "Protocols specify methods and attributes expected by consumers."
+      },
+      {
+        "id": "py233-q4",
+        "prompt": "Why use a fake implementation in tests?",
+        "answer": "To replace an external dependency predictably",
+        "options": [
+          "To replace an external dependency predictably",
+          "To bypass all assertions",
+          "To install packages",
+          "To change Python syntax"
+        ],
+        "explanation": "A fake can make tests deterministic and independent of external services."
+      },
+      {
+        "id": "py233-q5",
+        "prompt": "Does runtime_checkable prove method semantics are correct?",
+        "answer": "No",
+        "options": [
+          "No",
+          "Yes, completely",
+          "Only for async methods",
+          "Only when inheritance is explicit"
+        ],
+        "explanation": "Runtime protocol checks are limited and do not establish behavioural correctness."
+      }
+    ]
+  },
+  "status": "draft"
+}

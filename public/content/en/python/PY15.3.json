@@ -1,0 +1,161 @@
+{
+  "id": "python.py15.3.en",
+  "courseId": "python",
+  "moduleId": "PY15",
+  "topicId": "PY15.3",
+  "title": "Reading Python Text Files",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and practical uses of reading python text files.",
+    "Choose appropriate Python standard-library APIs and syntax for reading python text files.",
+    "Predict the behaviour of representative PY15.3 operations and their outputs.",
+    "Identify common mistakes, edge cases and failure conditions in reading python text files.",
+    "Apply safe, readable reading python text files techniques in a small program."
+  ],
+  "prerequisites": [
+    "PY14.1",
+    "PY14.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A readable text file object exposes methods for consuming text. `read()` returns a string, `readline()` returns one line, and iteration processes lines lazily. Reading advances the stream position, so a second read at the end usually returns an empty string unless the stream is repositioned.",
+      "whyItMatters": "Reading files is the foundation of importing configuration, processing logs and analysing datasets. Choosing an appropriate reading strategy helps control memory use and line-ending behaviour.",
+      "analogy": "Working with a file is like borrowing a labelled record from a filing room: you identify its location, choose whether to read or update it, and return the resource when finished.",
+      "analogyLimit": "A real filesystem has permissions, concurrent changes, encoding rules and failure modes that a physical filing-room analogy cannot fully represent.",
+      "summary": "Reading Python Text Files relies on explicit paths, correct modes, deliberate resource management and validation of data."
+    },
+    "explain": {
+      "narrative": "## Core idea\nA readable text file object exposes methods for consuming text. `read()` returns a string, `readline()` returns one line, and iteration processes lines lazily. Reading advances the stream position, so a second read at the end usually returns an empty string unless the stream is repositioned.\n\n## Syntax and behaviour\nUse `file.read(size)` for all or part of the remaining content, `file.readline()` for one line, or `for line in file:` for line-by-line processing. `seek()` changes the position on seekable streams; `tell()` reports the current position.\n\n## Rules and practical guidance\nLarge files should usually be processed line by line rather than loaded completely. Text mode decodes bytes using the selected encoding. Strip only the line ending or whitespace you intend to remove; `strip()` also removes spaces and tabs at both ends.\n\n## Example walkthroughs\nThe five examples below use deterministic in-memory streams or automatically cleaned temporary directories. Their outputs are designed to be reproducible in the course validator.\n\n## Common mistakes\n- Choosing a destructive mode when existing content must be preserved.\n- Assuming paths are relative to the script file rather than the process working directory.\n- Forgetting that text and binary streams accept different data types.\n- Building CSV or JSON by manually concatenating strings.\n- Ignoring exceptions caused by missing paths, permissions, invalid encodings or malformed data.\n\n## Best practices\nUse the standard library, explicit UTF-8 for text, context managers for resources, narrow exception handling and validation at application boundaries. Keep untrusted input within an explicitly approved data area.",
+      "examples": [
+        {
+          "id": "py15.3-ex1",
+          "language": "en",
+          "title": "Read all remaining text",
+          "code": "from io import StringIO\nwith StringIO('red\\nblue') as file:\n    print(repr(file.read()))",
+          "expectedOutput": "'red\\nblue'",
+          "explanation": "read() returns the remaining text as one string; repr makes the embedded newline visible."
+        },
+        {
+          "id": "py15.3-ex2",
+          "language": "en",
+          "title": "Read one line at a time",
+          "code": "from io import StringIO\nwith StringIO('one\\ntwo\\n') as file:\n    print(repr(file.readline()))\n    print(repr(file.readline()))",
+          "expectedOutput": "'one\\n'\n'two\\n'",
+          "explanation": "readline() includes the line-ending character when it is present."
+        },
+        {
+          "id": "py15.3-ex3",
+          "language": "en",
+          "title": "Iterate through lines",
+          "code": "from io import StringIO\nwith StringIO('A\\nB\\nC\\n') as file:\n    for line in file:\n        print(line.rstrip('\\n'))",
+          "expectedOutput": "A\nB\nC",
+          "explanation": "File iteration reads one line at a time, avoiding the need to store the entire file in memory."
+        },
+        {
+          "id": "py15.3-ex4",
+          "language": "en",
+          "title": "Read a bounded number of characters",
+          "code": "from io import StringIO\nwith StringIO('abcdef') as file:\n    print(file.read(3))\n    print(file.tell())",
+          "expectedOutput": "abc\n3",
+          "explanation": "The size argument limits the number of characters returned in text mode; tell reports the current stream position."
+        },
+        {
+          "id": "py15.3-ex5",
+          "language": "en",
+          "title": "Return to the beginning before rereading",
+          "code": "from io import StringIO\nwith StringIO('data') as file:\n    print(file.read())\n    file.seek(0)\n    print(file.read(2))",
+          "expectedOutput": "data\nda",
+          "explanation": "seek(0) moves the stream position back to the start, allowing a second read."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a small reading python text files demonstration using a temporary directory or an in-memory stream. Run it, compare the output with your prediction and explain each operation.",
+      "independentTask": "Build a mini record-processing utility that applies reading python text files to a small, known dataset. Include one valid case, one edge case and a clear response to an expected failure.",
+      "hints": [
+        "Start with the smallest possible file or stream and state what result you expect.",
+        "Choose the mode and encoding before writing the operation.",
+        "Use a context manager whenever a resource must be closed.",
+        "Test an empty input and an invalid or missing value.",
+        "Keep user-controlled paths and parsed external data within explicit validation rules."
+      ],
+      "challenge": "Extend the example into a reusable helper that validates inputs, handles one expected error and leaves resources in a predictable state.",
+      "validationCriteria": [
+        "The program uses the appropriate standard-library API.",
+        "The expected output matches the actual result.",
+        "Resources are closed or cleaned up reliably.",
+        "At least one edge case is handled explicitly."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py15.3-q1",
+        "prompt": "What does read() return in text mode?",
+        "answer": "The remaining text as a string",
+        "options": [
+          "The remaining text as a string",
+          "A list of dictionaries",
+          "A bytes object always",
+          "The file path"
+        ],
+        "explanation": "Text-mode read returns a string containing the remaining text."
+      },
+      {
+        "id": "py15.3-q2",
+        "prompt": "What does readline() normally retain when present?",
+        "answer": "The line-ending character",
+        "options": [
+          "The line-ending character",
+          "The file's permissions",
+          "The next line only",
+          "The file extension"
+        ],
+        "explanation": "readline returns one line and includes its newline when present."
+      },
+      {
+        "id": "py15.3-q3",
+        "prompt": "Why iterate over a large file?",
+        "answer": "To process lines incrementally",
+        "options": [
+          "To process lines incrementally",
+          "To force binary mode",
+          "To reset the file position",
+          "To remove all whitespace"
+        ],
+        "explanation": "Iteration avoids loading the entire file into memory at once."
+      },
+      {
+        "id": "py15.3-q4",
+        "prompt": "What does seek(0) do on a seekable stream?",
+        "answer": "Moves the position to the beginning",
+        "options": [
+          "Moves the position to the beginning",
+          "Closes the stream",
+          "Reads the first line",
+          "Deletes the content"
+        ],
+        "explanation": "Offset zero from the start returns the stream position to the beginning."
+      },
+      {
+        "id": "py15.3-q5",
+        "prompt": "What does tell() report?",
+        "answer": "The current stream position",
+        "options": [
+          "The current stream position",
+          "The number of lines in every file",
+          "The file's encoding",
+          "The file's permissions"
+        ],
+        "explanation": "tell reports the current position in the stream."
+      }
+    ]
+  },
+  "status": "draft"
+}

@@ -1,0 +1,154 @@
+{
+  "id": "python.py2.4.en",
+  "courseId": "python",
+  "moduleId": "PY2",
+  "topicId": "PY2.4",
+  "title": "Handling Common Python Input Errors",
+  "language": "en",
+  "learningObjectives": [
+    "Identify common errors caused by untrusted input.",
+    "Recognize ValueError during numeric conversion.",
+    "Handle empty input and unexpected text explicitly.",
+    "Distinguish conversion errors from application-rule violations.",
+    "Provide clear error messages without exposing unnecessary technical details."
+  ],
+  "prerequisites": [
+    "PY2.1",
+    "PY2.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Input errors occur when a program receives data that does not match its expectations. Numeric conversion may raise ValueError, missing tokens can cause IndexError or unpacking errors, and blank text may violate application rules even though it is valid input. A robust beginner program anticipates expected failures, handles only appropriate exception types and gives users actionable feedback. Conversion success and business-rule validity are separate checks.",
+      "whyItMatters": "Programs that crash on ordinary typing mistakes are frustrating and unreliable. Handling predictable input problems makes software safer and easier to use.",
+      "analogy": "Input validation is like checking a form before accepting it: a field can be present but still contain the wrong kind of information or an unacceptable value.",
+      "analogyLimit": "try/except cannot make every input valid. Broadly catching every exception can hide programming bugs. Validation rules must come from the application's requirements."
+    },
+    "explain": {
+      "narrative": "## 1. Invalid numeric text\n\nCalling `int()` or `float()` with unsuitable text raises `ValueError`. Put the conversion in a focused `try` block and catch `ValueError` when it is an expected user error.\n\n## 2. Empty input\n\nAn empty line produces an empty string. Check `text.strip()` when whitespace-only input should also count as empty. Decide whether the field is required before converting it.\n\n## 3. Conversion versus validation\n\nThe text `'0'` converts successfully to integer zero, but an application may require a positive quantity. Conversion checks whether the text can represent a number; validation checks whether the resulting value is acceptable for the task.\n\n## 4. Handle errors precisely\n\nCatch expected exceptions such as `ValueError` and `IndexError` where appropriate. Avoid `except:` or a broad `except Exception` around an entire program because it can conceal defects unrelated to user input.\n\n## 5. Give useful feedback\n\nExplain what the user should enter, not just that something went wrong. Do not expose secrets, internal paths or unnecessary traceback details in ordinary user-facing messages.",
+      "examples": [
+        {
+          "id": "py2.4-ex1",
+          "language": "en",
+          "title": "Handle invalid integer text",
+          "code": "text = 'eight'\ntry:\n    number = int(text)\nexcept ValueError:\n    print('Please enter a whole number')",
+          "expectedOutput": "Please enter a whole number",
+          "explanation": "The text is not a valid integer representation, so int() raises ValueError and the handler displays a clear message."
+        },
+        {
+          "id": "py2.4-ex2",
+          "language": "en",
+          "title": "Reject blank input",
+          "code": "text = '   '\nif not text.strip():\n    print('This field is required')\nelse:\n    print(text.strip())",
+          "expectedOutput": "This field is required",
+          "explanation": "strip() removes surrounding whitespace. The resulting empty string is treated as missing input."
+        },
+        {
+          "id": "py2.4-ex3",
+          "language": "en",
+          "title": "Separate conversion from range validation",
+          "code": "text = '0'\ntry:\n    quantity = int(text)\nexcept ValueError:\n    print('Enter a whole number')\nelse:\n    if quantity <= 0:\n        print('Quantity must be positive')\n    else:\n        print(quantity)",
+          "expectedOutput": "Quantity must be positive",
+          "explanation": "The text converts successfully to zero, but the business rule requires a positive quantity."
+        },
+        {
+          "id": "py2.4-ex4",
+          "language": "en",
+          "title": "Handle a missing token",
+          "code": "parts = ['Mina']\ntry:\n    age_text = parts[1]\nexcept IndexError:\n    print('Age was not supplied')",
+          "expectedOutput": "Age was not supplied",
+          "explanation": "Accessing a missing list position raises IndexError. The example handles that specific structural input problem."
+        },
+        {
+          "id": "py2.4-ex5",
+          "language": "en",
+          "title": "Handle several expected input problems",
+          "code": "text = '4.2x'\ntry:\n    amount = float(text)\nexcept ValueError:\n    print('Enter a valid decimal amount')\nelse:\n    print(f'Amount: {amount:.2f}')",
+          "expectedOutput": "Enter a valid decimal amount",
+          "explanation": "float() cannot parse the trailing x, so the expected conversion exception is handled."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Write a conversion block for a quantity. Handle invalid integer text, then reject zero and negative quantities with a separate message.",
+      "independentTask": "Create a small input checker for an age field. Reject blank text, handle non-integer input, and then enforce a reasonable application-defined age range. Keep each validation step clear.",
+      "hints": [
+        "Use strip() to detect whitespace-only input.",
+        "Catch ValueError around numeric conversion.",
+        "A number can convert successfully but still violate a range rule.",
+        "Catch IndexError when a list position may not exist.",
+        "Avoid bare except clauses that hide unrelated bugs."
+      ],
+      "challenge": "Design a reusable function that accepts text and returns either a validated positive integer or a clear error result. Include tests for blank text, alphabetic text, zero, a negative number and a valid positive number."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2.4-q1",
+        "prompt": "Which exception is commonly raised by int('hello')?",
+        "options": [
+          "ValueError",
+          "IndexError",
+          "KeyError",
+          "ZeroDivisionError"
+        ],
+        "answer": "ValueError",
+        "explanation": "The text does not represent a valid integer, so int() raises ValueError."
+      },
+      {
+        "id": "py2.4-q2",
+        "prompt": "What does '   '.strip() return?",
+        "options": [
+          "An empty string",
+          "None",
+          "Zero",
+          "A list"
+        ],
+        "answer": "An empty string",
+        "explanation": "strip() removes leading and trailing whitespace."
+      },
+      {
+        "id": "py2.4-q3",
+        "prompt": "What is the difference between conversion and range validation?",
+        "options": [
+          "Conversion checks representation; range validation checks application rules",
+          "They are always identical",
+          "Range validation changes a string into an integer",
+          "Conversion checks whether a user is logged in"
+        ],
+        "answer": "Conversion checks representation; range validation checks application rules",
+        "explanation": "A value can be a valid integer and still be outside the permitted range."
+      },
+      {
+        "id": "py2.4-q4",
+        "prompt": "Which exception can occur when accessing a missing list index?",
+        "options": [
+          "IndexError",
+          "ValueError",
+          "ImportError",
+          "SyntaxError"
+        ],
+        "answer": "IndexError",
+        "explanation": "A list index outside the available positions raises IndexError."
+      },
+      {
+        "id": "py2.4-q5",
+        "prompt": "Why should a program avoid a bare except clause for ordinary input validation?",
+        "options": [
+          "It may hide unrelated programming errors",
+          "It makes input() return None",
+          "It prevents all exceptions",
+          "It automatically retries input"
+        ],
+        "answer": "It may hide unrelated programming errors",
+        "explanation": "Catching only expected exceptions keeps defects visible and error handling precise."
+      }
+    ]
+  },
+  "status": "draft"
+}

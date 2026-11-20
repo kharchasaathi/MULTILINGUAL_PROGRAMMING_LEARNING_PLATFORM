@@ -1,0 +1,164 @@
+{
+  "id": "python.py15.9.en",
+  "courseId": "python",
+  "moduleId": "PY15",
+  "topicId": "PY15.9",
+  "title": "Deleting Files and Directories Safely",
+  "language": "en",
+  "learningObjectives": [
+    "Explain how Python removes files and empty directories using os and pathlib.",
+    "Use os.remove() and Path.unlink() to delete a known file.",
+    "Use os.rmdir() or Path.rmdir() to remove an empty directory.",
+    "Handle missing files and expected filesystem errors without hiding unrelated failures.",
+    "Apply path validation and temporary-directory techniques to avoid destructive operations on unintended locations."
+  ],
+  "prerequisites": [
+    "PY14.1",
+    "PY14.2",
+    "PY15.1",
+    "PY15.6"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Python can delete a file with os.remove(path) or Path.unlink(), and remove an empty directory with os.rmdir(path) or Path.rmdir(). These operations change the filesystem immediately. Directory removal does not recursively delete its contents. A missing path, insufficient permission, a non-empty directory or a path that identifies the wrong object can cause an exception.",
+      "whyItMatters": "Applications often need to remove temporary exports, obsolete cache files or empty working directories. Safe deletion prevents accidental data loss and makes cleanup predictable.",
+      "analogy": "Deleting a file is like shredding one identified document; removing a directory is like removing an empty folder from a cabinet. You must verify the exact target before acting.",
+      "analogyLimit": "Filesystem operations have permissions, symbolic links, concurrent changes and platform-specific behaviour that a physical filing analogy cannot fully represent.",
+      "summary": "Use explicit, validated paths; prefer narrow cleanup scopes; handle expected errors; and never demonstrate destructive deletion against arbitrary user or system paths."
+    },
+    "explain": {
+      "narrative": "## Core idea\nUse `os.remove(path)` or `Path.unlink()` to delete one file. Use `os.rmdir(path)` or `Path.rmdir()` to remove an empty directory. These directory functions intentionally fail when the directory is not empty; they do not recursively erase its contents.\n\n## Safe workflow\n1. Build the target path from a known, approved base directory.\n2. Resolve and validate that the target remains within the approved directory.\n3. Check that the intended target is a file or an empty directory.\n4. Perform the narrow deletion operation and handle expected exceptions such as `FileNotFoundError`, `PermissionError` and `OSError`.\n5. Use `TemporaryDirectory` in examples and tests so cleanup is bounded and automatic.\n\n## Common mistakes\n- Confusing `os.remove()` with directory removal.\n- Assuming `rmdir()` removes a non-empty directory.\n- Treating an existence check as a guarantee that deletion will succeed; another process can change the path.\n- Trusting an unchecked path supplied by a user.\n- Using recursive deletion when a single-file or empty-directory operation is sufficient.\n\n## Best practices\nNever hard-code a personal or system path for a deletion example. Avoid broad recursive deletion unless a separately reviewed feature truly requires it. Keep cleanup within an application-owned temporary or data directory and report failures clearly.",
+      "examples": [
+        {
+          "id": "py15.9-ex1",
+          "language": "en",
+          "title": "Delete one file with os.remove()",
+          "code": "import os\nfrom pathlib import Path\nfrom tempfile import TemporaryDirectory\nwith TemporaryDirectory() as folder:\n    target = Path(folder) / 'old.txt'\n    target.write_text('temporary', encoding='utf-8')\n    os.remove(target)\n    print(target.exists())",
+          "expectedOutput": "False",
+          "explanation": "os.remove deletes the identified file. The temporary directory confines this example and is cleaned automatically."
+        },
+        {
+          "id": "py15.9-ex2",
+          "language": "en",
+          "title": "Delete a file with Path.unlink()",
+          "code": "from pathlib import Path\nfrom tempfile import TemporaryDirectory\nwith TemporaryDirectory() as folder:\n    target = Path(folder) / 'report.txt'\n    target.write_text('draft', encoding='utf-8')\n    target.unlink()\n    print(target.is_file())",
+          "expectedOutput": "False",
+          "explanation": "Path.unlink removes a file or symbolic link. It is the pathlib equivalent for this single-file operation."
+        },
+        {
+          "id": "py15.9-ex3",
+          "language": "en",
+          "title": "Handle a file that is already missing",
+          "code": "from pathlib import Path\nfrom tempfile import TemporaryDirectory\nwith TemporaryDirectory() as folder:\n    target = Path(folder) / 'missing.txt'\n    try:\n        target.unlink()\n    except FileNotFoundError:\n        print('file not found')",
+          "expectedOutput": "file not found",
+          "explanation": "A missing target raises FileNotFoundError. Catch the specific expected error rather than suppressing every exception."
+        },
+        {
+          "id": "py15.9-ex4",
+          "language": "en",
+          "title": "Remove an empty directory",
+          "code": "import os\nfrom pathlib import Path\nfrom tempfile import TemporaryDirectory\nwith TemporaryDirectory() as folder:\n    empty_dir = Path(folder) / 'empty'\n    empty_dir.mkdir()\n    os.rmdir(empty_dir)\n    print(empty_dir.exists())",
+          "expectedOutput": "False",
+          "explanation": "os.rmdir removes an empty directory. It raises an error if the directory still contains entries."
+        },
+        {
+          "id": "py15.9-ex5",
+          "language": "en",
+          "title": "Validate a target before deleting it",
+          "code": "from pathlib import Path\nfrom tempfile import TemporaryDirectory\nwith TemporaryDirectory() as folder:\n    base = Path(folder).resolve()\n    target = (base / 'cache.tmp').resolve()\n    target.write_text('cache', encoding='utf-8')\n    if target.is_relative_to(base) and target.is_file():\n        target.unlink()\n    print(target.exists())",
+          "expectedOutput": "False",
+          "explanation": "The example checks that the resolved target is within the approved temporary base and is a file before unlinking it. Production systems must also consider symlinks, races and permissions."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a temporary directory, write one disposable file, delete it with Path.unlink(), and print whether it remains. Then try removing an empty child directory with Path.rmdir().",
+      "independentTask": "Write a cleanup helper that accepts only a file beneath a designated temporary workspace, validates the target, deletes only that file and reports missing-file or permission errors clearly.",
+      "hints": [
+        "Use TemporaryDirectory so the exercise cannot affect unrelated files.",
+        "Use os.remove() or Path.unlink() for one file.",
+        "Use os.rmdir() or Path.rmdir() only for an empty directory.",
+        "Catch FileNotFoundError separately from other OSError subclasses.",
+        "Resolve and validate a candidate path against an approved base before deletion."
+      ],
+      "challenge": "Create a small cleanup utility that removes a known set of generated files from an application-owned temporary directory, leaves unknown files untouched and reports every skipped or failed operation.",
+      "validationCriteria": [
+        "The correct API is used for files and empty directories.",
+        "Examples operate only inside automatically cleaned temporary directories.",
+        "Missing targets and non-empty directories are handled or explained accurately.",
+        "No broad recursive deletion or arbitrary external path is used.",
+        "Expected output matches actual execution."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py15.9-q1",
+        "prompt": "Which function removes a single file using the os module?",
+        "answer": "os.remove()",
+        "options": [
+          "os.remove()",
+          "os.rmdir()",
+          "os.listdir()",
+          "os.mkdir()"
+        ],
+        "explanation": "os.remove deletes a file path, not a directory."
+      },
+      {
+        "id": "py15.9-q2",
+        "prompt": "Which pathlib method deletes a file?",
+        "answer": "Path.unlink()",
+        "options": [
+          "Path.unlink()",
+          "Path.rmdir()",
+          "Path.iterdir()",
+          "Path.mkdir()"
+        ],
+        "explanation": "Path.unlink removes the file or symbolic link identified by the path."
+      },
+      {
+        "id": "py15.9-q3",
+        "prompt": "What does os.rmdir() require?",
+        "answer": "The target directory must be empty",
+        "options": [
+          "The target directory must be empty",
+          "The directory must contain a file",
+          "The path must be a JSON file",
+          "The directory must be the current working directory"
+        ],
+        "explanation": "rmdir removes an empty directory and does not recursively delete its contents."
+      },
+      {
+        "id": "py15.9-q4",
+        "prompt": "Which exception is raised when unlink() targets a missing file?",
+        "answer": "FileNotFoundError",
+        "options": [
+          "FileNotFoundError",
+          "StopIteration",
+          "ZeroDivisionError",
+          "ImportError"
+        ],
+        "explanation": "FileNotFoundError is the specific expected exception for a missing filesystem path."
+      },
+      {
+        "id": "py15.9-q5",
+        "prompt": "Why should a deletion target be checked against an approved base directory?",
+        "answer": "To reduce the risk of deleting an unintended path",
+        "options": [
+          "To reduce the risk of deleting an unintended path",
+          "To make every file read-only",
+          "To bypass filesystem permissions",
+          "To make deletion recursive"
+        ],
+        "explanation": "Path containment checks help keep cleanup operations within an explicitly approved workspace."
+      }
+    ]
+  },
+  "status": "draft"
+}

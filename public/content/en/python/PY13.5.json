@@ -1,0 +1,156 @@
+{
+  "id": "python.py13.5.en",
+  "courseId": "python",
+  "moduleId": "PY13",
+  "topicId": "PY13.5",
+  "title": "Python Generator Functions and yield",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the main ideas in python generator functions and yield.",
+    "Use the relevant iterator or generator protocol correctly.",
+    "Trace values and state across successive iteration steps.",
+    "Recognize exhaustion, lazy evaluation and relevant edge cases.",
+    "Apply the concept to a practical sequence-processing task."
+  ],
+  "prerequisites": [
+    "PY6.2",
+    "PY7.1",
+    "PY8.1",
+    "PY12.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A generator function contains yield and returns a generator iterator when called. Its body runs when the generator is advanced, yields values one at a time, and suspends its local state between yields. Unlike return, yield pauses rather than permanently ending the function.",
+      "whyItMatters": "Generators support streaming transformations and large or computed sequences without building every result in memory at once.",
+      "analogy": "A generator is like a presenter who reveals one card at a time and pauses until the audience asks for the next card.",
+      "analogyLimit": "A generator is not automatically faster or safer. It is usually one-pass, may hold references between yields, and can perform expensive or side-effecting work during iteration."
+    },
+    "explain": {
+      "narrative": "## yield turns a function into a generator\nCalling a generator function creates a generator object; its body does not run immediately. The first `next()` or a for loop starts execution. When Python reaches `yield value`, it returns that value and suspends the function's local state. The next advance resumes after the yield.\n\n## yield versus return\n`return` exits the function. `yield` produces an item and pauses so execution can continue later. A generator may yield many values. When it finishes, iteration ends with StopIteration.\n\n## Stream values deliberately\nGenerators are useful when values can be produced incrementally. They do not need to store the complete result collection. However, a generator can still use substantial memory if it retains large objects in local variables or if the consumer stores every yielded item.",
+      "examples": [
+        {
+          "id": "py13.5-ex1",
+          "language": "en",
+          "title": "Yield three status values",
+          "code": "def statuses():\n    yield 'queued'\n    yield 'running'\n    yield 'done'\nfor status in statuses():\n    print(status)",
+          "expectedOutput": "queued\nrunning\ndone",
+          "explanation": "Each yield returns one value and suspends the generator until the loop requests another."
+        },
+        {
+          "id": "py13.5-ex2",
+          "language": "en",
+          "title": "Resume after each yield",
+          "code": "def steps():\n    print('prepare')\n    yield 1\n    print('continue')\n    yield 2\ng = steps()\nprint('created')\nprint(next(g))\nprint(next(g))",
+          "expectedOutput": "created\nprepare\n1\ncontinue\n2",
+          "explanation": "Calling steps creates the generator without running its body; next starts and resumes it."
+        },
+        {
+          "id": "py13.5-ex3",
+          "language": "en",
+          "title": "Generate a bounded sequence",
+          "code": "def squares(limit):\n    for number in range(1, limit + 1):\n        yield number * number\nprint(list(squares(4)))",
+          "expectedOutput": "[1, 4, 9, 16]",
+          "explanation": "The generator calculates each square as iteration requests it."
+        },
+        {
+          "id": "py13.5-ex4",
+          "language": "en",
+          "title": "Use yield with a conditional",
+          "code": "def positive(values):\n    for value in values:\n        if value > 0:\n            yield value\nprint(list(positive([-2, 0, 3, 5])))",
+          "expectedOutput": "[3, 5]",
+          "explanation": "Only values meeting the condition are yielded; other inputs are skipped."
+        },
+        {
+          "id": "py13.5-ex5",
+          "language": "en",
+          "title": "Yield values from another iterable",
+          "code": "def all_tags(groups):\n    for group in groups:\n        yield from group\nprint(list(all_tags([['new', 'paid'], ['packed']])))",
+          "expectedOutput": "['new', 'paid', 'packed']",
+          "explanation": "yield from delegates iteration to a sub-iterable and yields its items in sequence."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Write a small program that demonstrates python generator functions and yield. Show at least two iteration steps and explain how the state changes.",
+      "independentTask": "Build a reusable or one-pass sequence processor using this topic. Test normal input, an empty or exhausted case, and describe when each value is calculated.",
+      "hints": [
+        "Identify whether the object is an iterable, an iterator or both.",
+        "Write down the state before and after each next() call.",
+        "Use StopIteration as the normal completion signal.",
+        "Test an empty input and an already exhausted iterator.",
+        "Choose a list only when repeated access or storage is required."
+      ],
+      "challenge": "Process a larger sequence incrementally and compare the memory and reuse trade-offs with building a list first."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py13.5-q1",
+        "prompt": "What does calling a generator function return?",
+        "answer": "A generator object",
+        "options": [
+          "A generator object",
+          "A completed list",
+          "The first yielded value",
+          "A class"
+        ],
+        "explanation": "A generator function call creates a generator iterator; its body begins when advanced."
+      },
+      {
+        "id": "py13.5-q2",
+        "prompt": "When does a generator function body begin running?",
+        "answer": "When the generator is advanced",
+        "options": [
+          "When the generator is advanced",
+          "Immediately when the function is called",
+          "Only when it is converted to a string",
+          "When the function is defined"
+        ],
+        "explanation": "Generator execution is lazy and starts on next() or iteration."
+      },
+      {
+        "id": "py13.5-q3",
+        "prompt": "What does yield do?",
+        "answer": "Produces a value and suspends the function",
+        "options": [
+          "Produces a value and suspends the function",
+          "Ends the function permanently",
+          "Creates a global variable",
+          "Sorts yielded values"
+        ],
+        "explanation": "yield returns a value while preserving the generator's execution state."
+      },
+      {
+        "id": "py13.5-q4",
+        "prompt": "How does return differ from yield?",
+        "answer": "return ends the function; yield pauses it",
+        "options": [
+          "return ends the function; yield pauses it",
+          "return pauses; yield ends permanently",
+          "They are identical",
+          "yield always returns a list"
+        ],
+        "explanation": "return terminates a function call, whereas yield suspends a generator for later resumption."
+      },
+      {
+        "id": "py13.5-q5",
+        "prompt": "What is yield from used for?",
+        "answer": "Delegating yielding to another iterable",
+        "options": [
+          "Delegating yielding to another iterable",
+          "Converting a list to a tuple",
+          "Catching StopIteration in a loop body",
+          "Defining a class attribute"
+        ],
+        "explanation": "yield from forwards values from a sub-iterator."
+      }
+    ]
+  },
+  "status": "draft"
+}

@@ -1,0 +1,169 @@
+{
+  "id": "python.py22.16.en",
+  "courseId": "python",
+  "moduleId": "PY22",
+  "topicId": "PY22.16",
+  "title": "Performance Measurement with timeit, cProfile and tracemalloc",
+  "language": "en",
+  "learningObjectives": [
+    "Explain benchmarking, profiling, CPU time, memory allocation and optimization workflow.",
+    "Select a suitable concurrency or performance technique for PY22.16.",
+    "Interpret task, thread, process or profiling results correctly.",
+    "Identify limitations and risks when applying PY22.16.",
+    "Apply PY22.16 concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY8.1",
+    "PY11.1",
+    "PY14.1",
+    "PY21.7",
+    "PY22.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Performance work begins with measurement. timeit measures the execution time of small snippets across repeated runs. cProfile profiles function-call activity and helps identify where time is spent. tracemalloc traces Python memory allocations. Use representative inputs and repeatable conditions before optimizing.",
+      "whyItMatters": "Measurement prevents premature optimization and helps focus effort on the code that actually limits performance.",
+      "analogy": "A performance profile is a diagnostic dashboard showing where a journey spends time and where resources are consumed.",
+      "analogyLimit": "Microbenchmarks can misrepresent real workloads; profiler overhead and environment variation affect results, so validate improvements in realistic conditions.",
+      "summary": "Performance Measurement with timeit, cProfile and tracemalloc develops advanced concurrency and performance skills."
+    },
+    "explain": {
+      "narrative": "## Measure before optimizing\nUse `timeit` to compare small operations under controlled repeated execution. Use `cProfile` for function-level runtime profiling and `pstats` to inspect results. Use `tracemalloc` to compare Python memory allocations. Profile representative inputs, not only tiny examples.\n\nOptimize the bottleneck that measurement identifies, then rerun the same benchmark and relevant correctness tests. Avoid trading maintainability for tiny gains that do not matter to users. Document the environment and input size when reporting performance.",
+      "examples": [
+        {
+          "id": "py2216-ex1",
+          "language": "en",
+          "title": "Measure a small expression with timeit",
+          "code": "import timeit\nelapsed = timeit.timeit('sum(range(100))', number=10)\nprint(elapsed >= 0)",
+          "expectedOutput": "True",
+          "explanation": "timeit returns elapsed time for the requested number of executions."
+        },
+        {
+          "id": "py2216-ex2",
+          "language": "en",
+          "title": "Run a function through cProfile",
+          "code": "import cProfile\ndef calculate(): return sum(range(100))\nprofiler = cProfile.Profile()\nprofiler.enable(); calculate(); profiler.disable()\nprint(profiler.getstats()[0].callcount >= 1)",
+          "expectedOutput": "True",
+          "explanation": "cProfile collects call statistics while the profiled code runs."
+        },
+        {
+          "id": "py2216-ex3",
+          "language": "en",
+          "title": "Track Python memory allocations",
+          "code": "import tracemalloc\ntracemalloc.start()\nvalues = [number for number in range(100)]\ncurrent, peak = tracemalloc.get_traced_memory()\ntracemalloc.stop()\nprint(peak >= current, len(values))",
+          "expectedOutput": "True 100",
+          "explanation": "tracemalloc reports current and peak traced memory for Python allocations."
+        },
+        {
+          "id": "py2216-ex4",
+          "language": "en",
+          "title": "Compare two equivalent calculations",
+          "code": "import timeit\nfirst = timeit.timeit('sum(range(20))', number=5)\nsecond = timeit.timeit('sum(range(20))', number=5)\nprint(first >= 0 and second >= 0)",
+          "expectedOutput": "True",
+          "explanation": "Both measurements are non-negative; this example does not claim one approach is faster."
+        },
+        {
+          "id": "py2216-ex5",
+          "language": "en",
+          "title": "Inspect profiler statistics availability",
+          "code": "import cProfile\nprofiler = cProfile.Profile()\nprofiler.enable(); sum([1, 2, 3]); profiler.disable()\nprint(len(profiler.getstats()) > 0)",
+          "expectedOutput": "True",
+          "explanation": "getstats exposes collected profiler entries for analysis."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Use timeit to compare two equivalent approaches, then use cProfile or tracemalloc to inspect a small workload. Explain why the benchmark may not represent production.",
+      "independentTask": "Write a performance investigation plan that records workload, baseline, bottleneck, proposed change, correctness tests and measured result.",
+      "hints": [
+        "timeit measures repeated execution of small snippets.",
+        "cProfile identifies function-level time costs.",
+        "tracemalloc tracks Python memory allocations.",
+        "Use representative data and repeatable conditions.",
+        "Rerun correctness tests after optimization."
+      ],
+      "challenge": "Create a reproducible benchmark report comparing two implementations, including environment, input scale, timing, memory observations and limitations.",
+      "validationCriteria": [
+        "The concurrency or performance concept is accurately explained.",
+        "Examples execute with the documented output.",
+        "Synchronization, scheduling or profiling behaviour is correct.",
+        "Limitations and appropriate use cases are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2216-q1",
+        "prompt": "What is timeit designed to measure?",
+        "answer": "Execution time of small code snippets",
+        "options": [
+          "Execution time of small code snippets",
+          "Memory allocation only",
+          "Execution time of small code snippets",
+          "Thread count",
+          "Code style"
+        ],
+        "explanation": "timeit repeats a statement and reports elapsed execution time."
+      },
+      {
+        "id": "py2216-q2",
+        "prompt": "What does cProfile help identify?",
+        "answer": "Function-level runtime costs",
+        "options": [
+          "Function-level runtime costs",
+          "Function-level runtime costs",
+          "Unused translations",
+          "Package licenses",
+          "Keyboard accessibility"
+        ],
+        "explanation": "cProfile collects deterministic function-call profiling statistics."
+      },
+      {
+        "id": "py2216-q3",
+        "prompt": "What does tracemalloc track?",
+        "answer": "Python memory allocations",
+        "options": [
+          "Python memory allocations",
+          "Network latency",
+          "Python memory allocations",
+          "Source file encoding",
+          "Thread names"
+        ],
+        "explanation": "tracemalloc traces memory blocks allocated by Python."
+      },
+      {
+        "id": "py2216-q4",
+        "prompt": "Why use representative benchmark inputs?",
+        "answer": "To make measurements reflect realistic workload behaviour",
+        "options": [
+          "To make measurements reflect realistic workload behaviour",
+          "To reduce the source file size",
+          "To make measurements reflect realistic workload behaviour",
+          "To avoid running tests",
+          "To guarantee a faster result"
+        ],
+        "explanation": "Input size and shape can change which operations dominate runtime."
+      },
+      {
+        "id": "py2216-q5",
+        "prompt": "What should follow a performance optimization?",
+        "answer": "Rerun correctness tests and measure again",
+        "options": [
+          "Rerun correctness tests and measure again",
+          "Delete the benchmark",
+          "Rerun correctness tests and measure again",
+          "Assume the change is faster",
+          "Disable profiling permanently"
+        ],
+        "explanation": "Optimization should preserve correctness and demonstrate a measured improvement."
+      }
+    ]
+  },
+  "status": "draft"
+}

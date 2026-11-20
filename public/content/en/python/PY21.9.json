@@ -1,0 +1,169 @@
+{
+  "id": "python.py21.9.en",
+  "courseId": "python",
+  "moduleId": "PY21",
+  "topicId": "PY21.9",
+  "title": "unittest Fixtures, Setup, Teardown and Subtests",
+  "language": "en",
+  "learningObjectives": [
+    "Explain setUp, tearDown, class fixtures, cleanup and subTest.",
+    "Select a suitable testing or code-quality technique for PY21.9.",
+    "Interpret test, diagnostic and quality-tool output correctly.",
+    "Identify limitations and risks when applying PY21.9.",
+    "Apply PY21.9 concepts in a maintainable Python workflow."
+  ],
+  "prerequisites": [
+    "PY8.1",
+    "PY11.1",
+    "PY14.1",
+    "PY20.1",
+    "PY21.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "unittest fixtures prepare and clean up resources used by tests. setUp runs before each test method and tearDown runs after it. Class-level fixtures can prepare expensive shared resources for a test class. subTest allows related input variations to be reported separately within one test method. Cleanup should be reliable even when an assertion fails.",
+      "whyItMatters": "Well-managed fixtures keep tests independent and prevent files, temporary resources or shared state from leaking between cases.",
+      "analogy": "A fixture is the preparation and cleanup crew that resets a laboratory bench before the next experiment.",
+      "analogyLimit": "Shared class fixtures can create coupling if tests mutate shared state; prefer per-test isolation unless shared setup is justified.",
+      "summary": "unittest Fixtures, Setup, Teardown and Subtests develops reliable testing and code-quality skills for Python projects."
+    },
+    "explain": {
+      "narrative": "## Manage test setup and cleanup\nUse `setUp()` to create state needed by each test and `tearDown()` to release it. For resources where cleanup must be registered immediately, use `addCleanup()`. Class methods `setUpClass()` and `tearDownClass()` are suitable for expensive resources shared by all tests in a class. Use `subTest()` to test several related values while identifying which case failed.\n\nKeep fixtures small and predictable. Avoid ordering dependencies between test methods and do not use shared mutable fixtures unless the test explicitly resets them.",
+      "examples": [
+        {
+          "id": "py219-ex1",
+          "language": "en",
+          "title": "Track per-test setup and cleanup order",
+          "code": "events = []\ndef setup(): events.append('setUp')\ndef test(): events.append('test')\ndef teardown(): events.append('tearDown')\nsetup(); test(); teardown()\nprint(events)",
+          "expectedOutput": "['setUp', 'test', 'tearDown']",
+          "explanation": "The sequence illustrates the lifecycle around one test method."
+        },
+        {
+          "id": "py219-ex2",
+          "language": "en",
+          "title": "Register a cleanup action",
+          "code": "import unittest\ncase = unittest.TestCase()\nitems = []\ncase.addCleanup(items.clear)\nitems.append('temporary')\nprint(len(items))\ncase.doCleanups()\nprint(len(items))",
+          "expectedOutput": "1\n0",
+          "explanation": "addCleanup registers an action that the test framework runs during cleanup."
+        },
+        {
+          "id": "py219-ex3",
+          "language": "en",
+          "title": "Use subTest for multiple values",
+          "code": "import unittest\ncase = unittest.TestCase()\nfor value, expected in [(1, 1), (2, 4), (3, 9)]:\n    with case.subTest(value=value):\n        case.assertEqual(value ** 2, expected)\nprint('checked')",
+          "expectedOutput": "checked",
+          "explanation": "subTest gives each iteration its own reported context in a unittest test run."
+        },
+        {
+          "id": "py219-ex4",
+          "language": "en",
+          "title": "Describe fixture scope",
+          "code": "scopes = ['setUp: each test', 'setUpClass: once per class']\nprint(len(scopes))",
+          "expectedOutput": "2",
+          "explanation": "Per-test and per-class fixtures have different lifetimes."
+        },
+        {
+          "id": "py219-ex5",
+          "language": "en",
+          "title": "Check cleanup registration API",
+          "code": "import unittest\ncase = unittest.TestCase()\nprint(callable(case.addCleanup))",
+          "expectedOutput": "True",
+          "explanation": "TestCase provides addCleanup to register cleanup callbacks."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Write a TestCase that creates a temporary list or file in setUp, verifies behaviour and cleans up reliably. Add subTest cases for several input values.",
+      "independentTask": "Compare per-test fixtures and class-level fixtures. Explain when shared setup is appropriate and how cleanup should work after a test failure.",
+      "hints": [
+        "setUp runs before each test method.",
+        "tearDown runs after each test method.",
+        "Use addCleanup for reliable cleanup registration.",
+        "Class fixtures are shared by the class.",
+        "subTest identifies individual cases within a loop."
+      ],
+      "challenge": "Design a fixture strategy for tests that use temporary files and a shared expensive resource without allowing tests to affect one another.",
+      "validationCriteria": [
+        "The testing or quality objective is clearly stated.",
+        "Examples execute with the documented output.",
+        "Test setup, cleanup and dependency boundaries are accurate.",
+        "Tool limitations and appropriate use cases are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py219-q1",
+        "prompt": "When does setUp normally run?",
+        "answer": "Before each test method",
+        "options": [
+          "Before each test method",
+          "Once for the whole repository",
+          "Before each test method",
+          "Only after a failure",
+          "After tearDown"
+        ],
+        "explanation": "setUp prepares each test case instance before its test method runs."
+      },
+      {
+        "id": "py219-q2",
+        "prompt": "What is tearDown used for?",
+        "answer": "Cleaning up resources after a test method",
+        "options": [
+          "Cleaning up resources after a test method",
+          "Installing dependencies",
+          "Cleaning up resources after a test method",
+          "Naming test modules",
+          "Starting the debugger"
+        ],
+        "explanation": "tearDown releases per-test resources after execution."
+      },
+      {
+        "id": "py219-q3",
+        "prompt": "When is setUpClass appropriate?",
+        "answer": "For setup shared by test methods in one class",
+        "options": [
+          "For setup shared by test methods in one class",
+          "For setup shared by test methods in one class",
+          "For every assertion individually",
+          "Only for production startup",
+          "To replace all test methods"
+        ],
+        "explanation": "Class fixtures prepare resources once for the class."
+      },
+      {
+        "id": "py219-q4",
+        "prompt": "What does addCleanup provide?",
+        "answer": "Registers a cleanup callback",
+        "options": [
+          "Registers a cleanup callback",
+          "Registers a cleanup callback",
+          "Skips the test suite",
+          "Formats Python code",
+          "Installs pytest"
+        ],
+        "explanation": "addCleanup schedules a callback to run during test cleanup."
+      },
+      {
+        "id": "py219-q5",
+        "prompt": "What is subTest useful for?",
+        "answer": "Reporting related input variations within one test method",
+        "options": [
+          "Reporting related input variations within one test method",
+          "Starting a virtual environment",
+          "Reporting related input variations within one test method",
+          "Replacing assertions",
+          "Capturing network traffic"
+        ],
+        "explanation": "subTest identifies each variation as a separate context."
+      }
+    ]
+  },
+  "status": "draft"
+}

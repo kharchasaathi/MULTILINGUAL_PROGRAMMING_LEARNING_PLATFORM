@@ -1,0 +1,168 @@
+{
+  "id": "python.py21.6.en",
+  "courseId": "python",
+  "moduleId": "PY21",
+  "topicId": "PY21.6",
+  "title": "Assertions and Defensive Programming",
+  "language": "en",
+  "learningObjectives": [
+    "Explain assert statements, preconditions, invariants and validation boundaries.",
+    "Select a suitable debugging or testing technique for PY21.6.",
+    "Interpret diagnostic information and test results correctly.",
+    "Identify limitations and risks when applying PY21.6.",
+    "Apply PY21.6 concepts in a maintainable Python workflow."
+  ],
+  "prerequisites": [
+    "PY8.1",
+    "PY11.1",
+    "PY14.1",
+    "PY20.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "An assert statement checks a condition that should always be true at a particular point in the program. If the condition is false, Python raises AssertionError. Assertions are useful for internal invariants and developer assumptions, but they must not replace validation of untrusted input because optimized execution can remove assert statements.",
+      "whyItMatters": "Explicit invariants reveal incorrect internal states early and make assumptions visible to developers and reviewers.",
+      "analogy": "An assertion is an internal checkpoint that confirms a process has reached a state the program expects.",
+      "analogyLimit": "Assertions can be disabled with optimization and are not a security or user-input validation mechanism; use explicit checks and exceptions for required validation.",
+      "summary": "Assertions and Defensive Programming develops reliable debugging and software verification skills."
+    },
+    "explain": {
+      "narrative": "## Use assert for internal invariants\nThe form `assert condition, message` raises AssertionError when the condition is false. Use it to document assumptions that should hold if the program is correct, such as an internal count never becoming negative. For external data, use explicit `if` checks and raise an appropriate exception or return a clear validation result.\n\nDo not rely on assert for authentication, authorization, financial checks or any condition that must always execute. Assertions are a development aid, not a substitute for robust input validation.",
+      "examples": [
+        {
+          "id": "py216-ex1",
+          "language": "en",
+          "title": "Check an internal invariant",
+          "code": "items = [2, 4, 6]\nassert len(items) >= 0, 'length cannot be negative'\nprint(sum(items))",
+          "expectedOutput": "12",
+          "explanation": "The assertion documents a condition expected to hold inside the program."
+        },
+        {
+          "id": "py216-ex2",
+          "language": "en",
+          "title": "Catch a failed assertion",
+          "code": "try:\n    assert 3 > 5, 'expected a larger value'\nexcept AssertionError as error:\n    print(type(error).__name__)\n    print(str(error))",
+          "expectedOutput": "AssertionError\nexpected a larger value",
+          "explanation": "A false assertion raises AssertionError with its optional message."
+        },
+        {
+          "id": "py216-ex3",
+          "language": "en",
+          "title": "Validate external input explicitly",
+          "code": "def require_positive(value):\n    if value <= 0:\n        raise ValueError('value must be positive')\n    return value\nprint(require_positive(4))",
+          "expectedOutput": "4",
+          "explanation": "Explicit validation always runs and can raise a documented exception."
+        },
+        {
+          "id": "py216-ex4",
+          "language": "en",
+          "title": "Separate validation from invariant",
+          "code": "def total(values):\n    if not values:\n        raise ValueError('values must not be empty')\n    result = sum(values)\n    assert result >= min(values) * len(values)\n    return result\nprint(total([2, 3]))",
+          "expectedOutput": "5",
+          "explanation": "The function explicitly validates input and uses an assertion for an internal mathematical invariant."
+        },
+        {
+          "id": "py216-ex5",
+          "language": "en",
+          "title": "Show assertion as a statement",
+          "code": "source = 'assert count >= 0, \"count cannot be negative\"'\nprint(source.startswith('assert '))",
+          "expectedOutput": "True",
+          "explanation": "An assertion statement records an assumption that should hold during correct execution."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Add assertions for internal invariants in a small calculation. Then replace an assertion used for external input validation with an explicit conditional and ValueError.",
+      "independentTask": "Review a function with assertions and identify which checks are internal invariants and which must become explicit validation.",
+      "hints": [
+        "Use assert condition, message for an internal invariant.",
+        "A failed assertion raises AssertionError.",
+        "Assertions may be removed under optimized execution.",
+        "Validate untrusted input with explicit checks.",
+        "Do not use assert for security-critical conditions."
+      ],
+      "challenge": "Refactor a data-processing function to separate external input validation, internal invariants and normal error handling.",
+      "validationCriteria": [
+        "The debugging or testing objective is clearly stated.",
+        "Examples execute with the documented output.",
+        "Test expectations and exception behaviour are accurate.",
+        "Limitations and appropriate use cases are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py216-q1",
+        "prompt": "What happens when an assert condition is false?",
+        "answer": "Python raises AssertionError",
+        "options": [
+          "Python raises AssertionError",
+          "Python installs a package",
+          "Python raises AssertionError",
+          "Python silently changes the condition",
+          "Python creates a virtual environment"
+        ],
+        "explanation": "A failed assert raises AssertionError."
+      },
+      {
+        "id": "py216-q2",
+        "prompt": "What is a suitable use of assert?",
+        "answer": "Checking an internal invariant",
+        "options": [
+          "Checking an internal invariant",
+          "Checking an internal invariant",
+          "Validating a password for security",
+          "Enforcing payment authorization",
+          "Checking access rights from untrusted input"
+        ],
+        "explanation": "Assertions are intended for internal assumptions and invariants."
+      },
+      {
+        "id": "py216-q3",
+        "prompt": "Why should assert not replace external input validation?",
+        "answer": "Assertions can be disabled in optimized execution",
+        "options": [
+          "Assertions can be disabled in optimized execution",
+          "Assertions always run in every execution mode",
+          "Assertions can be disabled in optimized execution",
+          "Assertions validate every data type automatically",
+          "Assertions prevent all exceptions"
+        ],
+        "explanation": "Python optimization can remove assert statements."
+      },
+      {
+        "id": "py216-q4",
+        "prompt": "Which approach is appropriate for required input validation?",
+        "answer": "An explicit conditional check with a suitable exception",
+        "options": [
+          "An explicit conditional check with a suitable exception",
+          "An explicit conditional check with a suitable exception",
+          "A comment only",
+          "A debugger command",
+          "A print statement only"
+        ],
+        "explanation": "Explicit validation runs regardless of assertion optimization."
+      },
+      {
+        "id": "py216-q5",
+        "prompt": "Which exception does a failed assert raise?",
+        "answer": "AssertionError",
+        "options": [
+          "AssertionError",
+          "ValueError",
+          "AssertionError",
+          "KeyError",
+          "ImportError"
+        ],
+        "explanation": "AssertionError is raised when the asserted condition is false."
+      }
+    ]
+  },
+  "status": "draft"
+}

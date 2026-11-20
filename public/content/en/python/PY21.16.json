@@ -1,0 +1,169 @@
+{
+  "id": "python.py21.16.en",
+  "courseId": "python",
+  "moduleId": "PY21",
+  "topicId": "PY21.16",
+  "title": "Linting, Formatting and Python Code Quality",
+  "language": "en",
+  "learningObjectives": [
+    "Explain PEP 8, linting, formatting, AST checks, readable code and review.",
+    "Select a suitable testing or code-quality technique for PY21.16.",
+    "Interpret test, diagnostic and quality-tool output correctly.",
+    "Identify limitations and risks when applying PY21.16.",
+    "Apply PY21.16 concepts in a maintainable Python workflow."
+  ],
+  "prerequisites": [
+    "PY8.1",
+    "PY11.1",
+    "PY14.1",
+    "PY20.1",
+    "PY21.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Code quality practices make Python source easier to read, maintain and review. Style guides such as PEP 8 describe conventions for naming, whitespace and layout. Linters identify suspicious patterns and potential errors; formatters apply consistent layout. These tools complement tests and code review rather than replacing them.",
+      "whyItMatters": "Consistent style and automated checks reduce avoidable review friction and help teams spot defects earlier.",
+      "analogy": "A linter is a checklist inspector and a formatter is a layout assistant; neither can decide whether the program meets its purpose.",
+      "analogyLimit": "A clean lint or format report does not prove program correctness, and automatic formatting cannot replace design review or tests.",
+      "summary": "Linting, Formatting and Python Code Quality develops reliable testing and code-quality skills for Python projects."
+    },
+    "explain": {
+      "narrative": "## Apply automated quality checks\nFollow readable naming and layout conventions. Tools such as Ruff, Flake8 and Black are external packages and must be installed in the project environment. Ruff can lint and format; Black is an opinionated formatter. Run tools consistently in local development and CI, and review automated changes before committing them.\n\nPython's `ast` module can parse source and inspect syntax structure without executing it. Combine style checks with unit tests, type checking where appropriate, security review and human code review. Do not treat formatting success as proof that logic is correct.",
+      "examples": [
+        {
+          "id": "py2116-ex1",
+          "language": "en",
+          "title": "Parse Python source with ast",
+          "code": "import ast\nsource = 'def add(a, b):\\n    return a + b\\n'\ntree = ast.parse(source)\nprint(type(tree).__name__)",
+          "expectedOutput": "Module",
+          "explanation": "ast.parse builds an abstract syntax tree when source syntax is valid."
+        },
+        {
+          "id": "py2116-ex2",
+          "language": "en",
+          "title": "Detect a syntax problem with ast",
+          "code": "import ast\ntry:\n    ast.parse('def broken(:')\nexcept SyntaxError as error:\n    print(type(error).__name__)",
+          "expectedOutput": "SyntaxError",
+          "explanation": "AST parsing detects invalid syntax without executing the source."
+        },
+        {
+          "id": "py2116-ex3",
+          "language": "en",
+          "title": "Inspect function names in source",
+          "code": "import ast\nsource = 'def add(a, b):\\n    return a + b\\n\\ndef total(items):\\n    return sum(items)\\n'\ntree = ast.parse(source)\nprint([node.name for node in ast.walk(tree) if isinstance(node, ast.FunctionDef)])",
+          "expectedOutput": "['add', 'total']",
+          "explanation": "AST nodes expose function definitions for static source inspection."
+        },
+        {
+          "id": "py2116-ex4",
+          "language": "en",
+          "title": "Represent quality tool commands",
+          "code": "commands = ['ruff check .', 'ruff format --check .', 'python -m unittest discover']\nprint(len(commands))",
+          "expectedOutput": "3",
+          "explanation": "Linting, formatting checks and tests are separate quality activities."
+        },
+        {
+          "id": "py2116-ex5",
+          "language": "en",
+          "title": "Check trailing whitespace in source text",
+          "code": "lines = ['value = 3', 'print(value) ']\nprint(sum(line.endswith(' ') for line in lines))",
+          "expectedOutput": "1",
+          "explanation": "A simple text inspection can reveal trailing spaces, though a formatter or linter provides broader checks."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Choose a small Python module. Run a formatter and linter in a virtual environment, fix the reported issues, then run its tests and review the final diff.",
+      "independentTask": "Write a code quality checklist covering naming, formatting, linting, tests, security-sensitive logging and human review.",
+      "hints": [
+        "Use consistent naming and whitespace conventions.",
+        "A formatter changes layout; a linter flags suspicious patterns.",
+        "Ruff, Flake8 and Black are external tools.",
+        "Use ast.parse to check source syntax without executing it.",
+        "Run tests after automatic formatting and lint fixes."
+      ],
+      "challenge": "Design a CI quality pipeline that separates formatting, linting, unit tests, coverage and human review, with clear failure criteria for each stage.",
+      "validationCriteria": [
+        "The testing or quality objective is clearly stated.",
+        "Examples execute with the documented output.",
+        "Test setup, cleanup and dependency boundaries are accurate.",
+        "Tool limitations and appropriate use cases are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2116-q1",
+        "prompt": "What does a linter primarily do?",
+        "answer": "Flags suspicious patterns and potential code issues",
+        "options": [
+          "Flags suspicious patterns and potential code issues",
+          "Runs a production server",
+          "Flags suspicious patterns and potential code issues",
+          "Installs Python",
+          "Creates test databases"
+        ],
+        "explanation": "Linters analyze source for style issues and potentially problematic patterns."
+      },
+      {
+        "id": "py2116-q2",
+        "prompt": "What does a formatter primarily do?",
+        "answer": "Applies consistent source layout",
+        "options": [
+          "Applies consistent source layout",
+          "Applies consistent source layout",
+          "Proves program correctness",
+          "Replaces all tests",
+          "Manages virtual environments"
+        ],
+        "explanation": "Formatters automatically standardize code layout."
+      },
+      {
+        "id": "py2116-q3",
+        "prompt": "Which module can parse Python source into an abstract syntax tree?",
+        "answer": "ast",
+        "options": [
+          "ast",
+          "ast",
+          "logging",
+          "tempfile",
+          "pdb"
+        ],
+        "explanation": "The ast module parses Python syntax into a tree representation."
+      },
+      {
+        "id": "py2116-q4",
+        "prompt": "Are Ruff, Flake8 and Black part of the Python standard library?",
+        "answer": "No",
+        "options": [
+          "No",
+          "Yes",
+          "No",
+          "Only Ruff",
+          "Only on Linux"
+        ],
+        "explanation": "They are external development tools that must be installed."
+      },
+      {
+        "id": "py2116-q5",
+        "prompt": "What should follow automatic formatting and lint fixes?",
+        "answer": "Run tests and review the changes",
+        "options": [
+          "Run tests and review the changes",
+          "Skip tests because formatting passed",
+          "Run tests and review the changes",
+          "Delete the source files",
+          "Disable CI"
+        ],
+        "explanation": "Style tools do not prove behaviour is correct, so tests and review remain necessary."
+      }
+    ]
+  },
+  "status": "draft"
+}

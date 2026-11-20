@@ -1,0 +1,164 @@
+{
+  "id": "python.py25.6.en",
+  "courseId": "python",
+  "moduleId": "PY25",
+  "topicId": "PY25.6",
+  "title": "Grouping Records and Aggregating Values",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose of Grouping Records and Aggregating Values.",
+    "Apply Grouping Records and Aggregating Values to a realistic Python data task.",
+    "Choose suitable Python structures and standard-library tools for the task.",
+    "Identify data-quality, correctness and interpretation risks.",
+    "Build a small reproducible analysis artifact using Grouping Records and Aggregating Values."
+  ],
+  "prerequisites": [
+    "PY15.1",
+    "PY21.7",
+    "PY23.5",
+    "PY24.11"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Grouping organizes records by a shared key; aggregation calculates a summary for each group. Common measures include count, sum, average, minimum and maximum. itertools.groupby() groups consecutive equal keys, so input generally must be sorted by the same key first. A dictionary accumulator is often clearer for unsorted input.",
+      "whyItMatters": "Reliable analysis depends on transparent decisions about data meaning, quality and interpretation—not merely on producing a number or chart.",
+      "analogy": "A data analyst is like a careful investigator who checks the evidence, records each transformation and explains how a conclusion was reached.",
+      "analogyLimit": "Datasets are not always complete or representative, and a neat summary cannot remove bias or prove causation.",
+      "summary": "Grouping Records and Aggregating Values provides a practical foundation for trustworthy Python data analysis."
+    },
+    "explain": {
+      "narrative": "Choose a grouping key that matches the question, such as month, region or product category. Accumulate totals and counts separately so averages are weighted by the number of observations. Distinguish a per-record average from an average of group averages. Check for empty groups and missing keys, and preserve the unit of each aggregate.",
+      "examples": [
+        {
+          "id": "py256-ex1",
+          "language": "en",
+          "title": "Accumulate totals by category",
+          "code": "sales = [('A', 10), ('B', 7), ('A', 5)]\ntotals = {}\nfor category, amount in sales:\n    totals[category] = totals.get(category, 0) + amount\nprint(totals['A'])",
+          "expectedOutput": "15",
+          "explanation": "A dictionary accumulator handles categories regardless of input order."
+        },
+        {
+          "id": "py256-ex2",
+          "language": "en",
+          "title": "Count records by group",
+          "code": "regions = ['East', 'West', 'East']\ncounts = {}\nfor region in regions:\n    counts[region] = counts.get(region, 0) + 1\nprint(counts['East'])",
+          "expectedOutput": "2",
+          "explanation": "get() supplies a starting count for a new group."
+        },
+        {
+          "id": "py256-ex3",
+          "language": "en",
+          "title": "Compute a group average",
+          "code": "values = {'A': [10, 20], 'B': [6]}\nprint(sum(values['A']) / len(values['A']))",
+          "expectedOutput": "15.0",
+          "explanation": "Average is total divided by the number of observations in that group."
+        },
+        {
+          "id": "py256-ex4",
+          "language": "en",
+          "title": "Sort before groupby",
+          "code": "from itertools import groupby\nrows = [('A', 1), ('B', 2), ('A', 3)]\nrows.sort(key=lambda row: row[0])\nprint([(key, len(list(group))) for key, group in groupby(rows, key=lambda row: row[0])])",
+          "expectedOutput": "[('A', 2), ('B', 1)]",
+          "explanation": "groupby groups consecutive equal keys, so sorting first makes each key contiguous."
+        },
+        {
+          "id": "py256-ex5",
+          "language": "en",
+          "title": "Track total and count",
+          "code": "amounts = [10, 20, 30]\ntotal = sum(amounts)\ncount = len(amounts)\nprint(total, count, total / count)",
+          "expectedOutput": "60 3 20.0",
+          "explanation": "Keeping total and count makes the average auditable."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Group transaction records by category and calculate total amount and record count for each category.",
+      "independentTask": "Analyze synthetic monthly sales by region. Produce group totals, counts and weighted averages, then explain how you checked the results.",
+      "hints": [
+        "Use dictionary accumulators for unsorted records.",
+        "Track count as well as sum.",
+        "Sort by key before itertools.groupby().",
+        "Avoid averaging group averages without weights.",
+        "Check missing group keys."
+      ],
+      "challenge": "Create a reusable group_summary(records, key_name, value_name) that returns count, total and average per group.",
+      "validationCriteria": [
+        "The data question and input assumptions are explicit.",
+        "All examples execute and match their expected output on Python 3.13.",
+        "Missing, invalid and boundary cases are handled deliberately.",
+        "The analysis preserves units and documents limitations.",
+        "The solution is reproducible and does not expose private data."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py256-q1",
+        "prompt": "What is the safest simple approach for grouping unsorted records?",
+        "answer": "Use a dictionary accumulator",
+        "options": [
+          "Use a dictionary accumulator",
+          "Call groupby() without sorting",
+          "Convert records to a set",
+          "Use min()"
+        ],
+        "explanation": "A dictionary accumulator can combine keys in any input order."
+      },
+      {
+        "id": "py256-q2",
+        "prompt": "What does itertools.groupby() group by default?",
+        "answer": "Consecutive equal keys",
+        "options": [
+          "Consecutive equal keys",
+          "All equal keys anywhere in the input",
+          "Numeric values only",
+          "Dictionary keys only"
+        ],
+        "explanation": "groupby() forms groups from adjacent equal keys."
+      },
+      {
+        "id": "py256-q3",
+        "prompt": "Why track both total and count?",
+        "answer": "To calculate and audit the average",
+        "options": [
+          "To calculate and audit the average",
+          "To sort records alphabetically",
+          "To remove duplicates",
+          "To change units"
+        ],
+        "explanation": "The mean is total divided by the number of observations."
+      },
+      {
+        "id": "py256-q4",
+        "prompt": "Why can an average of group averages be misleading?",
+        "answer": "Groups may contain different numbers of records",
+        "options": [
+          "Groups may contain different numbers of records",
+          "Averages are always integers",
+          "Groups cannot have totals",
+          "Python rounds every average"
+        ],
+        "explanation": "A weighted average accounts for different group sizes."
+      },
+      {
+        "id": "py256-q5",
+        "prompt": "What should happen before using groupby() on unsorted keys?",
+        "answer": "Sort by the same key",
+        "options": [
+          "Sort by the same key",
+          "Convert every key to a number",
+          "Remove repeated records",
+          "Reverse the input"
+        ],
+        "explanation": "Sorting makes equal keys consecutive."
+      }
+    ]
+  },
+  "status": "draft"
+}

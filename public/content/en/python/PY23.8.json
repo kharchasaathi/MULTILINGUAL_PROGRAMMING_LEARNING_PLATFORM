@@ -1,0 +1,163 @@
+{
+  "id": "python.py23.8.en",
+  "courseId": "python",
+  "moduleId": "PY23",
+  "topicId": "PY23.8",
+  "title": "Reliable API Clients: Timeouts, Status Codes and Retry Policy",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of Reliable API Clients: Timeouts, Status Codes and Retry Policy.",
+    "Choose an appropriate reliable api clients: timeouts, status codes and retry policy technique for an application.",
+    "Interpret representative code and output involving reliable api clients: timeouts, status codes and retry policy.",
+    "Identify limitations and failure modes for reliable api clients: timeouts, status codes and retry policy.",
+    "Apply the concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY11.1",
+    "PY14.1",
+    "PY20.1",
+    "PY21.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A reliable API client distinguishes transport failures, HTTP status errors and invalid response data. Timeouts bound waiting, status codes describe the server's response, and retries can recover from transient failures. Retrying is not always safe: non-idempotent operations such as creating a payment may be duplicated unless the API provides an idempotency mechanism. Backoff and retry limits protect both client and service.",
+      "whyItMatters": "Reliability controls make integrations predictable during network failures and service overload.",
+      "analogy": "A delivery service may retry a missed connection, but it should not place the same paid order twice.",
+      "analogyLimit": "A retry policy cannot fix permanent errors or guarantee that a timed-out operation did not already succeed on the server.",
+      "summary": "Reliable API Clients: Timeouts, Status Codes and Retry Policy develops practical application engineering skills for Python projects."
+    },
+    "explain": {
+      "narrative": "## Make failure behaviour explicit\nClassify errors before deciding what to do. A 4xx response often indicates a request or permission problem; 5xx responses may be transient, but the API contract decides. Retry only operations safe to repeat, use a finite attempt count and exponential backoff with jitter in production. Honour Retry-After where supported. Log a request identifier and status, but never credentials or sensitive payloads. Validate decoded response content independently.",
+      "examples": [
+        {
+          "id": "py238-ex1",
+          "language": "en",
+          "title": "Classify status code groups",
+          "code": "status = 503\nprint(status // 100)",
+          "expectedOutput": "5",
+          "explanation": "The first digit groups an HTTP status into a broad class."
+        },
+        {
+          "id": "py238-ex2",
+          "language": "en",
+          "title": "Identify a success status",
+          "code": "status = 201\nprint(200 <= status < 300)",
+          "expectedOutput": "True",
+          "explanation": "A 2xx response indicates successful HTTP handling, though the body still needs validation."
+        },
+        {
+          "id": "py238-ex3",
+          "language": "en",
+          "title": "Calculate bounded exponential delays",
+          "code": "delays = [min(2 ** attempt, 8) for attempt in range(4)]\nprint(delays)",
+          "expectedOutput": "[1, 2, 4, 8]",
+          "explanation": "A cap prevents the backoff delay from growing without bound."
+        },
+        {
+          "id": "py238-ex4",
+          "language": "en",
+          "title": "Recognize retry-safe methods",
+          "code": "method = 'GET'\nprint(method in {'GET', 'HEAD', 'OPTIONS'})",
+          "expectedOutput": "True",
+          "explanation": "These methods are generally safe, but application-specific side effects still matter."
+        },
+        {
+          "id": "py238-ex5",
+          "language": "en",
+          "title": "Validate a response content type",
+          "code": "content_type = 'application/json; charset=utf-8'\nprint(content_type.split(';', 1)[0].strip())",
+          "expectedOutput": "application/json",
+          "explanation": "Check the media type before interpreting a body as JSON."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Write a retry decision table for GET, POST and DELETE. Include maximum attempts, backoff and when retrying is unsafe.",
+      "independentTask": "Design an error model distinguishing timeout, HTTP status failure, invalid JSON and schema validation failure.",
+      "hints": [
+        "Do not retry every exception or every status.",
+        "Use finite attempts and capped backoff.",
+        "POST may not be safe to repeat without idempotency support.",
+        "Honor service retry guidance where applicable.",
+        "A 2xx response does not guarantee valid application data."
+      ],
+      "challenge": "Create a pure retry-policy function and test it with simulated status codes and operation methods; make no network calls.",
+      "validationCriteria": [
+        "The concept and intended use are accurately explained.",
+        "All examples execute with the documented output on Python 3.13.",
+        "External input, failure handling and dependency boundaries are treated appropriately.",
+        "Limitations and security implications are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py238-q1",
+        "prompt": "What does a 5xx status usually indicate?",
+        "answer": "A server-side error",
+        "options": [
+          "A server-side error",
+          "A successful response",
+          "A client-side syntax error",
+          "A DNS record"
+        ],
+        "explanation": "5xx codes indicate server errors."
+      },
+      {
+        "id": "py238-q2",
+        "prompt": "Why should retries be bounded?",
+        "answer": "To prevent unending attempts and excess load",
+        "options": [
+          "To prevent unending attempts and excess load",
+          "To guarantee success",
+          "To avoid validating responses",
+          "To hide all errors"
+        ],
+        "explanation": "Finite retries and backoff limit resource use and service pressure."
+      },
+      {
+        "id": "py238-q3",
+        "prompt": "Why can retrying a POST be dangerous?",
+        "answer": "It may repeat a non-idempotent operation",
+        "options": [
+          "It may repeat a non-idempotent operation",
+          "POST requests cannot contain data",
+          "POST is always cached",
+          "POST never returns a status"
+        ],
+        "explanation": "A timed-out create operation may have succeeded even if the client did not receive the response."
+      },
+      {
+        "id": "py238-q4",
+        "prompt": "What is exponential backoff?",
+        "answer": "Increasing wait intervals between retry attempts",
+        "options": [
+          "Increasing wait intervals between retry attempts",
+          "Sending requests faster each time",
+          "Changing HTTP to HTTPS",
+          "Compressing JSON"
+        ],
+        "explanation": "Backoff spaces retries to reduce repeated pressure."
+      },
+      {
+        "id": "py238-q5",
+        "prompt": "What should be checked after a 2xx response?",
+        "answer": "The response body and its expected schema",
+        "options": [
+          "The response body and its expected schema",
+          "Only the request URL",
+          "The source code license",
+          "The local Python version"
+        ],
+        "explanation": "HTTP success does not validate returned content."
+      }
+    ]
+  },
+  "status": "draft"
+}

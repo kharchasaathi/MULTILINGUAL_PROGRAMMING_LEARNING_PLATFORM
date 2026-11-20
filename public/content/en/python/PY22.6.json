@@ -1,0 +1,168 @@
+{
+  "id": "python.py22.6.en",
+  "courseId": "python",
+  "moduleId": "PY22",
+  "topicId": "PY22.6",
+  "title": "Context Managers and the with Statement",
+  "language": "en",
+  "learningObjectives": [
+    "Explain context manager protocol, __enter__, __exit__, contextlib and resource cleanup.",
+    "Select a suitable advanced Python technique for PY22.6.",
+    "Interpret iterator and callable behaviour correctly.",
+    "Identify limitations and risks when applying PY22.6.",
+    "Apply PY22.6 concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY8.1",
+    "PY11.1",
+    "PY14.1",
+    "PY21.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A context manager controls setup and cleanup around a block of code. The with statement calls __enter__ on entry and __exit__ on exit, including when an exception occurs. File objects are common context managers. The contextlib module provides tools such as contextmanager for creating context managers from generator functions.",
+      "whyItMatters": "Context managers make resource handling reliable by ensuring cleanup occurs even when a block exits unexpectedly.",
+      "analogy": "A context manager is a room attendant who prepares a room before use and restores it when the visitor leaves, even if the visit ends early.",
+      "analogyLimit": "The context manager's exception-suppression behaviour must be understood; accidentally suppressing exceptions can hide failures.",
+      "summary": "Context Managers and the with Statement develops advanced Python programming skills."
+    },
+    "explain": {
+      "narrative": "## Manage resources with with\nA context manager implements `__enter__()` and `__exit__()`. The with statement calls these methods around the block. `__exit__` receives exception information and can return a truthy value to suppress an exception, so custom implementations must be deliberate.\n\nUse `contextlib.contextmanager` to write a generator-based context manager with setup before yield and cleanup in a finally block. Prefer existing context managers for files, locks and temporary resources.",
+      "examples": [
+        {
+          "id": "py226-ex1",
+          "language": "en",
+          "title": "Use a built-in file context manager",
+          "code": "import tempfile\nfrom pathlib import Path\nwith tempfile.TemporaryDirectory() as folder:\n    path = Path(folder) / 'note.txt'\n    with path.open('w', encoding='utf-8') as file:\n        file.write('saved')\n    print(path.read_text(encoding='utf-8'))",
+          "expectedOutput": "saved",
+          "explanation": "The with statement ensures the file is closed after the block."
+        },
+        {
+          "id": "py226-ex2",
+          "language": "en",
+          "title": "Create a context manager with contextlib",
+          "code": "from contextlib import contextmanager\n@contextmanager\ndef managed(events):\n    events.append('enter')\n    try: yield\n    finally: events.append('exit')\nevents = []\nwith managed(events): events.append('work')\nprint(events)",
+          "expectedOutput": "['enter', 'work', 'exit']",
+          "explanation": "The finally block performs cleanup when the managed block exits."
+        },
+        {
+          "id": "py226-ex3",
+          "language": "en",
+          "title": "Ensure cleanup after an exception",
+          "code": "from contextlib import contextmanager\n@contextmanager\ndef managed(events):\n    try: yield\n    finally: events.append('cleaned')\nevents = []\ntry:\n    with managed(events): raise ValueError('problem')\nexcept ValueError: pass\nprint(events)",
+          "expectedOutput": "['cleaned']",
+          "explanation": "The generator context manager resumes in finally even when the with block raises."
+        },
+        {
+          "id": "py226-ex4",
+          "language": "en",
+          "title": "Inspect a context manager protocol",
+          "code": "from contextlib import nullcontext\nmanager = nullcontext('ready')\nwith manager as value: print(value)",
+          "expectedOutput": "ready",
+          "explanation": "nullcontext provides a context manager that returns a supplied value without extra work."
+        },
+        {
+          "id": "py226-ex5",
+          "language": "en",
+          "title": "Use ExitStack for managed resources",
+          "code": "from contextlib import ExitStack\nwith ExitStack() as stack:\n    values = [stack.enter_context(__import__('contextlib').nullcontext(x)) for x in [1, 2]]\n    print(values)",
+          "expectedOutput": "[1, 2]",
+          "explanation": "ExitStack manages a dynamic collection of context managers."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a context manager with contextlib.contextmanager that announces entry and exit. Verify that cleanup runs when the managed block raises an exception.",
+      "independentTask": "Compare manual try/finally cleanup with a with statement and explain how context managers handle exceptions.",
+      "hints": [
+        "with calls __enter__ and __exit__.",
+        "The exit method runs even when the block raises.",
+        "Use try/finally around yield in generator-based managers.",
+        "contextlib.contextmanager decorates a generator function.",
+        "Do not suppress exceptions unless that is intentional."
+      ],
+      "challenge": "Implement a context manager for a temporary application setting that always restores the original value after the block.",
+      "validationCriteria": [
+        "The advanced Python concept is accurately explained.",
+        "Examples execute with the documented output.",
+        "Iterator, scope or callable behaviour is correct.",
+        "Limitations and suitable use cases are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py226-q1",
+        "prompt": "Which methods define the basic context manager protocol?",
+        "answer": "__enter__ and __exit__",
+        "options": [
+          "__enter__ and __exit__",
+          "__iter__ and __next__",
+          "__enter__ and __exit__",
+          "__call__ and __repr__",
+          "__get__ and __set__"
+        ],
+        "explanation": "The with statement uses __enter__ and __exit__."
+      },
+      {
+        "id": "py226-q2",
+        "prompt": "When is __exit__ called?",
+        "answer": "When the with block exits, including exceptional exits",
+        "options": [
+          "When the with block exits, including exceptional exits",
+          "Only after successful blocks",
+          "When the with block exits, including exceptional exits",
+          "Only when the file is deleted",
+          "Only at interpreter shutdown"
+        ],
+        "explanation": "The context manager exit method participates in all normal block exits."
+      },
+      {
+        "id": "py226-q3",
+        "prompt": "Which decorator creates a context manager from a generator?",
+        "answer": "contextlib.contextmanager",
+        "options": [
+          "contextlib.contextmanager",
+          "functools.wraps",
+          "contextlib.contextmanager",
+          "dataclasses.dataclass",
+          "itertools.count"
+        ],
+        "explanation": "contextmanager adapts a generator with setup and cleanup around yield."
+      },
+      {
+        "id": "py226-q4",
+        "prompt": "What does a truthy return from __exit__ indicate?",
+        "answer": "The exception may be suppressed",
+        "options": [
+          "The exception may be suppressed",
+          "The program must restart",
+          "The exception may be suppressed",
+          "The file is deleted",
+          "The block runs again"
+        ],
+        "explanation": "The return value of __exit__ controls whether an exception is suppressed."
+      },
+      {
+        "id": "py226-q5",
+        "prompt": "Why is try/finally useful in a generator context manager?",
+        "answer": "It ensures cleanup runs when the block exits",
+        "options": [
+          "It ensures cleanup runs when the block exits",
+          "It disables exceptions",
+          "It ensures cleanup runs when the block exits",
+          "It creates a new process",
+          "It converts the generator to a list"
+        ],
+        "explanation": "finally executes during normal or exceptional unwinding."
+      }
+    ]
+  },
+  "status": "draft"
+}

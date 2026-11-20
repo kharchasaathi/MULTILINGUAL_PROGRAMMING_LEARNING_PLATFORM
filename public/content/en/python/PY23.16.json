@@ -1,0 +1,164 @@
+{
+  "id": "python.py23.16.en",
+  "courseId": "python",
+  "moduleId": "PY23",
+  "topicId": "PY23.16",
+  "title": "Application Readiness, Operational Checks and Release Planning",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of Application Readiness, Operational Checks and Release Planning.",
+    "Choose an appropriate application readiness, operational checks and release planning technique for a Python application.",
+    "Interpret representative code and output involving application readiness, operational checks and release planning.",
+    "Identify limitations and failure modes for application readiness, operational checks and release planning.",
+    "Apply the concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY11.1",
+    "PY14.1",
+    "PY20.1",
+    "PY21.7",
+    "PY23.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Operational readiness checks whether an application can start and perform its essential responsibilities in a target environment. A release plan verifies supported Python versions, declared dependencies, configuration, database migrations, health checks, logs, backups and rollback strategy. A passing test suite is important but does not alone prove production readiness.",
+      "whyItMatters": "A deliberate readiness process reduces avoidable deployment failures and makes releases easier to diagnose and reverse.",
+      "analogy": "A pre-flight checklist verifies critical systems before an aircraft begins a journey.",
+      "analogyLimit": "A checklist only covers known risks; production monitoring and incident response remain necessary after release.",
+      "summary": "Application Readiness, Operational Checks and Release Planning develops practical application engineering skills for Python projects."
+    },
+    "explain": {
+      "narrative": "## Verify the application before release\nDefine startup checks for required configuration and dependencies. Distinguish liveness (the process is running) from readiness (the service can handle work). Verify database connectivity and schema version without exposing credentials. Ensure logs are structured and useful, secrets are redacted, backups and migrations are planned, and rollback steps are documented. Build artifacts in a clean environment and test the installed package rather than relying only on the source checkout.",
+      "examples": [
+        {
+          "id": "py2316-ex1",
+          "language": "en",
+          "title": "Check required settings",
+          "code": "settings = {'database_url': 'sqlite:///app.db', 'secret_present': True}\nprint(all(settings.values()))",
+          "expectedOutput": "True",
+          "explanation": "A startup check can reject missing required configuration before accepting work."
+        },
+        {
+          "id": "py2316-ex2",
+          "language": "en",
+          "title": "Distinguish liveness and readiness",
+          "code": "checks = {'alive': True, 'database_ready': False}\nprint(checks['alive'], checks['alive'] and checks['database_ready'])",
+          "expectedOutput": "True False",
+          "explanation": "A process can be alive while a required dependency is not ready."
+        },
+        {
+          "id": "py2316-ex3",
+          "language": "en",
+          "title": "Verify a migration sequence",
+          "code": "steps = ['backup', 'apply migration', 'verify schema', 'smoke test']\nprint(' -> '.join(steps))",
+          "expectedOutput": "backup -> apply migration -> verify schema -> smoke test",
+          "explanation": "A migration plan includes backup and post-change verification."
+        },
+        {
+          "id": "py2316-ex4",
+          "language": "en",
+          "title": "Prepare a rollback marker",
+          "code": "release = {'current': '1.4.0', 'previous': '1.3.2'}\nprint(release['previous'])",
+          "expectedOutput": "1.3.2",
+          "explanation": "A known previous release supports a documented rollback plan."
+        },
+        {
+          "id": "py2316-ex5",
+          "language": "en",
+          "title": "Check release gates",
+          "code": "gates = {'tests': True, 'config': True, 'migration': True, 'rollback': True}\nprint(all(gates.values()))",
+          "expectedOutput": "True",
+          "explanation": "Release gates make critical readiness requirements explicit."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a readiness checklist for a small SQLite-backed API. Include configuration, migrations, health checks, logging, backups and rollback.",
+      "independentTask": "Write a release decision record that lists evidence required before deployment and who owns each verification step.",
+      "hints": [
+        "Liveness and readiness answer different questions.",
+        "Verify configuration without printing secret values.",
+        "Test migrations against a copy or disposable database.",
+        "Build and test the installed artifact in a clean environment.",
+        "Document rollback and monitoring before release."
+      ],
+      "challenge": "Design a staged release plan with pre-deployment gates, post-deployment smoke tests, health monitoring and a rollback trigger.",
+      "validationCriteria": [
+        "The concept and intended use are accurately explained.",
+        "All examples execute with the documented output on Python 3.13.",
+        "Application boundaries and dependency responsibilities are correctly identified.",
+        "Limitations and operational or security implications are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2316-q1",
+        "prompt": "What does a readiness check indicate?",
+        "answer": "Whether the service can safely accept work",
+        "options": [
+          "Whether the service can safely accept work",
+          "Whether the source file has comments",
+          "Whether Python is installed somewhere",
+          "Whether the repository has a README"
+        ],
+        "explanation": "Readiness checks essential dependencies and configuration."
+      },
+      {
+        "id": "py2316-q2",
+        "prompt": "Can a process be alive but not ready?",
+        "answer": "Yes",
+        "options": [
+          "Yes",
+          "No, never",
+          "Only on Windows",
+          "Only with SQLite"
+        ],
+        "explanation": "A running process may still be unable to reach required services."
+      },
+      {
+        "id": "py2316-q3",
+        "prompt": "Why test a built package in a clean environment?",
+        "answer": "To verify the artifact and declared dependencies work after installation",
+        "options": [
+          "To verify the artifact and declared dependencies work after installation",
+          "To skip integration testing",
+          "To avoid version metadata",
+          "To disable all health checks"
+        ],
+        "explanation": "The installed artifact can differ from a source-tree execution."
+      },
+      {
+        "id": "py2316-q4",
+        "prompt": "What should a rollback plan identify?",
+        "answer": "A known previous release and steps to restore service",
+        "options": [
+          "A known previous release and steps to restore service",
+          "A way to expose secrets",
+          "A new untested dependency",
+          "A method to delete logs"
+        ],
+        "explanation": "Rollback requires a recoverable version and clear restoration steps."
+      },
+      {
+        "id": "py2316-q5",
+        "prompt": "Does passing unit tests alone prove production readiness?",
+        "answer": "No",
+        "options": [
+          "No",
+          "Yes, completely",
+          "Only for command-line tools",
+          "Only for Python 3.13"
+        ],
+        "explanation": "Configuration, migrations, monitoring and operational concerns also matter."
+      }
+    ]
+  },
+  "status": "draft"
+}

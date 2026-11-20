@@ -1,0 +1,168 @@
+{
+  "id": "python.py21.1.en",
+  "courseId": "python",
+  "moduleId": "PY21",
+  "topicId": "PY21.1",
+  "title": "Debugging Workflow and Problem Isolation",
+  "language": "en",
+  "learningObjectives": [
+    "Explain reproducing defects, narrowing causes, inspecting state and verifying fixes.",
+    "Select a suitable debugging or testing technique for PY21.1.",
+    "Interpret diagnostic information and test results correctly.",
+    "Identify limitations and risks when applying PY21.1.",
+    "Apply PY21.1 concepts in a maintainable Python workflow."
+  ],
+  "prerequisites": [
+    "PY8.1",
+    "PY11.1",
+    "PY14.1",
+    "PY20.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Debugging is a disciplined process for finding the cause of incorrect program behaviour. A reliable workflow reproduces the problem, records the actual and expected behaviour, narrows the failing area, inspects relevant state, changes one cause at a time and reruns tests. Guessing and making several unrelated edits at once make defects harder to isolate.",
+      "whyItMatters": "A repeatable debugging method saves time and prevents a local fix from introducing regressions elsewhere.",
+      "analogy": "Debugging resembles tracing a leak: first reproduce where water appears, then isolate the section before replacing a part.",
+      "analogyLimit": "A reproduction may depend on timing, external services or machine state; a local example does not always reproduce every production condition.",
+      "summary": "Debugging Workflow and Problem Isolation develops reliable debugging and software verification skills."
+    },
+    "explain": {
+      "narrative": "## A repeatable debugging loop\nStart with a minimal, reliable reproduction. Record the input, expected result and actual result. Reduce the example while preserving the failure, then inspect variables and control flow around the first incorrect result. Make a focused correction and rerun the reproduction plus related regression tests.\n\nUse logging or a debugger when printed output is insufficient. Avoid hiding failures with broad exception handlers or changing expected results merely to make a test pass. A useful bug report includes environment details, steps to reproduce and the complete relevant traceback.",
+      "examples": [
+        {
+          "id": "py211-ex1",
+          "language": "en",
+          "title": "Inspect intermediate calculation values",
+          "code": "price = 80\nrate = 0.10\ntax = price * rate\ntotal = price + tax\nprint(tax, total)",
+          "expectedOutput": "8.0 88.0",
+          "explanation": "Printing selected intermediate values helps locate where a result diverges."
+        },
+        {
+          "id": "py211-ex2",
+          "language": "en",
+          "title": "Reduce a case to a focused function",
+          "code": "def normalize_name(value):\n    return value.strip().lower()\nprint(normalize_name('  Ada  '))",
+          "expectedOutput": "ada",
+          "explanation": "A small pure function is easier to reproduce and inspect than an entire application."
+        },
+        {
+          "id": "py211-ex3",
+          "language": "en",
+          "title": "Record expected and actual values",
+          "code": "expected = 12\nactual = 3 * 4\nprint({'expected': expected, 'actual': actual, 'matches': expected == actual})",
+          "expectedOutput": "{'expected': 12, 'actual': 12, 'matches': True}",
+          "explanation": "Explicit comparison makes the observed result easy to communicate."
+        },
+        {
+          "id": "py211-ex4",
+          "language": "en",
+          "title": "Check a boundary input",
+          "code": "def discount(price):\n    return price * 0.9 if price >= 100 else price\nprint(discount(100))",
+          "expectedOutput": "90.0",
+          "explanation": "Boundary values often reveal conditions that ordinary inputs miss."
+        },
+        {
+          "id": "py211-ex5",
+          "language": "en",
+          "title": "Keep a regression example",
+          "code": "def double(value):\n    return value * 2\ncases = [(0, 0), (3, 6), (-2, -4)]\nprint(all(double(value) == expected for value, expected in cases))",
+          "expectedOutput": "True",
+          "explanation": "A regression case preserves evidence that previously incorrect behaviour remains fixed."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Choose a small function with an incorrect result. Record one failing input, reduce it to a minimal reproduction, inspect intermediate values, fix the cause and add a regression test.",
+      "independentTask": "Write a debugging checklist for a defect report that includes reproducible input, expected and actual output, environment, first incorrect state and regression coverage.",
+      "hints": [
+        "Reproduce before editing code.",
+        "Record expected and actual results.",
+        "Reduce the failing case without removing the defect.",
+        "Inspect the first incorrect intermediate value.",
+        "Rerun the original case and related regression tests."
+      ],
+      "challenge": "Design a bug investigation note for an intermittent defect. Separate observed facts, hypotheses, experiments, root cause, fix and regression evidence.",
+      "validationCriteria": [
+        "The debugging or testing objective is clearly stated.",
+        "Examples execute with the documented output.",
+        "Test expectations and exception behaviour are accurate.",
+        "Limitations and appropriate use cases are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py211-q1",
+        "prompt": "What should usually happen before changing code to fix a bug?",
+        "answer": "Reproduce the problem reliably",
+        "options": [
+          "Reproduce the problem reliably",
+          "Rewrite the whole program",
+          "Reproduce the problem reliably",
+          "Delete the failing test",
+          "Suppress all exceptions"
+        ],
+        "explanation": "A reliable reproduction gives a stable way to test hypotheses and verify the fix."
+      },
+      {
+        "id": "py211-q2",
+        "prompt": "Why reduce a failing example?",
+        "answer": "To isolate the smallest part that still shows the defect",
+        "options": [
+          "To isolate the smallest part that still shows the defect",
+          "To remove all input data",
+          "To isolate the smallest part that still shows the defect",
+          "To hide the failure",
+          "To avoid testing"
+        ],
+        "explanation": "A minimal reproduction narrows the search area."
+      },
+      {
+        "id": "py211-q3",
+        "prompt": "What is a regression test?",
+        "answer": "A test that helps ensure a fixed defect does not return",
+        "options": [
+          "A test that helps ensure a fixed defect does not return",
+          "A test that changes expected output randomly",
+          "A test that helps ensure a fixed defect does not return",
+          "A replacement for source code",
+          "A performance-only report"
+        ],
+        "explanation": "A regression test captures behaviour that previously failed."
+      },
+      {
+        "id": "py211-q4",
+        "prompt": "Which evidence is useful in a bug report?",
+        "answer": "Steps, input, expected result, actual result and relevant traceback",
+        "options": [
+          "Steps, input, expected result, actual result and relevant traceback",
+          "Only the developer's guess",
+          "Steps, input, expected result, actual result and relevant traceback",
+          "Only a screenshot of the editor",
+          "A list of unrelated files"
+        ],
+        "explanation": "A reproducible report helps another person verify and investigate the issue."
+      },
+      {
+        "id": "py211-q5",
+        "prompt": "Why change one suspected cause at a time?",
+        "answer": "It makes the effect of each change easier to evaluate",
+        "options": [
+          "It makes the effect of each change easier to evaluate",
+          "It guarantees no bugs exist",
+          "It makes the effect of each change easier to evaluate",
+          "It removes the need for tests",
+          "It makes Python run faster"
+        ],
+        "explanation": "Focused changes make experiments and cause-effect reasoning clearer."
+      }
+    ]
+  },
+  "status": "draft"
+}

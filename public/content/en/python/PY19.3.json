@@ -1,0 +1,162 @@
+{
+  "id": "python.py19.3.en",
+  "courseId": "python",
+  "moduleId": "PY19",
+  "topicId": "PY19.3",
+  "title": "Regex Anchors, Word Boundaries and Escaping",
+  "language": "en",
+  "learningObjectives": [
+    "Explain ^, $, \\b, escaped metacharacters and whole-string validation and where they are useful.",
+    "Select the correct regex syntax or re function for ^, $, \\b, escaped metacharacters and whole-string validation.",
+    "Predict the output of representative PY19.3 expressions.",
+    "Identify matching, validation and performance risks related to ^, $, \\b, escaped metacharacters and whole-string validation.",
+    "Apply ^, $, \\b, escaped metacharacters and whole-string validation in a small, deterministic Python program."
+  ],
+  "prerequisites": [
+    "PY7.1",
+    "PY13.1",
+    "PY14.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Anchors assert a position rather than consuming a character. The caret and dollar sign identify string or line boundaries depending on flags, while \\b identifies a boundary between word and non-word characters. Escaping makes a metacharacter literal when its special meaning is not wanted.",
+      "whyItMatters": "Anchors prevent a valid-looking substring from being accepted inside a larger invalid value, and escaping allows patterns to search for punctuation literally.",
+      "analogy": "Anchors are like start and end markers on a form; they specify where a value must begin or finish.",
+      "analogyLimit": "The meaning of anchors can change with MULTILINE, and word boundaries are based on the regex engine's definition of word characters rather than human language grammar.",
+      "summary": "Regex Anchors, Word Boundaries and Escaping teaches readable and predictable pattern matching with Python's re module."
+    },
+    "explain": {
+      "narrative": "## Position assertions\n`^` asserts the start and `$` asserts the end of a string (or each line when MULTILINE applies). `\\b` asserts a word boundary and `\\B` asserts a position that is not a word boundary. These assertions do not consume text.\n\nEscape regex metacharacters with a backslash when you need their literal meaning, or use `re.escape()` for arbitrary literal text. For whole-field validation, `re.fullmatch()` is often clearer than manually combining anchors.",
+      "examples": [
+        {
+          "id": "py193-ex1",
+          "language": "en",
+          "title": "Require a prefix and suffix",
+          "code": "import re\npattern = r'^Start.*End$'\nprint(bool(re.search(pattern, 'Start in the middle End')))\nprint(bool(re.search(pattern, 'Before Start End')))",
+          "expectedOutput": "True\nFalse",
+          "explanation": "The anchors require the match to cover the string from its beginning through its end."
+        },
+        {
+          "id": "py193-ex2",
+          "language": "en",
+          "title": "Find a whole word",
+          "code": "import re\nprint(re.findall(r'\\bcat\\b', 'cat catalog bobcat cat'))",
+          "expectedOutput": "['cat', 'cat']",
+          "explanation": "Word boundaries prevent matching cat as part of catalog or bobcat."
+        },
+        {
+          "id": "py193-ex3",
+          "language": "en",
+          "title": "Match a literal dot",
+          "code": "import re\nprint(re.findall(r'\\.', 'v1.2 and v2.0'))",
+          "expectedOutput": "['.', '.']",
+          "explanation": "The backslash removes the dot's wildcard meaning."
+        },
+        {
+          "id": "py193-ex4",
+          "language": "en",
+          "title": "Escape arbitrary literal text",
+          "code": "import re\nliteral = 'price+tax?'\npattern = re.escape(literal)\nprint(bool(re.fullmatch(pattern, 'price+tax?')))",
+          "expectedOutput": "True",
+          "explanation": "re.escape creates a pattern that treats special characters in the input as literals."
+        },
+        {
+          "id": "py193-ex5",
+          "language": "en",
+          "title": "Validate a complete fixed format",
+          "code": "import re\npattern = r'[A-Z]{2}-\\d{3}'\nprint(bool(re.fullmatch(pattern, 'AB-204')))\nprint(bool(re.fullmatch(pattern, 'xAB-204y')))",
+          "expectedOutput": "True\nFalse",
+          "explanation": "fullmatch rejects extra characters before or after the required format."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Validate a two-letter prefix, a hyphen and three digits. Reject strings that contain the format only as a substring.",
+      "independentTask": "Search text for a literal filename extension and for a whole-word term. Use escaping and word boundaries, then compare with a substring search.",
+      "hints": [
+        "Anchors assert positions rather than matching characters.",
+        "Use fullmatch for complete-field validation.",
+        "Escape a dot when it should be literal.",
+        "Use re.escape for user-supplied literal fragments.",
+        "Remember MULTILINE changes line-anchor behaviour."
+      ],
+      "challenge": "Implement a strict reference-number validator and a separate whole-word search utility, documenting what each pattern does not validate.",
+      "validationCriteria": [
+        "The regular expression expresses the stated pattern without accidental substring acceptance.",
+        "The code uses raw string literals where backslashes are present.",
+        "Match results are checked before accessing Match methods.",
+        "Examples execute with the expected output and input edge cases are considered."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py193-q1",
+        "prompt": "What does ^ assert in a normal single-line pattern?",
+        "answer": "The start of the string",
+        "options": [
+          "The end of the string",
+          "The start of the string",
+          "A digit",
+          "A word boundary only"
+        ],
+        "explanation": "Caret asserts the beginning of the string unless MULTILINE changes line handling."
+      },
+      {
+        "id": "py193-q2",
+        "prompt": "How do you match a literal period?",
+        "answer": "\\.",
+        "options": [
+          ".",
+          "\\.",
+          "\\d",
+          "\\b"
+        ],
+        "explanation": "An escaped period is literal rather than the any-character wildcard."
+      },
+      {
+        "id": "py193-q3",
+        "prompt": "What does \\b represent?",
+        "answer": "A word boundary",
+        "options": [
+          "A backspace only in all regex contexts",
+          "A word boundary",
+          "The end of the string",
+          "A digit boundary"
+        ],
+        "explanation": "In a regex pattern, \\b asserts a word boundary."
+      },
+      {
+        "id": "py193-q4",
+        "prompt": "Which method checks the entire string?",
+        "answer": "re.fullmatch()",
+        "options": [
+          "re.search()",
+          "re.match()",
+          "re.fullmatch()",
+          "re.findall()"
+        ],
+        "explanation": "fullmatch succeeds only when the complete string matches."
+      },
+      {
+        "id": "py193-q5",
+        "prompt": "What does re.escape() do?",
+        "answer": "Escapes regex-special characters in literal text",
+        "options": [
+          "Compiles a regex into machine code",
+          "Escapes regex-special characters in literal text",
+          "Removes all punctuation",
+          "Makes matching case-insensitive"
+        ],
+        "explanation": "re.escape prepares arbitrary text to be used as a literal pattern fragment."
+      }
+    ]
+  },
+  "status": "draft"
+}

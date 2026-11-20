@@ -1,0 +1,171 @@
+{
+  "id": "python.py25.17.en",
+  "courseId": "python",
+  "moduleId": "PY25",
+  "topicId": "PY25.17",
+  "title": "Grouping DataFrames and Aggregating with Pandas",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and core concepts of Grouping DataFrames and Aggregating with Pandas.",
+    "Select appropriate Python library operations for the analytical question.",
+    "Inspect inputs, data types and intermediate results before interpreting output.",
+    "Validate calculations and communicate results with suitable evidence.",
+    "Identify assumptions, edge cases and limitations in the analysis."
+  ],
+  "prerequisites": [
+    "PY25.1",
+    "PY25.2",
+    "PY25.3",
+    "PY25.4",
+    "PY25.5",
+    "PY25.6",
+    "PY25.7",
+    "PY25.8",
+    "PY25.13",
+    "PY25.14",
+    "PY25.15",
+    "PY25.16"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Pandas groupby follows a split-apply-combine workflow: rows are split by one or more keys, an aggregation or transformation is applied to each group, and the results are combined. Use named aggregations to make output columns explicit, inspect group sizes, and remember that missing group keys are excluded by default unless dropna=False is selected.",
+      "whyItMatters": "Reliable data analysis requires choosing operations that match the question and checking how transformations affect the evidence. Clear methods make results easier to reproduce, explain and review.",
+      "analogy": "Think of an analysis as preparing a carefully labeled report: organize the records, calculate the measures, and present the evidence. The analogy is limited because real data requires explicit validation and statistical judgment.",
+      "summary": "Grouping DataFrames and Aggregating with Pandas extends the Python data-analysis workflow with practical, reproducible techniques."
+    },
+    "explain": {
+      "narrative": "Start by defining what one group represents. Use groupby(...).agg(...) for summaries, size() for row counts, and transform() when a group-level value must be aligned back to each original row. Sort the resulting summary deliberately and validate totals against the source. Grouped results describe the supplied data; they do not establish causation.",
+      "examples": [
+        {
+          "id": "py2517-ex1",
+          "language": "en",
+          "title": "Group means by category",
+          "code": "import pandas as pd\ndf = pd.DataFrame({'team': ['A', 'A', 'B'], 'score': [10, 20, 30]})\nresult = df.groupby('team')['score'].mean().round(1)\nprint(result.to_dict())",
+          "expectedOutput": "{'A': 15.0, 'B': 30.0}",
+          "explanation": "groupby creates one group per team and mean calculates its average score."
+        },
+        {
+          "id": "py2517-ex2",
+          "language": "en",
+          "title": "Count rows in each group",
+          "code": "import pandas as pd\ndf = pd.DataFrame({'region': ['East', 'East', 'West']})\nprint(df.groupby('region').size().to_dict())",
+          "expectedOutput": "{'East': 2, 'West': 1}",
+          "explanation": "size counts rows in each group, including rows whose other columns may be missing."
+        },
+        {
+          "id": "py2517-ex3",
+          "language": "en",
+          "title": "Use named aggregations",
+          "code": "import pandas as pd\ndf = pd.DataFrame({'kind': ['book', 'book', 'pen'], 'price': [5, 7, 2]})\nout = df.groupby('kind').agg(total=('price', 'sum'), average=('price', 'mean')).round(1)\nprint(out.to_dict('index'))",
+          "expectedOutput": "{'book': {'total': 12, 'average': 6.0}, 'pen': {'total': 2, 'average': 2.0}}",
+          "explanation": "Named aggregation creates clear output column names for multiple statistics."
+        },
+        {
+          "id": "py2517-ex4",
+          "language": "en",
+          "title": "Align group totals to original rows",
+          "code": "import pandas as pd\ndf = pd.DataFrame({'team': ['A', 'A', 'B'], 'points': [2, 3, 4]})\ndf['team_total'] = df.groupby('team')['points'].transform('sum')\nprint(df['team_total'].tolist())",
+          "expectedOutput": "[5, 5, 4]",
+          "explanation": "transform returns a result aligned to the original index, making it useful for per-row group features."
+        },
+        {
+          "id": "py2517-ex5",
+          "language": "en",
+          "title": "Keep missing group keys explicitly",
+          "code": "import pandas as pd\ndf = pd.DataFrame({'zone': ['North', None, 'North'], 'qty': [1, 2, 3]})\nprint(df.groupby('zone', dropna=False).size().to_dict())",
+          "expectedOutput": "{'North': 2, nan: 1}",
+          "explanation": "dropna=False retains a group for missing keys; decide whether that group is meaningful."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Group a sales DataFrame by region and product. Produce order counts, total revenue and average order value using named aggregations, then verify that grouped revenue reconciles with the source total.",
+      "independentTask": "Create a reusable summarize_sales function that accepts grouping columns, returns clearly named metrics, handles missing keys deliberately and sorts results deterministically.",
+      "hints": [
+        "Define the meaning of each group before calling groupby.",
+        "Use size() for row counts and count() for non-missing values in a column.",
+        "Use named aggregation to control result column names.",
+        "Use transform when the result must align with source rows.",
+        "Check that grouped sums reconcile with source totals."
+      ],
+      "challenge": "Build a multi-key sales summary and compare regional totals with product totals, reporting any reconciliation difference.",
+      "validationCriteria": [
+        "Required third-party dependencies are installed in the active environment.",
+        "Every example executes on the CI-supported Python version and matches its expected output.",
+        "Data types, missing values, indexes and aggregation rules are handled deliberately.",
+        "The analysis states assumptions and checks relevant edge cases.",
+        "Raw data is preserved and conclusions do not exceed the evidence."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2517-q1",
+        "prompt": "What does groupby implement?",
+        "answer": "A split-apply-combine workflow",
+        "options": [
+          "A split-apply-combine workflow",
+          "A file compression workflow",
+          "A plotting backend",
+          "A database connection"
+        ],
+        "explanation": "groupby partitions rows by keys, applies operations and combines results."
+      },
+      {
+        "id": "py2517-q2",
+        "prompt": "Which method counts rows in each group?",
+        "answer": "size()",
+        "options": [
+          "size()",
+          "mean()",
+          "describe()",
+          "astype()"
+        ],
+        "explanation": "size counts rows, while count counts non-missing values in selected columns."
+      },
+      {
+        "id": "py2517-q3",
+        "prompt": "Why use named aggregation?",
+        "answer": "To assign explicit names to summary columns",
+        "options": [
+          "To assign explicit names to summary columns",
+          "To rename source files",
+          "To fill missing values automatically",
+          "To change row indexes to dates"
+        ],
+        "explanation": "Named aggregation makes multi-metric summaries easier to interpret."
+      },
+      {
+        "id": "py2517-q4",
+        "prompt": "What is the key property of transform()?",
+        "answer": "It returns group results aligned to the original rows",
+        "options": [
+          "It returns group results aligned to the original rows",
+          "It always reduces each group to one row",
+          "It writes a CSV file",
+          "It sorts every group alphabetically"
+        ],
+        "explanation": "transform preserves the original row alignment."
+      },
+      {
+        "id": "py2517-q5",
+        "prompt": "What is the default treatment of missing group keys?",
+        "answer": "They are excluded from groups unless dropna=False is used",
+        "options": [
+          "They are excluded from groups unless dropna=False is used",
+          "They are always converted to zero",
+          "They create a separate group automatically",
+          "They cause groupby to fail"
+        ],
+        "explanation": "Set dropna=False when missing keys should form a group."
+      }
+    ]
+  },
+  "status": "draft"
+}
