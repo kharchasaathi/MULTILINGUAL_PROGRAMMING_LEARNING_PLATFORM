@@ -28,7 +28,7 @@ for (const topic of topics) {
   assert.equal(lesson.moduleId, topic.moduleId, topic.topicId + ": moduleId");
   assert.equal(lesson.topicId, topic.topicId, topic.topicId + ": topicId");
   assert.equal(lesson.language, "en", topic.topicId + ": language");
-  assert.equal(lesson.status, "draft", topic.topicId + ": status");
+  assert.equal(lesson.status, "published", topic.topicId + ": published status");
   assert.ok(Array.isArray(lesson.learningObjectives) && lesson.learningObjectives.length >= 5, topic.topicId + ": objectives");
   assert.ok(lesson.stages?.understand?.concept?.length > 50, topic.topicId + ": understand");
   assert.ok(lesson.stages?.explain?.narrative?.length > 100, topic.topicId + ": explanation");

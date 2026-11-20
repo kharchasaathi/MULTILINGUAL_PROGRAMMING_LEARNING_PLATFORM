@@ -9,7 +9,7 @@ Reference: [W3Schools Python Syllabus](https://www.w3schools.com/python/python_s
 - Source inventory: reconciled to **284 Python rows**, including PY8.9 list methods, PY9.7 tuple methods, PY11.8 frozenset and PY15.9 file deletion.
 - Progress tracker: reconciled to **284 Python rows**.
 - Five worked examples and five topic-specific MCQs are the authoring target per lesson (1,428 executed examples and 1,428 topic-specific MCQs were validated in the latest successful Python CI run #777); CI execution is the authority for validated counts.
-- All lessons remain draft. Telugu translation and lesson-renderer/playground integration remain pending.
+- All 284 English Python lessons are now marked `published` and included in the release branch. Telugu translation remains pending. `playgroundMode` stays `none` until runtime integration is verified.
 
 ## W3Schools 8-chapter / 45-module mapping
 
@@ -89,7 +89,7 @@ Release scope and follow-up work:
 1. The 45-module syllabus mapping and the targeted subtopic gaps above are covered. This does not claim that every method in every Python reference page or all 108 W3Schools exercise categories have been replicated one-for-one; CodeSaathi uses original lessons, examples and assessments.
 2. Django, Machine Learning, MySQL and MongoDB remain separate course tabs/curricula, as requested. They are intentionally outside this Python-only PR.
 3. Confirm latest-head Python CI and browser review after the added lessons and updated examples.
-4. Keep lessons in draft until final editorial review, Telugu translation, lesson-renderer/playground integration and release checks are completed.
+4. English lesson status has been published at the user's request. Final editorial review, Telugu translation and lesson-renderer/playground integration remain follow-up work; `playgroundMode` stays `none` until that integration is verified.
 ## Important counting rule
 
 The 284 figure is the current indexed English lesson count, **not** a percentage-complete claim. A defensible overall percentage requires the page/subtopic inventory to be fully enumerated, deduplicated and mapped. The 45-module W3Schools syllabus and its deeper page subtopics must not be treated as 45 lessons.
