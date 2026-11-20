@@ -5,10 +5,10 @@ Reference: [W3Schools Python Syllabus](https://www.w3schools.com/python/python_s
 
 ## Baseline
 
-- Curriculum index: **281 English Python lesson entries** across PY1–PY34.
-- Source inventory: reconciled to **281 Python rows**, including the newly added PY15.9 file-deletion lesson.
-- Progress tracker: reconciled to **281 Python rows**.
-- Five worked examples and five topic-specific MCQs are the authoring target per lesson (1,405 expected each at this baseline); CI execution is the authority for validated counts.
+- Curriculum index: **282 English Python lesson entries** across PY1–PY34.
+- Source inventory: reconciled to **282 Python rows**, including PY15.9 file deletion and PY9.7 tuple methods.
+- Progress tracker: reconciled to **282 Python rows**.
+- Five worked examples and five topic-specific MCQs are the authoring target per lesson (1,410 expected each at this baseline); CI execution is the authority for validated counts.
 - All lessons remain draft. Telugu translation and lesson-renderer/playground integration remain pending.
 
 ## W3Schools 8-chapter / 45-module mapping
@@ -28,7 +28,7 @@ Reference: [W3Schools Python Syllabus](https://www.w3schools.com/python/python_s
 | 2 Variables and data types | Python Booleans | PY3.4 | Mapped; subtopic review pending |
 | 2 Variables and data types | Python Operators | PY4 | Mapped; subtopic review pending |
 | 3 Collections | Python Lists | PY8 | Mapped; subtopic review pending |
-| 3 Collections | Python Tuples | PY9 | Mapped; subtopic review pending |
+| 3 Collections | Python Tuples | PY9.1–PY9.7 | Tuple construction, access, update patterns, unpacking, iteration, joining, count() and index() mapped; broader exercise-level review pending |
 | 3 Collections | Python Sets | PY11 | Mapped; subtopic review pending |
 | 3 Collections | Python Dictionaries | PY10 | Mapped; subtopic review pending |
 | 4 Control flow and functions | Python If...Else | PY5 | Mapped; subtopic review pending |
@@ -37,7 +37,7 @@ Reference: [W3Schools Python Syllabus](https://www.w3schools.com/python/python_s
 | 4 Control flow and functions | Python Functions | PY7; PY22 | Mapped; subtopic review pending |
 | 4 Control flow and functions | Python Lambda | PY7.8 | Mapped; subtopic review pending |
 | 4 Control flow and functions | Python Arrays | PY27 | Mapped; subtopic review pending |
-| 5 Object-oriented Python | Python Classes/Objects | PY26 | Mapped; subtopic review pending |
+| 5 Object-oriented Python | Python Classes/Objects | PY26 | Mapped; class methods, properties, encapsulation, inner classes and magic-method families included; subtopic review pending |
 | 5 Object-oriented Python | Python Inheritance | PY26.7 | Mapped; subtopic review pending |
 | 5 Object-oriented Python | Python Iterators | PY13; PY22.1–PY22.3 | Mapped; subtopic review pending |
 | 5 Object-oriented Python | Python Polymorphism | PY26.8 | Mapped; subtopic review pending |
@@ -80,4 +80,4 @@ W3Schools also lists Django, MySQL, MongoDB and Machine Learning as distinct tut
 
 ## Important counting rule
 
-The 281 figure is the current indexed English lesson count, **not** a percentage-complete claim. A defensible overall percentage requires the page/subtopic inventory to be fully enumerated, deduplicated and mapped. The 45-module W3Schools syllabus and its deeper page subtopics must not be treated as 45 lessons.
+The 282 figure is the current indexed English lesson count, **not** a percentage-complete claim. A defensible overall percentage requires the page/subtopic inventory to be fully enumerated, deduplicated and mapped. The 45-module W3Schools syllabus and its deeper page subtopics must not be treated as 45 lessons.
