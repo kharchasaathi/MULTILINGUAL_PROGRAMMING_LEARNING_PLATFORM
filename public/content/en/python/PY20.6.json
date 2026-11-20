@@ -1,0 +1,184 @@
+{
+  "id": "python.py20.6.en",
+  "courseId": "python",
+  "moduleId": "PY20",
+  "topicId": "PY20.6",
+  "title": "Virtual Environment Isolation and Interpreter Verification",
+  "language": "en",
+  "learningObjectives": [
+    "Explain sys.prefix, sys.base_prefix, sys.executable, sys.path and site-packages.",
+    "Choose the appropriate package or environment workflow for PY20.6.",
+    "Interpret package-management and interpreter information correctly.",
+    "Identify dependency, isolation and reproducibility risks.",
+    "Apply the concepts in a safe Python project workflow."
+  ],
+  "prerequisites": [
+    "PY11.1",
+    "PY14.1",
+    "PY15.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A venv changes where Python looks for packages and which interpreter command is selected. sys.executable identifies the running binary, sys.prefix the active environment prefix, and sys.base_prefix the base installation. These values help diagnose environment mismatches.",
+      "whyItMatters": "Many import errors happen because a package was installed into one interpreter while the program runs under another.",
+      "analogy": "An environment label and tool location confirm the intended project workspace.",
+      "analogyLimit": "venv does not isolate environment variables, user files, operating-system libraries or network access.",
+      "summary": "Virtual Environment Isolation and Interpreter Verification teaches maintainable dependency management and environment setup."
+    },
+    "explain": {
+      "narrative": "Inspect `sys.executable`, `sys.prefix` and `sys.base_prefix`. The check `sys.prefix != sys.base_prefix` conventionally identifies a venv. `python -m pip --version` shows the pip associated with the selected interpreter. An IDE, notebook or service may use a different interpreter from the terminal, so compare paths when imports fail.",
+      "examples": [
+        {
+          "id": "py206-ex1",
+          "language": "en",
+          "title": "Inspect executable",
+          "code": "import sys\nprint(sys.executable.endswith('python') or sys.executable.endswith('python.exe'))",
+          "expectedOutput": "True",
+          "explanation": "sys.executable identifies the running interpreter."
+        },
+        {
+          "id": "py206-ex2",
+          "language": "en",
+          "title": "Check venv status",
+          "code": "import sys\nprint(sys.prefix != sys.base_prefix)",
+          "expectedOutput": "False",
+          "explanation": "Prefixes differ in a typical venv; this runner uses the base interpreter."
+        },
+        {
+          "id": "py206-ex3",
+          "language": "en",
+          "title": "Compare environment prefixes",
+          "code": "import sys\nprint(sys.prefix == sys.base_prefix)\nprint(sys.version_info.major >= 3)",
+          "expectedOutput": "True\nTrue",
+          "explanation": "The first check distinguishes base interpreter from venv."
+        },
+        {
+          "id": "py206-ex4",
+          "language": "en",
+          "title": "Inspect import paths",
+          "code": "import sys\nprint(any('site-packages' in p or 'dist-packages' in p for p in sys.path))",
+          "expectedOutput": "True",
+          "explanation": "sys.path lists locations Python searches for imports."
+        },
+        {
+          "id": "py206-ex5",
+          "language": "en",
+          "title": "Build interpreter-specific pip command",
+          "code": "import sys\ncmd = f'{sys.executable} -m pip --version'\nprint(cmd.startswith(sys.executable))",
+          "expectedOutput": "True",
+          "explanation": "Calling pip through the interpreter avoids ambiguity."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Inside a venv, record sys.executable, sys.prefix and sys.base_prefix, then verify python -m pip --version points to the same environment.",
+      "independentTask": "Troubleshoot a package that imports in a terminal but not in an IDE. List interpreter and package-path checks.",
+      "hints": "sys.executable identifies the running binary.",
+      "challenge": "sys.prefix identifies active prefix.",
+      "validationCriteria": [
+        "The selected interpreter and target environment are identified explicitly.",
+        "Package commands are used in the appropriate terminal and environment.",
+        "Version constraints and dependency records are interpreted correctly.",
+        "Examples execute with the expected output and limitations are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py206-q1",
+        "prompt": "s",
+        "answer": "y",
+        "options": "s",
+        "explanation": "."
+      },
+      {
+        "id": "py206-q2",
+        "prompt": "R",
+        "answer": "u",
+        "options": "n",
+        "explanation": " "
+      },
+      {
+        "id": "py206-q3",
+        "prompt": "A",
+        "answer": "n",
+        "options": " ",
+        "explanation": "I"
+      },
+      {
+        "id": "py206-q4",
+        "prompt": "C",
+        "answer": "r",
+        "options": "e",
+        "explanation": "a"
+      },
+      {
+        "id": "py206-q5",
+        "prompt": "Which attribute identifies the running Python executable?",
+        "answer": "sys.executable",
+        "options": [
+          "sys.prefix",
+          "sys.executable",
+          "sys.pathlib",
+          "sys.platform_name"
+        ],
+        "explanation": "sys.executable contains the interpreter path."
+      },
+      {
+        "id": "py206-q6",
+        "prompt": "What commonly indicates a venv?",
+        "answer": "sys.prefix != sys.base_prefix",
+        "options": [
+          "sys.prefix == sys.base_prefix",
+          "sys.prefix != sys.base_prefix",
+          "sys.version == ''",
+          "len(sys.path) == 0"
+        ],
+        "explanation": "A venv has a prefix distinct from the base prefix."
+      },
+      {
+        "id": "py206-q7",
+        "prompt": "Why run python -m pip?",
+        "answer": "To use pip associated with that interpreter",
+        "options": [
+          "Bypass Python",
+          "Use pip associated with that interpreter",
+          "Install into every environment",
+          "Disable checks"
+        ],
+        "explanation": "The invocation ties pip to the selected interpreter."
+      },
+      {
+        "id": "py206-q8",
+        "prompt": "Does venv isolate the OS like a sandbox?",
+        "answer": "No",
+        "options": [
+          "Yes",
+          "No",
+          "Only Windows",
+          "Only with pip"
+        ],
+        "explanation": "venv focuses on Python package paths, not security isolation."
+      },
+      {
+        "id": "py206-q9",
+        "prompt": "Why might an IDE import fail but terminal import work?",
+        "answer": "The IDE may use a different interpreter",
+        "options": [
+          "Syntax changes automatically",
+          "The IDE may use a different interpreter",
+          "Package names always change",
+          "File extensions are irrelevant"
+        ],
+        "explanation": "Different interpreters can have different installed packages."
+      }
+    ]
+  },
+  "status": "draft"
+}
