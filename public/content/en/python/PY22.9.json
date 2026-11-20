@@ -1,0 +1,169 @@
+{
+  "id": "python.py22.9.en",
+  "courseId": "python",
+  "moduleId": "PY22",
+  "topicId": "PY22.9",
+  "title": "Asynchronous Programming with async and await",
+  "language": "en",
+  "learningObjectives": [
+    "Explain coroutines, async def, await and cooperative scheduling.",
+    "Select a suitable concurrency or performance technique for PY22.9.",
+    "Interpret task, thread, process or profiling results correctly.",
+    "Identify limitations and risks when applying PY22.9.",
+    "Apply PY22.9 concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY8.1",
+    "PY11.1",
+    "PY14.1",
+    "PY21.7",
+    "PY22.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "An async def function creates a coroutine function. Calling it returns a coroutine object that must be awaited or scheduled on an event loop. The await expression suspends the current coroutine while an awaitable completes, allowing other tasks to make progress. Asynchronous programming is particularly useful for I/O-bound work that spends time waiting.",
+      "whyItMatters": "Async code can handle many concurrent I/O operations without dedicating one operating-system thread to each waiting operation.",
+      "analogy": "An async worker starts a task, waits for a slow response by switching to another task, then returns when the response is ready.",
+      "analogyLimit": "Async does not automatically make CPU-heavy code faster; blocking calls inside an async function can stall the event loop.",
+      "summary": "Asynchronous Programming with async and await develops advanced concurrency and performance skills."
+    },
+    "explain": {
+      "narrative": "## Understand coroutines\nDefine a coroutine function with `async def` and use `await` inside it to wait for an awaitable. The event loop schedules coroutines and switches between tasks when they suspend. Use `asyncio.run()` as a top-level entry point for a simple asynchronous program.\n\nDo not call blocking operations such as long synchronous network or file calls directly in a busy event loop. Use an asynchronous library or offload blocking work appropriately. Keep async boundaries explicit and do not call asyncio.run from an already running event loop.",
+      "examples": [
+        {
+          "id": "py229-ex1",
+          "language": "en",
+          "title": "Create and await a coroutine",
+          "code": "import asyncio\nasync def answer():\n    await asyncio.sleep(0)\n    return 42\nprint(asyncio.run(answer()))",
+          "expectedOutput": "42",
+          "explanation": "asyncio.run executes a top-level coroutine and returns its result."
+        },
+        {
+          "id": "py229-ex2",
+          "language": "en",
+          "title": "Inspect a coroutine function",
+          "code": "import asyncio\nasync def work(): return 'done'\nprint(asyncio.iscoroutinefunction(work))",
+          "expectedOutput": "True",
+          "explanation": "isCoroutineFunction identifies a coroutine function defined with async def."
+        },
+        {
+          "id": "py229-ex3",
+          "language": "en",
+          "title": "Check a coroutine object",
+          "code": "import asyncio\nasync def work(): return 1\ncoroutine = work()\nprint(asyncio.iscoroutine(coroutine))\ncoroutine.close()",
+          "expectedOutput": "True",
+          "explanation": "Calling an async function creates a coroutine object; close it here because it is inspected but not awaited."
+        },
+        {
+          "id": "py229-ex4",
+          "language": "en",
+          "title": "Await a helper coroutine",
+          "code": "import asyncio\nasync def double(value): return value * 2\nasync def main(): return await double(6)\nprint(asyncio.run(main()))",
+          "expectedOutput": "12",
+          "explanation": "A coroutine can await another coroutine and use its result."
+        },
+        {
+          "id": "py229-ex5",
+          "language": "en",
+          "title": "Yield control cooperatively",
+          "code": "import asyncio\nasync def main():\n    await asyncio.sleep(0)\n    return 'resumed'\nprint(asyncio.run(main()))",
+          "expectedOutput": "resumed",
+          "explanation": "An awaitable such as asyncio.sleep(0) gives the event loop an opportunity to schedule other work."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Write an async function that awaits asyncio.sleep and returns a value. Run it from a normal script using asyncio.run.",
+      "independentTask": "Explain the difference between calling a coroutine, awaiting it and scheduling it as a task.",
+      "hints": [
+        "async def defines a coroutine function.",
+        "Calling it creates a coroutine object.",
+        "await suspends the current coroutine until an awaitable completes.",
+        "asyncio.run starts and manages an event loop.",
+        "Blocking synchronous work can stall the event loop."
+      ],
+      "challenge": "Design an asynchronous workflow that waits for several independent I/O responses while keeping CPU-heavy work out of the event loop.",
+      "validationCriteria": [
+        "The concurrency or performance concept is accurately explained.",
+        "Examples execute with the documented output.",
+        "Synchronization, scheduling or profiling behaviour is correct.",
+        "Limitations and appropriate use cases are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py229-q1",
+        "prompt": "What does calling an async def function create?",
+        "answer": "A coroutine object",
+        "options": [
+          "A coroutine object",
+          "A thread automatically",
+          "A coroutine object",
+          "A process",
+          "A list"
+        ],
+        "explanation": "Calling a coroutine function creates a coroutine object."
+      },
+      {
+        "id": "py229-q2",
+        "prompt": "What does await do?",
+        "answer": "Suspends the current coroutine until an awaitable completes",
+        "options": [
+          "Suspends the current coroutine until an awaitable completes",
+          "Starts a new operating system",
+          "Suspends the current coroutine until an awaitable completes",
+          "Converts a list to a tuple",
+          "Runs CPU work in parallel"
+        ],
+        "explanation": "await allows the event loop to run other work while the coroutine waits."
+      },
+      {
+        "id": "py229-q3",
+        "prompt": "Which function is a common top-level entry point for asyncio scripts?",
+        "answer": "asyncio.run",
+        "options": [
+          "asyncio.run",
+          "asyncio.run",
+          "threading.start",
+          "timeit.repeat",
+          "pdb.run"
+        ],
+        "explanation": "asyncio.run manages an event loop for a top-level coroutine."
+      },
+      {
+        "id": "py229-q4",
+        "prompt": "Does async automatically speed up CPU-bound calculations?",
+        "answer": "No",
+        "options": [
+          "No",
+          "Yes, always",
+          "No",
+          "Only with sleep",
+          "Only on one core"
+        ],
+        "explanation": "Async primarily helps with concurrency during waiting; CPU-bound code still occupies the event loop."
+      },
+      {
+        "id": "py229-q5",
+        "prompt": "What can happen if blocking synchronous code runs in the event loop?",
+        "answer": "It can block other tasks from making progress",
+        "options": [
+          "It can block other tasks from making progress",
+          "It automatically becomes asynchronous",
+          "It can block other tasks from making progress",
+          "It creates more event loops",
+          "It removes coroutine state"
+        ],
+        "explanation": "Blocking calls prevent the event loop from switching to other tasks."
+      }
+    ]
+  },
+  "status": "draft"
+}
