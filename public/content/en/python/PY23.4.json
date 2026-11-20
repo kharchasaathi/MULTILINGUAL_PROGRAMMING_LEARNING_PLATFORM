@@ -1,0 +1,163 @@
+{
+  "id": "python.py23.4.en",
+  "courseId": "python",
+  "moduleId": "PY23",
+  "topicId": "PY23.4",
+  "title": "Advanced Dataclasses, Validation and Immutable Records",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of Advanced Dataclasses, Validation and Immutable Records.",
+    "Choose an appropriate advanced dataclasses, validation and immutable records technique for a Python application.",
+    "Interpret representative code and output involving advanced dataclasses, validation and immutable records.",
+    "Identify limitations and failure modes for advanced dataclasses, validation and immutable records.",
+    "Apply advanced dataclasses, validation and immutable records concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY11.1",
+    "PY14.1",
+    "PY20.1",
+    "PY21.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "The dataclasses module generates common methods such as __init__ and __repr__ from annotated fields. Advanced options support immutable-style records, ordering, slots, keyword-only fields and post-initialization checks. field(default_factory=...) creates a fresh mutable default per instance. Dataclasses reduce boilerplate but do not automatically validate arbitrary field values.",
+      "whyItMatters": "Dataclasses make data-oriented application models concise and predictable while keeping domain logic close to the data.",
+      "analogy": "A dataclass is a preprinted form with standard fields and routine handling already prepared.",
+      "analogyLimit": "A generated form does not verify every business rule unless the application adds explicit validation.",
+      "summary": "Advanced Dataclasses, Validation and Immutable Records develops practical application engineering skills for Python projects."
+    },
+    "explain": {
+      "narrative": "## Model application data\nUse `@dataclass` for records whose fields define their main purpose. Use `default_factory` for mutable defaults, `frozen=True` when reassignment should be prevented, `slots=True` when a fixed attribute layout is appropriate, and `__post_init__` for invariant checks. Frozen dataclasses are shallowly immutable: mutable objects stored in fields can still change. Use `dataclasses.replace` to create a modified copy.",
+      "examples": [
+        {
+          "id": "py234-ex1",
+          "language": "en",
+          "title": "Generate a data record",
+          "code": "from dataclasses import dataclass\n@dataclass\nclass Product:\n    name: str\n    price: float\nitem = Product('Notebook', 25.0)\nprint(item)",
+          "expectedOutput": "Product(name='Notebook', price=25.0)",
+          "explanation": "The decorator generates a readable representation and initializer."
+        },
+        {
+          "id": "py234-ex2",
+          "language": "en",
+          "title": "Use a fresh list per instance",
+          "code": "from dataclasses import dataclass, field\n@dataclass\nclass Cart:\n    items: list[str] = field(default_factory=list)\na = Cart(); b = Cart(); a.items.append('pen')\nprint(a.items, b.items)",
+          "expectedOutput": "['pen'] []",
+          "explanation": "default_factory prevents instances from sharing one mutable list."
+        },
+        {
+          "id": "py234-ex3",
+          "language": "en",
+          "title": "Validate after initialization",
+          "code": "from dataclasses import dataclass\n@dataclass\nclass Age:\n    value: int\n    def __post_init__(self):\n        if self.value < 0: raise ValueError('age must be non-negative')\nprint(Age(18).value)",
+          "expectedOutput": "18",
+          "explanation": "__post_init__ runs after generated initialization and can enforce domain rules."
+        },
+        {
+          "id": "py234-ex4",
+          "language": "en",
+          "title": "Create a modified copy",
+          "code": "from dataclasses import dataclass, replace\n@dataclass(frozen=True)\nclass Point:\n    x: int\n    y: int\np = Point(2, 3)\nq = replace(p, x=8)\nprint(p.x, q.x)",
+          "expectedOutput": "2 8",
+          "explanation": "replace creates a new instance with selected fields changed."
+        },
+        {
+          "id": "py234-ex5",
+          "language": "en",
+          "title": "Use slots for declared fields",
+          "code": "from dataclasses import dataclass\n@dataclass(slots=True)\nclass Coordinate:\n    x: int\n    y: int\npoint = Coordinate(4, 5)\nprint(point.x + point.y, hasattr(point, '__dict__'))",
+          "expectedOutput": "9 False",
+          "explanation": "slots=True avoids the usual per-instance __dict__ for declared attributes."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a dataclass for an order line with quantity and unit price. Use __post_init__ to reject negative values and default_factory for mutable collections.",
+      "independentTask": "Model a configuration record with a frozen dataclass. Explain whether nested mutable values would still be protected.",
+      "hints": [
+        "Use field(default_factory=list) for per-instance mutable values.",
+        "__post_init__ runs after the generated initializer.",
+        "frozen=True prevents normal field reassignment, not deep mutation.",
+        "replace returns a new dataclass instance.",
+        "slots=True changes attribute storage; measure before using it for optimization."
+      ],
+      "challenge": "Design dataclasses for an invoice and its line items, validate invariants and compute totals without storing stale derived values.",
+      "validationCriteria": [
+        "The concept and intended use are accurately explained.",
+        "All examples execute with the documented output on Python 3.13.",
+        "External input, failure handling and dependency boundaries are treated appropriately.",
+        "Limitations and version requirements are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py234-q1",
+        "prompt": "Why use default_factory for a mutable dataclass field?",
+        "answer": "To create a separate value for each instance",
+        "options": [
+          "To create a separate value for each instance",
+          "To share one global list",
+          "To serialize automatically",
+          "To make the field a constant"
+        ],
+        "explanation": "A factory is called for each new instance."
+      },
+      {
+        "id": "py234-q2",
+        "prompt": "What does __post_init__ provide?",
+        "answer": "A hook after the generated initializer",
+        "options": [
+          "A hook after the generated initializer",
+          "A replacement for every method",
+          "Automatic JSON parsing",
+          "A database migration"
+        ],
+        "explanation": "It is useful for validating or deriving values after initialization."
+      },
+      {
+        "id": "py234-q3",
+        "prompt": "What does frozen=True prevent?",
+        "answer": "Normal reassignment of dataclass fields",
+        "options": [
+          "Normal reassignment of dataclass fields",
+          "All nested object mutation",
+          "Reading field values",
+          "Creating instances"
+        ],
+        "explanation": "Frozen dataclasses are shallowly immutable."
+      },
+      {
+        "id": "py234-q4",
+        "prompt": "What does dataclasses.replace do?",
+        "answer": "Creates a new instance with selected fields changed",
+        "options": [
+          "Creates a new instance with selected fields changed",
+          "Edits the class definition",
+          "Deletes the original object",
+          "Converts the record to JSON"
+        ],
+        "explanation": "replace constructs a new instance of the same dataclass."
+      },
+      {
+        "id": "py234-q5",
+        "prompt": "What is a trade-off of slots=True?",
+        "answer": "It restricts arbitrary per-instance attributes",
+        "options": [
+          "It restricts arbitrary per-instance attributes",
+          "It enables dynamic field creation",
+          "It stores data in SQLite",
+          "It enforces all type hints"
+        ],
+        "explanation": "Slots use a fixed declared attribute layout and remove the usual instance dictionary."
+      }
+    ]
+  },
+  "status": "draft"
+}

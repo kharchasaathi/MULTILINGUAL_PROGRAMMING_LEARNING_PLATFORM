@@ -1,0 +1,163 @@
+{
+  "id": "python.py23.2.en",
+  "courseId": "python",
+  "moduleId": "PY23",
+  "topicId": "PY23.2",
+  "title": "Generic Types, Type Variables and Reusable Collections",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of Generic Types, Type Variables and Reusable Collections.",
+    "Choose an appropriate generic types, type variables and reusable collections technique for a Python application.",
+    "Interpret representative code and output involving generic types, type variables and reusable collections.",
+    "Identify limitations and failure modes for generic types, type variables and reusable collections.",
+    "Apply generic types, type variables and reusable collections concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY11.1",
+    "PY14.1",
+    "PY20.1",
+    "PY21.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Generics let reusable functions and classes preserve relationships between input and output types. A type variable represents a type selected by the caller. Modern Python supports generic built-in collections such as list[T] and dict[str, T]. Generic annotations help static tools reason about reusable components while ordinary runtime behaviour remains unchanged.",
+      "whyItMatters": "Generics reduce duplicated implementations while retaining useful type information across reusable utilities.",
+      "analogy": "A generic container is a reusable box whose label is selected for each use.",
+      "analogyLimit": "The label is for type analysis; it does not create a different runtime list implementation or validate each inserted value.",
+      "summary": "Generic Types, Type Variables and Reusable Collections develops practical application engineering skills for Python projects."
+    },
+    "explain": {
+      "narrative": "## Preserve type relationships\nUse `TypeVar` for a function that accepts and returns the same type. Modern Python also supports generic syntax for built-in collections. Use abstractions such as `Sequence[T]` or `Mapping[K, V]` when a function only needs read access. Choose the minimum interface required and avoid overly complex signatures. Python 3.12 introduced new type-parameter syntax; older supported versions use `TypeVar`.",
+      "examples": [
+        {
+          "id": "py232-ex1",
+          "language": "en",
+          "title": "Preserve the input type",
+          "code": "from typing import TypeVar\nT = TypeVar('T')\ndef first(items: list[T]) -> T:\n    return items[0]\nprint(first([4, 5, 6]))",
+          "expectedOutput": "4",
+          "explanation": "The same type variable connects collection element type to return type."
+        },
+        {
+          "id": "py232-ex2",
+          "language": "en",
+          "title": "Use a generic dictionary",
+          "code": "prices: dict[str, float] = {'pen': 12.5, 'book': 40.0}\nprint(round(prices['book'], 1))",
+          "expectedOutput": "40.0",
+          "explanation": "The annotation describes string keys and float values."
+        },
+        {
+          "id": "py232-ex3",
+          "language": "en",
+          "title": "Accept a read-only sequence",
+          "code": "from collections.abc import Sequence\ndef last_item(items: Sequence[str]) -> str:\n    return items[-1]\nprint(last_item(('red', 'blue')))",
+          "expectedOutput": "blue",
+          "explanation": "Sequence describes the required operations without requiring a mutable list."
+        },
+        {
+          "id": "py232-ex4",
+          "language": "en",
+          "title": "Use a constrained type variable",
+          "code": "from typing import TypeVar\nN = TypeVar('N', int, float)\ndef double(value: N) -> N:\n    return value * 2\nprint(double(3), double(1.5))",
+          "expectedOutput": "6 3.0",
+          "explanation": "A constrained type variable documents supported alternatives."
+        },
+        {
+          "id": "py232-ex5",
+          "language": "en",
+          "title": "Model a generic pair",
+          "code": "from typing import TypeVar\nA = TypeVar('A')\nB = TypeVar('B')\ndef pair(left: A, right: B) -> tuple[A, B]:\n    return left, right\nprint(pair('id', 7))",
+          "expectedOutput": "('id', 7)",
+          "explanation": "Separate variables preserve each tuple position's type."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a generic first_or_none helper accepting a sequence and returning its first item or None.",
+      "independentTask": "Design a generic lookup helper and explain why Mapping can be more flexible than dict when mutation is unnecessary.",
+      "hints": [
+        "Use TypeVar when input and output types are related.",
+        "Use separate variables for independent values.",
+        "Choose Sequence or Mapping for read-only contracts.",
+        "A type variable is not a runtime conversion.",
+        "Document Python version requirements for newer syntax."
+      ],
+      "challenge": "Create a generic in-memory repository interface with typed keys and values, and explain how static analysis catches mismatches.",
+      "validationCriteria": [
+        "The concept and intended use are accurately explained.",
+        "All examples execute with the documented output on Python 3.13.",
+        "External input, failure handling and dependency boundaries are treated appropriately.",
+        "Limitations and version requirements are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py232-q1",
+        "prompt": "What is the main purpose of a TypeVar?",
+        "answer": "To represent a type shared across a generic relationship",
+        "options": [
+          "To represent a type shared across a generic relationship",
+          "To convert strings into classes",
+          "To allocate memory",
+          "To enforce a runtime schema"
+        ],
+        "explanation": "A type variable preserves type relationships in a generic signature."
+      },
+      {
+        "id": "py232-q2",
+        "prompt": "When is Sequence preferable to list in a parameter?",
+        "answer": "When only sequence operations are required",
+        "options": [
+          "When only sequence operations are required",
+          "When the function must append items",
+          "When a database is required",
+          "When values must be serialized"
+        ],
+        "explanation": "An abstract interface avoids requiring a concrete mutable list."
+      },
+      {
+        "id": "py232-q3",
+        "prompt": "What does dict[str, float] describe?",
+        "answer": "String keys and float values",
+        "options": [
+          "String keys and float values",
+          "Float keys and string values",
+          "Exactly two entries",
+          "A dictionary converted at runtime"
+        ],
+        "explanation": "Generic collection parameters document key and value types."
+      },
+      {
+        "id": "py232-q4",
+        "prompt": "Do generic annotations validate inserted values automatically?",
+        "answer": "No",
+        "options": [
+          "No",
+          "Yes, on every assignment",
+          "Only in functions",
+          "Only for tuples"
+        ],
+        "explanation": "Runtime containers do not normally enforce generic annotations."
+      },
+      {
+        "id": "py232-q5",
+        "prompt": "Why use two type variables in a pair function?",
+        "answer": "To preserve potentially different types for each position",
+        "options": [
+          "To preserve potentially different types for each position",
+          "To require both values be strings",
+          "To make the tuple mutable",
+          "To sort the values"
+        ],
+        "explanation": "Separate variables express independent left and right types."
+      }
+    ]
+  },
+  "status": "draft"
+}
