@@ -1,0 +1,164 @@
+{
+  "id": "python.py25.3.en",
+  "courseId": "python",
+  "moduleId": "PY25",
+  "topicId": "PY25.3",
+  "title": "Loading Tabular Data from CSV Files",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose of Loading Tabular Data from CSV Files.",
+    "Apply Loading Tabular Data from CSV Files to a realistic Python data task.",
+    "Choose suitable Python structures and standard-library tools for the task.",
+    "Identify data-quality, correctness and interpretation risks.",
+    "Build a small reproducible analysis artifact using Loading Tabular Data from CSV Files."
+  ],
+  "prerequisites": [
+    "PY15.1",
+    "PY21.7",
+    "PY23.5",
+    "PY24.11"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "CSV stores tabular records as delimited text. Python's csv module handles quoting, delimiters and rows more reliably than splitting each line manually. DictReader maps header names to values, but values are initially strings and need validation and conversion before numerical analysis.",
+      "whyItMatters": "Reliable analysis depends on transparent decisions about data meaning, quality and interpretation—not merely on producing a number or chart.",
+      "analogy": "A data analyst is like a careful investigator who checks the evidence, records each transformation and explains how a conclusion was reached.",
+      "analogyLimit": "Datasets are not always complete or representative, and a neat summary cannot remove bias or prove causation.",
+      "summary": "Loading Tabular Data from CSV Files provides a practical foundation for trustworthy Python data analysis."
+    },
+    "explain": {
+      "narrative": "Open text files with newline='' when using csv.reader or csv.DictReader, and specify an encoding such as utf-8 when appropriate. Validate required headers, handle blank cells, convert numeric fields with targeted error handling and avoid assuming every row is well-formed. For reproducible analysis, keep a small sample fixture and test the import function against it.",
+      "examples": [
+        {
+          "id": "py253-ex1",
+          "language": "en",
+          "title": "Read a CSV row",
+          "code": "import csv, io\ntext = 'name,score\\nAsha,85\\n'\nrows = list(csv.DictReader(io.StringIO(text)))\nprint(rows[0]['name'], rows[0]['score'])",
+          "expectedOutput": "Asha 85",
+          "explanation": "DictReader uses the first row as field names; values remain strings."
+        },
+        {
+          "id": "py253-ex2",
+          "language": "en",
+          "title": "Read numeric values",
+          "code": "import csv, io\ntext = 'item,qty\\nPen,3\\nBook,2\\n'\nrows = list(csv.DictReader(io.StringIO(text)))\nprint(sum(int(row['qty']) for row in rows))",
+          "expectedOutput": "5",
+          "explanation": "Convert numeric text before arithmetic."
+        },
+        {
+          "id": "py253-ex3",
+          "language": "en",
+          "title": "Inspect headers",
+          "code": "import csv, io\nreader = csv.DictReader(io.StringIO('date,total\\n2026-01-01,12\\n'))\nprint(reader.fieldnames)",
+          "expectedOutput": "['date', 'total']",
+          "explanation": "Checking headers catches schema mismatches early."
+        },
+        {
+          "id": "py253-ex4",
+          "language": "en",
+          "title": "Handle a quoted comma",
+          "code": "import csv, io\ntext = 'name,note\\nAsha,\"likes tea, coffee\"\\n'\nrow = next(csv.DictReader(io.StringIO(text)))\nprint(row['note'])",
+          "expectedOutput": "likes tea, coffee",
+          "explanation": "The CSV parser respects quoted delimiters."
+        },
+        {
+          "id": "py253-ex5",
+          "language": "en",
+          "title": "Check required columns",
+          "code": "import csv, io\nreader = csv.DictReader(io.StringIO('name,qty\\nPen,2\\n'))\nrequired = {'name', 'qty'}\nprint(required.issubset(set(reader.fieldnames or [])))",
+          "expectedOutput": "True",
+          "explanation": "A header check verifies the minimum input contract."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Load a CSV string with name and amount columns, validate the headers, convert amount to float and report rows that cannot be converted.",
+      "independentTask": "Write a reusable CSV import function that accepts a file-like object, returns validated dictionaries and reports malformed rows without silently changing values.",
+      "hints": [
+        "Use csv.DictReader rather than split(',').",
+        "Remember CSV field values are strings.",
+        "Check fieldnames before accessing a key.",
+        "Use io.StringIO for deterministic examples.",
+        "Handle conversion errors per row."
+      ],
+      "challenge": "Extend the importer to count accepted and rejected rows and return both the cleaned records and a structured error list.",
+      "validationCriteria": [
+        "The data question and input assumptions are explicit.",
+        "All examples execute and match their expected output on Python 3.13.",
+        "Missing, invalid and boundary cases are handled deliberately.",
+        "The analysis preserves units and documents limitations.",
+        "The solution is reproducible and does not expose private data."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py253-q1",
+        "prompt": "Why use csv.DictReader instead of splitting on commas?",
+        "answer": "It correctly handles quoted delimiters",
+        "options": [
+          "It correctly handles quoted delimiters",
+          "It automatically validates every number",
+          "It encrypts the file",
+          "It sorts rows"
+        ],
+        "explanation": "CSV quoting rules make naive splitting unreliable."
+      },
+      {
+        "id": "py253-q2",
+        "prompt": "What type are values read by DictReader?",
+        "answer": "Strings",
+        "options": [
+          "Strings",
+          "Integers",
+          "Floats",
+          "Booleans"
+        ],
+        "explanation": "CSV is text; convert fields explicitly."
+      },
+      {
+        "id": "py253-q3",
+        "prompt": "What does fieldnames provide?",
+        "answer": "The column headers",
+        "options": [
+          "The column headers",
+          "The number of valid records",
+          "The file encoding",
+          "The row totals"
+        ],
+        "explanation": "fieldnames exposes the parsed header names."
+      },
+      {
+        "id": "py253-q4",
+        "prompt": "Why open CSV files with newline=''?",
+        "answer": "It lets the csv module handle newline conventions",
+        "options": [
+          "It lets the csv module handle newline conventions",
+          "It removes all blank cells",
+          "It converts text to numbers",
+          "It forces UTF-16"
+        ],
+        "explanation": "The csv module documents newline='' for correct newline handling."
+      },
+      {
+        "id": "py253-q5",
+        "prompt": "What should happen when a required header is missing?",
+        "answer": "Report a clear input/schema error",
+        "options": [
+          "Report a clear input/schema error",
+          "Assume the first column is correct",
+          "Silently use zero",
+          "Skip all validation"
+        ],
+        "explanation": "Explicit schema checks prevent incorrect analysis."
+      }
+    ]
+  },
+  "status": "draft"
+}
