@@ -1,0 +1,163 @@
+{
+  "id": "python.py23.6.en",
+  "courseId": "python",
+  "moduleId": "PY23",
+  "topicId": "PY23.6",
+  "title": "Runtime Data Validation and Serialization Contracts",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of Runtime Data Validation and Serialization Contracts.",
+    "Choose an appropriate runtime data validation and serialization contracts technique for an application.",
+    "Interpret representative code and output involving runtime data validation and serialization contracts.",
+    "Identify limitations and failure modes for runtime data validation and serialization contracts.",
+    "Apply the concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY11.1",
+    "PY14.1",
+    "PY20.1",
+    "PY21.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "An application boundary is where data enters from a user, file, database or remote service. Type annotations help developers express expected shapes, while runtime validation checks actual values. Validation should verify required fields, exact types where necessary, allowed ranges, string lengths and cross-field rules. Normalization converts acceptable variants into one internal representation.",
+      "whyItMatters": "Boundary validation prevents malformed or hostile data from spreading into business logic and persistence layers.",
+      "analogy": "A reception desk checks a visitor's details before issuing an access pass.",
+      "analogyLimit": "A checklist catches known invalid cases but cannot guarantee every possible business or security issue has been anticipated.",
+      "summary": "Runtime Data Validation and Serialization Contracts develops practical application engineering skills for Python projects."
+    },
+    "explain": {
+      "narrative": "## Validate before trusting\nTreat external data as unknown until checked. Avoid assuming a JSON key exists or a value has the expected type. Remember `bool` is a subclass of `int`, so use `type(value) is int` when booleans must be rejected as integers. Normalize whitespace and casing deliberately, enforce length and range limits, and return clear validation errors. Keep validation separate from persistence and authorization decisions.",
+      "examples": [
+        {
+          "id": "py236-ex1",
+          "language": "en",
+          "title": "Check required keys",
+          "code": "payload = {'name': 'Ravi', 'age': 21}\nrequired = {'name', 'age'}\nprint(required.issubset(payload))",
+          "expectedOutput": "True",
+          "explanation": "A key-presence check detects missing required fields."
+        },
+        {
+          "id": "py236-ex2",
+          "language": "en",
+          "title": "Reject bool where integer is required",
+          "code": "value = True\nvalid_integer = type(value) is int\nprint(valid_integer)",
+          "expectedOutput": "False",
+          "explanation": "bool subclasses int, so exact type checking is useful when booleans are invalid."
+        },
+        {
+          "id": "py236-ex3",
+          "language": "en",
+          "title": "Validate a bounded quantity",
+          "code": "quantity = 4\nvalid = type(quantity) is int and 1 <= quantity <= 100\nprint(valid)",
+          "expectedOutput": "True",
+          "explanation": "A range check prevents invalid or excessive quantities."
+        },
+        {
+          "id": "py236-ex4",
+          "language": "en",
+          "title": "Normalize a user name",
+          "code": "raw = '  Asha  '\nname = raw.strip()\nprint(name, len(name))",
+          "expectedOutput": "Asha 4",
+          "explanation": "Normalization removes surrounding whitespace before later checks."
+        },
+        {
+          "id": "py236-ex5",
+          "language": "en",
+          "title": "Reject unknown status values",
+          "code": "status = 'shipped'\nallowed = {'new', 'paid', 'shipped'}\nprint(status in allowed)",
+          "expectedOutput": "True",
+          "explanation": "An allowlist is clearer than accepting arbitrary status strings."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a validator for a registration dictionary. Require a non-empty name, reject bool as an age and enforce a reasonable age range.",
+      "independentTask": "Document a validation contract for a payment request, separating syntactic validation from authorization and business rules.",
+      "hints": [
+        "Assume external values are untrusted.",
+        "Check required keys before indexing.",
+        "Use exact integer checks when bool is not acceptable.",
+        "Set sensible length and range limits.",
+        "Do not confuse validation with authorization."
+      ],
+      "challenge": "Build a reusable validator that returns normalized data or raises a dedicated ValueError subclass with a field-specific message.",
+      "validationCriteria": [
+        "The concept and intended use are accurately explained.",
+        "All examples execute with the documented output on Python 3.13.",
+        "External input, failure handling and dependency boundaries are treated appropriately.",
+        "Limitations and security implications are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py236-q1",
+        "prompt": "Why validate data at an application boundary?",
+        "answer": "To check untrusted values before business logic uses them",
+        "options": [
+          "To check untrusted values before business logic uses them",
+          "To avoid writing tests",
+          "To encrypt every value",
+          "To replace database transactions"
+        ],
+        "explanation": "Boundary validation stops malformed data from propagating."
+      },
+      {
+        "id": "py236-q2",
+        "prompt": "Why can isinstance(True, int) be surprising?",
+        "answer": "Because bool is a subclass of int",
+        "options": [
+          "Because bool is a subclass of int",
+          "Because True is a string",
+          "Because int is not a type",
+          "Because isinstance is deprecated"
+        ],
+        "explanation": "Python's bool type inherits from int."
+      },
+      {
+        "id": "py236-q3",
+        "prompt": "What is an allowlist?",
+        "answer": "A defined set of accepted values",
+        "options": [
+          "A defined set of accepted values",
+          "A list of all rejected users",
+          "A password database",
+          "A type annotation"
+        ],
+        "explanation": "Allowlisting makes permitted values explicit."
+      },
+      {
+        "id": "py236-q4",
+        "prompt": "Does valid input mean the user is authorized?",
+        "answer": "No",
+        "options": [
+          "No",
+          "Yes, always",
+          "Only for admin users",
+          "Only when JSON is used"
+        ],
+        "explanation": "Validation and authorization answer different questions."
+      },
+      {
+        "id": "py236-q5",
+        "prompt": "What is normalization?",
+        "answer": "Converting accepted input into a consistent internal form",
+        "options": [
+          "Converting accepted input into a consistent internal form",
+          "Encrypting all input",
+          "Removing all validation",
+          "Serializing Python bytecode"
+        ],
+        "explanation": "Normalization standardizes values after or during validation."
+      }
+    ]
+  },
+  "status": "draft"
+}

@@ -1,0 +1,163 @@
+{
+  "id": "python.py23.7.en",
+  "courseId": "python",
+  "moduleId": "PY23",
+  "topicId": "PY23.7",
+  "title": "HTTP Fundamentals and Standard-Library API Requests",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of HTTP Fundamentals and Standard-Library API Requests.",
+    "Choose an appropriate http fundamentals and standard-library api requests technique for an application.",
+    "Interpret representative code and output involving http fundamentals and standard-library api requests.",
+    "Identify limitations and failure modes for http fundamentals and standard-library api requests.",
+    "Apply the concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY11.1",
+    "PY14.1",
+    "PY20.1",
+    "PY21.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "An HTTP API lets a client exchange requests and responses with a server. Python's urllib.request can issue HTTP requests using the standard library. A client should set an appropriate method and headers, handle status and transport errors, decode response bytes using the declared encoding and parse structured payloads. Network examples are environment-dependent and should not be assumed to work in an offline browser playground.",
+      "whyItMatters": "API integration allows Python applications to use external services while keeping request handling explicit and testable.",
+      "analogy": "An API request is a structured order sent to a service desk; the response reports what the service could do.",
+      "analogyLimit": "The service may be unavailable, slow, rate-limited or return unexpected data, and a successful HTTP response can still contain invalid application data.",
+      "summary": "HTTP Fundamentals and Standard-Library API Requests develops practical application engineering skills for Python projects."
+    },
+    "explain": {
+      "narrative": "## Build an explicit HTTP client\nUse `urllib.request.Request` to describe a request and `urlopen` with a timeout to send it. Handle `HTTPError` for HTTP error responses and `URLError` for transport failures. Read and decode response bytes, then parse JSON only after checking the response. Never put API secrets in source code or log authorization headers. The examples construct and inspect request objects locally; they do not depend on a live external service.",
+      "examples": [
+        {
+          "id": "py237-ex1",
+          "language": "en",
+          "title": "Construct a GET request",
+          "code": "from urllib.request import Request\nrequest = Request('https://api.example.test/items', method='GET')\nprint(request.get_method())",
+          "expectedOutput": "GET",
+          "explanation": "Request objects can be prepared and inspected without making a network call."
+        },
+        {
+          "id": "py237-ex2",
+          "language": "en",
+          "title": "Set an Accept header",
+          "code": "from urllib.request import Request\nrequest = Request('https://api.example.test/items', headers={'Accept': 'application/json'})\nprint(request.get_header('Accept'))",
+          "expectedOutput": "application/json",
+          "explanation": "The Accept header communicates the preferred response format."
+        },
+        {
+          "id": "py237-ex3",
+          "language": "en",
+          "title": "Build a POST request body",
+          "code": "from urllib.request import Request\nbody = b'{\"name\":\"Asha\"}'\nrequest = Request('https://api.example.test/users', data=body, headers={'Content-Type': 'application/json'})\nprint(request.get_method(), len(body))",
+          "expectedOutput": "POST 15",
+          "explanation": "Providing data makes the default request method POST; the body is bytes."
+        },
+        {
+          "id": "py237-ex4",
+          "language": "en",
+          "title": "Encode query parameters",
+          "code": "from urllib.parse import urlencode\nquery = urlencode({'page': 2, 'search': 'blue pen'})\nprint(query)",
+          "expectedOutput": "page=2&search=blue+pen",
+          "explanation": "urlencode safely encodes query parameter values."
+        },
+        {
+          "id": "py237-ex5",
+          "language": "en",
+          "title": "Classify common network exceptions",
+          "code": "from urllib.error import HTTPError, URLError\nprint(issubclass(HTTPError, URLError))",
+          "expectedOutput": "True",
+          "explanation": "HTTPError is a specialized URLError and can be handled before its parent."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Construct a GET request with an Accept header and encoded query parameters. Add a timeout and describe HTTPError and URLError handling.",
+      "independentTask": "Design an API client interface that separates request construction, transport, response decoding and payload validation.",
+      "hints": [
+        "Use Request to specify method, headers and optional body.",
+        "Use urlencode for query parameters.",
+        "Set a finite timeout for network operations.",
+        "Catch HTTPError before URLError if handling separately.",
+        "Never embed API keys in committed source code."
+      ],
+      "challenge": "Design a testable API client using an injected transport function so unit tests need no live network access.",
+      "validationCriteria": [
+        "The concept and intended use are accurately explained.",
+        "All examples execute with the documented output on Python 3.13.",
+        "External input, failure handling and dependency boundaries are treated appropriately.",
+        "Limitations and security implications are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py237-q1",
+        "prompt": "Which module provides Request and urlopen?",
+        "answer": "urllib.request",
+        "options": [
+          "urllib.request",
+          "json",
+          "sqlite3",
+          "dataclasses"
+        ],
+        "explanation": "urllib.request is part of the Python standard library."
+      },
+      {
+        "id": "py237-q2",
+        "prompt": "What does an Accept header communicate?",
+        "answer": "The response media type the client prefers",
+        "options": [
+          "The response media type the client prefers",
+          "The user's password",
+          "The server's database schema",
+          "The request timeout"
+        ],
+        "explanation": "Accept describes acceptable response media types."
+      },
+      {
+        "id": "py237-q3",
+        "prompt": "Why set a timeout on a network request?",
+        "answer": "To avoid waiting indefinitely for a response",
+        "options": [
+          "To avoid waiting indefinitely for a response",
+          "To encrypt the body",
+          "To guarantee a 200 response",
+          "To disable DNS"
+        ],
+        "explanation": "A finite timeout bounds how long the client waits."
+      },
+      {
+        "id": "py237-q4",
+        "prompt": "What does urlencode do?",
+        "answer": "Encodes query parameter names and values",
+        "options": [
+          "Encodes query parameter names and values",
+          "Parses JSON",
+          "Creates SQL placeholders",
+          "Validates passwords"
+        ],
+        "explanation": "urlencode converts parameters into URL query text."
+      },
+      {
+        "id": "py237-q5",
+        "prompt": "Where should API credentials be kept?",
+        "answer": "In a protected configuration or secret store",
+        "options": [
+          "In a protected configuration or secret store",
+          "In a public source file",
+          "In a URL committed to Git",
+          "In exception messages"
+        ],
+        "explanation": "Secrets should not be committed or exposed through logs."
+      }
+    ]
+  },
+  "status": "draft"
+}

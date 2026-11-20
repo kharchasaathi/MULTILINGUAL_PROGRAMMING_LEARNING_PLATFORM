@@ -1,0 +1,163 @@
+{
+  "id": "python.py23.5.en",
+  "courseId": "python",
+  "moduleId": "PY23",
+  "topicId": "PY23.5",
+  "title": "JSON Serialization, Deserialization and Schema Boundaries",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of JSON Serialization, Deserialization and Schema Boundaries.",
+    "Choose an appropriate json serialization, deserialization and schema boundaries technique for an application.",
+    "Interpret representative code and output involving json serialization, deserialization and schema boundaries.",
+    "Identify limitations and failure modes for json serialization, deserialization and schema boundaries.",
+    "Apply the concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY11.1",
+    "PY14.1",
+    "PY20.1",
+    "PY21.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "JSON is a text format for exchanging structured data. Python's json module converts compatible Python values to JSON text with dumps and parses JSON text with loads. Files use dump and load. JSON supports objects, arrays, strings, numbers, booleans and null, but not every Python object. Deserialization creates values; it does not prove that those values match an application's expected schema.",
+      "whyItMatters": "Reliable JSON handling is essential for configuration files, APIs, data interchange and persistent application records.",
+      "analogy": "Serialization packs structured information into a standard shipping format; deserialization unpacks it at the destination.",
+      "analogyLimit": "A valid package can still contain the wrong item; syntactically valid JSON may violate business rules or expected types.",
+      "summary": "JSON Serialization, Deserialization and Schema Boundaries develops practical application engineering skills for Python projects."
+    },
+    "explain": {
+      "narrative": "## Convert data carefully\nUse `json.dumps` and `json.loads` for in-memory conversion, and `json.dump` and `json.load` for file objects. Handle JSONDecodeError for malformed text. JSON object keys become strings, tuples become arrays, and custom objects need an explicit conversion strategy. After parsing untrusted JSON, validate required keys, types, ranges and allowed values before using it.",
+      "examples": [
+        {
+          "id": "py235-ex1",
+          "language": "en",
+          "title": "Serialize a dictionary",
+          "code": "import json\nrecord = {'name': 'Asha', 'active': True}\ntext = json.dumps(record, sort_keys=True)\nprint(text)",
+          "expectedOutput": "{\"active\": true, \"name\": \"Asha\"}",
+          "explanation": "dumps converts a Python mapping into JSON text."
+        },
+        {
+          "id": "py235-ex2",
+          "language": "en",
+          "title": "Deserialize JSON text",
+          "code": "import json\nvalue = json.loads('{\"count\": 3, \"ok\": true}')\nprint(value['count'], value['ok'])",
+          "expectedOutput": "3 True",
+          "explanation": "loads parses JSON text into Python values."
+        },
+        {
+          "id": "py235-ex3",
+          "language": "en",
+          "title": "Round-trip a nested value",
+          "code": "import json\noriginal = {'scores': [8, 9], 'note': None}\nrestored = json.loads(json.dumps(original))\nprint(restored == original)",
+          "expectedOutput": "True",
+          "explanation": "A compatible value can be serialized and parsed back with equivalent structure."
+        },
+        {
+          "id": "py235-ex4",
+          "language": "en",
+          "title": "Handle malformed JSON",
+          "code": "import json\ntry:\n    json.loads('{bad}')\nexcept json.JSONDecodeError:\n    print('invalid JSON')",
+          "expectedOutput": "invalid JSON",
+          "explanation": "Malformed JSON raises JSONDecodeError."
+        },
+        {
+          "id": "py235-ex5",
+          "language": "en",
+          "title": "Convert a tuple to JSON",
+          "code": "import json\ntext = json.dumps({'point': (2, 4)})\nprint(text)",
+          "expectedOutput": "{\"point\": [2, 4]}",
+          "explanation": "JSON arrays are decoded as Python lists; tuple identity is not preserved."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Parse a JSON string describing a learner. Check required keys and confirm age is a non-negative integer before displaying it.",
+      "independentTask": "Write a safe JSON import routine that handles malformed text, missing keys, wrong types and unknown optional fields.",
+      "hints": [
+        "Use dumps/loads for strings and dump/load for file objects.",
+        "Catch JSONDecodeError for malformed input.",
+        "Validate structure after parsing.",
+        "JSON object keys are strings.",
+        "Never deserialize untrusted data with pickle."
+      ],
+      "challenge": "Design a versioned JSON export format for an expense record and plan a migration for a future schema version.",
+      "validationCriteria": [
+        "The concept and intended use are accurately explained.",
+        "All examples execute with the documented output on Python 3.13.",
+        "External input, failure handling and dependency boundaries are treated appropriately.",
+        "Limitations and security implications are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py235-q1",
+        "prompt": "Which function converts a Python object to JSON text?",
+        "answer": "json.dumps()",
+        "options": [
+          "json.dumps()",
+          "json.loads()",
+          "json.parse_file()",
+          "json.decode_text()"
+        ],
+        "explanation": "dumps serializes Python data into a string."
+      },
+      {
+        "id": "py235-q2",
+        "prompt": "Which exception indicates malformed JSON text?",
+        "answer": "JSONDecodeError",
+        "options": [
+          "JSONDecodeError",
+          "KeyError",
+          "StopIteration",
+          "ImportError"
+        ],
+        "explanation": "The JSON decoder raises JSONDecodeError for invalid JSON syntax."
+      },
+      {
+        "id": "py235-q3",
+        "prompt": "Does successful JSON parsing validate business rules?",
+        "answer": "No",
+        "options": [
+          "No",
+          "Yes, all rules",
+          "Only numeric ranges",
+          "Only object keys"
+        ],
+        "explanation": "Parsing checks syntax; application code must validate schema and semantics."
+      },
+      {
+        "id": "py235-q4",
+        "prompt": "How are JSON arrays represented after loading?",
+        "answer": "Python lists",
+        "options": [
+          "Python lists",
+          "Python tuples",
+          "Python sets",
+          "Python generators"
+        ],
+        "explanation": "The standard JSON decoder maps arrays to lists."
+      },
+      {
+        "id": "py235-q5",
+        "prompt": "Why should pickle not be used for untrusted data?",
+        "answer": "Unpickling can execute arbitrary code",
+        "options": [
+          "Unpickling can execute arbitrary code",
+          "It only supports strings",
+          "It cannot store numbers",
+          "It is a JSON subset"
+        ],
+        "explanation": "Pickle is Python-specific and unsafe for untrusted serialized input."
+      }
+    ]
+  },
+  "status": "draft"
+}
