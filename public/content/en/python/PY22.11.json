@@ -1,0 +1,169 @@
+{
+  "id": "python.py22.11.en",
+  "courseId": "python",
+  "moduleId": "PY22",
+  "topicId": "PY22.11",
+  "title": "Asynchronous Iterators and Async Generators",
+  "language": "en",
+  "learningObjectives": [
+    "Explain async for, __aiter__, __anext__, async yield and async context.",
+    "Select a suitable concurrency or performance technique for PY22.11.",
+    "Interpret task, thread, process or profiling results correctly.",
+    "Identify limitations and risks when applying PY22.11.",
+    "Apply PY22.11 concepts in maintainable Python code."
+  ],
+  "prerequisites": [
+    "PY8.1",
+    "PY11.1",
+    "PY14.1",
+    "PY21.7",
+    "PY22.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "An asynchronous iterator provides values through an awaitable __anext__ method and signals completion with StopAsyncIteration. The async for statement consumes asynchronous iterators. An async generator is defined with async def and yield, and can produce values while awaiting asynchronous operations between them.",
+      "whyItMatters": "Asynchronous iteration supports streams whose next value may require waiting, such as network messages or asynchronous database cursors.",
+      "analogy": "An async iterator is a delivery service that may need to wait for the next package before continuing the route.",
+      "analogyLimit": "Async iteration requires an active event loop and an asynchronous source; it does not make an ordinary in-memory list faster.",
+      "summary": "Asynchronous Iterators and Async Generators develops advanced concurrency and performance skills."
+    },
+    "explain": {
+      "narrative": "## Iterate over asynchronous streams\nUse `async for` to consume an asynchronous iterator. An async iterator implements `__aiter__()` and `__anext__()`, with `__anext__` returning an awaitable. An async generator can yield values and await other operations between yields.\n\nUse async iteration when retrieving the next item involves asynchronous waiting. Keep resource cleanup explicit for streams and cursors, and use async context managers when the resource API provides them.",
+      "examples": [
+        {
+          "id": "py2211-ex1",
+          "language": "en",
+          "title": "Create an async generator",
+          "code": "import asyncio\nasync def values():\n    for number in range(3):\n        await asyncio.sleep(0)\n        yield number\nasync def main(): return [value async for value in values()]\nprint(asyncio.run(main()))",
+          "expectedOutput": "[0, 1, 2]",
+          "explanation": "An async generator yields values and can await between them."
+        },
+        {
+          "id": "py2211-ex2",
+          "language": "en",
+          "title": "Consume with async for",
+          "code": "import asyncio\nasync def letters():\n    for letter in 'abc': yield letter\nasync def main():\n    result = []\n    async for letter in letters(): result.append(letter)\n    return ''.join(result)\nprint(asyncio.run(main()))",
+          "expectedOutput": "abc",
+          "explanation": "async for repeatedly awaits the asynchronous iterator's next value."
+        },
+        {
+          "id": "py2211-ex3",
+          "language": "en",
+          "title": "Check async generator identity",
+          "code": "import inspect\nasync def stream(): yield 1\nprint(inspect.isasyncgenfunction(stream))",
+          "expectedOutput": "True",
+          "explanation": "inspect can identify asynchronous generator functions."
+        },
+        {
+          "id": "py2211-ex4",
+          "language": "en",
+          "title": "Close an async generator",
+          "code": "import asyncio\nasync def stream():\n    try: yield 1\n    finally: print('closed')\nasync def main():\n    generator = stream()\n    print(await anext(generator))\n    await generator.aclose()\nasyncio.run(main())",
+          "expectedOutput": "1\nclosed",
+          "explanation": "aclose requests asynchronous generator shutdown and runs its finally cleanup."
+        },
+        {
+          "id": "py2211-ex5",
+          "language": "en",
+          "title": "Describe asynchronous iterator protocol",
+          "code": "protocol = ['__aiter__', '__anext__', 'StopAsyncIteration']\nprint(len(protocol))",
+          "expectedOutput": "3",
+          "explanation": "These names form the core asynchronous iteration protocol."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Write an async generator that yields three values with an asyncio.sleep(0) between them, then consume it using async for.",
+      "independentTask": "Compare ordinary iterators, generators, asynchronous iterators and async generators with one practical use case for each.",
+      "hints": [
+        "async for consumes an asynchronous iterator.",
+        "__anext__ returns an awaitable.",
+        "StopAsyncIteration signals completion.",
+        "An async generator uses async def and yield.",
+        "Use async iteration when obtaining the next item can involve waiting."
+      ],
+      "challenge": "Design an asynchronous event stream consumer that handles end-of-stream and ensures the stream resource is closed on cancellation.",
+      "validationCriteria": [
+        "The concurrency or performance concept is accurately explained.",
+        "Examples execute with the documented output.",
+        "Synchronization, scheduling or profiling behaviour is correct.",
+        "Limitations and appropriate use cases are explained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2211-q1",
+        "prompt": "Which statement consumes an asynchronous iterator?",
+        "answer": "async for",
+        "options": [
+          "async for",
+          "for",
+          "async for",
+          "while only",
+          "with"
+        ],
+        "explanation": "async for awaits values from the asynchronous iterator."
+      },
+      {
+        "id": "py2211-q2",
+        "prompt": "What does __anext__ return?",
+        "answer": "An awaitable for the next item",
+        "options": [
+          "An awaitable for the next item",
+          "A synchronous list",
+          "An awaitable for the next item",
+          "A thread",
+          "A file path"
+        ],
+        "explanation": "The asynchronous iterator protocol makes the next item available through an awaitable."
+      },
+      {
+        "id": "py2211-q3",
+        "prompt": "Which exception signals asynchronous iterator exhaustion?",
+        "answer": "StopAsyncIteration",
+        "options": [
+          "StopAsyncIteration",
+          "StopIteration",
+          "StopAsyncIteration",
+          "KeyError",
+          "EOFError"
+        ],
+        "explanation": "StopAsyncIteration indicates that no more asynchronous values remain."
+      },
+      {
+        "id": "py2211-q4",
+        "prompt": "How is an async generator defined?",
+        "answer": "With async def and yield",
+        "options": [
+          "With async def and yield",
+          "With class and __iter__ only",
+          "With async def and yield",
+          "With lambda only",
+          "With def and return only"
+        ],
+        "explanation": "An async generator function combines async def and yield."
+      },
+      {
+        "id": "py2211-q5",
+        "prompt": "Why use async iteration?",
+        "answer": "When obtaining the next item may require asynchronous waiting",
+        "options": [
+          "When obtaining the next item may require asynchronous waiting",
+          "To speed up every list loop",
+          "When obtaining the next item may require asynchronous waiting",
+          "To avoid all exceptions",
+          "To replace every for loop"
+        ],
+        "explanation": "Async iteration is designed for streams where producing the next value may involve waiting."
+      }
+    ]
+  },
+  "status": "draft"
+}
