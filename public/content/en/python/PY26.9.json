@@ -1,0 +1,160 @@
+{
+  "id": "python.py26.9.en",
+  "courseId": "python",
+  "moduleId": "PY26",
+  "topicId": "PY26.9",
+  "title": "Python Encapsulation and Attribute Access",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the core concepts of Python Encapsulation and Attribute Access.",
+    "Choose an appropriate object-oriented design for a small Python problem.",
+    "Trace object state and method calls accurately.",
+    "Apply Python class features with correct method and attribute behavior.",
+    "Recognize design trade-offs, edge cases and maintainability concerns."
+  ],
+  "prerequisites": [
+    "PY26.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Encapsulation groups state and behavior and defines how callers should interact with an object. Python uses conventions rather than strict private access: a leading underscore marks a non-public implementation detail, while double-leading-underscore names are name-mangled to reduce accidental clashes. Properties and methods can enforce invariants; name mangling is not a security boundary.",
+      "whyItMatters": "A controlled interface protects object invariants, makes future changes safer and communicates which attributes are intended for public use.",
+      "analogy": "A device exposes buttons for supported operations while keeping internal circuitry as an implementation detail; the casing is not a security vault.",
+      "summary": "Python Encapsulation and Attribute Access introduces a focused part of Python's object model and its practical use."
+    },
+    "explain": {
+      "narrative": "Study the concept, trace the receiver and state for each operation, then run the examples. Pay attention to Python's conventions and documented protocol behavior rather than assuming that class syntax provides strict access control.",
+      "examples": [
+        {
+          "id": "py2609-ex1",
+          "language": "en",
+          "title": "Mark an internal attribute by convention",
+          "code": "class Account:\\n    def __init__(self, balance): self._balance = balance\\na = Account(50)\\nprint(a._balance)",
+          "expectedOutput": "50",
+          "explanation": "A single underscore communicates non-public intent but does not block access."
+        },
+        {
+          "id": "py2609-ex2",
+          "language": "en",
+          "title": "Use a property to protect a balance",
+          "code": "class Account:\\n    def __init__(self, balance): self._balance = balance\\n    @property\\n    def balance(self): return self._balance\\na = Account(80)\\nprint(a.balance)",
+          "expectedOutput": "80",
+          "explanation": "A public property provides a stable read interface."
+        },
+        {
+          "id": "py2609-ex3",
+          "language": "en",
+          "title": "Validate state changes",
+          "code": "class Account:\\n    def __init__(self): self._balance = 0\\n    def deposit(self, amount):\\n        if amount <= 0: raise ValueError('positive amount required')\\n        self._balance += amount\\na = Account(); a.deposit(25)\\nprint(a._balance)",
+          "expectedOutput": "25",
+          "explanation": "A method can enforce rules before changing internal state."
+        },
+        {
+          "id": "py2609-ex4",
+          "language": "en",
+          "title": "Understand name mangling",
+          "code": "class Vault:\\n    def __init__(self): self.__code = 123\\nv = Vault()\\nprint(hasattr(v, '__code'), hasattr(v, '_Vault__code'))",
+          "expectedOutput": "False True",
+          "explanation": "Double-leading-underscore names are rewritten to reduce subclass naming collisions."
+        },
+        {
+          "id": "py2609-ex5",
+          "language": "en",
+          "title": "Keep implementation replaceable",
+          "code": "class Temperature:\\n    def __init__(self, c): self._c = c\\n    def in_fahrenheit(self): return self._c * 9 / 5 + 32\\nt = Temperature(0)\\nprint(t.in_fahrenheit())",
+          "expectedOutput": "32.0",
+          "explanation": "Callers use behavior instead of depending on internal storage details."
+        }
+      ]
+    }
+  },
+  "practise": {
+    "guidedTask": "Build a small program that demonstrates python encapsulation and attribute access. Write down the object types, relevant attributes, method calls and expected state changes before running it.",
+    "independentTask": "Extend the example into a small domain model of your choice. Add validation, clear method names, boundary tests and a short explanation of why your design uses classes rather than simpler functions or data structures.",
+    "hints": [
+      "Identify which object owns each piece of state.",
+      "Trace the first argument supplied to every bound method.",
+      "Prefer explicit invariants and small public interfaces.",
+      "Test at least one boundary or unsupported input.",
+      "Use composition when it models the relationship more accurately than inheritance."
+    ],
+    "challenge": "Refactor the model into a testable design with clear responsibilities, documented public behavior and tests for normal, boundary and invalid cases.",
+    "validationCriteria": [
+      "All five examples execute on the supported Python version and match their outputs.",
+      "The implementation follows Python's documented class and special-method semantics.",
+      "State changes are scoped to the intended object or class.",
+      "Unsupported inputs produce a deliberate result or a clear exception.",
+      "The design avoids unnecessary inheritance, shared mutable defaults and misleading private-access claims."
+    ]
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2609-q1",
+        "prompt": "What does a leading underscore usually communicate?",
+        "answer": "Non-public implementation detail by convention",
+        "options": [
+          "Encrypted value",
+          "Non-public implementation detail by convention",
+          "A constant",
+          "A syntax error"
+        ],
+        "explanation": "A single underscore signals internal-use intent but does not enforce access control."
+      },
+      {
+        "id": "py2609-q2",
+        "prompt": "Does Python enforce strict private attributes?",
+        "answer": "No",
+        "options": [
+          "Yes, completely",
+          "No",
+          "Only for integers",
+          "Only in modules"
+        ],
+        "explanation": "Python relies largely on conventions and name mangling."
+      },
+      {
+        "id": "py2609-q3",
+        "prompt": "What does double-leading-underscore name mangling help prevent?",
+        "answer": "Accidental name clashes in subclasses",
+        "options": [
+          "All unauthorized access",
+          "Accidental name clashes in subclasses",
+          "Memory leaks",
+          "Type conversion"
+        ],
+        "explanation": "Name mangling reduces accidental collisions; it is not security."
+      },
+      {
+        "id": "py2609-q4",
+        "prompt": "What is a property useful for in encapsulation?",
+        "answer": "Controlling and validating attribute access",
+        "options": [
+          "Encrypting memory",
+          "Controlling and validating attribute access",
+          "Creating a process",
+          "Changing indentation"
+        ],
+        "explanation": "Properties can preserve invariants behind an attribute-like API."
+      },
+      {
+        "id": "py2609-q5",
+        "prompt": "Is underscore naming a security boundary?",
+        "answer": "No",
+        "options": [
+          "Yes",
+          "No",
+          "Only on Windows",
+          "Only for classes"
+        ],
+        "explanation": "Underscores communicate intent, not security guarantees."
+      }
+    ]
+  },
+  "status": "draft"
+}
