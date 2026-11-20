@@ -1,0 +1,163 @@
+{
+  "id": "python.py25.15.en",
+  "courseId": "python",
+  "moduleId": "PY25",
+  "topicId": "PY25.15",
+  "title": "Loading and Exporting CSV Data with Pandas",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and core concepts of Loading and Exporting CSV Data with Pandas.",
+    "Use the relevant NumPy or pandas APIs to solve a data task.",
+    "Inspect shapes, labels, dtypes and missing-value behaviour.",
+    "Choose appropriate operations and validate their outputs.",
+    "Identify performance, correctness and data-quality limitations."
+  ],
+  "prerequisites": [
+    "PY25.1",
+    "PY25.2",
+    "PY25.3",
+    "PY25.4"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Pandas read_csv() loads delimited text into a DataFrame and supports options for column selection, data types, missing-value markers, date parsing and row limits. to_csv() exports tabular data. Correct file paths, encodings, delimiters and type expectations are part of the input contract. Large datasets may require chunked processing rather than loading everything into memory.",
+      "whyItMatters": "Data analysis depends on choosing correct representations and operations. Understanding these structures helps learners process datasets accurately and explain their results.",
+      "analogy": "CSV is a paper-style table stored as text; pandas turns that text into a structured DataFrame. The analogy does not mean the file has a guaranteed schema: headers, quoting, missing markers and types still need verification.",
+      "summary": "Loading and Exporting CSV Data with Pandas adds practical library skills to the Python data-analysis workflow."
+    },
+    "explain": {
+      "narrative": "Use read_csv() with explicit options when the data contract is known. Inspect head(), columns, dtypes and shape after loading. Use usecols to limit input, dtype to control conversion and na_values to identify domain-specific missing markers. Use to_csv(index=False) when the DataFrame index is not part of the output schema. Treat file paths and external files as untrusted inputs.",
+      "examples": [
+        {
+          "id": "py2515-ex1",
+          "language": "en",
+          "title": "Read CSV text",
+          "code": "import pandas as pd\nfrom io import StringIO\nsource = StringIO('item,qty\\nPen,3\\nBook,2\\n')\ndf = pd.read_csv(source)\nprint(df['qty'].sum())",
+          "expectedOutput": "5",
+          "explanation": "read_csv parses CSV text into a DataFrame; the qty column is inferred as numeric."
+        },
+        {
+          "id": "py2515-ex2",
+          "language": "en",
+          "title": "Select columns while reading",
+          "code": "import pandas as pd\nfrom io import StringIO\nsource = StringIO('name,score,city\\nAsha,80,Delhi\\n')\ndf = pd.read_csv(source, usecols=['name', 'score'])\nprint(df.columns.tolist())",
+          "expectedOutput": "['name', 'score']",
+          "explanation": "usecols avoids loading columns that are not required."
+        },
+        {
+          "id": "py2515-ex3",
+          "language": "en",
+          "title": "Specify a column dtype",
+          "code": "import pandas as pd\nfrom io import StringIO\nsource = StringIO('code,qty\\n001,4\\n002,5\\n')\ndf = pd.read_csv(source, dtype={'code': 'string'})\nprint(df['code'].tolist())",
+          "expectedOutput": "['001', '002']",
+          "explanation": "An explicit string dtype preserves leading zeros in identifiers."
+        },
+        {
+          "id": "py2515-ex4",
+          "language": "en",
+          "title": "Recognize a custom missing marker",
+          "code": "import pandas as pd\nfrom io import StringIO\nsource = StringIO('item,qty\\nPen,NA\\nBook,2\\n')\ndf = pd.read_csv(source, na_values=['NA'])\nprint(int(df['qty'].isna().sum()))",
+          "expectedOutput": "1",
+          "explanation": "na_values adds domain-specific missing markers during parsing."
+        },
+        {
+          "id": "py2515-ex5",
+          "language": "en",
+          "title": "Export without the index",
+          "code": "import pandas as pd\nfrom io import StringIO\ndf = pd.DataFrame({'item': ['Pen'], 'qty': [3]})\nbuffer = StringIO()\ndf.to_csv(buffer, index=False)\nprint(buffer.getvalue().strip())",
+          "expectedOutput": "item,qty\nPen,3",
+          "explanation": "index=False prevents the DataFrame's internal index from becoming an extra CSV column."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Load a CSV string containing product codes, quantities and prices. Preserve product codes as strings, select only required columns, calculate totals and export a clean CSV without an index.",
+      "independentTask": "Create a reusable import/export workflow that checks required headers, sets explicit dtypes, records missing markers and validates the exported file by reading it back.",
+      "hints": [
+        "Use StringIO for deterministic in-memory examples.",
+        "Use dtype for identifiers that may contain leading zeros.",
+        "Inspect columns, dtypes and shape after reading.",
+        "Use na_values for known missing markers.",
+        "Use index=False when the index is not part of the file schema."
+      ],
+      "challenge": "Build a CSV round-trip function that validates a schema, exports to an in-memory buffer and verifies that the reloaded values match the intended records.",
+      "validationCriteria": [
+        "The required third-party dependency is installed in the active environment.",
+        "The code executes on the CI-supported Python version and matches expected output.",
+        "Array shapes, indexes, dtypes and missing-value rules are handled correctly.",
+        "The solution documents assumptions and edge cases.",
+        "The source data is not silently overwritten or exposed."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2515-q1",
+        "prompt": "Which function loads CSV into a DataFrame?",
+        "answer": "pd.read_csv()",
+        "options": [
+          "pd.read_csv()",
+          "pd.to_csv()",
+          "pd.open_csv()",
+          "pd.load_table()"
+        ],
+        "explanation": "read_csv parses CSV data into a DataFrame."
+      },
+      {
+        "id": "py2515-q2",
+        "prompt": "Why set dtype={'code': 'string'} for an identifier?",
+        "answer": "To preserve leading zeros and treat it as a label",
+        "options": [
+          "To preserve leading zeros and treat it as a label",
+          "To calculate its average",
+          "To make it a date",
+          "To remove duplicate codes"
+        ],
+        "explanation": "Identifiers are labels, not quantities; numeric inference can discard leading zeros."
+      },
+      {
+        "id": "py2515-q3",
+        "prompt": "What does usecols do?",
+        "answer": "Restricts the columns loaded",
+        "options": [
+          "Restricts the columns loaded",
+          "Sorts the rows",
+          "Converts every value to a float",
+          "Writes a CSV file"
+        ],
+        "explanation": "usecols selects the columns to read."
+      },
+      {
+        "id": "py2515-q4",
+        "prompt": "What does index=False do in to_csv()?",
+        "answer": "Omits the DataFrame index from the exported file",
+        "options": [
+          "Omits the DataFrame index from the exported file",
+          "Drops the first data row",
+          "Disables column headers",
+          "Sorts the output"
+        ],
+        "explanation": "The index is not written as an additional column."
+      },
+      {
+        "id": "py2515-q5",
+        "prompt": "Why inspect dtypes after read_csv()?",
+        "answer": "To confirm inferred or requested column types",
+        "options": [
+          "To confirm inferred or requested column types",
+          "To count file permissions",
+          "To verify network connectivity",
+          "To rename the CSV file"
+        ],
+        "explanation": "Type inspection catches unexpected parsing and inference."
+      }
+    ]
+  },
+  "status": "draft"
+}

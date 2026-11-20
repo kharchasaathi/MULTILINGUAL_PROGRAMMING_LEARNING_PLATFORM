@@ -1,0 +1,163 @@
+{
+  "id": "python.py25.16.en",
+  "courseId": "python",
+  "moduleId": "PY25",
+  "topicId": "PY25.16",
+  "title": "Cleaning DataFrames: Missing Values, Invalid Data and Duplicates",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and core concepts of Cleaning DataFrames: Missing Values, Invalid Data and Duplicates.",
+    "Use the relevant NumPy or pandas APIs to solve a data task.",
+    "Inspect shapes, labels, dtypes and missing-value behaviour.",
+    "Choose appropriate operations and validate their outputs.",
+    "Identify performance, correctness and data-quality limitations."
+  ],
+  "prerequisites": [
+    "PY25.1",
+    "PY25.2",
+    "PY25.3",
+    "PY25.4"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "DataFrame cleaning identifies and handles missing values, invalid formats, out-of-domain values and duplicate records. Pandas represents missing data using dtype-dependent missing markers such as NaN, NaT or nullable values. isna() detects missing entries, dropna() removes selected missing data, fillna() replaces missing values and drop_duplicates() removes duplicate rows according to chosen columns.",
+      "whyItMatters": "Data analysis depends on choosing correct representations and operations. Understanding these structures helps learners process datasets accurately and explain their results.",
+      "analogy": "Cleaning resembles checking a form for blank, inconsistent or repeated entries before using it. The analogy is limited because a blank may be meaningful, and automatically deleting or filling values can introduce bias or change the question being answered.",
+      "summary": "Cleaning DataFrames: Missing Values, Invalid Data and Duplicates adds practical library skills to the Python data-analysis workflow."
+    },
+    "explain": {
+      "narrative": "Profile missingness before modifying data. Choose a policy per column: reject, retain, fill with a justified value or remove records when appropriate. Use replace() for known invalid markers, to_numeric(errors='coerce') only when coercion to missing is an explicit policy, and drop_duplicates(subset=...) for defined duplicate keys. Preserve raw input and report how many records were changed.",
+      "examples": [
+        {
+          "id": "py2516-ex1",
+          "language": "en",
+          "title": "Count missing values",
+          "code": "import pandas as pd\ndf = pd.DataFrame({'score': [80, None, 90]})\nprint(int(df['score'].isna().sum()))",
+          "expectedOutput": "1",
+          "explanation": "isna() identifies missing cells and sum() counts them."
+        },
+        {
+          "id": "py2516-ex2",
+          "language": "en",
+          "title": "Fill a missing value",
+          "code": "import pandas as pd\ndf = pd.DataFrame({'qty': [2, None, 4]})\nclean = df['qty'].fillna(0)\nprint(clean.tolist())",
+          "expectedOutput": "[2.0, 0.0, 4.0]",
+          "explanation": "fillna() returns values with missing entries replaced; zero is appropriate only when the domain justifies it."
+        },
+        {
+          "id": "py2516-ex3",
+          "language": "en",
+          "title": "Drop rows missing a required field",
+          "code": "import pandas as pd\ndf = pd.DataFrame({'name': ['A', None, 'C'], 'score': [70, 80, 90]})\nclean = df.dropna(subset=['name'])\nprint(clean['name'].tolist())",
+          "expectedOutput": "['A', 'C']",
+          "explanation": "subset limits the missing-value check to the required name column."
+        },
+        {
+          "id": "py2516-ex4",
+          "language": "en",
+          "title": "Convert invalid numeric text",
+          "code": "import pandas as pd\nvalues = pd.Series(['10', 'bad', '25'])\nclean = pd.to_numeric(values, errors='coerce')\nprint(int(clean.isna().sum()))",
+          "expectedOutput": "1",
+          "explanation": "errors='coerce' converts unparseable values to missing values, which should be counted and reviewed."
+        },
+        {
+          "id": "py2516-ex5",
+          "language": "en",
+          "title": "Remove duplicate business keys",
+          "code": "import pandas as pd\ndf = pd.DataFrame({'order_id': [1, 1, 2], 'amount': [10, 10, 15]})\nclean = df.drop_duplicates(subset=['order_id'])\nprint(clean['order_id'].tolist())",
+          "expectedOutput": "[1, 2]",
+          "explanation": "The subset identifies the business key used to detect duplicate orders."
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Given a DataFrame with blank customer names, invalid quantities and repeated order IDs, profile the problems and apply a documented cleaning policy to a copy.",
+      "independentTask": "Build a cleaning report with missing counts, invalid numeric counts and duplicate-key counts. Compare row counts before and after each transformation and explain why each rule is justified.",
+      "hints": [
+        "Profile missing values before cleaning.",
+        "Do not replace missing values with zero without a domain reason.",
+        "Use subset when only selected columns are required.",
+        "Count values coerced to missing and review them.",
+        "Preserve raw data and document each cleaning rule."
+      ],
+      "challenge": "Create a clean_orders function that returns a cleaned DataFrame plus an audit dictionary showing input rows, missing values, invalid quantities, duplicate keys and output rows.",
+      "validationCriteria": [
+        "The required third-party dependency is installed in the active environment.",
+        "The code executes on the CI-supported Python version and matches expected output.",
+        "Array shapes, indexes, dtypes and missing-value rules are handled correctly.",
+        "The solution documents assumptions and edge cases.",
+        "The source data is not silently overwritten or exposed."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "py2516-q1",
+        "prompt": "Which method counts missing cells?",
+        "answer": "isna().sum()",
+        "options": [
+          "isna().sum()",
+          "drop_duplicates()",
+          "sort_values()",
+          "to_csv()"
+        ],
+        "explanation": "isna() identifies missing values and sum() counts them by column."
+      },
+      {
+        "id": "py2516-q2",
+        "prompt": "What does fillna() do?",
+        "answer": "Replaces missing values according to the supplied rule",
+        "options": [
+          "Replaces missing values according to the supplied rule",
+          "Sorts missing values",
+          "Removes duplicate rows",
+          "Reads a CSV file"
+        ],
+        "explanation": "fillna() fills missing entries; the replacement must be justified."
+      },
+      {
+        "id": "py2516-q3",
+        "prompt": "What does errors='coerce' do in to_numeric()?",
+        "answer": "Converts invalid values to missing numeric values",
+        "options": [
+          "Converts invalid values to missing numeric values",
+          "Raises on every invalid value",
+          "Converts all values to strings",
+          "Drops every row"
+        ],
+        "explanation": "Coercion creates missing values for values that cannot be parsed."
+      },
+      {
+        "id": "py2516-q4",
+        "prompt": "Why use drop_duplicates(subset=['order_id'])?",
+        "answer": "To define duplicate identity using the order ID column",
+        "options": [
+          "To define duplicate identity using the order ID column",
+          "To remove all rows with missing data",
+          "To sort order IDs",
+          "To convert IDs to integers"
+        ],
+        "explanation": "subset specifies which columns determine duplicate records."
+      },
+      {
+        "id": "py2516-q5",
+        "prompt": "What should happen before deleting or filling missing data?",
+        "answer": "Inspect and document the reason and impact",
+        "options": [
+          "Inspect and document the reason and impact",
+          "Always replace every missing cell with zero",
+          "Delete the source file",
+          "Ignore the affected columns"
+        ],
+        "explanation": "Cleaning decisions affect analysis and should be traceable."
+      }
+    ]
+  },
+  "status": "draft"
+}
