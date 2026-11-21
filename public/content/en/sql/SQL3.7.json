@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql3.7.en",
+  "courseId": "sql",
+  "moduleId": "SQL3",
+  "topicId": "SQL3.7",
+  "title": "ALTER TABLE: Changing Table Structure",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of alter table: changing table structure.",
+    "Identify the statement, target object and affected columns or rows.",
+    "Predict the result of the SQLite examples before running them.",
+    "Recognize destructive operations and database-product differences.",
+    "Apply safe, readable and maintainable database practices."
+  ],
+  "prerequisites": [
+    "SQL1.3",
+    "SQL2.1",
+    "SQL2.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "ALTER TABLE changes an existing table definition. Learn to add, rename and remove columns while checking the target DBMS version and supported operations.",
+      "whyItMatters": "Database and table operations define where data lives, how records are maintained and how safely a schema can evolve. Incorrect commands can cause data loss or break dependent application code.",
+      "analogy": "Think of a database as a filing room: tables are labelled cabinets, rows are records and schema changes alter the cabinet structure.",
+      "analogyLimit": "This analogy does not describe database files, transactions, indexes, permissions or the engine-specific rules that govern real SQL operations."
+    },
+    "explain": {
+      "narrative": "## Concept\nALTER TABLE changes an existing table definition. Learn to add, rename and remove columns while checking the target DBMS version and supported operations.\n\n## How the operation works\nIdentify whether the statement changes a database connection, defines a schema object, inserts or changes records, or removes a schema object. Check the target DBMS documentation because database-level commands, data types and ALTER TABLE capabilities vary across products. The runnable examples in this lesson target SQLite.\n\n## Important SQLite differences\nSQLite databases are files opened by an application or API; SQLite does not implement server-style CREATE DATABASE or USE statements. ATTACH DATABASE makes another database available to one connection. SQLite's INTEGER PRIMARY KEY and AUTOINCREMENT behaviour differs from MySQL AUTO_INCREMENT and SQL Server/PostgreSQL identity mechanisms. DROP COLUMN availability depends on SQLite version.\n\n## Worked examples\n### 1. Create a staff table with an old column\n```sql\nCREATE TABLE staff_records (staff_id INTEGER PRIMARY KEY, staff_name TEXT NOT NULL, obsolete_note TEXT); INSERT INTO staff_records VALUES (1, 'Asha', 'temporary');\n```\nExpected result: `1 row inserted`\n\nThe starting table contains a column that will be changed.\n\n### 2. Add a new column\n```sql\nALTER TABLE staff_records ADD COLUMN team_name TEXT;\n```\nExpected result: `Column added`\n\nSQLite supports adding a column with ALTER TABLE ... ADD COLUMN.\n\n### 3. Rename the new column\n```sql\nALTER TABLE staff_records RENAME COLUMN team_name TO department_name;\n```\nExpected result: `Column renamed`\n\nSQLite supports RENAME COLUMN in current versions; older engines may differ.\n\n### 4. Drop an obsolete column\n```sql\nALTER TABLE staff_records DROP COLUMN obsolete_note;\n```\nExpected result: `Column dropped`\n\nSQLite supports DROP COLUMN in current versions; verify compatibility with the deployed engine.\n\n### 5. Inspect the updated table structure\n```sql\nSELECT name FROM pragma_table_info('staff_records') ORDER BY cid;\n```\nExpected result: `staff_id\\nstaff_name\\ndepartment_name`\n\npragma_table_info exposes the columns of the specified table.\n\n## Safe database practices\n- Use explicit column lists for INSERT statements.\n- Preview rows with the same WHERE condition before UPDATE or DELETE.\n- Use transactions and tested backups for important data changes.\n- Review dependencies before ALTER TABLE or DROP TABLE.\n- Add indexes based on measured query patterns, not by default on every column.\n- Never assume server-style database commands work in SQLite.\n\n## Common mistakes\n- Running CREATE DATABASE or USE in SQLite.\n- Omitting a WHERE clause from UPDATE or DELETE unintentionally.\n- Assuming CREATE TABLE IF NOT EXISTS migrates an existing schema.\n- Using AUTOINCREMENT without understanding its additional guarantee and cost.\n- Dropping tables or indexes without checking dependencies.",
+      "examples": [
+        {
+          "id": "sql3.7-ex1",
+          "language": "en",
+          "title": "Create a staff table with an old column",
+          "code": "CREATE TABLE staff_records (staff_id INTEGER PRIMARY KEY, staff_name TEXT NOT NULL, obsolete_note TEXT); INSERT INTO staff_records VALUES (1, 'Asha', 'temporary');",
+          "expectedOutput": "1 row inserted",
+          "explanation": "The starting table contains a column that will be changed.",
+          "runnable": true
+        },
+        {
+          "id": "sql3.7-ex2",
+          "language": "en",
+          "title": "Add a new column",
+          "code": "ALTER TABLE staff_records ADD COLUMN team_name TEXT;",
+          "expectedOutput": "Column added",
+          "explanation": "SQLite supports adding a column with ALTER TABLE ... ADD COLUMN.",
+          "runnable": true
+        },
+        {
+          "id": "sql3.7-ex3",
+          "language": "en",
+          "title": "Rename the new column",
+          "code": "ALTER TABLE staff_records RENAME COLUMN team_name TO department_name;",
+          "expectedOutput": "Column renamed",
+          "explanation": "SQLite supports RENAME COLUMN in current versions; older engines may differ.",
+          "runnable": true
+        },
+        {
+          "id": "sql3.7-ex4",
+          "language": "en",
+          "title": "Drop an obsolete column",
+          "code": "ALTER TABLE staff_records DROP COLUMN obsolete_note;",
+          "expectedOutput": "Column dropped",
+          "explanation": "SQLite supports DROP COLUMN in current versions; verify compatibility with the deployed engine.",
+          "runnable": true
+        },
+        {
+          "id": "sql3.7-ex5",
+          "language": "en",
+          "title": "Inspect the updated table structure",
+          "code": "SELECT name FROM pragma_table_info('staff_records') ORDER BY cid;",
+          "expectedOutput": "staff_id\\nstaff_name\\ndepartment_name",
+          "explanation": "pragma_table_info exposes the columns of the specified table.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the five examples for ALTER TABLE: Changing Table Structure in the SQL Playground. Before each statement, identify the object and rows it may affect, predict the outcome, then inspect the result.",
+      "independentTask": "Create a small original database task that demonstrates ALTER TABLE: Changing Table Structure. Write at least five statements, include one safety check or verification query, and explain any SQLite-specific syntax.",
+      "hints": [
+        "Read the target database, table and column names carefully.",
+        "Use explicit column lists and meaningful identifiers.",
+        "Preview the affected rows before broad UPDATE or DELETE operations.",
+        "Check SQLite and other DBMS version differences before schema changes.",
+        "Use backups or transactions before destructive production operations."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE staff_records (staff_id INTEGER PRIMARY KEY, staff_name TEXT NOT NULL, obsolete_note TEXT); INSERT INTO staff_records VALUES (1, 'Asha', 'temporary');\n\nALTER TABLE staff_records ADD COLUMN team_name TEXT;\n\nALTER TABLE staff_records RENAME COLUMN team_name TO department_name;\n\nALTER TABLE staff_records DROP COLUMN obsolete_note;\n\nSELECT name FROM pragma_table_info('staff_records') ORDER BY cid;",
+    "resetCode": "CREATE TABLE staff_records (staff_id INTEGER PRIMARY KEY, staff_name TEXT NOT NULL, obsolete_note TEXT); INSERT INTO staff_records VALUES (1, 'Asha', 'temporary');\n\nALTER TABLE staff_records ADD COLUMN team_name TEXT;\n\nALTER TABLE staff_records RENAME COLUMN team_name TO department_name;\n\nALTER TABLE staff_records DROP COLUMN obsolete_note;\n\nSELECT name FROM pragma_table_info('staff_records') ORDER BY cid;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql3.7-q1",
+        "prompt": "Which command changes an existing table definition?",
+        "options": [
+          "ALTER TABLE",
+          "INSERT TABLE",
+          "CHANGE DATABASE",
+          "UPDATE SCHEMA FILE"
+        ],
+        "answer": "ALTER TABLE",
+        "explanation": "ALTER TABLE modifies a table's structure."
+      },
+      {
+        "id": "sql3.7-q2",
+        "prompt": "Which clause adds a column in SQLite?",
+        "options": [
+          "ADD COLUMN",
+          "INSERT COLUMN",
+          "APPEND FIELD",
+          "CREATE COLUMN"
+        ],
+        "answer": "ADD COLUMN",
+        "explanation": "ALTER TABLE ... ADD COLUMN adds a new column."
+      },
+      {
+        "id": "sql3.7-q3",
+        "prompt": "What does RENAME COLUMN do?",
+        "options": [
+          "Changes a column's name",
+          "Deletes all its rows",
+          "Creates a database",
+          "Changes every value"
+        ],
+        "answer": "Changes a column's name",
+        "explanation": "RENAME COLUMN changes the identifier while retaining the column data."
+      },
+      {
+        "id": "sql3.7-q4",
+        "prompt": "Why should DROP COLUMN be checked against the target engine version?",
+        "options": [
+          "Support and restrictions vary by DBMS and version",
+          "It only works on empty databases",
+          "It always drops the whole database",
+          "It is a comment"
+        ],
+        "answer": "Support and restrictions vary by DBMS and version",
+        "explanation": "ALTER TABLE capabilities differ across products and versions."
+      },
+      {
+        "id": "sql3.7-q5",
+        "prompt": "What should be reviewed before ALTER TABLE?",
+        "options": [
+          "Dependencies, existing data and compatibility",
+          "Only the browser title",
+          "The query editor colour",
+          "The number of open windows"
+        ],
+        "answer": "Dependencies, existing data and compatibility",
+        "explanation": "Schema changes can affect applications, views, indexes and stored data."
+      }
+    ]
+  },
+  "status": "draft"
+}

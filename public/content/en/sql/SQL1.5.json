@@ -1,0 +1,155 @@
+{
+  "id": "sql.sql1.5.en",
+  "courseId": "sql",
+  "moduleId": "SQL1",
+  "topicId": "SQL1.5",
+  "title": "Foreign Keys and Table Relationships",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the core concepts of Foreign Keys and Table Relationships.",
+    "Identify the SQL structures and terminology used in this topic.",
+    "Read and interpret an original SQL example related to Foreign Keys and Table Relationships.",
+    "Predict the expected behaviour or result of a query in the stated engine context.",
+    "Apply safe and maintainable practices when using this concept."
+  ],
+  "prerequisites": [],
+  "stages": {
+    "understand": {
+      "concept": "A foreign key is a constraint that links one or more columns in a child table to a candidate key, usually the primary key, in a parent table. It helps enforce referential integrity by preventing references to missing parent rows, subject to the configured database rules.",
+      "whyItMatters": "Foreign keys model relationships between entities and protect data consistency. For example, an order can refer to an existing customer rather than storing an unverified customer identifier.",
+      "analogy": "A foreign key is like a reference number on a form that must match an existing entry in a master register.",
+      "analogyLimit": "A reference number alone does not guarantee that the related record exists; the database must enforce the foreign-key constraint. Enforcement settings and syntax can vary by DBMS."
+    },
+    "explain": {
+      "narrative": "## Parent and child tables\nA parent table contains the referenced key. A child table contains the foreign key. For example, Customer(customer_id) can be the parent and Orders(customer_id) the child. Each order refers to a customer.\n\n## Referential integrity\nA foreign key can prevent a child row from referring to a parent key that does not exist. It can also define what happens when a referenced parent row is updated or deleted, using actions such as RESTRICT, CASCADE or SET NULL where supported and appropriate.\n\n## SQLite enforcement\nSQLite supports foreign-key constraints, but enforcement must be enabled for each connection using PRAGMA foreign_keys = ON. A browser Playground must initialize this setting for every database connection/session. Other database engines have their own defaults and configuration rules.\n\n## Relationship types\nOne-to-many is commonly represented by placing the foreign key on the many side. Many-to-many relationships generally use a junction table containing foreign keys to both parent tables. One-to-one relationships require an additional uniqueness rule on the foreign-key column.\n\n## Design carefully\nChoose matching compatible key types, index foreign-key columns when useful for workload and understand delete/update actions before using CASCADE. Do not use cascading deletion without considering the business meaning and recovery requirements.",
+      "examples": [
+        {
+          "id": "sql1.5-ex1",
+          "language": "en",
+          "title": "Create parent and child tables",
+          "code": "PRAGMA foreign_keys = ON;\nCREATE TABLE Customer (customer_id INTEGER PRIMARY KEY, name TEXT NOT NULL);\nCREATE TABLE Orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL, FOREIGN KEY (customer_id) REFERENCES Customer(customer_id));",
+          "expectedOutput": "Tables created; foreign-key enforcement enabled for this connection",
+          "explanation": "SQLite requires foreign-key enforcement to be enabled per connection. The child table references the parent primary key.",
+          "runnable": false
+        },
+        {
+          "id": "sql1.5-ex2",
+          "language": "en",
+          "title": "Insert a parent then a child",
+          "code": "INSERT INTO Customer VALUES (1, 'Asha');\nINSERT INTO Orders VALUES (501, 1);",
+          "expectedOutput": "1 row inserted into Customer; 1 row inserted into Orders",
+          "explanation": "The referenced customer exists before the order is inserted.",
+          "runnable": false
+        },
+        {
+          "id": "sql1.5-ex3",
+          "language": "en",
+          "title": "Join child rows to their parent",
+          "code": "SELECT Orders.order_id, Customer.name FROM Orders JOIN Customer ON Orders.customer_id = Customer.customer_id;",
+          "expectedOutput": "order_id | name\n501      | Asha",
+          "explanation": "The join matches the foreign-key value to the parent key.",
+          "runnable": false
+        },
+        {
+          "id": "sql1.5-ex4",
+          "language": "en",
+          "title": "Reject an orphan reference",
+          "code": "INSERT INTO Orders VALUES (502, 999);",
+          "expectedOutput": "Error: FOREIGN KEY constraint failed",
+          "explanation": "With SQLite foreign-key enforcement enabled, a child row cannot reference a missing customer. Exact error text varies.",
+          "runnable": false
+        },
+        {
+          "id": "sql1.5-ex5",
+          "language": "en",
+          "title": "Model a many-to-many relationship",
+          "code": "CREATE TABLE Course (course_id INTEGER PRIMARY KEY, title TEXT NOT NULL);\nCREATE TABLE Enrollment (student_id INTEGER, course_id INTEGER, PRIMARY KEY (student_id, course_id), FOREIGN KEY (course_id) REFERENCES Course(course_id));",
+          "expectedOutput": "Tables created",
+          "explanation": "A junction table stores associations. A production Enrollment table would also reference a Student primary key; the example focuses on the course-side relationship and composite identity.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Study the five examples for Foreign Keys and Table Relationships. For each example, identify the SQL statement, predict its effect or result, then verify it in a compatible SQL engine when available.",
+      "independentTask": "Create a small relational database scenario that demonstrates Foreign Keys and Table Relationships. Write at least three queries or statements, explain the expected result, and identify any assumptions about the database dialect.",
+      "hints": [
+        "Read the statement from its first keyword and identify the target object.",
+        "Check table and column names against the schema before running a query.",
+        "Use explicit column names when they make the query clearer.",
+        "Predict the result before executing; then compare it with the actual result.",
+        "Check the target database engine's documentation for dialect-specific behaviour."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "PRAGMA foreign_keys = ON;\nCREATE TABLE Customer (customer_id INTEGER PRIMARY KEY, name TEXT NOT NULL);\nCREATE TABLE Orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL, FOREIGN KEY (customer_id) REFERENCES Customer(customer_id));",
+    "resetCode": "PRAGMA foreign_keys = ON;\nCREATE TABLE Customer (customer_id INTEGER PRIMARY KEY, name TEXT NOT NULL);\nCREATE TABLE Orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL, FOREIGN KEY (customer_id) REFERENCES Customer(customer_id));"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql1.5-q1",
+        "prompt": "Which table normally contains the referenced key in a foreign-key relationship?",
+        "options": [
+          "The parent table",
+          "Only the child table",
+          "A temporary query result",
+          "The transaction log"
+        ],
+        "answer": "The parent table",
+        "explanation": "The parent table exposes the referenced candidate key, commonly its primary key."
+      },
+      {
+        "id": "sql1.5-q2",
+        "prompt": "What does a foreign key help enforce?",
+        "options": [
+          "Referential integrity",
+          "Text formatting",
+          "Query indentation",
+          "Column display width"
+        ],
+        "answer": "Referential integrity",
+        "explanation": "A foreign key can prevent child rows from referencing missing parent rows."
+      },
+      {
+        "id": "sql1.5-q3",
+        "prompt": "In SQLite, what must be enabled on a connection for foreign-key enforcement?",
+        "options": [
+          "PRAGMA foreign_keys = ON",
+          "PRAGMA table_info = ON",
+          "SET FOREIGN_KEY_MODE = TEXT",
+          "CREATE FOREIGN_KEY_ENGINE"
+        ],
+        "answer": "PRAGMA foreign_keys = ON",
+        "explanation": "SQLite foreign-key enforcement must be enabled for each connection."
+      },
+      {
+        "id": "sql1.5-q4",
+        "prompt": "Where is a foreign key commonly placed for a one-to-many relationship?",
+        "options": [
+          "On the many-side (child) table",
+          "Only in the parent table",
+          "In a SQL comment",
+          "In a view definition only"
+        ],
+        "answer": "On the many-side (child) table",
+        "explanation": "Each child row stores the key of its related parent row."
+      },
+      {
+        "id": "sql1.5-q5",
+        "prompt": "How is a many-to-many relationship commonly represented?",
+        "options": [
+          "With a junction table that references both related tables",
+          "By duplicating all columns into one table",
+          "By using a single nullable text field",
+          "By removing both primary keys"
+        ],
+        "answer": "With a junction table that references both related tables",
+        "explanation": "A junction table stores associations and normally contains foreign keys to both parent tables."
+      }
+    ]
+  },
+  "status": "draft"
+}

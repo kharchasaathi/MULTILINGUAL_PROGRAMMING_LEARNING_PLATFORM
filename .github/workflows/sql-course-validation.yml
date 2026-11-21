@@ -1,0 +1,38 @@
+name: SQL course validation
+
+on:
+  push:
+    branches: [release/v1-frontend, content/sql-course-foundation]
+    paths:
+      - "public/content/en/sql/**"
+      - "public/content/curriculum-index.json"
+      - "public/content/lesson.schema.json"
+      - "scripts/validate-sql-course.mjs"
+      - ".github/workflows/sql-course-validation.yml"
+  pull_request:
+    branches: [release/v1-frontend]
+    paths:
+      - "public/content/en/sql/**"
+      - "public/content/curriculum-index.json"
+      - "public/content/lesson.schema.json"
+      - "scripts/validate-sql-course.mjs"
+      - ".github/workflows/sql-course-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-sql:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check Python SQLite runtime
+        run: python3 -c "import sqlite3; print('SQLite', sqlite3.sqlite_version)"
+      - name: Validate SQL lessons and execute examples in SQLite
+        run: node scripts/validate-sql-course.mjs

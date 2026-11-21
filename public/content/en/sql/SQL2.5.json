@@ -1,0 +1,158 @@
+{
+  "id": "sql.sql2.5.en",
+  "courseId": "sql",
+  "moduleId": "SQL2",
+  "topicId": "SQL2.5",
+  "title": "SQL NULL Values and Unknown Comparisons",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and structure of sql null values and unknown comparisons.",
+    "Identify SQL keywords, clauses, identifiers and literal values used in the examples.",
+    "Predict the result of a query before running it in the stated SQLite context.",
+    "Recognize common syntax mistakes and explain how to correct them.",
+    "Apply readable, dialect-aware SQL practices in a small database task."
+  ],
+  "prerequisites": [
+    "SQL1.1",
+    "SQL1.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "NULL represents missing or unknown information. Learn SQL's three-valued logic, correct NULL predicates and safe fallback functions.",
+      "whyItMatters": "Clear syntax and precise value handling make SQL easier to review, debug and maintain. Small misunderstandings about identifiers, comments, literals or NULL can produce incorrect results or failed queries.",
+      "analogy": "A SQL statement resembles a carefully labelled instruction: its action, target and conditions must be clear to the database engine.",
+      "analogyLimit": "A database does not infer a learner's intent. It follows the exact grammar, data types, permissions and NULL rules implemented by the selected engine."
+    },
+    "explain": {
+      "narrative": "## Core idea\nNULL represents missing or unknown information. Learn SQL's three-valued logic, correct NULL predicates and safe fallback functions.\n\n## Statement structure and interpretation\nRead a SQL statement from its main keyword, then identify its clauses, object names, expressions and optional conditions. The exact grammar is defined by the database product's SQL dialect. SQL is declarative: a query describes the requested result, while the engine determines an execution strategy.\n\n## Naming and values\nObject identifiers name schema objects and columns. String and numeric literals represent values. Do not confuse a quoted string such as 'status' with a column identifier named status. Prefer descriptive, stable names and avoid reserved keywords. Delimited identifiers are useful when needed, but quoting rules differ among products.\n\n## Comments, formatting and case\nComments explain intent but are not executed. Uppercase keywords are a convention that improves scanning; they are not a requirement in SQLite. Text literal values preserve their content, and comparison sensitivity can depend on collation.\n\n## Expressions and NULL\nExpressions can calculate values in a SELECT list. NULL is not zero or an empty string. Comparisons with NULL generally produce UNKNOWN; use IS NULL and IS NOT NULL. WHERE retains only rows whose predicate is TRUE.\n\n## Dialect and execution notes\nExamples in this lesson target SQLite unless explicitly stated. SQLite uses || for string concatenation and stores dates using supported storage classes such as TEXT, REAL or INTEGER rather than a dedicated DATE storage class. Other database products may use different types, functions or operators.\n\n### Example 1: Test whether a value is NULL\n```sql\nSELECT NULL IS NULL AS is_missing;\n```\nExpected result:\n```text\nis_missing\n1\n```\nUse IS NULL to test for a missing or unknown value; SQLite returns 1 for true.\n\n### Example 2: Test for a present value\n```sql\nSELECT NULL IS NOT NULL AS is_present;\n```\nExpected result:\n```text\nis_present\n0\n```\nIS NOT NULL tests whether an expression is not NULL.\n\n### Example 3: Compare a value with NULL\n```sql\nSELECT 5 = NULL AS comparison_result;\n```\nExpected result:\n```text\ncomparison_result\nNULL\n```\nOrdinary equality comparison with NULL yields unknown (represented as NULL in this result), not true or false.\n\n### Example 4: Provide a display fallback\n```sql\nSELECT COALESCE(NULL, 'Not provided') AS display_value;\n```\nExpected result:\n```text\ndisplay_value\nNot provided\n```\nCOALESCE returns the first non-NULL argument.\n\n### Example 5: Turn a sentinel value into NULL\n```sql\nSELECT NULLIF(0, 0) AS safe_divisor;\n```\nExpected result:\n```text\nsafe_divisor\nNULL\n```\nNULLIF returns NULL when its two arguments compare equal.\n\n## Common mistakes\n- Treating a string literal as a column identifier.\n- Using = NULL instead of IS NULL.\n- Assuming quoted identifier syntax is identical in every product.\n- Assuming every engine stores dates or displays Boolean values the same way.\n- Writing comments that accidentally consume the rest of a line or omit a closing block-comment delimiter.\n\n## Best practices\nUse readable clause formatting, descriptive identifiers, explicit aliases, standard single-quoted string literals, and NULL-aware predicates. Verify dialect-specific syntax in the target database documentation before using it in production.",
+      "examples": [
+        {
+          "id": "sql2.5-ex1",
+          "language": "en",
+          "title": "Test whether a value is NULL",
+          "code": "SELECT NULL IS NULL AS is_missing;",
+          "expectedOutput": "is_missing\n1",
+          "explanation": "Use IS NULL to test for a missing or unknown value; SQLite returns 1 for true.",
+          "runnable": false
+        },
+        {
+          "id": "sql2.5-ex2",
+          "language": "en",
+          "title": "Test for a present value",
+          "code": "SELECT NULL IS NOT NULL AS is_present;",
+          "expectedOutput": "is_present\n0",
+          "explanation": "IS NOT NULL tests whether an expression is not NULL.",
+          "runnable": false
+        },
+        {
+          "id": "sql2.5-ex3",
+          "language": "en",
+          "title": "Compare a value with NULL",
+          "code": "SELECT 5 = NULL AS comparison_result;",
+          "expectedOutput": "comparison_result\nNULL",
+          "explanation": "Ordinary equality comparison with NULL yields unknown (represented as NULL in this result), not true or false.",
+          "runnable": false
+        },
+        {
+          "id": "sql2.5-ex4",
+          "language": "en",
+          "title": "Provide a display fallback",
+          "code": "SELECT COALESCE(NULL, 'Not provided') AS display_value;",
+          "expectedOutput": "display_value\nNot provided",
+          "explanation": "COALESCE returns the first non-NULL argument.",
+          "runnable": false
+        },
+        {
+          "id": "sql2.5-ex5",
+          "language": "en",
+          "title": "Turn a sentinel value into NULL",
+          "code": "SELECT NULLIF(0, 0) AS safe_divisor;",
+          "expectedOutput": "safe_divisor\nNULL",
+          "explanation": "NULLIF returns NULL when its two arguments compare equal.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "For SQL NULL Values and Unknown Comparisons, run the five examples in order in a SQLite-compatible environment. Before each run, identify the keyword, any identifiers and literals, and predict the output. Explain why the result matches the statement.",
+      "independentTask": "Create five original SQL statements that demonstrate SQL NULL Values and Unknown Comparisons. Include at least one example that could be misunderstood by a beginner, explain the correct interpretation, and state any SQLite-specific assumptions.",
+      "hints": [
+        "Identify the main SQL keyword before interpreting the rest of the statement.",
+        "Distinguish object identifiers from quoted text literals.",
+        "Use parentheses where they make expression grouping clearer.",
+        "Check NULL with IS NULL or IS NOT NULL rather than equality.",
+        "When syntax is dialect-specific, name the engine and verify its documentation."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "SELECT NULL IS NULL AS is_missing;",
+    "resetCode": "SELECT NULL IS NULL AS is_missing;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql2.5-q1",
+        "prompt": "Which predicate correctly finds rows with a NULL value?",
+        "options": [
+          "column_name IS NULL",
+          "column_name = NULL",
+          "column_name == NULL",
+          "column_name LIKE NULL"
+        ],
+        "answer": "column_name IS NULL",
+        "explanation": "NULL is tested with IS NULL, not ordinary equality."
+      },
+      {
+        "id": "sql2.5-q2",
+        "prompt": "What does 5 = NULL evaluate to under SQL three-valued logic?",
+        "options": [
+          "UNKNOWN",
+          "TRUE",
+          "FALSE",
+          "5"
+        ],
+        "answer": "UNKNOWN",
+        "explanation": "A comparison with NULL normally yields UNKNOWN."
+      },
+      {
+        "id": "sql2.5-q3",
+        "prompt": "What does COALESCE return?",
+        "options": [
+          "The first non-NULL argument",
+          "The last table created",
+          "The largest number only",
+          "A random value"
+        ],
+        "answer": "The first non-NULL argument",
+        "explanation": "COALESCE scans its arguments and returns the first value that is not NULL."
+      },
+      {
+        "id": "sql2.5-q4",
+        "prompt": "What does NULLIF(a, b) return when a equals b?",
+        "options": [
+          "NULL",
+          "a + b",
+          "An empty string",
+          "A Boolean column"
+        ],
+        "answer": "NULL",
+        "explanation": "NULLIF returns NULL when its arguments compare equal."
+      },
+      {
+        "id": "sql2.5-q5",
+        "prompt": "Why can WHERE column_name = NULL not find missing values?",
+        "options": [
+          "The comparison is UNKNOWN rather than TRUE",
+          "WHERE ignores all predicates",
+          "NULL is always zero",
+          "The column must be indexed"
+        ],
+        "answer": "The comparison is UNKNOWN rather than TRUE",
+        "explanation": "WHERE keeps rows whose predicate is TRUE; UNKNOWN does not qualify."
+      }
+    ]
+  },
+  "status": "draft"
+}

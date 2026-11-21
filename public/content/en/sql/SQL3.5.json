@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql3.5.en",
+  "courseId": "sql",
+  "moduleId": "SQL3",
+  "topicId": "SQL3.5",
+  "title": "UPDATE: Modifying Existing Rows",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of update: modifying existing rows.",
+    "Identify the statement, target object and affected columns or rows.",
+    "Predict the result of the SQLite examples before running them.",
+    "Recognize destructive operations and database-product differences.",
+    "Apply safe, readable and maintainable database practices."
+  ],
+  "prerequisites": [
+    "SQL1.3",
+    "SQL2.1",
+    "SQL2.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "UPDATE changes values in existing rows. Learn SET assignments, conditions, multi-column changes and why checking the WHERE clause is essential.",
+      "whyItMatters": "Database and table operations define where data lives, how records are maintained and how safely a schema can evolve. Incorrect commands can cause data loss or break dependent application code.",
+      "analogy": "Think of a database as a filing room: tables are labelled cabinets, rows are records and schema changes alter the cabinet structure.",
+      "analogyLimit": "This analogy does not describe database files, transactions, indexes, permissions or the engine-specific rules that govern real SQL operations."
+    },
+    "explain": {
+      "narrative": "## Concept\nUPDATE changes values in existing rows. Learn SET assignments, conditions, multi-column changes and why checking the WHERE clause is essential.\n\n## How the operation works\nIdentify whether the statement changes a database connection, defines a schema object, inserts or changes records, or removes a schema object. Check the target DBMS documentation because database-level commands, data types and ALTER TABLE capabilities vary across products. The runnable examples in this lesson target SQLite.\n\n## Important SQLite differences\nSQLite databases are files opened by an application or API; SQLite does not implement server-style CREATE DATABASE or USE statements. ATTACH DATABASE makes another database available to one connection. SQLite's INTEGER PRIMARY KEY and AUTOINCREMENT behaviour differs from MySQL AUTO_INCREMENT and SQL Server/PostgreSQL identity mechanisms. DROP COLUMN availability depends on SQLite version.\n\n## Worked examples\n### 1. Create a product table and seed rows\n```sql\nCREATE TABLE stock_items (item_id INTEGER PRIMARY KEY, item_name TEXT NOT NULL, quantity INTEGER NOT NULL, unit_price REAL NOT NULL); INSERT INTO stock_items VALUES (1, 'Notebook', 12, 45.0), (2, 'Pen', 30, 10.0), (3, 'Folder', 8, 25.0);\n```\nExpected result: `3 rows inserted`\n\nThe sample data gives the update examples a controlled target.\n\n### 2. Update one row by its primary key\n```sql\nUPDATE stock_items SET quantity = 15 WHERE item_id = 1;\n```\nExpected result: `1 row updated`\n\nThe WHERE condition limits the update to one identified row.\n\n### 3. Update rows matching a condition\n```sql\nUPDATE stock_items SET unit_price = unit_price * 1.10 WHERE quantity < 10;\n```\nExpected result: `1 row updated`\n\nAn expression can calculate a new value for each matching row.\n\n### 4. Update more than one column\n```sql\nUPDATE stock_items SET quantity = 20, unit_price = 12.5 WHERE item_id = 2;\n```\nExpected result: `1 row updated`\n\nA single UPDATE can assign values to multiple columns.\n\n### 5. Review the resulting records\n```sql\nSELECT item_name, quantity, unit_price FROM stock_items ORDER BY item_id;\n```\nExpected result: `Notebook | 15 | 45.0\\nPen | 20 | 12.5\\nFolder | 8 | 27.5`\n\nA SELECT query verifies the changed values.\n\n## Safe database practices\n- Use explicit column lists for INSERT statements.\n- Preview rows with the same WHERE condition before UPDATE or DELETE.\n- Use transactions and tested backups for important data changes.\n- Review dependencies before ALTER TABLE or DROP TABLE.\n- Add indexes based on measured query patterns, not by default on every column.\n- Never assume server-style database commands work in SQLite.\n\n## Common mistakes\n- Running CREATE DATABASE or USE in SQLite.\n- Omitting a WHERE clause from UPDATE or DELETE unintentionally.\n- Assuming CREATE TABLE IF NOT EXISTS migrates an existing schema.\n- Using AUTOINCREMENT without understanding its additional guarantee and cost.\n- Dropping tables or indexes without checking dependencies.",
+      "examples": [
+        {
+          "id": "sql3.5-ex1",
+          "language": "en",
+          "title": "Create a product table and seed rows",
+          "code": "CREATE TABLE stock_items (item_id INTEGER PRIMARY KEY, item_name TEXT NOT NULL, quantity INTEGER NOT NULL, unit_price REAL NOT NULL); INSERT INTO stock_items VALUES (1, 'Notebook', 12, 45.0), (2, 'Pen', 30, 10.0), (3, 'Folder', 8, 25.0);",
+          "expectedOutput": "3 rows inserted",
+          "explanation": "The sample data gives the update examples a controlled target.",
+          "runnable": true
+        },
+        {
+          "id": "sql3.5-ex2",
+          "language": "en",
+          "title": "Update one row by its primary key",
+          "code": "UPDATE stock_items SET quantity = 15 WHERE item_id = 1;",
+          "expectedOutput": "1 row updated",
+          "explanation": "The WHERE condition limits the update to one identified row.",
+          "runnable": true
+        },
+        {
+          "id": "sql3.5-ex3",
+          "language": "en",
+          "title": "Update rows matching a condition",
+          "code": "UPDATE stock_items SET unit_price = unit_price * 1.10 WHERE quantity < 10;",
+          "expectedOutput": "1 row updated",
+          "explanation": "An expression can calculate a new value for each matching row.",
+          "runnable": true
+        },
+        {
+          "id": "sql3.5-ex4",
+          "language": "en",
+          "title": "Update more than one column",
+          "code": "UPDATE stock_items SET quantity = 20, unit_price = 12.5 WHERE item_id = 2;",
+          "expectedOutput": "1 row updated",
+          "explanation": "A single UPDATE can assign values to multiple columns.",
+          "runnable": true
+        },
+        {
+          "id": "sql3.5-ex5",
+          "language": "en",
+          "title": "Review the resulting records",
+          "code": "SELECT item_name, quantity, unit_price FROM stock_items ORDER BY item_id;",
+          "expectedOutput": "Notebook | 15 | 45.0\\nPen | 20 | 12.5\\nFolder | 8 | 27.5",
+          "explanation": "A SELECT query verifies the changed values.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the five examples for UPDATE: Modifying Existing Rows in the SQL Playground. Before each statement, identify the object and rows it may affect, predict the outcome, then inspect the result.",
+      "independentTask": "Create a small original database task that demonstrates UPDATE: Modifying Existing Rows. Write at least five statements, include one safety check or verification query, and explain any SQLite-specific syntax.",
+      "hints": [
+        "Read the target database, table and column names carefully.",
+        "Use explicit column lists and meaningful identifiers.",
+        "Preview the affected rows before broad UPDATE or DELETE operations.",
+        "Check SQLite and other DBMS version differences before schema changes.",
+        "Use backups or transactions before destructive production operations."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE stock_items (item_id INTEGER PRIMARY KEY, item_name TEXT NOT NULL, quantity INTEGER NOT NULL, unit_price REAL NOT NULL); INSERT INTO stock_items VALUES (1, 'Notebook', 12, 45.0), (2, 'Pen', 30, 10.0), (3, 'Folder', 8, 25.0);\n\nUPDATE stock_items SET quantity = 15 WHERE item_id = 1;\n\nUPDATE stock_items SET unit_price = unit_price * 1.10 WHERE quantity < 10;\n\nUPDATE stock_items SET quantity = 20, unit_price = 12.5 WHERE item_id = 2;\n\nSELECT item_name, quantity, unit_price FROM stock_items ORDER BY item_id;",
+    "resetCode": "CREATE TABLE stock_items (item_id INTEGER PRIMARY KEY, item_name TEXT NOT NULL, quantity INTEGER NOT NULL, unit_price REAL NOT NULL); INSERT INTO stock_items VALUES (1, 'Notebook', 12, 45.0), (2, 'Pen', 30, 10.0), (3, 'Folder', 8, 25.0);\n\nUPDATE stock_items SET quantity = 15 WHERE item_id = 1;\n\nUPDATE stock_items SET unit_price = unit_price * 1.10 WHERE quantity < 10;\n\nUPDATE stock_items SET quantity = 20, unit_price = 12.5 WHERE item_id = 2;\n\nSELECT item_name, quantity, unit_price FROM stock_items ORDER BY item_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql3.5-q1",
+        "prompt": "Which clause identifies the columns to change?",
+        "options": [
+          "SET",
+          "VALUES",
+          "GROUP BY",
+          "REFERENCES"
+        ],
+        "answer": "SET",
+        "explanation": "SET assigns new values to one or more columns."
+      },
+      {
+        "id": "sql3.5-q2",
+        "prompt": "What is the role of WHERE in UPDATE?",
+        "options": [
+          "It limits which rows are modified",
+          "It creates the table",
+          "It sorts updated rows",
+          "It changes the database name"
+        ],
+        "answer": "It limits which rows are modified",
+        "explanation": "WHERE filters the target rows; without it all rows are updated."
+      },
+      {
+        "id": "sql3.5-q3",
+        "prompt": "What happens if UPDATE has no WHERE clause?",
+        "options": [
+          "Every row in the target table is updated",
+          "No rows are changed",
+          "Only the first row changes",
+          "The table is dropped"
+        ],
+        "answer": "Every row in the target table is updated",
+        "explanation": "An UPDATE without WHERE applies its SET assignments to all rows."
+      },
+      {
+        "id": "sql3.5-q4",
+        "prompt": "Can UPDATE calculate a new value from the existing value?",
+        "options": [
+          "Yes, for example quantity = quantity + 1",
+          "No, only constants are allowed",
+          "Only if the table has no key",
+          "Only in comments"
+        ],
+        "answer": "Yes, for example quantity = quantity + 1",
+        "explanation": "Expressions in SET can use existing column values."
+      },
+      {
+        "id": "sql3.5-q5",
+        "prompt": "What is a safe habit before running an UPDATE?",
+        "options": [
+          "Run a SELECT with the same WHERE condition to inspect target rows",
+          "Remove the WHERE clause",
+          "Drop the primary key",
+          "Disable all constraints"
+        ],
+        "answer": "Run a SELECT with the same WHERE condition to inspect target rows",
+        "explanation": "Previewing the target rows helps avoid unintended mass updates."
+      }
+    ]
+  },
+  "status": "draft"
+}

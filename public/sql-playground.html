@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101828">
+  <meta name="description" content="Write and run SQL in a local SQLite database in your browser with CodeSaathi.">
+  <title>SQL Playground — CodeSaathi</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .sql-page{width:min(1360px,calc(100% - 40px));margin:28px auto 56px}
+    .sql-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap;margin-bottom:18px}
+    .sql-heading h1{font:700 clamp(28px,4vw,42px)/1.15 "Space Grotesk",sans-serif;letter-spacing:-1px;margin:8px 0}
+    .sql-heading p{max-width:850px;color:#667085;line-height:1.7;margin:8px 0}
+    .sql-back{display:inline-flex;align-items:center;gap:8px;color:#4437b5;font-weight:700;text-decoration:none}
+    .sql-status{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:14px 0;padding:11px 14px;border:1px solid #e4e7ec;border-radius:12px;color:#475467;font-size:13px}
+    .sql-dot{width:8px;height:8px;border-radius:50%;background:#98a2b3}
+    .sql-status[data-state="ready"] .sql-dot{background:#12b76a}
+    .sql-status[data-state="error"] .sql-dot{background:#f04438}
+    .sql-version{margin-left:auto;font-weight:700;color:#344054}
+    .sql-workspace{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr);gap:16px;align-items:stretch}
+    .sql-panel{min-width:0;border:1px solid #30384a;border-radius:14px;overflow:hidden;background:#111827;color:#e6edf7}
+    .sql-toolbar{min-height:48px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 12px;background:#202a3b;border-bottom:1px solid #344054}
+    .sql-toolbar strong{font-size:12px;margin-right:auto}
+    .sql-toolbar button,.sql-toolbar select{border:1px solid #475467;border-radius:8px;padding:8px 10px;background:#273449;color:#f8fafc;font-size:12px;font-weight:700}
+    .sql-toolbar button:disabled{opacity:.45;cursor:not-allowed}
+    .sql-run{background:#176b4a!important;border-color:#1a8f63!important}
+    .sql-stop{background:#7a271a!important;border-color:#b42318!important}
+    .sql-editor{display:block;width:100%;min-height:430px;resize:vertical;border:0;outline:0;padding:18px;background:#111827;color:#e6edf7;font:14px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;tab-size:4;white-space:pre;overflow:auto}
+    .sql-editor:focus-visible{outline:2px solid #8b80ff;outline-offset:-3px}
+    .sql-results{min-height:430px;max-height:650px;overflow:auto;padding:14px;background:#0b1220;color:#d1fae5;font:13px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}
+    .sql-result{margin:0 0 18px}
+    .sql-result h3{margin:0 0 8px;color:#c7d2fe;font:700 12px/1.4 "DM Sans",sans-serif}
+    .sql-result table{width:100%;border-collapse:collapse;display:block;overflow:auto;white-space:nowrap}
+    .sql-result th,.sql-result td{padding:7px 10px;border:1px solid #344054;text-align:left}
+    .sql-result th{background:#202a3b;color:#f8fafc}
+    .sql-empty{color:#98a2b3;white-space:pre-wrap}
+    .sql-error{color:#fda29b;white-space:pre-wrap;overflow-wrap:anywhere}
+    .sql-message{color:#a7f3d0;white-space:pre-wrap}
+    .sql-note{margin:16px 0;padding:14px 16px;border:1px solid #e4e7ec;border-radius:12px;background:#f8f9fc;color:#475467;font-size:13px;line-height:1.7}
+    .sql-note strong{color:#101828}
+    .sql-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .sql-actions button{border:1px solid #d0d5dd;border-radius:8px;padding:8px 11px;background:#fff;color:#344054;font-size:12px;font-weight:700}
+    .sql-shortcuts{font-size:12px;color:#98a2b3;padding:10px 14px;background:#111827}
+    button:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid #8175ed;outline-offset:2px}
+    @media(max-width:900px){.sql-workspace{grid-template-columns:1fr}.sql-editor{min-height:340px}.sql-results{min-height:260px;max-height:420px}}
+    @media(max-width:600px){.sql-page{width:calc(100% - 20px);margin:18px auto 32px}.sql-toolbar{gap:6px}.sql-toolbar button,.sql-toolbar select{padding:8px}.sql-editor{min-height:300px;font-size:13px}.sql-version{margin-left:0;width:100%}}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="CodeSaathi home"><span class="brand-mark">C</span><span>Code<span class="brand-accent">Saathi</span></span></a>
+    <nav class="desktop-nav" aria-label="SQL playground navigation"><a href="/#courses">Courses</a><a href="/master-curriculum.html">Curriculum</a><a href="/python-playground.html">Python Playground</a></nav>
+  </header>
+  <main class="sql-page">
+    <div class="sql-heading">
+      <div>
+        <a class="sql-back" href="/#courses">← Back to courses</a>
+        <div class="eyebrow">SQL PROGRAMMING · LOCAL BROWSER DATABASE</div>
+        <h1>SQL Playground</h1>
+        <p>Write SQL and run it against a SQLite database in your browser. Your queries run in a dedicated Web Worker; the database snapshot is saved locally in this browser and is not sent to a CodeSaathi execution server.</p>
+      </div>
+    </div>
+    <div class="sql-status" id="sqlStatus" data-state="loading" role="status" aria-live="polite">
+      <span class="sql-dot" aria-hidden="true"></span><span id="sqlStatusText">Loading SQLite runtime…</span><span class="sql-version" id="sqlVersion">SQLite: loading</span>
+    </div>
+    <section class="sql-workspace" aria-label="SQL editor and query results">
+      <div class="sql-panel">
+        <div class="sql-toolbar">
+          <strong>query.sql</strong>
+          <label class="sr-only" for="sqlExample">Choose an example</label>
+          <select id="sqlExample" aria-label="Choose an SQL example">
+            <option value="starter">Create and query a table</option>
+            <option value="filter">Filter and sort rows</option>
+            <option value="update">Update a record</option>
+            <option value="join">Join two tables</option>
+            <option value="constraint">Test a constraint</option>
+          </select>
+          <button class="sql-run" id="runSql" type="button" disabled>▶ Run</button>
+          <button class="sql-stop" id="stopSql" type="button" disabled>■ Stop</button>
+        </div>
+        <textarea class="sql-editor" id="sqlCode" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="SQL code editor">CREATE TABLE learners (
+  learner_id INTEGER PRIMARY KEY,
+  learner_name TEXT NOT NULL,
+  score INTEGER NOT NULL
+);
+
+INSERT INTO learners (learner_name, score)
+VALUES ('Asha', 88), ('Ravi', 76), ('Noor', 91);
+
+SELECT learner_name, score
+FROM learners
+ORDER BY score DESC;</textarea>
+        <div class="sql-toolbar">
+          <button id="resetSqlCode" type="button">Reset code</button>
+          <button id="restoreSqlCode" type="button">Restore lesson starter</button>
+          <button id="copySqlCode" type="button">Copy SQL</button>
+          <button id="clearSqlOutput" type="button">Clear results</button>
+        </div>
+        <div class="sql-shortcuts">Shortcut: Ctrl + Enter (Windows/Linux) or ⌘ + Enter (Mac) to run</div>
+      </div>
+      <div class="sql-panel">
+        <div class="sql-toolbar"><strong>Query results</strong><span id="sqlRunState" aria-live="polite">Waiting</span></div>
+        <div class="sql-results" id="sqlResults" aria-live="polite"><p class="sql-empty">Run a query to see results here.</p></div>
+      </div>
+    </section>
+    <div class="sql-actions" style="margin-top:14px">
+      <button id="resetSqlDatabase" type="button" disabled>Reset local database</button>
+      <button id="exportSqlDatabase" type="button" disabled>Export SQLite database</button>
+    </div>
+    <section class="sql-note">
+      <strong>Runtime, storage and safety:</strong> This playground uses sql.js 1.16.0 (SQLite compiled to WebAssembly) inside a dedicated browser Worker. Query execution does not connect to a remote database and learner SQL is not uploaded. A database snapshot is stored in IndexedDB on this browser; it is not automatically synced across devices. Reset removes the local database. Export downloads a SQLite database file. SQL statements are not arbitrary JavaScript, but this is an educational sandbox rather than a hardened multi-tenant security boundary. Do not enter secrets or private records. The runtime implements SQLite, not MySQL or SQL Server; commands such as CREATE DATABASE and USE are not supported by SQLite.
+    </section>
+  </main>
+  <script src="/js/sql-playground.js" defer></script>
+</body>
+</html>

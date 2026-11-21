@@ -110,12 +110,17 @@ test("all seven courses render representative lessons and starter programs execu
   await expect(page.locator("#courseGrid .course-card")).toHaveCount(await page.evaluate(async () => (await fetch("/content/curriculum-index.json")).json().then(data => data.courses.length)));
 
   // Exercise the shared lesson renderer and modal with one representative lesson per course.
-  for (const [course, topicId] of [["foundation","F0.1"],["html","H16.1"],["css","C22.1"],["javascript","J24.1"],["c","CL1.1"],["cpp","CPP1.1"],["python","PY1.1"]]) {
+  for (const [course, topicId] of [["foundation","F0.1"],["html","H16.1"],["css","C22.1"],["javascript","J24.1"],["c","CL1.1"],["cpp","CPP1.1"],["python","PY1.1"],["sql","SQL1.1"]]) {
     await page.locator(`[data-course-nav="${course}"]`).click();
     const dialog = page.locator("#lessonDialog");
     await expect(dialog).toBeVisible();
     await dialog.locator(`[data-topic-id="${topicId}"]`).click();
-    await expect(dialog.locator(".lesson-template-title")).toContainText(topicId);
+    try {
+      await expect(dialog.locator(".lesson-template-title")).toContainText(topicId);
+    } catch (error) {
+      const diagnostic = await dialog.locator("#lessonContent").innerText().catch(() => "No lesson container");
+      throw new Error("Lesson render diagnostic for " + topicId + ": " + diagnostic.slice(0, 1200));
+    }
     await expect(dialog.locator(".curriculum-back")).toBeVisible();
     await expect(dialog.locator(".curriculum-draft-notice")).toHaveCount(0);
     const lessonResponse = await page.request.get(`${baseURL}/content/en/${course}/${topicId}.json`);
@@ -269,5 +274,90 @@ test("Python lesson practice link opens its dedicated playground with the first 
   const [playground] = await Promise.all([page.waitForEvent("popup"), link.click()]);
   await expect(playground.locator("#pythonCode")).toHaveValue(expectedCode);
   await expect(playground.locator("#runtimeStatus")).toHaveAttribute("data-state", "ready", { timeout: 180000 });
+  await playground.close();
+});
+
+test("SQL Playground runs SQLite in a worker, persists locally, reports errors and resets safely", async ({ page }) => {
+  test.setTimeout(180000);
+  const nonGetRequests = [];
+  page.on("request", request => {
+    if (request.method() !== "GET" && request.method() !== "HEAD") nonGetRequests.push(request.url());
+  });
+  await page.goto(`${baseURL}/sql-playground.html`, { waitUntil: "domcontentloaded" });
+  await expect(page.locator("#sqlStatus")).toHaveAttribute("data-state", "ready", { timeout: 120000 });
+  await expect(page.locator("#sqlVersion")).toContainText("SQLite");
+
+  const createAndQuery = "CREATE TABLE learners (learner_id INTEGER PRIMARY KEY, learner_name TEXT NOT NULL, score INTEGER NOT NULL); INSERT INTO learners (learner_name, score) VALUES ('Asha', 88), ('Ravi', 76); SELECT learner_name, score FROM learners ORDER BY score DESC;";
+  await page.locator("#sqlCode").fill(createAndQuery);
+  await page.locator("#runSql").click();
+  await expect(page.locator("#sqlResults")).toContainText("Asha", { timeout: 20000 });
+  await expect(page.locator("#sqlResults")).toContainText("88");
+  await expect(page.locator("#sqlStatus")).toHaveAttribute("data-state", "ready");
+
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(page.locator("#sqlStatus")).toHaveAttribute("data-state", "ready", { timeout: 120000 });
+  await page.locator("#sqlCode").fill("SELECT learner_name, score FROM learners ORDER BY learner_id;");
+  await page.locator("#runSql").click();
+  await expect(page.locator("#sqlResults")).toContainText("Asha", { timeout: 20000 });
+  await expect(page.locator("#sqlResults")).toContainText("Ravi");
+
+  await page.locator("#sqlCode").fill("SELECT missing_column FROM learners;");
+  await page.locator("#runSql").click();
+  await expect(page.locator("#sqlResults")).toContainText("SQL error:", { timeout: 15000 });
+  await expect(page.locator("#sqlStatus")).toHaveAttribute("data-state", "error");
+
+  await page.locator("#sqlCode").fill("SELECT COUNT(*) AS learner_count FROM learners;");
+  await page.locator("#runSql").click();
+  await expect(page.locator("#sqlResults")).toContainText("2", { timeout: 15000 });
+  await expect(page.locator("#sqlStatus")).toHaveAttribute("data-state", "ready");
+
+  page.once("dialog", dialog => dialog.accept());
+  await page.locator("#resetSqlDatabase").click();
+  await expect(page.locator("#sqlStatus")).toHaveAttribute("data-state", "ready", { timeout: 15000 });
+  await page.locator("#sqlCode").fill("SELECT COUNT(*) AS table_count FROM sqlite_master WHERE type = 'table' AND name = 'learners';");
+  await page.locator("#runSql").click();
+  await expect(page.locator("#sqlResults")).toContainText("0", { timeout: 15000 });
+
+  await page.locator("#sqlExample").selectOption("join");
+  await expect(page.locator("#sqlCode")).toHaveValue(/JOIN/);
+  await page.locator("#resetSqlCode").click();
+  await expect(page.locator("#sqlCode")).toHaveValue(/CREATE TABLE learners/);
+
+  // Execute every SQL3 lesson starter in the actual browser WebAssembly runtime.
+  for (let topicNumber = 1; topicNumber <= 10; topicNumber += 1) {
+    const topicId = "SQL3." + topicNumber;
+    const response = await page.request.get(`${baseURL}/content/en/sql/${topicId}.json`);
+    expect(response.ok(), topicId + " lesson JSON").toBeTruthy();
+    const lesson = await response.json();
+    await page.locator("#sqlCode").fill(lesson.practice.starterCode);
+    await page.locator("#runSql").click();
+    await expect(page.locator("#sqlStatus"), topicId + " browser SQLite execution").toHaveAttribute("data-state", "ready", { timeout: 20000 });
+    await expect(page.locator("#sqlResults"), topicId + " should not return a SQL error").not.toContainText("SQL error:");
+  }
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.locator("#sqlCode")).toBeVisible();
+  const hasHorizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+  expect(hasHorizontalOverflow, "SQL Playground should not overflow horizontally on mobile").toBe(false);
+  expect(nonGetRequests, "learner SQL should not be sent using a non-GET request").toEqual([]);
+});
+
+test("SQL lesson practice links open the dedicated SQL Playground with lesson starter code", async ({ page }) => {
+  await page.goto(baseURL, { waitUntil: "domcontentloaded" });
+  await waitForCurriculum(page);
+  await page.locator('[data-course-nav="sql"]').click();
+  const dialog = page.locator("#lessonDialog");
+  await expect(dialog).toBeVisible();
+  await dialog.locator('[data-topic-id="SQL3.1"]').click();
+  const response = await page.request.get(`${baseURL}/content/en/sql/SQL3.1.json`);
+  expect(response.ok()).toBeTruthy();
+  const lesson = await response.json();
+  const expectedCode = lesson.practice.starterCode;
+  const link = dialog.locator(".lesson-practice-link");
+  await expect(link).toHaveAttribute("href", /sql-playground\.html#code=/);
+  await expect(link).toContainText("SQL Playground");
+  const [playground] = await Promise.all([page.waitForEvent("popup"), link.click()]);
+  await expect(playground.locator("#sqlCode")).toHaveValue(expectedCode);
+  await expect(playground.locator("#sqlStatus")).toHaveAttribute("data-state", "ready", { timeout: 120000 });
   await playground.close();
 });

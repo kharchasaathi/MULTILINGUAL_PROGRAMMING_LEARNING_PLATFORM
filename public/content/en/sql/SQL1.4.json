@@ -1,0 +1,155 @@
+{
+  "id": "sql.sql1.4.en",
+  "courseId": "sql",
+  "moduleId": "SQL1",
+  "topicId": "SQL1.4",
+  "title": "Keys and Primary Keys",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the core concepts of Keys and Primary Keys.",
+    "Identify the SQL structures and terminology used in this topic.",
+    "Read and interpret an original SQL example related to Keys and Primary Keys.",
+    "Predict the expected behaviour or result of a query in the stated engine context.",
+    "Apply safe and maintainable practices when using this concept."
+  ],
+  "prerequisites": [],
+  "stages": {
+    "understand": {
+      "concept": "A key is one or more columns used to identify rows or establish relationships. A primary key is the chosen candidate key that uniquely identifies each row in a table. Primary-key values must be unique and cannot be NULL.",
+      "whyItMatters": "Primary keys give every row a reliable identity. They help prevent duplicate entities, support references from other tables and make updates target the intended record.",
+      "analogy": "A primary key is like a unique library membership number: it identifies one member even when several members share the same name.",
+      "analogyLimit": "A key is not necessarily meaningful to a person, secret or proof of identity. A database key only identifies records within the rules and scope of the database design."
+    },
+    "explain": {
+      "narrative": "## Why keys are needed\nNames and other descriptive values may repeat or change. A stable key provides an unambiguous way to identify a row. A candidate key is a minimal set of columns that can uniquely identify rows. One candidate key is selected as the primary key; other candidate keys may be enforced with UNIQUE constraints.\n\n## Primary-key rules\nA primary key must be unique and non-NULL. It may consist of one column or several columns (a composite primary key). A table has one primary-key constraint, although that constraint can cover multiple columns.\n\n## SQLite integer primary keys\nIn SQLite, a column declared exactly INTEGER PRIMARY KEY is an alias for the rowid in ordinary rowid tables. This is a SQLite-specific behaviour. AUTOINCREMENT is optional and has additional semantics; it should not be added automatically to every table.\n\n## Natural and surrogate keys\nA natural key comes from meaningful domain data, such as a carefully chosen externally assigned code. A surrogate key is an identifier created for database use, such as an integer ID. Both approaches have trade-offs. Natural values can change; surrogate keys need not carry business meaning.\n\n## Composite keys\nA composite primary key uses more than one column, for example (student_id, course_id) in an Enrollment table. Each component alone may repeat, while the combination must be unique.",
+      "examples": [
+        {
+          "id": "sql1.4-ex1",
+          "language": "en",
+          "title": "Create a table with a primary key",
+          "code": "CREATE TABLE Student (student_id INTEGER PRIMARY KEY, full_name TEXT NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "The primary-key constraint makes student_id unique and non-NULL. NOT NULL on full_name is a separate rule.",
+          "runnable": false
+        },
+        {
+          "id": "sql1.4-ex2",
+          "language": "en",
+          "title": "Insert distinct identifiers",
+          "code": "INSERT INTO Student (student_id, full_name) VALUES (101, 'Asha'), (102, 'Ravi');",
+          "expectedOutput": "2 rows inserted",
+          "explanation": "Each inserted row has a different primary-key value.",
+          "runnable": false
+        },
+        {
+          "id": "sql1.4-ex3",
+          "language": "en",
+          "title": "Find a row by its key",
+          "code": "SELECT student_id, full_name FROM Student WHERE student_id = 102;",
+          "expectedOutput": "student_id | full_name\n102        | Ravi",
+          "explanation": "A primary key is a natural target for a single-row lookup.",
+          "runnable": false
+        },
+        {
+          "id": "sql1.4-ex4",
+          "language": "en",
+          "title": "Demonstrate uniqueness enforcement",
+          "code": "INSERT INTO Student (student_id, full_name) VALUES (101, 'Duplicate ID');",
+          "expectedOutput": "Error: UNIQUE constraint failed: Student.student_id",
+          "explanation": "The duplicate key is rejected. Exact error wording varies by engine and version.",
+          "runnable": false
+        },
+        {
+          "id": "sql1.4-ex5",
+          "language": "en",
+          "title": "Use a composite primary key",
+          "code": "CREATE TABLE Enrollment (student_id INTEGER, course_id INTEGER, PRIMARY KEY (student_id, course_id));",
+          "expectedOutput": "Table created",
+          "explanation": "The pair identifies an enrollment. The same student may enroll in different courses, but the same pair cannot be inserted twice.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Study the five examples for Keys and Primary Keys. For each example, identify the SQL statement, predict its effect or result, then verify it in a compatible SQL engine when available.",
+      "independentTask": "Create a small relational database scenario that demonstrates Keys and Primary Keys. Write at least three queries or statements, explain the expected result, and identify any assumptions about the database dialect.",
+      "hints": [
+        "Read the statement from its first keyword and identify the target object.",
+        "Check table and column names against the schema before running a query.",
+        "Use explicit column names when they make the query clearer.",
+        "Predict the result before executing; then compare it with the actual result.",
+        "Check the target database engine's documentation for dialect-specific behaviour."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE Student (student_id INTEGER PRIMARY KEY, full_name TEXT NOT NULL);",
+    "resetCode": "CREATE TABLE Student (student_id INTEGER PRIMARY KEY, full_name TEXT NOT NULL);"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql1.4-q1",
+        "prompt": "What is the main purpose of a primary key?",
+        "options": [
+          "Uniquely identify each row in a table",
+          "Sort every query automatically",
+          "Store multiple duplicate identifiers",
+          "Encrypt the row"
+        ],
+        "answer": "Uniquely identify each row in a table",
+        "explanation": "A primary key enforces uniqueness and non-NULL values for row identity."
+      },
+      {
+        "id": "sql1.4-q2",
+        "prompt": "Can a primary key contain NULL?",
+        "options": [
+          "No",
+          "Yes, in every row",
+          "Only when it is text",
+          "Only when a table is empty"
+        ],
+        "answer": "No",
+        "explanation": "Primary-key columns cannot contain NULL values."
+      },
+      {
+        "id": "sql1.4-q3",
+        "prompt": "What is a composite primary key?",
+        "options": [
+          "A key made from more than one column",
+          "A key stored in another database",
+          "A key that allows duplicates",
+          "A key that contains only NULL"
+        ],
+        "answer": "A key made from more than one column",
+        "explanation": "A composite key uses a combination of columns to identify a row."
+      },
+      {
+        "id": "sql1.4-q4",
+        "prompt": "What happens if an INSERT duplicates an existing primary-key value?",
+        "options": [
+          "The database rejects the conflicting row",
+          "It silently replaces the original row in all engines",
+          "It renames the table",
+          "It removes the primary key"
+        ],
+        "answer": "The database rejects the conflicting row",
+        "explanation": "A uniqueness violation prevents duplicate primary-key values."
+      },
+      {
+        "id": "sql1.4-q5",
+        "prompt": "Which is a suitable primary-key declaration?",
+        "options": [
+          "student_id INTEGER PRIMARY KEY",
+          "student_id TEXT DEFAULT NULL only",
+          "student_id with no uniqueness rule",
+          "student_id as a comment"
+        ],
+        "answer": "student_id INTEGER PRIMARY KEY",
+        "explanation": "A primary key is a straightforward way to enforce row identity."
+      }
+    ]
+  },
+  "status": "draft"
+}
