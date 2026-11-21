@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql5.2.en",
+  "courseId": "sql",
+  "moduleId": "SQL5",
+  "topicId": "SQL5.2",
+  "title": "Selecting Specific Columns and Using SELECT *",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of Selecting Specific Columns and Using SELECT *.",
+    "Identify the source table, selected expressions and query clauses.",
+    "Predict which rows and columns a SQLite query returns.",
+    "Recognize NULL handling, sorting and dialect-specific pagination behaviour.",
+    "Write readable SELECT queries and verify their results."
+  ],
+  "prerequisites": [
+    "SQL2.1",
+    "SQL2.5",
+    "SQL3.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A SELECT list can name one column, several columns or all columns with *. Column order in the result follows the SELECT list, not necessarily the physical table definition.",
+      "whyItMatters": "Choosing exact columns reduces unnecessary output and makes a query's purpose easier to understand.",
+      "analogy": "It is like choosing a few fields from a form rather than photocopying the entire form.",
+      "analogyLimit": "The analogy simplifies query processing. Actual results follow SQL expression rules, three-valued NULL logic, collation, and the selected database engine's query semantics."
+    },
+    "explain": {
+      "narrative": "## Core idea\nA SELECT list can name one column, several columns or all columns with *. Column order in the result follows the SELECT list, not necessarily the physical table definition.\n\n## Why this matters\nChoosing exact columns reduces unnecessary output and makes a query's purpose easier to understand.\n\n## How to use it\nWrite the SELECT list to describe the output, identify the source with FROM, add a WHERE predicate when rows need filtering, and use ORDER BY to define the result sequence. SQLite pagination uses LIMIT and OFFSET. Use a stable sort key when a query is paginated.\n\n## SQLite and dialect notes\nThese runnable examples target SQLite. SELECT, WHERE, DISTINCT, ORDER BY, NULL predicates and aliases are broadly familiar SQL features, but details such as collations, NULL ordering, Boolean values and pagination syntax can vary. SQLite uses LIMIT/OFFSET; SQL Server commonly supports TOP or OFFSET/FETCH. Do not assume these forms are interchangeable.\n\n## Worked examples\n### 1. Create a staff table\n```sql\nCREATE TABLE s52_staff (staff_id INTEGER, full_name TEXT, team TEXT, salary INTEGER); INSERT INTO s52_staff VALUES (1,'Mira','Design',52000),(2,'Dev','Support',43000),(3,'Asha','Design',56000);\n```\nExpected result: 3 rows inserted\n\nThe table contains four columns and three staff records.\n\n### 2. Select one column\n```sql\nSELECT full_name FROM s52_staff ORDER BY staff_id;\n```\nExpected result: Mira; Dev; Asha\n\nOnly the full_name column is returned.\n\n### 3. Select multiple columns in a chosen order\n```sql\nSELECT team, full_name FROM s52_staff ORDER BY staff_id;\n```\nExpected result: Design | Mira; Support | Dev; Design | Asha\n\nThe output order follows the SELECT list.\n\n### 4. Select every column\n```sql\nSELECT * FROM s52_staff ORDER BY staff_id;\n```\nExpected result: All four columns for three rows\n\nThe asterisk returns every column.\n\n### 5. Select a key and one descriptive field\n```sql\nSELECT staff_id, team FROM s52_staff WHERE staff_id >= 2 ORDER BY staff_id;\n```\nExpected result: 2 | Support; 3 | Design\n\nA query can combine a focused column list with a row filter.\n\n## Common mistakes\n- Using SELECT * when only a few columns are needed.\n- Assuming DISTINCT deletes duplicate source records.\n- Using = NULL instead of IS NULL.\n- Mixing AND and OR without parentheses.\n- Assuming result order without ORDER BY.\n- Paginating without a deterministic sort key.\n- Copying LIMIT syntax into a DBMS that expects TOP or FETCH FIRST.\n\n## Good practice\nUse explicit columns, clear aliases, NULL-aware predicates, parentheses for compound logic, and a unique tie-breaker for paginated results. Test dialect-specific SQL in the target engine.",
+      "examples": [
+        {
+          "id": "sql5.2-ex1",
+          "language": "en",
+          "title": "Create a staff table",
+          "code": "CREATE TABLE s52_staff (staff_id INTEGER, full_name TEXT, team TEXT, salary INTEGER); INSERT INTO s52_staff VALUES (1,'Mira','Design',52000),(2,'Dev','Support',43000),(3,'Asha','Design',56000);",
+          "expectedOutput": "3 rows inserted",
+          "explanation": "The table contains four columns and three staff records.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.2-ex2",
+          "language": "en",
+          "title": "Select one column",
+          "code": "SELECT full_name FROM s52_staff ORDER BY staff_id;",
+          "expectedOutput": "Mira; Dev; Asha",
+          "explanation": "Only the full_name column is returned.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.2-ex3",
+          "language": "en",
+          "title": "Select multiple columns in a chosen order",
+          "code": "SELECT team, full_name FROM s52_staff ORDER BY staff_id;",
+          "expectedOutput": "Design | Mira; Support | Dev; Design | Asha",
+          "explanation": "The output order follows the SELECT list.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.2-ex4",
+          "language": "en",
+          "title": "Select every column",
+          "code": "SELECT * FROM s52_staff ORDER BY staff_id;",
+          "expectedOutput": "All four columns for three rows",
+          "explanation": "The asterisk returns every column.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.2-ex5",
+          "language": "en",
+          "title": "Select a key and one descriptive field",
+          "code": "SELECT staff_id, team FROM s52_staff WHERE staff_id >= 2 ORDER BY staff_id;",
+          "expectedOutput": "2 | Support; 3 | Design",
+          "explanation": "A query can combine a focused column list with a row filter.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the five examples for Selecting Specific Columns and Using SELECT * in the SQL Playground. Before each run, identify the SELECT list, source, filters, sort keys and row limit where applicable. Predict the output and compare it with the SQLite result.",
+      "independentTask": "Create an original SQLite query task that demonstrates Selecting Specific Columns and Using SELECT *. Include a small table, at least five SQL statements, a verification query and a short explanation of any dialect-specific behaviour.",
+      "hints": [
+        "Read the SELECT list to identify the output columns.",
+        "Check the source table and each WHERE predicate.",
+        "Use parentheses when combining AND and OR conditions.",
+        "Use IS NULL or IS NOT NULL for missing values.",
+        "Add ORDER BY before LIMIT/OFFSET when predictable pagination is required."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE s52_staff (staff_id INTEGER, full_name TEXT, team TEXT, salary INTEGER); INSERT INTO s52_staff VALUES (1,'Mira','Design',52000),(2,'Dev','Support',43000),(3,'Asha','Design',56000);\n\nSELECT full_name FROM s52_staff ORDER BY staff_id;\n\nSELECT team, full_name FROM s52_staff ORDER BY staff_id;\n\nSELECT * FROM s52_staff ORDER BY staff_id;\n\nSELECT staff_id, team FROM s52_staff WHERE staff_id >= 2 ORDER BY staff_id;",
+    "resetCode": "CREATE TABLE s52_staff (staff_id INTEGER, full_name TEXT, team TEXT, salary INTEGER); INSERT INTO s52_staff VALUES (1,'Mira','Design',52000),(2,'Dev','Support',43000),(3,'Asha','Design',56000);\n\nSELECT full_name FROM s52_staff ORDER BY staff_id;\n\nSELECT team, full_name FROM s52_staff ORDER BY staff_id;\n\nSELECT * FROM s52_staff ORDER BY staff_id;\n\nSELECT staff_id, team FROM s52_staff WHERE staff_id >= 2 ORDER BY staff_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql5.2-q1",
+        "prompt": "How do you request only the full_name column?",
+        "options": [
+          "SELECT full_name FROM s52_staff;",
+          "SELECT * full_name;",
+          "GET full_name FROM s52_staff;",
+          "SELECT FROM full_name;"
+        ],
+        "answer": "SELECT full_name FROM s52_staff;",
+        "explanation": "The column name is written in the SELECT list."
+      },
+      {
+        "id": "sql5.2-q2",
+        "prompt": "What determines the order of result columns?",
+        "options": [
+          "The order of expressions in the SELECT list",
+          "The order rows were inserted",
+          "The alphabetic order of table names",
+          "The WHERE clause"
+        ],
+        "answer": "The order of expressions in the SELECT list",
+        "explanation": "The SELECT list defines the output column sequence."
+      },
+      {
+        "id": "sql5.2-q3",
+        "prompt": "Which symbol is shorthand for all columns?",
+        "options": [
+          "*",
+          "%",
+          "#",
+          "&"
+        ],
+        "answer": "*",
+        "explanation": "The asterisk requests every source column."
+      },
+      {
+        "id": "sql5.2-q4",
+        "prompt": "When is an explicit column list useful?",
+        "options": [
+          "When only certain fields are needed",
+          "When deleting every row",
+          "When changing a table name",
+          "When disabling constraints"
+        ],
+        "answer": "When only certain fields are needed",
+        "explanation": "It keeps the query focused on the required output."
+      },
+      {
+        "id": "sql5.2-q5",
+        "prompt": "Does SELECT team, full_name return columns in that order?",
+        "options": [
+          "Yes",
+          "No, the table order always overrides it",
+          "Only when an index exists",
+          "Only when both columns are numeric"
+        ],
+        "answer": "Yes",
+        "explanation": "The SELECT list controls the result column order."
+      }
+    ]
+  },
+  "status": "draft"
+}
