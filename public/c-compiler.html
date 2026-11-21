@@ -34,12 +34,28 @@
         <p>Write C, choose a language standard, compile, provide standard input (stdin), and inspect program output or compiler diagnostics.</p>
       </div>
     </div>
-    <iframe class="c-compiler-frame" title="CodeSaathi browser-based C compiler" src="https://nothing12-glitch.github.io/cpp-forge/" loading="eager" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-forms allow-downloads"></iframe>
+    <iframe id="cCompilerFrame" class="c-compiler-frame" title="CodeSaathi browser-based C compiler" loading="eager" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-forms allow-downloads"></iframe>
     <p class="c-compiler-notice">If the embedded compiler is blocked by your browser or network, <a href="https://nothing12-glitch.github.io/cpp-forge/" target="_blank" rel="noopener noreferrer">open the C compiler directly</a>.</p>
     <aside class="c-compiler-notice">
       <strong>Compiler and privacy notes:</strong> The compiler uses Clang compiled to WebAssembly and runs in the browser. Your source code is processed by the embedded compiler rather than sent to a CodeSaathi compilation server. The first visit may download about 23 MB of compiler files; later visits can use the browser cache. This is an external open-source compiler interface embedded in CodeSaathi, not yet a CodeSaathi-owned compiler runtime. Browser execution is sandboxed and does not provide native operating-system access, unrestricted file access, or networking. Do not enter passwords, API keys, or other secrets in sample programs.
     </aside>
     <p class="c-compiler-notice">Need C++ instead? Open the <a href="/cpp-compiler.html">dedicated C++ compiler and playground</a>.</p>\n    <p class="c-compiler-notice">Compiler project: <a href="https://github.com/nothing12-glitch/cpp-forge" target="_blank" rel="noopener noreferrer">cpp-forge (MIT)</a>. Its compiler toolchain credits include <a href="https://github.com/YoWASP/clang" target="_blank" rel="noopener noreferrer">YoWASP Clang</a>.</p>
   </main>
+  <script>
+    (() => {
+      const frame = document.getElementById("cCompilerFrame");
+      if (!frame) return;
+      const incoming = location.hash.match(/(?:^|#|&)code=([^&]+)/);
+      let token = incoming?.[1] || "";
+      if (!token) {
+        const state = { language: "c", code: '#include <stdio.h>\n\nint main(void) {\n    printf("Hello, CodeSaathi!\\\n");\n    return 0;\n}\n', stdin: "" };
+        const bytes = new TextEncoder().encode(JSON.stringify(state));
+        let binary = "";
+        bytes.forEach(byte => { binary += String.fromCharCode(byte); });
+        token = btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+      }
+      frame.src = "https://nothing12-glitch.github.io/cpp-forge/#code=" + token;
+    })();
+  </script>
 </body>
 </html>

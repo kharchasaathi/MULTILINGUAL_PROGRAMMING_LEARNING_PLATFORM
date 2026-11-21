@@ -163,7 +163,9 @@
     const practice = lesson.stages.practise || lesson.practise || lesson.practice || {};
     const examples = Array.isArray(explain?.examples) ? explain.examples : (Array.isArray(lesson.examples) ? lesson.examples : []);
     const explanationText = explain?.narrative || explain?.explain || understand?.explain || lesson.explanation || "";
-    const code = lesson.practice?.starterCode || "";
+    const code = lesson.practice?.starterCode || (lesson.courseId === "cpp" || lesson.courseId === "c"
+      ? examples.find(example => typeof example.code === "string" && example.code.trim())?.code || ""
+      : "");
     const questions = (lesson.assessment?.questions || []).map(question => ({ ...question, answer: Number.isInteger(question.answer) ? question.options?.[question.answer] : question.answer }));
     const onComplete = () => {
       saveProgress(lesson.topicId);
@@ -195,7 +197,20 @@
       }
     }
 const link = $(".lesson-practice-link", container);
-    if (link && lesson.courseId === "python") {
+    if (link && (lesson.courseId === "cpp" || lesson.courseId === "c")) {
+      const language = lesson.courseId;
+      const starter = code || (language === "cpp"
+        ? '#include <iostream>\n\nint main() {\n    std::cout << "Hello, CodeSaathi!\\\n";\n    return 0;\n}\n'
+        : '#include <stdio.h>\n\nint main(void) {\n    printf("Hello, CodeSaathi!\\\n");\n    return 0;\n}\n');
+      const stateBytes = new TextEncoder().encode(JSON.stringify({ language, code: starter, stdin: "" }));
+      let stateBinary = "";
+      stateBytes.forEach(byte => { stateBinary += String.fromCharCode(byte); });
+      const stateToken = btoa(stateBinary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+      link.href = (language === "cpp" ? "/cpp-compiler.html" : "/c-compiler.html") + "#code=" + stateToken;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = "Open this lesson's code in the " + (language === "cpp" ? "C++" : "C") + " Compiler ↗";
+    } else if (link && lesson.courseId === "python") {
       link.href = "/python-playground.html?topic=" + encodeURIComponent(lesson.topicId);
       link.target = "_blank";
       link.rel = "noopener noreferrer";
