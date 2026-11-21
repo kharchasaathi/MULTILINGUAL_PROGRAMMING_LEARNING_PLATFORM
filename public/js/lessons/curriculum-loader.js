@@ -217,7 +217,7 @@ const link = $(".lesson-practice-link", container);
         const stateBytes = new TextEncoder().encode(JSON.stringify(pythonState));
         let stateBinary = "";
         stateBytes.forEach(byte => { stateBinary += String.fromCharCode(byte); });
-        const stateToken = btoa(stateBinary).replace(/\\+/g, "-").replace(/\\//g, "_").replace(/=+$/, "");
+        const stateToken = btoa(stateBinary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
         link.href = "/python-playground.html#code=" + stateToken;
         link.textContent = "Open this lesson's example in Python Playground ↗";
       } else {
