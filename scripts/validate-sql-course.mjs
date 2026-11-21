@@ -7,7 +7,7 @@ const root = process.cwd();
 const index = JSON.parse(await readFile(resolve(root, "public/content/curriculum-index.json"), "utf8"));
 assert.ok(index.courses?.includes("sql"), "SQL course must be registered");
 const topics = index.topics.filter((item) => item.courseId === "sql");
-assert.equal(topics.length, 15, "Expected SQL1 and SQL2 foundation topics");
+assert.equal(topics.length, 25, "Expected SQL1, SQL2 and SQL3 foundation topics");
 const topicIds = new Set();
 const questionIds = new Set();
 let examplesChecked = 0;
@@ -46,7 +46,7 @@ for (const topic of topics) {
   assert.ok(lesson.stages?.practise?.guidedTask?.length > 20);
   assert.ok(lesson.stages?.practise?.independentTask?.length > 20);
   assert.ok(lesson.stages?.practise?.hints?.length >= 3);
-  assert.equal(lesson.practice?.playgroundMode, "none", "Playground remains disabled until runtime integration is verified");
+  assert.equal(lesson.practice?.playgroundMode, "sql", "SQL lessons must use the dedicated SQL Playground");
   const examples = lesson.stages.explain.examples;
   assert.ok(examples?.length >= 5);
   for (const example of examples) {
