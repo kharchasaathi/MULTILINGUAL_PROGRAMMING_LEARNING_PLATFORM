@@ -264,7 +264,7 @@ test("Python lesson practice link opens its dedicated playground with the first 
   const lesson = await lessonResponse.json();
   const expectedCode = lesson.stages.explain.examples[0].code;
   const link = dialog.locator(".lesson-practice-link");
-  await expect(link).toHaveAttribute("href", /python-playground\.html\?topic=PY1\.1/);
+  await expect(link).toHaveAttribute("href", /python-playground\.html#code=/);
   await expect(link).toContainText("Python Playground");
   const [playground] = await Promise.all([page.waitForEvent("popup"), link.click()]);
   await expect(playground.locator("#pythonCode")).toHaveValue(expectedCode);
