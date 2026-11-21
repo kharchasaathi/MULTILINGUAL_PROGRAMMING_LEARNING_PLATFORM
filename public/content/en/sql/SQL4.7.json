@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql4.7.en",
+  "courseId": "sql",
+  "moduleId": "SQL4",
+  "topicId": "SQL4.7",
+  "title": "Column-Level and Table-Level Constraints",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of column-level and table-level constraints.",
+    "Identify the rule, affected columns and expected write behaviour.",
+    "Predict the outcome of valid inserts and schema operations.",
+    "Recognize SQLite-specific behaviour and cross-DBMS differences.",
+    "Apply safe data-integrity and schema-migration practices."
+  ],
+  "prerequisites": [
+    "SQL3.2",
+    "SQL3.3",
+    "SQL3.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A column-level constraint is written with a column definition. A table-level constraint is declared after the column definitions and can refer to one or several columns. Named constraints make schema intent easier to identify.",
+      "whyItMatters": "Choosing the correct scope matters for composite keys, multi-column uniqueness and readable schema definitions.",
+      "analogy": "Column-level rules are attached to one form field; table-level rules compare or coordinate several fields.",
+      "analogyLimit": "The analogy simplifies database behaviour. Actual constraint enforcement follows SQL NULL semantics, transaction rules and the selected database engine's implementation."
+    },
+    "explain": {
+      "narrative": "## Concept\nA column-level constraint is written with a column definition. A table-level constraint is declared after the column definitions and can refer to one or several columns. Named constraints make schema intent easier to identify.\n\n## Why this matters\nChoosing the correct scope matters for composite keys, multi-column uniqueness and readable schema definitions.\n\n## Practical rules\nUse explicit column lists, test both valid and invalid cases in an isolated database, and keep engine-specific behaviour visible. Constraints protect writes, but they do not replace application-level validation or a safe migration plan.\n\n## Worked examples\n### 1. Create a table with a column-level rule\n```sql\nCREATE TABLE c4_scope_a (id INTEGER PRIMARY KEY, code TEXT NOT NULL UNIQUE);\n```\nExpected result: `Table created`\n\nNOT NULL and UNIQUE are attached to the code column.\n\n### 2. Create a table with a table-level composite rule\n```sql\nCREATE TABLE c4_scope_b (region TEXT NOT NULL, local_code TEXT NOT NULL, CONSTRAINT uq_region_code UNIQUE (region, local_code));\n```\nExpected result: `Table created`\n\nThe named rule applies to the pair of columns.\n\n### 3. Insert a valid first pair\n```sql\nINSERT INTO c4_scope_b VALUES ('north', 'A1');\n```\nExpected result: `1 row inserted`\n\nThe pair is accepted.\n\n### 4. Insert a valid second pair\n```sql\nINSERT INTO c4_scope_b VALUES ('south', 'A1');\n```\nExpected result: `1 row inserted`\n\nThe local code can repeat when the region differs.\n\n### 5. Inspect the declared table SQL\n```sql\nSELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'c4_scope_b';\n```\nExpected result: `CREATE TABLE statement returned`\n\nThe schema catalog exposes the table definition and named constraint.\n\n## Common mistakes\n- Confusing an omitted column with an explicit NULL value.\n- Assuming UNIQUE automatically means NOT NULL.\n- Treating a composite key as separate single-column rules.\n- Forgetting to enable SQLite foreign-key enforcement for a connection.\n- Assuming every DBMS supports the same ALTER TABLE constraint syntax.\n\n## Safe practice\nTest migrations against a copy, inspect existing data, use transactions where supported, and keep a recoverable backup before changing important schemas.",
+      "examples": [
+        {
+          "id": "sql4.7-ex1",
+          "language": "en",
+          "title": "Create a table with a column-level rule",
+          "code": "CREATE TABLE c4_scope_a (id INTEGER PRIMARY KEY, code TEXT NOT NULL UNIQUE);",
+          "expectedOutput": "Table created",
+          "explanation": "NOT NULL and UNIQUE are attached to the code column.",
+          "runnable": true
+        },
+        {
+          "id": "sql4.7-ex2",
+          "language": "en",
+          "title": "Create a table with a table-level composite rule",
+          "code": "CREATE TABLE c4_scope_b (region TEXT NOT NULL, local_code TEXT NOT NULL, CONSTRAINT uq_region_code UNIQUE (region, local_code));",
+          "expectedOutput": "Table created",
+          "explanation": "The named rule applies to the pair of columns.",
+          "runnable": true
+        },
+        {
+          "id": "sql4.7-ex3",
+          "language": "en",
+          "title": "Insert a valid first pair",
+          "code": "INSERT INTO c4_scope_b VALUES ('north', 'A1');",
+          "expectedOutput": "1 row inserted",
+          "explanation": "The pair is accepted.",
+          "runnable": true
+        },
+        {
+          "id": "sql4.7-ex4",
+          "language": "en",
+          "title": "Insert a valid second pair",
+          "code": "INSERT INTO c4_scope_b VALUES ('south', 'A1');",
+          "expectedOutput": "1 row inserted",
+          "explanation": "The local code can repeat when the region differs.",
+          "runnable": true
+        },
+        {
+          "id": "sql4.7-ex5",
+          "language": "en",
+          "title": "Inspect the declared table SQL",
+          "code": "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'c4_scope_b';",
+          "expectedOutput": "CREATE TABLE statement returned",
+          "explanation": "The schema catalog exposes the table definition and named constraint.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the five examples for Column-Level and Table-Level Constraints in the SQL Playground. Predict each result, execute the statement, and explain which rule is being enforced.",
+      "independentTask": "Design a small original schema demonstrating Column-Level and Table-Level Constraints. Include at least five SQL statements, one verification query and a short explanation of the SQLite behaviour involved.",
+      "hints": [
+        "Identify whether the rule applies to one column or a combination of columns.",
+        "Check whether a value is omitted, NULL or an ordinary value.",
+        "Use explicit column lists and meaningful constraint names.",
+        "For foreign keys, enable PRAGMA foreign_keys = ON in SQLite.",
+        "Test schema changes on sample data before applying them to important databases."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE c4_scope_a (id INTEGER PRIMARY KEY, code TEXT NOT NULL UNIQUE);\n\nCREATE TABLE c4_scope_b (region TEXT NOT NULL, local_code TEXT NOT NULL, CONSTRAINT uq_region_code UNIQUE (region, local_code));\n\nINSERT INTO c4_scope_b VALUES ('north', 'A1');\n\nINSERT INTO c4_scope_b VALUES ('south', 'A1');\n\nSELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'c4_scope_b';",
+    "resetCode": "CREATE TABLE c4_scope_a (id INTEGER PRIMARY KEY, code TEXT NOT NULL UNIQUE);\n\nCREATE TABLE c4_scope_b (region TEXT NOT NULL, local_code TEXT NOT NULL, CONSTRAINT uq_region_code UNIQUE (region, local_code));\n\nINSERT INTO c4_scope_b VALUES ('north', 'A1');\n\nINSERT INTO c4_scope_b VALUES ('south', 'A1');\n\nSELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'c4_scope_b';"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql4.7-q1",
+        "prompt": "Where is a column-level constraint written?",
+        "options": [
+          "With the column definition",
+          "Only after all tables are created",
+          "Inside a SELECT result",
+          "In a database filename"
+        ],
+        "answer": "With the column definition",
+        "explanation": "It appears as part of the column's declaration."
+      },
+      {
+        "id": "sql4.7-q2",
+        "prompt": "What can a table-level UNIQUE rule cover?",
+        "options": [
+          "A combination of columns",
+          "Only the table name",
+          "Only a SELECT alias",
+          "Only one database file"
+        ],
+        "answer": "A combination of columns",
+        "explanation": "Table-level constraints can define multi-column keys."
+      },
+      {
+        "id": "sql4.7-q3",
+        "prompt": "Why give a constraint a name?",
+        "options": [
+          "To make the schema rule easier to identify",
+          "To make it execute before every SELECT",
+          "To encrypt the constraint",
+          "To create a new database automatically"
+        ],
+        "answer": "To make the schema rule easier to identify",
+        "explanation": "Meaningful names improve schema readability and diagnostics."
+      },
+      {
+        "id": "sql4.7-q4",
+        "prompt": "In a composite UNIQUE constraint, what must be unique?",
+        "options": [
+          "The combination of constrained values",
+          "Every individual column across the entire database",
+          "Only the first column",
+          "Only the last inserted row"
+        ],
+        "answer": "The combination of constrained values",
+        "explanation": "Uniqueness is evaluated across the complete key tuple."
+      },
+      {
+        "id": "sql4.7-q5",
+        "prompt": "Which is a table-level constraint declaration?",
+        "options": [
+          "CONSTRAINT uq_pair UNIQUE (a, b)",
+          "a TEXT NOT NULL",
+          "b INTEGER DEFAULT 0",
+          "SELECT a FROM t"
+        ],
+        "answer": "CONSTRAINT uq_pair UNIQUE (a, b)",
+        "explanation": "It follows the column definitions and names a multi-column rule."
+      }
+    ]
+  },
+  "status": "draft"
+}
