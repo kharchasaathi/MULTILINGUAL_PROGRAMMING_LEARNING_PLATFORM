@@ -200,12 +200,12 @@ const link = $(".lesson-practice-link", container);
     if (link && (lesson.courseId === "cpp" || lesson.courseId === "c")) {
       const language = lesson.courseId;
       const starter = code || (language === "cpp"
-        ? '#include <iostream>\\n\\nint main() {\\n    std::cout << "Hello, CodeSaathi!\\\\n";\\n    return 0;\\n}\\n'
-        : '#include <stdio.h>\\n\\nint main(void) {\\n    printf("Hello, CodeSaathi!\\\\n");\\n    return 0;\\n}\\n');
+        ? '#include <iostream>\n\nint main() {\n    std::cout << "Hello, CodeSaathi!\\\n";\n    return 0;\n}\n'
+        : '#include <stdio.h>\n\nint main(void) {\n    printf("Hello, CodeSaathi!\\\n");\n    return 0;\n}\n');
       const stateBytes = new TextEncoder().encode(JSON.stringify({ language, code: starter, stdin: "" }));
       let stateBinary = "";
       stateBytes.forEach(byte => { stateBinary += String.fromCharCode(byte); });
-      const stateToken = btoa(stateBinary).replace(/\\+/g, "-").replace(/\\//g, "_").replace(/=+$/, "");
+      const stateToken = btoa(stateBinary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
       link.href = (language === "cpp" ? "/cpp-compiler.html" : "/c-compiler.html") + "#code=" + stateToken;
       link.target = "_blank";
       link.rel = "noopener noreferrer";
