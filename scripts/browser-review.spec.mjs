@@ -314,9 +314,9 @@ test("SQL Playground runs SQLite in a worker, persists locally, reports errors a
   await expect(page.locator("#sqlResults")).toContainText("0", { timeout: 15000 });
 
   await page.locator("#sqlExample").selectOption("join");
-  await expect(page.locator("#sqlCode")).toContainText("JOIN");
+  await expect(page.locator("#sqlCode")).toHaveValue(/JOIN/);
   await page.locator("#resetSqlCode").click();
-  await expect(page.locator("#sqlCode")).toContainText("CREATE TABLE learners");
+  await expect(page.locator("#sqlCode")).toHaveValue(/CREATE TABLE learners/);
 
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.locator("#sqlCode")).toBeVisible();
@@ -337,7 +337,7 @@ test("SQL lesson practice links open the dedicated SQL Playground with lesson st
   const lesson = await response.json();
   const expectedCode = lesson.practice.starterCode;
   const link = dialog.locator(".lesson-practice-link");
-  await expect(link).toHaveAttribute("href", /sql-playground\\.html#code=/);
+  await expect(link).toHaveAttribute("href", /sql-playground\.html#code=/);
   await expect(link).toContainText("SQL Playground");
   const [playground] = await Promise.all([page.waitForEvent("popup"), link.click()]);
   await expect(playground.locator("#sqlCode")).toHaveValue(expectedCode);
