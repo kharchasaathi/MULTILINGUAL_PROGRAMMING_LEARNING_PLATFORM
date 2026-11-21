@@ -7,7 +7,7 @@ const root = process.cwd();
 const index = JSON.parse(await readFile(resolve(root, "public/content/curriculum-index.json"), "utf8"));
 assert.ok(index.courses?.includes("sql"), "SQL course must be registered");
 const topics = index.topics.filter((item) => item.courseId === "sql");
-assert.equal(topics.length, 25, "Expected SQL1, SQL2 and SQL3 foundation topics");
+assert.equal(topics.length, 33, "Expected SQL1 through SQL4 foundation topics");
 const topicIds = new Set();
 const questionIds = new Set();
 let examplesChecked = 0;
