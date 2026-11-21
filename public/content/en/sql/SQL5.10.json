@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql5.10.en",
+  "courseId": "sql",
+  "moduleId": "SQL5",
+  "topicId": "SQL5.10",
+  "title": "Combining SELECT, WHERE, ORDER BY and Pagination",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of Combining SELECT, WHERE, ORDER BY and Pagination.",
+    "Identify the source table, selected expressions and query clauses.",
+    "Predict which rows and columns a SQLite query returns.",
+    "Recognize NULL handling, sorting and dialect-specific pagination behaviour.",
+    "Write readable SELECT queries and verify their results."
+  ],
+  "prerequisites": [
+    "SQL2.1",
+    "SQL2.5",
+    "SQL3.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A practical retrieval query combines a selected column list, a row filter, a defined sort order and a row limit. In a simple SELECT query, FROM identifies the source, WHERE filters rows, ORDER BY sorts the qualifying result and LIMIT/OFFSET paginates it.",
+      "whyItMatters": "Most real application queries combine several clauses. Understanding their roles prevents incorrect filtering, unstable sorting and confusing result sets.",
+      "analogy": "A report request first chooses the fields, applies eligibility rules, arranges the matches and then displays one page.",
+      "analogyLimit": "The analogy simplifies query processing. Actual results follow SQL expression rules, three-valued NULL logic, collation, and the selected database engine's query semantics."
+    },
+    "explain": {
+      "narrative": "## Core idea\nA practical retrieval query combines a selected column list, a row filter, a defined sort order and a row limit. In a simple SELECT query, FROM identifies the source, WHERE filters rows, ORDER BY sorts the qualifying result and LIMIT/OFFSET paginates it.\n\n## Why this matters\nMost real application queries combine several clauses. Understanding their roles prevents incorrect filtering, unstable sorting and confusing result sets.\n\n## How to use it\nWrite the SELECT list to describe the output, identify the source with FROM, add a WHERE predicate when rows need filtering, and use ORDER BY to define the result sequence. SQLite pagination uses LIMIT and OFFSET. Use a stable sort key when a query is paginated.\n\n## SQLite and dialect notes\nThese runnable examples target SQLite. SELECT, WHERE, DISTINCT, ORDER BY, NULL predicates and aliases are broadly familiar SQL features, but details such as collations, NULL ordering, Boolean values and pagination syntax can vary. SQLite uses LIMIT/OFFSET; SQL Server commonly supports TOP or OFFSET/FETCH. Do not assume these forms are interchangeable.\n\n## Worked examples\n### 1. Create a service-ticket table\n```sql\nCREATE TABLE s510_tickets (ticket_id INTEGER, customer TEXT, status TEXT, priority INTEGER, city TEXT); INSERT INTO s510_tickets VALUES (1,'Asha','open',2,'Kakinada'),(2,'Balu','closed',1,'Rajahmundry'),(3,'Chitra','open',1,'Kakinada'),(4,'Dev','open',3,'Amalapuram'),(5,'Esha','open',1,'Rajahmundry');\n```\nExpected result: 5 rows inserted\n\nThe table provides a small service queue for combined queries.\n\n### 2. Select fields and filter open tickets\n```sql\nSELECT ticket_id, customer, priority FROM s510_tickets WHERE status = 'open';\n```\nExpected result: 4 matching rows\n\nWHERE restricts the source rows before sorting and limiting.\n\n### 3. Filter and sort by priority\n```sql\nSELECT ticket_id, customer, priority FROM s510_tickets WHERE status = 'open' ORDER BY priority ASC, ticket_id ASC;\n```\nExpected result: 3 priority groups sorted from 1 to 3\n\nThe query sorts matching tickets by priority and then ID.\n\n### 4. Return the first two highest-priority tickets\n```sql\nSELECT ticket_id, customer, priority FROM s510_tickets WHERE status = 'open' ORDER BY priority ASC, ticket_id ASC LIMIT 2;\n```\nExpected result: 3 | Chitra | 1; 5 | Esha | 1\n\nThe unique ticket ID provides a tie-breaker before limiting the result.\n\n### 5. Retrieve the next page\n```sql\nSELECT ticket_id, customer, priority FROM s510_tickets WHERE status = 'open' ORDER BY priority ASC, ticket_id ASC LIMIT 2 OFFSET 2;\n```\nExpected result: 1 | Asha | 2; 4 | Dev | 3\n\nOFFSET retrieves the next slice of the same ordered result.\n\n## Common mistakes\n- Using SELECT * when only a few columns are needed.\n- Assuming DISTINCT deletes duplicate source records.\n- Using = NULL instead of IS NULL.\n- Mixing AND and OR without parentheses.\n- Assuming result order without ORDER BY.\n- Paginating without a deterministic sort key.\n- Copying LIMIT syntax into a DBMS that expects TOP or FETCH FIRST.\n\n## Good practice\nUse explicit columns, clear aliases, NULL-aware predicates, parentheses for compound logic, and a unique tie-breaker for paginated results. Test dialect-specific SQL in the target engine.",
+      "examples": [
+        {
+          "id": "sql5.10-ex1",
+          "language": "en",
+          "title": "Create a service-ticket table",
+          "code": "CREATE TABLE s510_tickets (ticket_id INTEGER, customer TEXT, status TEXT, priority INTEGER, city TEXT); INSERT INTO s510_tickets VALUES (1,'Asha','open',2,'Kakinada'),(2,'Balu','closed',1,'Rajahmundry'),(3,'Chitra','open',1,'Kakinada'),(4,'Dev','open',3,'Amalapuram'),(5,'Esha','open',1,'Rajahmundry');",
+          "expectedOutput": "5 rows inserted",
+          "explanation": "The table provides a small service queue for combined queries.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.10-ex2",
+          "language": "en",
+          "title": "Select fields and filter open tickets",
+          "code": "SELECT ticket_id, customer, priority FROM s510_tickets WHERE status = 'open';",
+          "expectedOutput": "4 matching rows",
+          "explanation": "WHERE restricts the source rows before sorting and limiting.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.10-ex3",
+          "language": "en",
+          "title": "Filter and sort by priority",
+          "code": "SELECT ticket_id, customer, priority FROM s510_tickets WHERE status = 'open' ORDER BY priority ASC, ticket_id ASC;",
+          "expectedOutput": "3 priority groups sorted from 1 to 3",
+          "explanation": "The query sorts matching tickets by priority and then ID.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.10-ex4",
+          "language": "en",
+          "title": "Return the first two highest-priority tickets",
+          "code": "SELECT ticket_id, customer, priority FROM s510_tickets WHERE status = 'open' ORDER BY priority ASC, ticket_id ASC LIMIT 2;",
+          "expectedOutput": "3 | Chitra | 1; 5 | Esha | 1",
+          "explanation": "The unique ticket ID provides a tie-breaker before limiting the result.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.10-ex5",
+          "language": "en",
+          "title": "Retrieve the next page",
+          "code": "SELECT ticket_id, customer, priority FROM s510_tickets WHERE status = 'open' ORDER BY priority ASC, ticket_id ASC LIMIT 2 OFFSET 2;",
+          "expectedOutput": "1 | Asha | 2; 4 | Dev | 3",
+          "explanation": "OFFSET retrieves the next slice of the same ordered result.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the five examples for Combining SELECT, WHERE, ORDER BY and Pagination in the SQL Playground. Before each run, identify the SELECT list, source, filters, sort keys and row limit where applicable. Predict the output and compare it with the SQLite result.",
+      "independentTask": "Create an original SQLite query task that demonstrates Combining SELECT, WHERE, ORDER BY and Pagination. Include a small table, at least five SQL statements, a verification query and a short explanation of any dialect-specific behaviour.",
+      "hints": [
+        "Read the SELECT list to identify the output columns.",
+        "Check the source table and each WHERE predicate.",
+        "Use parentheses when combining AND and OR conditions.",
+        "Use IS NULL or IS NOT NULL for missing values.",
+        "Add ORDER BY before LIMIT/OFFSET when predictable pagination is required."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE s510_tickets (ticket_id INTEGER, customer TEXT, status TEXT, priority INTEGER, city TEXT); INSERT INTO s510_tickets VALUES (1,'Asha','open',2,'Kakinada'),(2,'Balu','closed',1,'Rajahmundry'),(3,'Chitra','open',1,'Kakinada'),(4,'Dev','open',3,'Amalapuram'),(5,'Esha','open',1,'Rajahmundry');\n\nSELECT ticket_id, customer, priority FROM s510_tickets WHERE status = 'open';\n\nSELECT ticket_id, customer, priority FROM s510_tickets WHERE status = 'open' ORDER BY priority ASC, ticket_id ASC;\n\nSELECT ticket_id, customer, priority FROM s510_tickets WHERE status = 'open' ORDER BY priority ASC, ticket_id ASC LIMIT 2;\n\nSELECT ticket_id, customer, priority FROM s510_tickets WHERE status = 'open' ORDER BY priority ASC, ticket_id ASC LIMIT 2 OFFSET 2;",
+    "resetCode": "CREATE TABLE s510_tickets (ticket_id INTEGER, customer TEXT, status TEXT, priority INTEGER, city TEXT); INSERT INTO s510_tickets VALUES (1,'Asha','open',2,'Kakinada'),(2,'Balu','closed',1,'Rajahmundry'),(3,'Chitra','open',1,'Kakinada'),(4,'Dev','open',3,'Amalapuram'),(5,'Esha','open',1,'Rajahmundry');\n\nSELECT ticket_id, customer, priority FROM s510_tickets WHERE status = 'open';\n\nSELECT ticket_id, customer, priority FROM s510_tickets WHERE status = 'open' ORDER BY priority ASC, ticket_id ASC;\n\nSELECT ticket_id, customer, priority FROM s510_tickets WHERE status = 'open' ORDER BY priority ASC, ticket_id ASC LIMIT 2;\n\nSELECT ticket_id, customer, priority FROM s510_tickets WHERE status = 'open' ORDER BY priority ASC, ticket_id ASC LIMIT 2 OFFSET 2;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql5.10-q1",
+        "prompt": "Which clause identifies the source table in a SELECT query?",
+        "options": [
+          "FROM",
+          "WHERE",
+          "ORDER BY",
+          "LIMIT"
+        ],
+        "answer": "FROM",
+        "explanation": "FROM identifies the table or other source being queried."
+      },
+      {
+        "id": "sql5.10-q2",
+        "prompt": "Which clause filters rows before result sorting?",
+        "options": [
+          "WHERE",
+          "ORDER BY",
+          "LIMIT",
+          "AS"
+        ],
+        "answer": "WHERE",
+        "explanation": "WHERE applies the row predicate to the source."
+      },
+      {
+        "id": "sql5.10-q3",
+        "prompt": "What is the purpose of ORDER BY before LIMIT?",
+        "options": [
+          "To define which rows appear first",
+          "To change the stored rows",
+          "To create a unique constraint",
+          "To convert NULL into zero"
+        ],
+        "answer": "To define which rows appear first",
+        "explanation": "Sorting determines the sequence from which LIMIT selects rows."
+      },
+      {
+        "id": "sql5.10-q4",
+        "prompt": "Why add a unique tie-breaker such as ticket_id to ORDER BY?",
+        "options": [
+          "To make page ordering stable when priorities tie",
+          "To remove duplicate customer names",
+          "To create a new table",
+          "To make every priority unique in storage"
+        ],
+        "answer": "To make page ordering stable when priorities tie",
+        "explanation": "A deterministic ordering helps consistent pagination."
+      },
+      {
+        "id": "sql5.10-q5",
+        "prompt": "What does OFFSET do in a paginated query?",
+        "options": [
+          "Skips a specified number of sorted rows",
+          "Filters by a column value",
+          "Changes the sort direction",
+          "Renames the selected columns"
+        ],
+        "answer": "Skips a specified number of sorted rows",
+        "explanation": "OFFSET skips rows from the ordered result before returning the limited page."
+      }
+    ]
+  },
+  "status": "draft"
+}
