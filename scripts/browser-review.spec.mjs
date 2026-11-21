@@ -323,6 +323,18 @@ test("SQL Playground runs SQLite in a worker, persists locally, reports errors a
   await page.locator("#resetSqlCode").click();
   await expect(page.locator("#sqlCode")).toHaveValue(/CREATE TABLE learners/);
 
+  // Execute every SQL3 lesson starter in the actual browser WebAssembly runtime.
+  for (let topicNumber = 1; topicNumber <= 10; topicNumber += 1) {
+    const topicId = "SQL3." + topicNumber;
+    const response = await page.request.get(`${baseURL}/content/en/sql/${topicId}.json`);
+    expect(response.ok(), topicId + " lesson JSON").toBeTruthy();
+    const lesson = await response.json();
+    await page.locator("#sqlCode").fill(lesson.practice.starterCode);
+    await page.locator("#runSql").click();
+    await expect(page.locator("#sqlStatus"), topicId + " browser SQLite execution").toHaveAttribute("data-state", "ready", { timeout: 20000 });
+    await expect(page.locator("#sqlResults"), topicId + " should not return a SQL error").not.toContainText("SQL error:");
+  }
+
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.locator("#sqlCode")).toBeVisible();
   const hasHorizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
