@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql5.8.en",
+  "courseId": "sql",
+  "moduleId": "SQL5",
+  "topicId": "SQL5.8",
+  "title": "Limiting Results with LIMIT and OFFSET; SELECT TOP Portability",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of Limiting Results with LIMIT and OFFSET; SELECT TOP Portability.",
+    "Identify the source table, selected expressions and query clauses.",
+    "Predict which rows and columns a SQLite query returns.",
+    "Recognize NULL handling, sorting and dialect-specific pagination behaviour.",
+    "Write readable SELECT queries and verify their results."
+  ],
+  "prerequisites": [
+    "SQL2.1",
+    "SQL2.5",
+    "SQL3.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "LIMIT caps the number of rows returned in SQLite, and OFFSET skips an initial number of rows. Other DBMS products may use TOP, FETCH FIRST or different pagination syntax; these forms are not interchangeable in every dialect.",
+      "whyItMatters": "Pagination lets applications and reports retrieve manageable portions of large result sets.",
+      "analogy": "LIMIT and OFFSET are like reading a page from a long numbered list: skip earlier entries, then take a fixed number.",
+      "analogyLimit": "The analogy simplifies query processing. Actual results follow SQL expression rules, three-valued NULL logic, collation, and the selected database engine's query semantics."
+    },
+    "explain": {
+      "narrative": "## Core idea\nLIMIT caps the number of rows returned in SQLite, and OFFSET skips an initial number of rows. Other DBMS products may use TOP, FETCH FIRST or different pagination syntax; these forms are not interchangeable in every dialect.\n\n## Why this matters\nPagination lets applications and reports retrieve manageable portions of large result sets.\n\n## How to use it\nWrite the SELECT list to describe the output, identify the source with FROM, add a WHERE predicate when rows need filtering, and use ORDER BY to define the result sequence. SQLite pagination uses LIMIT and OFFSET. Use a stable sort key when a query is paginated.\n\n## SQLite and dialect notes\nThese runnable examples target SQLite. SELECT, WHERE, DISTINCT, ORDER BY, NULL predicates and aliases are broadly familiar SQL features, but details such as collations, NULL ordering, Boolean values and pagination syntax can vary. SQLite uses LIMIT/OFFSET; SQL Server commonly supports TOP or OFFSET/FETCH. Do not assume these forms are interchangeable.\n\n## Worked examples\n### 1. Create a ranked inventory table\n```sql\nCREATE TABLE s58_inventory (item_id INTEGER, item_name TEXT, quantity INTEGER); INSERT INTO s58_inventory VALUES (1,'Cable',18),(2,'Adapter',42),(3,'Keyboard',12),(4,'Mouse',31),(5,'Stand',25);\n```\nExpected result: 5 rows inserted\n\nThe table contains five items with different quantities.\n\n### 2. Return the first two rows in a defined order\n```sql\nSELECT item_name, quantity FROM s58_inventory ORDER BY quantity DESC, item_id ASC LIMIT 2;\n```\nExpected result: Adapter | 42; Mouse | 31\n\nLIMIT 2 returns no more than two rows after sorting.\n\n### 3. Skip two rows and return the next two\n```sql\nSELECT item_name, quantity FROM s58_inventory ORDER BY quantity DESC, item_id ASC LIMIT 2 OFFSET 2;\n```\nExpected result: Stand | 25; Cable | 18\n\nOFFSET 2 skips the first two rows in the ordered result.\n\n### 4. Return at most one row\n```sql\nSELECT item_name FROM s58_inventory ORDER BY item_id LIMIT 1;\n```\nExpected result: Cable\n\nLIMIT 1 caps the result at one row.\n\n### 5. Use the comma pagination form supported by SQLite\n```sql\nSELECT item_name FROM s58_inventory ORDER BY item_id LIMIT 2, 2;\n```\nExpected result: Keyboard; Mouse\n\nSQLite interprets LIMIT offset, count; the LIMIT count OFFSET offset form is usually clearer.\n\n## Common mistakes\n- Using SELECT * when only a few columns are needed.\n- Assuming DISTINCT deletes duplicate source records.\n- Using = NULL instead of IS NULL.\n- Mixing AND and OR without parentheses.\n- Assuming result order without ORDER BY.\n- Paginating without a deterministic sort key.\n- Copying LIMIT syntax into a DBMS that expects TOP or FETCH FIRST.\n\n## Good practice\nUse explicit columns, clear aliases, NULL-aware predicates, parentheses for compound logic, and a unique tie-breaker for paginated results. Test dialect-specific SQL in the target engine.",
+      "examples": [
+        {
+          "id": "sql5.8-ex1",
+          "language": "en",
+          "title": "Create a ranked inventory table",
+          "code": "CREATE TABLE s58_inventory (item_id INTEGER, item_name TEXT, quantity INTEGER); INSERT INTO s58_inventory VALUES (1,'Cable',18),(2,'Adapter',42),(3,'Keyboard',12),(4,'Mouse',31),(5,'Stand',25);",
+          "expectedOutput": "5 rows inserted",
+          "explanation": "The table contains five items with different quantities.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.8-ex2",
+          "language": "en",
+          "title": "Return the first two rows in a defined order",
+          "code": "SELECT item_name, quantity FROM s58_inventory ORDER BY quantity DESC, item_id ASC LIMIT 2;",
+          "expectedOutput": "Adapter | 42; Mouse | 31",
+          "explanation": "LIMIT 2 returns no more than two rows after sorting.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.8-ex3",
+          "language": "en",
+          "title": "Skip two rows and return the next two",
+          "code": "SELECT item_name, quantity FROM s58_inventory ORDER BY quantity DESC, item_id ASC LIMIT 2 OFFSET 2;",
+          "expectedOutput": "Stand | 25; Cable | 18",
+          "explanation": "OFFSET 2 skips the first two rows in the ordered result.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.8-ex4",
+          "language": "en",
+          "title": "Return at most one row",
+          "code": "SELECT item_name FROM s58_inventory ORDER BY item_id LIMIT 1;",
+          "expectedOutput": "Cable",
+          "explanation": "LIMIT 1 caps the result at one row.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.8-ex5",
+          "language": "en",
+          "title": "Use the comma pagination form supported by SQLite",
+          "code": "SELECT item_name FROM s58_inventory ORDER BY item_id LIMIT 2, 2;",
+          "expectedOutput": "Keyboard; Mouse",
+          "explanation": "SQLite interprets LIMIT offset, count; the LIMIT count OFFSET offset form is usually clearer.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the five examples for Limiting Results with LIMIT and OFFSET; SELECT TOP Portability in the SQL Playground. Before each run, identify the SELECT list, source, filters, sort keys and row limit where applicable. Predict the output and compare it with the SQLite result.",
+      "independentTask": "Create an original SQLite query task that demonstrates Limiting Results with LIMIT and OFFSET; SELECT TOP Portability. Include a small table, at least five SQL statements, a verification query and a short explanation of any dialect-specific behaviour.",
+      "hints": [
+        "Read the SELECT list to identify the output columns.",
+        "Check the source table and each WHERE predicate.",
+        "Use parentheses when combining AND and OR conditions.",
+        "Use IS NULL or IS NOT NULL for missing values.",
+        "Add ORDER BY before LIMIT/OFFSET when predictable pagination is required."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE s58_inventory (item_id INTEGER, item_name TEXT, quantity INTEGER); INSERT INTO s58_inventory VALUES (1,'Cable',18),(2,'Adapter',42),(3,'Keyboard',12),(4,'Mouse',31),(5,'Stand',25);\n\nSELECT item_name, quantity FROM s58_inventory ORDER BY quantity DESC, item_id ASC LIMIT 2;\n\nSELECT item_name, quantity FROM s58_inventory ORDER BY quantity DESC, item_id ASC LIMIT 2 OFFSET 2;\n\nSELECT item_name FROM s58_inventory ORDER BY item_id LIMIT 1;\n\nSELECT item_name FROM s58_inventory ORDER BY item_id LIMIT 2, 2;",
+    "resetCode": "CREATE TABLE s58_inventory (item_id INTEGER, item_name TEXT, quantity INTEGER); INSERT INTO s58_inventory VALUES (1,'Cable',18),(2,'Adapter',42),(3,'Keyboard',12),(4,'Mouse',31),(5,'Stand',25);\n\nSELECT item_name, quantity FROM s58_inventory ORDER BY quantity DESC, item_id ASC LIMIT 2;\n\nSELECT item_name, quantity FROM s58_inventory ORDER BY quantity DESC, item_id ASC LIMIT 2 OFFSET 2;\n\nSELECT item_name FROM s58_inventory ORDER BY item_id LIMIT 1;\n\nSELECT item_name FROM s58_inventory ORDER BY item_id LIMIT 2, 2;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql5.8-q1",
+        "prompt": "What does LIMIT 3 do in SQLite?",
+        "options": [
+          "Returns at most three rows",
+          "Skips three rows",
+          "Deletes three rows",
+          "Creates three indexes"
+        ],
+        "answer": "Returns at most three rows",
+        "explanation": "LIMIT caps the number of returned rows."
+      },
+      {
+        "id": "sql5.8-q2",
+        "prompt": "What does OFFSET 5 do?",
+        "options": [
+          "Skips the first five rows of the ordered result",
+          "Returns only five rows",
+          "Sorts five columns",
+          "Changes the primary key"
+        ],
+        "answer": "Skips the first five rows of the ordered result",
+        "explanation": "OFFSET specifies how many result rows to skip."
+      },
+      {
+        "id": "sql5.8-q3",
+        "prompt": "Why should pagination use ORDER BY?",
+        "options": [
+          "To define a predictable row sequence",
+          "To make NULL values impossible",
+          "To create a new table",
+          "To remove the need for WHERE"
+        ],
+        "answer": "To define a predictable row sequence",
+        "explanation": "Without an explicit order, page membership can be unpredictable."
+      },
+      {
+        "id": "sql5.8-q4",
+        "prompt": "Which is a common SQL Server form for limiting rows?",
+        "options": [
+          "SELECT TOP (n)",
+          "SELECT LIMIT n",
+          "SELECT OFFSET FIRST n",
+          "SELECT ROWS n"
+        ],
+        "answer": "SELECT TOP (n)",
+        "explanation": "SQL Server supports TOP; SQLite uses LIMIT."
+      },
+      {
+        "id": "sql5.8-q5",
+        "prompt": "Are LIMIT, TOP and FETCH FIRST identical across every DBMS?",
+        "options": [
+          "No, syntax and support vary",
+          "Yes, every engine uses LIMIT",
+          "Yes, but only for text columns",
+          "Only the keyword case differs"
+        ],
+        "answer": "No, syntax and support vary",
+        "explanation": "Pagination syntax is dialect-specific."
+      }
+    ]
+  },
+  "status": "draft"
+}
