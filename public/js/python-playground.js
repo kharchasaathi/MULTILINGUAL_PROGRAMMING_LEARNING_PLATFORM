@@ -2,6 +2,7 @@
   "use strict";
   const $ = (id) => document.getElementById(id);
   const starter = 'print("Hello, CodeSaathi!")';
+  let lessonStarter = starter;
   const examples = {
     hello: { code: starter, stdin: "" },
     input: { code: 'name = input("Your name: ")\nage = int(input("Your age: "))\nprint(f"Hello {name}, next year you will be {age + 1}.")', stdin: "Asha\n25" },
@@ -125,13 +126,13 @@
   runButton.addEventListener("click", runCode);
   stopButton.addEventListener("click", stopCode);
   $("resetPython").addEventListener("click", () => {
-    editor.value = starter;
+    editor.value = lessonStarter;
     stdin.value = "";
     output.textContent = "Output will appear here.";
     runState.textContent = "Waiting";
   });
   $("restorePython").addEventListener("click", () => {
-    editor.value = starter;
+    editor.value = lessonStarter;
     stdin.value = "";
     editor.focus();
   });
@@ -150,6 +151,7 @@
     const example = examples[event.target.value];
     if (!example) return;
     editor.value = example.code;
+    lessonStarter = example.code;
     stdin.value = example.stdin;
     editor.focus();
   });
@@ -164,6 +166,27 @@
     if (worker) worker.terminate();
   });
   async function loadLinkedLessonExample() {
+    const hashParams = new URLSearchParams(window.location.hash.slice(1));
+    const codeToken = hashParams.get("code");
+    if (codeToken) {
+      try {
+        const base64 = codeToken.replace(/-/g, "+").replace(/_/g, "/");
+        const binary = atob(base64);
+        const bytes = Uint8Array.from(binary, character => character.charCodeAt(0));
+        const state = JSON.parse(new TextDecoder().decode(bytes));
+        if (state.language !== "python" || typeof state.code !== "string" || !state.code.trim() || state.code.length > 200000) {
+          throw new Error("Invalid Python lesson code state");
+        }
+        editor.value = state.code;
+        lessonStarter = state.code;
+        stdin.value = typeof state.stdin === "string" ? state.stdin : "";
+        runState.textContent = "Lesson example loaded";
+        document.title = "Python Lesson Playground — CodeSaathi";
+        return;
+      } catch (error) {
+        appendOutput("Could not read the linked lesson code: " + error.message, "system");
+      }
+    }
     const params = new URLSearchParams(window.location.search);
     const topicId = params.get("topic");
     if (!topicId || !/^PY\d+\.\d+$/.test(topicId)) return;
@@ -175,6 +198,7 @@
       const example = lesson.stages?.explain?.examples?.[0];
       if (typeof example?.code !== "string" || !example.code.trim()) throw new Error("No runnable lesson example is available");
       editor.value = example.code;
+      lessonStarter = example.code;
       runState.textContent = topicId + " example loaded";
       document.title = topicId + " Python Playground — CodeSaathi";
     } catch (error) {
