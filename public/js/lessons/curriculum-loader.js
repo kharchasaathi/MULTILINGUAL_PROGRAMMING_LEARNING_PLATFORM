@@ -54,7 +54,7 @@
       top.append(text("span", "course-icon " + (courseId === "html" ? "icon-html" : courseId === "css" ? "icon-css" : courseId === "c" ? "icon-c" : ""), meta[3]));
       top.append(text("span", "course-number", String(items.length).padStart(2, "0") + " TOPICS"));
       card.append(top, text("h3", "", meta[0]), text("p", "", meta[2]));
-      const metaLine = text("div", "course-meta", courseId === "c" || courseId === "cpp" ? items.length + " authored English lesson drafts · Telugu translation pending" : items.length + " authored lesson topics · English and Telugu drafts");
+      const metaLine = text("div", "course-meta", courseId === "c" || courseId === "cpp" || courseId === "sql" ? items.length + " authored English lesson drafts · Telugu translation pending" : items.length + " authored lesson topics · English and Telugu drafts");
       card.append(metaLine);
       const footer = text("div", "course-footer");
       footer.append(text("span", "course-price", "FREE PREVIEW"));
@@ -224,6 +224,22 @@ const link = $(".lesson-practice-link", container);
       } else {
         link.href = "/python-playground.html";
         link.textContent = "Open Python Playground ↗";
+      }
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+    } else if (link && lesson.courseId === "sql") {
+      const sqlStarter = code || examples.find(example => typeof example.code === "string" && example.code.trim())?.code || "";
+      if (sqlStarter) {
+        const sqlState = { language: "sql", code: sqlStarter, topicId: lesson.topicId };
+        const stateBytes = new TextEncoder().encode(JSON.stringify(sqlState));
+        let stateBinary = "";
+        stateBytes.forEach(byte => { stateBinary += String.fromCharCode(byte); });
+        const stateToken = btoa(stateBinary).replace(/\\+/g, "-").replace(/\\//g, "_").replace(/=+$/, "");
+        link.href = "/sql-playground.html#code=" + stateToken;
+        link.textContent = "Open this lesson's example in SQL Playground ↗";
+      } else {
+        link.href = "/sql-playground.html";
+        link.textContent = "Open SQL Playground ↗";
       }
       link.target = "_blank";
       link.rel = "noopener noreferrer";
