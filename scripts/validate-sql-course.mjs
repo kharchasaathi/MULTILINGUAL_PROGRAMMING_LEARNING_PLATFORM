@@ -7,7 +7,7 @@ const root = process.cwd();
 const index = JSON.parse(await readFile(resolve(root, "public/content/curriculum-index.json"), "utf8"));
 assert.ok(index.courses?.includes("sql"), "SQL course must be registered");
 const topics = index.topics.filter((item) => item.courseId === "sql");
-assert.equal(topics.length, 5, "Expected the first five SQL foundation topics");
+assert.equal(topics.length, 10, "Expected SQL1 and SQL2 foundation topics");
 const topicIds = new Set();
 const questionIds = new Set();
 let examplesChecked = 0;
@@ -71,4 +71,4 @@ for (const topic of topics) {
   const run = spawnSync("python3", ["-c", pyRunner, JSON.stringify(payload)], { encoding: "utf8", timeout: 15000 });
   assert.equal(run.status, 0, topic.topicId + ": SQLite execution check failed: " + (run.stderr || run.stdout));
 }
-console.log("SQL foundation validation passed: " + topics.length + " lessons, " + examplesChecked + " SQLite-executed examples, " + questionIds.size + " MCQs.");
+console.log("SQL course validation passed: " + topics.length + " lessons, " + examplesChecked + " SQLite-executed examples, " + questionIds.size + " MCQs.");
