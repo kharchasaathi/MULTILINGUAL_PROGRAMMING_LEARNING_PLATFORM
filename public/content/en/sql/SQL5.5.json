@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql5.5.en",
+  "courseId": "sql",
+  "moduleId": "SQL5",
+  "topicId": "SQL5.5",
+  "title": "AND, OR and NOT Operators in WHERE",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of AND, OR and NOT Operators in WHERE.",
+    "Identify the source table, selected expressions and query clauses.",
+    "Predict which rows and columns a SQLite query returns.",
+    "Recognize NULL handling, sorting and dialect-specific pagination behaviour.",
+    "Write readable SELECT queries and verify their results."
+  ],
+  "prerequisites": [
+    "SQL2.1",
+    "SQL2.5",
+    "SQL3.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "AND requires all combined conditions to be TRUE; OR requires at least one condition to be TRUE; NOT reverses a predicate's truth value. Parentheses make intended grouping explicit.",
+      "whyItMatters": "Real searches often combine several requirements, such as a city and a score threshold or one of several categories.",
+      "analogy": "AND is a checklist where every condition must pass; OR is a choice where at least one condition must pass.",
+      "analogyLimit": "The analogy simplifies query processing. Actual results follow SQL expression rules, three-valued NULL logic, collation, and the selected database engine's query semantics."
+    },
+    "explain": {
+      "narrative": "## Core idea\nAND requires all combined conditions to be TRUE; OR requires at least one condition to be TRUE; NOT reverses a predicate's truth value. Parentheses make intended grouping explicit.\n\n## Why this matters\nReal searches often combine several requirements, such as a city and a score threshold or one of several categories.\n\n## How to use it\nWrite the SELECT list to describe the output, identify the source with FROM, add a WHERE predicate when rows need filtering, and use ORDER BY to define the result sequence. SQLite pagination uses LIMIT and OFFSET. Use a stable sort key when a query is paginated.\n\n## SQLite and dialect notes\nThese runnable examples target SQLite. SELECT, WHERE, DISTINCT, ORDER BY, NULL predicates and aliases are broadly familiar SQL features, but details such as collations, NULL ordering, Boolean values and pagination syntax can vary. SQLite uses LIMIT/OFFSET; SQL Server commonly supports TOP or OFFSET/FETCH. Do not assume these forms are interchangeable.\n\n## Worked examples\n### 1. Create a course results table\n```sql\nCREATE TABLE s55_results (result_id INTEGER, learner TEXT, course TEXT, score INTEGER, active INTEGER); INSERT INTO s55_results VALUES (1,'Ari','SQL',88,1),(2,'Bea','Python',74,1),(3,'Chet','SQL',61,0),(4,'Dia','Python',92,1),(5,'Eli','C',80,0);\n```\nExpected result: 5 rows inserted\n\nThe table includes course, score and active status fields.\n\n### 2. Use AND to require both conditions\n```sql\nSELECT learner FROM s55_results WHERE course = 'SQL' AND score >= 70 ORDER BY result_id;\n```\nExpected result: Ari\n\nBoth the course and score conditions must be true.\n\n### 3. Use OR to accept either course\n```sql\nSELECT learner FROM s55_results WHERE course = 'SQL' OR course = 'C' ORDER BY result_id;\n```\nExpected result: Ari; Chet; Eli\n\nA row qualifies when at least one course condition is true.\n\n### 4. Use NOT to reverse a condition\n```sql\nSELECT learner FROM s55_results WHERE NOT active = 1 ORDER BY result_id;\n```\nExpected result: Chet; Eli\n\nNOT reverses the active = 1 predicate.\n\n### 5. Use parentheses to control grouping\n```sql\nSELECT learner FROM s55_results WHERE (course = 'SQL' OR course = 'C') AND score >= 70 ORDER BY result_id;\n```\nExpected result: Ari; Eli\n\nParentheses ensure the score condition applies to either selected course.\n\n## Common mistakes\n- Using SELECT * when only a few columns are needed.\n- Assuming DISTINCT deletes duplicate source records.\n- Using = NULL instead of IS NULL.\n- Mixing AND and OR without parentheses.\n- Assuming result order without ORDER BY.\n- Paginating without a deterministic sort key.\n- Copying LIMIT syntax into a DBMS that expects TOP or FETCH FIRST.\n\n## Good practice\nUse explicit columns, clear aliases, NULL-aware predicates, parentheses for compound logic, and a unique tie-breaker for paginated results. Test dialect-specific SQL in the target engine.",
+      "examples": [
+        {
+          "id": "sql5.5-ex1",
+          "language": "en",
+          "title": "Create a course results table",
+          "code": "CREATE TABLE s55_results (result_id INTEGER, learner TEXT, course TEXT, score INTEGER, active INTEGER); INSERT INTO s55_results VALUES (1,'Ari','SQL',88,1),(2,'Bea','Python',74,1),(3,'Chet','SQL',61,0),(4,'Dia','Python',92,1),(5,'Eli','C',80,0);",
+          "expectedOutput": "5 rows inserted",
+          "explanation": "The table includes course, score and active status fields.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.5-ex2",
+          "language": "en",
+          "title": "Use AND to require both conditions",
+          "code": "SELECT learner FROM s55_results WHERE course = 'SQL' AND score >= 70 ORDER BY result_id;",
+          "expectedOutput": "Ari",
+          "explanation": "Both the course and score conditions must be true.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.5-ex3",
+          "language": "en",
+          "title": "Use OR to accept either course",
+          "code": "SELECT learner FROM s55_results WHERE course = 'SQL' OR course = 'C' ORDER BY result_id;",
+          "expectedOutput": "Ari; Chet; Eli",
+          "explanation": "A row qualifies when at least one course condition is true.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.5-ex4",
+          "language": "en",
+          "title": "Use NOT to reverse a condition",
+          "code": "SELECT learner FROM s55_results WHERE NOT active = 1 ORDER BY result_id;",
+          "expectedOutput": "Chet; Eli",
+          "explanation": "NOT reverses the active = 1 predicate.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.5-ex5",
+          "language": "en",
+          "title": "Use parentheses to control grouping",
+          "code": "SELECT learner FROM s55_results WHERE (course = 'SQL' OR course = 'C') AND score >= 70 ORDER BY result_id;",
+          "expectedOutput": "Ari; Eli",
+          "explanation": "Parentheses ensure the score condition applies to either selected course.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the five examples for AND, OR and NOT Operators in WHERE in the SQL Playground. Before each run, identify the SELECT list, source, filters, sort keys and row limit where applicable. Predict the output and compare it with the SQLite result.",
+      "independentTask": "Create an original SQLite query task that demonstrates AND, OR and NOT Operators in WHERE. Include a small table, at least five SQL statements, a verification query and a short explanation of any dialect-specific behaviour.",
+      "hints": [
+        "Read the SELECT list to identify the output columns.",
+        "Check the source table and each WHERE predicate.",
+        "Use parentheses when combining AND and OR conditions.",
+        "Use IS NULL or IS NOT NULL for missing values.",
+        "Add ORDER BY before LIMIT/OFFSET when predictable pagination is required."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE s55_results (result_id INTEGER, learner TEXT, course TEXT, score INTEGER, active INTEGER); INSERT INTO s55_results VALUES (1,'Ari','SQL',88,1),(2,'Bea','Python',74,1),(3,'Chet','SQL',61,0),(4,'Dia','Python',92,1),(5,'Eli','C',80,0);\n\nSELECT learner FROM s55_results WHERE course = 'SQL' AND score >= 70 ORDER BY result_id;\n\nSELECT learner FROM s55_results WHERE course = 'SQL' OR course = 'C' ORDER BY result_id;\n\nSELECT learner FROM s55_results WHERE NOT active = 1 ORDER BY result_id;\n\nSELECT learner FROM s55_results WHERE (course = 'SQL' OR course = 'C') AND score >= 70 ORDER BY result_id;",
+    "resetCode": "CREATE TABLE s55_results (result_id INTEGER, learner TEXT, course TEXT, score INTEGER, active INTEGER); INSERT INTO s55_results VALUES (1,'Ari','SQL',88,1),(2,'Bea','Python',74,1),(3,'Chet','SQL',61,0),(4,'Dia','Python',92,1),(5,'Eli','C',80,0);\n\nSELECT learner FROM s55_results WHERE course = 'SQL' AND score >= 70 ORDER BY result_id;\n\nSELECT learner FROM s55_results WHERE course = 'SQL' OR course = 'C' ORDER BY result_id;\n\nSELECT learner FROM s55_results WHERE NOT active = 1 ORDER BY result_id;\n\nSELECT learner FROM s55_results WHERE (course = 'SQL' OR course = 'C') AND score >= 70 ORDER BY result_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql5.5-q1",
+        "prompt": "When does an AND expression evaluate to TRUE?",
+        "options": [
+          "When every operand is TRUE",
+          "When any one operand is TRUE",
+          "When every operand is FALSE",
+          "Only when parentheses are absent"
+        ],
+        "answer": "When every operand is TRUE",
+        "explanation": "AND requires all its conditions to pass."
+      },
+      {
+        "id": "sql5.5-q2",
+        "prompt": "When does an OR expression evaluate to TRUE?",
+        "options": [
+          "When at least one operand is TRUE",
+          "Only when all operands are TRUE",
+          "Only when all operands are FALSE",
+          "Only when a column is NULL"
+        ],
+        "answer": "When at least one operand is TRUE",
+        "explanation": "OR accepts a row when one or more conditions pass."
+      },
+      {
+        "id": "sql5.5-q3",
+        "prompt": "What does NOT do to a predicate?",
+        "options": [
+          "Reverses its truth value",
+          "Sorts the result in reverse order",
+          "Removes NULL values automatically",
+          "Changes a column type"
+        ],
+        "answer": "Reverses its truth value",
+        "explanation": "NOT negates a Boolean predicate."
+      },
+      {
+        "id": "sql5.5-q4",
+        "prompt": "Why use parentheses in a compound WHERE condition?",
+        "options": [
+          "To make logical grouping explicit",
+          "To create a new table",
+          "To force an index scan",
+          "To convert text to numbers"
+        ],
+        "answer": "To make logical grouping explicit",
+        "explanation": "Parentheses show which conditions are evaluated together."
+      },
+      {
+        "id": "sql5.5-q5",
+        "prompt": "Which query requires both city and score conditions?",
+        "options": [
+          "WHERE city = 'East' AND score > 70",
+          "WHERE city = 'East' OR score > 70",
+          "WHERE NOT city = 'East'",
+          "ORDER BY city AND score"
+        ],
+        "answer": "WHERE city = 'East' AND score > 70",
+        "explanation": "AND requires both conditions to be true."
+      }
+    ]
+  },
+  "status": "draft"
+}
