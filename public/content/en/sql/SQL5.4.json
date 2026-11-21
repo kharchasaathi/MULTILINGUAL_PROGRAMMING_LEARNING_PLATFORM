@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql5.4.en",
+  "courseId": "sql",
+  "moduleId": "SQL5",
+  "topicId": "SQL5.4",
+  "title": "WHERE Clause and Comparison Conditions",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of WHERE Clause and Comparison Conditions.",
+    "Identify the source table, selected expressions and query clauses.",
+    "Predict which rows and columns a SQLite query returns.",
+    "Recognize NULL handling, sorting and dialect-specific pagination behaviour.",
+    "Write readable SELECT queries and verify their results."
+  ],
+  "prerequisites": [
+    "SQL2.1",
+    "SQL2.5",
+    "SQL3.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "WHERE filters source rows using a predicate. Common comparisons include =, <>, <, <=, > and >=. A row is returned only when the predicate evaluates to TRUE.",
+      "whyItMatters": "Filtering at the database keeps result sets focused and avoids transferring unrelated rows to an application.",
+      "analogy": "WHERE is like a selection rule on a form: only records meeting the stated condition pass through.",
+      "analogyLimit": "The analogy simplifies query processing. Actual results follow SQL expression rules, three-valued NULL logic, collation, and the selected database engine's query semantics."
+    },
+    "explain": {
+      "narrative": "## Core idea\nWHERE filters source rows using a predicate. Common comparisons include =, <>, <, <=, > and >=. A row is returned only when the predicate evaluates to TRUE.\n\n## Why this matters\nFiltering at the database keeps result sets focused and avoids transferring unrelated rows to an application.\n\n## How to use it\nWrite the SELECT list to describe the output, identify the source with FROM, add a WHERE predicate when rows need filtering, and use ORDER BY to define the result sequence. SQLite pagination uses LIMIT and OFFSET. Use a stable sort key when a query is paginated.\n\n## SQLite and dialect notes\nThese runnable examples target SQLite. SELECT, WHERE, DISTINCT, ORDER BY, NULL predicates and aliases are broadly familiar SQL features, but details such as collations, NULL ordering, Boolean values and pagination syntax can vary. SQLite uses LIMIT/OFFSET; SQL Server commonly supports TOP or OFFSET/FETCH. Do not assume these forms are interchangeable.\n\n## Worked examples\n### 1. Create a score table\n```sql\nCREATE TABLE s54_scores (learner_id INTEGER, learner_name TEXT, score INTEGER, city TEXT); INSERT INTO s54_scores VALUES (1,'Anu',82,'Kakinada'),(2,'Bala',64,'Rajahmundry'),(3,'Charan',91,'Kakinada'),(4,'Diya',72,'Amalapuram');\n```\nExpected result: 4 rows inserted\n\nThe data includes different scores and cities for comparison.\n\n### 2. Filter with equality\n```sql\nSELECT learner_name FROM s54_scores WHERE city = 'Kakinada' ORDER BY learner_id;\n```\nExpected result: Anu; Charan\n\nEquality matches the exact city value under the configured comparison rules.\n\n### 3. Filter with a greater-than condition\n```sql\nSELECT learner_name, score FROM s54_scores WHERE score > 80 ORDER BY score DESC;\n```\nExpected result: Charan | 91; Anu | 82\n\nOnly scores greater than 80 qualify.\n\n### 4. Filter with an inclusive boundary\n```sql\nSELECT learner_name, score FROM s54_scores WHERE score >= 72 ORDER BY learner_id;\n```\nExpected result: Anu | 82; Charan | 91; Diya | 72\n\nThe >= operator includes the boundary value 72.\n\n### 5. Filter with not-equal\n```sql\nSELECT learner_name FROM s54_scores WHERE city <> 'Kakinada' ORDER BY learner_id;\n```\nExpected result: Bala; Diya\n\nThe <> operator selects rows whose city differs from Kakinada.\n\n## Common mistakes\n- Using SELECT * when only a few columns are needed.\n- Assuming DISTINCT deletes duplicate source records.\n- Using = NULL instead of IS NULL.\n- Mixing AND and OR without parentheses.\n- Assuming result order without ORDER BY.\n- Paginating without a deterministic sort key.\n- Copying LIMIT syntax into a DBMS that expects TOP or FETCH FIRST.\n\n## Good practice\nUse explicit columns, clear aliases, NULL-aware predicates, parentheses for compound logic, and a unique tie-breaker for paginated results. Test dialect-specific SQL in the target engine.",
+      "examples": [
+        {
+          "id": "sql5.4-ex1",
+          "language": "en",
+          "title": "Create a score table",
+          "code": "CREATE TABLE s54_scores (learner_id INTEGER, learner_name TEXT, score INTEGER, city TEXT); INSERT INTO s54_scores VALUES (1,'Anu',82,'Kakinada'),(2,'Bala',64,'Rajahmundry'),(3,'Charan',91,'Kakinada'),(4,'Diya',72,'Amalapuram');",
+          "expectedOutput": "4 rows inserted",
+          "explanation": "The data includes different scores and cities for comparison.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.4-ex2",
+          "language": "en",
+          "title": "Filter with equality",
+          "code": "SELECT learner_name FROM s54_scores WHERE city = 'Kakinada' ORDER BY learner_id;",
+          "expectedOutput": "Anu; Charan",
+          "explanation": "Equality matches the exact city value under the configured comparison rules.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.4-ex3",
+          "language": "en",
+          "title": "Filter with a greater-than condition",
+          "code": "SELECT learner_name, score FROM s54_scores WHERE score > 80 ORDER BY score DESC;",
+          "expectedOutput": "Charan | 91; Anu | 82",
+          "explanation": "Only scores greater than 80 qualify.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.4-ex4",
+          "language": "en",
+          "title": "Filter with an inclusive boundary",
+          "code": "SELECT learner_name, score FROM s54_scores WHERE score >= 72 ORDER BY learner_id;",
+          "expectedOutput": "Anu | 82; Charan | 91; Diya | 72",
+          "explanation": "The >= operator includes the boundary value 72.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.4-ex5",
+          "language": "en",
+          "title": "Filter with not-equal",
+          "code": "SELECT learner_name FROM s54_scores WHERE city <> 'Kakinada' ORDER BY learner_id;",
+          "expectedOutput": "Bala; Diya",
+          "explanation": "The <> operator selects rows whose city differs from Kakinada.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the five examples for WHERE Clause and Comparison Conditions in the SQL Playground. Before each run, identify the SELECT list, source, filters, sort keys and row limit where applicable. Predict the output and compare it with the SQLite result.",
+      "independentTask": "Create an original SQLite query task that demonstrates WHERE Clause and Comparison Conditions. Include a small table, at least five SQL statements, a verification query and a short explanation of any dialect-specific behaviour.",
+      "hints": [
+        "Read the SELECT list to identify the output columns.",
+        "Check the source table and each WHERE predicate.",
+        "Use parentheses when combining AND and OR conditions.",
+        "Use IS NULL or IS NOT NULL for missing values.",
+        "Add ORDER BY before LIMIT/OFFSET when predictable pagination is required."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE s54_scores (learner_id INTEGER, learner_name TEXT, score INTEGER, city TEXT); INSERT INTO s54_scores VALUES (1,'Anu',82,'Kakinada'),(2,'Bala',64,'Rajahmundry'),(3,'Charan',91,'Kakinada'),(4,'Diya',72,'Amalapuram');\n\nSELECT learner_name FROM s54_scores WHERE city = 'Kakinada' ORDER BY learner_id;\n\nSELECT learner_name, score FROM s54_scores WHERE score > 80 ORDER BY score DESC;\n\nSELECT learner_name, score FROM s54_scores WHERE score >= 72 ORDER BY learner_id;\n\nSELECT learner_name FROM s54_scores WHERE city <> 'Kakinada' ORDER BY learner_id;",
+    "resetCode": "CREATE TABLE s54_scores (learner_id INTEGER, learner_name TEXT, score INTEGER, city TEXT); INSERT INTO s54_scores VALUES (1,'Anu',82,'Kakinada'),(2,'Bala',64,'Rajahmundry'),(3,'Charan',91,'Kakinada'),(4,'Diya',72,'Amalapuram');\n\nSELECT learner_name FROM s54_scores WHERE city = 'Kakinada' ORDER BY learner_id;\n\nSELECT learner_name, score FROM s54_scores WHERE score > 80 ORDER BY score DESC;\n\nSELECT learner_name, score FROM s54_scores WHERE score >= 72 ORDER BY learner_id;\n\nSELECT learner_name FROM s54_scores WHERE city <> 'Kakinada' ORDER BY learner_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql5.4-q1",
+        "prompt": "What is the purpose of WHERE?",
+        "options": [
+          "Filter rows using a condition",
+          "Rename a table",
+          "Create an index",
+          "Group result rows"
+        ],
+        "answer": "Filter rows using a condition",
+        "explanation": "WHERE restricts which source rows qualify."
+      },
+      {
+        "id": "sql5.4-q2",
+        "prompt": "Which operator means not equal in SQLite SQL?",
+        "options": [
+          "<>",
+          "=>",
+          "=!",
+          "><"
+        ],
+        "answer": "<>",
+        "explanation": "The standard SQL not-equal operator is <>; SQLite also accepts !=."
+      },
+      {
+        "id": "sql5.4-q3",
+        "prompt": "Does score >= 72 include a score of 72?",
+        "options": [
+          "Yes",
+          "No",
+          "Only for text columns",
+          "Only when DISTINCT is used"
+        ],
+        "answer": "Yes",
+        "explanation": "The >= operator includes equality at the boundary."
+      },
+      {
+        "id": "sql5.4-q4",
+        "prompt": "When is a row returned by a WHERE predicate?",
+        "options": [
+          "When the predicate evaluates to TRUE",
+          "When it evaluates to FALSE",
+          "When it evaluates to UNKNOWN",
+          "Whenever the table has an index"
+        ],
+        "answer": "When the predicate evaluates to TRUE",
+        "explanation": "FALSE and UNKNOWN predicates do not pass the WHERE filter."
+      },
+      {
+        "id": "sql5.4-q5",
+        "prompt": "Which clause filters rows before the result is returned?",
+        "options": [
+          "WHERE",
+          "ORDER BY",
+          "AS",
+          "DISTINCT"
+        ],
+        "answer": "WHERE",
+        "explanation": "WHERE applies the row filter to the source data."
+      }
+    ]
+  },
+  "status": "draft"
+}
