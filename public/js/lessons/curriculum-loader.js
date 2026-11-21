@@ -211,10 +211,21 @@ const link = $(".lesson-practice-link", container);
       link.rel = "noopener noreferrer";
       link.textContent = "Open this lesson's code in the " + (language === "cpp" ? "C++" : "C") + " Compiler ↗";
     } else if (link && lesson.courseId === "python") {
-      link.href = "/python-playground.html?topic=" + encodeURIComponent(lesson.topicId);
+      const pythonExample = examples.find(example => typeof example.code === "string" && example.code.trim());
+      if (pythonExample) {
+        const pythonState = { language: "python", code: pythonExample.code, stdin: "" };
+        const stateBytes = new TextEncoder().encode(JSON.stringify(pythonState));
+        let stateBinary = "";
+        stateBytes.forEach(byte => { stateBinary += String.fromCharCode(byte); });
+        const stateToken = btoa(stateBinary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+        link.href = "/python-playground.html#code=" + stateToken;
+        link.textContent = "Open this lesson's example in Python Playground ↗";
+      } else {
+        link.href = "/python-playground.html";
+        link.textContent = "Open Python Playground ↗";
+      }
       link.target = "_blank";
       link.rel = "noopener noreferrer";
-      link.textContent = "Open this lesson's code in Python Playground ↗";
     } else if (link) {
       link.addEventListener("click", event => {
         event.preventDefault();
