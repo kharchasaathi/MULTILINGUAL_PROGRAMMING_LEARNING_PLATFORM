@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql3.6.en",
+  "courseId": "sql",
+  "moduleId": "SQL3",
+  "topicId": "SQL3.6",
+  "title": "DELETE: Removing Rows Safely",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of delete: removing rows safely.",
+    "Identify the statement, target object and affected columns or rows.",
+    "Predict the result of the SQLite examples before running them.",
+    "Recognize destructive operations and database-product differences.",
+    "Apply safe, readable and maintainable database practices."
+  ],
+  "prerequisites": [
+    "SQL1.3",
+    "SQL2.1",
+    "SQL2.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "DELETE removes rows from a table. Learn conditional deletion, the difference between deleting selected rows and all rows, and how to preserve the table structure.",
+      "whyItMatters": "Database and table operations define where data lives, how records are maintained and how safely a schema can evolve. Incorrect commands can cause data loss or break dependent application code.",
+      "analogy": "Think of a database as a filing room: tables are labelled cabinets, rows are records and schema changes alter the cabinet structure.",
+      "analogyLimit": "This analogy does not describe database files, transactions, indexes, permissions or the engine-specific rules that govern real SQL operations."
+    },
+    "explain": {
+      "narrative": "## Concept\nDELETE removes rows from a table. Learn conditional deletion, the difference between deleting selected rows and all rows, and how to preserve the table structure.\n\n## How the operation works\nIdentify whether the statement changes a database connection, defines a schema object, inserts or changes records, or removes a schema object. Check the target DBMS documentation because database-level commands, data types and ALTER TABLE capabilities vary across products. The runnable examples in this lesson target SQLite.\n\n## Important SQLite differences\nSQLite databases are files opened by an application or API; SQLite does not implement server-style CREATE DATABASE or USE statements. ATTACH DATABASE makes another database available to one connection. SQLite's INTEGER PRIMARY KEY and AUTOINCREMENT behaviour differs from MySQL AUTO_INCREMENT and SQL Server/PostgreSQL identity mechanisms. DROP COLUMN availability depends on SQLite version.\n\n## Worked examples\n### 1. Create and seed a task table\n```sql\nCREATE TABLE task_queue (task_id INTEGER PRIMARY KEY, task_name TEXT NOT NULL, status TEXT NOT NULL); INSERT INTO task_queue VALUES (1, 'Email', 'done'), (2, 'Report', 'open'), (3, 'Backup', 'done');\n```\nExpected result: `3 rows inserted`\n\nThe sample table contains rows with two statuses.\n\n### 2. Delete one selected row\n```sql\nDELETE FROM task_queue WHERE task_id = 2;\n```\nExpected result: `1 row deleted`\n\nThe WHERE condition targets only the row with task_id 2.\n\n### 3. Delete rows matching a condition\n```sql\nDELETE FROM task_queue WHERE status = 'done';\n```\nExpected result: `2 rows deleted`\n\nEvery row satisfying the condition is removed.\n\n### 4. Delete all rows from a separate queue\n```sql\nCREATE TABLE temporary_queue (queue_id INTEGER PRIMARY KEY, label TEXT); INSERT INTO temporary_queue VALUES (1, 'A'), (2, 'B'); DELETE FROM temporary_queue;\n```\nExpected result: `2 rows deleted`\n\nDELETE without WHERE removes all rows but leaves the table definition.\n\n### 5. Check that the table still exists and is empty\n```sql\nSELECT COUNT(*) AS remaining_rows FROM temporary_queue;\n```\nExpected result: `remaining_rows\\n0`\n\nThe table remains available after its rows are deleted.\n\n## Safe database practices\n- Use explicit column lists for INSERT statements.\n- Preview rows with the same WHERE condition before UPDATE or DELETE.\n- Use transactions and tested backups for important data changes.\n- Review dependencies before ALTER TABLE or DROP TABLE.\n- Add indexes based on measured query patterns, not by default on every column.\n- Never assume server-style database commands work in SQLite.\n\n## Common mistakes\n- Running CREATE DATABASE or USE in SQLite.\n- Omitting a WHERE clause from UPDATE or DELETE unintentionally.\n- Assuming CREATE TABLE IF NOT EXISTS migrates an existing schema.\n- Using AUTOINCREMENT without understanding its additional guarantee and cost.\n- Dropping tables or indexes without checking dependencies.",
+      "examples": [
+        {
+          "id": "sql3.6-ex1",
+          "language": "en",
+          "title": "Create and seed a task table",
+          "code": "CREATE TABLE task_queue (task_id INTEGER PRIMARY KEY, task_name TEXT NOT NULL, status TEXT NOT NULL); INSERT INTO task_queue VALUES (1, 'Email', 'done'), (2, 'Report', 'open'), (3, 'Backup', 'done');",
+          "expectedOutput": "3 rows inserted",
+          "explanation": "The sample table contains rows with two statuses.",
+          "runnable": true
+        },
+        {
+          "id": "sql3.6-ex2",
+          "language": "en",
+          "title": "Delete one selected row",
+          "code": "DELETE FROM task_queue WHERE task_id = 2;",
+          "expectedOutput": "1 row deleted",
+          "explanation": "The WHERE condition targets only the row with task_id 2.",
+          "runnable": true
+        },
+        {
+          "id": "sql3.6-ex3",
+          "language": "en",
+          "title": "Delete rows matching a condition",
+          "code": "DELETE FROM task_queue WHERE status = 'done';",
+          "expectedOutput": "2 rows deleted",
+          "explanation": "Every row satisfying the condition is removed.",
+          "runnable": true
+        },
+        {
+          "id": "sql3.6-ex4",
+          "language": "en",
+          "title": "Delete all rows from a separate queue",
+          "code": "CREATE TABLE temporary_queue (queue_id INTEGER PRIMARY KEY, label TEXT); INSERT INTO temporary_queue VALUES (1, 'A'), (2, 'B'); DELETE FROM temporary_queue;",
+          "expectedOutput": "2 rows deleted",
+          "explanation": "DELETE without WHERE removes all rows but leaves the table definition.",
+          "runnable": true
+        },
+        {
+          "id": "sql3.6-ex5",
+          "language": "en",
+          "title": "Check that the table still exists and is empty",
+          "code": "SELECT COUNT(*) AS remaining_rows FROM temporary_queue;",
+          "expectedOutput": "remaining_rows\\n0",
+          "explanation": "The table remains available after its rows are deleted.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the five examples for DELETE: Removing Rows Safely in the SQL Playground. Before each statement, identify the object and rows it may affect, predict the outcome, then inspect the result.",
+      "independentTask": "Create a small original database task that demonstrates DELETE: Removing Rows Safely. Write at least five statements, include one safety check or verification query, and explain any SQLite-specific syntax.",
+      "hints": [
+        "Read the target database, table and column names carefully.",
+        "Use explicit column lists and meaningful identifiers.",
+        "Preview the affected rows before broad UPDATE or DELETE operations.",
+        "Check SQLite and other DBMS version differences before schema changes.",
+        "Use backups or transactions before destructive production operations."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE task_queue (task_id INTEGER PRIMARY KEY, task_name TEXT NOT NULL, status TEXT NOT NULL); INSERT INTO task_queue VALUES (1, 'Email', 'done'), (2, 'Report', 'open'), (3, 'Backup', 'done');\n\nDELETE FROM task_queue WHERE task_id = 2;\n\nDELETE FROM task_queue WHERE status = 'done';\n\nCREATE TABLE temporary_queue (queue_id INTEGER PRIMARY KEY, label TEXT); INSERT INTO temporary_queue VALUES (1, 'A'), (2, 'B'); DELETE FROM temporary_queue;\n\nSELECT COUNT(*) AS remaining_rows FROM temporary_queue;",
+    "resetCode": "CREATE TABLE task_queue (task_id INTEGER PRIMARY KEY, task_name TEXT NOT NULL, status TEXT NOT NULL); INSERT INTO task_queue VALUES (1, 'Email', 'done'), (2, 'Report', 'open'), (3, 'Backup', 'done');\n\nDELETE FROM task_queue WHERE task_id = 2;\n\nDELETE FROM task_queue WHERE status = 'done';\n\nCREATE TABLE temporary_queue (queue_id INTEGER PRIMARY KEY, label TEXT); INSERT INTO temporary_queue VALUES (1, 'A'), (2, 'B'); DELETE FROM temporary_queue;\n\nSELECT COUNT(*) AS remaining_rows FROM temporary_queue;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql3.6-q1",
+        "prompt": "Which statement removes rows from a table?",
+        "options": [
+          "DELETE FROM",
+          "DROP DATABASE",
+          "REMOVE COLUMN",
+          "ERASE TABLE"
+        ],
+        "answer": "DELETE FROM",
+        "explanation": "DELETE FROM removes rows from a table."
+      },
+      {
+        "id": "sql3.6-q2",
+        "prompt": "What does WHERE do in DELETE?",
+        "options": [
+          "It selects which rows are removed",
+          "It creates an index",
+          "It renames the table",
+          "It restores deleted data"
+        ],
+        "answer": "It selects which rows are removed",
+        "explanation": "WHERE limits the rows affected by DELETE."
+      },
+      {
+        "id": "sql3.6-q3",
+        "prompt": "What does DELETE FROM table_name without WHERE do?",
+        "options": [
+          "Removes every row while keeping the table structure",
+          "Drops the table definition",
+          "Deletes the database file",
+          "Deletes only the first row"
+        ],
+        "answer": "Removes every row while keeping the table structure",
+        "explanation": "DELETE without WHERE removes all rows but leaves the table itself."
+      },
+      {
+        "id": "sql3.6-q4",
+        "prompt": "What is the difference between DELETE and DROP TABLE?",
+        "options": [
+          "DELETE removes rows; DROP TABLE removes the table definition and its data",
+          "They are identical in every DBMS",
+          "DROP only deletes one row",
+          "DELETE changes the database name"
+        ],
+        "answer": "DELETE removes rows; DROP TABLE removes the table definition and its data",
+        "explanation": "DELETE is a data operation; DROP TABLE removes the schema object."
+      },
+      {
+        "id": "sql3.6-q5",
+        "prompt": "What should you do before a broad DELETE?",
+        "options": [
+          "Preview the matching rows and ensure a recovery plan exists",
+          "Run it without checking",
+          "Remove all constraints",
+          "Assume it can always be undone"
+        ],
+        "answer": "Preview the matching rows and ensure a recovery plan exists",
+        "explanation": "A broad delete can cause data loss, so inspect its scope first."
+      }
+    ]
+  },
+  "status": "draft"
+}
