@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql3.10.en",
+  "courseId": "sql",
+  "moduleId": "SQL3",
+  "topicId": "SQL3.10",
+  "title": "CREATE INDEX and DROP INDEX",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of create index and drop index.",
+    "Identify the statement, target object and affected columns or rows.",
+    "Predict the result of the SQLite examples before running them.",
+    "Recognize destructive operations and database-product differences.",
+    "Apply safe, readable and maintainable database practices."
+  ],
+  "prerequisites": [
+    "SQL1.3",
+    "SQL2.1",
+    "SQL2.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Indexes can help a database find rows more efficiently, at the cost of storage and additional work during data changes. Learn to create, inspect and remove a basic index.",
+      "whyItMatters": "Database and table operations define where data lives, how records are maintained and how safely a schema can evolve. Incorrect commands can cause data loss or break dependent application code.",
+      "analogy": "Think of a database as a filing room: tables are labelled cabinets, rows are records and schema changes alter the cabinet structure.",
+      "analogyLimit": "This analogy does not describe database files, transactions, indexes, permissions or the engine-specific rules that govern real SQL operations."
+    },
+    "explain": {
+      "narrative": "## Concept\nIndexes can help a database find rows more efficiently, at the cost of storage and additional work during data changes. Learn to create, inspect and remove a basic index.\n\n## How the operation works\nIdentify whether the statement changes a database connection, defines a schema object, inserts or changes records, or removes a schema object. Check the target DBMS documentation because database-level commands, data types and ALTER TABLE capabilities vary across products. The runnable examples in this lesson target SQLite.\n\n## Important SQLite differences\nSQLite databases are files opened by an application or API; SQLite does not implement server-style CREATE DATABASE or USE statements. ATTACH DATABASE makes another database available to one connection. SQLite's INTEGER PRIMARY KEY and AUTOINCREMENT behaviour differs from MySQL AUTO_INCREMENT and SQL Server/PostgreSQL identity mechanisms. DROP COLUMN availability depends on SQLite version.\n\n## Worked examples\n### 1. Create an orders table and sample rows\n```sql\nCREATE TABLE indexed_orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL, amount REAL NOT NULL); INSERT INTO indexed_orders VALUES (1, 10, 250.0), (2, 20, 180.0), (3, 10, 90.0);\n```\nExpected result: `3 rows inserted`\n\nThe sample data includes repeated customer IDs for a lookup example.\n\n### 2. Create an index on customer_id\n```sql\nCREATE INDEX idx_orders_customer ON indexed_orders (customer_id);\n```\nExpected result: `Index created`\n\nThe index stores lookup information for the customer_id column.\n\n### 3. Inspect the table's indexes\n```sql\nSELECT name FROM pragma_index_list('indexed_orders') ORDER BY name;\n```\nExpected result: `idx_orders_customer`\n\nSQLite's pragma_index_list reports indexes associated with a table.\n\n### 4. Query using the indexed column\n```sql\nSELECT order_id, amount FROM indexed_orders WHERE customer_id = 10 ORDER BY order_id;\n```\nExpected result: `1 | 250.0\\n3 | 90.0`\n\nThe query can use the index when the optimizer considers it beneficial.\n\n### 5. Drop the index\n```sql\nDROP INDEX idx_orders_customer;\n```\nExpected result: `Index dropped`\n\nDROP INDEX removes the index but leaves the table and its rows.\n\n## Safe database practices\n- Use explicit column lists for INSERT statements.\n- Preview rows with the same WHERE condition before UPDATE or DELETE.\n- Use transactions and tested backups for important data changes.\n- Review dependencies before ALTER TABLE or DROP TABLE.\n- Add indexes based on measured query patterns, not by default on every column.\n- Never assume server-style database commands work in SQLite.\n\n## Common mistakes\n- Running CREATE DATABASE or USE in SQLite.\n- Omitting a WHERE clause from UPDATE or DELETE unintentionally.\n- Assuming CREATE TABLE IF NOT EXISTS migrates an existing schema.\n- Using AUTOINCREMENT without understanding its additional guarantee and cost.\n- Dropping tables or indexes without checking dependencies.",
+      "examples": [
+        {
+          "id": "sql3.10-ex1",
+          "language": "en",
+          "title": "Create an orders table and sample rows",
+          "code": "CREATE TABLE indexed_orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL, amount REAL NOT NULL); INSERT INTO indexed_orders VALUES (1, 10, 250.0), (2, 20, 180.0), (3, 10, 90.0);",
+          "expectedOutput": "3 rows inserted",
+          "explanation": "The sample data includes repeated customer IDs for a lookup example.",
+          "runnable": true
+        },
+        {
+          "id": "sql3.10-ex2",
+          "language": "en",
+          "title": "Create an index on customer_id",
+          "code": "CREATE INDEX idx_orders_customer ON indexed_orders (customer_id);",
+          "expectedOutput": "Index created",
+          "explanation": "The index stores lookup information for the customer_id column.",
+          "runnable": true
+        },
+        {
+          "id": "sql3.10-ex3",
+          "language": "en",
+          "title": "Inspect the table's indexes",
+          "code": "SELECT name FROM pragma_index_list('indexed_orders') ORDER BY name;",
+          "expectedOutput": "idx_orders_customer",
+          "explanation": "SQLite's pragma_index_list reports indexes associated with a table.",
+          "runnable": true
+        },
+        {
+          "id": "sql3.10-ex4",
+          "language": "en",
+          "title": "Query using the indexed column",
+          "code": "SELECT order_id, amount FROM indexed_orders WHERE customer_id = 10 ORDER BY order_id;",
+          "expectedOutput": "1 | 250.0\\n3 | 90.0",
+          "explanation": "The query can use the index when the optimizer considers it beneficial.",
+          "runnable": true
+        },
+        {
+          "id": "sql3.10-ex5",
+          "language": "en",
+          "title": "Drop the index",
+          "code": "DROP INDEX idx_orders_customer;",
+          "expectedOutput": "Index dropped",
+          "explanation": "DROP INDEX removes the index but leaves the table and its rows.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the five examples for CREATE INDEX and DROP INDEX in the SQL Playground. Before each statement, identify the object and rows it may affect, predict the outcome, then inspect the result.",
+      "independentTask": "Create a small original database task that demonstrates CREATE INDEX and DROP INDEX. Write at least five statements, include one safety check or verification query, and explain any SQLite-specific syntax.",
+      "hints": [
+        "Read the target database, table and column names carefully.",
+        "Use explicit column lists and meaningful identifiers.",
+        "Preview the affected rows before broad UPDATE or DELETE operations.",
+        "Check SQLite and other DBMS version differences before schema changes.",
+        "Use backups or transactions before destructive production operations."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE indexed_orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL, amount REAL NOT NULL); INSERT INTO indexed_orders VALUES (1, 10, 250.0), (2, 20, 180.0), (3, 10, 90.0);\n\nCREATE INDEX idx_orders_customer ON indexed_orders (customer_id);\n\nSELECT name FROM pragma_index_list('indexed_orders') ORDER BY name;\n\nSELECT order_id, amount FROM indexed_orders WHERE customer_id = 10 ORDER BY order_id;\n\nDROP INDEX idx_orders_customer;",
+    "resetCode": "CREATE TABLE indexed_orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL, amount REAL NOT NULL); INSERT INTO indexed_orders VALUES (1, 10, 250.0), (2, 20, 180.0), (3, 10, 90.0);\n\nCREATE INDEX idx_orders_customer ON indexed_orders (customer_id);\n\nSELECT name FROM pragma_index_list('indexed_orders') ORDER BY name;\n\nSELECT order_id, amount FROM indexed_orders WHERE customer_id = 10 ORDER BY order_id;\n\nDROP INDEX idx_orders_customer;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql3.10-q1",
+        "prompt": "What is an index commonly used for?",
+        "options": [
+          "To help the database locate matching rows more efficiently",
+          "To translate SQL into Telugu",
+          "To replace a primary key in every table",
+          "To store a second copy of the entire application"
+        ],
+        "answer": "To help the database locate matching rows more efficiently",
+        "explanation": "Indexes can improve selected lookups and ordering operations."
+      },
+      {
+        "id": "sql3.10-q2",
+        "prompt": "What is a cost of maintaining an index?",
+        "options": [
+          "Extra storage and additional work during data changes",
+          "It removes all NULL values",
+          "It prevents SELECT queries",
+          "It automatically backs up the database"
+        ],
+        "answer": "Extra storage and additional work during data changes",
+        "explanation": "Indexes consume storage and must be maintained as rows change."
+      },
+      {
+        "id": "sql3.10-q3",
+        "prompt": "Which command creates an index?",
+        "options": [
+          "CREATE INDEX",
+          "MAKE INDEX",
+          "INSERT INDEX",
+          "ADD DATABASE INDEX"
+        ],
+        "answer": "CREATE INDEX",
+        "explanation": "CREATE INDEX defines a new index on one or more columns."
+      },
+      {
+        "id": "sql3.10-q4",
+        "prompt": "What does DROP INDEX remove?",
+        "options": [
+          "The index object, not the table's rows",
+          "The whole database",
+          "The indexed column",
+          "All rows matching the index"
+        ],
+        "answer": "The index object, not the table's rows",
+        "explanation": "DROP INDEX removes the index definition while leaving the table intact."
+      },
+      {
+        "id": "sql3.10-q5",
+        "prompt": "Should every column be indexed automatically?",
+        "options": [
+          "No; indexes should be chosen based on query patterns and trade-offs",
+          "Yes, always",
+          "Only text columns",
+          "Only columns with NULL"
+        ],
+        "answer": "No; indexes should be chosen based on query patterns and trade-offs",
+        "explanation": "Unnecessary indexes increase storage and write costs."
+      }
+    ]
+  },
+  "status": "draft"
+}
