@@ -33,7 +33,7 @@ IndexedDB stores the exported database bytes locally; it does not sync data acro
 
 ## Follow-up before release
 
-1. **Passed:** Browser Review #1029 verified the pinned CDN build in Chromium, including mobile layout.
+1. **Passed:** Browser Review #1032 verified the pinned CDN build in Chromium, including mobile layout.
 2. **Passed:** Browser Review #1029 verified IndexedDB persistence across reload, reset, SQL errors, worker initialization and lesson code transfer. File export is implemented but still needs a manual downloaded-file/open test.
 3. Review memory limits, large result sets and transaction behaviour before enabling the playground for larger projects.
 4. Decide whether to vendor the pinned runtime assets or extend the service-worker strategy for offline use.
