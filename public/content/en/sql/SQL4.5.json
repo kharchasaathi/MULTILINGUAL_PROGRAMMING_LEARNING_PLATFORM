@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql4.5.en",
+  "courseId": "sql",
+  "moduleId": "SQL4",
+  "topicId": "SQL4.5",
+  "title": "FOREIGN KEY Constraints and Referential Integrity",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of foreign key constraints and referential integrity.",
+    "Identify the rule, affected columns and expected write behaviour.",
+    "Predict the outcome of valid inserts and schema operations.",
+    "Recognize SQLite-specific behaviour and cross-DBMS differences.",
+    "Apply safe data-integrity and schema-migration practices."
+  ],
+  "prerequisites": [
+    "SQL3.2",
+    "SQL3.3",
+    "SQL3.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A foreign key requires child-table key values to match an eligible key in a parent table, or be NULL when the relationship is optional. It protects relationships from orphan references. SQLite foreign-key enforcement must be enabled for each connection.",
+      "whyItMatters": "Referential integrity prevents orders, enrolments or other child records from referring to parent records that do not exist.",
+      "analogy": "A foreign key is like a reference number that must point to an entry in an official register.",
+      "analogyLimit": "The analogy simplifies database behaviour. Actual constraint enforcement follows SQL NULL semantics, transaction rules and the selected database engine's implementation."
+    },
+    "explain": {
+      "narrative": "## Concept\nA foreign key requires child-table key values to match an eligible key in a parent table, or be NULL when the relationship is optional. It protects relationships from orphan references. SQLite foreign-key enforcement must be enabled for each connection.\n\n## Why this matters\nReferential integrity prevents orders, enrolments or other child records from referring to parent records that do not exist.\n\n## Practical rules\nUse explicit column lists, test both valid and invalid cases in an isolated database, and keep engine-specific behaviour visible. Constraints protect writes, but they do not replace application-level validation or a safe migration plan.\n\n## Worked examples\n### 1. Enable SQLite foreign-key enforcement\n```sql\nPRAGMA foreign_keys = ON;\n```\nExpected result: `foreign_keys = 1`\n\nSQLite connections must enable enforcement explicitly.\n\n### 2. Create a parent table\n```sql\nCREATE TABLE c4_parent (department_id INTEGER PRIMARY KEY, department_name TEXT NOT NULL);\n```\nExpected result: `Table created`\n\nThe parent table stores valid department identifiers.\n\n### 3. Create a child table with a reference\n```sql\nCREATE TABLE c4_child (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, department_id INTEGER, FOREIGN KEY (department_id) REFERENCES c4_parent(department_id));\n```\nExpected result: `Table created`\n\nThe child department_id must reference an existing parent key or be NULL.\n\n### 4. Insert a parent and a matching child\n```sql\nINSERT INTO c4_parent VALUES (10, 'Research'); INSERT INTO c4_child VALUES (1, 'Uma', 10);\n```\nExpected result: `1 parent and 1 child inserted`\n\nThe child references an existing department.\n\n### 5. Join child rows to their parent\n```sql\nSELECT c.employee_name, p.department_name FROM c4_child AS c JOIN c4_parent AS p ON p.department_id = c.department_id;\n```\nExpected result: `Uma | Research`\n\nThe join follows the declared parent-child relationship.\n\n## Common mistakes\n- Confusing an omitted column with an explicit NULL value.\n- Assuming UNIQUE automatically means NOT NULL.\n- Treating a composite key as separate single-column rules.\n- Forgetting to enable SQLite foreign-key enforcement for a connection.\n- Assuming every DBMS supports the same ALTER TABLE constraint syntax.\n\n## Safe practice\nTest migrations against a copy, inspect existing data, use transactions where supported, and keep a recoverable backup before changing important schemas.",
+      "examples": [
+        {
+          "id": "sql4.5-ex1",
+          "language": "en",
+          "title": "Enable SQLite foreign-key enforcement",
+          "code": "PRAGMA foreign_keys = ON;",
+          "expectedOutput": "foreign_keys = 1",
+          "explanation": "SQLite connections must enable enforcement explicitly.",
+          "runnable": true
+        },
+        {
+          "id": "sql4.5-ex2",
+          "language": "en",
+          "title": "Create a parent table",
+          "code": "CREATE TABLE c4_parent (department_id INTEGER PRIMARY KEY, department_name TEXT NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "The parent table stores valid department identifiers.",
+          "runnable": true
+        },
+        {
+          "id": "sql4.5-ex3",
+          "language": "en",
+          "title": "Create a child table with a reference",
+          "code": "CREATE TABLE c4_child (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, department_id INTEGER, FOREIGN KEY (department_id) REFERENCES c4_parent(department_id));",
+          "expectedOutput": "Table created",
+          "explanation": "The child department_id must reference an existing parent key or be NULL.",
+          "runnable": true
+        },
+        {
+          "id": "sql4.5-ex4",
+          "language": "en",
+          "title": "Insert a parent and a matching child",
+          "code": "INSERT INTO c4_parent VALUES (10, 'Research'); INSERT INTO c4_child VALUES (1, 'Uma', 10);",
+          "expectedOutput": "1 parent and 1 child inserted",
+          "explanation": "The child references an existing department.",
+          "runnable": true
+        },
+        {
+          "id": "sql4.5-ex5",
+          "language": "en",
+          "title": "Join child rows to their parent",
+          "code": "SELECT c.employee_name, p.department_name FROM c4_child AS c JOIN c4_parent AS p ON p.department_id = c.department_id;",
+          "expectedOutput": "Uma | Research",
+          "explanation": "The join follows the declared parent-child relationship.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the five examples for FOREIGN KEY Constraints and Referential Integrity in the SQL Playground. Predict each result, execute the statement, and explain which rule is being enforced.",
+      "independentTask": "Design a small original schema demonstrating FOREIGN KEY Constraints and Referential Integrity. Include at least five SQL statements, one verification query and a short explanation of the SQLite behaviour involved.",
+      "hints": [
+        "Identify whether the rule applies to one column or a combination of columns.",
+        "Check whether a value is omitted, NULL or an ordinary value.",
+        "Use explicit column lists and meaningful constraint names.",
+        "For foreign keys, enable PRAGMA foreign_keys = ON in SQLite.",
+        "Test schema changes on sample data before applying them to important databases."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "PRAGMA foreign_keys = ON;\n\nCREATE TABLE c4_parent (department_id INTEGER PRIMARY KEY, department_name TEXT NOT NULL);\n\nCREATE TABLE c4_child (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, department_id INTEGER, FOREIGN KEY (department_id) REFERENCES c4_parent(department_id));\n\nINSERT INTO c4_parent VALUES (10, 'Research'); INSERT INTO c4_child VALUES (1, 'Uma', 10);\n\nSELECT c.employee_name, p.department_name FROM c4_child AS c JOIN c4_parent AS p ON p.department_id = c.department_id;",
+    "resetCode": "PRAGMA foreign_keys = ON;\n\nCREATE TABLE c4_parent (department_id INTEGER PRIMARY KEY, department_name TEXT NOT NULL);\n\nCREATE TABLE c4_child (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, department_id INTEGER, FOREIGN KEY (department_id) REFERENCES c4_parent(department_id));\n\nINSERT INTO c4_parent VALUES (10, 'Research'); INSERT INTO c4_child VALUES (1, 'Uma', 10);\n\nSELECT c.employee_name, p.department_name FROM c4_child AS c JOIN c4_parent AS p ON p.department_id = c.department_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql4.5-q1",
+        "prompt": "What does a foreign key protect?",
+        "options": [
+          "Referential integrity between related tables",
+          "The formatting of SQL",
+          "The order of rows in a table",
+          "The size of a text value"
+        ],
+        "answer": "Referential integrity between related tables",
+        "explanation": "A foreign key prevents invalid references to missing parent keys."
+      },
+      {
+        "id": "sql4.5-q2",
+        "prompt": "Which table contains the foreign key in a parent-child relationship?",
+        "options": [
+          "The child table",
+          "The parent table only",
+          "A system table only",
+          "A view only"
+        ],
+        "answer": "The child table",
+        "explanation": "The child row stores the reference to its parent."
+      },
+      {
+        "id": "sql4.5-q3",
+        "prompt": "What must be enabled per SQLite connection for foreign-key enforcement?",
+        "options": [
+          "PRAGMA foreign_keys = ON",
+          "PRAGMA unique = ON",
+          "PRAGMA primary_key = ON",
+          "PRAGMA check = OFF"
+        ],
+        "answer": "PRAGMA foreign_keys = ON",
+        "explanation": "SQLite foreign-key enforcement is connection-configurable."
+      },
+      {
+        "id": "sql4.5-q4",
+        "prompt": "When can a nullable foreign-key column be NULL?",
+        "options": [
+          "When the relationship is optional",
+          "Only when the parent table is empty",
+          "Never",
+          "Only after DROP TABLE"
+        ],
+        "answer": "When the relationship is optional",
+        "explanation": "A NULL foreign key represents no related parent when the schema allows it."
+      },
+      {
+        "id": "sql4.5-q5",
+        "prompt": "What is an orphan child record?",
+        "options": [
+          "A child record whose referenced parent does not exist",
+          "A parent row with no child rows",
+          "A row with a NULL text column",
+          "A table without an index"
+        ],
+        "answer": "A child record whose referenced parent does not exist",
+        "explanation": "Foreign-key enforcement is designed to prevent such invalid references."
+      }
+    ]
+  },
+  "status": "draft"
+}
