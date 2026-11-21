@@ -169,6 +169,7 @@
           catch (error) { appendMessage("Query ran, but the local save failed: " + error.message, "sql-error"); }
         }
         renderResultSets(message.resultSets || [], message.changes || 0);
+        setStatus("Query completed · local database saved", "ready");
         setRunning(false);
         return;
       }
