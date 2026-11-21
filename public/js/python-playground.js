@@ -126,7 +126,7 @@
   runButton.addEventListener("click", runCode);
   stopButton.addEventListener("click", stopCode);
   $("resetPython").addEventListener("click", () => {
-    editor.value = lessonStarter;
+    editor.value = starter;
     stdin.value = "";
     output.textContent = "Output will appear here.";
     runState.textContent = "Waiting";
@@ -151,7 +151,6 @@
     const example = examples[event.target.value];
     if (!example) return;
     editor.value = example.code;
-    lessonStarter = example.code;
     stdin.value = example.stdin;
     editor.focus();
   });
