@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql5.3.en",
+  "courseId": "sql",
+  "moduleId": "SQL5",
+  "topicId": "SQL5.3",
+  "title": "SELECT DISTINCT and Removing Duplicate Results",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of SELECT DISTINCT and Removing Duplicate Results.",
+    "Identify the source table, selected expressions and query clauses.",
+    "Predict which rows and columns a SQLite query returns.",
+    "Recognize NULL handling, sorting and dialect-specific pagination behaviour.",
+    "Write readable SELECT queries and verify their results."
+  ],
+  "prerequisites": [
+    "SQL2.1",
+    "SQL2.5",
+    "SQL3.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "DISTINCT removes duplicate result rows from the selected column combination. With multiple selected columns, uniqueness is evaluated across the complete combination, not each column independently.",
+      "whyItMatters": "Reports often need a list of unique categories, locations or combinations without repeating identical result rows.",
+      "analogy": "DISTINCT is like making a list of unique labels from a register while leaving the original register unchanged.",
+      "analogyLimit": "The analogy simplifies query processing. Actual results follow SQL expression rules, three-valued NULL logic, collation, and the selected database engine's query semantics."
+    },
+    "explain": {
+      "narrative": "## Core idea\nDISTINCT removes duplicate result rows from the selected column combination. With multiple selected columns, uniqueness is evaluated across the complete combination, not each column independently.\n\n## Why this matters\nReports often need a list of unique categories, locations or combinations without repeating identical result rows.\n\n## How to use it\nWrite the SELECT list to describe the output, identify the source with FROM, add a WHERE predicate when rows need filtering, and use ORDER BY to define the result sequence. SQLite pagination uses LIMIT and OFFSET. Use a stable sort key when a query is paginated.\n\n## SQLite and dialect notes\nThese runnable examples target SQLite. SELECT, WHERE, DISTINCT, ORDER BY, NULL predicates and aliases are broadly familiar SQL features, but details such as collations, NULL ordering, Boolean values and pagination syntax can vary. SQLite uses LIMIT/OFFSET; SQL Server commonly supports TOP or OFFSET/FETCH. Do not assume these forms are interchangeable.\n\n## Worked examples\n### 1. Create a table with repeated categories\n```sql\nCREATE TABLE s53_items (item_id INTEGER, item_name TEXT, category TEXT, zone TEXT); INSERT INTO s53_items VALUES (1,'Pencil','Stationery','East'),(2,'Marker','Stationery','West'),(3,'Mug','Kitchen','East'),(4,'Folder','Stationery','East');\n```\nExpected result: 4 rows inserted\n\nThe category and zone values intentionally repeat.\n\n### 2. Select all category values\n```sql\nSELECT category FROM s53_items ORDER BY item_id;\n```\nExpected result: Stationery; Stationery; Kitchen; Stationery\n\nWithout DISTINCT, repeated values remain in the result.\n\n### 3. Return unique categories\n```sql\nSELECT DISTINCT category FROM s53_items ORDER BY category;\n```\nExpected result: Kitchen; Stationery\n\nDISTINCT removes duplicate category values.\n\n### 4. Return unique category and zone pairs\n```sql\nSELECT DISTINCT category, zone FROM s53_items ORDER BY category, zone;\n```\nExpected result: Kitchen | East; Stationery | East; Stationery | West\n\nThe pair is distinct even though category values repeat.\n\n### 5. Count unique categories\n```sql\nSELECT COUNT(DISTINCT category) AS category_count FROM s53_items;\n```\nExpected result: 2\n\nSQLite supports COUNT(DISTINCT expression) for counting unique non-NULL values.\n\n## Common mistakes\n- Using SELECT * when only a few columns are needed.\n- Assuming DISTINCT deletes duplicate source records.\n- Using = NULL instead of IS NULL.\n- Mixing AND and OR without parentheses.\n- Assuming result order without ORDER BY.\n- Paginating without a deterministic sort key.\n- Copying LIMIT syntax into a DBMS that expects TOP or FETCH FIRST.\n\n## Good practice\nUse explicit columns, clear aliases, NULL-aware predicates, parentheses for compound logic, and a unique tie-breaker for paginated results. Test dialect-specific SQL in the target engine.",
+      "examples": [
+        {
+          "id": "sql5.3-ex1",
+          "language": "en",
+          "title": "Create a table with repeated categories",
+          "code": "CREATE TABLE s53_items (item_id INTEGER, item_name TEXT, category TEXT, zone TEXT); INSERT INTO s53_items VALUES (1,'Pencil','Stationery','East'),(2,'Marker','Stationery','West'),(3,'Mug','Kitchen','East'),(4,'Folder','Stationery','East');",
+          "expectedOutput": "4 rows inserted",
+          "explanation": "The category and zone values intentionally repeat.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.3-ex2",
+          "language": "en",
+          "title": "Select all category values",
+          "code": "SELECT category FROM s53_items ORDER BY item_id;",
+          "expectedOutput": "Stationery; Stationery; Kitchen; Stationery",
+          "explanation": "Without DISTINCT, repeated values remain in the result.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.3-ex3",
+          "language": "en",
+          "title": "Return unique categories",
+          "code": "SELECT DISTINCT category FROM s53_items ORDER BY category;",
+          "expectedOutput": "Kitchen; Stationery",
+          "explanation": "DISTINCT removes duplicate category values.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.3-ex4",
+          "language": "en",
+          "title": "Return unique category and zone pairs",
+          "code": "SELECT DISTINCT category, zone FROM s53_items ORDER BY category, zone;",
+          "expectedOutput": "Kitchen | East; Stationery | East; Stationery | West",
+          "explanation": "The pair is distinct even though category values repeat.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.3-ex5",
+          "language": "en",
+          "title": "Count unique categories",
+          "code": "SELECT COUNT(DISTINCT category) AS category_count FROM s53_items;",
+          "expectedOutput": "2",
+          "explanation": "SQLite supports COUNT(DISTINCT expression) for counting unique non-NULL values.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the five examples for SELECT DISTINCT and Removing Duplicate Results in the SQL Playground. Before each run, identify the SELECT list, source, filters, sort keys and row limit where applicable. Predict the output and compare it with the SQLite result.",
+      "independentTask": "Create an original SQLite query task that demonstrates SELECT DISTINCT and Removing Duplicate Results. Include a small table, at least five SQL statements, a verification query and a short explanation of any dialect-specific behaviour.",
+      "hints": [
+        "Read the SELECT list to identify the output columns.",
+        "Check the source table and each WHERE predicate.",
+        "Use parentheses when combining AND and OR conditions.",
+        "Use IS NULL or IS NOT NULL for missing values.",
+        "Add ORDER BY before LIMIT/OFFSET when predictable pagination is required."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE s53_items (item_id INTEGER, item_name TEXT, category TEXT, zone TEXT); INSERT INTO s53_items VALUES (1,'Pencil','Stationery','East'),(2,'Marker','Stationery','West'),(3,'Mug','Kitchen','East'),(4,'Folder','Stationery','East');\n\nSELECT category FROM s53_items ORDER BY item_id;\n\nSELECT DISTINCT category FROM s53_items ORDER BY category;\n\nSELECT DISTINCT category, zone FROM s53_items ORDER BY category, zone;\n\nSELECT COUNT(DISTINCT category) AS category_count FROM s53_items;",
+    "resetCode": "CREATE TABLE s53_items (item_id INTEGER, item_name TEXT, category TEXT, zone TEXT); INSERT INTO s53_items VALUES (1,'Pencil','Stationery','East'),(2,'Marker','Stationery','West'),(3,'Mug','Kitchen','East'),(4,'Folder','Stationery','East');\n\nSELECT category FROM s53_items ORDER BY item_id;\n\nSELECT DISTINCT category FROM s53_items ORDER BY category;\n\nSELECT DISTINCT category, zone FROM s53_items ORDER BY category, zone;\n\nSELECT COUNT(DISTINCT category) AS category_count FROM s53_items;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql5.3-q1",
+        "prompt": "What does SELECT DISTINCT do?",
+        "options": [
+          "Removes duplicate result rows",
+          "Deletes duplicate rows from the source table",
+          "Sorts all columns descending",
+          "Creates a unique index"
+        ],
+        "answer": "Removes duplicate result rows",
+        "explanation": "DISTINCT affects the query result, not stored records."
+      },
+      {
+        "id": "sql5.3-q2",
+        "prompt": "With DISTINCT on two columns, what is compared?",
+        "options": [
+          "The complete pair of selected values",
+          "Only the first selected column",
+          "Only the last selected column",
+          "The table names"
+        ],
+        "answer": "The complete pair of selected values",
+        "explanation": "A result row is duplicate when the whole selected combination matches."
+      },
+      {
+        "id": "sql5.3-q3",
+        "prompt": "Does DISTINCT permanently delete rows from a table?",
+        "options": [
+          "No",
+          "Yes, it deletes repeated records",
+          "Only when a primary key exists",
+          "Only when ORDER BY is used"
+        ],
+        "answer": "No",
+        "explanation": "It changes only the result set returned by the query."
+      },
+      {
+        "id": "sql5.3-q4",
+        "prompt": "Which query returns unique categories?",
+        "options": [
+          "SELECT DISTINCT category FROM s53_items;",
+          "SELECT UNIQUE ROW category;",
+          "DELETE DISTINCT category FROM s53_items;",
+          "SELECT category DISTINCT ALL;"
+        ],
+        "answer": "SELECT DISTINCT category FROM s53_items;",
+        "explanation": "DISTINCT follows SELECT and precedes the result expressions."
+      },
+      {
+        "id": "sql5.3-q5",
+        "prompt": "What does COUNT(DISTINCT category) count in SQLite?",
+        "options": [
+          "Different non-NULL category values",
+          "All table rows including duplicate categories",
+          "Only categories with the word DISTINCT",
+          "The number of columns"
+        ],
+        "answer": "Different non-NULL category values",
+        "explanation": "COUNT(DISTINCT expression) counts unique non-NULL expression values."
+      }
+    ]
+  },
+  "status": "draft"
+}
