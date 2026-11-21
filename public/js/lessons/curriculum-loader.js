@@ -234,7 +234,7 @@ const link = $(".lesson-practice-link", container);
         const stateBytes = new TextEncoder().encode(JSON.stringify(sqlState));
         let stateBinary = "";
         stateBytes.forEach(byte => { stateBinary += String.fromCharCode(byte); });
-        const stateToken = btoa(stateBinary).replace(/\\+/g, "-").replace(/\\//g, "_").replace(/=+$/, "");
+        const stateToken = btoa(stateBinary).split("+").join("-").split("/").join("_").replace(/=+$/, "");
         link.href = "/sql-playground.html#code=" + stateToken;
         link.textContent = "Open this lesson's example in SQL Playground ↗";
       } else {
