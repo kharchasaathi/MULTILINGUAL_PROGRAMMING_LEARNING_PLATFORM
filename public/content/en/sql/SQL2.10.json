@@ -1,0 +1,158 @@
+{
+  "id": "sql.sql2.10.en",
+  "courseId": "sql",
+  "moduleId": "SQL2",
+  "topicId": "SQL2.10",
+  "title": "Writing Readable and Maintainable SQL",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the key ideas in writing readable and maintainable sql.",
+    "Identify the SQL syntax and database concepts demonstrated by the examples.",
+    "Predict the output or effect before running a statement.",
+    "Recognize common errors and describe a safe correction.",
+    "Apply readable and dialect-aware SQL practices."
+  ],
+  "prerequisites": [
+    "SQL2.1",
+    "SQL2.4"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Readable SQL makes intent visible to teammates and future maintainers. Learn consistent formatting, meaningful aliases, explicit columns and safe query habits.",
+      "whyItMatters": "A reliable SQL developer must understand not only what a statement looks like, but how the database parses, evaluates and reports it. These skills reduce mistakes and make database work easier to maintain.",
+      "analogy": "Think of a SQL statement as a precise instruction sheet: each keyword, name and condition has a defined role.",
+      "analogyLimit": "The database does not infer intent from formatting or context. It applies the selected engine's syntax, type and execution rules."
+    },
+    "explain": {
+      "narrative": "## Concept\nReadable SQL makes intent visible to teammates and future maintainers. Learn consistent formatting, meaningful aliases, explicit columns and safe query habits.\n\n## How to reason about it\nRead the statement in its SQL grammar, identify the operation, then inspect expressions, identifiers, conditions and result labels. The database engine applies its own type system, operator rules, parser and execution semantics. The examples target SQLite and note where behaviour is product-specific.\n\n## Practical guidance\nUse explicit expressions and aliases, group conditions with parentheses when helpful, and keep statements readable. Check schema names before running queries. Treat error text as diagnostic evidence rather than a universal specification. For data-changing operations, inspect target rows and consider transaction and recovery requirements.\n\n## Worked examples\n### 1. Format clauses on separate lines\n```sql\nSELECT employee_id, salary\nFROM employee\nWHERE salary > 40000\nORDER BY salary DESC;\n```\nExpected result: `Rows ordered by salary descending`\n\nEach clause begins on a new line to make query structure easy to scan.\n\n### 2. Use meaningful aliases\n```sql\nSELECT salary AS annual_salary FROM employee;\n```\nExpected result: `annual_salary\n42000`\n\nA meaningful alias explains the meaning of the output column.\n\n### 3. Select only needed columns\n```sql\nSELECT employee_id FROM employee;\n```\nExpected result: `employee_id\n1`\n\nExplicit column selection documents the required output and avoids unnecessary data.\n\n### 4. Group related conditions\n```sql\nSELECT employee_id FROM employee WHERE (salary > 30000 AND salary < 60000);\n```\nExpected result: `employee_id\n1`\n\nParentheses make the intended condition group explicit.\n\n### 5. Use a descriptive table alias\n```sql\nSELECT e.employee_id, e.salary FROM employee AS e;\n```\nExpected result: `employee_id | salary\n1 | 42000`\n\nA short alias can improve readability in queries involving multiple tables.\n\n## Common mistakes\n- Assuming every SQL product uses identical syntax, type rules or error messages.\n- Treating line breaks as statement terminators.\n- Ignoring operator precedence or NULL behaviour.\n- Using ambiguous identifiers and aliases.\n- Repeating a failed data-changing statement without checking its effects.\n\n## Best practices\nPrefer standard SQL where practical, label SQLite-specific behaviour, format clauses consistently, use explicit column names and verify examples against the target engine.",
+      "examples": [
+        {
+          "id": "sql2.10-ex1",
+          "language": "en",
+          "title": "Format clauses on separate lines",
+          "code": "SELECT employee_id, salary\nFROM employee\nWHERE salary > 40000\nORDER BY salary DESC;",
+          "expectedOutput": "Rows ordered by salary descending",
+          "explanation": "Each clause begins on a new line to make query structure easy to scan.",
+          "runnable": false
+        },
+        {
+          "id": "sql2.10-ex2",
+          "language": "en",
+          "title": "Use meaningful aliases",
+          "code": "SELECT salary AS annual_salary FROM employee;",
+          "expectedOutput": "annual_salary\n42000",
+          "explanation": "A meaningful alias explains the meaning of the output column.",
+          "runnable": false
+        },
+        {
+          "id": "sql2.10-ex3",
+          "language": "en",
+          "title": "Select only needed columns",
+          "code": "SELECT employee_id FROM employee;",
+          "expectedOutput": "employee_id\n1",
+          "explanation": "Explicit column selection documents the required output and avoids unnecessary data.",
+          "runnable": false
+        },
+        {
+          "id": "sql2.10-ex4",
+          "language": "en",
+          "title": "Group related conditions",
+          "code": "SELECT employee_id FROM employee WHERE (salary > 30000 AND salary < 60000);",
+          "expectedOutput": "employee_id\n1",
+          "explanation": "Parentheses make the intended condition group explicit.",
+          "runnable": false
+        },
+        {
+          "id": "sql2.10-ex5",
+          "language": "en",
+          "title": "Use a descriptive table alias",
+          "code": "SELECT e.employee_id, e.salary FROM employee AS e;",
+          "expectedOutput": "employee_id | salary\n1 | 42000",
+          "explanation": "A short alias can improve readability in queries involving multiple tables.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run each example for Writing Readable and Maintainable SQL in a SQLite-compatible database. Identify the statement boundaries and expressions, predict the outcome, then explain the actual result.",
+      "independentTask": "Write five original statements that demonstrate Writing Readable and Maintainable SQL. Include one deliberate misconception or common error, show its correction, and state the target database assumptions.",
+      "hints": [
+        "Read the full statement before predicting its effect.",
+        "Check object names and column names against the schema.",
+        "Use parentheses to clarify complex expressions.",
+        "Keep dialect-specific behaviour labelled.",
+        "For data changes, inspect the affected rows before execution."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "SELECT employee_id, salary\nFROM employee\nWHERE salary > 40000\nORDER BY salary DESC;",
+    "resetCode": "SELECT employee_id, salary\nFROM employee\nWHERE salary > 40000\nORDER BY salary DESC;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql2.10-q1",
+        "prompt": "Why select explicit columns instead of always using *?",
+        "options": [
+          "It documents the intended output and avoids fetching unneeded columns",
+          "It disables SQL parsing",
+          "It automatically creates indexes",
+          "It prevents all NULL values"
+        ],
+        "answer": "It documents the intended output and avoids fetching unneeded columns",
+        "explanation": "Explicit columns improve clarity and reduce accidental over-fetching."
+      },
+      {
+        "id": "sql2.10-q2",
+        "prompt": "What makes an alias useful?",
+        "options": [
+          "A meaningful name for a result column or table reference",
+          "A replacement for a WHERE clause",
+          "A transaction rollback",
+          "A database backup"
+        ],
+        "answer": "A meaningful name for a result column or table reference",
+        "explanation": "Aliases can clarify output labels and qualify columns in multi-table queries."
+      },
+      {
+        "id": "sql2.10-q3",
+        "prompt": "What does consistent indentation help with?",
+        "options": [
+          "Seeing the structure and relationships between clauses",
+          "Changing query results",
+          "Encrypting database files",
+          "Enforcing permissions"
+        ],
+        "answer": "Seeing the structure and relationships between clauses",
+        "explanation": "Formatting makes complex SQL easier to review and debug."
+      },
+      {
+        "id": "sql2.10-q4",
+        "prompt": "What is a good habit before running a destructive statement?",
+        "options": [
+          "Check the target rows and use a transaction or backup where appropriate",
+          "Remove all conditions",
+          "Assume rollback is always possible",
+          "Run it on production first"
+        ],
+        "answer": "Check the target rows and use a transaction or backup where appropriate",
+        "explanation": "Destructive changes need careful scope checks and a recovery plan."
+      },
+      {
+        "id": "sql2.10-q5",
+        "prompt": "Should formatting change the logical meaning of a query?",
+        "options": [
+          "No, formatting should preserve the statement's semantics",
+          "Yes, indentation always changes results",
+          "Only uppercase changes data",
+          "Only aliases change permissions"
+        ],
+        "answer": "No, formatting should preserve the statement's semantics",
+        "explanation": "Formatting is for readability; the SQL expression and clauses determine behaviour."
+      }
+    ]
+  },
+  "status": "draft"
+}
