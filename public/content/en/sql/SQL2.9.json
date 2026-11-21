@@ -1,0 +1,158 @@
+{
+  "id": "sql.sql2.9.en",
+  "courseId": "sql",
+  "moduleId": "SQL2",
+  "topicId": "SQL2.9",
+  "title": "SQL Error Messages and Query Debugging",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the key ideas in sql error messages and query debugging.",
+    "Identify the SQL syntax and database concepts demonstrated by the examples.",
+    "Predict the output or effect before running a statement.",
+    "Recognize common errors and describe a safe correction.",
+    "Apply readable and dialect-aware SQL practices."
+  ],
+  "prerequisites": [
+    "SQL2.1",
+    "SQL2.4"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Database errors identify problems such as missing tables, unknown columns, invalid syntax or constraint violations. Learn to read an error and verify a corrected query.",
+      "whyItMatters": "A reliable SQL developer must understand not only what a statement looks like, but how the database parses, evaluates and reports it. These skills reduce mistakes and make database work easier to maintain.",
+      "analogy": "Think of a SQL statement as a precise instruction sheet: each keyword, name and condition has a defined role.",
+      "analogyLimit": "The database does not infer intent from formatting or context. It applies the selected engine's syntax, type and execution rules."
+    },
+    "explain": {
+      "narrative": "## Concept\nDatabase errors identify problems such as missing tables, unknown columns, invalid syntax or constraint violations. Learn to read an error and verify a corrected query.\n\n## How to reason about it\nRead the statement in its SQL grammar, identify the operation, then inspect expressions, identifiers, conditions and result labels. The database engine applies its own type system, operator rules, parser and execution semantics. The examples target SQLite and note where behaviour is product-specific.\n\n## Practical guidance\nUse explicit expressions and aliases, group conditions with parentheses when helpful, and keep statements readable. Check schema names before running queries. Treat error text as diagnostic evidence rather than a universal specification. For data-changing operations, inspect target rows and consider transaction and recovery requirements.\n\n## Worked examples\n### 1. Create a small employee table\n```sql\nCREATE TABLE employee (employee_id INTEGER PRIMARY KEY, salary INTEGER NOT NULL);\n```\nExpected result: `Table created`\n\nThis schema provides a controlled context for later debugging examples.\n\n### 2. Insert a test row\n```sql\nINSERT INTO employee VALUES (1, 42000);\n```\nExpected result: `1 row inserted`\n\nA known test row makes it easier to distinguish query errors from missing data.\n\n### 3. Run a valid query\n```sql\nSELECT salary FROM employee WHERE employee_id = 1;\n```\nExpected result: `salary\n42000`\n\nThe table and column names match the schema.\n\n### 4. Demonstrate an unknown-column error\n```sql\nSELECT salaryy FROM employee;\n```\nExpected result: `Error: no such column: salaryy`\n\nThe misspelled identifier is intentionally invalid. Exact error wording can vary by engine and version.\n\n### 5. Correct the identifier\n```sql\nSELECT salary AS annual_salary FROM employee;\n```\nExpected result: `annual_salary\n42000`\n\nThe corrected query uses the actual salary column and a clear output alias.\n\n## Common mistakes\n- Assuming every SQL product uses identical syntax, type rules or error messages.\n- Treating line breaks as statement terminators.\n- Ignoring operator precedence or NULL behaviour.\n- Using ambiguous identifiers and aliases.\n- Repeating a failed data-changing statement without checking its effects.\n\n## Best practices\nPrefer standard SQL where practical, label SQLite-specific behaviour, format clauses consistently, use explicit column names and verify examples against the target engine.",
+      "examples": [
+        {
+          "id": "sql2.9-ex1",
+          "language": "en",
+          "title": "Create a small employee table",
+          "code": "CREATE TABLE employee (employee_id INTEGER PRIMARY KEY, salary INTEGER NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "This schema provides a controlled context for later debugging examples.",
+          "runnable": false
+        },
+        {
+          "id": "sql2.9-ex2",
+          "language": "en",
+          "title": "Insert a test row",
+          "code": "INSERT INTO employee VALUES (1, 42000);",
+          "expectedOutput": "1 row inserted",
+          "explanation": "A known test row makes it easier to distinguish query errors from missing data.",
+          "runnable": false
+        },
+        {
+          "id": "sql2.9-ex3",
+          "language": "en",
+          "title": "Run a valid query",
+          "code": "SELECT salary FROM employee WHERE employee_id = 1;",
+          "expectedOutput": "salary\n42000",
+          "explanation": "The table and column names match the schema.",
+          "runnable": false
+        },
+        {
+          "id": "sql2.9-ex4",
+          "language": "en",
+          "title": "Demonstrate an unknown-column error",
+          "code": "SELECT salaryy FROM employee;",
+          "expectedOutput": "Error: no such column: salaryy",
+          "explanation": "The misspelled identifier is intentionally invalid. Exact error wording can vary by engine and version.",
+          "runnable": false
+        },
+        {
+          "id": "sql2.9-ex5",
+          "language": "en",
+          "title": "Correct the identifier",
+          "code": "SELECT salary AS annual_salary FROM employee;",
+          "expectedOutput": "annual_salary\n42000",
+          "explanation": "The corrected query uses the actual salary column and a clear output alias.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run each example for SQL Error Messages and Query Debugging in a SQLite-compatible database. Identify the statement boundaries and expressions, predict the outcome, then explain the actual result.",
+      "independentTask": "Write five original statements that demonstrate SQL Error Messages and Query Debugging. Include one deliberate misconception or common error, show its correction, and state the target database assumptions.",
+      "hints": [
+        "Read the full statement before predicting its effect.",
+        "Check object names and column names against the schema.",
+        "Use parentheses to clarify complex expressions.",
+        "Keep dialect-specific behaviour labelled.",
+        "For data changes, inspect the affected rows before execution."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "CREATE TABLE employee (employee_id INTEGER PRIMARY KEY, salary INTEGER NOT NULL);",
+    "resetCode": "CREATE TABLE employee (employee_id INTEGER PRIMARY KEY, salary INTEGER NOT NULL);"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql2.9-q1",
+        "prompt": "What should you check first for a 'no such column' error?",
+        "options": [
+          "The column name against the table schema",
+          "The browser theme",
+          "The database icon",
+          "The query's font"
+        ],
+        "answer": "The column name against the table schema",
+        "explanation": "Unknown-column errors commonly result from misspelled or unavailable column identifiers."
+      },
+      {
+        "id": "sql2.9-q2",
+        "prompt": "Why use a small reproducible example when debugging?",
+        "options": [
+          "It isolates the failing statement and its required schema",
+          "It guarantees faster production queries",
+          "It removes all constraints",
+          "It hides the error"
+        ],
+        "answer": "It isolates the failing statement and its required schema",
+        "explanation": "A minimal reproducible case makes the cause easier to identify."
+      },
+      {
+        "id": "sql2.9-q3",
+        "prompt": "Should exact error wording be assumed identical across DBMSs?",
+        "options": [
+          "No",
+          "Yes, every engine uses identical text",
+          "Only for SELECT",
+          "Only on mobile"
+        ],
+        "answer": "No",
+        "explanation": "Error text and codes vary across products and versions."
+      },
+      {
+        "id": "sql2.9-q4",
+        "prompt": "What is a safe response to an UPDATE error?",
+        "options": [
+          "Inspect the statement, schema and target rows before retrying",
+          "Remove WHERE and retry",
+          "Disable every constraint",
+          "Repeat until it works"
+        ],
+        "answer": "Inspect the statement, schema and target rows before retrying",
+        "explanation": "Inspecting scope and schema prevents unintended data changes."
+      },
+      {
+        "id": "sql2.9-q5",
+        "prompt": "What does a successful corrected query prove?",
+        "options": [
+          "That this statement ran in the tested context",
+          "That the entire database design is perfect",
+          "That it works in every SQL dialect",
+          "That no security review is needed"
+        ],
+        "answer": "That this statement ran in the tested context",
+        "explanation": "Testing verifies the specific context, not every environment or design concern."
+      }
+    ]
+  },
+  "status": "draft"
+}
