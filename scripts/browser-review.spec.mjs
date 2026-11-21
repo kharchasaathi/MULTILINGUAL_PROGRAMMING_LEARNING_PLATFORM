@@ -110,7 +110,7 @@ test("all seven courses render representative lessons and starter programs execu
   await expect(page.locator("#courseGrid .course-card")).toHaveCount(await page.evaluate(async () => (await fetch("/content/curriculum-index.json")).json().then(data => data.courses.length)));
 
   // Exercise the shared lesson renderer and modal with one representative lesson per course.
-  for (const [course, topicId] of [["foundation","F0.1"],["html","H16.1"],["css","C22.1"],["javascript","J24.1"],["c","CL1.1"],["cpp","CPP1.1"],["python","PY1.1"]]) {
+  for (const [course, topicId] of [["foundation","F0.1"],["html","H16.1"],["css","C22.1"],["javascript","J24.1"],["c","CL1.1"],["cpp","CPP1.1"],["python","PY1.1"],["sql","SQL1.1"]]) {
     await page.locator(`[data-course-nav="${course}"]`).click();
     const dialog = page.locator("#lessonDialog");
     await expect(dialog).toBeVisible();
