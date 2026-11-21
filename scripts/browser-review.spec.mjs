@@ -115,7 +115,12 @@ test("all seven courses render representative lessons and starter programs execu
     const dialog = page.locator("#lessonDialog");
     await expect(dialog).toBeVisible();
     await dialog.locator(`[data-topic-id="${topicId}"]`).click();
-    await expect(dialog.locator(".lesson-template-title")).toContainText(topicId);
+    try {
+      await expect(dialog.locator(".lesson-template-title")).toContainText(topicId);
+    } catch (error) {
+      const diagnostic = await dialog.locator("#lessonContent").innerText().catch(() => "No lesson container");
+      throw new Error("Lesson render diagnostic for " + topicId + ": " + diagnostic.slice(0, 1200));
+    }
     await expect(dialog.locator(".curriculum-back")).toBeVisible();
     await expect(dialog.locator(".curriculum-draft-notice")).toHaveCount(0);
     const lessonResponse = await page.request.get(`${baseURL}/content/en/${course}/${topicId}.json`);
