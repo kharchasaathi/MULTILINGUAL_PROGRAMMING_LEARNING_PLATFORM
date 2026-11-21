@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql5.6.en",
+  "courseId": "sql",
+  "moduleId": "SQL5",
+  "topicId": "SQL5.6",
+  "title": "ORDER BY, ASC, DESC and Multiple Sort Keys",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of ORDER BY, ASC, DESC and Multiple Sort Keys.",
+    "Identify the source table, selected expressions and query clauses.",
+    "Predict which rows and columns a SQLite query returns.",
+    "Recognize NULL handling, sorting and dialect-specific pagination behaviour.",
+    "Write readable SELECT queries and verify their results."
+  ],
+  "prerequisites": [
+    "SQL2.1",
+    "SQL2.5",
+    "SQL3.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "ORDER BY sorts the result using one or more expressions. ASC is ascending and is the default; DESC is descending. Additional sort keys resolve ordering among rows tied on earlier keys.",
+      "whyItMatters": "Stable, intentional sorting makes reports easier to read and helps applications present predictable result sequences.",
+      "analogy": "ORDER BY is like arranging a list alphabetically, then using a second rule to arrange entries that share the same first label.",
+      "analogyLimit": "The analogy simplifies query processing. Actual results follow SQL expression rules, three-valued NULL logic, collation, and the selected database engine's query semantics."
+    },
+    "explain": {
+      "narrative": "## Core idea\nORDER BY sorts the result using one or more expressions. ASC is ascending and is the default; DESC is descending. Additional sort keys resolve ordering among rows tied on earlier keys.\n\n## Why this matters\nStable, intentional sorting makes reports easier to read and helps applications present predictable result sequences.\n\n## How to use it\nWrite the SELECT list to describe the output, identify the source with FROM, add a WHERE predicate when rows need filtering, and use ORDER BY to define the result sequence. SQLite pagination uses LIMIT and OFFSET. Use a stable sort key when a query is paginated.\n\n## SQLite and dialect notes\nThese runnable examples target SQLite. SELECT, WHERE, DISTINCT, ORDER BY, NULL predicates and aliases are broadly familiar SQL features, but details such as collations, NULL ordering, Boolean values and pagination syntax can vary. SQLite uses LIMIT/OFFSET; SQL Server commonly supports TOP or OFFSET/FETCH. Do not assume these forms are interchangeable.\n\n## Worked examples\n### 1. Create a sales table\n```sql\nCREATE TABLE s56_sales (sale_id INTEGER, region TEXT, salesperson TEXT, amount INTEGER); INSERT INTO s56_sales VALUES (1,'East','Mina',400),(2,'West','Arun',650),(3,'East','Zoya',550),(4,'West','Bina',650);\n```\nExpected result: 4 rows inserted\n\nThe sample includes equal sales amounts and repeated regions.\n\n### 2. Sort amounts ascending\n```sql\nSELECT salesperson, amount FROM s56_sales ORDER BY amount ASC;\n```\nExpected result: Mina | 400; Zoya | 550; Arun | 650; Bina | 650\n\nASC sorts from the smallest amount to the largest.\n\n### 3. Sort amounts descending\n```sql\nSELECT salesperson, amount FROM s56_sales ORDER BY amount DESC, sale_id ASC;\n```\nExpected result: Arun | 650; Bina | 650; Zoya | 550; Mina | 400\n\nDESC reverses the amount order; sale_id breaks the tie.\n\n### 4. Sort by region then salesperson\n```sql\nSELECT region, salesperson FROM s56_sales ORDER BY region ASC, salesperson ASC;\n```\nExpected result: East | Mina; East | Zoya; West | Arun; West | Bina\n\nThe second key sorts names within each region.\n\n### 5. Sort by a result expression\n```sql\nSELECT salesperson, amount * 1.1 AS adjusted_amount FROM s56_sales ORDER BY adjusted_amount DESC, salesperson ASC;\n```\nExpected result: Arun | 715; Bina | 715; Zoya | 605; Mina | 440\n\nORDER BY can use a selected expression alias in SQLite.\n\n## Common mistakes\n- Using SELECT * when only a few columns are needed.\n- Assuming DISTINCT deletes duplicate source records.\n- Using = NULL instead of IS NULL.\n- Mixing AND and OR without parentheses.\n- Assuming result order without ORDER BY.\n- Paginating without a deterministic sort key.\n- Copying LIMIT syntax into a DBMS that expects TOP or FETCH FIRST.\n\n## Good practice\nUse explicit columns, clear aliases, NULL-aware predicates, parentheses for compound logic, and a unique tie-breaker for paginated results. Test dialect-specific SQL in the target engine.",
+      "examples": [
+        {
+          "id": "sql5.6-ex1",
+          "language": "en",
+          "title": "Create a sales table",
+          "code": "CREATE TABLE s56_sales (sale_id INTEGER, region TEXT, salesperson TEXT, amount INTEGER); INSERT INTO s56_sales VALUES (1,'East','Mina',400),(2,'West','Arun',650),(3,'East','Zoya',550),(4,'West','Bina',650);",
+          "expectedOutput": "4 rows inserted",
+          "explanation": "The sample includes equal sales amounts and repeated regions.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.6-ex2",
+          "language": "en",
+          "title": "Sort amounts ascending",
+          "code": "SELECT salesperson, amount FROM s56_sales ORDER BY amount ASC;",
+          "expectedOutput": "Mina | 400; Zoya | 550; Arun | 650; Bina | 650",
+          "explanation": "ASC sorts from the smallest amount to the largest.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.6-ex3",
+          "language": "en",
+          "title": "Sort amounts descending",
+          "code": "SELECT salesperson, amount FROM s56_sales ORDER BY amount DESC, sale_id ASC;",
+          "expectedOutput": "Arun | 650; Bina | 650; Zoya | 550; Mina | 400",
+          "explanation": "DESC reverses the amount order; sale_id breaks the tie.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.6-ex4",
+          "language": "en",
+          "title": "Sort by region then salesperson",
+          "code": "SELECT region, salesperson FROM s56_sales ORDER BY region ASC, salesperson ASC;",
+          "expectedOutput": "East | Mina; East | Zoya; West | Arun; West | Bina",
+          "explanation": "The second key sorts names within each region.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.6-ex5",
+          "language": "en",
+          "title": "Sort by a result expression",
+          "code": "SELECT salesperson, amount * 1.1 AS adjusted_amount FROM s56_sales ORDER BY adjusted_amount DESC, salesperson ASC;",
+          "expectedOutput": "Arun | 715; Bina | 715; Zoya | 605; Mina | 440",
+          "explanation": "ORDER BY can use a selected expression alias in SQLite.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the five examples for ORDER BY, ASC, DESC and Multiple Sort Keys in the SQL Playground. Before each run, identify the SELECT list, source, filters, sort keys and row limit where applicable. Predict the output and compare it with the SQLite result.",
+      "independentTask": "Create an original SQLite query task that demonstrates ORDER BY, ASC, DESC and Multiple Sort Keys. Include a small table, at least five SQL statements, a verification query and a short explanation of any dialect-specific behaviour.",
+      "hints": [
+        "Read the SELECT list to identify the output columns.",
+        "Check the source table and each WHERE predicate.",
+        "Use parentheses when combining AND and OR conditions.",
+        "Use IS NULL or IS NOT NULL for missing values.",
+        "Add ORDER BY before LIMIT/OFFSET when predictable pagination is required."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE s56_sales (sale_id INTEGER, region TEXT, salesperson TEXT, amount INTEGER); INSERT INTO s56_sales VALUES (1,'East','Mina',400),(2,'West','Arun',650),(3,'East','Zoya',550),(4,'West','Bina',650);\n\nSELECT salesperson, amount FROM s56_sales ORDER BY amount ASC;\n\nSELECT salesperson, amount FROM s56_sales ORDER BY amount DESC, sale_id ASC;\n\nSELECT region, salesperson FROM s56_sales ORDER BY region ASC, salesperson ASC;\n\nSELECT salesperson, amount * 1.1 AS adjusted_amount FROM s56_sales ORDER BY adjusted_amount DESC, salesperson ASC;",
+    "resetCode": "CREATE TABLE s56_sales (sale_id INTEGER, region TEXT, salesperson TEXT, amount INTEGER); INSERT INTO s56_sales VALUES (1,'East','Mina',400),(2,'West','Arun',650),(3,'East','Zoya',550),(4,'West','Bina',650);\n\nSELECT salesperson, amount FROM s56_sales ORDER BY amount ASC;\n\nSELECT salesperson, amount FROM s56_sales ORDER BY amount DESC, sale_id ASC;\n\nSELECT region, salesperson FROM s56_sales ORDER BY region ASC, salesperson ASC;\n\nSELECT salesperson, amount * 1.1 AS adjusted_amount FROM s56_sales ORDER BY adjusted_amount DESC, salesperson ASC;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql5.6-q1",
+        "prompt": "What is the default sort direction for ORDER BY?",
+        "options": [
+          "ASC",
+          "DESC",
+          "RANDOM",
+          "NONE"
+        ],
+        "answer": "ASC",
+        "explanation": "Ascending order is the default when direction is omitted."
+      },
+      {
+        "id": "sql5.6-q2",
+        "prompt": "What does DESC mean?",
+        "options": [
+          "Descending order",
+          "Distinct rows",
+          "Delete records",
+          "Default column"
+        ],
+        "answer": "Descending order",
+        "explanation": "DESC sorts from higher to lower for typical numeric values."
+      },
+      {
+        "id": "sql5.6-q3",
+        "prompt": "How are multiple ORDER BY keys applied?",
+        "options": [
+          "Later keys sort rows tied on earlier keys",
+          "Every key creates a separate result set",
+          "Only the last key is used",
+          "Keys are ignored without an index"
+        ],
+        "answer": "Later keys sort rows tied on earlier keys",
+        "explanation": "Sort keys are applied from left to right to refine ties."
+      },
+      {
+        "id": "sql5.6-q4",
+        "prompt": "Does ORDER BY change stored row order permanently?",
+        "options": [
+          "No, it sorts the query result",
+          "Yes, it rewrites the table",
+          "Yes, it creates a new primary key",
+          "Only when DESC is used"
+        ],
+        "answer": "No, it sorts the query result",
+        "explanation": "Relational tables have no guaranteed storage order; ORDER BY specifies result order."
+      },
+      {
+        "id": "sql5.6-q5",
+        "prompt": "Why add a unique tie-breaker to ORDER BY when paginating?",
+        "options": [
+          "To make row ordering deterministic",
+          "To remove duplicate source records",
+          "To create a foreign key",
+          "To disable LIMIT"
+        ],
+        "answer": "To make row ordering deterministic",
+        "explanation": "A unique final sort key helps avoid rows shifting unpredictably between pages."
+      }
+    ]
+  },
+  "status": "draft"
+}
