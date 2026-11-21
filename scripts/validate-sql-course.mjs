@@ -56,10 +56,14 @@ for (const topic of topics) {
   }
   const questions = lesson.assessment?.questions;
   assert.ok(questions?.length >= 5);
+  const prompts = new Set();
   for (const question of questions) {
     assert.ok(question.id && !questionIds.has(question.id), "Duplicate MCQ ID " + question.id);
+    assert.ok(question.prompt?.trim() && !prompts.has(question.prompt.trim()), "Duplicate or empty MCQ prompt in " + topic.topicId);
+    prompts.add(question.prompt.trim());
     questionIds.add(question.id);
     assert.ok(question.options?.length >= 4);
+    assert.equal(new Set(question.options).size, question.options.length, topic.topicId + ": duplicate MCQ options");
     assert.ok(question.options.includes(question.answer));
     assert.ok(question.explanation?.length > 15);
   }
