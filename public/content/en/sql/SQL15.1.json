@@ -25,7 +25,7 @@
       "analogyLimit": "The analogy does not model B-tree pages, query planner estimates, index maintenance or the full range of SQL access paths."
     },
     "explain": {
-      "narrative": "## Index fundamentals\nAn index stores searchable key values and references to table rows. An index on a frequently filtered column can reduce the rows the engine must inspect. An index is not automatically useful for every query; selectivity, table size, query shape and statistics matter.\n\n## Query plans\nEXPLAIN QUERY PLAN in SQLite shows whether a query uses a table scan or an index search. The exact wording and plan details can vary with SQLite versions and schema statistics, so treat plans as diagnostic evidence rather than fixed output strings.\n\n## Trade-offs\nIndexes use storage and must be maintained when indexed data changes. Too many or poorly chosen indexes can slow writes and make maintenance more expensive.",
+      "narrative": "## Index fundamentals\nAn index stores searchable key values and references to table rows. An index on a frequently filtered column can reduce the rows the engine must inspect. An index is not automatically useful for every query; selectivity, table size, query shape and statistics matter.\n\n## Query plans\nEXPLAIN QUERY PLAN in SQLite shows whether a query uses a table scan or an index search. The exact wording and plan details can vary with SQLite versions and schema statistics, so treat plans as diagnostic evidence rather than fixed output strings.\n\n## Trade-offs\nIndexes use storage and must be maintained when indexed data changes. Too many or poorly chosen indexes can slow writes and make maintenance more expensive.\n\n### Selectivity and plan evidence\nAn index is more likely to help when a predicate narrows the search to a relatively small part of a large table. A low-selectivity column may still be useful in a composite or covering index, but the optimizer can correctly choose a table scan when reading most rows is cheaper.\n\n### Measure before and after\nUse the same representative data and query parameters when comparing plans or timing. EXPLAIN QUERY PLAN is diagnostic output, not a benchmark and not a guarantee that the query is faster.",
       "examples": [
         {
           "id": "sql15.1-ex1",
@@ -33,7 +33,7 @@
           "title": "Create an orders table",
           "code": "CREATE TABLE perf15_orders (order_id INTEGER PRIMARY KEY, customer TEXT NOT NULL, amount INTEGER NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create an orders table in SQLite. Verify both the access strategy and the returned data.",
+          "explanation": "Creates an orders table with a primary key and required customer and amount columns. The primary-key index is created automatically by SQLite; the next index is a separate access path for customer lookups.",
           "runnable": true
         },
         {
@@ -42,7 +42,7 @@
           "title": "Generate 200 sample orders",
           "code": "WITH RECURSIVE seq(value) AS (SELECT 1 UNION ALL SELECT value + 1 FROM seq WHERE value < 200) INSERT INTO perf15_orders SELECT value, printf('Customer%03d', value % 20), value FROM seq;",
           "expectedOutput": "200 rows inserted",
-          "explanation": "This example demonstrates generate 200 sample orders in SQLite. Verify both the access strategy and the returned data.",
+          "explanation": "Uses a recursive CTE to generate values 1 through 200 and inserts one order per value. printf creates repeatable customer labels, so each of 20 customers appears ten times and the data set is large enough to demonstrate a non-unique lookup index.",
           "runnable": true
         },
         {
@@ -51,7 +51,7 @@
           "title": "Create an index for customer lookups",
           "code": "CREATE INDEX idx_perf15_customer ON perf15_orders(customer);",
           "expectedOutput": "Index created",
-          "explanation": "This example demonstrates create an index for customer lookups in SQLite. Verify both the access strategy and the returned data.",
+          "explanation": "Creates a secondary index on customer. The index stores customer keys with references to matching rows, allowing the planner to consider an indexed search instead of scanning every order.",
           "runnable": true
         },
         {
@@ -61,7 +61,7 @@
           "code": "EXPLAIN QUERY PLAN SELECT order_id, amount FROM perf15_orders WHERE customer = 'Customer007';",
           "expectedOutput": "Query plan uses idx_perf15_customer",
           "expectedPattern": "SEARCH.*USING INDEX idx_perf15_customer",
-          "explanation": "This example demonstrates inspect the query plan for a customer lookup in SQLite. Verify both the access strategy and the returned data.",
+          "explanation": "EXPLAIN QUERY PLAN displays SQLite's chosen access strategy for the customer predicate. The expected description is conceptual: exact plan text varies by SQLite version, schema statistics and data distribution, so inspect the actual output rather than relying on one fixed string.",
           "runnable": true
         },
         {
@@ -70,7 +70,7 @@
           "title": "Measure the matching rows",
           "code": "SELECT COUNT(*) AS matching_orders, SUM(amount) AS total_amount FROM perf15_orders WHERE customer = 'Customer007';",
           "expectedOutput": "10 | 970",
-          "explanation": "This example demonstrates measure the matching rows in SQLite. Verify both the access strategy and the returned data.",
+          "explanation": "Counts the ten rows for Customer007 and sums their order_id values, which total 970. This query verifies the matching data independently of the plan; an index should not change the logical result.",
           "runnable": true
         }
       ]
