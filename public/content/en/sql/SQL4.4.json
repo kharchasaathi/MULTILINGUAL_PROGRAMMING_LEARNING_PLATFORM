@@ -6,7 +6,7 @@
   "title": "PRIMARY KEY Constraints",
   "language": "en",
   "learningObjectives": [
-    "Explain the purpose and behaviour of primary key constraints.",
+    "Explain primary keys and distinguish candidate, alternate, natural and surrogate keys.",
     "Identify the rule, affected columns and expected write behaviour.",
     "Predict the outcome of valid inserts and schema operations.",
     "Recognize SQLite-specific behaviour and cross-DBMS differences.",
@@ -19,13 +19,13 @@
   ],
   "stages": {
     "understand": {
-      "concept": "A primary key identifies each row in a table. A table has one primary key definition, which may contain one column or a combination of columns; its key values must uniquely identify records and cannot be NULL.",
-      "whyItMatters": "Stable row identity supports reliable updates, relationships, joins and record references.",
+      "concept": "A primary key identifies each row in a table. A table has one primary key definition, which may contain one column or a combination of columns; its key values must uniquely identify records and cannot be NULL. A candidate key is a minimal set of columns that uniquely identifies a row. One candidate key is selected as the primary key; other candidate keys are alternate keys. A natural key uses meaningful business data, while a surrogate key is an artificial identifier such as an integer ID.",
+      "whyItMatters": "Stable row identity supports reliable updates, relationships, joins and record references. Choosing stable keys avoids using mutable business attributes as long-term row identifiers.",
       "analogy": "A primary key is like a unique library accession number assigned to each item.",
       "analogyLimit": "The analogy simplifies database behaviour. Actual constraint enforcement follows SQL NULL semantics, transaction rules and the selected database engine's implementation."
     },
     "explain": {
-      "narrative": "## Concept\nA primary key identifies each row in a table. A table has one primary key definition, which may contain one column or a combination of columns; its key values must uniquely identify records and cannot be NULL.\n\n## Why this matters\nStable row identity supports reliable updates, relationships, joins and record references.\n\n## Practical rules\nUse explicit column lists, test both valid and invalid cases in an isolated database, and keep engine-specific behaviour visible. Constraints protect writes, but they do not replace application-level validation or a safe migration plan.\n\n## Worked examples\n### 1. Create a table with a single-column primary key\n```sql\nCREATE TABLE c4_pk_single (student_id INTEGER PRIMARY KEY, student_name TEXT NOT NULL);\n```\nExpected result: `Table created`\n\nThe integer primary key identifies each student row in SQLite.\n\n### 2. Insert two identified rows\n```sql\nINSERT INTO c4_pk_single VALUES (101, 'Ira'), (102, 'Noel');\n```\nExpected result: `2 rows inserted`\n\nEach row has a distinct identifier.\n\n### 3. Retrieve one row by its key\n```sql\nSELECT student_name FROM c4_pk_single WHERE student_id = 102;\n```\nExpected result: `Noel`\n\nThe primary key can be used to target one record.\n\n### 4. Create a table with a composite primary key\n```sql\nCREATE TABLE c4_pk_pair (course_code TEXT, term_code TEXT, room TEXT, PRIMARY KEY (course_code, term_code));\n```\nExpected result: `Table created`\n\nThe pair of course_code and term_code identifies an offering.\n\n### 5. Insert distinct composite keys\n```sql\nINSERT INTO c4_pk_pair VALUES ('SQL101', '2026A', 'R1'), ('SQL101', '2026B', 'R2');\n```\nExpected result: `2 rows inserted`\n\nThe course code may repeat because the full pair is different.\n\n## Common mistakes\n- Confusing an omitted column with an explicit NULL value.\n- Assuming UNIQUE automatically means NOT NULL.\n- Treating a composite key as separate single-column rules.\n- Forgetting to enable SQLite foreign-key enforcement for a connection.\n- Assuming every DBMS supports the same ALTER TABLE constraint syntax.\n\n## Safe practice\nTest migrations against a copy, inspect existing data, use transactions where supported, and keep a recoverable backup before changing important schemas.",
+      "narrative": "## Concept\nA primary key identifies each row in a table. A table has one primary key definition, which may contain one column or a combination of columns; its key values must uniquely identify records and cannot be NULL.\n\n## Candidate, primary, alternate, natural and surrogate keys\\nA candidate key is a minimal column or column set that uniquely identifies each row. The table designer chooses one candidate key as the primary key. Any other candidate keys are alternate keys and can usually be protected with UNIQUE constraints. A natural key comes from meaningful business data, such as a stable government-issued code or a carefully governed product code. A surrogate key is generated only to identify the row, such as an integer ID.\\n\\nA natural key can be useful when it is genuinely stable and unique, but names, email addresses and phone numbers can change or be shared. A surrogate key avoids coupling relationships to mutable business values; it does not remove the need for UNIQUE constraints on business identifiers.\\n\\n## Why this matters\nStable row identity supports reliable updates, relationships, joins and record references.\n\n## Practical rules\nUse explicit column lists, test both valid and invalid cases in an isolated database, and keep engine-specific behaviour visible. Constraints protect writes, but they do not replace application-level validation or a safe migration plan.\n\n## Worked examples\n### 1. Create a table with a single-column primary key\n```sql\nCREATE TABLE c4_pk_single (student_id INTEGER PRIMARY KEY, student_name TEXT NOT NULL);\n```\nExpected result: `Table created`\n\nThe integer primary key identifies each student row in SQLite.\n\n### 2. Insert two identified rows\n```sql\nINSERT INTO c4_pk_single VALUES (101, 'Ira'), (102, 'Noel');\n```\nExpected result: `2 rows inserted`\n\nEach row has a distinct identifier.\n\n### 3. Retrieve one row by its key\n```sql\nSELECT student_name FROM c4_pk_single WHERE student_id = 102;\n```\nExpected result: `Noel`\n\nThe primary key can be used to target one record.\n\n### 4. Create a table with a composite primary key\n```sql\nCREATE TABLE c4_pk_pair (course_code TEXT, term_code TEXT, room TEXT, PRIMARY KEY (course_code, term_code));\n```\nExpected result: `Table created`\n\nThe pair of course_code and term_code identifies an offering.\n\n### 5. Insert distinct composite keys\n```sql\nINSERT INTO c4_pk_pair VALUES ('SQL101', '2026A', 'R1'), ('SQL101', '2026B', 'R2');\n```\nExpected result: `2 rows inserted`\n\nThe course code may repeat because the full pair is different.\n\n## Common mistakes\n- Confusing an omitted column with an explicit NULL value.\n- Assuming UNIQUE automatically means NOT NULL.\n- Treating a composite key as separate single-column rules.\n- Forgetting to enable SQLite foreign-key enforcement for a connection.\n- Assuming every DBMS supports the same ALTER TABLE constraint syntax.\n\n## Safe practice\nTest migrations against a copy, inspect existing data, use transactions where supported, and keep a recoverable backup before changing important schemas.",
       "examples": [
         {
           "id": "sql4.4-ex1",
@@ -75,14 +75,14 @@
       ]
     },
     "practise": {
-      "guidedTask": "Run the five examples for PRIMARY KEY Constraints in the SQL Playground. Predict each result, execute the statement, and explain which rule is being enforced.",
-      "independentTask": "Design a small original schema demonstrating PRIMARY KEY Constraints. Include at least five SQL statements, one verification query and a short explanation of the SQLite behaviour involved.",
+      "guidedTask": "Run the five examples. Then classify student_id as a surrogate key and course_code plus term_code as a composite key. Identify another possible candidate key and explain why it would be an alternate key if the primary key is already selected.",
+      "independentTask": "Design a table with at least two candidate keys. Choose one primary key, enforce the other candidate key with UNIQUE, and explain whether each key is natural or surrogate. Include a case where a natural key could change and justify your design.",
       "hints": [
-        "Identify whether the rule applies to one column or a combination of columns.",
-        "Check whether a value is omitted, NULL or an ordinary value.",
-        "Use explicit column lists and meaningful constraint names.",
-        "For foreign keys, enable PRAGMA foreign_keys = ON in SQLite.",
-        "Test schema changes on sample data before applying them to important databases."
+        "A candidate key must be unique and minimal.",
+        "Only one primary key constraint is selected per table, but it can contain multiple columns.",
+        "An alternate key is another candidate key not selected as the primary key.",
+        "Natural keys use business data; surrogate keys are generated identifiers.",
+        "A surrogate primary key does not replace UNIQUE constraints on business identifiers."
       ]
     }
   },
