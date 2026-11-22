@@ -25,7 +25,7 @@
       "analogyLimit": "The analogy does not model SQL's exact cardinality rules, NULL logic, query optimizer or recursive evaluation."
     },
     "explain": {
-      "narrative": "## Recursive structure\nA recursive CTE uses WITH RECURSIVE. Its definition contains an anchor member that produces the starting rows and a recursive member that joins the current result to the next level. UNION ALL combines the anchor and recursive rows.\n\n## Hierarchy traversal\nA table with id and parent_id columns can represent a tree. Start at a root row, then repeatedly find children whose parent_id matches the current row's id. Add a depth or path column to make the traversal understandable.\n\n## Termination and cycle safety\nThe recursive member must eventually stop. Use a clear termination condition for generated sequences. For graph-like data, track visited identifiers and prevent revisiting a node; otherwise a cycle can produce unbounded recursion. SQLite also has recursion limits.",
+      "narrative": "## Recursive structure\nA recursive CTE uses WITH RECURSIVE. Its definition contains an anchor member that produces the starting rows and a recursive member that joins the current result to the next level. UNION ALL combines the anchor and recursive rows.\n\n## Hierarchy traversal\nA table with id and parent_id columns can represent a tree. Start at a root row, then repeatedly find children whose parent_id matches the current row's id. Add a depth or path column to make the traversal understandable.\n\n## Termination and cycle safety\nThe recursive member must eventually stop. Use a clear termination condition for generated sequences. For graph-like data, track visited identifiers and prevent revisiting a node; otherwise a cycle can produce unbounded recursion. SQLite also has recursion limits.\n\n### Anchor, recursive member and termination\nThe anchor query establishes the starting rows. The recursive member derives the next level from rows already produced. A recursive query must have a termination condition or a cycle guard; otherwise it can generate excessive work or hit the engine's recursion limit.\n\n### Trees versus general graphs\nAn adjacency list naturally represents parent-child relationships, but real graph data can contain multiple paths and cycles. A visited-node strategy must account for the graph's identity and path rules. The example's text path is suitable for positive integer IDs in this fixture, not a universal graph algorithm.",
       "examples": [
         {
           "id": "sql13.5-ex1",
@@ -33,7 +33,7 @@
           "title": "Generate a sequence from one to five",
           "code": "WITH RECURSIVE numbers(value) AS (SELECT 1 UNION ALL SELECT value + 1 FROM numbers WHERE value < 5) SELECT value FROM numbers;",
           "expectedOutput": "1; 2; 3; 4; 5",
-          "explanation": "This example demonstrates generate a sequence from one to five using SQLite. Follow the inner query and outer result carefully.",
+          "explanation": "Defines a recursive CTE with an anchor row of 1 and a recursive member that adds one while the current value is below 5. The WHERE condition is the termination rule, so the sequence contains exactly five values.",
           "runnable": true
         },
         {
@@ -42,7 +42,7 @@
           "title": "Create an employee hierarchy table",
           "code": "CREATE TABLE sub13_org (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, parent_id INTEGER);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create an employee hierarchy table using SQLite. Follow the inner query and outer result carefully.",
+          "explanation": "Creates an adjacency-list hierarchy: employee_id identifies a node and parent_id points to its parent. A NULL parent_id identifies the root in this sample.",
           "runnable": true
         },
         {
@@ -51,7 +51,7 @@
           "title": "Insert a small organization tree",
           "code": "INSERT INTO sub13_org VALUES (1, 'CEO', NULL), (2, 'Asha', 1), (3, 'Bilal', 1), (4, 'Chitra', 2);",
           "expectedOutput": "4 rows inserted",
-          "explanation": "This example demonstrates insert a small organization tree using SQLite. Follow the inner query and outer result carefully.",
+          "explanation": "Inserts a four-node organization tree. CEO is the root, Asha and Bilal report to CEO, and Chitra reports to Asha.",
           "runnable": true
         },
         {
@@ -60,7 +60,7 @@
           "title": "Traverse the hierarchy with depth",
           "code": "WITH RECURSIVE org_tree(employee_id, employee_name, depth) AS (SELECT employee_id, employee_name, 0 FROM sub13_org WHERE parent_id IS NULL UNION ALL SELECT child.employee_id, child.employee_name, parent.depth + 1 FROM sub13_org AS child JOIN org_tree AS parent ON child.parent_id = parent.employee_id) SELECT employee_name, depth FROM org_tree ORDER BY depth, employee_name;",
           "expectedOutput": "CEO | 0; Asha | 1; Bilal | 1; Chitra | 2",
-          "explanation": "This example demonstrates traverse the hierarchy with depth using SQLite. Follow the inner query and outer result carefully.",
+          "explanation": "The anchor selects the root at depth zero. The recursive member joins each child to the parent rows already found and increases depth by one. The final ORDER BY presents the root, its children and then the next level.",
           "runnable": true
         },
         {
@@ -69,7 +69,7 @@
           "title": "Build a path and prevent revisiting an identifier",
           "code": "WITH RECURSIVE org_path(employee_id, employee_name, path) AS (SELECT employee_id, employee_name, '/' || employee_id || '/' FROM sub13_org WHERE parent_id IS NULL UNION ALL SELECT child.employee_id, child.employee_name, parent.path || child.employee_id || '/' FROM sub13_org AS child JOIN org_path AS parent ON child.parent_id = parent.employee_id WHERE instr(parent.path, '/' || child.employee_id || '/') = 0) SELECT employee_name, path FROM org_path ORDER BY length(path), employee_id;",
           "expectedOutput": "CEO | /1/; Asha | /1/2/; Bilal | /1/3/; Chitra | /1/2/4/",
-          "explanation": "This example demonstrates build a path and prevent revisiting an identifier using SQLite. Follow the inner query and outer result carefully.",
+          "explanation": "Builds a slash-delimited path for each node and uses instr() to avoid adding a child identifier already present in the current path. This is a SQLite-specific string-search technique for cycle protection; path encoding must be unambiguous if identifiers can contain delimiter characters.",
           "runnable": true
         }
       ]
