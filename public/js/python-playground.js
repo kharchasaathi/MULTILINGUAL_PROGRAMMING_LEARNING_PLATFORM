@@ -42,7 +42,7 @@
     running = value;
     runButton.disabled = !ready || value;
     stopButton.disabled = !value;
-    runState.textContent = value ? "Running…" : "Waiting";
+    if (value) runState.textContent = "Running…";
   }
   function bootWorker() {
     ready = false;
@@ -80,12 +80,14 @@
         clearTimeout(watchdog);
         watchdog = null;
         setRunning(false);
+        runState.textContent = "Completed";
       }
     };
     worker.onerror = (event) => {
       clearTimeout(watchdog);
       watchdog = null;
       setRunning(false);
+      runState.textContent = "Error";
       setStatus("Python worker error: " + (event.message || "Unknown worker error"), "error");
       appendOutput(event.message || "Worker failed.", "stderr");
     };
