@@ -68,6 +68,7 @@ const pyRunner = [
   "skipped = 0",
   "dynamic = 0",
   "expected_errors = 0",
+  "status_state_assertions = 0",
   "mismatches = []",
   "for item in examples:",
   "    result_sets = []",
@@ -123,7 +124,7 @@ const pyRunner = [
   "    else:",
   "        compared += 1",
   "db.close()",
-  "print(json.dumps({'compared': compared, 'skipped': skipped, 'dynamic': dynamic, 'expected_errors': expected_errors, 'mismatches': mismatches}))"
+  "print(json.dumps({'compared': compared, 'skipped': skipped, 'dynamic': dynamic, 'expected_errors': expected_errors, 'status_state_assertions': status_state_assertions, 'mismatches': mismatches}))"
 ].join("\n");
 
 for (const topic of topics) {
@@ -184,6 +185,7 @@ for (const topic of topics) {
   statusOnlyExamples += result.skipped;
   dynamicOutputs += result.dynamic;
   expectedErrors += result.expected_errors;
+  statusStateAssertions += result.status_state_assertions;
   assert.equal(result.mismatches.length, 0, topic.topicId + ": expectedOutput mismatch: " + JSON.stringify(result.mismatches));
 }
 console.log("SQL course validation passed: " + topics.length + " lessons, " + examplesChecked + " SQLite-executed examples, " + outputsCompared + " expected outputs compared with actual result sets, " + statusOnlyExamples + " status-only examples, " + statusStateAssertions + " database-state assertions for status-only statements, " + dynamicOutputs + " runtime-dependent outputs checked by pattern, " + expectedErrors + " expected-error examples, " + questionIds.size + " MCQs.");
