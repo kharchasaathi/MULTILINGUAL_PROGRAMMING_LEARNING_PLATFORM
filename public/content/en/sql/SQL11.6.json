@@ -27,51 +27,61 @@
       "analogyLimit": "The analogy does not model SQL grammar, database transaction isolation, driver APIs, security boundaries or DBMS-specific implementation details."
     },
     "explain": {
-      "narrative": "## Three-stage workflow\nPrepare a query template containing placeholders. Bind each value through the database API using the expected data type. Execute the prepared statement; it may be reused with different values. In MySQLi, for example, applications use prepare(), bind_param() and execute(). Other drivers expose different APIs.\n\n## Security properties\nPrepared statements keep parameter values separate from SQL syntax. They are a primary defence against SQL injection when the query structure itself is trusted. They do not make unsafe dynamic identifiers safe, and they do not replace authorization, validation or least-privilege access.\n\n## SQL Playground boundary\nThe browser Playground executes SQL scripts but does not expose the host application's prepare/bind API. The examples therefore show safe fixed-value SQL equivalents and include the prepared template as a comment. Do not interpret the static examples as proof that parameter binding occurred inside the Playground.\n\n## Worked examples\nThe five original SQLite examples below are executable in the CodeSaathi SQL Playground. Any host-language API or other DBMS command is explicitly labelled as explanatory rather than runnable.",
+      "narrative": "## Three-stage workflow\nPrepare a query template containing placeholders. Bind each value through the database API using the expected data type. Execute the prepared statement; it may be reused with different values. In MySQLi, for example, applications use prepare(), bind_param() and execute(). Other drivers expose different APIs.\n\n## CodeSaathi Playground\nThe Playground's Bound parameters (JSON) field prepares and binds one SQL statement using sql.js. Use a JSON array for positional ? placeholders, or a JSON object for named placeholders such as :person_id. Parameterized mode rejects multiple statements; clear the parameter field before running a multi-statement setup script.\n\n## Security properties\nPrepared statements keep parameter values separate from SQL syntax. They are a primary defence against SQL injection when the query structure itself is trusted. They do not make unsafe dynamic identifiers safe, and they do not replace authorization, validation or least-privilege access.\n\n## Worked examples\nFor examples with parameters, copy the SQL into the editor and enter the listed JSON array in the Bound parameters field. The examples run against SQLite; host-language driver APIs and other DBMS commands have their own syntax.",
       "examples": [
         {
           "id": "sql11.6-ex1",
           "language": "en",
-          "title": "Prepare a read template conceptually",
-          "code": "-- Prepared template: SELECT name FROM prepared_people WHERE id = ?;\nDROP TABLE IF EXISTS prepared_people; CREATE TABLE prepared_people(id INTEGER PRIMARY KEY,name TEXT); INSERT INTO prepared_people VALUES(1,'Asha'),(2,'Bilal'); SELECT name FROM prepared_people WHERE id=1;",
-          "expectedOutput": "Asha",
-          "explanation": "The template is prepared by the application; the runnable SELECT is a fixed-value demonstration.",
+          "title": "Create a prepared-statement table",
+          "code": "CREATE TABLE prepared_people (id INTEGER PRIMARY KEY, name TEXT NOT NULL, city TEXT NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "The table is created before the parameterized statements.",
           "runnable": true
         },
         {
           "id": "sql11.6-ex2",
           "language": "en",
-          "title": "Reuse a query shape with another value",
-          "code": "-- Reuse template: SELECT name FROM prepared_people WHERE id = ?;\nDROP TABLE IF EXISTS prepared_people; CREATE TABLE prepared_people(id INTEGER PRIMARY KEY,name TEXT); INSERT INTO prepared_people VALUES(1,'Asha'),(2,'Bilal'); SELECT name FROM prepared_people WHERE id=2;",
-          "expectedOutput": "Bilal",
-          "explanation": "A host application can bind a different id and execute the same prepared statement again.",
+          "title": "Insert sample rows",
+          "code": "INSERT INTO prepared_people VALUES (1, 'Asha', 'Hyderabad'), (2, 'Bilal', 'Vijayawada');",
+          "expectedOutput": "2 rows inserted",
+          "explanation": "This setup statement inserts two sample records.",
           "runnable": true
         },
         {
           "id": "sql11.6-ex3",
           "language": "en",
-          "title": "Prepare an INSERT template",
-          "code": "-- Prepared template: INSERT INTO prepared_people(id,name) VALUES(?,?);\nDROP TABLE IF EXISTS prepared_people; CREATE TABLE prepared_people(id INTEGER PRIMARY KEY,name TEXT); INSERT INTO prepared_people VALUES(3,'Mira'); SELECT id,name FROM prepared_people;",
-          "expectedOutput": "3 | Mira",
-          "explanation": "Prepared INSERT statements can be reused for multiple rows by binding new values.",
+          "title": "Prepare and bind a read query",
+          "code": "SELECT name FROM prepared_people WHERE id = ?;",
+          "expectedOutput": "Asha",
+          "parameters": [
+            1
+          ],
+          "explanation": "The id is supplied separately as a bound value. Enter [1] in the parameter field.",
           "runnable": true
         },
         {
           "id": "sql11.6-ex4",
           "language": "en",
-          "title": "Prepare an UPDATE template",
-          "code": "-- Prepared template: UPDATE prepared_people SET city = ? WHERE id = ?;\nDROP TABLE IF EXISTS prepared_people; CREATE TABLE prepared_people(id INTEGER PRIMARY KEY,name TEXT,city TEXT); INSERT INTO prepared_people VALUES(1,'Asha','Hyderabad'); UPDATE prepared_people SET city='Chennai' WHERE id=1; SELECT name,city FROM prepared_people;",
+          "title": "Bind values in an UPDATE and return the changed row",
+          "code": "UPDATE prepared_people SET city = ? WHERE id = ? RETURNING name, city;",
           "expectedOutput": "Asha | Chennai",
-          "explanation": "The application should bind both the new city and the target id, then verify the changed row.",
+          "parameters": [
+            "Chennai",
+            1
+          ],
+          "explanation": "Both the new city and target id are bound values. RETURNING displays the updated row in SQLite.",
           "runnable": true
         },
         {
           "id": "sql11.6-ex5",
           "language": "en",
-          "title": "Prepare a DELETE template carefully",
-          "code": "-- Prepared template: DELETE FROM prepared_people WHERE id = ?;\nDROP TABLE IF EXISTS prepared_people; CREATE TABLE prepared_people(id INTEGER PRIMARY KEY,name TEXT); INSERT INTO prepared_people VALUES(1,'Asha'),(2,'Bilal'); DELETE FROM prepared_people WHERE id=1; SELECT COUNT(*) FROM prepared_people;",
-          "expectedOutput": "1",
-          "explanation": "Prepared statements do not remove the need for a precise WHERE condition and authorization.",
+          "title": "Bind a DELETE target carefully",
+          "code": "DELETE FROM prepared_people WHERE id = ? RETURNING id;",
+          "expectedOutput": "2",
+          "parameters": [
+            2
+          ],
+          "explanation": "The identifier is bound as a value and the WHERE clause limits which row is deleted.",
           "runnable": true
         }
       ]
