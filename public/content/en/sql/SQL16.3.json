@@ -25,7 +25,7 @@
       "analogyLimit": "The analogy does not model type systems, function return types, time-zone rules, optimizer behaviour or transaction semantics."
     },
     "explain": {
-      "narrative": "## SQLite generated row identifiers\nIn an ordinary SQLite rowid table, an INTEGER PRIMARY KEY column aliases the rowid and receives a generated integer when omitted. AUTOINCREMENT prevents reuse of previously issued rowids in specific circumstances but adds overhead; it is not required for ordinary generated IDs.\n\n## Other database products\nMySQL commonly uses AUTO_INCREMENT, SQL Server uses IDENTITY, and PostgreSQL supports GENERATED AS IDENTITY as well as sequences. The syntax, retrieval APIs and transactional behaviour differ.\n\n## Gaps and assumptions\nGenerated identifiers are unique keys, not gap-free business numbers. Failed inserts, deletes and concurrency can create gaps. Do not use an identity column as a count of transactions or as a guaranteed chronological business sequence.",
+      "narrative": "## SQLite generated row identifiers\nIn an ordinary SQLite rowid table, an INTEGER PRIMARY KEY column aliases the rowid and receives a generated integer when omitted. AUTOINCREMENT prevents reuse of previously issued rowids in specific circumstances but adds overhead; it is not required for ordinary generated IDs.\n\n## Other database products\nMySQL commonly uses AUTO_INCREMENT, SQL Server uses IDENTITY, and PostgreSQL supports GENERATED AS IDENTITY as well as sequences. The syntax, retrieval APIs and transactional behaviour differ.\n\n## Gaps and assumptions\nGenerated identifiers are unique keys, not gap-free business numbers. Failed inserts, deletes and concurrency can create gaps. Do not use an identity column as a count of transactions or as a guaranteed chronological business sequence.\n\n### Identity syntax is not portable\nSQLite uses INTEGER PRIMARY KEY (with optional AUTOINCREMENT semantics); MySQL commonly uses AUTO_INCREMENT; SQL Server uses IDENTITY; PostgreSQL supports GENERATED AS IDENTITY and sequences. Retrieval APIs and sequence/transaction behaviour differ.\n\n### Do not treat keys as business numbers\nIdentity values are unique identifiers, not proof of row count, chronological order or gap-free numbering. Failed operations and deletions can leave gaps. Use a separate business-numbering design when legal or operational requirements demand a controlled sequence.",
       "examples": [
         {
           "id": "sql16.3-ex1",
@@ -33,7 +33,7 @@
           "title": "Create a SQLite identity table",
           "code": "CREATE TABLE dialect16_ids (id INTEGER PRIMARY KEY, label TEXT NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create a sqlite identity table using SQLite. Compare its syntax with the target DBMS before migration.",
+          "explanation": "Creates a SQLite rowid table in which INTEGER PRIMARY KEY aliases the rowid. When the id is omitted on an insert, SQLite can assign an available integer identifier.",
           "runnable": true
         },
         {
@@ -42,7 +42,7 @@
           "title": "Insert rows without specifying IDs",
           "code": "INSERT INTO dialect16_ids(label) VALUES ('first'), ('second');",
           "expectedOutput": "2 rows inserted",
-          "explanation": "This example demonstrates insert rows without specifying ids using SQLite. Compare its syntax with the target DBMS before migration.",
+          "explanation": "Inserts two rows without id values. SQLite assigns generated identifiers, which are then read in the next example.",
           "runnable": true
         },
         {
@@ -51,7 +51,7 @@
           "title": "Read generated identifiers",
           "code": "SELECT id, label FROM dialect16_ids ORDER BY id;",
           "expectedOutput": "1 | first; 2 | second",
-          "explanation": "This example demonstrates read generated identifiers using SQLite. Compare its syntax with the target DBMS before migration.",
+          "explanation": "Reads the generated identifiers in ascending order. The output shows 1 and 2 in this new database, but generated IDs are not guaranteed to be gap-free or a business sequence.",
           "runnable": true
         },
         {
@@ -60,7 +60,7 @@
           "title": "Insert a row with an explicit ID",
           "code": "INSERT INTO dialect16_ids(id, label) VALUES (10, 'manual');",
           "expectedOutput": "1 row inserted",
-          "explanation": "This example demonstrates insert a row with an explicit id using SQLite. Compare its syntax with the target DBMS before migration.",
+          "explanation": "Inserts an explicit identifier 10. SQLite permits an explicit INTEGER PRIMARY KEY value when it does not conflict with an existing key; subsequent automatic allocation considers the stored maximum under ordinary rowid rules.",
           "runnable": true
         },
         {
@@ -69,7 +69,7 @@
           "title": "Read the generated and explicit identifiers",
           "code": "SELECT id, label FROM dialect16_ids ORDER BY id;",
           "expectedOutput": "1 | first; 2 | second; 10 | manual",
-          "explanation": "This example demonstrates read the generated and explicit identifiers using SQLite. Compare its syntax with the target DBMS before migration.",
+          "explanation": "Reads all three records ordered by id. The result contains generated IDs 1 and 2 and the explicitly supplied ID 10.",
           "runnable": true
         }
       ]
