@@ -168,4 +168,4 @@ for (const topic of topics) {
   dynamicOutputs += result.dynamic;
   assert.equal(result.mismatches.length, 0, topic.topicId + ": expectedOutput mismatch: " + JSON.stringify(result.mismatches));
 }
-console.log("SQL course validation passed: " + topics.length + " lessons, " + examplesChecked + " SQLite-executed examples, " + outputsCompared + " expected outputs compared with actual result sets, " + statusOnlyExamples + " status-only examples, " + questionIds.size + " MCQs.");
+console.log("SQL course validation passed: " + topics.length + " lessons, " + examplesChecked + " SQLite-executed examples, " + outputsCompared + " expected outputs compared with actual result sets, " + statusOnlyExamples + " status-only examples, " + dynamicOutputs + " runtime-dependent outputs checked by pattern, " + questionIds.size + " MCQs.");
