@@ -25,7 +25,7 @@
       "analogyLimit": "The analogy does not model type systems, function return types, time-zone rules, optimizer behaviour or transaction semantics."
     },
     "explain": {
-      "narrative": "## SQL standard and product dialects\nSQL standards define common language features, but database products add extensions and differ in implementation details. SQLite is an embedded database library; MySQL, PostgreSQL and SQL Server commonly run as database servers; Access has its own SQL and application model.\n\n## Common portability differences\nDifferences include identity columns, data types, date arithmetic, string concatenation, NULL functions, pagination, transaction behaviour, DDL support and parameter-binding APIs. Identifier quoting and reserved words can also vary.\n\n## A practical portability strategy\nChoose a target DBMS, document the dialect for each runnable example, use portable constructs such as COALESCE when appropriate, and isolate product-specific code. Test queries against the actual engine and version used in production; SQLite success does not prove server-database compatibility.",
+      "narrative": "## SQL standard and product dialects\nSQL standards define common language features, but database products add extensions and differ in implementation details. SQLite is an embedded database library; MySQL, PostgreSQL and SQL Server commonly run as database servers; Access has its own SQL and application model.\n\n## Common portability differences\nDifferences include identity columns, data types, date arithmetic, string concatenation, NULL functions, pagination, transaction behaviour, DDL support and parameter-binding APIs. Identifier quoting and reserved words can also vary.\n\n## A practical portability strategy\nChoose a target DBMS, document the dialect for each runnable example, use portable constructs such as COALESCE when appropriate, and isolate product-specific code. Test queries against the actual engine and version used in production; SQLite success does not prove server-database compatibility.\n\n### Standard SQL versus product extensions\nA portable learning path should separate standard constructs from vendor-specific features. For example, COALESCE is broadly standardized, while sqlite_version() is an SQLite-specific diagnostic function. A query's syntax, type conversion and result ordering must be checked against the actual product and version.\n\n### Portability checklist\nRecord the target engine/version, identifier quoting rules, types, NULL behaviour, date/time functions, identity strategy, pagination syntax, transaction guarantees and parameter-binding API. Use automated integration tests against each supported engine rather than treating SQLite execution as universal proof.",
       "examples": [
         {
           "id": "sql16.1-ex1",
@@ -33,7 +33,7 @@
           "title": "Create a portable sample table",
           "code": "CREATE TABLE dialect16_people (person_id INTEGER PRIMARY KEY, person_name TEXT NOT NULL, active INTEGER NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create a portable sample table using SQLite. Compare its syntax with the target DBMS before migration.",
+          "explanation": "Creates a table using SQLite's INTEGER PRIMARY KEY and TEXT declarations. The query illustrates a small common subset of SQL; type and identity semantics still need to be checked against each target DBMS.",
           "runnable": true
         },
         {
@@ -42,7 +42,7 @@
           "title": "Insert portable sample values",
           "code": "INSERT INTO dialect16_people VALUES (1, 'Asha', 1), (2, 'Bilal', 0);",
           "expectedOutput": "2 rows inserted",
-          "explanation": "This example demonstrates insert portable sample values using SQLite. Compare its syntax with the target DBMS before migration.",
+          "explanation": "Inserts two people with integer flags. This is portable in intent, but a production schema should use the target engine's Boolean type or a documented constrained representation.",
           "runnable": true
         },
         {
@@ -51,7 +51,7 @@
           "title": "Use a common SELECT pattern",
           "code": "SELECT person_name FROM dialect16_people WHERE active = 1 ORDER BY person_name;",
           "expectedOutput": "Asha",
-          "explanation": "This example demonstrates use a common select pattern using SQLite. Compare its syntax with the target DBMS before migration.",
+          "explanation": "Selects active people and sorts by name. SELECT, WHERE and ORDER BY are core SQL constructs, although collation, Boolean comparisons and identifier rules can vary by product.",
           "runnable": true
         },
         {
@@ -60,7 +60,7 @@
           "title": "Use COALESCE as a broadly supported NULL expression",
           "code": "SELECT COALESCE(NULL, 'fallback') AS display_value;",
           "expectedOutput": "fallback",
-          "explanation": "This example demonstrates use coalesce as a broadly supported null expression using SQLite. Compare its syntax with the target DBMS before migration.",
+          "explanation": "Uses COALESCE to return the first non-NULL expression. COALESCE is part of standard SQL and widely implemented, but argument type resolution and implicit casts may differ among engines.",
           "runnable": true
         },
         {
@@ -69,7 +69,7 @@
           "title": "Check the SQLite engine version explicitly",
           "code": "SELECT sqlite_version();",
           "expectedOutput": "version depends on runtime",
-          "explanation": "This example demonstrates check the sqlite engine version explicitly using SQLite. Compare its syntax with the target DBMS before migration.",
+          "explanation": "Returns the version of the SQLite library executing the query. This function is SQLite-specific and demonstrates why an example must label its dialect even when the surrounding lesson is about portability.",
           "runnable": true
         }
       ]
