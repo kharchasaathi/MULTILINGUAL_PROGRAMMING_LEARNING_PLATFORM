@@ -29,7 +29,7 @@
       "analogyLimit": "The analogy does not model database isolation, concurrent workloads, deployment security or recovery guarantees."
     },
     "explain": {
-      "narrative": "## Reporting model\nJoin order headers to customers and order items, then join products for names and categories. Use stable keys for relationships and avoid joining on display text.\n\n## Aggregates\nSUM(quantity * unit_price) calculates sales value. COUNT(DISTINCT order_id) counts unique orders. GROUP BY defines the reporting grain, such as one row per product or category.\n\n## HAVING and ranking\nUse WHERE to filter source rows before grouping and HAVING to filter aggregated groups. Window functions can rank products by revenue while preserving one row per product.",
+      "narrative": "## Reporting model\nJoin order headers to customers and order items, then join products for names and categories. Use stable keys for relationships and avoid joining on display text.\n\n## Aggregates\nSUM(quantity * unit_price) calculates sales value. COUNT(DISTINCT order_id) counts unique orders. GROUP BY defines the reporting grain, such as one row per product or category.\n\n## HAVING and ranking\nUse WHERE to filter source rows before grouping and HAVING to filter aggregated groups. Window functions can rank products by revenue while preserving one row per product.\n\n### Reporting grain\nDecide what one output row represents before writing an aggregate query. This example's first report has one row per product; the category report has one row per category. Grouping at the wrong grain can duplicate totals or hide detail.\n\n### WHERE, HAVING and window functions\nWHERE filters source rows before aggregation; HAVING filters groups after aggregation. A window function such as DENSE_RANK adds a ranking to grouped results without collapsing the rows further. Validate totals independently from the source sample before publishing a report.",
       "examples": [
         {
           "id": "sql19.4-ex1",
@@ -37,7 +37,7 @@
           "title": "Create a reporting sales table",
           "code": "CREATE TABLE cap19_report_sales (sale_id INTEGER PRIMARY KEY, customer TEXT NOT NULL, product TEXT NOT NULL, category TEXT NOT NULL, quantity INTEGER NOT NULL, unit_price INTEGER NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create a reporting sales table in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "explanation": "Creates a denormalized reporting fixture that stores customer, product and category labels alongside each sale line. It is intentionally compact for aggregation practice; production transactional schemas should normally reference customer and product keys instead of repeating mutable names.",
           "runnable": true
         },
         {
@@ -46,7 +46,7 @@
           "title": "Insert report rows",
           "code": "INSERT INTO cap19_report_sales VALUES (1, 'Asha', 'Cable', 'Accessories', 2, 250), (2, 'Bilal', 'Case', 'Accessories', 1, 400), (3, 'Asha', 'Notebook', 'Stationery', 3, 60), (4, 'Mira', 'Cable', 'Accessories', 1, 250);",
           "expectedOutput": "4 rows inserted",
-          "explanation": "This example demonstrates insert report rows in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "explanation": "Inserts four sale lines. The data contains two Cable lines, one Case line and one Notebook line. Revenue for each line is quantity multiplied by unit_price.",
           "runnable": true
         },
         {
@@ -55,7 +55,7 @@
           "title": "Calculate revenue by product",
           "code": "SELECT product, SUM(quantity * unit_price) AS revenue FROM cap19_report_sales GROUP BY product ORDER BY revenue DESC, product;",
           "expectedOutput": "Cable | 750; Case | 400; Notebook | 180",
-          "explanation": "This example demonstrates calculate revenue by product in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "explanation": "Groups sale lines by product and sums line revenue. Cable totals 2 × 250 + 1 × 250 = 750; Case totals 1 × 400 = 400; Notebook totals 3 × 60 = 180. ORDER BY revenue DESC, product provides deterministic ordering for both revenue and ties.",
           "runnable": true
         },
         {
@@ -64,7 +64,7 @@
           "title": "Filter categories by total revenue",
           "code": "SELECT category, SUM(quantity * unit_price) AS revenue FROM cap19_report_sales GROUP BY category HAVING SUM(quantity * unit_price) >= 500 ORDER BY revenue DESC;",
           "expectedOutput": "Accessories | 1150",
-          "explanation": "This example demonstrates filter categories by total revenue in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "explanation": "Groups rows by category, calculates total revenue per category, and uses HAVING to keep only groups whose total is at least 500. Accessories totals 750 + 400 = 1,150, while Stationery totals 180 and is excluded.",
           "runnable": true
         },
         {
@@ -73,7 +73,7 @@
           "title": "Rank products by revenue",
           "code": "WITH product_totals AS (SELECT product, SUM(quantity * unit_price) AS revenue FROM cap19_report_sales GROUP BY product) SELECT product, revenue, DENSE_RANK() OVER (ORDER BY revenue DESC) AS revenue_rank FROM product_totals ORDER BY revenue_rank, product;",
           "expectedOutput": "Cable | 750 | 1; Case | 400 | 2; Notebook | 180 | 3",
-          "explanation": "This example demonstrates rank products by revenue in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "explanation": "Builds a CTE containing one revenue total per product, then applies DENSE_RANK over descending revenue. The ranking assigns 1, 2 and 3 for the three distinct totals. The outer ORDER BY makes the presentation sequence explicit.",
           "runnable": true
         }
       ]
