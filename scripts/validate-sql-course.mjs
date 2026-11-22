@@ -95,7 +95,7 @@ const pyRunner = [
   "                upper = statement.strip().upper()",
   "                after_schema = schema_snapshot()",
   "                changed = db.total_changes - before_changes",
-  "                normalized_statement = re.sub(r\"^\s*(?:(?:--[^\n]*(?:\n|$))|(?:/\*.*?\*/\s*))*\", \"\", statement, flags=re.S)",
+  "                normalized_statement = re.sub(r\"^\\s*(?:(?:--[^\\n]*(?:\\n|$))|(?:/\\*.*?\\*/\\s*))*\", \"\", statement, flags=re.S)",
   "                if re.match(r\"^(CREATE|DROP|ALTER|REINDEX)\\b\", normalized_statement, re.I):",
   "                    assert after_schema != before_schema or \"IF EXISTS\" in upper or \"IF NOT EXISTS\" in upper, item['id'] + \" schema operation did not produce or confirm the requested state\"",
   "                    status_state_assertions += 1",
