@@ -1,0 +1,160 @@
+{
+  "id": "sql.sql9.2.en",
+  "courseId": "sql",
+  "moduleId": "SQL9",
+  "topicId": "SQL9.2",
+  "title": "SQL UNION ALL Operator",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of SQL UNION ALL Operator.",
+    "Write valid SQLite queries that demonstrate the topic or a documented equivalent.",
+    "Predict result rows using the supplied sample data.",
+    "Identify common mistakes and important NULL or duplicate behaviour.",
+    "Choose an appropriate query pattern for a practical reporting task."
+  ],
+  "prerequisites": [
+    "SQL5.1",
+    "SQL5.4",
+    "SQL6.1",
+    "SQL8.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "UNION ALL combines result rows from multiple SELECT statements and preserves every row, including duplicate rows. The SELECT branches must return the same number of columns with compatible data types in corresponding positions.",
+      "whyItMatters": "UNION ALL is useful for event histories, transaction ledgers and append-style reports where repeated values are meaningful and must not be discarded.",
+      "analogy": "Think of a database report as carefully combining or grouping rows from well-labelled registers to answer a specific question.",
+      "analogyLimit": "The analogy does not model SQL's exact evaluation rules, duplicate semantics, three-valued NULL logic or dialect-specific features."
+    },
+    "explain": {
+      "narrative": "## Core concept\nUNION ALL combines result rows from multiple SELECT statements and preserves every row, including duplicate rows. The SELECT branches must return the same number of columns with compatible data types in corresponding positions.\n\n## Syntax\n```sql\nSELECT column_list FROM source_a\nUNION ALL\nSELECT column_list FROM source_b;\n```\n\n## SQLite sample database\nThe following examples use a small fictional dataset. Each worked example starts with a repeatable setup script so it can be run independently in the SQL Playground.\n\n## Worked examples\n### 1. Keep repeated visitor names\n```sql\nDROP TABLE IF EXISTS visits_morning;\nDROP TABLE IF EXISTS visits_evening;\nCREATE TABLE visits_morning (visit_id INTEGER PRIMARY KEY, visitor_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE visits_evening (visit_id INTEGER PRIMARY KEY, visitor_name TEXT NOT NULL, city TEXT NOT NULL);\nINSERT INTO visits_morning VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada');\nINSERT INTO visits_evening VALUES (4,'Asha','Rajahmundry'),(5,'Dev','Mumbai'),(6,'Bilal','Hyderabad');\nSELECT visitor_name FROM visits_morning UNION ALL SELECT visitor_name FROM visits_evening ORDER BY visitor_name;\n```\nExpected result: Asha; Asha; Bilal; Bilal; Chitra; Dev\n\nUNION ALL preserves both visits by Asha and both visits by Bilal.\n\n### 2. Compare UNION and UNION ALL row counts\n```sql\nDROP TABLE IF EXISTS visits_morning;\nDROP TABLE IF EXISTS visits_evening;\nCREATE TABLE visits_morning (visit_id INTEGER PRIMARY KEY, visitor_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE visits_evening (visit_id INTEGER PRIMARY KEY, visitor_name TEXT NOT NULL, city TEXT NOT NULL);\nINSERT INTO visits_morning VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada');\nINSERT INTO visits_evening VALUES (4,'Asha','Rajahmundry'),(5,'Dev','Mumbai'),(6,'Bilal','Hyderabad');\nSELECT COUNT(*) AS all_visit_rows FROM (SELECT visitor_name FROM visits_morning UNION ALL SELECT visitor_name FROM visits_evening);\n```\nExpected result: 6\n\nThe combined event list contains all six input rows.\n\n### 3. Combine source labels with every event\n```sql\nDROP TABLE IF EXISTS visits_morning;\nDROP TABLE IF EXISTS visits_evening;\nCREATE TABLE visits_morning (visit_id INTEGER PRIMARY KEY, visitor_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE visits_evening (visit_id INTEGER PRIMARY KEY, visitor_name TEXT NOT NULL, city TEXT NOT NULL);\nINSERT INTO visits_morning VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada');\nINSERT INTO visits_evening VALUES (4,'Asha','Rajahmundry'),(5,'Dev','Mumbai'),(6,'Bilal','Hyderabad');\nSELECT 'Morning' AS session, visitor_name FROM visits_morning UNION ALL SELECT 'Evening' AS session, visitor_name FROM visits_evening ORDER BY session, visitor_name;\n```\nExpected result: Evening | Asha; Evening | Bilal; Evening | Dev; Morning | Asha; Morning | Bilal; Morning | Chitra\n\nThe session label keeps each source context, while UNION ALL retains every row.\n\n### 4. Filter each branch before combining\n```sql\nDROP TABLE IF EXISTS visits_morning;\nDROP TABLE IF EXISTS visits_evening;\nCREATE TABLE visits_morning (visit_id INTEGER PRIMARY KEY, visitor_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE visits_evening (visit_id INTEGER PRIMARY KEY, visitor_name TEXT NOT NULL, city TEXT NOT NULL);\nINSERT INTO visits_morning VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada');\nINSERT INTO visits_evening VALUES (4,'Asha','Rajahmundry'),(5,'Dev','Mumbai'),(6,'Bilal','Hyderabad');\nSELECT visitor_name, city FROM visits_morning WHERE city = 'Hyderabad' UNION ALL SELECT visitor_name, city FROM visits_evening WHERE city = 'Hyderabad' ORDER BY visitor_name;\n```\nExpected result: Bilal | Hyderabad; Bilal | Hyderabad\n\nEach branch is filtered independently and duplicate visitor-city rows remain.\n\n### 5. Aggregate the combined event stream\n```sql\nDROP TABLE IF EXISTS visits_morning;\nDROP TABLE IF EXISTS visits_evening;\nCREATE TABLE visits_morning (visit_id INTEGER PRIMARY KEY, visitor_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE visits_evening (visit_id INTEGER PRIMARY KEY, visitor_name TEXT NOT NULL, city TEXT NOT NULL);\nINSERT INTO visits_morning VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada');\nINSERT INTO visits_evening VALUES (4,'Asha','Rajahmundry'),(5,'Dev','Mumbai'),(6,'Bilal','Hyderabad');\nSELECT city, COUNT(*) AS visit_count FROM (SELECT city FROM visits_morning UNION ALL SELECT city FROM visits_evening) AS all_visits GROUP BY city ORDER BY city;\n```\nExpected result: Hyderabad | 2; Mumbai | 1; Rajahmundry | 2; Vijayawada | 1\n\nThe derived table preserves all events before the outer query counts them by city.\n\n## Query behaviour and dialect notes\nThe examples target SQLite and use portable core SQL syntax. Column positions and compatible data types must align across set-operation branches. Result order is not guaranteed without an outer ORDER BY.\n\n## Common mistakes\n- Returning different numbers of columns from the SELECT branches.\n- Putting columns in different semantic positions.\n- Assuming UNION and UNION ALL treat duplicates the same way.\n- Expecting output order without ORDER BY.\n- Using incompatible types across corresponding columns.\n\n## Best practices\nChoose UNION when duplicate elimination is required and UNION ALL when every source row must be preserved. Align selected columns deliberately, add a source label when provenance matters, and sort only in the final combined query.",
+      "examples": [
+        {
+          "id": "sql9.2-ex1",
+          "language": "en",
+          "title": "Keep repeated visitor names",
+          "code": "DROP TABLE IF EXISTS visits_morning;\nDROP TABLE IF EXISTS visits_evening;\nCREATE TABLE visits_morning (visit_id INTEGER PRIMARY KEY, visitor_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE visits_evening (visit_id INTEGER PRIMARY KEY, visitor_name TEXT NOT NULL, city TEXT NOT NULL);\nINSERT INTO visits_morning VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada');\nINSERT INTO visits_evening VALUES (4,'Asha','Rajahmundry'),(5,'Dev','Mumbai'),(6,'Bilal','Hyderabad');\nSELECT visitor_name FROM visits_morning UNION ALL SELECT visitor_name FROM visits_evening ORDER BY visitor_name;",
+          "expectedOutput": "Asha; Asha; Bilal; Bilal; Chitra; Dev",
+          "explanation": "UNION ALL preserves both visits by Asha and both visits by Bilal.",
+          "runnable": true
+        },
+        {
+          "id": "sql9.2-ex2",
+          "language": "en",
+          "title": "Compare UNION and UNION ALL row counts",
+          "code": "DROP TABLE IF EXISTS visits_morning;\nDROP TABLE IF EXISTS visits_evening;\nCREATE TABLE visits_morning (visit_id INTEGER PRIMARY KEY, visitor_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE visits_evening (visit_id INTEGER PRIMARY KEY, visitor_name TEXT NOT NULL, city TEXT NOT NULL);\nINSERT INTO visits_morning VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada');\nINSERT INTO visits_evening VALUES (4,'Asha','Rajahmundry'),(5,'Dev','Mumbai'),(6,'Bilal','Hyderabad');\nSELECT COUNT(*) AS all_visit_rows FROM (SELECT visitor_name FROM visits_morning UNION ALL SELECT visitor_name FROM visits_evening);",
+          "expectedOutput": "6",
+          "explanation": "The combined event list contains all six input rows.",
+          "runnable": true
+        },
+        {
+          "id": "sql9.2-ex3",
+          "language": "en",
+          "title": "Combine source labels with every event",
+          "code": "DROP TABLE IF EXISTS visits_morning;\nDROP TABLE IF EXISTS visits_evening;\nCREATE TABLE visits_morning (visit_id INTEGER PRIMARY KEY, visitor_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE visits_evening (visit_id INTEGER PRIMARY KEY, visitor_name TEXT NOT NULL, city TEXT NOT NULL);\nINSERT INTO visits_morning VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada');\nINSERT INTO visits_evening VALUES (4,'Asha','Rajahmundry'),(5,'Dev','Mumbai'),(6,'Bilal','Hyderabad');\nSELECT 'Morning' AS session, visitor_name FROM visits_morning UNION ALL SELECT 'Evening' AS session, visitor_name FROM visits_evening ORDER BY session, visitor_name;",
+          "expectedOutput": "Evening | Asha; Evening | Bilal; Evening | Dev; Morning | Asha; Morning | Bilal; Morning | Chitra",
+          "explanation": "The session label keeps each source context, while UNION ALL retains every row.",
+          "runnable": true
+        },
+        {
+          "id": "sql9.2-ex4",
+          "language": "en",
+          "title": "Filter each branch before combining",
+          "code": "DROP TABLE IF EXISTS visits_morning;\nDROP TABLE IF EXISTS visits_evening;\nCREATE TABLE visits_morning (visit_id INTEGER PRIMARY KEY, visitor_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE visits_evening (visit_id INTEGER PRIMARY KEY, visitor_name TEXT NOT NULL, city TEXT NOT NULL);\nINSERT INTO visits_morning VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada');\nINSERT INTO visits_evening VALUES (4,'Asha','Rajahmundry'),(5,'Dev','Mumbai'),(6,'Bilal','Hyderabad');\nSELECT visitor_name, city FROM visits_morning WHERE city = 'Hyderabad' UNION ALL SELECT visitor_name, city FROM visits_evening WHERE city = 'Hyderabad' ORDER BY visitor_name;",
+          "expectedOutput": "Bilal | Hyderabad; Bilal | Hyderabad",
+          "explanation": "Each branch is filtered independently and duplicate visitor-city rows remain.",
+          "runnable": true
+        },
+        {
+          "id": "sql9.2-ex5",
+          "language": "en",
+          "title": "Aggregate the combined event stream",
+          "code": "DROP TABLE IF EXISTS visits_morning;\nDROP TABLE IF EXISTS visits_evening;\nCREATE TABLE visits_morning (visit_id INTEGER PRIMARY KEY, visitor_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE visits_evening (visit_id INTEGER PRIMARY KEY, visitor_name TEXT NOT NULL, city TEXT NOT NULL);\nINSERT INTO visits_morning VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada');\nINSERT INTO visits_evening VALUES (4,'Asha','Rajahmundry'),(5,'Dev','Mumbai'),(6,'Bilal','Hyderabad');\nSELECT city, COUNT(*) AS visit_count FROM (SELECT city FROM visits_morning UNION ALL SELECT city FROM visits_evening) AS all_visits GROUP BY city ORDER BY city;",
+          "expectedOutput": "Hyderabad | 2; Mumbai | 1; Rajahmundry | 2; Vijayawada | 1",
+          "explanation": "The derived table preserves all events before the outer query counts them by city.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the UNION and UNION ALL versions over the visitor tables. Compare row counts and identify which rows would be lost by duplicate elimination.",
+      "independentTask": "Create two daily payment tables. Combine them with UNION ALL, retain source-day labels, and calculate total payments by customer. Include a repeated payment amount and explain why it must not be removed.",
+      "hints": [
+        "UNION ALL does not perform duplicate elimination.",
+        "Use UNION ALL when repeated events are meaningful.",
+        "A derived table can be used to aggregate a combined result.",
+        "Keep source labels when reports need provenance.",
+        "Use UNION only when distinct-row semantics are intended."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "DROP TABLE IF EXISTS visits_morning;\nDROP TABLE IF EXISTS visits_evening;\nCREATE TABLE visits_morning (visit_id INTEGER PRIMARY KEY, visitor_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE visits_evening (visit_id INTEGER PRIMARY KEY, visitor_name TEXT NOT NULL, city TEXT NOT NULL);\nINSERT INTO visits_morning VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada');\nINSERT INTO visits_evening VALUES (4,'Asha','Rajahmundry'),(5,'Dev','Mumbai'),(6,'Bilal','Hyderabad');\n\n-- Try the lesson's first query\nSELECT visitor_name FROM visits_morning UNION ALL SELECT visitor_name FROM visits_evening ORDER BY visitor_name;",
+    "resetCode": "DROP TABLE IF EXISTS visits_morning;\nDROP TABLE IF EXISTS visits_evening;\nCREATE TABLE visits_morning (visit_id INTEGER PRIMARY KEY, visitor_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE visits_evening (visit_id INTEGER PRIMARY KEY, visitor_name TEXT NOT NULL, city TEXT NOT NULL);\nINSERT INTO visits_morning VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada');\nINSERT INTO visits_evening VALUES (4,'Asha','Rajahmundry'),(5,'Dev','Mumbai'),(6,'Bilal','Hyderabad');"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql9.2-q1",
+        "prompt": "What is the main purpose of SQL UNION ALL Operator?",
+        "options": [
+          "UNION ALL combines result rows from multiple SELECT statements and preserves every row, including duplicate rows",
+          "To permanently change the database schema",
+          "To disable query filtering",
+          "To create a new database connection"
+        ],
+        "answer": "UNION ALL combines result rows from multiple SELECT statements and preserves every row, including duplicate rows",
+        "explanation": "This describes the central operation taught in this lesson."
+      },
+      {
+        "id": "sql9.2-q2",
+        "prompt": "Which statement about the sample queries is correct?",
+        "options": [
+          "The query result depends on the input rows and the SQL condition",
+          "SQL always returns rows in insertion order",
+          "Aliases permanently rename source columns",
+          "A SELECT query always changes stored data"
+        ],
+        "answer": "The query result depends on the input rows and the SQL condition",
+        "explanation": "SQL result sets are determined by the selected source rows and query expressions."
+      },
+      {
+        "id": "sql9.2-q3",
+        "prompt": "Why should an SQL learner inspect expected output?",
+        "options": [
+          "To verify the query's meaning against actual sample data",
+          "To make every query return the same rows",
+          "To avoid using a WHERE clause",
+          "To force a database-specific syntax"
+        ],
+        "answer": "To verify the query's meaning against actual sample data",
+        "explanation": "Expected output helps detect misunderstandings about filtering, grouping, duplicates or comparisons."
+      },
+      {
+        "id": "sql9.2-q4",
+        "prompt": "Which practice improves query reliability?",
+        "options": [
+          "Use explicit conditions and test edge cases",
+          "Omit conditions to shorten every query",
+          "Assume NULL behaves like zero",
+          "Rely on unspecified row order"
+        ],
+        "answer": "Use explicit conditions and test edge cases",
+        "explanation": "Explicit query logic and edge-case testing make results easier to reason about."
+      },
+      {
+        "id": "sql9.2-q5",
+        "prompt": "What should be done when a feature differs between database engines?",
+        "options": [
+          "Label the dialect and verify the target engine's support",
+          "Assume all SQL engines behave identically",
+          "Remove the compatibility note",
+          "Silently replace the syntax without explanation"
+        ],
+        "answer": "Label the dialect and verify the target engine's support",
+        "explanation": "Dialect-aware teaching avoids promising features that the learner's runtime cannot execute."
+      }
+    ]
+  },
+  "status": "draft"
+}
