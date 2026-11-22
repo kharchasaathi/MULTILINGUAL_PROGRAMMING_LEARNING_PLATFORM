@@ -1,0 +1,163 @@
+{
+  "id": "sql.sql19.2.en",
+  "courseId": "sql",
+  "moduleId": "SQL19",
+  "topicId": "SQL19.2",
+  "title": "Capstone Schema: Customers, Orders and Order Items",
+  "language": "en",
+  "learningObjectives": [
+    "Model customers, orders and order items as related entities.",
+    "Create foreign keys for customer, order and product relationships.",
+    "Explain why order items store the unit price at the time of sale.",
+    "Use CHECK constraints for positive quantities and non-negative prices.",
+    "Calculate an order total from quantity multiplied by unit price."
+  ],
+  "prerequisites": [
+    "SQL3.2",
+    "SQL4.1",
+    "SQL8.2",
+    "SQL9.3",
+    "SQL12.2",
+    "SQL14.1",
+    "SQL15.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "An order belongs to a customer, and an order can contain multiple order items. Each order item references a product and stores the quantity and sale-time unit price. Keeping order items separate supports multi-product orders and preserves the price charged at the time of sale.",
+      "whyItMatters": "A normalized order model supports accurate receipts, reporting and stock movements without storing multiple products in one order row.",
+      "analogy": "A database capstone is like a complete shop workflow: records, rules, operations and reports must all work together.",
+      "analogyLimit": "The analogy does not model database isolation, concurrent workloads, deployment security or recovery guarantees."
+    },
+    "explain": {
+      "narrative": "## Customer and order entities\nA customer can place many orders. Each order references one customer. An order item belongs to one order and references one product.\n\n## Preserve sale-time values\nStore the unit price charged on the order item. Product catalogue prices can change later; historical orders should continue to show the price agreed at purchase time.\n\n## Integrity rules\nUse foreign keys for customer, order and product relationships. Use CHECK(quantity > 0) and CHECK(unit_price >= 0). Enable SQLite foreign-key enforcement for the connection when testing these rules.",
+      "examples": [
+        {
+          "id": "sql19.2-ex1",
+          "language": "en",
+          "title": "Create customers",
+          "code": "CREATE TABLE cap19_customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, phone TEXT UNIQUE);",
+          "expectedOutput": "Table created",
+          "explanation": "This example demonstrates create customers in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "runnable": true
+        },
+        {
+          "id": "sql19.2-ex2",
+          "language": "en",
+          "title": "Create orders linked to customers",
+          "code": "CREATE TABLE cap19_orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL REFERENCES cap19_customers(customer_id), order_date TEXT NOT NULL, order_status TEXT NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "This example demonstrates create orders linked to customers in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "runnable": true
+        },
+        {
+          "id": "sql19.2-ex3",
+          "language": "en",
+          "title": "Create order items linked to orders and products",
+          "code": "CREATE TABLE cap19_order_items (order_item_id INTEGER PRIMARY KEY, order_id INTEGER NOT NULL REFERENCES cap19_orders(order_id), product_id INTEGER NOT NULL REFERENCES cap19_products(product_id), quantity INTEGER NOT NULL CHECK (quantity > 0), unit_price REAL NOT NULL CHECK (unit_price >= 0));",
+          "expectedOutput": "Table created",
+          "explanation": "This example demonstrates create order items linked to orders and products in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "runnable": true
+        },
+        {
+          "id": "sql19.2-ex4",
+          "language": "en",
+          "title": "Insert a customer and an order",
+          "code": "INSERT INTO cap19_customers VALUES (1, 'Asha', '9000000001'); INSERT INTO cap19_orders VALUES (1, 1, '2026-11-22', 'created');",
+          "expectedOutput": "Customer and order inserted",
+          "explanation": "This example demonstrates insert a customer and an order in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "runnable": true
+        },
+        {
+          "id": "sql19.2-ex5",
+          "language": "en",
+          "title": "Add two order items and calculate the order total",
+          "code": "INSERT INTO cap19_order_items VALUES (1, 1, 1, 2, 250), (2, 1, 3, 3, 60); SELECT order_id, SUM(quantity * unit_price) AS order_total FROM cap19_order_items GROUP BY order_id;",
+          "expectedOutput": "1 | 680.0",
+          "explanation": "This example demonstrates add two order items and calculate the order total in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples after SQL19.1's product tables are available. Trace the customer-to-order-to-order-item relationships and calculate the receipt total.",
+      "independentTask": "Extend the capstone with a payment table. Decide whether an order can have multiple payments and design the keys and constraints accordingly.",
+      "hints": [
+        "One customer can have many orders.",
+        "One order can have many order items.",
+        "Each order item references one product.",
+        "Store the sale-time unit price in the order item.",
+        "Calculate line totals as quantity multiplied by unit_price."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE cap19_customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, phone TEXT UNIQUE);\nCREATE TABLE cap19_orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL REFERENCES cap19_customers(customer_id), order_date TEXT NOT NULL, order_status TEXT NOT NULL);\nCREATE TABLE cap19_order_items (order_item_id INTEGER PRIMARY KEY, order_id INTEGER NOT NULL REFERENCES cap19_orders(order_id), product_id INTEGER NOT NULL REFERENCES cap19_products(product_id), quantity INTEGER NOT NULL CHECK (quantity > 0), unit_price REAL NOT NULL CHECK (unit_price >= 0));",
+    "resetCode": "CREATE TABLE cap19_customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, phone TEXT UNIQUE);\nCREATE TABLE cap19_orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL REFERENCES cap19_customers(customer_id), order_date TEXT NOT NULL, order_status TEXT NOT NULL);\nCREATE TABLE cap19_order_items (order_item_id INTEGER PRIMARY KEY, order_id INTEGER NOT NULL REFERENCES cap19_orders(order_id), product_id INTEGER NOT NULL REFERENCES cap19_products(product_id), quantity INTEGER NOT NULL CHECK (quantity > 0), unit_price REAL NOT NULL CHECK (unit_price >= 0));"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql19.2-q1",
+        "prompt": "What does an order item represent?",
+        "options": [
+          "One product line within an order",
+          "A customer account",
+          "A product category",
+          "A database migration"
+        ],
+        "answer": "One product line within an order",
+        "explanation": "An order item stores one product and quantity within an order."
+      },
+      {
+        "id": "sql19.2-q2",
+        "prompt": "Why store unit_price on the order item?",
+        "options": [
+          "To preserve the price charged when the sale occurred",
+          "To overwrite the product catalogue price",
+          "To avoid using foreign keys",
+          "To make all products free"
+        ],
+        "answer": "To preserve the price charged when the sale occurred",
+        "explanation": "Historical order values should not change when catalogue prices change."
+      },
+      {
+        "id": "sql19.2-q3",
+        "prompt": "Which key links an order to its customer?",
+        "options": [
+          "customer_id foreign key",
+          "product_id primary key",
+          "unit_price index",
+          "order_date default"
+        ],
+        "answer": "customer_id foreign key",
+        "explanation": "The order references the customer who placed it."
+      },
+      {
+        "id": "sql19.2-q4",
+        "prompt": "What does CHECK(quantity > 0) enforce?",
+        "options": [
+          "Each order item has a positive quantity",
+          "Every order has zero items",
+          "The customer name is unique",
+          "The order date is current"
+        ],
+        "answer": "Each order item has a positive quantity",
+        "explanation": "The check constraint rejects zero or negative quantities."
+      },
+      {
+        "id": "sql19.2-q5",
+        "prompt": "How is an order total calculated from line items?",
+        "options": [
+          "SUM(quantity * unit_price)",
+          "COUNT(product_name) only",
+          "MIN(order_date)",
+          "AVG(customer_id)"
+        ],
+        "answer": "SUM(quantity * unit_price)",
+        "explanation": "The total is the sum of each line's quantity multiplied by its sale-time unit price."
+      }
+    ]
+  },
+  "status": "draft"
+}
