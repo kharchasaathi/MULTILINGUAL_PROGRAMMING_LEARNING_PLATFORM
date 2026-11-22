@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql13.4.en",
+  "courseId": "sql",
+  "moduleId": "SQL13",
+  "topicId": "SQL13.4",
+  "title": "Common Table Expressions (CTEs)",
+  "language": "en",
+  "learningObjectives": [
+    "Define a common table expression and identify the WITH clause.",
+    "Create a named CTE and query it from the following statement.",
+    "Chain multiple CTEs so later steps use earlier results.",
+    "Explain the statement-level scope of a CTE.",
+    "Compare a CTE with a derived table without assuming materialization or performance gains."
+  ],
+  "prerequisites": [
+    "SQL5.1",
+    "SQL9.3",
+    "SQL9.5"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A common table expression (CTE) is a named temporary result set defined with WITH and used by the statement that follows. A CTE can make complex SQL easier to organize and can be referenced by later CTEs in the same WITH clause.",
+      "whyItMatters": "CTEs let learners give meaningful names to intermediate calculations, separate stages of analysis and avoid deeply nested query expressions.",
+      "analogy": "A nested query is like a staged research task: first calculate or collect an intermediate result, then use it to answer the final question.",
+      "analogyLimit": "The analogy does not model SQL's exact cardinality rules, NULL logic, query optimizer or recursive evaluation."
+    },
+    "explain": {
+      "narrative": "## WITH and named query steps\nA CTE begins with WITH name AS (SELECT ...). The main statement can query that name like a table. A statement can define multiple CTEs separated by commas, and later CTEs can reference earlier ones.\n\n## CTE scope\nA CTE exists only for the single statement that follows the WITH clause. It is not a permanent table or view. SQLite supports ordinary and recursive CTEs.\n\n## CTE versus derived table\nA CTE can improve readability when a query has several logical steps or when an intermediate result is referenced more than once. It does not guarantee materialization or better performance; the optimizer decides how to execute the query.",
+      "examples": [
+        {
+          "id": "sql13.4-ex1",
+          "language": "en",
+          "title": "Create a CTE source table",
+          "code": "CREATE TABLE sub13_cte_sales (sale_id INTEGER PRIMARY KEY, customer TEXT NOT NULL, amount INTEGER NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "This example demonstrates create a cte source table using SQLite. Follow the inner query and outer result carefully.",
+          "runnable": true
+        },
+        {
+          "id": "sql13.4-ex2",
+          "language": "en",
+          "title": "Insert CTE sample rows",
+          "code": "INSERT INTO sub13_cte_sales VALUES (1, 'Asha', 50), (2, 'Asha', 70), (3, 'Bilal', 40), (4, 'Mira', 30);",
+          "expectedOutput": "4 rows inserted",
+          "explanation": "This example demonstrates insert cte sample rows using SQLite. Follow the inner query and outer result carefully.",
+          "runnable": true
+        },
+        {
+          "id": "sql13.4-ex3",
+          "language": "en",
+          "title": "Define one CTE for customer totals",
+          "code": "WITH customer_totals AS (SELECT customer, SUM(amount) AS total_amount FROM sub13_cte_sales GROUP BY customer) SELECT customer, total_amount FROM customer_totals ORDER BY customer;",
+          "expectedOutput": "Asha | 120; Bilal | 40; Mira | 30",
+          "explanation": "This example demonstrates define one cte for customer totals using SQLite. Follow the inner query and outer result carefully.",
+          "runnable": true
+        },
+        {
+          "id": "sql13.4-ex4",
+          "language": "en",
+          "title": "Chain two CTEs for a filtered report",
+          "code": "WITH customer_totals AS (SELECT customer, SUM(amount) AS total_amount FROM sub13_cte_sales GROUP BY customer), high_value AS (SELECT customer, total_amount FROM customer_totals WHERE total_amount >= 50) SELECT customer, total_amount FROM high_value ORDER BY total_amount DESC, customer;",
+          "expectedOutput": "Asha | 120; Bilal | 40",
+          "explanation": "This example demonstrates chain two ctes for a filtered report using SQLite. Follow the inner query and outer result carefully.",
+          "runnable": true
+        },
+        {
+          "id": "sql13.4-ex5",
+          "language": "en",
+          "title": "Reference a CTE in a scalar summary",
+          "code": "WITH customer_totals AS (SELECT customer, SUM(amount) AS total_amount FROM sub13_cte_sales GROUP BY customer) SELECT COUNT(*) AS customer_count, MAX(total_amount) AS largest_total FROM customer_totals;",
+          "expectedOutput": "2 | 120",
+          "explanation": "This example demonstrates reference a cte in a scalar summary using SQLite. Follow the inner query and outer result carefully.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the CTE examples and trace how customer_totals is created, then how high_value uses the earlier CTE.",
+      "independentTask": "Build a two-step report using one CTE for product totals and another CTE for products above a chosen threshold. Return the final rows in a deterministic order.",
+      "hints": [
+        "Start the statement with WITH.",
+        "Place each CTE definition in parentheses after AS.",
+        "Separate multiple CTE definitions with commas.",
+        "The main SELECT follows the final CTE definition.",
+        "A CTE is scoped to one statement and is not a permanent database object."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE sub13_cte_sales (sale_id INTEGER PRIMARY KEY, customer TEXT NOT NULL, amount INTEGER NOT NULL);\nINSERT INTO sub13_cte_sales VALUES (1, 'Asha', 50), (2, 'Asha', 70), (3, 'Bilal', 40), (4, 'Mira', 30);\nWITH customer_totals AS (SELECT customer, SUM(amount) AS total_amount FROM sub13_cte_sales GROUP BY customer)\nSELECT customer, total_amount FROM customer_totals ORDER BY customer;",
+    "resetCode": "CREATE TABLE sub13_cte_sales (sale_id INTEGER PRIMARY KEY, customer TEXT NOT NULL, amount INTEGER NOT NULL);\nINSERT INTO sub13_cte_sales VALUES (1, 'Asha', 50), (2, 'Asha', 70), (3, 'Bilal', 40), (4, 'Mira', 30);\nWITH customer_totals AS (SELECT customer, SUM(amount) AS total_amount FROM sub13_cte_sales GROUP BY customer)\nSELECT customer, total_amount FROM customer_totals ORDER BY customer;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql13.4-q1",
+        "prompt": "Which keyword begins an ordinary CTE?",
+        "options": [
+          "WITH",
+          "CREATE",
+          "SAVEPOINT",
+          "ATTACH"
+        ],
+        "answer": "WITH",
+        "explanation": "WITH introduces the named query expression."
+      },
+      {
+        "id": "sql13.4-q2",
+        "prompt": "How long does an ordinary CTE exist?",
+        "options": [
+          "For the single statement that follows its WITH clause",
+          "Until the database is closed",
+          "Until the table is dropped",
+          "For every future session"
+        ],
+        "answer": "For the single statement that follows its WITH clause",
+        "explanation": "A CTE has statement-level scope."
+      },
+      {
+        "id": "sql13.4-q3",
+        "prompt": "How are multiple CTEs separated in one WITH clause?",
+        "options": [
+          "With commas",
+          "With semicolons between each CTE",
+          "With JOIN only",
+          "With the keyword UNION before every CTE"
+        ],
+        "answer": "With commas",
+        "explanation": "Multiple CTE definitions are comma-separated."
+      },
+      {
+        "id": "sql13.4-q4",
+        "prompt": "Does a CTE guarantee that its result is materialized?",
+        "options": [
+          "No, the optimizer controls execution strategy",
+          "Yes, every CTE creates a permanent table",
+          "Only when it has an alias",
+          "Only when the query uses ORDER BY"
+        ],
+        "answer": "No, the optimizer controls execution strategy",
+        "explanation": "A CTE is a logical query expression and does not guarantee materialization."
+      },
+      {
+        "id": "sql13.4-q5",
+        "prompt": "What is a key readability benefit of CTEs?",
+        "options": [
+          "They name intermediate query steps",
+          "They automatically add indexes",
+          "They encrypt result sets",
+          "They replace transaction control"
+        ],
+        "answer": "They name intermediate query steps",
+        "explanation": "Named steps make complex queries easier to organize and understand."
+      }
+    ]
+  },
+  "status": "draft"
+}
