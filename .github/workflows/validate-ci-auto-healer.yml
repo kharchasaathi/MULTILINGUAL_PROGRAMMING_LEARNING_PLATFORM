@@ -1,0 +1,32 @@
+name: Validate CodeSaathi CI Auto-Healer
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/codesaathi-ci-auto-healer.yml"
+      - ".github/workflows/validate-ci-auto-healer.yml"
+      - "docs/CODESAATHI_CI_AUTO_HEALER.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  actionlint:
+    name: Lint GitHub Actions workflows
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+      - name: Install actionlint
+        run: go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.7
+      - name: Lint Auto-Healer and validation workflows
+        run: |
+          "$(go env GOPATH)/bin/actionlint" -color \
+            .github/workflows/codesaathi-ci-auto-healer.yml \
+            .github/workflows/validate-ci-auto-healer.yml
