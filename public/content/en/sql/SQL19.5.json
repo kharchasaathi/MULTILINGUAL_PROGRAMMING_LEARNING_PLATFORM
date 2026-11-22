@@ -1,0 +1,163 @@
+{
+  "id": "sql.sql19.5.en",
+  "courseId": "sql",
+  "moduleId": "SQL19",
+  "topicId": "SQL19.5",
+  "title": "Capstone Validation, Data Quality and Final Review",
+  "language": "en",
+  "learningObjectives": [
+    "Define data-quality checks for an inventory and sales database.",
+    "Verify non-negative stock and allowed status values.",
+    "Use UNIQUE and CHECK constraints to prevent invalid data.",
+    "Create an index for a frequent active-product lookup.",
+    "Summarize capstone acceptance criteria and deployment limitations."
+  ],
+  "prerequisites": [
+    "SQL3.2",
+    "SQL4.1",
+    "SQL8.2",
+    "SQL9.3",
+    "SQL12.2",
+    "SQL14.1",
+    "SQL15.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A capstone is complete when the schema, data, transactions and reports satisfy stated requirements. Validation checks should look for invalid quantities, missing relationships, duplicate business values and incorrect report totals.",
+      "whyItMatters": "A database project must prove that it protects data and produces correct results, not merely that its SQL statements execute.",
+      "analogy": "A database capstone is like a complete shop workflow: records, rules, operations and reports must all work together.",
+      "analogyLimit": "The analogy does not model database isolation, concurrent workloads, deployment security or recovery guarantees."
+    },
+    "explain": {
+      "narrative": "## Data-quality checks\nCheck for negative stock, invalid quantities, missing required values, duplicate business identifiers and broken relationships. Use constraints to prevent many invalid writes and validation queries to detect legacy or imported data problems.\n\n## Operational readiness\nVerify indexes for important lookups, test transaction failure paths, review migration history, and document backup and restore procedures. Test with realistic data volumes and with the target DBMS/version.\n\n## Capstone acceptance criteria\nThe project should include a normalized schema, keys and constraints, safe sale transactions, accurate reports, data-quality checks, and a short explanation of its limitations and deployment plan.",
+      "examples": [
+        {
+          "id": "sql19.5-ex1",
+          "language": "en",
+          "title": "Create a capstone quality table",
+          "code": "CREATE TABLE cap19_quality (row_id INTEGER PRIMARY KEY, product_code TEXT NOT NULL UNIQUE, stock_qty INTEGER NOT NULL CHECK (stock_qty >= 0), active INTEGER NOT NULL CHECK (active IN (0,1)));",
+          "expectedOutput": "Table created",
+          "explanation": "This example demonstrates create a capstone quality table in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "runnable": true
+        },
+        {
+          "id": "sql19.5-ex2",
+          "language": "en",
+          "title": "Insert valid quality rows",
+          "code": "INSERT INTO cap19_quality VALUES (1, 'P-100', 8, 1), (2, 'P-200', 0, 0);",
+          "expectedOutput": "2 rows inserted",
+          "explanation": "This example demonstrates insert valid quality rows in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "runnable": true
+        },
+        {
+          "id": "sql19.5-ex3",
+          "language": "en",
+          "title": "Check for invalid stock values",
+          "code": "SELECT COUNT(*) AS invalid_stock FROM cap19_quality WHERE stock_qty < 0;",
+          "expectedOutput": "invalid_stock = 0",
+          "explanation": "This example demonstrates check for invalid stock values in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "runnable": true
+        },
+        {
+          "id": "sql19.5-ex4",
+          "language": "en",
+          "title": "Create an index for active product lookups",
+          "code": "CREATE INDEX idx_cap19_quality_active ON cap19_quality(active, product_code);",
+          "expectedOutput": "Index created",
+          "explanation": "This example demonstrates create an index for active product lookups in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "runnable": true
+        },
+        {
+          "id": "sql19.5-ex5",
+          "language": "en",
+          "title": "Produce a final active-product report",
+          "code": "SELECT product_code, stock_qty FROM cap19_quality WHERE active = 1 ORDER BY product_code;",
+          "expectedOutput": "P-100 | 8",
+          "explanation": "This example demonstrates produce a final active-product report in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and evaluate the quality checks. Explain which problems are prevented by constraints and which are detected by validation queries.",
+      "independentTask": "Submit a complete inventory and sales database design with schema, sample data, a safe sale transaction, two reports, data-quality checks and a deployment/recovery checklist.",
+      "hints": [
+        "Start from explicit business requirements.",
+        "Use primary and foreign keys for relationships.",
+        "Use CHECK and UNIQUE constraints for row-level invariants.",
+        "Verify reports against manually calculated sample totals.",
+        "Include transactions, indexes, migration history and backup/restore planning in the final review."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE cap19_quality (row_id INTEGER PRIMARY KEY, product_code TEXT NOT NULL UNIQUE, stock_qty INTEGER NOT NULL CHECK (stock_qty >= 0), active INTEGER NOT NULL CHECK (active IN (0,1)));\nINSERT INTO cap19_quality VALUES (1, 'P-100', 8, 1), (2, 'P-200', 0, 0);\nCREATE INDEX idx_cap19_quality_active ON cap19_quality(active, product_code);\nSELECT product_code, stock_qty FROM cap19_quality WHERE active = 1 ORDER BY product_code;",
+    "resetCode": "CREATE TABLE cap19_quality (row_id INTEGER PRIMARY KEY, product_code TEXT NOT NULL UNIQUE, stock_qty INTEGER NOT NULL CHECK (stock_qty >= 0), active INTEGER NOT NULL CHECK (active IN (0,1)));\nINSERT INTO cap19_quality VALUES (1, 'P-100', 8, 1), (2, 'P-200', 0, 0);\nCREATE INDEX idx_cap19_quality_active ON cap19_quality(active, product_code);\nSELECT product_code, stock_qty FROM cap19_quality WHERE active = 1 ORDER BY product_code;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql19.5-q1",
+        "prompt": "What demonstrates that a database capstone is complete?",
+        "options": [
+          "A validated schema, correct transactions, reports and data-quality checks",
+          "Only that CREATE TABLE succeeds",
+          "Only that the database has many rows",
+          "Only that all keywords are uppercase"
+        ],
+        "answer": "A validated schema, correct transactions, reports and data-quality checks",
+        "explanation": "A capstone must demonstrate data integrity and correct business results."
+      },
+      {
+        "id": "sql19.5-q2",
+        "prompt": "Which constraint prevents a negative stock quantity?",
+        "options": [
+          "CHECK (stock_qty >= 0)",
+          "ORDER BY",
+          "DISTINCT",
+          "LIMIT"
+        ],
+        "answer": "CHECK (stock_qty >= 0)",
+        "explanation": "The CHECK constraint rejects negative stock values."
+      },
+      {
+        "id": "sql19.5-q3",
+        "prompt": "What does a UNIQUE constraint protect?",
+        "options": [
+          "A business identifier from duplicate values",
+          "The query's sort order",
+          "The database backup",
+          "The number of indexes"
+        ],
+        "answer": "A business identifier from duplicate values",
+        "explanation": "UNIQUE enforces uniqueness for the selected column or columns."
+      },
+      {
+        "id": "sql19.5-q4",
+        "prompt": "Why add an index for active-product lookups?",
+        "options": [
+          "To support a frequent filter and ordering pattern",
+          "To enforce a foreign key automatically",
+          "To change the product price",
+          "To remove duplicate rows"
+        ],
+        "answer": "To support a frequent filter and ordering pattern",
+        "explanation": "An index can improve a frequently used lookup when its key matches the query pattern."
+      },
+      {
+        "id": "sql19.5-q5",
+        "prompt": "What should a final deployment checklist include?",
+        "options": [
+          "Migration, backup/restore, security, performance and regression checks",
+          "Only a screenshot of the editor",
+          "Only the lesson title",
+          "No testing"
+        ],
+        "answer": "Migration, backup/restore, security, performance and regression checks",
+        "explanation": "Deployment readiness includes operational and recovery controls."
+      }
+    ]
+  },
+  "status": "draft"
+}
