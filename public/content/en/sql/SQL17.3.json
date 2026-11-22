@@ -26,7 +26,7 @@
       "analogyLimit": "The analogy does not model OLD/NEW row values, transaction timing, recursive execution or DBMS-specific trigger semantics."
     },
     "explain": {
-      "narrative": "## BEFORE triggers\nA BEFORE trigger runs before the associated row change. It can inspect NEW values and reject an invalid operation. In SQLite, RAISE(ABORT, message) aborts the current statement with an error.\n\n## Validation with WHEN\nA WHEN clause can make a trigger run only when a condition is true. For example, reject an inserted stock quantity below zero.\n\n## SQLite caution\nAvoid using a BEFORE UPDATE or BEFORE DELETE trigger to modify or delete the same row that the outer statement is changing; SQLite documents undefined or surprising behaviour for such patterns. Prefer AFTER triggers for side effects and constraints for simple declarative rules.",
+      "narrative": "## BEFORE triggers\nA BEFORE trigger runs before the associated row change. It can inspect NEW values and reject an invalid operation. In SQLite, RAISE(ABORT, message) aborts the current statement with an error.\n\n## Validation with WHEN\nA WHEN clause can make a trigger run only when a condition is true. For example, reject an inserted stock quantity below zero.\n\n## SQLite caution\nAvoid using a BEFORE UPDATE or BEFORE DELETE trigger to modify or delete the same row that the outer statement is changing; SQLite documents undefined or surprising behaviour for such patterns. Prefer AFTER triggers for side effects and constraints for simple declarative rules.\n\n### Validation and abort semantics\nSQLite's RAISE(ABORT, message) inside a trigger raises a constraint error and backs out the current SQL statement while leaving the surrounding transaction active. RAISE(ROLLBACK) has a broader transaction effect; do not substitute it casually. The example validates inserts only. If existing rows can be updated, add and test a corresponding UPDATE rule or use a CHECK constraint for a simple invariant.\n\n### Portability\nRAISE() is SQLite-specific trigger syntax. Other products use different procedural or trigger-body mechanisms. Prefer declarative CHECK constraints when they express the rule clearly.",
       "examples": [
         {
           "id": "sql17.3-ex1",
@@ -34,7 +34,7 @@
           "title": "Create a stock table",
           "code": "CREATE TABLE trg17_stock (item_id INTEGER PRIMARY KEY, item_name TEXT NOT NULL, quantity INTEGER NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create a stock table using SQLite triggers. Verify the event, timing and affected rows.",
+          "explanation": "Creates a stock table whose quantity is NOT NULL. The trigger below adds a business rule that quantity must not be negative; a CHECK constraint would often be the simpler declarative choice for this single-column rule.",
           "runnable": true
         },
         {
@@ -43,7 +43,7 @@
           "title": "Create a validation trigger",
           "code": "CREATE TRIGGER trg17_stock_nonnegative BEFORE INSERT ON trg17_stock WHEN NEW.quantity < 0 BEGIN SELECT RAISE(ABORT, 'quantity must be non-negative'); END;",
           "expectedOutput": "Trigger created",
-          "explanation": "This example demonstrates create a validation trigger using SQLite triggers. Verify the event, timing and affected rows.",
+          "explanation": "Creates a SQLite BEFORE INSERT validation trigger. When NEW.quantity is negative, RAISE(ABORT, ...) stops the current statement with the supplied error message; no stock row is inserted.",
           "runnable": true
         },
         {
@@ -52,7 +52,7 @@
           "title": "Insert a valid stock row",
           "code": "INSERT INTO trg17_stock VALUES (1, 'Cable', 5);",
           "expectedOutput": "1 row inserted",
-          "explanation": "This example demonstrates insert a valid stock row using SQLite triggers. Verify the event, timing and affected rows.",
+          "explanation": "Inserts a valid stock row with quantity 5. The WHEN condition is false, so the validation trigger does not raise an error and the row is stored.",
           "runnable": true
         },
         {
@@ -61,7 +61,7 @@
           "title": "Verify the valid row",
           "code": "SELECT item_name, quantity FROM trg17_stock;",
           "expectedOutput": "Cable | 5",
-          "explanation": "This example demonstrates verify the valid row using SQLite triggers. Verify the event, timing and affected rows.",
+          "explanation": "Reads the stored item name and quantity to verify that the valid insert succeeded and that the value is unchanged.",
           "runnable": true
         },
         {
@@ -70,7 +70,7 @@
           "title": "Reject a negative quantity",
           "code": "INSERT INTO trg17_stock VALUES (2, 'Adapter', -3);",
           "expectedOutput": "Error: quantity must be non-negative",
-          "explanation": "This example demonstrates reject a negative quantity using SQLite triggers. Verify the event, timing and affected rows.",
+          "explanation": "Attempts an insert with quantity -3. The trigger raises the expected error and aborts this INSERT statement; the row is not added. This is an intentional negative test, not a query to run in a production data-import batch without handling the error.",
           "runnable": true
         }
       ]
