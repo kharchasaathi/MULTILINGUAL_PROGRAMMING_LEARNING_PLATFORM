@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql16.4.en",
+  "courseId": "sql",
+  "moduleId": "SQL16",
+  "topicId": "SQL16.4",
+  "title": "Date and Time Portability Across DBMS Products",
+  "language": "en",
+  "learningObjectives": [
+    "Describe SQLite's common date/time storage representations.",
+    "Use SQLite date(), strftime() and julianday() for basic date calculations.",
+    "Recognize native date/time types in MySQL, SQL Server and PostgreSQL.",
+    "Explain why time-zone context matters when storing instants.",
+    "Translate date arithmetic only after checking the target DBMS function and type semantics."
+  ],
+  "prerequisites": [
+    "SQL2.7",
+    "SQL3.9",
+    "SQL11.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Date and time storage and functions differ across database products. SQLite has no dedicated date/time storage class and commonly uses ISO-8601 TEXT, Julian day REAL or Unix timestamp INTEGER values. Other DBMS products provide native date/time types and different date arithmetic functions.",
+      "whyItMatters": "Consistent date/time handling is essential for reporting, time zones, scheduling and data exchange.",
+      "analogy": "SQL portability is like translating a precise instruction into several product dialects: the intent stays the same, but the exact words and rules can differ.",
+      "analogyLimit": "The analogy does not model type systems, function return types, time-zone rules, optimizer behaviour or transaction semantics."
+    },
+    "explain": {
+      "narrative": "## SQLite date/time representation\nSQLite date/time values are commonly stored as ISO-8601 text, Julian day numbers or Unix timestamps. Built-in functions include date(), time(), datetime(), julianday(), unixepoch() and strftime().\n\n## Server database differences\nMySQL has DATE, TIME, DATETIME and TIMESTAMP types and functions such as DATE_ADD and NOW. SQL Server has DATE, DATETIME2 and functions such as DATEADD and GETDATE. PostgreSQL has timestamp with/without time zone and interval arithmetic.\n\n## Time-zone discipline\nStore a clearly defined instant, commonly normalized to UTC, and preserve the original zone when business rules require it. Do not assume that a date string without a zone identifies a universal instant.",
+      "examples": [
+        {
+          "id": "sql16.4-ex1",
+          "language": "en",
+          "title": "Create an event date table",
+          "code": "CREATE TABLE dialect16_dates (event_id INTEGER PRIMARY KEY, event_name TEXT NOT NULL, event_date TEXT NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "This example demonstrates create an event date table using SQLite. Compare its syntax with the target DBMS before migration.",
+          "runnable": true
+        },
+        {
+          "id": "sql16.4-ex2",
+          "language": "en",
+          "title": "Insert ISO-8601 date values",
+          "code": "INSERT INTO dialect16_dates VALUES (1, 'Launch', '2026-11-22'), (2, 'Review', '2026-12-05');",
+          "expectedOutput": "2 rows inserted",
+          "explanation": "This example demonstrates insert iso-8601 date values using SQLite. Compare its syntax with the target DBMS before migration.",
+          "runnable": true
+        },
+        {
+          "id": "sql16.4-ex3",
+          "language": "en",
+          "title": "Extract a year with SQLite strftime",
+          "code": "SELECT event_name, strftime('%Y', event_date) AS event_year FROM dialect16_dates ORDER BY event_id;",
+          "expectedOutput": "Launch | 2026; Review | 2026",
+          "explanation": "This example demonstrates extract a year with sqlite strftime using SQLite. Compare its syntax with the target DBMS before migration.",
+          "runnable": true
+        },
+        {
+          "id": "sql16.4-ex4",
+          "language": "en",
+          "title": "Add days using SQLite date()",
+          "code": "SELECT date('2026-11-22', '+7 days');",
+          "expectedOutput": "2026-11-29",
+          "explanation": "This example demonstrates add days using sqlite date() using SQLite. Compare its syntax with the target DBMS before migration.",
+          "runnable": true
+        },
+        {
+          "id": "sql16.4-ex5",
+          "language": "en",
+          "title": "Calculate a day difference",
+          "code": "SELECT julianday('2026-12-05') - julianday('2026-11-22');",
+          "expectedOutput": "13.0",
+          "explanation": "This example demonstrates calculate a day difference using SQLite. Compare its syntax with the target DBMS before migration.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and calculate the difference between the two event dates. Identify the SQLite functions used.",
+      "independentTask": "Design a date/time column strategy for an application that stores event instants from multiple time zones. Compare SQLite, MySQL, SQL Server and PostgreSQL representations.",
+      "hints": [
+        "SQLite commonly stores dates as ISO-8601 text, Julian day numbers or Unix timestamps.",
+        "Use strftime() for formatted date parts in SQLite.",
+        "MySQL DATE_ADD and SQL Server DATEADD are product-specific functions.",
+        "PostgreSQL supports interval arithmetic and timestamp types.",
+        "Define whether a value is a local date, local time or UTC instant."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE dialect16_dates (event_id INTEGER PRIMARY KEY, event_name TEXT NOT NULL, event_date TEXT NOT NULL);\nINSERT INTO dialect16_dates VALUES (1, 'Launch', '2026-11-22'), (2, 'Review', '2026-12-05');\nSELECT event_name, strftime('%Y', event_date) AS event_year FROM dialect16_dates ORDER BY event_id;",
+    "resetCode": "CREATE TABLE dialect16_dates (event_id INTEGER PRIMARY KEY, event_name TEXT NOT NULL, event_date TEXT NOT NULL);\nINSERT INTO dialect16_dates VALUES (1, 'Launch', '2026-11-22'), (2, 'Review', '2026-12-05');\nSELECT event_name, strftime('%Y', event_date) AS event_year FROM dialect16_dates ORDER BY event_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql16.4-q1",
+        "prompt": "Which statement describes SQLite date/time storage?",
+        "options": [
+          "It commonly uses TEXT, REAL or INTEGER representations",
+          "It has one mandatory native TIMESTAMP storage class",
+          "It stores every date as a BLOB",
+          "It cannot calculate dates"
+        ],
+        "answer": "It commonly uses TEXT, REAL or INTEGER representations",
+        "explanation": "SQLite date/time values can be stored in several representations."
+      },
+      {
+        "id": "sql16.4-q2",
+        "prompt": "Which SQLite function formats date parts?",
+        "options": [
+          "strftime()",
+          "DATEADD()",
+          "GETDATE()",
+          "AUTO_INCREMENT"
+        ],
+        "answer": "strftime()",
+        "explanation": "strftime() formats date/time values in SQLite."
+      },
+      {
+        "id": "sql16.4-q3",
+        "prompt": "Which function is commonly used by SQL Server to add date parts?",
+        "options": [
+          "DATEADD",
+          "DATE_ADD",
+          "julianday",
+          "unixepoch only"
+        ],
+        "answer": "DATEADD",
+        "explanation": "SQL Server uses DATEADD for date arithmetic."
+      },
+      {
+        "id": "sql16.4-q4",
+        "prompt": "Why should time-zone context be preserved?",
+        "options": [
+          "A local timestamp without a zone may not identify a unique instant",
+          "It makes all dates sort alphabetically",
+          "It prevents indexes",
+          "It converts dates into primary keys"
+        ],
+        "answer": "A local timestamp without a zone may not identify a unique instant",
+        "explanation": "Time-zone information is needed to interpret instants correctly."
+      },
+      {
+        "id": "sql16.4-q5",
+        "prompt": "Which approach is safest for cross-system date arithmetic?",
+        "options": [
+          "Check the target DBMS types, functions and time-zone semantics",
+          "Assume every product uses the same function names",
+          "Store all dates as arbitrary text with no format",
+          "Ignore daylight-saving changes"
+        ],
+        "answer": "Check the target DBMS types, functions and time-zone semantics",
+        "explanation": "Date/time portability requires checking product-specific semantics."
+      }
+    ]
+  },
+  "status": "draft"
+}
