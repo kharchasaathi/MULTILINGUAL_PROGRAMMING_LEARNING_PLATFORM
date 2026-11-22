@@ -1,0 +1,160 @@
+{
+  "id": "sql.sql8.8.en",
+  "courseId": "sql",
+  "moduleId": "SQL8",
+  "topicId": "SQL8.8",
+  "title": "Joining Multiple Tables",
+  "language": "en",
+  "learningObjectives": [
+    "Explain how a join chain combines data from three or more related tables.",
+    "Choose the correct key relationship for each join in a multi-table query.",
+    "Write readable queries using aliases and explicit ON conditions.",
+    "Combine multi-table joins with filtering and aggregation.",
+    "Preserve rows with LEFT JOIN when related records may be missing."
+  ],
+  "prerequisites": [
+    "SQL1.5",
+    "SQL5.9",
+    "SQL8.2",
+    "SQL8.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A multi-table join combines more than two tables by adding join operations to a query. Each join should connect tables through a valid relationship, commonly a primary-key and foreign-key pair. In a many-to-many model, a junction table such as enrollments connects the two entity tables.",
+      "whyItMatters": "Real business questions often require facts spread across several normalized tables, such as students and their courses, orders and their products, or employees and departments.",
+      "analogy": "It is like following a chain of reference numbers across several related registers to assemble one useful record.",
+      "analogyLimit": "The analogy does not show row multiplication, NULL extension, join order choices or the effect of an incorrect relationship condition."
+    },
+    "explain": {
+      "narrative": "## Core concept\nA multi-table join combines more than two tables by adding join operations to a query. Each join should connect tables through a valid relationship, commonly a primary-key and foreign-key pair. In a many-to-many model, a junction table such as enrollments connects the two entity tables.\n\n## SQLite syntax\n```sql\nSELECT selected_columns\nFROM table_a AS a\nJOIN junction_table AS j ON j.a_id = a.a_id\nJOIN table_b AS b ON b.b_id = j.b_id;\n```\n\n## Worked examples\n### 1. Inspect the three-table sample\n```sql\nDROP TABLE IF EXISTS enrollments;\nDROP TABLE IF EXISTS students;\nDROP TABLE IF EXISTS courses;\nCREATE TABLE students (student_id INTEGER PRIMARY KEY, student_name TEXT NOT NULL);\nCREATE TABLE courses (course_id INTEGER PRIMARY KEY, course_title TEXT NOT NULL);\nCREATE TABLE enrollments (enrollment_id INTEGER PRIMARY KEY, student_id INTEGER NOT NULL, course_id INTEGER NOT NULL);\nINSERT INTO students VALUES (1,'Asha Rao'),(2,'Bilal Khan'),(3,'Chitra Das');\nINSERT INTO courses VALUES (10,'SQL'),(11,'Python'),(12,'Database Design');\nINSERT INTO enrollments VALUES (100,1,10),(101,1,11),(102,2,10);\nSELECT (SELECT COUNT(*) FROM students) AS students, (SELECT COUNT(*) FROM courses) AS courses, (SELECT COUNT(*) FROM enrollments) AS enrollments;\n```\nExpected result: 3 | 3 | 3\n\nThe sample separates student facts, course facts and the many-to-many enrollment relationship.\n\n### 2. Join students, enrollments and courses\n```sql\nDROP TABLE IF EXISTS enrollments;\nDROP TABLE IF EXISTS students;\nDROP TABLE IF EXISTS courses;\nCREATE TABLE students (student_id INTEGER PRIMARY KEY, student_name TEXT NOT NULL);\nCREATE TABLE courses (course_id INTEGER PRIMARY KEY, course_title TEXT NOT NULL);\nCREATE TABLE enrollments (enrollment_id INTEGER PRIMARY KEY, student_id INTEGER NOT NULL, course_id INTEGER NOT NULL);\nINSERT INTO students VALUES (1,'Asha Rao'),(2,'Bilal Khan'),(3,'Chitra Das');\nINSERT INTO courses VALUES (10,'SQL'),(11,'Python'),(12,'Database Design');\nINSERT INTO enrollments VALUES (100,1,10),(101,1,11),(102,2,10);\nSELECT s.student_name, c.course_title FROM students AS s INNER JOIN enrollments AS e ON e.student_id = s.student_id INNER JOIN courses AS c ON c.course_id = e.course_id ORDER BY s.student_id, c.course_id;\n```\nExpected result: Asha Rao | SQL; Asha Rao | Python; Bilal Khan | SQL\n\nEach join connects the next table through the appropriate key. The join chain returns one row per enrollment.\n\n### 3. Filter a multi-table result\n```sql\nDROP TABLE IF EXISTS enrollments;\nDROP TABLE IF EXISTS students;\nDROP TABLE IF EXISTS courses;\nCREATE TABLE students (student_id INTEGER PRIMARY KEY, student_name TEXT NOT NULL);\nCREATE TABLE courses (course_id INTEGER PRIMARY KEY, course_title TEXT NOT NULL);\nCREATE TABLE enrollments (enrollment_id INTEGER PRIMARY KEY, student_id INTEGER NOT NULL, course_id INTEGER NOT NULL);\nINSERT INTO students VALUES (1,'Asha Rao'),(2,'Bilal Khan'),(3,'Chitra Das');\nINSERT INTO courses VALUES (10,'SQL'),(11,'Python'),(12,'Database Design');\nINSERT INTO enrollments VALUES (100,1,10),(101,1,11),(102,2,10);\nSELECT s.student_name, c.course_title FROM students AS s INNER JOIN enrollments AS e ON e.student_id = s.student_id INNER JOIN courses AS c ON c.course_id = e.course_id WHERE c.course_title = 'SQL' ORDER BY s.student_id;\n```\nExpected result: Asha Rao | SQL; Bilal Khan | SQL\n\nThe WHERE predicate filters the completed logical join result to one course.\n\n### 4. Count enrollments for every course\n```sql\nDROP TABLE IF EXISTS enrollments;\nDROP TABLE IF EXISTS students;\nDROP TABLE IF EXISTS courses;\nCREATE TABLE students (student_id INTEGER PRIMARY KEY, student_name TEXT NOT NULL);\nCREATE TABLE courses (course_id INTEGER PRIMARY KEY, course_title TEXT NOT NULL);\nCREATE TABLE enrollments (enrollment_id INTEGER PRIMARY KEY, student_id INTEGER NOT NULL, course_id INTEGER NOT NULL);\nINSERT INTO students VALUES (1,'Asha Rao'),(2,'Bilal Khan'),(3,'Chitra Das');\nINSERT INTO courses VALUES (10,'SQL'),(11,'Python'),(12,'Database Design');\nINSERT INTO enrollments VALUES (100,1,10),(101,1,11),(102,2,10);\nSELECT c.course_title, COUNT(e.enrollment_id) AS enrollment_count FROM courses AS c LEFT JOIN enrollments AS e ON e.course_id = c.course_id GROUP BY c.course_id, c.course_title ORDER BY c.course_id;\n```\nExpected result: SQL | 2; Python | 1; Database Design | 0\n\nA LEFT JOIN keeps courses with no enrollment, and COUNT of a non-null enrollment key reports zero.\n\n### 5. Keep every student, including those without a course\n```sql\nDROP TABLE IF EXISTS enrollments;\nDROP TABLE IF EXISTS students;\nDROP TABLE IF EXISTS courses;\nCREATE TABLE students (student_id INTEGER PRIMARY KEY, student_name TEXT NOT NULL);\nCREATE TABLE courses (course_id INTEGER PRIMARY KEY, course_title TEXT NOT NULL);\nCREATE TABLE enrollments (enrollment_id INTEGER PRIMARY KEY, student_id INTEGER NOT NULL, course_id INTEGER NOT NULL);\nINSERT INTO students VALUES (1,'Asha Rao'),(2,'Bilal Khan'),(3,'Chitra Das');\nINSERT INTO courses VALUES (10,'SQL'),(11,'Python'),(12,'Database Design');\nINSERT INTO enrollments VALUES (100,1,10),(101,1,11),(102,2,10);\nSELECT s.student_name, c.course_title FROM students AS s LEFT JOIN enrollments AS e ON e.student_id = s.student_id LEFT JOIN courses AS c ON c.course_id = e.course_id ORDER BY s.student_id, c.course_id;\n```\nExpected result: Asha Rao | SQL; Asha Rao | Python; Bilal Khan | SQL; Chitra Das | NULL\n\nEach LEFT JOIN preserves the original student population through the chain.\n\n## Query behaviour and design\nA join chain is evaluated from the relationships described by each ON clause. If a junction table contains multiple rows per entity, the result can contain multiple rows for one entity. Use LEFT JOIN at each appropriate stage when the left-side entity must remain even if later related data is missing. Filter placement in ON versus WHERE is especially important for outer joins.\n\n## Common mistakes\n- Joining two tables through unrelated columns.\n- Omitting one join condition and creating a Cartesian multiplication.\n- Using ambiguous unqualified column names.\n- Counting rows from the nullable side with COUNT(*) instead of COUNT(non_null_key).\n- Using INNER JOIN where the report must preserve entities without related records.\n\n## Best practices\nSketch the relationship path before writing SQL. Use short, meaningful aliases and explicit ON conditions. Test one join at a time, then add the next table. Validate row counts and unmatched records with representative data.",
+      "examples": [
+        {
+          "id": "sql8.8-ex1",
+          "language": "en",
+          "title": "Inspect the three-table sample",
+          "code": "DROP TABLE IF EXISTS enrollments;\nDROP TABLE IF EXISTS students;\nDROP TABLE IF EXISTS courses;\nCREATE TABLE students (student_id INTEGER PRIMARY KEY, student_name TEXT NOT NULL);\nCREATE TABLE courses (course_id INTEGER PRIMARY KEY, course_title TEXT NOT NULL);\nCREATE TABLE enrollments (enrollment_id INTEGER PRIMARY KEY, student_id INTEGER NOT NULL, course_id INTEGER NOT NULL);\nINSERT INTO students VALUES (1,'Asha Rao'),(2,'Bilal Khan'),(3,'Chitra Das');\nINSERT INTO courses VALUES (10,'SQL'),(11,'Python'),(12,'Database Design');\nINSERT INTO enrollments VALUES (100,1,10),(101,1,11),(102,2,10);\nSELECT (SELECT COUNT(*) FROM students) AS students, (SELECT COUNT(*) FROM courses) AS courses, (SELECT COUNT(*) FROM enrollments) AS enrollments;",
+          "expectedOutput": "3 | 3 | 3",
+          "explanation": "The sample separates student facts, course facts and the many-to-many enrollment relationship.",
+          "runnable": true
+        },
+        {
+          "id": "sql8.8-ex2",
+          "language": "en",
+          "title": "Join students, enrollments and courses",
+          "code": "DROP TABLE IF EXISTS enrollments;\nDROP TABLE IF EXISTS students;\nDROP TABLE IF EXISTS courses;\nCREATE TABLE students (student_id INTEGER PRIMARY KEY, student_name TEXT NOT NULL);\nCREATE TABLE courses (course_id INTEGER PRIMARY KEY, course_title TEXT NOT NULL);\nCREATE TABLE enrollments (enrollment_id INTEGER PRIMARY KEY, student_id INTEGER NOT NULL, course_id INTEGER NOT NULL);\nINSERT INTO students VALUES (1,'Asha Rao'),(2,'Bilal Khan'),(3,'Chitra Das');\nINSERT INTO courses VALUES (10,'SQL'),(11,'Python'),(12,'Database Design');\nINSERT INTO enrollments VALUES (100,1,10),(101,1,11),(102,2,10);\nSELECT s.student_name, c.course_title FROM students AS s INNER JOIN enrollments AS e ON e.student_id = s.student_id INNER JOIN courses AS c ON c.course_id = e.course_id ORDER BY s.student_id, c.course_id;",
+          "expectedOutput": "Asha Rao | SQL; Asha Rao | Python; Bilal Khan | SQL",
+          "explanation": "Each join connects the next table through the appropriate key. The join chain returns one row per enrollment.",
+          "runnable": true
+        },
+        {
+          "id": "sql8.8-ex3",
+          "language": "en",
+          "title": "Filter a multi-table result",
+          "code": "DROP TABLE IF EXISTS enrollments;\nDROP TABLE IF EXISTS students;\nDROP TABLE IF EXISTS courses;\nCREATE TABLE students (student_id INTEGER PRIMARY KEY, student_name TEXT NOT NULL);\nCREATE TABLE courses (course_id INTEGER PRIMARY KEY, course_title TEXT NOT NULL);\nCREATE TABLE enrollments (enrollment_id INTEGER PRIMARY KEY, student_id INTEGER NOT NULL, course_id INTEGER NOT NULL);\nINSERT INTO students VALUES (1,'Asha Rao'),(2,'Bilal Khan'),(3,'Chitra Das');\nINSERT INTO courses VALUES (10,'SQL'),(11,'Python'),(12,'Database Design');\nINSERT INTO enrollments VALUES (100,1,10),(101,1,11),(102,2,10);\nSELECT s.student_name, c.course_title FROM students AS s INNER JOIN enrollments AS e ON e.student_id = s.student_id INNER JOIN courses AS c ON c.course_id = e.course_id WHERE c.course_title = 'SQL' ORDER BY s.student_id;",
+          "expectedOutput": "Asha Rao | SQL; Bilal Khan | SQL",
+          "explanation": "The WHERE predicate filters the completed logical join result to one course.",
+          "runnable": true
+        },
+        {
+          "id": "sql8.8-ex4",
+          "language": "en",
+          "title": "Count enrollments for every course",
+          "code": "DROP TABLE IF EXISTS enrollments;\nDROP TABLE IF EXISTS students;\nDROP TABLE IF EXISTS courses;\nCREATE TABLE students (student_id INTEGER PRIMARY KEY, student_name TEXT NOT NULL);\nCREATE TABLE courses (course_id INTEGER PRIMARY KEY, course_title TEXT NOT NULL);\nCREATE TABLE enrollments (enrollment_id INTEGER PRIMARY KEY, student_id INTEGER NOT NULL, course_id INTEGER NOT NULL);\nINSERT INTO students VALUES (1,'Asha Rao'),(2,'Bilal Khan'),(3,'Chitra Das');\nINSERT INTO courses VALUES (10,'SQL'),(11,'Python'),(12,'Database Design');\nINSERT INTO enrollments VALUES (100,1,10),(101,1,11),(102,2,10);\nSELECT c.course_title, COUNT(e.enrollment_id) AS enrollment_count FROM courses AS c LEFT JOIN enrollments AS e ON e.course_id = c.course_id GROUP BY c.course_id, c.course_title ORDER BY c.course_id;",
+          "expectedOutput": "SQL | 2; Python | 1; Database Design | 0",
+          "explanation": "A LEFT JOIN keeps courses with no enrollment, and COUNT of a non-null enrollment key reports zero.",
+          "runnable": true
+        },
+        {
+          "id": "sql8.8-ex5",
+          "language": "en",
+          "title": "Keep every student, including those without a course",
+          "code": "DROP TABLE IF EXISTS enrollments;\nDROP TABLE IF EXISTS students;\nDROP TABLE IF EXISTS courses;\nCREATE TABLE students (student_id INTEGER PRIMARY KEY, student_name TEXT NOT NULL);\nCREATE TABLE courses (course_id INTEGER PRIMARY KEY, course_title TEXT NOT NULL);\nCREATE TABLE enrollments (enrollment_id INTEGER PRIMARY KEY, student_id INTEGER NOT NULL, course_id INTEGER NOT NULL);\nINSERT INTO students VALUES (1,'Asha Rao'),(2,'Bilal Khan'),(3,'Chitra Das');\nINSERT INTO courses VALUES (10,'SQL'),(11,'Python'),(12,'Database Design');\nINSERT INTO enrollments VALUES (100,1,10),(101,1,11),(102,2,10);\nSELECT s.student_name, c.course_title FROM students AS s LEFT JOIN enrollments AS e ON e.student_id = s.student_id LEFT JOIN courses AS c ON c.course_id = e.course_id ORDER BY s.student_id, c.course_id;",
+          "expectedOutput": "Asha Rao | SQL; Asha Rao | Python; Bilal Khan | SQL; Chitra Das | NULL",
+          "explanation": "Each LEFT JOIN preserves the original student population through the chain.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the setup and write the students-to-enrollments join first. Add the courses table only after the first relationship works. Compare your row count after each join.",
+      "independentTask": "Design a small orders, order_items and products schema. Insert at least three orders, four products and five line items. Write five multi-table queries, including one filtered report, one aggregate, one outer join and one query that identifies missing relationships.",
+      "hints": [
+        "Map each foreign key to its referenced primary key.",
+        "Join the junction table between the two many-to-many entity tables.",
+        "Qualify columns with aliases.",
+        "Use COUNT of a non-null child key to count optional matches.",
+        "Test the query with one join at a time."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "DROP TABLE IF EXISTS enrollments;\nDROP TABLE IF EXISTS students;\nDROP TABLE IF EXISTS courses;\nCREATE TABLE students (student_id INTEGER PRIMARY KEY, student_name TEXT NOT NULL);\nCREATE TABLE courses (course_id INTEGER PRIMARY KEY, course_title TEXT NOT NULL);\nCREATE TABLE enrollments (enrollment_id INTEGER PRIMARY KEY, student_id INTEGER NOT NULL, course_id INTEGER NOT NULL);\nINSERT INTO students VALUES (1,'Asha Rao'),(2,'Bilal Khan'),(3,'Chitra Das');\nINSERT INTO courses VALUES (10,'SQL'),(11,'Python'),(12,'Database Design');\nINSERT INTO enrollments VALUES (100,1,10),(101,1,11),(102,2,10);\n\nSELECT s.student_name, c.course_title\nFROM students AS s\nINNER JOIN enrollments AS e ON e.student_id = s.student_id\nINNER JOIN courses AS c ON c.course_id = e.course_id\nORDER BY s.student_id, c.course_id;",
+    "resetCode": "DROP TABLE IF EXISTS enrollments;\nDROP TABLE IF EXISTS students;\nDROP TABLE IF EXISTS courses;\nCREATE TABLE students (student_id INTEGER PRIMARY KEY, student_name TEXT NOT NULL);\nCREATE TABLE courses (course_id INTEGER PRIMARY KEY, course_title TEXT NOT NULL);\nCREATE TABLE enrollments (enrollment_id INTEGER PRIMARY KEY, student_id INTEGER NOT NULL, course_id INTEGER NOT NULL);\nINSERT INTO students VALUES (1,'Asha Rao'),(2,'Bilal Khan'),(3,'Chitra Das');\nINSERT INTO courses VALUES (10,'SQL'),(11,'Python'),(12,'Database Design');\nINSERT INTO enrollments VALUES (100,1,10),(101,1,11),(102,2,10);"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql8.8-q1",
+        "prompt": "What connects two tables in a join chain?",
+        "options": [
+          "A relationship predicate in ON",
+          "The order of their filenames",
+          "A shared display colour",
+          "A GROUP BY clause only"
+        ],
+        "answer": "A relationship predicate in ON",
+        "explanation": "Each ON clause specifies how the next table relates to the rows already in the query."
+      },
+      {
+        "id": "sql8.8-q2",
+        "prompt": "Which table commonly connects two sides of a many-to-many relationship?",
+        "options": [
+          "A junction table",
+          "A temporary view only",
+          "An index table with no keys",
+          "A duplicate copy of one entity"
+        ],
+        "answer": "A junction table",
+        "explanation": "The junction table stores references to both related entity tables."
+      },
+      {
+        "id": "sql8.8-q3",
+        "prompt": "What can an incorrect or missing join condition cause?",
+        "options": [
+          "Unintended Cartesian row multiplication",
+          "Automatic normalization",
+          "Guaranteed duplicate removal",
+          "A transaction rollback"
+        ],
+        "answer": "Unintended Cartesian row multiplication",
+        "explanation": "Without the correct relationship predicate, many or all row combinations may be returned."
+      },
+      {
+        "id": "sql8.8-q4",
+        "prompt": "Which aggregate counts only matching enrollment rows after a LEFT JOIN?",
+        "options": [
+          "COUNT(e.enrollment_id)",
+          "COUNT(*)",
+          "SUM(NULL)",
+          "COUNT(c.course_title) in every schema"
+        ],
+        "answer": "COUNT(e.enrollment_id)",
+        "explanation": "The non-null enrollment key is NULL for the placeholder row created by an unmatched LEFT JOIN."
+      },
+      {
+        "id": "sql8.8-q5",
+        "prompt": "What is a good way to debug a complex multi-table join?",
+        "options": [
+          "Add and verify one join at a time",
+          "Start with SELECT * from every table",
+          "Remove all ON conditions",
+          "Use DISTINCT to hide all extra rows"
+        ],
+        "answer": "Add and verify one join at a time",
+        "explanation": "Incremental testing helps locate incorrect relationships and unexpected row multiplication."
+      }
+    ]
+  },
+  "status": "draft"
+}
