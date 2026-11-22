@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql12.5.en",
+  "courseId": "sql",
+  "moduleId": "SQL12",
+  "topicId": "SQL12.5",
+  "title": "SQLite Transaction Modes and Concurrency Boundaries",
+  "language": "en",
+  "learningObjectives": [
+    "Distinguish SQLite DEFERRED, IMMEDIATE and EXCLUSIVE transaction modes.",
+    "Explain when a transaction attempts to acquire write access.",
+    "Describe SQLite's single-writer behaviour and the role of WAL mode.",
+    "Use a busy timeout and explain SQLITE_BUSY handling.",
+    "Recognize that concurrency and lock contention require multiple database connections to test."
+  ],
+  "prerequisites": [
+    "SQL3.3",
+    "SQL3.5",
+    "SQL4.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "SQLite supports DEFERRED, IMMEDIATE and EXCLUSIVE transaction modes. DEFERRED delays acquiring locks until database access requires them; IMMEDIATE starts a write transaction early; EXCLUSIVE obtains stronger access in rollback-journal mode. WAL mode changes reader/writer interactions. Locking and concurrency behaviour must be tested with multiple connections.",
+      "whyItMatters": "Transaction modes affect when a writer competes for database access. Choosing a mode deliberately helps applications handle busy databases and avoid holding locks longer than necessary.",
+      "analogy": "A transaction is like a sealed work packet: its related steps are accepted together or returned for correction.",
+      "analogyLimit": "The analogy does not model SQL locking, isolation levels, storage durability or engine-specific transaction implementation."
+    },
+    "explain": {
+      "narrative": "## SQLite transaction modes\n- **BEGIN DEFERRED:** starts a transaction without immediately acquiring a write reservation. A later write may need to upgrade the transaction.\n- **BEGIN IMMEDIATE:** starts a write transaction immediately and can fail with SQLITE_BUSY if another writer is active.\n- **BEGIN EXCLUSIVE:** in rollback-journal mode, prevents other connections from reading while the transaction is active; in WAL mode it behaves like IMMEDIATE for this distinction.\n\n## Isolation and WAL\nSQLite normally provides serializable isolation by serializing writes. WAL mode allows readers and a writer to overlap, but there is still only one writer at a time. Shared-cache connections with read_uncommitted are a special case. These behaviours cannot be fully demonstrated in a single-connection in-memory Playground.\n\n## Busy handling\nApplications should keep transactions short, configure a busy timeout where appropriate, handle SQLITE_BUSY, and retry only operations that are safe to retry. Do not assume that a transaction mode creates parallel writers.",
+      "examples": [
+        {
+          "id": "sql12.5-ex1",
+          "language": "en",
+          "title": "Create a table for transaction mode examples",
+          "code": "CREATE TABLE tx12_modes (mode_id INTEGER PRIMARY KEY, mode_name TEXT NOT NULL, active INTEGER NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "This example demonstrates create a table for transaction mode examples in SQLite. Observe the transaction boundary and verify the stated result.",
+          "runnable": true
+        },
+        {
+          "id": "sql12.5-ex2",
+          "language": "en",
+          "title": "Use a deferred transaction for a read",
+          "code": "BEGIN DEFERRED; SELECT COUNT(*) AS row_count FROM tx12_modes; COMMIT;",
+          "expectedOutput": "row_count = 0",
+          "explanation": "This example demonstrates use a deferred transaction for a read in SQLite. Observe the transaction boundary and verify the stated result.",
+          "runnable": true
+        },
+        {
+          "id": "sql12.5-ex3",
+          "language": "en",
+          "title": "Start an immediate write transaction",
+          "code": "BEGIN IMMEDIATE; INSERT INTO tx12_modes VALUES (1, 'immediate', 1); COMMIT; SELECT mode_name FROM tx12_modes WHERE mode_id = 1;",
+          "expectedOutput": "immediate",
+          "explanation": "This example demonstrates start an immediate write transaction in SQLite. Observe the transaction boundary and verify the stated result.",
+          "runnable": true
+        },
+        {
+          "id": "sql12.5-ex4",
+          "language": "en",
+          "title": "Use an exclusive transaction",
+          "code": "BEGIN EXCLUSIVE; UPDATE tx12_modes SET active = 0 WHERE mode_id = 1; COMMIT; SELECT active FROM tx12_modes WHERE mode_id = 1;",
+          "expectedOutput": "0",
+          "explanation": "This example demonstrates use an exclusive transaction in SQLite. Observe the transaction boundary and verify the stated result.",
+          "runnable": true
+        },
+        {
+          "id": "sql12.5-ex5",
+          "language": "en",
+          "title": "Inspect the configured busy timeout",
+          "code": "PRAGMA busy_timeout = 2500; PRAGMA busy_timeout;",
+          "expectedOutput": "2500",
+          "explanation": "This example demonstrates inspect the configured busy timeout in SQLite. Observe the transaction boundary and verify the stated result.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the three transaction-mode examples and inspect the busy timeout. Explain when a write reservation is requested and why this single-connection Playground cannot reproduce lock contention.",
+      "independentTask": "Write a short application-level transaction policy for a SQLite app: choose a transaction mode, set a busy timeout, keep writes short, and describe how SQLITE_BUSY should be handled safely.",
+      "hints": [
+        "DEFERRED postpones acquiring write access until needed.",
+        "IMMEDIATE requests write access at transaction start.",
+        "EXCLUSIVE has journal-mode-specific reader effects.",
+        "WAL allows readers and one writer to overlap; it does not allow multiple simultaneous writers.",
+        "A single connection cannot demonstrate real multi-connection lock contention."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE tx12_modes (mode_id INTEGER PRIMARY KEY, mode_name TEXT NOT NULL, active INTEGER NOT NULL);\nBEGIN DEFERRED;\nSELECT COUNT(*) AS row_count FROM tx12_modes;\nCOMMIT;\nBEGIN IMMEDIATE;\nINSERT INTO tx12_modes VALUES (1, 'immediate', 1);\nCOMMIT;\nSELECT mode_name FROM tx12_modes WHERE mode_id = 1;",
+    "resetCode": "CREATE TABLE tx12_modes (mode_id INTEGER PRIMARY KEY, mode_name TEXT NOT NULL, active INTEGER NOT NULL);\nBEGIN DEFERRED;\nSELECT COUNT(*) AS row_count FROM tx12_modes;\nCOMMIT;\nBEGIN IMMEDIATE;\nINSERT INTO tx12_modes VALUES (1, 'immediate', 1);\nCOMMIT;\nSELECT mode_name FROM tx12_modes WHERE mode_id = 1;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql12.5-q1",
+        "prompt": "Which SQLite transaction mode requests write access at the beginning?",
+        "options": [
+          "BEGIN IMMEDIATE",
+          "BEGIN DEFERRED",
+          "SAVEPOINT",
+          "COMMIT"
+        ],
+        "answer": "BEGIN IMMEDIATE",
+        "explanation": "IMMEDIATE starts a write transaction early."
+      },
+      {
+        "id": "sql12.5-q2",
+        "prompt": "What is SQLite's normal writer concurrency model?",
+        "options": [
+          "Only one writer at a time",
+          "Unlimited simultaneous writers",
+          "One writer per table",
+          "Writers never wait"
+        ],
+        "answer": "Only one writer at a time",
+        "explanation": "SQLite serializes writes; WAL can overlap readers with a writer but does not create multiple writers."
+      },
+      {
+        "id": "sql12.5-q3",
+        "prompt": "What does PRAGMA busy_timeout configure?",
+        "options": [
+          "How long SQLite waits for a locked database before returning SQLITE_BUSY",
+          "How long a SELECT result is cached",
+          "The transaction's commit timestamp",
+          "The maximum number of tables"
+        ],
+        "answer": "How long SQLite waits for a locked database before returning SQLITE_BUSY",
+        "explanation": "The busy timeout sets a wait period for a locked database."
+      },
+      {
+        "id": "sql12.5-q4",
+        "prompt": "What is a key WAL-mode property?",
+        "options": [
+          "Readers can overlap with a writer, but there is still only one writer at a time",
+          "It allows unlimited concurrent writers",
+          "It disables transactions",
+          "It makes COMMIT optional"
+        ],
+        "answer": "Readers can overlap with a writer, but there is still only one writer at a time",
+        "explanation": "WAL improves reader/writer overlap while retaining a single writer."
+      },
+      {
+        "id": "sql12.5-q5",
+        "prompt": "Why can't the CodeSaathi single-connection Playground fully test lock contention?",
+        "options": [
+          "Lock contention requires multiple concurrent database connections",
+          "SQLite has no transactions",
+          "The SQL language has no BEGIN statement",
+          "PRAGMA commands cannot run in browsers"
+        ],
+        "answer": "Lock contention requires multiple concurrent database connections",
+        "explanation": "Concurrency tests need multiple connections contending for the same database."
+      }
+    ]
+  },
+  "status": "draft"
+}
