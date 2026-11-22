@@ -13,15 +13,22 @@ Current audited branch HEAD before this roadmap commit: 60e3e2c0189da3f51474f481
 - 121 English SQL lesson JSON files are present across SQL1–SQL19 (81 original lessons plus 5 lessons each for SQL12 transactions, SQL13 subqueries/CTEs, SQL14 window functions, SQL15 indexing/performance, SQL16 dialect portability, SQL17 triggers, SQL18 migrations and SQL19 inventory/sales capstone).
 - 121 SQL curriculum-index topics, 126 source-inventory records and 121 SQL progress-tracker rows are present.
 - `docs/SQL_W3SCHOOLS_EXERCISE_COVERAGE.csv` records 60 official exercise categories mapped to existing CodeSaathi topics. This is a mapping audit, not a claim that original exercise content is complete.
+- `docs/SQL_W3SCHOOLS_CHALLENGE_COVERAGE.csv` maps all 32 currently listed W3Schools SQL Code Challenge categories to existing CodeSaathi topic IDs. Original CodeSaathi challenge tasks and grading rubrics remain to be authored.
 - The new `docs/SQL_W3SCHOOLS_COVERAGE_MATRIX.csv` maps 72 W3Schools navigation/reference topics to existing CodeSaathi lesson IDs:
   - 45 SQL Tutorial topics
   - 21 SQL Database topics
   - 6 SQL Reference topics (Data Types, Keywords, Quick Reference, MySQL Functions, SQL Server Functions and MS Access Functions)
 - Mapping is a coverage index, not editorial sign-off. Every mapped lesson remains draft pending technical/editorial review.
-- Latest SQL validation PASS on commit `8317b494ef23bf4949fd9ac04dc86638ddda3d14` (run #45008219586): 121 lessons; 605 SQLite-executed examples; 382 expected outputs compared; 212 status-only examples; 902 database-state assertions; 7 runtime-dependent outputs checked by pattern; 4 expected-error examples; 605 MCQs.
+- Latest SQL validation PASS on code commit `c546a058ed583b73d285b3d94aa386423c2dc2bf` (run #45008728425, SQL workflow #636): 121 lessons; 605 SQLite-executed examples; 382 expected outputs compared; 212 status-only examples; 902 database-state assertions; 7 runtime-dependent outputs checked by pattern; 4 expected-error examples; 605 MCQs.
 - SQL Playground is implemented with browser-side SQLite. Final feature/security/browser audit remains pending.
 - Telugu SQL lesson translations are not complete.
 - No production deployment has been performed.
+
+## English editorial review progress (2026-11-22)
+
+- Detailed technical/editorial explanations have been reviewed and expanded for 40 lessons across SQL12–SQL19 (five lessons per module). The updated explanations cover transaction safety, correlated and recursive queries, window frames and ranking, index/query-plan trade-offs, dialect portability, trigger semantics, schema migrations and the inventory/sales capstone.
+- Corresponding progress-tracker review notes were updated. All 40 lessons remain `draft`; editorial review does not itself grant `VALIDATED`, `COMPLETED` or `DEPLOYED` status.
+- The remaining 81 original lessons in SQL1–SQL11 still require detailed editorial/source-depth review.
 
 ## Latest verified CI before this roadmap document
 
@@ -104,8 +111,8 @@ These are supplementary curriculum additions, not W3Schools core navigation topi
 - [x] Update curriculum index, source inventory, coverage matrix and progress tracker for SQL12 and the expanded reference mapping.
 - [ ] Reconcile the final progress tracker and source inventory after all latest-head checks complete. SQL19.1–SQL19.5 English editorial review notes were updated in the tracker on commit `8317b494ef23bf4949fd9ac04dc86638ddda3d14`.
 - [x] Latest-head SQL validation PASS on commit `8317b494ef23bf4949fd9ac04dc86638ddda3d14` (run #45008219586).
-- [ ] Latest-head browser/accessibility/technical review PASS (run #45008219582 was still in progress at last check).
-- [x] Latest-head curriculum validation PASS (F1.7 run #45008219616).
+- [ ] Latest browser/accessibility/technical review PASS (run #45008728355 was in progress at last check).
+- [x] Latest curriculum validation PASS (F1.7 run #45008728265).
 - [ ] English editorial review complete. Telugu parity is deferred until the user explicitly begins the final translation phase.
 - [ ] Security, privacy, performance and regression checks complete.
 - [ ] PR review and explicit release approval.
