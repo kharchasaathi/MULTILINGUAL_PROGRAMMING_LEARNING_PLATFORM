@@ -184,8 +184,9 @@
         if (message.bytes) {
           try { await saveSnapshot(message.bytes); } catch {}
         }
-        appendMessage("SQL error: " + message.message, "sql-error");
-        setStatus("Query returned an error", "error");
+        databaseFile.value = "";
+        appendMessage((message.operation === "import" ? "Import error: " : "SQL error: ") + message.message, "sql-error");
+        setStatus(message.operation === "import" ? "Database import failed" : "Query returned an error", "error");
         setRunning(false);
         return;
       }
@@ -272,10 +273,12 @@
   stopButton.addEventListener("click", stopCode);
   $("resetSqlCode").addEventListener("click", () => {
     editor.value = starter;
+    paramsEditor.value = "";
     editor.focus();
   });
   $("restoreSqlCode").addEventListener("click", () => {
     editor.value = lessonStarter;
+    paramsEditor.value = "";
     editor.focus();
   });
   $("clearSqlOutput").addEventListener("click", () => clearResults());
