@@ -27,7 +27,7 @@
       "analogyLimit": "The analogy does not model transactional DDL, locking, data backfills, version checks or application compatibility."
     },
     "explain": {
-      "narrative": "## Additive changes\nAdding a nullable column or a column with an appropriate default is often safer than renaming or dropping a column immediately. Create new structures before deploying application code that depends on them.\n\n## Migration transaction\nWhere the engine supports transactional DDL, wrap related schema and data changes in one transaction. Record the migration version only after the change succeeds.\n\n## Expand and contract\nA common rollout pattern is to add a new column, deploy code that writes both old and new fields, backfill existing rows, switch reads, and only later remove the old field after all application versions stop using it.",
+      "narrative": "## Additive changes\nAdding a nullable column or a column with an appropriate default is often safer than renaming or dropping a column immediately. Create new structures before deploying application code that depends on them.\n\n## Migration transaction\nWhere the engine supports transactional DDL, wrap related schema and data changes in one transaction. Record the migration version only after the change succeeds.\n\n## Expand and contract\nA common rollout pattern is to add a new column, deploy code that writes both old and new fields, backfill existing rows, switch reads, and only later remove the old field after all application versions stop using it.\n\n### Additive migration sequence\nAn additive migration introduces a compatible schema element before application code depends on it. A typical rollout is: add a nullable or defaulted column, deploy code that can read and write it, backfill existing rows, validate the result, then enforce stricter constraints if required.\n\n### Transaction and portability warning\nThe example uses SQLite syntax. Transactional DDL and ALTER TABLE capabilities differ by engine and operation. Test the exact sequence against the production DBMS; do not assume a transaction can roll back every DDL statement on every platform.",
       "examples": [
         {
           "id": "sql18.2-ex1",
@@ -35,7 +35,7 @@
           "title": "Create a version-one products table",
           "code": "CREATE TABLE mig18_products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create a version-one products table in SQLite. Verify the migration state before and after the operation.",
+          "explanation": "Creates the version-one product table. The table starts without a category column so the next statements can demonstrate an additive migration.",
           "runnable": true
         },
         {
@@ -44,7 +44,7 @@
           "title": "Insert existing products",
           "code": "INSERT INTO mig18_products VALUES (1, 'Notebook'), (2, 'Pen');",
           "expectedOutput": "2 rows inserted",
-          "explanation": "This example demonstrates insert existing products in SQLite. Verify the migration state before and after the operation.",
+          "explanation": "Inserts two existing product records before the migration. They represent data that must remain available when the schema changes.",
           "runnable": true
         },
         {
@@ -53,7 +53,7 @@
           "title": "Create migration history",
           "code": "CREATE TABLE mig18_product_history (version INTEGER PRIMARY KEY, description TEXT NOT NULL); INSERT INTO mig18_product_history VALUES (1, 'Create products');",
           "expectedOutput": "Migration history created; version 1 recorded",
-          "explanation": "This example demonstrates create migration history in SQLite. Verify the migration state before and after the operation.",
+          "explanation": "Creates a migration ledger and records the baseline version in one statement batch. The ledger is separate from the business table so deployment tooling can check which migration version was applied.",
           "runnable": true
         },
         {
@@ -62,7 +62,7 @@
           "title": "Apply an additive category column and record version two",
           "code": "BEGIN; ALTER TABLE mig18_products ADD COLUMN category TEXT NOT NULL DEFAULT 'general'; UPDATE mig18_products SET category = 'stationery'; INSERT INTO mig18_product_history VALUES (2, 'Add product category'); COMMIT;",
           "expectedOutput": "Migration applied",
-          "explanation": "This example demonstrates apply an additive category column and record version two in SQLite. Verify the migration state before and after the operation.",
+          "explanation": "Runs an additive migration in a transaction: add a category column with a temporary default, backfill existing rows, record migration version 2, and commit. Confirm the target engine supports transactional DDL for the exact operation before relying on rollback semantics in production.",
           "runnable": true
         },
         {
@@ -71,7 +71,7 @@
           "title": "Verify the new column and values",
           "code": "SELECT product_name, category FROM mig18_products ORDER BY product_id;",
           "expectedOutput": "Notebook | stationery; Pen | stationery",
-          "explanation": "This example demonstrates verify the new column and values in SQLite. Verify the migration state before and after the operation.",
+          "explanation": "Reads the products after migration. Both pre-existing rows should remain, and both should have the backfilled category value. This verifies data preservation and the intended post-migration state.",
           "runnable": true
         }
       ]
