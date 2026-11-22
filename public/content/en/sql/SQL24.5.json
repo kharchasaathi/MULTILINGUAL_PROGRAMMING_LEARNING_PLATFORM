@@ -1,0 +1,161 @@
+{
+  "id": "sql.sql24.5.en",
+  "courseId": "sql",
+  "moduleId": "SQL24",
+  "topicId": "SQL24.5",
+  "title": "Query Debugging and Transaction-Based Workflows",
+  "language": "en",
+  "learningObjectives": [
+    "Use small diagnostic queries to isolate incorrect results.",
+    "Check row counts and join cardinality while debugging.",
+    "Use transactions and savepoints for multi-step operations.",
+    "Roll back optional work without discarding required changes.",
+    "Document the assumptions and verification steps of a business workflow."
+  ],
+  "prerequisites": [
+    "SQL3.2",
+    "SQL4.1",
+    "SQL8.1",
+    "SQL9.3",
+    "SQL12.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Query debugging is a disciplined process of checking inputs, joins, filters, grouping and intermediate results. Transaction workflows keep related data changes consistent when several statements form one business operation.",
+      "whyItMatters": "A query may return plausible but incorrect numbers, and a multi-step update can leave partial state if one statement fails.",
+      "analogy": "A mechanic tests each system separately, then verifies that the complete repair works as one coordinated process.",
+      "analogyLimit": "A transaction cannot fix an incorrect business rule, and SQL debugging output may differ by engine. Application code must handle errors and transaction boundaries reliably."
+    },
+    "explain": {
+      "narrative": "## Debug from the smallest relation\nCheck the source rows, then each join, filter and grouping step. Compare row counts before and after joins and inspect duplicate keys when totals grow unexpectedly.\n\n## Transaction workflow\nGroup related writes in one transaction. Validate preconditions, perform the changes, inspect affected-row counts and commit only when every required step succeeds. If a required step fails, roll back the transaction.\n\n## Savepoints\nA savepoint allows optional work to be undone while the outer transaction remains active. Use it for a sub-operation that may be discarded without invalidating the required business operation.\n\n## Operational notes\nKeep transactions short, avoid waiting for network calls while holding locks, and record a non-secret operation identifier for support diagnostics.",
+      "examples": [
+        {
+          "id": "sql245-ex1",
+          "language": "en",
+          "title": "Create inventory and shipment tables",
+          "code": "CREATE TABLE prj24_stock (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, quantity INTEGER NOT NULL CHECK (quantity >= 0)); CREATE TABLE prj24_shipments (shipment_id INTEGER PRIMARY KEY, product_id INTEGER NOT NULL, quantity INTEGER NOT NULL CHECK (quantity > 0), shipment_state TEXT NOT NULL);",
+          "expectedOutput": "Tables created",
+          "explanation": "Creates stock and shipment relations with basic integrity constraints. The sample uses a single product key for a simple transaction workflow.",
+          "runnable": true
+        },
+        {
+          "id": "sql245-ex2",
+          "language": "en",
+          "title": "Seed available stock",
+          "code": "INSERT INTO prj24_stock VALUES (1, 'Keyboard', 10);",
+          "expectedOutput": "1 row inserted",
+          "explanation": "Creates ten units of stock. This known balance is the starting point for the shipment transaction.",
+          "runnable": true
+        },
+        {
+          "id": "sql245-ex3",
+          "language": "en",
+          "title": "Record a shipment and decrement stock atomically",
+          "code": "BEGIN; INSERT INTO prj24_shipments VALUES (501, 1, 3, 'created'); UPDATE prj24_stock SET quantity = quantity - 3 WHERE product_id = 1 AND quantity >= 3; COMMIT; SELECT quantity FROM prj24_stock WHERE product_id = 1;",
+          "expectedOutput": "7",
+          "explanation": "Creates a shipment and reduces stock within one transaction. In production, inspect the UPDATE affected-row count and ROLLBACK instead of COMMIT if it is not exactly one; this happy-path sample has sufficient stock.",
+          "runnable": true
+        },
+        {
+          "id": "sql245-ex4",
+          "language": "en",
+          "title": "Create a savepoint for optional shipment annotation",
+          "code": "BEGIN; SAVEPOINT optional_note; UPDATE prj24_shipments SET shipment_state = 'packed' WHERE shipment_id = 501; ROLLBACK TO optional_note; RELEASE optional_note; COMMIT; SELECT shipment_state FROM prj24_shipments WHERE shipment_id = 501;",
+          "expectedOutput": "created",
+          "explanation": "Demonstrates partial rollback of optional work. The shipment remains in its original created state after rolling back to the savepoint, and the outer transaction is then committed.",
+          "runnable": true
+        },
+        {
+          "id": "sql245-ex5",
+          "language": "en",
+          "title": "Debug shipment and stock consistency",
+          "code": "SELECT s.shipment_id, s.quantity AS shipped_quantity, st.quantity AS remaining_stock FROM prj24_shipments AS s JOIN prj24_stock AS st ON st.product_id = s.product_id WHERE s.shipment_id = 501;",
+          "expectedOutput": "501 | 3 | 7",
+          "explanation": "Joins the shipment to its stock row to verify the recorded quantity and remaining stock. A full system should also reconcile all shipments and stock movements, not only one sample row.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the transaction and savepoint examples. Explain what remains after ROLLBACK TO and why application code must check the stock update before committing.",
+      "independentTask": "Design a transfer workflow between two stock locations. Include source availability validation, two updates, a transfer record, affected-row checks and a rollback plan.",
+      "hints": [
+        "Debug one relation and join at a time.",
+        "Check row counts before and after joins.",
+        "Group related writes in one transaction.",
+        "Use a savepoint for optional work only.",
+        "Check affected-row counts before COMMIT."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE prj24_stock (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, quantity INTEGER NOT NULL CHECK (quantity >= 0));\nCREATE TABLE prj24_shipments (shipment_id INTEGER PRIMARY KEY, product_id INTEGER NOT NULL, quantity INTEGER NOT NULL, shipment_state TEXT NOT NULL);\nINSERT INTO prj24_stock VALUES (1, 'Keyboard', 10);\nBEGIN;\nINSERT INTO prj24_shipments VALUES (501, 1, 3, 'created');\nUPDATE prj24_stock SET quantity = quantity - 3 WHERE product_id = 1 AND quantity >= 3;\nCOMMIT;\nSELECT quantity FROM prj24_stock WHERE product_id = 1;",
+    "resetCode": "CREATE TABLE prj24_stock (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, quantity INTEGER NOT NULL CHECK (quantity >= 0));\nCREATE TABLE prj24_shipments (shipment_id INTEGER PRIMARY KEY, product_id INTEGER NOT NULL, quantity INTEGER NOT NULL, shipment_state TEXT NOT NULL);\nINSERT INTO prj24_stock VALUES (1, 'Keyboard', 10);\nBEGIN;\nINSERT INTO prj24_shipments VALUES (501, 1, 3, 'created');\nUPDATE prj24_stock SET quantity = quantity - 3 WHERE product_id = 1 AND quantity >= 3;\nCOMMIT;\nSELECT quantity FROM prj24_stock WHERE product_id = 1;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql245-q1",
+        "prompt": "What is a useful first step when debugging a complex join?",
+        "options": [
+          "Inspect source rows and intermediate join results",
+          "Add more indexes immediately",
+          "Remove all WHERE clauses",
+          "Use SELECT * from every table"
+        ],
+        "answer": "Inspect source rows and intermediate join results",
+        "explanation": "Debugging one relation at a time helps isolate cardinality and filter errors."
+      },
+      {
+        "id": "sql245-q2",
+        "prompt": "What keeps related multi-statement writes together?",
+        "options": [
+          "A transaction",
+          "An ORDER BY clause",
+          "A column alias",
+          "A DISTINCT keyword"
+        ],
+        "answer": "A transaction",
+        "explanation": "A transaction groups related changes under one commit or rollback boundary."
+      },
+      {
+        "id": "sql245-q3",
+        "prompt": "What does ROLLBACK TO SAVEPOINT do?",
+        "options": [
+          "Undoes changes after the savepoint while keeping the outer transaction active",
+          "Commits the entire database",
+          "Deletes the savepoint table",
+          "Starts a new connection"
+        ],
+        "answer": "Undoes changes after the savepoint while keeping the outer transaction active",
+        "explanation": "ROLLBACK TO returns the transaction to the savepoint marker."
+      },
+      {
+        "id": "sql245-q4",
+        "prompt": "What should happen if a required stock UPDATE affects zero rows?",
+        "options": [
+          "Roll back the transaction and report the failed precondition",
+          "Commit the shipment anyway",
+          "Ignore the update count",
+          "Delete the stock table"
+        ],
+        "answer": "Roll back the transaction and report the failed precondition",
+        "explanation": "A failed precondition must not leave a shipment without a stock deduction."
+      },
+      {
+        "id": "sql245-q5",
+        "prompt": "Why keep transactions short?",
+        "options": [
+          "To reduce lock duration and contention",
+          "To avoid using primary keys",
+          "To make every query return NULL",
+          "To disable indexes"
+        ],
+        "answer": "To reduce lock duration and contention",
+        "explanation": "Short transactions reduce resource contention and operational risk."
+      }
+    ]
+  },
+  "status": "draft"
+}
