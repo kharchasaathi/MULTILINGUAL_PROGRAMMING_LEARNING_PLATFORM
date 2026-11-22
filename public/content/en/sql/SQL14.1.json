@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql14.1.en",
+  "courseId": "sql",
+  "moduleId": "SQL14",
+  "topicId": "SQL14.1",
+  "title": "Window Functions and the OVER Clause",
+  "language": "en",
+  "learningObjectives": [
+    "Define a window function and explain how it differs from a grouped aggregate.",
+    "Identify the role of the OVER clause.",
+    "Use SUM() OVER () to add an overall total to each row.",
+    "Use AVG() OVER () and MAX() OVER () without collapsing detail rows.",
+    "Explain why window functions preserve the input row count."
+  ],
+  "prerequisites": [
+    "SQL6.1",
+    "SQL9.3",
+    "SQL5.6"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A window function calculates a value across a set of related rows while keeping each input row in the result. The OVER clause defines the window. Unlike GROUP BY aggregates, window functions do not collapse the input rows into one row per group.",
+      "whyItMatters": "Window functions support rankings, running totals and comparisons between neighbouring rows while preserving detail-level records.",
+      "analogy": "A window calculation is like adding a running commentary to each row while keeping the original list intact.",
+      "analogyLimit": "The analogy does not represent SQL partition rules, frame boundaries, tie handling or optimizer behaviour."
+    },
+    "explain": {
+      "narrative": "## Window functions\nA window function performs a calculation across a window of rows related to the current row. The OVER clause defines that window. The result is added to each row instead of collapsing the rows into a grouped result.\n\n## Aggregate versus window aggregate\nSUM(amount) with GROUP BY returns one row per group. SUM(amount) OVER () returns every input row and adds the overall total to each one.\n\n## Window definition\nOVER () uses the full result set as the window. Later lessons add PARTITION BY, ORDER BY and frame clauses to control which rows contribute.",
+      "examples": [
+        {
+          "id": "sql14.1-ex1",
+          "language": "en",
+          "title": "Create a sales table",
+          "code": "CREATE TABLE win14_sales (sale_id INTEGER PRIMARY KEY, salesperson TEXT NOT NULL, amount INTEGER NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "This example demonstrates create a sales table with SQLite window functions. Check the window definition and row order.",
+          "runnable": true
+        },
+        {
+          "id": "sql14.1-ex2",
+          "language": "en",
+          "title": "Insert sales rows",
+          "code": "INSERT INTO win14_sales VALUES (1, 'Asha', 50), (2, 'Bilal', 70), (3, 'Mira', 40), (4, 'Noor', 80);",
+          "expectedOutput": "4 rows inserted",
+          "explanation": "This example demonstrates insert sales rows with SQLite window functions. Check the window definition and row order.",
+          "runnable": true
+        },
+        {
+          "id": "sql14.1-ex3",
+          "language": "en",
+          "title": "Add the overall total without grouping rows",
+          "code": "SELECT salesperson, amount, SUM(amount) OVER () AS overall_total FROM win14_sales ORDER BY salesperson;",
+          "expectedOutput": "Asha | 50 | 240; Bilal | 70 | 240; Mira | 40 | 240; Noor | 80 | 240",
+          "explanation": "This example demonstrates add the overall total without grouping rows with SQLite window functions. Check the window definition and row order.",
+          "runnable": true
+        },
+        {
+          "id": "sql14.1-ex4",
+          "language": "en",
+          "title": "Add an overall average",
+          "code": "SELECT salesperson, amount, AVG(amount) OVER () AS overall_average FROM win14_sales ORDER BY salesperson;",
+          "expectedOutput": "Asha | 50 | 60.0; Bilal | 70 | 60.0; Mira | 40 | 60.0; Noor | 80 | 60.0",
+          "explanation": "This example demonstrates add an overall average with SQLite window functions. Check the window definition and row order.",
+          "runnable": true
+        },
+        {
+          "id": "sql14.1-ex5",
+          "language": "en",
+          "title": "Compare each row with the overall maximum",
+          "code": "SELECT salesperson, amount, MAX(amount) OVER () AS highest_sale FROM win14_sales ORDER BY salesperson;",
+          "expectedOutput": "Asha | 50 | 80; Bilal | 70 | 80; Mira | 40 | 80; Noor | 80 | 80",
+          "explanation": "This example demonstrates compare each row with the overall maximum with SQLite window functions. Check the window definition and row order.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and compare their row counts with a GROUP BY aggregate query over the same table.",
+      "independentTask": "Create a table of product sales and write three window queries that add the overall total, average and maximum to each product row.",
+      "hints": [
+        "A window function uses OVER.",
+        "OVER () defines a window containing the full result set.",
+        "Window aggregates preserve the detail rows.",
+        "GROUP BY can reduce rows; a window function adds calculated columns to them.",
+        "Use ORDER BY in the outer query when deterministic display order is required."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE win14_sales (sale_id INTEGER PRIMARY KEY, salesperson TEXT NOT NULL, amount INTEGER NOT NULL);\nINSERT INTO win14_sales VALUES (1, 'Asha', 50), (2, 'Bilal', 70), (3, 'Mira', 40), (4, 'Noor', 80);\nSELECT salesperson, amount, SUM(amount) OVER () AS overall_total FROM win14_sales ORDER BY salesperson;",
+    "resetCode": "CREATE TABLE win14_sales (sale_id INTEGER PRIMARY KEY, salesperson TEXT NOT NULL, amount INTEGER NOT NULL);\nINSERT INTO win14_sales VALUES (1, 'Asha', 50), (2, 'Bilal', 70), (3, 'Mira', 40), (4, 'Noor', 80);\nSELECT salesperson, amount, SUM(amount) OVER () AS overall_total FROM win14_sales ORDER BY salesperson;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql14.1-q1",
+        "prompt": "What does a window function do?",
+        "options": [
+          "Calculates across related rows while preserving each input row",
+          "Deletes duplicate rows",
+          "Creates a permanent summary table",
+          "Starts a transaction"
+        ],
+        "answer": "Calculates across related rows while preserving each input row",
+        "explanation": "Window functions add calculations to each row without collapsing the result set."
+      },
+      {
+        "id": "sql14.1-q2",
+        "prompt": "Which clause defines a window?",
+        "options": [
+          "OVER",
+          "GROUP BY",
+          "HAVING",
+          "REFERENCES"
+        ],
+        "answer": "OVER",
+        "explanation": "OVER specifies the window used by the function."
+      },
+      {
+        "id": "sql14.1-q3",
+        "prompt": "What does SUM(amount) OVER () return?",
+        "options": [
+          "The overall sum repeated on each input row",
+          "One row per salesperson only",
+          "A new table",
+          "Only the largest amount"
+        ],
+        "answer": "The overall sum repeated on each input row",
+        "explanation": "An empty OVER clause uses the full result set as the window."
+      },
+      {
+        "id": "sql14.1-q4",
+        "prompt": "How does a window aggregate differ from GROUP BY?",
+        "options": [
+          "It preserves detail rows instead of reducing them to one row per group",
+          "It cannot use SUM",
+          "It always returns NULL",
+          "It permanently stores the result"
+        ],
+        "answer": "It preserves detail rows instead of reducing them to one row per group",
+        "explanation": "Window aggregates add a value to each row; GROUP BY aggregates rows into groups."
+      },
+      {
+        "id": "sql14.1-q5",
+        "prompt": "Which clause is added in later lessons to split windows into groups?",
+        "options": [
+          "PARTITION BY",
+          "DROP TABLE",
+          "SAVEPOINT",
+          "ATTACH"
+        ],
+        "answer": "PARTITION BY",
+        "explanation": "PARTITION BY divides the window into independent partitions."
+      }
+    ]
+  },
+  "status": "draft"
+}
