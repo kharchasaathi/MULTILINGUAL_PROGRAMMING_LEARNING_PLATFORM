@@ -1,0 +1,163 @@
+{
+  "id": "sql.sql19.1.en",
+  "courseId": "sql",
+  "moduleId": "SQL19",
+  "topicId": "SQL19.1",
+  "title": "Capstone Planning: Model Inventory and Products",
+  "language": "en",
+  "learningObjectives": [
+    "Translate shop inventory requirements into relational entities.",
+    "Create category and product tables with primary and foreign keys.",
+    "Use UNIQUE, NOT NULL and CHECK constraints for domain rules.",
+    "Explain the one-to-many relationship between categories and products.",
+    "Query products with their category names using a join."
+  ],
+  "prerequisites": [
+    "SQL3.2",
+    "SQL4.1",
+    "SQL8.2",
+    "SQL9.3",
+    "SQL12.2",
+    "SQL14.1",
+    "SQL15.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A database capstone starts with requirements and a relational model. For an inventory and sales application, categories and products are separate entities connected by a foreign key. Product price and stock quantity need domain rules.",
+      "whyItMatters": "A clear data model prevents duplicate category text, inconsistent prices and disconnected inventory records.",
+      "analogy": "A database capstone is like a complete shop workflow: records, rules, operations and reports must all work together.",
+      "analogyLimit": "The analogy does not model database isolation, concurrent workloads, deployment security or recovery guarantees."
+    },
+    "explain": {
+      "narrative": "## Capstone scenario\nBuild a small inventory and sales database for a shop. The system must store product categories, products, customers, orders and order items. It must report sales and protect stock data.\n\n## Model the entities\nA category can contain many products. Each product belongs to one category. Give each entity a primary key and use a foreign key for the relationship.\n\n## Domain rules\nProduct names should be required, prices and stock quantities should not be negative, and category names should be unique. Use database constraints for rules that must hold regardless of which application writes the data.",
+      "examples": [
+        {
+          "id": "sql19.1-ex1",
+          "language": "en",
+          "title": "Create product categories",
+          "code": "CREATE TABLE cap19_categories (category_id INTEGER PRIMARY KEY, category_name TEXT NOT NULL UNIQUE);",
+          "expectedOutput": "Table created",
+          "explanation": "This example demonstrates create product categories in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "runnable": true
+        },
+        {
+          "id": "sql19.1-ex2",
+          "language": "en",
+          "title": "Create products with a category relationship",
+          "code": "CREATE TABLE cap19_products (product_id INTEGER PRIMARY KEY, category_id INTEGER NOT NULL REFERENCES cap19_categories(category_id), product_name TEXT NOT NULL, unit_price REAL NOT NULL CHECK (unit_price >= 0), stock_qty INTEGER NOT NULL CHECK (stock_qty >= 0));",
+          "expectedOutput": "Table created",
+          "explanation": "This example demonstrates create products with a category relationship in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "runnable": true
+        },
+        {
+          "id": "sql19.1-ex3",
+          "language": "en",
+          "title": "Insert categories",
+          "code": "INSERT INTO cap19_categories VALUES (1, 'Accessories'), (2, 'Stationery');",
+          "expectedOutput": "2 rows inserted",
+          "explanation": "This example demonstrates insert categories in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "runnable": true
+        },
+        {
+          "id": "sql19.1-ex4",
+          "language": "en",
+          "title": "Insert products",
+          "code": "INSERT INTO cap19_products VALUES (1, 1, 'USB Cable', 250, 20), (2, 1, 'Phone Case', 400, 12), (3, 2, 'Notebook', 60, 50);",
+          "expectedOutput": "3 rows inserted",
+          "explanation": "This example demonstrates insert products in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "runnable": true
+        },
+        {
+          "id": "sql19.1-ex5",
+          "language": "en",
+          "title": "List products with their category",
+          "code": "SELECT p.product_name, c.category_name, p.unit_price, p.stock_qty FROM cap19_products AS p JOIN cap19_categories AS c ON c.category_id = p.category_id ORDER BY p.product_id;",
+          "expectedOutput": "USB Cable | Accessories | 250.0 | 20; Phone Case | Accessories | 400.0 | 12; Notebook | Stationery | 60.0 | 50",
+          "explanation": "This example demonstrates list products with their category in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and inspect the category-product relationship. Identify which constraints prevent duplicate categories and negative stock.",
+      "independentTask": "Extend the model with suppliers. Design a supplier table and connect products to suppliers using a foreign key; explain the relationship cardinality.",
+      "hints": [
+        "Separate categories and products into different tables.",
+        "Use a primary key for each entity.",
+        "Use a foreign key from products to categories.",
+        "Use CHECK constraints for non-negative price and stock.",
+        "Join the tables to display category names with products."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE cap19_categories (category_id INTEGER PRIMARY KEY, category_name TEXT NOT NULL UNIQUE);\nCREATE TABLE cap19_products (product_id INTEGER PRIMARY KEY, category_id INTEGER NOT NULL REFERENCES cap19_categories(category_id), product_name TEXT NOT NULL, unit_price REAL NOT NULL CHECK (unit_price >= 0), stock_qty INTEGER NOT NULL CHECK (stock_qty >= 0));\nINSERT INTO cap19_categories VALUES (1, 'Accessories'), (2, 'Stationery');\nINSERT INTO cap19_products VALUES (1, 1, 'USB Cable', 250, 20), (2, 1, 'Phone Case', 400, 12), (3, 2, 'Notebook', 60, 50);\nSELECT p.product_name, c.category_name FROM cap19_products AS p JOIN cap19_categories AS c ON c.category_id = p.category_id ORDER BY p.product_id;",
+    "resetCode": "CREATE TABLE cap19_categories (category_id INTEGER PRIMARY KEY, category_name TEXT NOT NULL UNIQUE);\nCREATE TABLE cap19_products (product_id INTEGER PRIMARY KEY, category_id INTEGER NOT NULL REFERENCES cap19_categories(category_id), product_name TEXT NOT NULL, unit_price REAL NOT NULL CHECK (unit_price >= 0), stock_qty INTEGER NOT NULL CHECK (stock_qty >= 0));\nINSERT INTO cap19_categories VALUES (1, 'Accessories'), (2, 'Stationery');\nINSERT INTO cap19_products VALUES (1, 1, 'USB Cable', 250, 20), (2, 1, 'Phone Case', 400, 12), (3, 2, 'Notebook', 60, 50);\nSELECT p.product_name, c.category_name FROM cap19_products AS p JOIN cap19_categories AS c ON c.category_id = p.category_id ORDER BY p.product_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql19.1-q1",
+        "prompt": "Why store categories in a separate table?",
+        "options": [
+          "To avoid repeating category data and to enforce a relationship",
+          "To make every product have two prices",
+          "To remove primary keys",
+          "To prevent SELECT queries"
+        ],
+        "answer": "To avoid repeating category data and to enforce a relationship",
+        "explanation": "A separate category entity avoids repeated text and supports referential integrity."
+      },
+      {
+        "id": "sql19.1-q2",
+        "prompt": "Which constraint prevents duplicate category names?",
+        "options": [
+          "UNIQUE",
+          "CHECK",
+          "DEFAULT",
+          "AUTOINCREMENT"
+        ],
+        "answer": "UNIQUE",
+        "explanation": "UNIQUE prevents duplicate values in the category_name column."
+      },
+      {
+        "id": "sql19.1-q3",
+        "prompt": "What does the product category_id foreign key enforce?",
+        "options": [
+          "Each referenced category must exist when foreign keys are enforced",
+          "Every category must have one product",
+          "Product prices must be integers",
+          "Category names must be sorted"
+        ],
+        "answer": "Each referenced category must exist when foreign keys are enforced",
+        "explanation": "The foreign key links a product to an existing category."
+      },
+      {
+        "id": "sql19.1-q4",
+        "prompt": "Why use CHECK(unit_price >= 0)?",
+        "options": [
+          "To reject negative product prices",
+          "To create an index",
+          "To sort products",
+          "To make a category optional"
+        ],
+        "answer": "To reject negative product prices",
+        "explanation": "CHECK enforces the allowed price domain."
+      },
+      {
+        "id": "sql19.1-q5",
+        "prompt": "Which join displays category names with product rows?",
+        "options": [
+          "JOIN products to categories on category_id",
+          "CROSS JOIN without a condition",
+          "UNION ALL",
+          "DROP TABLE"
+        ],
+        "answer": "JOIN products to categories on category_id",
+        "explanation": "A join matches each product's category_id to the category primary key."
+      }
+    ]
+  },
+  "status": "draft"
+}
