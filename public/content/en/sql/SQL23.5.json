@@ -1,0 +1,161 @@
+{
+  "id": "sql.sql23.5.en",
+  "courseId": "sql",
+  "moduleId": "SQL23",
+  "topicId": "SQL23.5",
+  "title": "Portable SQL Design and Compatibility Testing",
+  "language": "en",
+  "learningObjectives": [
+    "Identify a practical portable SQL subset.",
+    "Use explicit joins, CASE and COALESCE for common cross-engine logic.",
+    "Avoid unlabelled vendor-specific functions and row-limiting syntax.",
+    "Create a dialect compatibility test matrix.",
+    "Verify NULL, type, collation and transaction behaviour on every target DBMS."
+  ],
+  "prerequisites": [
+    "SQL16.1",
+    "SQL16.2",
+    "SQL16.3",
+    "SQL16.4",
+    "SQL16.5"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Portable SQL uses features and data models supported consistently by the target database products. Compatibility testing checks the same business rules against each engine rather than assuming syntax similarity guarantees identical behaviour.",
+      "whyItMatters": "A portability strategy reduces migration cost and prevents subtle differences in NULL handling, types, ordering, dates and transactions.",
+      "analogy": "A shared electrical plug standard works across locations only when voltage and safety requirements are also checked.",
+      "analogyLimit": "No single SQL subset removes every engine difference. Data types, collations, generated keys, JSON, transactions and performance remain product-specific."
+    },
+    "explain": {
+      "narrative": "## A practical portable baseline\nPrefer explicit column lists, standard joins, CASE, COALESCE, common aggregate functions, clear constraints and bound parameters. Avoid relying on implicit casts, undocumented ordering, vendor-only functions and reserved words as identifiers.\n\n## Compatibility matrix\nFor every supported engine, record its version, type mapping, generated-key strategy, date/time functions, pagination syntax, string comparison/collation, upsert behaviour, transaction guarantees and migration tooling.\n\n## Test semantics, not just parsing\nRun shared test cases for NULL, duplicate values, boundary dates, Unicode text, numeric precision, foreign-key enforcement and transaction rollback. A query can parse on two engines and still return different results.\n\n## Dialect isolation\nKeep vendor-specific SQL in clearly named adapters or repository methods. Document why the extension is needed and provide a portable alternative where practical. Do not claim that SQLite execution validates MySQL, PostgreSQL, SQL Server or Oracle behaviour.",
+      "examples": [
+        {
+          "id": "sql235-ex1",
+          "language": "en",
+          "title": "Create portable parent and child tables",
+          "code": "CREATE TABLE dialect23_departments (department_id INTEGER PRIMARY KEY, department_name TEXT NOT NULL UNIQUE); CREATE TABLE dialect23_staff (staff_id INTEGER PRIMARY KEY, staff_name TEXT NOT NULL, department_id INTEGER REFERENCES dialect23_departments(department_id));",
+          "expectedOutput": "Tables created",
+          "explanation": "Uses primary keys, a unique constraint and a foreign-key relationship. Generated-key syntax and enforcement configuration still need to be adapted to each engine.",
+          "runnable": true
+        },
+        {
+          "id": "sql235-ex2",
+          "language": "en",
+          "title": "Insert related rows",
+          "code": "INSERT INTO dialect23_departments VALUES (1, 'Sales'), (2, 'Support'); INSERT INTO dialect23_staff VALUES (1, 'Asha', 1), (2, 'Bilal', 2);",
+          "expectedOutput": "4 rows inserted",
+          "explanation": "Inserts parent rows before child rows. Enable and verify foreign-key enforcement on engines/configurations where it is optional.",
+          "runnable": true
+        },
+        {
+          "id": "sql235-ex3",
+          "language": "en",
+          "title": "Use an explicit portable join",
+          "code": "SELECT s.staff_name, d.department_name FROM dialect23_staff AS s INNER JOIN dialect23_departments AS d ON d.department_id = s.department_id ORDER BY s.staff_id;",
+          "expectedOutput": "Asha | Sales; Bilal | Support",
+          "explanation": "Uses explicit INNER JOIN and ON syntax rather than a vendor-specific join form. The outer ORDER BY ensures stable presentation.",
+          "runnable": true
+        },
+        {
+          "id": "sql235-ex4",
+          "language": "en",
+          "title": "Use CASE for portable business classification",
+          "code": "SELECT staff_name, CASE WHEN department_id = 1 THEN 'Commercial' ELSE 'Operations' END AS team_group FROM dialect23_staff ORDER BY staff_id;",
+          "expectedOutput": "Asha | Commercial; Bilal | Operations",
+          "explanation": "Uses searched CASE to express a simple rule. Keep the business mapping in one tested location if it changes frequently.",
+          "runnable": true
+        },
+        {
+          "id": "sql235-ex5",
+          "language": "en",
+          "title": "Use COALESCE and aggregation in a portable report",
+          "code": "SELECT COALESCE(d.department_name, 'Unassigned') AS department_label, COUNT(s.staff_id) AS staff_count FROM dialect23_departments AS d LEFT JOIN dialect23_staff AS s ON s.department_id = d.department_id GROUP BY d.department_name ORDER BY department_label;",
+          "expectedOutput": "Sales | 1; Support | 1",
+          "explanation": "Combines COALESCE, LEFT JOIN and COUNT. These constructs are widely supported, but collation, type resolution and aggregate result types should still be checked across engines.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and identify the constructs that form a portable baseline. Create a five-engine compatibility checklist for SQLite, MySQL, PostgreSQL, SQL Server and Oracle.",
+      "independentTask": "Choose a project query and create a compatibility test plan covering syntax, data types, NULL, collation, dates, generated keys, transactions and performance on two target DBMS products.",
+      "hints": [
+        "Prefer explicit joins and columns.",
+        "Use CASE and COALESCE for common logic.",
+        "Avoid relying on implicit casts or row order.",
+        "Test NULL, dates, precision and collation on each engine.",
+        "Isolate vendor extensions behind clearly named adapters."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE dialect23_departments (department_id INTEGER PRIMARY KEY, department_name TEXT NOT NULL UNIQUE);\nCREATE TABLE dialect23_staff (staff_id INTEGER PRIMARY KEY, staff_name TEXT NOT NULL, department_id INTEGER REFERENCES dialect23_departments(department_id));\nINSERT INTO dialect23_departments VALUES (1, 'Sales'), (2, 'Support');\nINSERT INTO dialect23_staff VALUES (1, 'Asha', 1), (2, 'Bilal', 2);\nSELECT s.staff_name, d.department_name FROM dialect23_staff s JOIN dialect23_departments d ON d.department_id = s.department_id ORDER BY s.staff_id;",
+    "resetCode": "CREATE TABLE dialect23_departments (department_id INTEGER PRIMARY KEY, department_name TEXT NOT NULL UNIQUE);\nCREATE TABLE dialect23_staff (staff_id INTEGER PRIMARY KEY, staff_name TEXT NOT NULL, department_id INTEGER REFERENCES dialect23_departments(department_id));\nINSERT INTO dialect23_departments VALUES (1, 'Sales'), (2, 'Support');\nINSERT INTO dialect23_staff VALUES (1, 'Asha', 1), (2, 'Bilal', 2);\nSELECT s.staff_name, d.department_name FROM dialect23_staff s JOIN dialect23_departments d ON d.department_id = s.department_id ORDER BY s.staff_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql235-q1",
+        "prompt": "What is a portable SQL baseline?",
+        "options": [
+          "A set of common constructs supported consistently by target engines",
+          "A query that uses every vendor extension",
+          "A database backup format",
+          "A SQL statement without a WHERE clause"
+        ],
+        "answer": "A set of common constructs supported consistently by target engines",
+        "explanation": "A portable baseline uses broadly supported syntax and explicit semantics."
+      },
+      {
+        "id": "sql235-q2",
+        "prompt": "Why use explicit ORDER BY in a report?",
+        "options": [
+          "SQL result order is not guaranteed without it",
+          "It creates a primary key",
+          "It enables encryption",
+          "It forces a hash join"
+        ],
+        "answer": "SQL result order is not guaranteed without it",
+        "explanation": "A stable ordering must be requested explicitly."
+      },
+      {
+        "id": "sql235-q3",
+        "prompt": "Which cases belong in a cross-engine compatibility test?",
+        "options": [
+          "NULL, dates, precision, collation and transactions",
+          "Only keyword capitalization",
+          "Only table names",
+          "Only comments"
+        ],
+        "answer": "NULL, dates, precision, collation and transactions",
+        "explanation": "Subtle engine differences often appear in types and runtime semantics."
+      },
+      {
+        "id": "sql235-q4",
+        "prompt": "Does successful SQLite execution prove MySQL and PostgreSQL compatibility?",
+        "options": [
+          "No; test each target DBMS and version",
+          "Yes, all SQL engines are identical",
+          "Only for INSERT",
+          "Only when the table has no rows"
+        ],
+        "answer": "No; test each target DBMS and version",
+        "explanation": "SQLite is one runtime and does not emulate every other engine."
+      },
+      {
+        "id": "sql235-q5",
+        "prompt": "Where should vendor-specific SQL usually live?",
+        "options": [
+          "In clearly labelled dialect adapters or isolated repository methods",
+          "Mixed into every shared query without comments",
+          "In user passwords",
+          "In the curriculum index only"
+        ],
+        "answer": "In clearly labelled dialect adapters or isolated repository methods",
+        "explanation": "Isolation makes dialect differences easier to test and maintain."
+      }
+    ]
+  },
+  "status": "draft"
+}
