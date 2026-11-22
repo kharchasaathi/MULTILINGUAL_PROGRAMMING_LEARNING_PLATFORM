@@ -25,7 +25,7 @@
       "analogyLimit": "The analogy does not model B-tree pages, query planner estimates, index maintenance or the full range of SQL access paths."
     },
     "explain": {
-      "narrative": "## Partial indexes\nA partial index adds a WHERE clause to CREATE INDEX. Only rows satisfying the condition are represented in the index. Queries that use a compatible predicate can benefit from it.\n\n## Design considerations\nThe query predicate must be compatible with the partial-index condition for the optimizer to use the index. Rows outside the condition are not indexed by that partial index. Updates that move rows into or out of the condition still require index maintenance.\n\n## Portability\nPartial or filtered index syntax and optimizer rules differ across database products. The examples target SQLite; verify the feature and predicate matching in the selected DBMS.",
+      "narrative": "## Partial indexes\nA partial index adds a WHERE clause to CREATE INDEX. Only rows satisfying the condition are represented in the index. Queries that use a compatible predicate can benefit from it.\n\n## Design considerations\nThe query predicate must be compatible with the partial-index condition for the optimizer to use the index. Rows outside the condition are not indexed by that partial index. Updates that move rows into or out of the condition still require index maintenance.\n\n## Portability\nPartial or filtered index syntax and optimizer rules differ across database products. The examples target SQLite; verify the feature and predicate matching in the selected DBMS.\n\n### Predicate compatibility\nThe optimizer must be able to establish that the query predicate implies the partial-index WHERE condition. A query that does not restrict to open events cannot use this index to find all qualifying rows because closed rows are absent from it.\n\n### Portability and maintenance\nSQLite supports partial indexes; other products may call the feature filtered indexes or implement different predicate restrictions. Updates that change event_status can add or remove index entries, so partial indexes still have write-maintenance costs.",
       "examples": [
         {
           "id": "sql15.3-ex1",
@@ -33,7 +33,7 @@
           "title": "Create an event table",
           "code": "CREATE TABLE perf15_events (event_id INTEGER PRIMARY KEY, event_status TEXT NOT NULL, created_at TEXT NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create an event table in SQLite. Verify both the access strategy and the returned data.",
+          "explanation": "Creates an events table with a status and date-like text value. ISO-formatted YYYY-MM-DD values sort lexicographically in chronological order for this fixed format.",
           "runnable": true
         },
         {
@@ -42,7 +42,7 @@
           "title": "Insert open and closed events",
           "code": "INSERT INTO perf15_events VALUES (1, 'open', '2026-01-01'), (2, 'closed', '2026-01-02'), (3, 'open', '2026-02-01'), (4, 'closed', '2026-02-02'), (5, 'open', '2026-03-01');",
           "expectedOutput": "5 rows inserted",
-          "explanation": "This example demonstrates insert open and closed events in SQLite. Verify both the access strategy and the returned data.",
+          "explanation": "Inserts five events: three open and two closed. The partial index created next contains only the three rows whose status is open.",
           "runnable": true
         },
         {
@@ -51,7 +51,7 @@
           "title": "Create an index only for open events",
           "code": "CREATE INDEX idx_perf15_open_created ON perf15_events(created_at) WHERE event_status = 'open';",
           "expectedOutput": "Index created",
-          "explanation": "This example demonstrates create an index only for open events in SQLite. Verify both the access strategy and the returned data.",
+          "explanation": "Creates a partial index on created_at restricted to open events. Rows with status closed are omitted from this index, reducing its size when open events are a subset of the table.",
           "runnable": true
         },
         {
@@ -61,7 +61,7 @@
           "code": "EXPLAIN QUERY PLAN SELECT event_id FROM perf15_events WHERE event_status = 'open' AND created_at >= '2026-02-01';",
           "expectedOutput": "Query plan uses idx_perf15_open_created",
           "expectedPattern": "SEARCH.*USING (?:COVERING )?INDEX idx_perf15_open_created",
-          "explanation": "This example demonstrates inspect the partial-index query plan in SQLite. Verify both the access strategy and the returned data.",
+          "explanation": "Displays the plan for a query whose WHERE clause includes the partial-index predicate and a date range. SQLite may use the partial index because the query condition implies event_status = 'open'; plan details depend on statistics and engine version.",
           "runnable": true
         },
         {
@@ -70,7 +70,7 @@
           "title": "Return open events in the date range",
           "code": "SELECT event_id, created_at FROM perf15_events WHERE event_status = 'open' AND created_at >= '2026-02-01' ORDER BY created_at;",
           "expectedOutput": "3 | 2026-02-01; 5 | 2026-03-01",
-          "explanation": "This example demonstrates return open events in the date range in SQLite. Verify both the access strategy and the returned data.",
+          "explanation": "Returns the two open events on or after 2026-02-01, ordered by date. This verifies the business result separately from the index access strategy.",
           "runnable": true
         }
       ]
