@@ -1,0 +1,161 @@
+{
+  "id": "sql.sql18.2.en",
+  "courseId": "sql",
+  "moduleId": "SQL18",
+  "topicId": "SQL18.2",
+  "title": "Applying Additive Schema Migrations",
+  "language": "en",
+  "learningObjectives": [
+    "Identify additive schema changes and explain their compatibility benefits.",
+    "Add a column with an appropriate default in SQLite.",
+    "Group schema, backfill and history updates in a transaction.",
+    "Explain the expand-and-contract migration pattern.",
+    "Verify the new schema field and backfilled values."
+  ],
+  "prerequisites": [
+    "SQL3.2",
+    "SQL3.7",
+    "SQL12.1",
+    "SQL12.2",
+    "SQL12.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "An additive migration introduces a compatible schema element such as a nullable column, a column with a safe default or a new index. Additive changes can support rolling application deployments when old and new application versions can both work with the schema.",
+      "whyItMatters": "Small, compatible changes reduce deployment risk and allow applications to transition gradually.",
+      "analogy": "A migration is like a numbered building renovation plan: each change has a recorded step, a verification and a recovery plan.",
+      "analogyLimit": "The analogy does not model transactional DDL, locking, data backfills, version checks or application compatibility."
+    },
+    "explain": {
+      "narrative": "## Additive changes\nAdding a nullable column or a column with an appropriate default is often safer than renaming or dropping a column immediately. Create new structures before deploying application code that depends on them.\n\n## Migration transaction\nWhere the engine supports transactional DDL, wrap related schema and data changes in one transaction. Record the migration version only after the change succeeds.\n\n## Expand and contract\nA common rollout pattern is to add a new column, deploy code that writes both old and new fields, backfill existing rows, switch reads, and only later remove the old field after all application versions stop using it.",
+      "examples": [
+        {
+          "id": "sql18.2-ex1",
+          "language": "en",
+          "title": "Create a version-one products table",
+          "code": "CREATE TABLE mig18_products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "This example demonstrates create a version-one products table in SQLite. Verify the migration state before and after the operation.",
+          "runnable": true
+        },
+        {
+          "id": "sql18.2-ex2",
+          "language": "en",
+          "title": "Insert existing products",
+          "code": "INSERT INTO mig18_products VALUES (1, 'Notebook'), (2, 'Pen');",
+          "expectedOutput": "2 rows inserted",
+          "explanation": "This example demonstrates insert existing products in SQLite. Verify the migration state before and after the operation.",
+          "runnable": true
+        },
+        {
+          "id": "sql18.2-ex3",
+          "language": "en",
+          "title": "Create migration history",
+          "code": "CREATE TABLE mig18_product_history (version INTEGER PRIMARY KEY, description TEXT NOT NULL); INSERT INTO mig18_product_history VALUES (1, 'Create products');",
+          "expectedOutput": "Migration history created; version 1 recorded",
+          "explanation": "This example demonstrates create migration history in SQLite. Verify the migration state before and after the operation.",
+          "runnable": true
+        },
+        {
+          "id": "sql18.2-ex4",
+          "language": "en",
+          "title": "Apply an additive category column and record version two",
+          "code": "BEGIN; ALTER TABLE mig18_products ADD COLUMN category TEXT NOT NULL DEFAULT 'general'; UPDATE mig18_products SET category = 'stationery'; INSERT INTO mig18_product_history VALUES (2, 'Add product category'); COMMIT;",
+          "expectedOutput": "Migration applied",
+          "explanation": "This example demonstrates apply an additive category column and record version two in SQLite. Verify the migration state before and after the operation.",
+          "runnable": true
+        },
+        {
+          "id": "sql18.2-ex5",
+          "language": "en",
+          "title": "Verify the new column and values",
+          "code": "SELECT product_name, category FROM mig18_products ORDER BY product_id;",
+          "expectedOutput": "Notebook | stationery; Pen | stationery",
+          "explanation": "This example demonstrates verify the new column and values in SQLite. Verify the migration state before and after the operation.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and inspect the new category column for existing product rows.",
+      "independentTask": "Plan an additive migration that adds a nullable contact field, backfills known values and records a new schema version. Explain how old and new application versions can coexist during rollout.",
+      "hints": [
+        "Add the new structure before relying on it in application code.",
+        "Choose a safe default or nullable definition for existing rows.",
+        "Use a transaction when the engine supports transactional DDL.",
+        "Record the migration version only after successful changes.",
+        "Verify existing rows as well as new writes."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE mig18_products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL);\nINSERT INTO mig18_products VALUES (1, 'Notebook'), (2, 'Pen');\nBEGIN;\nALTER TABLE mig18_products ADD COLUMN category TEXT NOT NULL DEFAULT 'general';\nUPDATE mig18_products SET category = 'stationery';\nCOMMIT;\nSELECT product_name, category FROM mig18_products ORDER BY product_id;",
+    "resetCode": "CREATE TABLE mig18_products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL);\nINSERT INTO mig18_products VALUES (1, 'Notebook'), (2, 'Pen');\nBEGIN;\nALTER TABLE mig18_products ADD COLUMN category TEXT NOT NULL DEFAULT 'general';\nUPDATE mig18_products SET category = 'stationery';\nCOMMIT;\nSELECT product_name, category FROM mig18_products ORDER BY product_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql18.2-q1",
+        "prompt": "What is an additive migration?",
+        "options": [
+          "A change that adds compatible schema elements without immediately removing existing ones",
+          "A command that deletes all old columns",
+          "A database backup",
+          "A query that returns no rows"
+        ],
+        "answer": "A change that adds compatible schema elements without immediately removing existing ones",
+        "explanation": "Additive migrations introduce new structures while preserving existing ones."
+      },
+      {
+        "id": "sql18.2-q2",
+        "prompt": "Why add a column before removing an old one?",
+        "options": [
+          "It can allow old and new application versions to coexist during rollout",
+          "It forces every application to stop",
+          "It removes the need for testing",
+          "It disables constraints"
+        ],
+        "answer": "It can allow old and new application versions to coexist during rollout",
+        "explanation": "Expand-and-contract reduces compatibility risk during deployment."
+      },
+      {
+        "id": "sql18.2-q3",
+        "prompt": "When should the migration version be recorded?",
+        "options": [
+          "After the schema and data changes succeed",
+          "Before any SQL is executed",
+          "Only after a user logs out",
+          "Before the backup is taken"
+        ],
+        "answer": "After the schema and data changes succeed",
+        "explanation": "The history should reflect successfully applied changes."
+      },
+      {
+        "id": "sql18.2-q4",
+        "prompt": "What does a backfill do?",
+        "options": [
+          "Populates a newly introduced field for existing rows",
+          "Drops an index",
+          "Creates a new database user",
+          "Renames the primary key"
+        ],
+        "answer": "Populates a newly introduced field for existing rows",
+        "explanation": "A backfill updates existing records to satisfy the new data model."
+      },
+      {
+        "id": "sql18.2-q5",
+        "prompt": "What should be checked after adding a column?",
+        "options": [
+          "Existing and new rows have the intended values",
+          "Only the column's visual width",
+          "The database filename",
+          "The SQL editor theme"
+        ],
+        "answer": "Existing and new rows have the intended values",
+        "explanation": "Post-migration checks must verify both schema and data."
+      }
+    ]
+  },
+  "status": "draft"
+}
