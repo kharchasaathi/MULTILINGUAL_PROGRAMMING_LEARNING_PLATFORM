@@ -29,6 +29,11 @@
     .sql-stop{background:#7a271a!important;border-color:#b42318!important}
     .sql-editor{display:block;width:100%;min-height:430px;resize:vertical;border:0;outline:0;padding:18px;background:#111827;color:#e6edf7;font:14px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;tab-size:4;white-space:pre;overflow:auto}
     .sql-editor:focus-visible{outline:2px solid #8b80ff;outline-offset:-3px}
+    .sql-params{padding:12px 14px;background:#182235;border-top:1px solid #344054;color:#e6edf7}
+    .sql-params label{display:block;font-size:12px;font-weight:700;margin-bottom:6px}
+    .sql-params textarea{display:block;width:100%;min-height:70px;resize:vertical;border:1px solid #475467;border-radius:8px;padding:9px;background:#0b1220;color:#e6edf7;font:12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace}
+    .sql-params p{margin:6px 0 0;color:#98a2b3;font-size:11px;line-height:1.5}
+    .sql-actions .sql-file-input{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
     .sql-results{min-height:430px;max-height:650px;overflow:auto;padding:14px;background:#0b1220;color:#d1fae5;font:13px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}
     .sql-result{margin:0 0 18px}
     .sql-result h3{margin:0 0 8px;color:#c7d2fe;font:700 12px/1.4 "DM Sans",sans-serif}
@@ -92,6 +97,11 @@ VALUES ('Asha', 88), ('Ravi', 76), ('Noor', 91);
 SELECT learner_name, score
 FROM learners
 ORDER BY score DESC;</textarea>
+        <div class="sql-params">
+          <label for="sqlParams">Bound parameters (JSON)</label>
+          <textarea id="sqlParams" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-describedby="sqlParamsHelp" placeholder='["Asha", 80] or {":name":"Asha"}'></textarea>
+          <p id="sqlParamsHelp">Leave blank for regular SQL. When supplied, CodeSaathi prepares one SQL statement and binds these values; use ? placeholders with an array or :name placeholders with an object. Never build SQL by concatenating untrusted input.</p>
+        </div>
         <div class="sql-toolbar">
           <button id="resetSqlCode" type="button">Reset code</button>
           <button id="restoreSqlCode" type="button">Restore lesson starter</button>
@@ -108,6 +118,8 @@ ORDER BY score DESC;</textarea>
     <div class="sql-actions" style="margin-top:14px">
       <button id="resetSqlDatabase" type="button" disabled>Reset local database</button>
       <button id="exportSqlDatabase" type="button" disabled>Export SQLite database</button>
+      <button id="importSqlDatabase" type="button" disabled>Import SQLite database</button>
+      <input class="sql-file-input" id="sqlDatabaseFile" type="file" accept=".sqlite,.sqlite3,.db,application/vnd.sqlite3" aria-label="Choose a SQLite database file">
     </div>
     <section class="sql-note">
       <strong>Runtime, storage and safety:</strong> This playground uses sql.js 1.16.0 (SQLite compiled to WebAssembly) inside a dedicated browser Worker. Query execution does not connect to a remote database and learner SQL is not uploaded. A database snapshot is stored in IndexedDB on this browser; it is not automatically synced across devices. Reset removes the local database. Export downloads a SQLite database file. SQL statements are not arbitrary JavaScript, but this is an educational sandbox rather than a hardened multi-tenant security boundary. Do not enter secrets or private records. The runtime implements SQLite, not MySQL or SQL Server; commands such as CREATE DATABASE and USE are not supported by SQLite.
