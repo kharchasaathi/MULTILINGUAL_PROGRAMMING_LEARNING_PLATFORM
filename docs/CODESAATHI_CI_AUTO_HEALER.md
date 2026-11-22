@@ -5,7 +5,7 @@
 The workflow `.github/workflows/codesaathi-ci-auto-healer.yml` listens for completed runs of the selected CodeSaathi validation and deployment workflows.
 
 1. Reads the failed workflow run and its failed job/step metadata through the GitHub Actions API.
-2. Retries failed jobs once only when every failed step matches the narrow setup/download/cache allow-list.
+2. Retries failed jobs once only when the failed step is GitHub runner provisioning (`Set up job`).
 3. Opens one deduplicated GitHub issue for deterministic, unknown, or still-failing runs.
 4. Includes the workflow run URL, branch, commit SHA, failed jobs, failed steps, classification, and recovery decision.
 
@@ -13,7 +13,7 @@ The workflow `.github/workflows/codesaathi-ci-auto-healer.yml` listens for compl
 
 - It never checks out or executes the failed run's source code.
 - It never reads or executes workflow artifacts.
-- It does not retry content assertions, tests, lint, compilation, security checks, or other deterministic failures.
+- It does not retry checkout, dependency installation, browser setup, content assertions, tests, lint, compilation, security checks, or other project steps.
 - It has a one-retry ceiling; no retry loops.
 - It does not edit source code, generate repair commits, or merge pull requests.
 - A maintainer must diagnose and approve any code repair.
