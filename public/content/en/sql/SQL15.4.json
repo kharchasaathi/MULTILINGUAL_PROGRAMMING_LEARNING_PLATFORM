@@ -25,7 +25,7 @@
       "analogyLimit": "The analogy does not model B-tree pages, query planner estimates, index maintenance or the full range of SQL access paths."
     },
     "explain": {
-      "narrative": "## Covering index concept\nAn index can cover a query when it contains the columns used by the query's filters and output. SQLite may report USING COVERING INDEX in EXPLAIN QUERY PLAN when it can satisfy the query from the index alone.\n\n## Design trade-offs\nAdding output columns to an index can make it wider. Wider indexes consume more pages and increase maintenance work. Use covering indexes selectively for frequent, measured queries.\n\n## Verify the plan\nUse EXPLAIN QUERY PLAN to confirm whether the index is covering for the specific query. A change to the SELECT list or WHERE clause can change whether the index covers the query.",
+      "narrative": "## Covering index concept\nAn index can cover a query when it contains the columns used by the query's filters and output. SQLite may report USING COVERING INDEX in EXPLAIN QUERY PLAN when it can satisfy the query from the index alone.\n\n## Design trade-offs\nAdding output columns to an index can make it wider. Wider indexes consume more pages and increase maintenance work. Use covering indexes selectively for frequent, measured queries.\n\n## Verify the plan\nUse EXPLAIN QUERY PLAN to confirm whether the index is covering for the specific query. A change to the SELECT list or WHERE clause can change whether the index covers the query.\n\n### Covering is query-specific\nAn index covers a query only when it contains all columns needed for the filters, joins and output (plus any required ordering). Adding a new selected column can make the same query no longer covered.\n\n### Cost of wider indexes\nCovering indexes can reduce table lookups, but they consume more storage and increase work on INSERT, UPDATE and DELETE. Add included or trailing columns only for measured high-value read paths.",
       "examples": [
         {
           "id": "sql15.4-ex1",
@@ -33,7 +33,7 @@
           "title": "Create a customer payment table",
           "code": "CREATE TABLE perf15_payments (payment_id INTEGER PRIMARY KEY, customer TEXT NOT NULL, payment_status TEXT NOT NULL, amount INTEGER NOT NULL, note TEXT);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create a customer payment table in SQLite. Verify both the access strategy and the returned data.",
+          "explanation": "Creates a payments table with customer, status, amount and a note. The report query will filter on customer and status and return amount only.",
           "runnable": true
         },
         {
@@ -42,7 +42,7 @@
           "title": "Insert sample payments",
           "code": "INSERT INTO perf15_payments VALUES (1, 'Asha', 'paid', 100, 'card'), (2, 'Asha', 'open', 50, 'cash'), (3, 'Bilal', 'paid', 80, 'bank'), (4, 'Mira', 'paid', 70, 'card');",
           "expectedOutput": "4 rows inserted",
-          "explanation": "This example demonstrates insert sample payments in SQLite. Verify both the access strategy and the returned data.",
+          "explanation": "Inserts four payments. Only Asha's first row matches customer = 'Asha' and payment_status = 'paid'.",
           "runnable": true
         },
         {
@@ -51,7 +51,7 @@
           "title": "Create an index that covers a frequent report",
           "code": "CREATE INDEX idx_perf15_cover ON perf15_payments(customer, payment_status, amount);",
           "expectedOutput": "Index created",
-          "explanation": "This example demonstrates create an index that covers a frequent report in SQLite. Verify both the access strategy and the returned data.",
+          "explanation": "Creates an index containing both filter columns and the selected amount. Because the query's required values are all present in the index, SQLite may be able to answer it without looking up the full table row.",
           "runnable": true
         },
         {
@@ -61,7 +61,7 @@
           "code": "EXPLAIN QUERY PLAN SELECT amount FROM perf15_payments WHERE customer = 'Asha' AND payment_status = 'paid';",
           "expectedOutput": "Query plan uses a covering index",
           "expectedPattern": "USING COVERING INDEX idx_perf15_cover",
-          "explanation": "This example demonstrates inspect the covering-index plan in SQLite. Verify both the access strategy and the returned data.",
+          "explanation": "Displays the query plan for the covered report. Look for a covering-index access description in the actual plan; exact text is version-dependent and a tiny table may lead the optimizer to choose a scan instead.",
           "runnable": true
         },
         {
@@ -70,7 +70,7 @@
           "title": "Run the covered report query",
           "code": "SELECT amount FROM perf15_payments WHERE customer = 'Asha' AND payment_status = 'paid';",
           "expectedOutput": "100",
-          "explanation": "This example demonstrates run the covered report query in SQLite. Verify both the access strategy and the returned data.",
+          "explanation": "Returns the amount 100 for Asha's paid payment. This is the logical result whether SQLite uses the covering index or another valid access path.",
           "runnable": true
         }
       ]
