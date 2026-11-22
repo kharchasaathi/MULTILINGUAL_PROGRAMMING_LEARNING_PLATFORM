@@ -25,7 +25,7 @@
       "analogyLimit": "The analogy does not represent SQL partition rules, frame boundaries, tie handling or optimizer behaviour."
     },
     "explain": {
-      "narrative": "## PARTITION BY\nPARTITION BY divides the input into groups. A window aggregate is calculated separately for each partition, but each source row remains visible.\n\n## ORDER BY inside OVER\nORDER BY inside OVER defines the order used by ranking and ordered window calculations. It is not the same as the outer ORDER BY, which controls display order.\n\n## Deterministic ordering\nWhen ties are possible, add a stable tie-breaker such as a unique id if the function requires a deterministic row sequence. A window order does not guarantee final display order unless the outer query also has ORDER BY.",
+      "narrative": "## PARTITION BY\nPARTITION BY divides the input into groups. A window aggregate is calculated separately for each partition, but each source row remains visible.\n\n## ORDER BY inside OVER\nORDER BY inside OVER defines the order used by ranking and ordered window calculations. It is not the same as the outer ORDER BY, which controls display order.\n\n## Deterministic ordering\nWhen ties are possible, add a stable tie-breaker such as a unique id if the function requires a deterministic row sequence. A window order does not guarantee final display order unless the outer query also has ORDER BY.\n\n### Partition and ordering are separate controls\nPARTITION BY defines which rows belong to the same calculation group. ORDER BY inside OVER defines the sequence used by ranking or ordered calculations. The outer ORDER BY is separate and controls only the final display order.\n\n### Tie handling\nFor ROW_NUMBER, include a stable unique tie-breaker if every row needs a repeatable position. For RANK and DENSE_RANK, omit non-business tie-breakers from the window ordering when equal business values must share a rank.",
       "examples": [
         {
           "id": "sql14.2-ex1",
@@ -33,7 +33,7 @@
           "title": "Create regional sales data",
           "code": "CREATE TABLE win14_regions (sale_id INTEGER PRIMARY KEY, region TEXT NOT NULL, salesperson TEXT NOT NULL, amount INTEGER NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create regional sales data with SQLite window functions. Check the window definition and row order.",
+          "explanation": "Creates regional sales data with a region, salesperson and amount for each sale. The primary key uniquely identifies each input row.",
           "runnable": true
         },
         {
@@ -42,7 +42,7 @@
           "title": "Insert two regions",
           "code": "INSERT INTO win14_regions VALUES (1, 'East', 'Asha', 100), (2, 'East', 'Bilal', 50), (3, 'West', 'Mira', 80), (4, 'West', 'Noor', 20);",
           "expectedOutput": "4 rows inserted",
-          "explanation": "This example demonstrates insert two regions with SQLite window functions. Check the window definition and row order.",
+          "explanation": "Inserts two East sales and two West sales. East totals 150 and West totals 100, allowing each partition's calculation to be checked.",
           "runnable": true
         },
         {
@@ -51,7 +51,7 @@
           "title": "Calculate a total per region while preserving each sale",
           "code": "SELECT salesperson, region, amount, SUM(amount) OVER (PARTITION BY region) AS region_total FROM win14_regions ORDER BY region, salesperson;",
           "expectedOutput": "Asha | East | 100 | 150; Bilal | East | 50 | 150; Mira | West | 80 | 100; Noor | West | 20 | 100",
-          "explanation": "This example demonstrates calculate a total per region while preserving each sale with SQLite window functions. Check the window definition and row order.",
+          "explanation": "PARTITION BY region divides the rows into East and West windows. SUM is calculated separately for each region and repeated on each row in that partition; the outer ORDER BY sets the displayed order.",
           "runnable": true
         },
         {
@@ -60,7 +60,7 @@
           "title": "Calculate average amount per region",
           "code": "SELECT salesperson, region, amount, AVG(amount) OVER (PARTITION BY region) AS region_average FROM win14_regions ORDER BY region, salesperson;",
           "expectedOutput": "Asha | East | 100 | 75.0; Bilal | East | 50 | 75.0; Mira | West | 80 | 50.0; Noor | West | 20 | 50.0",
-          "explanation": "This example demonstrates calculate average amount per region with SQLite window functions. Check the window definition and row order.",
+          "explanation": "Calculates the average separately in each region. East averages 75.0 and West averages 50.0, while all four sale rows remain in the output.",
           "runnable": true
         },
         {
@@ -69,7 +69,7 @@
           "title": "Number sales within each region",
           "code": "SELECT salesperson, region, ROW_NUMBER() OVER (PARTITION BY region ORDER BY amount DESC, salesperson) AS region_position FROM win14_regions ORDER BY region, region_position;",
           "expectedOutput": "Asha | East | 1; Bilal | East | 2; Mira | West | 1; Noor | West | 2",
-          "explanation": "This example demonstrates number sales within each region with SQLite window functions. Check the window definition and row order.",
+          "explanation": "ROW_NUMBER assigns a sequence within each region ordered by amount descending and salesperson. The salesperson tie-breaker makes the numbering deterministic if two sales in a region have the same amount.",
           "runnable": true
         }
       ]
