@@ -1,0 +1,162 @@
+{
+  "id": "sql.sql25.2.en",
+  "courseId": "sql",
+  "moduleId": "SQL25",
+  "topicId": "SQL25.2",
+  "title": "Project: Library Management Database",
+  "language": "en",
+  "learningObjectives": [
+    "Model books, members and loans as separate entities.",
+    "Use foreign keys and constraints to protect loan records.",
+    "Query current and overdue loans using date comparisons.",
+    "Record a book return without deleting loan history.",
+    "Define inventory and member-privacy tests for the project."
+  ],
+  "prerequisites": [
+    "SQL1.1",
+    "SQL3.2",
+    "SQL4.1",
+    "SQL8.1",
+    "SQL12.1",
+    "SQL20.4"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A library system tracks a catalogue, registered members and borrowing events. A loan records when a member borrowed a book and whether it has been returned.",
+      "whyItMatters": "Keeping loan events separate from book and member records preserves borrowing history and supports overdue reporting.",
+      "analogy": "A library catalogue describes books, a membership register describes borrowers, and a loan slip records each borrowing event.",
+      "analogyLimit": "A real library may have multiple physical copies per title, reservations, renewals, fines and branch-specific inventory; this model is intentionally compact."
+    },
+    "explain": {
+      "narrative": "## Project brief\nBuild a library database that stores books, members and loan events. The system must list current loans, identify overdue books and record returns while retaining historical loan data.\n\n## ER design\nBooks and members are parent entities. Loans references both through foreign keys and stores loan_date, due_date and returned_at. One book can have many historical loan rows; one member can borrow many books over time.\n\n## Business rules\nA due date must follow the loan date, each loan must reference a valid book and member, and returned_at remains NULL while the loan is active. A production model should track physical copies separately from title metadata.\n\n## Assessment and operations\nTest overdue boundaries, repeat borrowing, missing members, duplicate copy loans and return updates. Restrict member personal data and document the loan policy, date/time zone and retention rules.",
+      "examples": [
+        {
+          "id": "sql252-ex1",
+          "language": "en",
+          "title": "Create books, members and loan events",
+          "code": "CREATE TABLE proj25_books (book_id INTEGER PRIMARY KEY, isbn TEXT NOT NULL UNIQUE, book_title TEXT NOT NULL); CREATE TABLE proj25_members (member_id INTEGER PRIMARY KEY, member_name TEXT NOT NULL, email TEXT NOT NULL UNIQUE); CREATE TABLE proj25_loans (loan_id INTEGER PRIMARY KEY, book_id INTEGER NOT NULL REFERENCES proj25_books(book_id), member_id INTEGER NOT NULL REFERENCES proj25_members(member_id), loan_date TEXT NOT NULL, due_date TEXT NOT NULL, returned_at TEXT, CHECK (due_date >= loan_date));",
+          "expectedOutput": "Tables created",
+          "explanation": "Separates catalogue, membership and borrowing events. returned_at is NULL while the loan is active; a production schema should model individual physical copies if multiple copies exist.",
+          "runnable": true
+        },
+        {
+          "id": "sql252-ex2",
+          "language": "en",
+          "title": "Insert sample books, members and loans",
+          "code": "INSERT INTO proj25_books VALUES (1, '9780000000011', 'SQL Basics'), (2, '9780000000028', 'Database Design'); INSERT INTO proj25_members VALUES (1, 'Asha', 'asha@example.test'), (2, 'Bilal', 'bilal@example.test'); INSERT INTO proj25_loans VALUES (101, 1, 1, '2026-11-01', '2026-11-15', NULL), (102, 2, 2, '2026-11-10', '2026-11-24', NULL), (103, 1, 2, '2026-10-01', '2026-10-15', '2026-10-12');",
+          "expectedOutput": "7 rows inserted",
+          "explanation": "Adds two titles, two members and three loan events. Loan 103 is historical because returned_at is populated.",
+          "runnable": true
+        },
+        {
+          "id": "sql252-ex3",
+          "language": "en",
+          "title": "List currently borrowed books",
+          "code": "SELECT l.loan_id, b.book_title, m.member_name, l.due_date FROM proj25_loans AS l JOIN proj25_books AS b ON b.book_id = l.book_id JOIN proj25_members AS m ON m.member_id = l.member_id WHERE l.returned_at IS NULL ORDER BY l.due_date, l.loan_id;",
+          "expectedOutput": "101 | SQL Basics | Asha | 2026-11-15; 102 | Database Design | Bilal | 2026-11-24",
+          "explanation": "Returns only active loans. Historical returned rows remain in the loan table but are excluded from the current-loan view.",
+          "runnable": true
+        },
+        {
+          "id": "sql252-ex4",
+          "language": "en",
+          "title": "Find overdue active loans as of the stated date",
+          "code": "SELECT l.loan_id, b.book_title, m.member_name, l.due_date FROM proj25_loans AS l JOIN proj25_books AS b ON b.book_id = l.book_id JOIN proj25_members AS m ON m.member_id = l.member_id WHERE l.returned_at IS NULL AND l.due_date < '2026-11-22' ORDER BY l.due_date;",
+          "expectedOutput": "101 | SQL Basics | Asha | 2026-11-15",
+          "explanation": "Uses a fixed as-of date so the example is repeatable. In production, use a trusted current date/time and define the library's local time zone.",
+          "runnable": true
+        },
+        {
+          "id": "sql252-ex5",
+          "language": "en",
+          "title": "Record a return while preserving the loan row",
+          "code": "UPDATE proj25_loans SET returned_at = '2026-11-20' WHERE loan_id = 101 AND returned_at IS NULL; SELECT loan_id, returned_at FROM proj25_loans WHERE loan_id = 101;",
+          "expectedOutput": "101 | 2026-11-20",
+          "explanation": "Updates the active loan once and retains its history. Application code should check the affected-row count to detect an already-returned or missing loan.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the current-loan and overdue queries. Return loan 101 and verify it disappears from the active-loan list while its historical row remains.",
+      "independentTask": "Extend the model with book_copies and reservations. Prevent the same physical copy from having two active loans and define a test for concurrent checkout attempts.",
+      "hints": [
+        "Separate title metadata from loan events.",
+        "Use returned_at IS NULL to identify active loans.",
+        "Use a fixed as-of date for repeatable overdue tests.",
+        "Retain returned loans for history and reporting.",
+        "Model physical copies separately when titles have multiple copies."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE proj25_books (book_id INTEGER PRIMARY KEY, book_title TEXT NOT NULL);\nCREATE TABLE proj25_members (member_id INTEGER PRIMARY KEY, member_name TEXT NOT NULL);\nCREATE TABLE proj25_loans (loan_id INTEGER PRIMARY KEY, book_id INTEGER NOT NULL, member_id INTEGER NOT NULL, due_date TEXT NOT NULL, returned_at TEXT);\nINSERT INTO proj25_books VALUES (1, 'SQL Basics');\nINSERT INTO proj25_members VALUES (1, 'Asha');\nINSERT INTO proj25_loans VALUES (101, 1, 1, '2026-11-15', NULL);\nSELECT b.book_title, m.member_name, l.due_date FROM proj25_loans l JOIN proj25_books b ON b.book_id=l.book_id JOIN proj25_members m ON m.member_id=l.member_id WHERE l.returned_at IS NULL;",
+    "resetCode": "CREATE TABLE proj25_books (book_id INTEGER PRIMARY KEY, book_title TEXT NOT NULL);\nCREATE TABLE proj25_members (member_id INTEGER PRIMARY KEY, member_name TEXT NOT NULL);\nCREATE TABLE proj25_loans (loan_id INTEGER PRIMARY KEY, book_id INTEGER NOT NULL, member_id INTEGER NOT NULL, due_date TEXT NOT NULL, returned_at TEXT);\nINSERT INTO proj25_books VALUES (1, 'SQL Basics');\nINSERT INTO proj25_members VALUES (1, 'Asha');\nINSERT INTO proj25_loans VALUES (101, 1, 1, '2026-11-15', NULL);\nSELECT b.book_title, m.member_name, l.due_date FROM proj25_loans l JOIN proj25_books b ON b.book_id=l.book_id JOIN proj25_members m ON m.member_id=l.member_id WHERE l.returned_at IS NULL;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql252-q1",
+        "prompt": "What does a loan row represent?",
+        "options": [
+          "A borrowing event for a member and book",
+          "The book title only",
+          "A member's password",
+          "A database backup"
+        ],
+        "answer": "A borrowing event for a member and book",
+        "explanation": "Loan events should be separate from catalogue and member entities."
+      },
+      {
+        "id": "sql252-q2",
+        "prompt": "How are current loans identified in this model?",
+        "options": [
+          "returned_at IS NULL",
+          "due_date IS NULL",
+          "book_title = NULL",
+          "loan_id = 0"
+        ],
+        "answer": "returned_at IS NULL",
+        "explanation": "A NULL return timestamp indicates the loan is still active."
+      },
+      {
+        "id": "sql252-q3",
+        "prompt": "Why keep returned loan rows?",
+        "options": [
+          "To preserve borrowing history and support reporting",
+          "To prevent books from being reused",
+          "To make every member overdue",
+          "To avoid primary keys"
+        ],
+        "answer": "To preserve borrowing history and support reporting",
+        "explanation": "Historical events are valuable for audit and library operations."
+      },
+      {
+        "id": "sql252-q4",
+        "prompt": "Why use a fixed as-of date in the overdue example?",
+        "options": [
+          "To make the expected result repeatable",
+          "To avoid using WHERE",
+          "To create a new book",
+          "To sort by member name"
+        ],
+        "answer": "To make the expected result repeatable",
+        "explanation": "Fixed dates prevent test output changing with the runtime date."
+      },
+      {
+        "id": "sql252-q5",
+        "prompt": "What is needed when a library owns multiple copies of one title?",
+        "options": [
+          "A separate physical-copy entity or copy identifier",
+          "A single book row with no copy data",
+          "A separate database for every member",
+          "A CROSS JOIN"
+        ],
+        "answer": "A separate physical-copy entity or copy identifier",
+        "explanation": "Loan availability is tracked at copy level when several copies exist."
+      }
+    ]
+  },
+  "status": "draft"
+}
