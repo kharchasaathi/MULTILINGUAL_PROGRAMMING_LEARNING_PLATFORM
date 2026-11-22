@@ -26,7 +26,7 @@
       "analogyLimit": "The analogy does not model OLD/NEW row values, transaction timing, recursive execution or DBMS-specific trigger semantics."
     },
     "explain": {
-      "narrative": "## OLD and NEW\nIn an UPDATE trigger, OLD refers to the row values before the update and NEW refers to the values after the update. A trigger can compare them or store both in an audit table.\n\n## AFTER UPDATE OF column\nSQLite allows an UPDATE OF column_name trigger clause to fire when the named column appears in the SET list. A WHEN condition can further restrict which row changes are logged.\n\n## Avoid unnecessary audit noise\nUse a WHEN condition such as OLD.price IS NOT NEW.price to avoid recording updates where the value did not actually change. Audit tables should record the minimum information required by the business and retention policy.",
+      "narrative": "## OLD and NEW\nIn an UPDATE trigger, OLD refers to the row values before the update and NEW refers to the values after the update. A trigger can compare them or store both in an audit table.\n\n## AFTER UPDATE OF column\nSQLite allows an UPDATE OF column_name trigger clause to fire when the named column appears in the SET list. A WHEN condition can further restrict which row changes are logged.\n\n## Avoid unnecessary audit noise\nUse a WHEN condition such as OLD.price IS NOT NEW.price to avoid recording updates where the value did not actually change. Audit tables should record the minimum information required by the business and retention policy.\n\n### OLD and NEW\nFor an UPDATE trigger, OLD represents the row before the update and NEW represents the row after it. SQLite's UPDATE OF price clause narrows firing to statements that name price; the WHEN clause then checks whether the value actually changed. IS NOT is SQLite's null-aware comparison form; other engines may use IS DISTINCT FROM or another product-specific expression.\n\n### Operational caution\nA multi-row UPDATE can fire the row trigger for each affected row. Audit data is written in the same transaction as the update, so an audit failure should not be ignored.",
       "examples": [
         {
           "id": "sql17.2-ex1",
@@ -34,7 +34,7 @@
           "title": "Create a product table",
           "code": "CREATE TABLE trg17_products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, price INTEGER NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create a product table using SQLite triggers. Verify the event, timing and affected rows.",
+          "explanation": "Creates a product table with an integer key and a required integer price. Integer prices are used here to keep the example's arithmetic exact; a real currency design should select a suitable exact decimal or integer-minor-unit strategy.",
           "runnable": true
         },
         {
@@ -43,7 +43,7 @@
           "title": "Create a price audit table",
           "code": "CREATE TABLE trg17_price_audit (audit_id INTEGER PRIMARY KEY, product_id INTEGER NOT NULL, old_price INTEGER NOT NULL, new_price INTEGER NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create a price audit table using SQLite triggers. Verify the event, timing and affected rows.",
+          "explanation": "Creates a separate history table that records the key and both values observed by the update trigger. It intentionally stores the old and new values so later reports can explain the change.",
           "runnable": true
         },
         {
@@ -52,7 +52,7 @@
           "title": "Insert a starting product",
           "code": "INSERT INTO trg17_products VALUES (1, 'Notebook', 40);",
           "expectedOutput": "1 row inserted",
-          "explanation": "This example demonstrates insert a starting product using SQLite triggers. Verify the event, timing and affected rows.",
+          "explanation": "Seeds the product row before creating or testing the update event. This establishes OLD.price = 40 as the before-image for the next statement.",
           "runnable": true
         },
         {
@@ -61,7 +61,7 @@
           "title": "Create an AFTER UPDATE trigger",
           "code": "CREATE TRIGGER trg17_price_update AFTER UPDATE OF price ON trg17_products WHEN OLD.price IS NOT NEW.price BEGIN INSERT INTO trg17_price_audit(product_id, old_price, new_price) VALUES (OLD.product_id, OLD.price, NEW.price); END;",
           "expectedOutput": "Trigger created",
-          "explanation": "This example demonstrates create an after update trigger using SQLite triggers. Verify the event, timing and affected rows.",
+          "explanation": "Creates an AFTER UPDATE trigger restricted to updates that mention price. The WHEN predicate uses SQLite's IS NOT comparison, which treats NULL values as comparable for change detection; OLD refers to the stored value before the update and NEW to the resulting value.",
           "runnable": true
         },
         {
@@ -70,7 +70,7 @@
           "title": "Update the price and inspect the audit",
           "code": "UPDATE trg17_products SET price = 55 WHERE product_id = 1; SELECT product_id, old_price, new_price FROM trg17_price_audit;",
           "expectedOutput": "1 | 40 | 55",
-          "explanation": "This example demonstrates update the price and inspect the audit using SQLite triggers. Verify the event, timing and affected rows.",
+          "explanation": "Changes the product price from 40 to 55, then reads the audit table. The trigger records one before/after pair. The UPDATE and audit INSERT participate in the same statement transaction, so a trigger failure aborts the statement.",
           "runnable": true
         }
       ]
