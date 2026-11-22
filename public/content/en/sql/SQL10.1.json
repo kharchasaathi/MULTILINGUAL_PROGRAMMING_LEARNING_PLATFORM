@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql10.1.en",
+  "courseId": "sql",
+  "moduleId": "SQL10",
+  "topicId": "SQL10.1",
+  "title": "SQL SELECT INTO and Creating Tables from Query Results",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of SQL SELECT INTO and Creating Tables from Query Results.",
+    "Write SQLite-compatible SQL for the topic or a clearly labelled equivalent.",
+    "Predict result rows using the lesson's sample data.",
+    "Identify dialect limitations, NULL behaviour and common errors.",
+    "Apply the topic to a practical data task."
+  ],
+  "prerequisites": [
+    "SQL5.1",
+    "SQL5.4",
+    "SQL9.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "SELECT INTO is used in some SQL dialects to create a new table from a query result. It is not portable: SQL Server and Microsoft Access support SELECT INTO patterns, while SQLite uses CREATE TABLE ... AS SELECT. MySQL and PostgreSQL use their own CTAS forms. The source table is read; it is not moved or deleted.",
+      "whyItMatters": "Creating a snapshot or archive from a filtered query is useful for reporting, backups of selected rows, and separating a working subset from a larger table.",
+      "analogy": "Think of a SQL query as a carefully specified instruction for selecting or shaping rows in a database.",
+      "analogyLimit": "The analogy does not model SQL evaluation order, transaction guarantees, NULL logic or DBMS-specific implementation details."
+    },
+    "explain": {
+      "narrative": "## Purpose and dialect differences\nIn SQL Server and Microsoft Access, SELECT ... INTO new_table FROM source creates a table from the query result. SQLite does not implement that syntax. In this SQLite Playground, use CREATE TABLE new_table AS SELECT ... . This creates the destination table and copies the selected result rows; it does not copy every constraint, index, trigger or identity property from the source.\n\n## SQL Server / Access style (illustrative, not run in SQLite)\n```sql\nSELECT employee_id, employee_name, department\nINTO department_snapshot\nFROM employees\nWHERE department = 'Sales';\n```\n\n## SQLite equivalent\n```sql\nCREATE TABLE department_snapshot AS\nSELECT employee_id, employee_name, department\nFROM employees\nWHERE department = 'Sales';\n```\n\nThe destination table must not already exist. Use DROP TABLE IF EXISTS before a repeatable practice run. Review the destination schema after CTAS: add keys, constraints and indexes explicitly when required.\n\n## Common mistakes\n- Assuming syntax is identical across all database engines.\n- Omitting explicit column lists when moving data.\n- Ignoring NULL, constraints or result ordering.\n- Treating a documented dialect example as executable SQLite syntax.\n\n## Best practices\nUse explicit columns, test against the target DBMS/version, keep setup scripts repeatable, and verify results with SELECT queries.",
+      "examples": [
+        {
+          "id": "sql10.1-ex1",
+          "language": "en",
+          "title": "Create a filtered snapshot",
+          "code": "DROP TABLE IF EXISTS staff;\nDROP TABLE IF EXISTS sales_snapshot;\nCREATE TABLE staff (staff_id INTEGER PRIMARY KEY, full_name TEXT, department TEXT, salary INTEGER);\nINSERT INTO staff VALUES (1,'Asha','Sales',52000),(2,'Bilal','IT',61000),(3,'Chitra','Sales',57000);\nCREATE TABLE sales_snapshot AS SELECT staff_id, full_name, salary FROM staff WHERE department='Sales';\nSELECT staff_id, full_name, salary FROM sales_snapshot ORDER BY staff_id;",
+          "expectedOutput": "1 | Asha | 52000; 3 | Chitra | 57000",
+          "explanation": "CTAS creates a new table containing only the selected Sales columns and rows.",
+          "runnable": true
+        },
+        {
+          "id": "sql10.1-ex2",
+          "language": "en",
+          "title": "Create a table from selected columns",
+          "code": "DROP TABLE IF EXISTS staff;\nDROP TABLE IF EXISTS staff_names;\nCREATE TABLE staff (staff_id INTEGER PRIMARY KEY, full_name TEXT, department TEXT, salary INTEGER);\nINSERT INTO staff VALUES (1,'Asha','Sales',52000),(2,'Bilal','IT',61000);\nCREATE TABLE staff_names AS SELECT full_name, department FROM staff;\nSELECT full_name, department FROM staff_names ORDER BY full_name;",
+          "expectedOutput": "Asha | Sales; Bilal | IT",
+          "explanation": "The query projection determines which columns are created in the destination.",
+          "runnable": true
+        },
+        {
+          "id": "sql10.1-ex3",
+          "language": "en",
+          "title": "Create a table with a calculated column",
+          "code": "DROP TABLE IF EXISTS staff;\nDROP TABLE IF EXISTS salary_review;\nCREATE TABLE staff (staff_id INTEGER PRIMARY KEY, full_name TEXT, department TEXT, salary INTEGER);\nINSERT INTO staff VALUES (1,'Asha','Sales',52000),(2,'Bilal','IT',61000);\nCREATE TABLE salary_review AS SELECT full_name, salary, salary * 1.10 AS proposed_salary FROM staff;\nSELECT full_name, proposed_salary FROM salary_review ORDER BY full_name;",
+          "expectedOutput": "Asha | 57200.0; Bilal | 67100.0",
+          "explanation": "CTAS can materialize expressions and aliases as columns in the new table.",
+          "runnable": true
+        },
+        {
+          "id": "sql10.1-ex4",
+          "language": "en",
+          "title": "Create an aggregate summary table",
+          "code": "DROP TABLE IF EXISTS staff;\nDROP TABLE IF EXISTS department_totals;\nCREATE TABLE staff (staff_id INTEGER PRIMARY KEY, full_name TEXT, department TEXT, salary INTEGER);\nINSERT INTO staff VALUES (1,'Asha','Sales',52000),(2,'Bilal','IT',61000),(3,'Chitra','Sales',57000);\nCREATE TABLE department_totals AS SELECT department, COUNT(*) AS staff_count, SUM(salary) AS payroll FROM staff GROUP BY department;\nSELECT department, staff_count, payroll FROM department_totals ORDER BY department;",
+          "expectedOutput": "IT | 1 | 61000; Sales | 2 | 109000",
+          "explanation": "A query result can be grouped before being stored as a snapshot table.",
+          "runnable": true
+        },
+        {
+          "id": "sql10.1-ex5",
+          "language": "en",
+          "title": "Create an empty table from a query shape",
+          "code": "DROP TABLE IF EXISTS staff;\nDROP TABLE IF EXISTS empty_staff_copy;\nCREATE TABLE staff (staff_id INTEGER PRIMARY KEY, full_name TEXT, department TEXT, salary INTEGER);\nINSERT INTO staff VALUES (1,'Asha','Sales',52000);\nCREATE TABLE empty_staff_copy AS SELECT staff_id, full_name, department, salary FROM staff WHERE 0;\nSELECT COUNT(*) AS copied_rows FROM empty_staff_copy;",
+          "expectedOutput": "0",
+          "explanation": "A false WHERE condition copies the selected column structure but no rows; CTAS does not preserve all source constraints.",
+          "runnable": true
+        }
+      ]
+    }
+  },
+  "practise": {
+    "guidedTask": "Run the five examples in order. Before each run, predict the result and explain how SQL SELECT INTO and Creating Tables from Query Results affects it.",
+    "independentTask": "Create your own small dataset and write three new queries using SQL SELECT INTO and Creating Tables from Query Results. Include one boundary case and document the expected output.",
+    "hints": [
+      "Read the target DBMS syntax notes before running an example.",
+      "Use explicit column names and aliases where they improve clarity.",
+      "Check NULL values separately from zero and empty strings.",
+      "Use ORDER BY when the display order matters.",
+      "Compare the returned rows with your prediction after execution."
+    ]
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "DROP TABLE IF EXISTS staff;\nDROP TABLE IF EXISTS sales_snapshot;\nCREATE TABLE staff (staff_id INTEGER PRIMARY KEY, full_name TEXT, department TEXT, salary INTEGER);\nINSERT INTO staff VALUES (1,'Asha','Sales',52000),(2,'Bilal','IT',61000),(3,'Chitra','Sales',57000);\nCREATE TABLE sales_snapshot AS SELECT staff_id, full_name, salary FROM staff WHERE department='Sales';\nSELECT staff_id, full_name, salary FROM sales_snapshot ORDER BY staff_id;",
+    "resetCode": "DROP TABLE IF EXISTS staff;\nDROP TABLE IF EXISTS sales_snapshot;\nCREATE TABLE staff (staff_id INTEGER PRIMARY KEY, full_name TEXT, department TEXT, salary INTEGER);\nINSERT INTO staff VALUES (1,'Asha','Sales',52000),(2,'Bilal','IT',61000),(3,'Chitra','Sales',57000);\nCREATE TABLE sales_snapshot AS SELECT staff_id, full_name, salary FROM staff WHERE department='Sales';\nSELECT staff_id, full_name, salary FROM sales_snapshot ORDER BY staff_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql10.1-q1",
+        "prompt": "Which statement best describes SQLite's table-from-query syntax?",
+        "options": [
+          "SQLite uses CREATE TABLE ... AS SELECT",
+          "SQLite uses SELECT ... INTO",
+          "SQLite uses MOVE TABLE",
+          "SQLite uses COPY TABLE ONLY"
+        ],
+        "answer": "SQLite uses CREATE TABLE ... AS SELECT",
+        "explanation": "SQLite uses CREATE TABLE ... AS SELECT to create a table from query results."
+      },
+      {
+        "id": "sql10.1-q2",
+        "prompt": "Which practice is safest for this topic?",
+        "options": [
+          "Name columns explicitly and verify dialect support",
+          "Assume all SQL dialects use identical syntax",
+          "Ignore NULL and constraint behaviour",
+          "Rely on implicit row order"
+        ],
+        "answer": "Name columns explicitly and verify dialect support",
+        "explanation": "Explicit columns, dialect checks and clear assumptions make SQL predictable."
+      },
+      {
+        "id": "sql10.1-q3",
+        "prompt": "What should a learner check before relying on this feature?",
+        "options": [
+          "The target DBMS and its supported syntax",
+          "Only the browser screen size",
+          "The name of the SQL file",
+          "Whether the query has uppercase keywords"
+        ],
+        "answer": "The target DBMS and its supported syntax",
+        "explanation": "SQL syntax and behaviour can vary between database engines and versions."
+      },
+      {
+        "id": "sql10.1-q4",
+        "prompt": "Which statement about query results is correct?",
+        "options": [
+          "A result should be ordered explicitly when order matters",
+          "Rows are always returned in insertion order",
+          "Aliases change the stored source table",
+          "Comments alter the result set"
+        ],
+        "answer": "A result should be ordered explicitly when order matters",
+        "explanation": "Without ORDER BY, SQL does not guarantee a particular result order."
+      },
+      {
+        "id": "sql10.1-q5",
+        "prompt": "How should this topic be practised in the CodeSaathi SQLite Playground?",
+        "options": [
+          "Run the provided SQLite-compatible examples and distinguish documented dialect syntax",
+          "Paste unsupported DBMS syntax and assume it will run",
+          "Skip the setup statements",
+          "Treat expected output as a database command"
+        ],
+        "answer": "Run the provided SQLite-compatible examples and distinguish documented dialect syntax",
+        "explanation": "The Playground runs SQLite, so dialect-specific syntax must be labelled and translated to a supported equivalent."
+      }
+    ]
+  },
+  "status": "draft"
+}
