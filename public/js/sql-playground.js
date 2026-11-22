@@ -9,6 +9,7 @@
     update: "CREATE TABLE inventory (item_id INTEGER PRIMARY KEY, item_name TEXT, quantity INTEGER);\nINSERT INTO inventory VALUES (1, 'Notebook', 12), (2, 'Pen', 30);\nUPDATE inventory SET quantity = quantity + 5 WHERE item_id = 1;\nSELECT * FROM inventory ORDER BY item_id;",
     join: "CREATE TABLE departments (department_id INTEGER PRIMARY KEY, department_name TEXT);\nCREATE TABLE employees (employee_id INTEGER PRIMARY KEY, employee_name TEXT, department_id INTEGER);\nINSERT INTO departments VALUES (1, 'Support'), (2, 'Sales');\nINSERT INTO employees VALUES (10, 'Asha', 1), (11, 'Ravi', 2);\nSELECT e.employee_name, d.department_name FROM employees AS e JOIN departments AS d ON e.department_id = d.department_id;",
     constraint: "CREATE TABLE registrations (registration_id INTEGER PRIMARY KEY, email TEXT NOT NULL UNIQUE, age INTEGER CHECK (age >= 18));\nINSERT INTO registrations (email, age) VALUES ('asha@example.test', 22);\nSELECT * FROM registrations;"
+    parameter: "SELECT learner_name, score FROM learners WHERE learner_name = ?;"
   };
   const editor = $("sqlCode");
   const paramsEditor = $("sqlParams");
@@ -290,6 +291,7 @@
   });
   $("sqlExample").addEventListener("change", event => {
     if (samples[event.target.value]) editor.value = samples[event.target.value];
+    paramsEditor.value = event.target.value === "parameter" ? '["Asha"]' : "";
     editor.focus();
   });
   resetDbButton.addEventListener("click", () => {
