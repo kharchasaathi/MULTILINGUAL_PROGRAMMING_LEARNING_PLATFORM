@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql16.2.en",
+  "courseId": "sql",
+  "moduleId": "SQL16",
+  "topicId": "SQL16.2",
+  "title": "Data Types and Type Behaviour Across DBMS Products",
+  "language": "en",
+  "learningObjectives": [
+    "Describe SQLite's dynamic typing and type-affinity model.",
+    "Identify SQLite's main storage classes.",
+    "Explain why server DBMS data types may enforce different ranges and precision.",
+    "Choose data types deliberately for money, dates, booleans and identifiers.",
+    "Use constraints and application validation to protect required value rules."
+  ],
+  "prerequisites": [
+    "SQL2.7",
+    "SQL3.9",
+    "SQL11.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Database products represent and enforce data types differently. SQLite uses dynamic typing with type affinity, while server DBMS products commonly enforce more rigid column types and offer product-specific precision, date/time and boolean types.",
+      "whyItMatters": "Choosing the correct type affects storage, arithmetic precision, sorting, validation and application interoperability.",
+      "analogy": "SQL portability is like translating a precise instruction into several product dialects: the intent stays the same, but the exact words and rules can differ.",
+      "analogyLimit": "The analogy does not model type systems, function return types, time-zone rules, optimizer behaviour or transaction semantics."
+    },
+    "explain": {
+      "narrative": "## SQLite type affinity\nSQLite associates storage classes with values and applies type affinity based on declared column types. INTEGER, REAL, TEXT, BLOB and NUMERIC are the main storage classes. A declared type name influences affinity but does not behave exactly like a rigid server-side type system.\n\n## Server DBMS differences\nPostgreSQL, MySQL and SQL Server provide richer native types and different rules for DECIMAL precision, timestamps, time zones, booleans, JSON and binary values. The same type name can have different ranges or semantics.\n\n## Practical design\nUse exact numeric types for money in server databases, define precision and scale deliberately, store dates consistently, and validate application input. For SQLite, understand how values are stored and use constraints where the application requires stronger validation.",
+      "examples": [
+        {
+          "id": "sql16.2-ex1",
+          "language": "en",
+          "title": "Create columns with different SQLite affinities",
+          "code": "CREATE TABLE dialect16_types (integer_value INTEGER, real_value REAL, text_value TEXT, blob_value BLOB, numeric_value NUMERIC);",
+          "expectedOutput": "Table created",
+          "explanation": "This example demonstrates create columns with different sqlite affinities using SQLite. Compare its syntax with the target DBMS before migration.",
+          "runnable": true
+        },
+        {
+          "id": "sql16.2-ex2",
+          "language": "en",
+          "title": "Insert values into typed columns",
+          "code": "INSERT INTO dialect16_types VALUES (42, 3.5, 'hello', X'4142', 12.75);",
+          "expectedOutput": "1 row inserted",
+          "explanation": "This example demonstrates insert values into typed columns using SQLite. Compare its syntax with the target DBMS before migration.",
+          "runnable": true
+        },
+        {
+          "id": "sql16.2-ex3",
+          "language": "en",
+          "title": "Inspect SQLite storage classes",
+          "code": "SELECT typeof(integer_value), typeof(real_value), typeof(text_value), typeof(blob_value), typeof(numeric_value) FROM dialect16_types;",
+          "expectedOutput": "integer | real | text | blob | real",
+          "explanation": "This example demonstrates inspect sqlite storage classes using SQLite. Compare its syntax with the target DBMS before migration.",
+          "runnable": true
+        },
+        {
+          "id": "sql16.2-ex4",
+          "language": "en",
+          "title": "Use a CHECK constraint to validate a numeric range",
+          "code": "CREATE TABLE dialect16_scores (score INTEGER CHECK (score BETWEEN 0 AND 100));",
+          "expectedOutput": "Table created",
+          "explanation": "This example demonstrates use a check constraint to validate a numeric range using SQLite. Compare its syntax with the target DBMS before migration.",
+          "runnable": true
+        },
+        {
+          "id": "sql16.2-ex5",
+          "language": "en",
+          "title": "Verify a stored decimal-like value",
+          "code": "SELECT numeric_value, typeof(numeric_value) FROM dialect16_types;",
+          "expectedOutput": "12.75 | real",
+          "explanation": "This example demonstrates verify a stored decimal-like value using SQLite. Compare its syntax with the target DBMS before migration.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and compare declared column types with the storage classes returned by typeof().",
+      "independentTask": "Design a customer and payment schema. Identify which types are portable and which need DBMS-specific choices for money, date/time and boolean values.",
+      "hints": [
+        "SQLite has INTEGER, REAL, TEXT, BLOB and NUMERIC storage classes.",
+        "A declared type influences affinity but does not guarantee rigid storage.",
+        "Server DBMS products often enforce precision and type ranges more strictly.",
+        "Use CHECK constraints for domain rules when appropriate.",
+        "Test numeric precision and date/time behaviour in the target DBMS."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE dialect16_types (integer_value INTEGER, real_value REAL, text_value TEXT, blob_value BLOB, numeric_value NUMERIC);\nINSERT INTO dialect16_types VALUES (42, 3.5, 'hello', X'4142', 12.75);\nSELECT typeof(integer_value), typeof(real_value), typeof(text_value), typeof(blob_value), typeof(numeric_value) FROM dialect16_types;",
+    "resetCode": "CREATE TABLE dialect16_types (integer_value INTEGER, real_value REAL, text_value TEXT, blob_value BLOB, numeric_value NUMERIC);\nINSERT INTO dialect16_types VALUES (42, 3.5, 'hello', X'4142', 12.75);\nSELECT typeof(integer_value), typeof(real_value), typeof(text_value), typeof(blob_value), typeof(numeric_value) FROM dialect16_types;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql16.2-q1",
+        "prompt": "Which statement describes SQLite typing?",
+        "options": [
+          "It uses dynamic typing with column type affinity",
+          "It requires every value to match a rigid server-style type",
+          "It stores only text",
+          "It has no numeric values"
+        ],
+        "answer": "It uses dynamic typing with column type affinity",
+        "explanation": "SQLite uses storage classes and affinity rather than rigid typing in every case."
+      },
+      {
+        "id": "sql16.2-q2",
+        "prompt": "What does typeof() return?",
+        "options": [
+          "The storage class of a value",
+          "The column's index name",
+          "The database server version",
+          "The table's primary key"
+        ],
+        "answer": "The storage class of a value",
+        "explanation": "typeof() reports the storage class used for the value."
+      },
+      {
+        "id": "sql16.2-q3",
+        "prompt": "Why must DECIMAL precision be reviewed across DBMS products?",
+        "options": [
+          "Precision and scale enforcement can differ",
+          "All databases store every decimal identically",
+          "DECIMAL is always a text value",
+          "Precision only affects column names"
+        ],
+        "answer": "Precision and scale enforcement can differ",
+        "explanation": "Numeric type semantics and precision rules vary among engines."
+      },
+      {
+        "id": "sql16.2-q4",
+        "prompt": "Which SQLite storage class is used for binary data?",
+        "options": [
+          "BLOB",
+          "TEXT",
+          "REAL",
+          "NUMERIC"
+        ],
+        "answer": "BLOB",
+        "explanation": "BLOB stores binary data."
+      },
+      {
+        "id": "sql16.2-q5",
+        "prompt": "How can an application protect a score range?",
+        "options": [
+          "Use a CHECK constraint and validate input",
+          "Store the score in a comment",
+          "Remove all constraints",
+          "Use a table alias"
+        ],
+        "answer": "Use a CHECK constraint and validate input",
+        "explanation": "A CHECK constraint enforces the allowed range at the database level."
+      }
+    ]
+  },
+  "status": "draft"
+}
