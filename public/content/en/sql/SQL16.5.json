@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql16.5.en",
+  "courseId": "sql",
+  "moduleId": "SQL16",
+  "topicId": "SQL16.5",
+  "title": "NULL Functions, String Concatenation and Pagination Differences",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose of COALESCE and recognize product-specific NULL replacement functions.",
+    "Compare IFNULL, ISNULL and NVL at a conceptual level.",
+    "Use SQLite's || operator for string concatenation.",
+    "Recognize product differences in string concatenation and NULL behaviour.",
+    "Apply LIMIT/OFFSET pagination with a deterministic ORDER BY."
+  ],
+  "prerequisites": [
+    "SQL2.7",
+    "SQL3.9",
+    "SQL11.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "NULL handling, string concatenation and row limiting syntax vary across database products. COALESCE is widely supported, while IFNULL, ISNULL and NVL are product-specific. SQLite uses || for concatenation and LIMIT/OFFSET for pagination; other products provide different alternatives.",
+      "whyItMatters": "These differences commonly break migrations and application queries even when the underlying data model is similar.",
+      "analogy": "SQL portability is like translating a precise instruction into several product dialects: the intent stays the same, but the exact words and rules can differ.",
+      "analogyLimit": "The analogy does not model type systems, function return types, time-zone rules, optimizer behaviour or transaction semantics."
+    },
+    "explain": {
+      "narrative": "## NULL replacement functions\nCOALESCE returns the first non-NULL expression and is widely supported. SQLite and MySQL support IFNULL in their dialects; SQL Server uses ISNULL; Oracle uses NVL. Return type and conversion rules can differ.\n\n## String concatenation\nSQLite and PostgreSQL commonly use ||. MySQL supports CONCAT and SQL Server commonly uses CONCAT. NULL behaviour and type conversion can differ among products.\n\n## Pagination\nSQLite, PostgreSQL and MySQL support LIMIT/OFFSET. SQL Server supports TOP and OFFSET/FETCH patterns. Standard FETCH FIRST syntax is supported by several engines. Always use a deterministic ORDER BY before applying pagination.",
+      "examples": [
+        {
+          "id": "sql16.5-ex1",
+          "language": "en",
+          "title": "Use COALESCE for a NULL fallback",
+          "code": "SELECT COALESCE(NULL, 'unknown') AS label;",
+          "expectedOutput": "unknown",
+          "explanation": "This example demonstrates use coalesce for a null fallback using SQLite. Compare its syntax with the target DBMS before migration.",
+          "runnable": true
+        },
+        {
+          "id": "sql16.5-ex2",
+          "language": "en",
+          "title": "Concatenate values with SQLite's operator",
+          "code": "SELECT 'Code' || 'Saathi' AS product_name;",
+          "expectedOutput": "CodeSaathi",
+          "explanation": "This example demonstrates concatenate values with sqlite's operator using SQLite. Compare its syntax with the target DBMS before migration.",
+          "runnable": true
+        },
+        {
+          "id": "sql16.5-ex3",
+          "language": "en",
+          "title": "Use IFNULL in SQLite",
+          "code": "SELECT IFNULL(NULL, 'not supplied') AS display_value;",
+          "expectedOutput": "not supplied",
+          "explanation": "This example demonstrates use ifnull in sqlite using SQLite. Compare its syntax with the target DBMS before migration.",
+          "runnable": true
+        },
+        {
+          "id": "sql16.5-ex4",
+          "language": "en",
+          "title": "Apply deterministic pagination",
+          "code": "SELECT value FROM (SELECT 10 AS value UNION ALL SELECT 20 UNION ALL SELECT 30 UNION ALL SELECT 40) AS values_table ORDER BY value LIMIT 2 OFFSET 1;",
+          "expectedOutput": "20; 30",
+          "explanation": "This example demonstrates apply deterministic pagination using SQLite. Compare its syntax with the target DBMS before migration.",
+          "runnable": true
+        },
+        {
+          "id": "sql16.5-ex5",
+          "language": "en",
+          "title": "Use a fallback and concatenate a nullable field",
+          "code": "SELECT COALESCE(NULL, 'Guest') || ' user' AS display_name;",
+          "expectedOutput": "Guest user",
+          "explanation": "This example demonstrates use a fallback and concatenate a nullable field using SQLite. Compare its syntax with the target DBMS before migration.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and identify which syntax is SQLite-specific and which NULL fallback function is broadly portable.",
+      "independentTask": "Rewrite a report query for SQLite, MySQL and SQL Server. Compare NULL fallback, string concatenation and pagination syntax, and include a stable ordering column.",
+      "hints": [
+        "COALESCE is widely supported for NULL fallback.",
+        "IFNULL, ISNULL and NVL are product-specific alternatives.",
+        "SQLite uses || for concatenation.",
+        "Pagination syntax differs; SQL Server commonly uses OFFSET/FETCH or TOP.",
+        "Always use ORDER BY before pagination to make page contents deterministic."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "SELECT COALESCE(NULL, 'unknown') AS label;\nSELECT 'Code' || 'Saathi' AS product_name;\nSELECT value FROM (SELECT 10 AS value UNION ALL SELECT 20 UNION ALL SELECT 30 UNION ALL SELECT 40) AS values_table ORDER BY value LIMIT 2 OFFSET 1;",
+    "resetCode": "SELECT COALESCE(NULL, 'unknown') AS label;\nSELECT 'Code' || 'Saathi' AS product_name;\nSELECT value FROM (SELECT 10 AS value UNION ALL SELECT 20 UNION ALL SELECT 30 UNION ALL SELECT 40) AS values_table ORDER BY value LIMIT 2 OFFSET 1;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql16.5-q1",
+        "prompt": "Which NULL function is widely supported across SQL products?",
+        "options": [
+          "COALESCE",
+          "AUTOINCREMENT",
+          "ROW_NUMBER",
+          "VACUUM"
+        ],
+        "answer": "COALESCE",
+        "explanation": "COALESCE is a broadly supported standard expression."
+      },
+      {
+        "id": "sql16.5-q2",
+        "prompt": "Which function is commonly associated with SQL Server?",
+        "options": [
+          "ISNULL",
+          "NVL",
+          "IFNULL only",
+          "julianday"
+        ],
+        "answer": "ISNULL",
+        "explanation": "SQL Server uses ISNULL for a NULL replacement expression."
+      },
+      {
+        "id": "sql16.5-q3",
+        "prompt": "Which operator does SQLite commonly use for string concatenation?",
+        "options": [
+          "||",
+          "&&",
+          "->>",
+          "%%"
+        ],
+        "answer": "||",
+        "explanation": "SQLite uses the || operator to concatenate strings."
+      },
+      {
+        "id": "sql16.5-q4",
+        "prompt": "Which syntax is commonly used by SQL Server for pagination?",
+        "options": [
+          "OFFSET/FETCH or TOP",
+          "Only LIMIT/OFFSET",
+          "Only IFNULL",
+          "Only AUTOINCREMENT"
+        ],
+        "answer": "OFFSET/FETCH or TOP",
+        "explanation": "SQL Server commonly uses TOP or OFFSET/FETCH patterns."
+      },
+      {
+        "id": "sql16.5-q5",
+        "prompt": "Why should pagination include ORDER BY?",
+        "options": [
+          "To make the selected page deterministic",
+          "To create a transaction",
+          "To force NULL values",
+          "To disable indexes"
+        ],
+        "answer": "To make the selected page deterministic",
+        "explanation": "Without a stable order, page membership is not reliably defined."
+      }
+    ]
+  },
+  "status": "draft"
+}
