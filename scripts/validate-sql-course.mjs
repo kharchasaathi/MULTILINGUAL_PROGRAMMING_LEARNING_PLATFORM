@@ -18,7 +18,7 @@ let dynamicOutputs = 0;
 const pyRunner = [
   "import json, re, sqlite3, sys",
   "examples = json.loads(sys.argv[1])",
-  "db = sqlite3.connect(':memory:')",
+  "db = sqlite3.connect(':memory:', isolation_level=None)",
   "db.execute('PRAGMA foreign_keys = ON')",
   "def statements(script):",
   "    pending = ''",
@@ -67,6 +67,7 @@ const pyRunner = [
   "            cursor = db.execute(statement)",
   "            if cursor.description is not None:",
   "                result_sets.append(([column[0] for column in cursor.description], cursor.fetchall()))",
+  "            cursor.close()",
   "        if item['expectsError']:",
   "            raise AssertionError('Expected SQL error but statement succeeded: ' + item['id'])",
   "    except sqlite3.Error as exc:",
