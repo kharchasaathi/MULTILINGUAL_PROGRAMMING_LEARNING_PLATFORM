@@ -48,6 +48,7 @@ const pyRunner = [
   "    value = re.sub(r'\\s*=\\s*', '=', value)",
   "    value = re.sub(r'\\s*;\\s*', ';', value)",
   "    return re.sub(r'\\s+', ' ', value).strip()",
+  "    # Accept labelled single-column forms such as 'count | 3'.",
   "def output_variants(columns, rows):",
   "    values = [[cell(v) for v in row] for row in rows]",
   "    if not values:",
