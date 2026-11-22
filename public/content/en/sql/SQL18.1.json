@@ -27,7 +27,7 @@
       "analogyLimit": "The analogy does not model transactional DDL, locking, data backfills, version checks or application compatibility."
     },
     "explain": {
-      "narrative": "## What is a migration?\nA migration is a versioned change to schema or carefully managed reference data. Examples include adding a column, creating an index, introducing a constraint or backfilling a new field.\n\n## Migration history\nA migration tool stores applied versions in a schema-history table. During deployment it compares available migrations with applied versions and runs only those that are pending.\n\n## Safe migration principles\nBack up important data, test on a copy, use transactions where supported, make changes compatible with the application rollout, and verify the resulting schema and data. A migration should be reviewed like application code.",
+      "narrative": "## What is a migration?\nA migration is a versioned change to schema or carefully managed reference data. Examples include adding a column, creating an index, introducing a constraint or backfilling a new field.\n\n## Migration history\nA migration tool stores applied versions in a schema-history table. During deployment it compares available migrations with applied versions and runs only those that are pending.\n\n## Safe migration principles\nBack up important data, test on a copy, use transactions where supported, make changes compatible with the application rollout, and verify the resulting schema and data. A migration should be reviewed like application code.\n\n### Migration ledger and schema drift\nA migration is a controlled, ordered change to a database schema or its data. Teams commonly keep an append-only migration ledger containing a version identifier, description and application time. The ledger is not proof that the live schema still matches the intended version: manual changes, interrupted deployment steps and out-of-band restores can create schema drift.\n\n### Safe rollout\nBack up the database, test the migration on a representative copy, apply it with a known deployment process, and verify both the schema and data afterwards. SQLite examples here are not universal CREATE DATABASE or migration-tool syntax.",
       "examples": [
         {
           "id": "sql18.1-ex1",
@@ -35,7 +35,7 @@
           "title": "Create an application table",
           "code": "CREATE TABLE mig18_users (user_id INTEGER PRIMARY KEY, user_name TEXT NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create an application table in SQLite. Verify the migration state before and after the operation.",
+          "explanation": "Creates the initial user table. IF NOT EXISTS makes the DDL safe to reapply when the table already exists, but it does not verify that an existing table has the expected columns; migration validation must inspect the schema separately.",
           "runnable": true
         },
         {
@@ -44,7 +44,7 @@
           "title": "Insert baseline users",
           "code": "INSERT INTO mig18_users VALUES (1, 'Asha'), (2, 'Bilal');",
           "expectedOutput": "2 rows inserted",
-          "explanation": "This example demonstrates insert baseline users in SQLite. Verify the migration state before and after the operation.",
+          "explanation": "Inserts two baseline users. A migration should preserve existing production rows and should be tested against representative data volumes; this small seed set is only a reproducible teaching fixture.",
           "runnable": true
         },
         {
@@ -53,7 +53,7 @@
           "title": "Create a migration history table",
           "code": "CREATE TABLE mig18_history (version INTEGER PRIMARY KEY, description TEXT NOT NULL, applied_at TEXT NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create a migration history table in SQLite. Verify the migration state before and after the operation.",
+          "explanation": "Creates a version table that records which schema changes have been applied. A primary key on version prevents the same version number from being recorded twice.",
           "runnable": true
         },
         {
@@ -62,7 +62,7 @@
           "title": "Record the baseline schema version",
           "code": "INSERT INTO mig18_history VALUES (1, 'Create users table', '2026-11-22T00:00:00Z');",
           "expectedOutput": "1 row inserted",
-          "explanation": "This example demonstrates record the baseline schema version in SQLite. Verify the migration state before and after the operation.",
+          "explanation": "Records version 1 with a description and timestamp. The timestamp is illustrative UTC text; production migration tools should use a consistent clock and format, and should not infer successful migration solely from the presence of a row.",
           "runnable": true
         },
         {
@@ -71,7 +71,7 @@
           "title": "Inspect applied migrations",
           "code": "SELECT version, description FROM mig18_history ORDER BY version;",
           "expectedOutput": "1 | Create users table",
-          "explanation": "This example demonstrates inspect applied migrations in SQLite. Verify the migration state before and after the operation.",
+          "explanation": "Reads the migration ledger in version order. The ledger provides evidence of recorded migrations, but it should be reconciled with the actual schema because manual changes or partially failed deployments can cause drift.",
           "runnable": true
         }
       ]
