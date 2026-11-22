@@ -52,9 +52,10 @@ The roadmap-document commit itself must receive a fresh Actions run before its C
 - [ ] Review destructive operations, transactions, SQL injection and privilege examples for safe teaching defaults.
 - [ ] Complete independent editorial review; keep lesson status as draft until approved.
 
-### C. Decide and author advanced supplementary SQL
-These are supplementary curriculum candidates, not claims about W3Schools core navigation coverage. Add only after checking existing lessons and approving stable topic IDs:
-- [ ] Transactions, isolation concepts, COMMIT, ROLLBACK and SAVEPOINT.
+### C. Advanced supplementary SQL
+These are supplementary curriculum additions, not W3Schools core navigation topics.
+- [x] SQL12.1–SQL12.5: Transactions, ACID, BEGIN/COMMIT, ROLLBACK, SAVEPOINT, SQLite transaction modes and concurrency boundaries. Five English draft lessons, 25 examples and 25 MCQs added; latest-head CI validation pending.
+- [ ] SQL13: Subqueries, correlated subqueries and common table expressions (CTEs).
 - [ ] Subqueries, correlated subqueries and common table expressions (CTEs).
 - [ ] Recursive CTEs and hierarchical data.
 - [ ] Window functions, ranking, LAG/LEAD and running aggregates.
