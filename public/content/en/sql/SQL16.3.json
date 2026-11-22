@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql16.3.en",
+  "courseId": "sql",
+  "moduleId": "SQL16",
+  "topicId": "SQL16.3",
+  "title": "Generated IDs and Identity Columns Across DBMS Products",
+  "language": "en",
+  "learningObjectives": [
+    "Explain how SQLite INTEGER PRIMARY KEY generates row identifiers.",
+    "Distinguish SQLite AUTOINCREMENT from ordinary INTEGER PRIMARY KEY behaviour.",
+    "Recognize AUTO_INCREMENT, IDENTITY and GENERATED AS IDENTITY in other DBMS products.",
+    "Explain why generated IDs can contain gaps.",
+    "Avoid using generated identifiers as gap-free business sequence numbers."
+  ],
+  "prerequisites": [
+    "SQL2.7",
+    "SQL3.9",
+    "SQL11.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Database products provide different ways to generate unique row identifiers. SQLite commonly uses INTEGER PRIMARY KEY as an alias for the rowid; AUTOINCREMENT changes reuse behaviour and has additional overhead. Other DBMS products use identity or sequence features with different syntax.",
+      "whyItMatters": "Correct identity design avoids collisions, understands gaps and supports reliable relationships and insert workflows.",
+      "analogy": "SQL portability is like translating a precise instruction into several product dialects: the intent stays the same, but the exact words and rules can differ.",
+      "analogyLimit": "The analogy does not model type systems, function return types, time-zone rules, optimizer behaviour or transaction semantics."
+    },
+    "explain": {
+      "narrative": "## SQLite generated row identifiers\nIn an ordinary SQLite rowid table, an INTEGER PRIMARY KEY column aliases the rowid and receives a generated integer when omitted. AUTOINCREMENT prevents reuse of previously issued rowids in specific circumstances but adds overhead; it is not required for ordinary generated IDs.\n\n## Other database products\nMySQL commonly uses AUTO_INCREMENT, SQL Server uses IDENTITY, and PostgreSQL supports GENERATED AS IDENTITY as well as sequences. The syntax, retrieval APIs and transactional behaviour differ.\n\n## Gaps and assumptions\nGenerated identifiers are unique keys, not gap-free business numbers. Failed inserts, deletes and concurrency can create gaps. Do not use an identity column as a count of transactions or as a guaranteed chronological business sequence.",
+      "examples": [
+        {
+          "id": "sql16.3-ex1",
+          "language": "en",
+          "title": "Create a SQLite identity table",
+          "code": "CREATE TABLE dialect16_ids (id INTEGER PRIMARY KEY, label TEXT NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "This example demonstrates create a sqlite identity table using SQLite. Compare its syntax with the target DBMS before migration.",
+          "runnable": true
+        },
+        {
+          "id": "sql16.3-ex2",
+          "language": "en",
+          "title": "Insert rows without specifying IDs",
+          "code": "INSERT INTO dialect16_ids(label) VALUES ('first'), ('second');",
+          "expectedOutput": "2 rows inserted",
+          "explanation": "This example demonstrates insert rows without specifying ids using SQLite. Compare its syntax with the target DBMS before migration.",
+          "runnable": true
+        },
+        {
+          "id": "sql16.3-ex3",
+          "language": "en",
+          "title": "Read generated identifiers",
+          "code": "SELECT id, label FROM dialect16_ids ORDER BY id;",
+          "expectedOutput": "1 | first; 2 | second",
+          "explanation": "This example demonstrates read generated identifiers using SQLite. Compare its syntax with the target DBMS before migration.",
+          "runnable": true
+        },
+        {
+          "id": "sql16.3-ex4",
+          "language": "en",
+          "title": "Insert a row with an explicit ID",
+          "code": "INSERT INTO dialect16_ids(id, label) VALUES (10, 'manual');",
+          "expectedOutput": "1 row inserted",
+          "explanation": "This example demonstrates insert a row with an explicit id using SQLite. Compare its syntax with the target DBMS before migration.",
+          "runnable": true
+        },
+        {
+          "id": "sql16.3-ex5",
+          "language": "en",
+          "title": "Read the generated and explicit identifiers",
+          "code": "SELECT id, label FROM dialect16_ids ORDER BY id;",
+          "expectedOutput": "1 | first; 2 | second; 10 | manual",
+          "explanation": "This example demonstrates read the generated and explicit identifiers using SQLite. Compare its syntax with the target DBMS before migration.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and identify which IDs were generated and which was supplied explicitly.",
+      "independentTask": "Design an orders table for SQLite, MySQL, SQL Server and PostgreSQL. Write the identity declaration for each engine and explain how the application retrieves the generated ID.",
+      "hints": [
+        "SQLite INTEGER PRIMARY KEY aliases the rowid in an ordinary rowid table.",
+        "AUTOINCREMENT is not required for normal generated IDs.",
+        "MySQL uses AUTO_INCREMENT; SQL Server uses IDENTITY; PostgreSQL supports GENERATED AS IDENTITY.",
+        "Generated values can have gaps.",
+        "Use a separate business-numbering process if gap-free numbering is legally required."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE dialect16_ids (id INTEGER PRIMARY KEY, label TEXT NOT NULL);\nINSERT INTO dialect16_ids(label) VALUES ('first'), ('second');\nSELECT id, label FROM dialect16_ids ORDER BY id;",
+    "resetCode": "CREATE TABLE dialect16_ids (id INTEGER PRIMARY KEY, label TEXT NOT NULL);\nINSERT INTO dialect16_ids(label) VALUES ('first'), ('second');\nSELECT id, label FROM dialect16_ids ORDER BY id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql16.3-q1",
+        "prompt": "What does SQLite INTEGER PRIMARY KEY do in a rowid table?",
+        "options": [
+          "Aliases the rowid and can generate an integer when omitted",
+          "Creates a text UUID automatically",
+          "Prevents all deleted IDs from being reused in every case",
+          "Creates a sequence table"
+        ],
+        "answer": "Aliases the rowid and can generate an integer when omitted",
+        "explanation": "INTEGER PRIMARY KEY aliases the rowid and can generate values."
+      },
+      {
+        "id": "sql16.3-q2",
+        "prompt": "Is AUTOINCREMENT required for ordinary generated IDs in SQLite?",
+        "options": [
+          "No",
+          "Yes, always",
+          "Only for text columns",
+          "Only for foreign keys"
+        ],
+        "answer": "No",
+        "explanation": "INTEGER PRIMARY KEY already generates values; AUTOINCREMENT adds specific non-reuse behaviour and overhead."
+      },
+      {
+        "id": "sql16.3-q3",
+        "prompt": "Which keyword is common for MySQL generated integer IDs?",
+        "options": [
+          "AUTO_INCREMENT",
+          "IDENTITY",
+          "SERIALIZE",
+          "ROW_NUMBER"
+        ],
+        "answer": "AUTO_INCREMENT",
+        "explanation": "MySQL commonly uses AUTO_INCREMENT."
+      },
+      {
+        "id": "sql16.3-q4",
+        "prompt": "Which feature is commonly used by SQL Server?",
+        "options": [
+          "IDENTITY",
+          "AUTOINCREMENT",
+          "ROWID ONLY",
+          "PRAGMA optimize"
+        ],
+        "answer": "IDENTITY",
+        "explanation": "SQL Server uses IDENTITY columns for generated values."
+      },
+      {
+        "id": "sql16.3-q5",
+        "prompt": "Should an identity column be treated as a gap-free invoice number?",
+        "options": [
+          "No, generated identifiers can contain gaps",
+          "Yes, every generated ID is consecutive forever",
+          "Only when a table has a foreign key",
+          "Only when AUTOINCREMENT is enabled"
+        ],
+        "answer": "No, generated identifiers can contain gaps",
+        "explanation": "Identity values are keys, not guaranteed gap-free business sequences."
+      }
+    ]
+  },
+  "status": "draft"
+}
