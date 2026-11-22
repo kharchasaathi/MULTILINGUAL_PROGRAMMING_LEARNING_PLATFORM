@@ -27,7 +27,7 @@
       "analogyLimit": "Aggregates can hide detail and NULL values. The report must define whether cancelled, pending or returned transactions are included."
     },
     "explain": {
-      "narrative": "## Define the report grain\nBefore writing a query, state what one output row represents. Joining an order header to order items creates one row per line item, not one row per order. Summing an order-level total after that join can duplicate the total for every item.\n\n## Aggregate at the right level\nCalculate line revenue as quantity multiplied by unit price, then group by the desired dimension. Use HAVING to filter groups after aggregation and WHERE to filter source rows before grouping.\n\n## Reconciliation\nCompare totals with a trusted source calculation, account for cancelled or returned orders, and test customers or products with no matching rows. Keep a deterministic ORDER BY for exported reports.",
+      "narrative": "## Define the report grain\nBefore writing a query, state what one output row represents. Joining an order header to order items creates one row per line item, not one row per order. Summing an order-level total after that join can duplicate the total for every item.\n\n## Aggregate at the right level\nCalculate line revenue as quantity multiplied by unit price, then group by the desired dimension. Use HAVING to filter groups after aggregation and WHERE to filter source rows before grouping.\n\n## Reconciliation\nCompare totals with a trusted source calculation, account for cancelled or returned orders, and test customers or products with no matching rows. Keep a deterministic ORDER BY for exported reports.\n\n### Numeric precision in business reports\nFor monetary reports, use an exact DECIMAL/NUMERIC type with a defined precision and scale on engines that enforce it, or store integer minor units with an explicit currency code. Avoid floating-point storage for financial totals unless the rounding model is deliberate and documented. Apply rounding at a defined business boundary, not arbitrarily to every source row.",
       "examples": [
         {
           "id": "sql243-ex1",
@@ -53,7 +53,7 @@
           "title": "Calculate paid revenue per customer",
           "code": "SELECT c.customer_name, SUM(i.quantity * i.unit_price) AS paid_revenue FROM prj24_report_customers AS c JOIN prj24_report_orders AS o ON o.customer_id = c.customer_id JOIN prj24_report_items AS i ON i.order_id = o.order_id WHERE o.order_status = 'paid' GROUP BY c.customer_id, c.customer_name ORDER BY paid_revenue DESC, c.customer_name;",
           "expectedOutput": "Asha | 560; Bilal | 400",
-          "explanation": "Filters to paid orders before grouping. Revenue is calculated from line items, avoiding duplication of order-header totals.",
+          "explanation": "Filters to paid orders before grouping. Revenue is calculated from line items, avoiding duplication of order-header totals. For real financial reporting, use exact numeric storage or integer minor units and document currency and rounding rules.",
           "runnable": true
         },
         {
