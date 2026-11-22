@@ -42,7 +42,7 @@ const pyRunner = [
   "def output_variants(columns, rows):",
   "    values = [[cell(v) for v in row] for row in rows]",
   "    if not values:",
-  "        variants = {'(no rows)', 'no rows', 'no rows returned'}",
+  "        variants = {'(no rows)', 'no rows', 'no rows returned', '0 rows'}",
   "        variants.add(' | '.join(columns) + '\\n(no rows)')",
   "        return {norm(v) for v in variants}",
   "    row_pipe = [' | '.join(row) for row in values]",
