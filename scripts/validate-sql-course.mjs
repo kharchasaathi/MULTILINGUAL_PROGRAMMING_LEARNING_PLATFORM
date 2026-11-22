@@ -33,7 +33,7 @@ const pyRunner = [
   "def schema_snapshot():",
   "    snapshot = []",
   "    for _, schema, _ in db.execute('PRAGMA database_list').fetchall():",
-  "        quoted = '"' + schema.replace('"', '""') + '"'",
+  "        quoted = chr(34) + schema.replace(chr(34), chr(34) * 2) + chr(34)",
   "        objects = tuple(db.execute('SELECT type,name,tbl_name,sql FROM ' + quoted + '.sqlite_schema ORDER BY type,name').fetchall())",
   "        snapshot.append((schema, objects))",
   "    return tuple(snapshot)",
