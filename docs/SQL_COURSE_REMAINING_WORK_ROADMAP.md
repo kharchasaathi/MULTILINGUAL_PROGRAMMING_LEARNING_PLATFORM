@@ -10,8 +10,8 @@ Current audited branch HEAD before this roadmap commit: 60e3e2c0189da3f51474f481
 
 ## Verified current baseline
 
-- 136 English SQL lesson JSON files are present across SQL1–SQL22 (81 original lessons across SQL1–SQL11, five-lesson supplementary modules SQL12–SQL22).
-- 136 SQL curriculum-index topics, 146 source-inventory records and 136 SQL progress-tracker rows are present.
+- 141 English SQL lesson JSON files are present across SQL1–SQL23 (81 original lessons across SQL1–SQL11, five-lesson supplementary modules SQL12–SQL23).
+- 141 SQL curriculum-index topics, 151 source-inventory records and 141 SQL progress-tracker rows are present.
 - `docs/SQL_W3SCHOOLS_EXERCISE_COVERAGE.csv` records 60 official exercise categories mapped to existing CodeSaathi topics. This is a mapping audit, not a claim that original exercise content is complete.
 - `docs/SQL_W3SCHOOLS_CHALLENGE_COVERAGE.csv` maps all 32 currently listed W3Schools SQL Code Challenge categories to existing CodeSaathi topic IDs. The 32 original CodeSaathi challenge tasks are authored in `public/content/en/sql/sql-code-challenges.json`; reference solutions execute successfully in isolated SQLite databases (run #45009052445). Hidden tests, grading and UI integration remain pending.
 - The new `docs/SQL_W3SCHOOLS_COVERAGE_MATRIX.csv` maps 72 W3Schools navigation/reference topics to existing CodeSaathi lesson IDs:
@@ -19,7 +19,7 @@ Current audited branch HEAD before this roadmap commit: 60e3e2c0189da3f51474f481
   - 21 SQL Database topics
   - 6 SQL Reference topics (Data Types, Keywords, Quick Reference, MySQL Functions, SQL Server Functions and MS Access Functions)
 - Mapping is a coverage index, not editorial sign-off. Every mapped lesson remains draft pending technical/editorial review.
-- Latest SQL validation PASS on PR merge commit for head `70abfab49fd3ee31e90e804234a6bcb7b62bc53f` (run #45009758019, SQL workflow #708): 136 lessons; 680 SQLite-executed examples; 414 expected outputs compared; 252 status-only examples; 961 database-state assertions; 10 runtime-dependent outputs checked by pattern; 4 expected-error examples; 680 MCQs. The same run also validates all 32 original SQL code challenges in isolated SQLite databases.
+- Latest SQL validation PASS on PR merge commit for head `6a37fb36568d21e75ae69871d7c21f89f10216ee` (run #45009995975, SQL workflow #724): 141 lessons; 705 SQLite-executed examples; 429 expected outputs compared; 262 status-only examples; 974 database-state assertions; 10 runtime-dependent outputs checked by pattern; 4 expected-error examples; 705 MCQs. The same run also validates all 32 original SQL code challenges in isolated SQLite databases.
 - SQL Playground is implemented with browser-side SQLite. Final feature/security/browser audit remains pending.
 - Telugu SQL lesson translations are not complete.
 - No production deployment has been performed.
@@ -28,7 +28,7 @@ Current audited branch HEAD before this roadmap commit: 60e3e2c0189da3f51474f481
 
 - Detailed technical/editorial explanations have been reviewed and expanded for 40 lessons across SQL12–SQL19 (five lessons per module). The updated explanations cover transaction safety, correlated and recursive queries, window frames and ranking, index/query-plan trade-offs, dialect portability, trigger semantics, schema migrations and the inventory/sales capstone.
 - Corresponding progress-tracker review notes were updated. All 40 lessons remain `draft`; editorial review does not itself grant `VALIDATED`, `COMPLETED` or `DEPLOYED` status.
-- The remaining 81 original lessons in SQL1–SQL11 still require detailed editorial/source-depth review. SQL20.1–SQL20.5 are English security drafts, SQL21.1–SQL21.5 are English administration drafts, and SQL22.1–SQL22.5 are English advanced query-optimization drafts. Their automated SQLite examples and MCQs passed run #45009758019; manual DBMS-specific security, administration and performance review remains open.
+- The remaining 81 original lessons in SQL1–SQL11 still require detailed editorial/source-depth review. SQL20 covers security, SQL21 administration, SQL22 advanced query optimization, and SQL23 DBMS dialect comparisons. Their automated SQLite examples and MCQs passed run #45009995975; actual vendor-specific examples still require execution on each target DBMS/version.
 
 ## Latest verified CI before this roadmap document
 
@@ -49,13 +49,13 @@ The roadmap-document commit itself must receive a fresh Actions run before its C
 - [x] Add the standalone SQL Aggregate Functions overview to SQL6.1 and map all five aggregate lessons.
 - [x] Add SQL Quick Reference and MySQL, SQL Server and MS Access function-reference records; explicitly mark these reference catalogs as partial rather than claiming exhaustive function coverage.
 - [x] Correct SQL4.2–SQL4.7 inventory and coverage mappings against actual lesson titles; map DEFAULT to SQL4.2, UNIQUE to SQL4.3, PRIMARY KEY to SQL4.4, FOREIGN KEY to SQL4.5, CHECK to SQL4.6 and column/table-level constraints to SQL4.7.
-- [ ] Check all 136 lesson files for title accuracy, learning objectives, three learning stages, examples, practice, MCQ explanations and dialect notes.
+- [ ] Check all 141 lesson files for title accuracy, learning objectives, three learning stages, examples, practice, MCQ explanations and dialect notes.
 - [ ] Resolve remaining source-inventory `missing_coverage` notes; distinguish required tutorial concepts from optional advanced depth and dialect-specific extensions.
 - [ ] Complete curated dialect function reference coverage; current MySQL, SQL Server and MS Access function mappings are explicitly partial.
 - [ ] Verify that no W3Schools topic is missing and no CodeSaathi lesson duplicates another topic unnecessarily.
 
 ### B. Complete English lesson quality
-- [ ] Technical review of all 136 lessons against official database-engine documentation where behaviour is dialect-specific.
+- [ ] Technical review of all 141 lessons against official database-engine documentation where behaviour is dialect-specific.
 - [ ] Execute and compare all runnable examples; add explicit state assertions for statements whose effects are not visible in a result set.
 - [ ] Review destructive operations, transactions, SQL injection and privilege examples for safe teaching defaults.
 - [ ] Complete independent editorial review; keep lesson status as draft until approved.
@@ -110,9 +110,9 @@ These are supplementary curriculum additions, not W3Schools core navigation topi
 ### G. Release gates
 - [x] Update curriculum index, source inventory, coverage matrix and progress tracker for SQL12 and the expanded reference mapping.
 - [ ] Reconcile the final progress tracker and source inventory after all latest-head checks complete. SQL19.1–SQL19.5 English editorial review notes were updated in the tracker on commit `8317b494ef23bf4949fd9ac04dc86638ddda3d14`.
-- [x] Latest SQL validation PASS on PR merge commit for head `70abfab49fd3ee31e90e804234a6bcb7b62bc53f` (run #45009758019).
-- [ ] Latest browser/accessibility/technical review PASS (run #45009757919 was in progress at last check).
-- [x] Latest curriculum validation PASS (F1.7 run #45009757947).
+- [x] Latest SQL validation PASS on PR merge commit for head `6a37fb36568d21e75ae69871d7c21f89f10216ee` (run #45009995975).
+- [ ] Latest browser/accessibility/technical review PASS (run #45009995929 was in progress at last check).
+- [x] Latest curriculum validation PASS (F1.7 run #45009995928).
 - [ ] English editorial review complete. Telugu parity is deferred until the user explicitly begins the final translation phase.
 - [ ] Security, privacy, performance and regression checks complete.
 - [ ] PR review and explicit release approval.
