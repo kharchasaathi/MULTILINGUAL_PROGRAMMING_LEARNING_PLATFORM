@@ -46,7 +46,7 @@ const pyRunner = [
   "        variants.add(' | '.join(columns) + '\\n(no rows)')",
   "        return {norm(v) for v in variants}",
   "    row_pipe = [' | '.join(row) for row in values]",
-  "    variants = {'; '.join(row_pipe)}",
+  "    variants = {'; '.join(row_pipe), '\\n'.join(row_pipe)}",
   "    if len(columns) == 1:",
   "        variants.add('; '.join(row[0] for row in values))",
   "        variants.add('\\n'.join(row[0] for row in values))",
