@@ -1,0 +1,160 @@
+{
+  "id": "sql.sql7.1.en",
+  "courseId": "sql",
+  "moduleId": "SQL7",
+  "topicId": "SQL7.1",
+  "title": "SQL LIKE Operator",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of SQL LIKE Operator.",
+    "Write valid SQLite queries that use the topic in a WHERE condition.",
+    "Interpret matching and non-matching rows from a sample table.",
+    "Combine the topic with other filtering conditions safely.",
+    "Recognize NULL and SQL dialect considerations relevant to the topic."
+  ],
+  "prerequisites": [
+    "SQL5.4",
+    "SQL5.5",
+    "SQL5.7",
+    "SQL6.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "The LIKE operator filters text values by matching a pattern. It is commonly used in a WHERE clause when an exact equality comparison is too restrictive. In SQLite, LIKE uses % for any sequence of zero or more characters and _ for exactly one character. Matching and case behaviour can vary across database engines.",
+      "whyItMatters": "Pattern matching helps find customers, products, addresses and other text records when the learner knows only part of a value.",
+      "analogy": "Think of a librarian applying a clear rule to decide which records belong in a result list.",
+      "analogyLimit": "The analogy does not represent SQL's NULL logic, collation rules, optimizer decisions or product-specific pattern behaviour."
+    },
+    "explain": {
+      "narrative": "## Core concept\nThe LIKE operator filters text values by matching a pattern. It is commonly used in a WHERE clause when an exact equality comparison is too restrictive. In SQLite, LIKE uses % for any sequence of zero or more characters and _ for exactly one character. Matching and case behaviour can vary across database engines.\n\n## SQLite syntax\n```sql\nSELECT column_name FROM table_name WHERE column_name LIKE 'pattern';\n```\n\n## Worked examples\n### 1. Create a sample customer table\n```sql\nCREATE TABLE like_customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT, city TEXT);\nINSERT INTO like_customers VALUES (1,'Asha Rao','Rajahmundry'),(2,'Bharat Kumar','Hyderabad'),(3,'Ananya Das','Vijayawada'),(4,'Ravi Teja','Rajahmundry'),(5,'Mira Shah','Mumbai'),(6,'Arun Das','Chennai');\n```\nExpected result: Six customer rows are inserted.\n\nThe sample contains names and cities for pattern searches.\n\n### 2. Find names that start with A\n```sql\nSELECT customer_name FROM like_customers WHERE customer_name LIKE 'A%' ORDER BY customer_name;\n```\nExpected result: Ananya Das; Asha Rao; Arun Das\n\nThe trailing percent sign permits any suffix, including an empty suffix.\n\n### 3. Find names that end with a\n```sql\nSELECT customer_name FROM like_customers WHERE customer_name LIKE '%a' ORDER BY customer_name;\n```\nExpected result: Asha Rao; Mira Shah\n\nThe leading percent sign permits any prefix; the final a must match.\n\n### 4. Find names containing the sequence 'as'\n```sql\nSELECT customer_name FROM like_customers WHERE customer_name LIKE '%as%' ORDER BY customer_name;\n```\nExpected result: Ananya Das; Mira Shah\n\nPercent signs on both sides allow the sequence anywhere in the value.\n\n### 5. Combine LIKE patterns with another condition\n```sql\nSELECT customer_name, city FROM like_customers WHERE customer_name LIKE 'A%' AND city = 'Rajahmundry' ORDER BY customer_id;\n```\nExpected result: Asha Rao | Rajahmundry\n\nLIKE is a predicate and can be combined with other WHERE conditions.\n\n## Query behaviour and limitations\nThese examples target SQLite. SQL pattern syntax, LIKE case behaviour, collation, date/time representation and support for product-specific wildcard forms can vary across DBMS products. SQLite LIKE uses % and _; do not assume SQL Server-style bracket lists are portable. Comparisons involving NULL evaluate to UNKNOWN, so NULL rows are not selected by ordinary positive or negative predicates.\n\n## Common mistakes\n- Omitting quotes around text patterns or text list values.\n- Assuming % and _ mean the same thing.\n- Treating BETWEEN as exclusive.\n- Using NOT IN without checking whether a subquery can return NULL.\n- Assuming wildcard and collation behaviour is identical across products.\n\n## Best practices\nUse explicit predicates, predictable ORDER BY clauses, representative test data and documented dialect assumptions. Inspect boundary and NULL cases before relying on a filter in a report.",
+      "examples": [
+        {
+          "id": "sql7.1-ex1",
+          "language": "en",
+          "title": "Create a sample customer table",
+          "code": "CREATE TABLE like_customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT, city TEXT);\nINSERT INTO like_customers VALUES (1,'Asha Rao','Rajahmundry'),(2,'Bharat Kumar','Hyderabad'),(3,'Ananya Das','Vijayawada'),(4,'Ravi Teja','Rajahmundry'),(5,'Mira Shah','Mumbai'),(6,'Arun Das','Chennai');",
+          "expectedOutput": "Six customer rows are inserted.",
+          "explanation": "The sample contains names and cities for pattern searches.",
+          "runnable": true
+        },
+        {
+          "id": "sql7.1-ex2",
+          "language": "en",
+          "title": "Find names that start with A",
+          "code": "SELECT customer_name FROM like_customers WHERE customer_name LIKE 'A%' ORDER BY customer_name;",
+          "expectedOutput": "Ananya Das; Asha Rao; Arun Das",
+          "explanation": "The trailing percent sign permits any suffix, including an empty suffix.",
+          "runnable": true
+        },
+        {
+          "id": "sql7.1-ex3",
+          "language": "en",
+          "title": "Find names that end with a",
+          "code": "SELECT customer_name FROM like_customers WHERE customer_name LIKE '%a' ORDER BY customer_name;",
+          "expectedOutput": "Asha Rao; Mira Shah",
+          "explanation": "The leading percent sign permits any prefix; the final a must match.",
+          "runnable": true
+        },
+        {
+          "id": "sql7.1-ex4",
+          "language": "en",
+          "title": "Find names containing the sequence 'as'",
+          "code": "SELECT customer_name FROM like_customers WHERE customer_name LIKE '%as%' ORDER BY customer_name;",
+          "expectedOutput": "Ananya Das; Mira Shah",
+          "explanation": "Percent signs on both sides allow the sequence anywhere in the value.",
+          "runnable": true
+        },
+        {
+          "id": "sql7.1-ex5",
+          "language": "en",
+          "title": "Combine LIKE patterns with another condition",
+          "code": "SELECT customer_name, city FROM like_customers WHERE customer_name LIKE 'A%' AND city = 'Rajahmundry' ORDER BY customer_id;",
+          "expectedOutput": "Asha Rao | Rajahmundry",
+          "explanation": "LIKE is a predicate and can be combined with other WHERE conditions.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the sample setup, then change the patterns to find names that start with B, contain 'ar', or end with 'i'. Predict the rows before running each query.",
+      "independentTask": "Create a products table with product_name and category. Insert at least six rows and write five different LIKE queries: starts with, ends with, contains, one-character position, and a combined condition.",
+      "hints": [
+        "Use % when any number of characters may appear.",
+        "Use _ when exactly one character is required.",
+        "Put wildcard characters inside the quoted pattern.",
+        "Add ORDER BY when you need predictable display order.",
+        "Check the target DBMS because LIKE case behaviour can differ."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE like_customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT, city TEXT);\nINSERT INTO like_customers VALUES (1,'Asha Rao','Rajahmundry'),(2,'Bharat Kumar','Hyderabad'),(3,'Ananya Das','Vijayawada'),(4,'Ravi Teja','Rajahmundry'),(5,'Mira Shah','Mumbai'),(6,'Arun Das','Chennai');\n\n-- Try the lesson query here\nSELECT * FROM like_customers;",
+    "resetCode": "CREATE TABLE like_customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT, city TEXT);\nINSERT INTO like_customers VALUES (1,'Asha Rao','Rajahmundry'),(2,'Bharat Kumar','Hyderabad'),(3,'Ananya Das','Vijayawada'),(4,'Ravi Teja','Rajahmundry'),(5,'Mira Shah','Mumbai'),(6,'Arun Das','Chennai');"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql7.1-q1",
+        "prompt": "What does LIKE primarily do?",
+        "options": [
+          "Matches text against a pattern",
+          "Sorts rows alphabetically",
+          "Counts matching rows",
+          "Changes text to uppercase"
+        ],
+        "answer": "Matches text against a pattern",
+        "explanation": "LIKE evaluates a text pattern in a predicate."
+      },
+      {
+        "id": "sql7.1-q2",
+        "prompt": "Which pattern finds values beginning with 'Jo'?",
+        "options": [
+          "'Jo%'",
+          "'%Jo'",
+          "'%Jo%'",
+          "'_Jo'"
+        ],
+        "answer": "'Jo%'",
+        "explanation": "A trailing percent sign permits any suffix."
+      },
+      {
+        "id": "sql7.1-q3",
+        "prompt": "Which pattern finds 'net' anywhere in a value?",
+        "options": [
+          "'%net%'",
+          "'net%'",
+          "'%net'",
+          "'net_'"
+        ],
+        "answer": "'%net%'",
+        "explanation": "Wildcards on both sides allow text before and after the sequence."
+      },
+      {
+        "id": "sql7.1-q4",
+        "prompt": "In SQLite LIKE, what does '_' represent?",
+        "options": [
+          "Exactly one character",
+          "Any number of characters",
+          "Only a digit",
+          "An empty string only"
+        ],
+        "answer": "Exactly one character",
+        "explanation": "Underscore matches one character position."
+      },
+      {
+        "id": "sql7.1-q5",
+        "prompt": "What should be checked when moving a LIKE query between DBMS products?",
+        "options": [
+          "Case and pattern-matching behaviour",
+          "The table's row count only",
+          "The column's display width only",
+          "Whether ORDER BY is present"
+        ],
+        "answer": "Case and pattern-matching behaviour",
+        "explanation": "LIKE details and collation behaviour are not identical across all engines."
+      }
+    ]
+  },
+  "status": "draft"
+}
