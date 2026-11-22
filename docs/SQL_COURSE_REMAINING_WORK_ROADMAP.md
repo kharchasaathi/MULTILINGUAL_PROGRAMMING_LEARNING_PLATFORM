@@ -19,7 +19,7 @@ Current audited branch HEAD before this roadmap commit: 60e3e2c0189da3f51474f481
   - 21 SQL Database topics
   - 6 SQL Reference topics (Data Types, Keywords, Quick Reference, MySQL Functions, SQL Server Functions and MS Access Functions)
 - Mapping is a coverage index, not editorial sign-off. Every mapped lesson remains draft pending technical/editorial review.
-- Latest SQL validation PASS on PR merge commit for head `bc087c4fe73a6b91148a3d911ca001e570257215` (run #45010499921, SQL workflow #758): 151 lessons; 755 SQLite-executed examples; 459 expected outputs compared; 282 status-only examples; 1,037 database-state assertions; 10 runtime-dependent outputs checked by pattern; 4 expected-error examples; 755 MCQs. The same run also validates all 32 original SQL code challenges in isolated SQLite databases.
+- Latest SQL validation PASS on PR head `40eb7efe2d8da64931a4da30a3377f4a0ad57745` (run #45011134985, SQL workflow #784): 151 lessons; 755 SQLite-executed examples; 459 expected outputs compared; 282 status-only examples; 1,037 database-state assertions; 10 runtime-dependent outputs checked by pattern; 4 expected-error examples; 755 MCQs. The same run also validates all 32 original SQL code challenges in isolated SQLite databases.
 - SQL Playground is implemented with browser-side SQLite. Final feature/security/browser audit remains pending.
 - Telugu SQL lesson translations are not complete.
 - No production deployment has been performed.
@@ -28,7 +28,7 @@ Current audited branch HEAD before this roadmap commit: 60e3e2c0189da3f51474f481
 
 - Detailed technical/editorial explanations have been reviewed and expanded for 40 lessons across SQL12–SQL19 (five lessons per module). The updated explanations cover transaction safety, correlated and recursive queries, window frames and ranking, index/query-plan trade-offs, dialect portability, trigger semantics, schema migrations and the inventory/sales capstone.
 - Corresponding progress-tracker review notes were updated. All 40 lessons remain `draft`; editorial review does not itself grant `VALIDATED`, `COMPLETED` or `DEPLOYED` status.
-- All 25 modules and 151 English lesson files are now registered. Forty lessons across SQL12–SQL19 received detailed editorial explanation improvements. The remaining 111 lessons (81 original SQL1–SQL11 lessons plus 30 new SQL20–SQL25 lessons) still require detailed editorial/source-depth review. SQL Course Validation run #45010499921 passed all 151 lessons; vendor-specific syntax still requires execution on each target DBMS/version.
+- All 25 modules and 151 English lesson files are now registered. Forty lessons across SQL12–SQL19 received detailed editorial explanation improvements. The remaining 111 lessons (81 original SQL1–SQL11 lessons plus 30 new SQL20–SQL25 lessons) still require detailed editorial/source-depth review. SQL Course Validation run #45011134985 passed all 151 lessons; vendor-specific syntax still requires execution on each target DBMS/version.
 
 ## Latest verified CI before this roadmap document
 
@@ -36,8 +36,8 @@ Commit `60e3e2c0189da3f51474f48123209b8ac9a8c809`:
 - SQL Course Validation push run #45005256327: PASS.
 - SQL Course Validation PR run #45005259384: PASS.
 - F1.7 Curriculum Validation run #45005259408: PASS.
-- Browser / Technical / Accessibility Review run #45005259509: PASS.
-- Python Course Validation run #45005259414: PASS.
+- Browser / Technical / Accessibility Review run #45011134959: PASS; 10/10 Playwright tests passed.
+- Python Course Validation run #45011134962: IN_PROGRESS at last check; unrelated to SQL content and not declared PASS.
 
 The roadmap-document commit itself must receive a fresh Actions run before its CI status can be called PASS.
 
@@ -110,7 +110,7 @@ These are supplementary curriculum additions, not W3Schools core navigation topi
 ### G. Release gates
 - [x] Update curriculum index, source inventory, coverage matrix and progress tracker for SQL12 and the expanded reference mapping.
 - [ ] Reconcile the final progress tracker and source inventory after all latest-head checks complete. SQL19.1–SQL19.5 English editorial review notes were updated in the tracker on commit `8317b494ef23bf4949fd9ac04dc86638ddda3d14`.
-- [x] Latest SQL validation PASS on PR merge commit for head `bc087c4fe73a6b91148a3d911ca001e570257215` (run #45010499921).
+- [x] Latest SQL validation PASS on PR head `40eb7efe2d8da64931a4da30a3377f4a0ad57745` (run #45011134985).
 - [ ] Latest browser/accessibility/technical review PASS (run #45010499877 was in progress at last check).
 - [x] Latest curriculum validation PASS (F1.7 run #45010499885).
 - [ ] English editorial review complete. Telugu parity is deferred until the user explicitly begins the final translation phase.
