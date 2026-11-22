@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql14.5.en",
+  "courseId": "sql",
+  "moduleId": "SQL14",
+  "topicId": "SQL14.5",
+  "title": "Running Totals and Window Frames",
+  "language": "en",
+  "learningObjectives": [
+    "Explain what a window frame controls.",
+    "Write a running total using UNBOUNDED PRECEDING and CURRENT ROW.",
+    "Use a bounded ROWS frame for a moving average.",
+    "Distinguish the frame definition from the partition and window ordering.",
+    "Choose a frame that matches the intended business calculation."
+  ],
+  "prerequisites": [
+    "SQL6.1",
+    "SQL9.3",
+    "SQL5.6"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A window frame defines which rows within a window contribute to the current row's calculation. Running totals commonly use ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW. Moving calculations can use a smaller frame such as the current row and one preceding row.",
+      "whyItMatters": "Window frames support running balances, rolling averages and cumulative counts without collapsing transaction-level rows.",
+      "analogy": "A window calculation is like adding a running commentary to each row while keeping the original list intact.",
+      "analogyLimit": "The analogy does not represent SQL partition rules, frame boundaries, tie handling or optimizer behaviour."
+    },
+    "explain": {
+      "narrative": "## Window frames\nA frame is the subset of rows used by a window function for the current row. A frame can be based on ROWS, RANGE or GROUPS, depending on the SQL engine and requirements.\n\n## Running total\nROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW includes every earlier row in the ordered partition plus the current row. SUM over this frame produces a running total.\n\n## Moving calculations\nA frame such as ROWS BETWEEN 1 PRECEDING AND CURRENT ROW includes the previous physical row and current row. It can be used for a two-row moving average. Always define an order and choose a frame that matches the business definition.",
+      "examples": [
+        {
+          "id": "sql14.5-ex1",
+          "language": "en",
+          "title": "Create daily transaction amounts",
+          "code": "CREATE TABLE win14_transactions (sequence_no INTEGER PRIMARY KEY, amount INTEGER NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "This example demonstrates create daily transaction amounts with SQLite window functions. Check the window definition and row order.",
+          "runnable": true
+        },
+        {
+          "id": "sql14.5-ex2",
+          "language": "en",
+          "title": "Insert four transactions",
+          "code": "INSERT INTO win14_transactions VALUES (1, 10), (2, 20), (3, 15), (4, 5);",
+          "expectedOutput": "4 rows inserted",
+          "explanation": "This example demonstrates insert four transactions with SQLite window functions. Check the window definition and row order.",
+          "runnable": true
+        },
+        {
+          "id": "sql14.5-ex3",
+          "language": "en",
+          "title": "Calculate a running total",
+          "code": "SELECT sequence_no, amount, SUM(amount) OVER (ORDER BY sequence_no ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_total FROM win14_transactions ORDER BY sequence_no;",
+          "expectedOutput": "1 | 10 | 10; 2 | 20 | 30; 3 | 15 | 45; 4 | 5 | 50",
+          "explanation": "This example demonstrates calculate a running total with SQLite window functions. Check the window definition and row order.",
+          "runnable": true
+        },
+        {
+          "id": "sql14.5-ex4",
+          "language": "en",
+          "title": "Calculate a two-row moving average",
+          "code": "SELECT sequence_no, amount, AVG(amount) OVER (ORDER BY sequence_no ROWS BETWEEN 1 PRECEDING AND CURRENT ROW) AS moving_average FROM win14_transactions ORDER BY sequence_no;",
+          "expectedOutput": "1 | 10 | 10.0; 2 | 20 | 15.0; 3 | 15 | 17.5; 4 | 5 | 10.0",
+          "explanation": "This example demonstrates calculate a two-row moving average with SQLite window functions. Check the window definition and row order.",
+          "runnable": true
+        },
+        {
+          "id": "sql14.5-ex5",
+          "language": "en",
+          "title": "Calculate a cumulative transaction count",
+          "code": "SELECT sequence_no, COUNT(*) OVER (ORDER BY sequence_no ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS transactions_so_far FROM win14_transactions ORDER BY sequence_no;",
+          "expectedOutput": "1 | 1; 2 | 2; 3 | 3; 4 | 4",
+          "explanation": "This example demonstrates calculate a cumulative transaction count with SQLite window functions. Check the window definition and row order.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the running total and moving average examples. For each row, identify exactly which input rows contribute to the frame.",
+      "independentTask": "Create a daily balance table. Calculate a running balance and a three-row moving average with an explicit frame. Explain how the first two rows are handled.",
+      "hints": [
+        "A frame limits which rows contribute for the current row.",
+        "UNBOUNDED PRECEDING starts at the first row in the partition.",
+        "CURRENT ROW includes the current row.",
+        "ROWS BETWEEN 1 PRECEDING AND CURRENT ROW includes at most two rows.",
+        "Always specify the ordering column when a running calculation depends on sequence."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE win14_transactions (sequence_no INTEGER PRIMARY KEY, amount INTEGER NOT NULL);\nINSERT INTO win14_transactions VALUES (1, 10), (2, 20), (3, 15), (4, 5);\nSELECT sequence_no, amount, SUM(amount) OVER (ORDER BY sequence_no ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_total FROM win14_transactions ORDER BY sequence_no;",
+    "resetCode": "CREATE TABLE win14_transactions (sequence_no INTEGER PRIMARY KEY, amount INTEGER NOT NULL);\nINSERT INTO win14_transactions VALUES (1, 10), (2, 20), (3, 15), (4, 5);\nSELECT sequence_no, amount, SUM(amount) OVER (ORDER BY sequence_no ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_total FROM win14_transactions ORDER BY sequence_no;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql14.5-q1",
+        "prompt": "What does a window frame define?",
+        "options": [
+          "Which rows contribute to the current row's window calculation",
+          "Which tables are deleted",
+          "Which database is attached",
+          "Which columns are primary keys"
+        ],
+        "answer": "Which rows contribute to the current row's window calculation",
+        "explanation": "The frame selects the subset of rows used for the current calculation."
+      },
+      {
+        "id": "sql14.5-q2",
+        "prompt": "What does UNBOUNDED PRECEDING mean?",
+        "options": [
+          "Start at the first row in the ordered partition",
+          "Start at the next row only",
+          "Use no rows",
+          "Use only the current row"
+        ],
+        "answer": "Start at the first row in the ordered partition",
+        "explanation": "UNBOUNDED PRECEDING includes all rows from the beginning of the partition."
+      },
+      {
+        "id": "sql14.5-q3",
+        "prompt": "Which frame is commonly used for a running total?",
+        "options": [
+          "ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW",
+          "ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING",
+          "ROWS BETWEEN 1 FOLLOWING AND 2 FOLLOWING",
+          "RANGE BETWEEN 5 PRECEDING AND 5 FOLLOWING"
+        ],
+        "answer": "ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW",
+        "explanation": "The running total accumulates all rows up to and including the current row."
+      },
+      {
+        "id": "sql14.5-q4",
+        "prompt": "What does ROWS BETWEEN 1 PRECEDING AND CURRENT ROW include?",
+        "options": [
+          "The previous physical row and current row",
+          "All rows in the table",
+          "Only the first row",
+          "The next two rows"
+        ],
+        "answer": "The previous physical row and current row",
+        "explanation": "The frame contains at most two physical rows."
+      },
+      {
+        "id": "sql14.5-q5",
+        "prompt": "Why should a running calculation specify an order?",
+        "options": [
+          "The order defines the sequence in which values accumulate",
+          "It creates a new database",
+          "It prevents all NULL values",
+          "It changes the data type"
+        ],
+        "answer": "The order defines the sequence in which values accumulate",
+        "explanation": "Running totals depend on a well-defined row sequence."
+      }
+    ]
+  },
+  "status": "draft"
+}
