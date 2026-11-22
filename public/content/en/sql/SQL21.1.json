@@ -27,7 +27,7 @@
       "analogyLimit": "A staging table does not validate data automatically. Rules, rejected-row handling, transaction boundaries and source reconciliation must be designed."
     },
     "explain": {
-      "narrative": "## Staging workflow\nA controlled import commonly follows these steps: load source values into staging, validate required fields and formats, detect duplicates and invalid relationships, move accepted rows into target tables, and preserve rejected rows with a reason for correction.\n\n## Type conversion\nSQLite uses dynamic typing and CAST can convert text to numeric values, but invalid strings may convert to zero rather than raise an error. Validate the raw text before casting. In rigidly typed DBMS products, use safe conversion functions and explicit error handling supported by that engine.\n\n## Reconciliation\nCompare source row counts with accepted and rejected counts. Record the import batch identifier, source reference, load time and validation status. Do not silently discard invalid rows or report a successful import merely because an INSERT statement ran.",
+      "narrative": "## Staging workflow\nA controlled import commonly follows these steps: load source values into staging, validate required fields and formats, detect duplicates and invalid relationships, move accepted rows into target tables, and preserve rejected rows with a reason for correction.\n\n## Type conversion\nSQLite uses dynamic typing and CAST can convert text to numeric values, but invalid strings may convert to zero rather than raise an error. Validate the raw text before casting. In rigidly typed DBMS products, use safe conversion functions and explicit error handling supported by that engine.\n\n## Reconciliation\nCompare source row counts with accepted and rejected counts. Record the import batch identifier, source reference, load time and validation status. Do not silently discard invalid rows or report a successful import merely because an INSERT statement ran.\n\n### Rejected-row handling\nA production import should preserve rejected records with an import batch ID, source row reference and stable validation code such as INVALID_AMOUNT or UNKNOWN_CUSTOMER. Restrict access to raw rejected data, redact secrets and define a retention period. Re-run only corrected rows under an idempotent batch process so retries do not duplicate accepted records.",
       "examples": [
         {
           "id": "sql211-ex1",
@@ -84,7 +84,8 @@
         "Validate text before casting it to a number.",
         "Keep rejected rows and their reasons for correction.",
         "Use constraints on the final target table as a second line of defence.",
-        "Reconcile source, accepted and rejected counts."
+        "Reconcile source, accepted and rejected counts.",
+        "Keep rejected rows with a batch ID and stable validation reason so a corrected import can be audited and retried safely."
       ]
     }
   },
