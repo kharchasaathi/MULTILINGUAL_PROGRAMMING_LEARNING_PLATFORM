@@ -1,0 +1,162 @@
+{
+  "id": "sql.sql25.3.en",
+  "courseId": "sql",
+  "moduleId": "SQL25",
+  "topicId": "SQL25.3",
+  "title": "Project: Employee and Payroll Database",
+  "language": "en",
+  "learningObjectives": [
+    "Model departments, employees, pay periods and payroll entries.",
+    "Store monetary amounts using exact minor units for the teaching project.",
+    "Calculate net pay and department payroll totals.",
+    "Use constraints to prevent negative payroll components.",
+    "Document payroll access, approval and audit requirements."
+  ],
+  "prerequisites": [
+    "SQL1.1",
+    "SQL3.2",
+    "SQL4.1",
+    "SQL8.1",
+    "SQL12.1",
+    "SQL20.4"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A payroll database stores employee assignments and pay-run results. Separating employees, pay periods and payroll lines supports historical reporting and controlled payroll processing.",
+      "whyItMatters": "Payroll data is sensitive and financially important. Incorrect calculations or uncontrolled access can cause financial and privacy harm.",
+      "analogy": "A payslip combines employee details with a specific pay-period calculation, while the employee record remains stable across periods.",
+      "analogyLimit": "A real payroll system includes jurisdiction-specific tax, benefits, deductions, approvals, rounding and legal retention rules; this project is not a payroll calculator for real payments."
+    },
+    "explain": {
+      "narrative": "## Project brief\nBuild a payroll database that records departments, employees, pay periods and payroll lines. Each line stores gross pay, tax and other deductions for one employee in one period.\n\n## ER design and precision\nEmployees reference departments. Payroll lines reference employees and pay periods. Use integer minor units (for example, cents) in this SQLite project to avoid binary floating-point rounding; production currency and rounding rules must be explicit.\n\n## Reports and controls\nCalculate net pay as gross minus tax and deductions, summarize payroll by department and reconcile the run total. Add approval state and an audit trail before any production payment integration.\n\n## Security and assessment\nRestrict access to salary and tax data, avoid exposing personal identifiers in general reports, test negative amounts and duplicate payroll lines, and document the assumptions and approval process.",
+      "examples": [
+        {
+          "id": "sql253-ex1",
+          "language": "en",
+          "title": "Create department, employee and payroll tables",
+          "code": "CREATE TABLE proj25_departments (department_id INTEGER PRIMARY KEY, department_name TEXT NOT NULL UNIQUE); CREATE TABLE proj25_employees (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, department_id INTEGER NOT NULL REFERENCES proj25_departments(department_id)); CREATE TABLE proj25_pay_periods (period_id INTEGER PRIMARY KEY, period_label TEXT NOT NULL UNIQUE); CREATE TABLE proj25_payroll_lines (period_id INTEGER NOT NULL REFERENCES proj25_pay_periods(period_id), employee_id INTEGER NOT NULL REFERENCES proj25_employees(employee_id), gross_cents INTEGER NOT NULL CHECK (gross_cents >= 0), tax_cents INTEGER NOT NULL CHECK (tax_cents >= 0), deduction_cents INTEGER NOT NULL CHECK (deduction_cents >= 0), PRIMARY KEY (period_id, employee_id));",
+          "expectedOutput": "Tables created",
+          "explanation": "Creates parent tables and a payroll-line junction between employees and pay periods. Monetary values are stored as integer cents for this teaching model.",
+          "runnable": true
+        },
+        {
+          "id": "sql253-ex2",
+          "language": "en",
+          "title": "Seed employees and one payroll period",
+          "code": "INSERT INTO proj25_departments VALUES (1, 'Sales'), (2, 'Support'); INSERT INTO proj25_employees VALUES (1, 'Asha', 1), (2, 'Bilal', 2), (3, 'Chitra', 1); INSERT INTO proj25_pay_periods VALUES (1, '2026-11'); INSERT INTO proj25_payroll_lines VALUES (1, 1, 600000, 90000, 10000), (1, 2, 520000, 70000, 5000), (1, 3, 580000, 85000, 15000);",
+          "expectedOutput": "9 rows inserted",
+          "explanation": "Adds two departments, three employees, one pay period and three payroll lines. Values are synthetic and expressed in cents.",
+          "runnable": true
+        },
+        {
+          "id": "sql253-ex3",
+          "language": "en",
+          "title": "Calculate net pay per employee",
+          "code": "SELECT e.employee_name, p.gross_cents - p.tax_cents - p.deduction_cents AS net_cents FROM proj25_payroll_lines AS p JOIN proj25_employees AS e ON e.employee_id = p.employee_id WHERE p.period_id = 1 ORDER BY e.employee_id;",
+          "expectedOutput": "Asha | 500000; Bilal | 445000; Chitra | 480000",
+          "explanation": "Calculates net pay in integer cents: gross minus tax minus other deductions. The payroll rules and rounding policy must be approved by the relevant business and jurisdiction.",
+          "runnable": true
+        },
+        {
+          "id": "sql253-ex4",
+          "language": "en",
+          "title": "Summarize net payroll by department",
+          "code": "SELECT d.department_name, SUM(p.gross_cents - p.tax_cents - p.deduction_cents) AS net_payroll_cents FROM proj25_payroll_lines AS p JOIN proj25_employees AS e ON e.employee_id = p.employee_id JOIN proj25_departments AS d ON d.department_id = e.department_id WHERE p.period_id = 1 GROUP BY d.department_id, d.department_name ORDER BY d.department_name;",
+          "expectedOutput": "Sales | 980000; Support | 445000",
+          "explanation": "Groups net pay by department. Sales combines Asha and Chitra; Support contains Bilal.",
+          "runnable": true
+        },
+        {
+          "id": "sql253-ex5",
+          "language": "en",
+          "title": "Reconcile the payroll run total",
+          "code": "SELECT COUNT(*) AS employee_count, SUM(gross_cents) AS gross_total_cents, SUM(tax_cents + deduction_cents) AS deductions_cents, SUM(gross_cents - tax_cents - deduction_cents) AS net_total_cents FROM proj25_payroll_lines WHERE period_id = 1;",
+          "expectedOutput": "employee_count = 3; gross_total_cents = 1700000; deductions_cents = 275000; net_total_cents = 1425000",
+          "explanation": "Reconciles gross pay, deductions and net pay for the period. A production payroll run should also have approval, payment status and an immutable audit record.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the net-pay and department reports. Reconcile gross minus deductions to net total and explain why the example uses integer cents.",
+      "independentTask": "Add payroll approval states and payment references. Create tests for duplicate employee-period lines, negative deductions, missing employees and unauthorized access to salary reports.",
+      "hints": [
+        "Separate employees from period-specific payroll lines.",
+        "Use integer minor units or exact decimal storage.",
+        "Net pay equals gross minus tax and other deductions.",
+        "Reconcile totals at the pay-run level.",
+        "Restrict salary data and require approval/audit controls."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE proj25_payroll_lines (employee_id INTEGER NOT NULL, gross_cents INTEGER NOT NULL, tax_cents INTEGER NOT NULL, deduction_cents INTEGER NOT NULL);\nINSERT INTO proj25_payroll_lines VALUES (1, 600000, 90000, 10000), (2, 520000, 70000, 5000);\nSELECT employee_id, gross_cents - tax_cents - deduction_cents AS net_cents FROM proj25_payroll_lines ORDER BY employee_id;",
+    "resetCode": "CREATE TABLE proj25_payroll_lines (employee_id INTEGER NOT NULL, gross_cents INTEGER NOT NULL, tax_cents INTEGER NOT NULL, deduction_cents INTEGER NOT NULL);\nINSERT INTO proj25_payroll_lines VALUES (1, 600000, 90000, 10000), (2, 520000, 70000, 5000);\nSELECT employee_id, gross_cents - tax_cents - deduction_cents AS net_cents FROM proj25_payroll_lines ORDER BY employee_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql253-q1",
+        "prompt": "Why store money as integer cents in this project?",
+        "options": [
+          "To avoid binary floating-point rounding for these amounts",
+          "To make every value a date",
+          "To remove the need for constraints",
+          "To encrypt payroll data"
+        ],
+        "answer": "To avoid binary floating-point rounding for these amounts",
+        "explanation": "Integer minor units provide exact arithmetic for the chosen currency unit."
+      },
+      {
+        "id": "sql253-q2",
+        "prompt": "What does a payroll line represent?",
+        "options": [
+          "An employee's pay calculation for one period",
+          "The employee's permanent department only",
+          "A bank login",
+          "A list of SQL keywords"
+        ],
+        "answer": "An employee's pay calculation for one period",
+        "explanation": "Payroll values are period-specific and should be stored separately from employee identity."
+      },
+      {
+        "id": "sql253-q3",
+        "prompt": "How is net pay calculated in this example?",
+        "options": [
+          "Gross minus tax minus other deductions",
+          "Gross plus tax plus deductions",
+          "Tax minus gross",
+          "COUNT(*) times gross"
+        ],
+        "answer": "Gross minus tax minus other deductions",
+        "explanation": "Net pay is the amount remaining after deductions."
+      },
+      {
+        "id": "sql253-q4",
+        "prompt": "Why should salary reports be access-restricted?",
+        "options": [
+          "Payroll contains sensitive personal and financial information",
+          "Salary values cannot be aggregated",
+          "Every employee is a database administrator",
+          "It improves ORDER BY"
+        ],
+        "answer": "Payroll contains sensitive personal and financial information",
+        "explanation": "Payroll data needs least-privilege access and audit controls."
+      },
+      {
+        "id": "sql253-q5",
+        "prompt": "What does the reconciliation query verify?",
+        "options": [
+          "Gross, deductions and net totals are arithmetically consistent",
+          "Every employee has the same salary",
+          "Every payroll line is deleted",
+          "The database has no indexes"
+        ],
+        "answer": "Gross, deductions and net totals are arithmetically consistent",
+        "explanation": "Reconciliation checks the financial totals before approval."
+      }
+    ]
+  },
+  "status": "draft"
+}
