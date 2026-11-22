@@ -25,7 +25,7 @@
       "analogyLimit": "The analogy does not model SQL's exact cardinality rules, NULL logic, query optimizer or recursive evaluation."
     },
     "explain": {
-      "narrative": "## What is a subquery?\nA subquery is a query nested inside another SQL statement. It is usually enclosed in parentheses and can appear in WHERE, SELECT or FROM. The context determines whether it must return one scalar value, a list of values or a table-shaped result.\n\n## Scalar and multi-row results\nA scalar subquery returns one column and at most one row when used as a scalar expression. A subquery used with IN can return multiple values. A derived table in FROM produces rows and columns for the outer query.\n\n## Evaluation and readability\nThe database optimizer may transform a subquery into another execution strategy. Do not assume every subquery is executed once per outer row; inspect plans when performance matters. Give derived columns clear aliases and keep nesting understandable.",
+      "narrative": "## What is a subquery?\nA subquery is a query nested inside another SQL statement. It is usually enclosed in parentheses and can appear in WHERE, SELECT or FROM. The context determines whether it must return one scalar value, a list of values or a table-shaped result.\n\n## Scalar and multi-row results\nA scalar subquery returns one column and at most one row when used as a scalar expression. A subquery used with IN can return multiple values. A derived table in FROM produces rows and columns for the outer query.\n\n## Evaluation and readability\nThe database optimizer may transform a subquery into another execution strategy. Do not assume every subquery is executed once per outer row; inspect plans when performance matters. Give derived columns clear aliases and keep nesting understandable.\n\n### Match the subquery to its context\nA scalar context expects one value; an IN predicate can consume a one-column set; and a FROM clause can consume a table-shaped result. A scalar subquery that returns no rows evaluates to NULL in SQLite, while a scalar subquery that returns multiple rows raises an error.\n\n### Optimizer note\nThe SQL text describes logical relationships, not a guaranteed execution order. The optimizer may flatten or transform subqueries. Compare plans and indexes before assuming a correlated or nested form is slower than a join.",
       "examples": [
         {
           "id": "sql13.1-ex1",
@@ -33,7 +33,7 @@
           "title": "Create an orders table",
           "code": "CREATE TABLE sub13_orders (order_id INTEGER PRIMARY KEY, customer TEXT NOT NULL, amount REAL NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create an orders table using SQLite. Follow the inner query and outer result carefully.",
+          "explanation": "Creates an orders table with a numeric key, required customer name and amount. The sample uses REAL for simplicity; financial systems should choose exact decimal storage or integer minor units and define currency explicitly.",
           "runnable": true
         },
         {
@@ -42,7 +42,7 @@
           "title": "Insert sample orders",
           "code": "INSERT INTO sub13_orders VALUES (1, 'Asha', 90), (2, 'Bilal', 40), (3, 'Chitra', 70), (4, 'Dinesh', 110);",
           "expectedOutput": "4 rows inserted",
-          "explanation": "This example demonstrates insert sample orders using SQLite. Follow the inner query and outer result carefully.",
+          "explanation": "Inserts four orders with amounts 90, 40, 70 and 110. The arithmetic average is 77.5, which establishes the threshold used by the next query.",
           "runnable": true
         },
         {
@@ -51,7 +51,7 @@
           "title": "Compare each order with the overall average",
           "code": "SELECT customer FROM sub13_orders WHERE amount > (SELECT AVG(amount) FROM sub13_orders) ORDER BY customer;",
           "expectedOutput": "Asha; Dinesh",
-          "explanation": "This example demonstrates compare each order with the overall average using SQLite. Follow the inner query and outer result carefully.",
+          "explanation": "The inner query calculates one scalar value, AVG(amount), across the whole table. The outer query compares each order amount with that 77.5 threshold and returns Asha and Dinesh. The ORDER BY makes the names deterministic.",
           "runnable": true
         },
         {
@@ -60,7 +60,7 @@
           "title": "Return a scalar value from a subquery",
           "code": "SELECT (SELECT MAX(amount) FROM sub13_orders) AS largest_amount;",
           "expectedOutput": "largest_amount = 110",
-          "explanation": "This example demonstrates return a scalar value from a subquery using SQLite. Follow the inner query and outer result carefully.",
+          "explanation": "The nested SELECT returns one value: the maximum order amount, 110. Because the subquery is scalar, it can be used as a column expression in the outer SELECT.",
           "runnable": true
         },
         {
@@ -69,7 +69,7 @@
           "title": "Compare rows with a scalar minimum",
           "code": "SELECT customer, amount FROM sub13_orders WHERE amount = (SELECT MIN(amount) FROM sub13_orders);",
           "expectedOutput": "Bilal | 40",
-          "explanation": "This example demonstrates compare rows with a scalar minimum using SQLite. Follow the inner query and outer result carefully.",
+          "explanation": "The scalar MIN subquery returns 40. The outer predicate selects the order whose amount equals that minimum; if several orders tied for the minimum, all matching customers would be returned.",
           "runnable": true
         }
       ]
