@@ -29,7 +29,7 @@
       "analogyLimit": "The analogy does not model database isolation, concurrent workloads, deployment security or recovery guarantees."
     },
     "explain": {
-      "narrative": "## Data-quality checks\nCheck for negative stock, invalid quantities, missing required values, duplicate business identifiers and broken relationships. Use constraints to prevent many invalid writes and validation queries to detect legacy or imported data problems.\n\n## Operational readiness\nVerify indexes for important lookups, test transaction failure paths, review migration history, and document backup and restore procedures. Test with realistic data volumes and with the target DBMS/version.\n\n## Capstone acceptance criteria\nThe project should include a normalized schema, keys and constraints, safe sale transactions, accurate reports, data-quality checks, and a short explanation of its limitations and deployment plan.",
+      "narrative": "## Data-quality checks\nCheck for negative stock, invalid quantities, missing required values, duplicate business identifiers and broken relationships. Use constraints to prevent many invalid writes and validation queries to detect legacy or imported data problems.\n\n## Operational readiness\nVerify indexes for important lookups, test transaction failure paths, review migration history, and document backup and restore procedures. Test with realistic data volumes and with the target DBMS/version.\n\n## Capstone acceptance criteria\nThe project should include a normalized schema, keys and constraints, safe sale transactions, accurate reports, data-quality checks, and a short explanation of its limitations and deployment plan.\n\n### Constraints versus validation queries\nConstraints prevent many invalid writes at the database boundary. Validation queries detect existing data problems, import defects or rules that cannot be expressed conveniently as constraints. Use both: prevention for invariants and repeatable audits for operational confidence.\n\n### Index review\nThe composite index is a hypothesis, not a performance guarantee. Check representative data volumes with `EXPLAIN QUERY PLAN`, compare query latency under repeatable conditions, and consider the cost of maintaining the index during INSERT, UPDATE and DELETE operations.",
       "examples": [
         {
           "id": "sql19.5-ex1",
@@ -37,7 +37,7 @@
           "title": "Create a capstone quality table",
           "code": "CREATE TABLE cap19_quality (row_id INTEGER PRIMARY KEY, product_code TEXT NOT NULL UNIQUE, stock_qty INTEGER NOT NULL CHECK (stock_qty >= 0), active INTEGER NOT NULL CHECK (active IN (0,1)));",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create a capstone quality table in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "explanation": "Creates a quality-check table with a required unique product code, a non-negative stock rule and a Boolean-like active flag constrained to 0 or 1. SQLite represents this flag as an integer convention rather than a dedicated Boolean storage class.",
           "runnable": true
         },
         {
@@ -46,7 +46,7 @@
           "title": "Insert valid quality rows",
           "code": "INSERT INTO cap19_quality VALUES (1, 'P-100', 8, 1), (2, 'P-200', 0, 0);",
           "expectedOutput": "2 rows inserted",
-          "explanation": "This example demonstrates insert valid quality rows in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "explanation": "Inserts two valid rows. The first represents an active item with stock; the second represents an inactive item with zero stock. Both satisfy the table's CHECK and UNIQUE constraints.",
           "runnable": true
         },
         {
@@ -55,7 +55,7 @@
           "title": "Check for invalid stock values",
           "code": "SELECT COUNT(*) AS invalid_stock FROM cap19_quality WHERE stock_qty < 0;",
           "expectedOutput": "invalid_stock = 0",
-          "explanation": "This example demonstrates check for invalid stock values in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "explanation": "Counts rows with negative stock. The expected zero means the current sample contains no such invalid values. The CHECK constraint should prevent new negative values, while this query can help audit legacy imports or tables created before the rule existed.",
           "runnable": true
         },
         {
@@ -64,7 +64,7 @@
           "title": "Create an index for active product lookups",
           "code": "CREATE INDEX idx_cap19_quality_active ON cap19_quality(active, product_code);",
           "expectedOutput": "Index created",
-          "explanation": "This example demonstrates create an index for active product lookups in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "explanation": "Creates a composite index with active as the leading column and product_code as the second. It may help queries filtering by active and ordering or searching by product_code, but usefulness depends on data distribution, selectivity and the query plan. An index adds storage and write-maintenance cost.",
           "runnable": true
         },
         {
@@ -73,7 +73,7 @@
           "title": "Produce a final active-product report",
           "code": "SELECT product_code, stock_qty FROM cap19_quality WHERE active = 1 ORDER BY product_code;",
           "expectedOutput": "P-100 | 8",
-          "explanation": "This example demonstrates produce a final active-product report in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "explanation": "Returns active products ordered by product code. The predicate selects only active = 1, and the index may be considered by SQLite's planner. Use EXPLAIN QUERY PLAN to inspect actual index usage rather than assuming the index must be chosen for this tiny two-row table.",
           "runnable": true
         }
       ]
