@@ -1,0 +1,161 @@
+{
+  "id": "sql.sql23.2.en",
+  "courseId": "sql",
+  "moduleId": "SQL23",
+  "topicId": "SQL23.2",
+  "title": "PostgreSQL Dialect Features and Portability",
+  "language": "en",
+  "learningObjectives": [
+    "Recognize PostgreSQL-specific types and operators.",
+    "Explain the purpose of RETURNING and ON CONFLICT.",
+    "Distinguish ILIKE from portable case-normalization patterns.",
+    "Identify PostgreSQL features that SQLite cannot execute directly.",
+    "Label PostgreSQL-only examples and verify them against the target version."
+  ],
+  "prerequisites": [
+    "SQL16.1",
+    "SQL16.2",
+    "SQL16.3",
+    "SQL16.4",
+    "SQL16.5"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "PostgreSQL provides a standards-oriented SQL implementation with additional features such as JSONB, arrays, RETURNING, ILIKE, rich type support and advanced indexing.",
+      "whyItMatters": "Using PostgreSQL features can simplify application code, but those features should be deliberately chosen and isolated when portability matters.",
+      "analogy": "A toolkit may include specialist tools that are excellent for one workshop but are not available in every workshop.",
+      "analogyLimit": "A PostgreSQL feature may have no direct SQLite equivalent, and similar-looking syntax can have different type, collation or transaction behaviour."
+    },
+    "explain": {
+      "narrative": "## PostgreSQL extensions and capabilities\nPostgreSQL supports `RETURNING` on data-modification statements, `ILIKE` for case-insensitive pattern matching, `JSONB` for binary JSON storage, arrays, UUID types, identity columns and `DISTINCT ON` as a product-specific query feature.\n\n## Conflict handling\nPostgreSQL supports `INSERT ... ON CONFLICT (...) DO UPDATE` with explicit conflict targets. SQLite also supports an UPSERT form, but supported clauses, constraints and edge-case behaviour must be checked against the relevant versions.\n\n## Time and type semantics\nPostgreSQL distinguishes timestamp with and without time zone and provides rich numeric, range and user-defined types. Do not replace TIMESTAMPTZ with arbitrary text without a deliberate time-zone model.\n\n## Runnable examples\nThe examples below use SQLite-compatible relational SQL. PostgreSQL-only syntax is shown in the explanation as a labelled dialect reference and must be tested in PostgreSQL before use.",
+      "examples": [
+        {
+          "id": "sql232-ex1",
+          "language": "en",
+          "title": "Create a portable account table",
+          "code": "CREATE TABLE dialect23_accounts (account_id INTEGER PRIMARY KEY, email TEXT NOT NULL UNIQUE, account_state TEXT NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "Creates a simple account relation. PostgreSQL would commonly use BIGINT or GENERATED AS IDENTITY for the key and may use CITEXT or a suitable unique expression for case-insensitive email policy.",
+          "runnable": true
+        },
+        {
+          "id": "sql232-ex2",
+          "language": "en",
+          "title": "Insert sample accounts",
+          "code": "INSERT INTO dialect23_accounts VALUES (1, 'asha@example.test', 'active'), (2, 'bilal@example.test', 'locked');",
+          "expectedOutput": "2 rows inserted",
+          "explanation": "Adds two synthetic accounts. PostgreSQL can return inserted values directly with INSERT ... RETURNING; this SQLite-compatible example reads them in a separate statement.",
+          "runnable": true
+        },
+        {
+          "id": "sql232-ex3",
+          "language": "en",
+          "title": "Read the inserted account rows",
+          "code": "SELECT account_id, email, account_state FROM dialect23_accounts ORDER BY account_id;",
+          "expectedOutput": "1 | asha@example.test | active; 2 | bilal@example.test | locked",
+          "explanation": "Uses a portable SELECT projection. In PostgreSQL, `INSERT INTO ... VALUES (...) RETURNING account_id, email` can return generated or inserted values in the same statement.",
+          "runnable": true
+        },
+        {
+          "id": "sql232-ex4",
+          "language": "en",
+          "title": "Use a portable case-normalized lookup",
+          "code": "SELECT account_id, email FROM dialect23_accounts WHERE lower(email) = lower('ASHA@example.test');",
+          "expectedOutput": "1 | asha@example.test",
+          "explanation": "Demonstrates a case-normalized comparison. PostgreSQL offers ILIKE for case-insensitive pattern matching; collation and index strategy still matter.",
+          "runnable": true
+        },
+        {
+          "id": "sql232-ex5",
+          "language": "en",
+          "title": "Use a SQLite/PostgreSQL-compatible conflict update pattern",
+          "code": "INSERT INTO dialect23_accounts (account_id, email, account_state) VALUES (1, 'asha@example.test', 'active') ON CONFLICT(account_id) DO UPDATE SET account_state = excluded.account_state; SELECT account_id, account_state FROM dialect23_accounts WHERE account_id = 1;",
+          "expectedOutput": "1 | active",
+          "explanation": "Uses an UPSERT form supported by modern SQLite and PostgreSQL. Conflict target rules and available RETURNING behaviour should be verified for the target engine version.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the portable examples and identify where PostgreSQL offers a direct extension such as RETURNING or ILIKE. Explain why an extension must be tested separately from the SQLite lesson runtime.",
+      "independentTask": "Design a PostgreSQL-specific customer table using an identity key, TIMESTAMPTZ and JSONB metadata. Label each type and write a portable fallback or migration note for another DBMS.",
+      "hints": [
+        "PostgreSQL supports RETURNING for data changes.",
+        "ILIKE is PostgreSQL-specific pattern matching.",
+        "JSONB and arrays are PostgreSQL type features.",
+        "TIMESTAMPTZ represents time-zone-aware instants.",
+        "SQLite execution does not validate PostgreSQL-only syntax."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE dialect23_accounts (account_id INTEGER PRIMARY KEY, email TEXT NOT NULL UNIQUE, account_state TEXT NOT NULL);\nINSERT INTO dialect23_accounts VALUES (1, 'asha@example.test', 'active'), (2, 'bilal@example.test', 'locked');\nSELECT account_id, email FROM dialect23_accounts WHERE lower(email) = lower('ASHA@example.test');",
+    "resetCode": "CREATE TABLE dialect23_accounts (account_id INTEGER PRIMARY KEY, email TEXT NOT NULL UNIQUE, account_state TEXT NOT NULL);\nINSERT INTO dialect23_accounts VALUES (1, 'asha@example.test', 'active'), (2, 'bilal@example.test', 'locked');\nSELECT account_id, email FROM dialect23_accounts WHERE lower(email) = lower('ASHA@example.test');"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql232-q1",
+        "prompt": "Which PostgreSQL feature returns values from an INSERT or UPDATE statement?",
+        "options": [
+          "RETURNING",
+          "AUTO_INCREMENT",
+          "TOP",
+          "NVL"
+        ],
+        "answer": "RETURNING",
+        "explanation": "PostgreSQL supports RETURNING on data-modification statements."
+      },
+      {
+        "id": "sql232-q2",
+        "prompt": "Which operator is PostgreSQL-specific for case-insensitive pattern matching?",
+        "options": [
+          "ILIKE",
+          "BETWEEN",
+          "IS NULL",
+          "UNION ALL"
+        ],
+        "answer": "ILIKE",
+        "explanation": "ILIKE performs case-insensitive pattern matching in PostgreSQL."
+      },
+      {
+        "id": "sql232-q3",
+        "prompt": "What is JSONB in PostgreSQL?",
+        "options": [
+          "A binary-oriented JSON data type",
+          "A database backup command",
+          "A generated identity column",
+          "A transaction isolation level"
+        ],
+        "answer": "A binary-oriented JSON data type",
+        "explanation": "JSONB stores parsed JSON in a binary representation with indexing support."
+      },
+      {
+        "id": "sql232-q4",
+        "prompt": "Why should TIMESTAMPTZ be chosen deliberately?",
+        "options": [
+          "It represents time-zone-aware instants and has conversion semantics",
+          "It stores only a calendar date",
+          "It is the same as arbitrary text",
+          "It disables daylight saving time"
+        ],
+        "answer": "It represents time-zone-aware instants and has conversion semantics",
+        "explanation": "Time-zone semantics affect storage and display of instants."
+      },
+      {
+        "id": "sql232-q5",
+        "prompt": "Does a SQLite test prove a PostgreSQL-only ILIKE query works?",
+        "options": [
+          "No; test it in the target PostgreSQL version",
+          "Yes, always",
+          "Only when the table is empty",
+          "Only after VACUUM"
+        ],
+        "answer": "No; test it in the target PostgreSQL version",
+        "explanation": "Dialect-specific syntax requires execution against that DBMS."
+      }
+    ]
+  },
+  "status": "draft"
+}
