@@ -88,9 +88,15 @@ These are supplementary curriculum additions, not W3Schools core navigation topi
 - [ ] Test parameter binding and database import/export in the latest browser run; verify malformed database files leave the existing database intact.
 - [ ] Run browser smoke, keyboard, accessibility, responsive and cross-browser checks.
 
-### F. Learning experience integration
+### F. W3Schools learning activities and platform integration
+- [x] Map W3Schools syllabus, examples, exercises, quiz, code challenges, SQL editor, certification and study plan to CodeSaathi in `docs/SQL_W3SCHOOLS_ACTIVITIES_COVERAGE.csv`.
+- [ ] Add fill-in-the-blank exercise type alongside MCQs.
+- [ ] Build a cumulative SQL quiz flow with scoring, review and persistent progress.
+- [ ] Integrate SQL code challenges with starter databases, hidden tests and auto-grading.
+- [ ] Define an end-of-course certification-style assessment blueprint.
 - [ ] Verify exercises, quizzes and lesson completion tracking for SQL.
 - [ ] Verify progress, bookmarks, lesson history and language preference persistence.
+- [ ] Integrate SQL19 capstone into the platform project activity, rubric and learner progress.
 - [ ] Add SQL projects and capstone evaluation criteria.
 - [ ] Confirm all learning activities are linked to the correct curriculum-index topic IDs.
 
