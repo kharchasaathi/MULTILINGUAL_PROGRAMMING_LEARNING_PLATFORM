@@ -1,0 +1,161 @@
+{
+  "id": "sql.sql11.7.en",
+  "courseId": "sql",
+  "moduleId": "SQL11",
+  "topicId": "SQL11.7",
+  "title": "SQL Database Hosting and Deployment Fundamentals",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and practical behaviour of SQL Database Hosting and Deployment Fundamentals.",
+    "Identify which database engine or application layer performs the operation.",
+    "Predict the result of the SQLite examples before running them.",
+    "Recognize security, recovery, portability and operational limitations.",
+    "Apply the concept safely in a realistic database workflow."
+  ],
+  "prerequisites": [
+    "SQL1.2",
+    "SQL2.1",
+    "SQL3.1",
+    "SQL3.2",
+    "SQL5.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Database hosting means providing the database engine, storage, network access, backups, monitoring and security needed by an application. A local SQLite file, a managed cloud database and a self-hosted database server have different operational models.",
+      "whyItMatters": "A working SQL query is only one part of a production application. Learners must understand where data lives, how applications connect and how deployments protect availability and confidentiality.",
+      "analogy": "Think of a database workflow as a carefully controlled service desk: each operation has a defined responsibility, input and verification step.",
+      "analogyLimit": "The analogy does not model SQL grammar, database transaction isolation, driver APIs, security boundaries or DBMS-specific implementation details."
+    },
+    "explain": {
+      "narrative": "## Hosting models\nSQLite is an embedded database stored in a file and accessed by an application process; it is not a network database server. MySQL, PostgreSQL and SQL Server commonly run as database services that applications connect to over a network or local socket. Managed database hosting moves some operational responsibilities to a provider but does not remove application security duties.\n\n## Deployment checklist\nChoose an engine compatible with application requirements, configure credentials outside source code, use TLS where appropriate, restrict network access, apply least-privilege accounts, plan backups and restores, monitor storage and performance, and test migrations. Keep development, staging and production data separate.\n\n## CodeSaathi Playground boundary\nThe SQL Playground uses browser-side SQLite in an isolated worker with local browser persistence. It is an educational sandbox, not a public database host, shared production database or secure multi-tenant service. Never place real credentials or sensitive production records in lesson examples.\n\n## Worked examples\nThe five original SQLite examples below are executable in the CodeSaathi SQL Playground. Any host-language API or other DBMS command is explicitly labelled as explanatory rather than runnable.",
+      "examples": [
+        {
+          "id": "sql11.7-ex1",
+          "language": "en",
+          "title": "Create a local demonstration schema",
+          "code": "DROP TABLE IF EXISTS hosting_inventory; CREATE TABLE hosting_inventory(id INTEGER PRIMARY KEY,item TEXT NOT NULL,qty INTEGER NOT NULL); INSERT INTO hosting_inventory VALUES(1,'Keyboard',4),(2,'Mouse',9); SELECT COUNT(*) FROM hosting_inventory;",
+          "expectedOutput": "2",
+          "explanation": "This runs locally in the Playground's SQLite database; it does not provision a hosted database server.",
+          "runnable": true
+        },
+        {
+          "id": "sql11.7-ex2",
+          "language": "en",
+          "title": "Check the active SQLite engine version",
+          "code": "SELECT sqlite_version();",
+          "expectedOutput": "3.46.1",
+          "explanation": "The exact version depends on the runtime. A production deployment should record and test its actual database engine version.",
+          "runnable": true
+        },
+        {
+          "id": "sql11.7-ex3",
+          "language": "en",
+          "title": "Inspect connection-level foreign key setting",
+          "code": "PRAGMA foreign_keys;",
+          "expectedOutput": "0",
+          "explanation": "Foreign-key enforcement is connection-specific in SQLite and should be enabled by the application connection setup. The validator enables it for lesson execution.",
+          "runnable": true
+        },
+        {
+          "id": "sql11.7-ex4",
+          "language": "en",
+          "title": "Use a health-check query",
+          "code": "SELECT 1 AS database_health_check;",
+          "expectedOutput": "1",
+          "explanation": "A small query can confirm that a connection responds, but it does not prove backup, authorization or full application health.",
+          "runnable": true
+        },
+        {
+          "id": "sql11.7-ex5",
+          "language": "en",
+          "title": "Inspect local database objects",
+          "code": "DROP TABLE IF EXISTS hosting_demo; CREATE TABLE hosting_demo(id INTEGER PRIMARY KEY,label TEXT); SELECT name FROM sqlite_schema WHERE type='table' AND name='hosting_demo';",
+          "expectedOutput": "hosting_demo",
+          "explanation": "Schema inspection helps verify a migration in a test environment; production rollout still needs backups and rollback planning.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run all five examples for SQL Database Hosting and Deployment Fundamentals. Before running each one, state what the statement or application operation does, predict the result and explain any SQLite-specific limitation.",
+      "independentTask": "Create a small original scenario for SQL Database Hosting and Deployment Fundamentals. Write at least five statements or a documented application workflow, include a safety or verification step, and explain which parts are specific to SQLite or another DBMS.",
+      "hints": [
+        "Read the engine and version notes before choosing syntax.",
+        "Keep user-provided values separate from SQL command text.",
+        "Use explicit names and columns so the operation is easy to review.",
+        "Check the result with a SELECT or integrity/health query.",
+        "For operational changes, document backup, restore and rollback requirements."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "DROP TABLE IF EXISTS hosting_inventory; CREATE TABLE hosting_inventory(id INTEGER PRIMARY KEY,item TEXT NOT NULL,qty INTEGER NOT NULL); INSERT INTO hosting_inventory VALUES(1,'Keyboard',4),(2,'Mouse',9); SELECT COUNT(*) FROM hosting_inventory;",
+    "resetCode": "DROP TABLE IF EXISTS hosting_inventory; CREATE TABLE hosting_inventory(id INTEGER PRIMARY KEY,item TEXT NOT NULL,qty INTEGER NOT NULL); INSERT INTO hosting_inventory VALUES(1,'Keyboard',4),(2,'Mouse',9); SELECT COUNT(*) FROM hosting_inventory;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql11.7-q1",
+        "prompt": "Is SQLite a network database server by itself?",
+        "options": [
+          "No, SQLite is an embedded database engine commonly stored in a file",
+          "Yes, it always listens on a public TCP port",
+          "Yes, it requires a cloud host",
+          "No, it only stores CSV files"
+        ],
+        "answer": "No, SQLite is an embedded database engine commonly stored in a file",
+        "explanation": "SQLite is an embedded database, unlike server products such as MySQL or PostgreSQL."
+      },
+      {
+        "id": "sql11.7-q2",
+        "prompt": "Which secret-handling practice is appropriate?",
+        "options": [
+          "Keep credentials in protected configuration or a secret manager, not source code",
+          "Commit passwords to Git",
+          "Put credentials in lesson JSON",
+          "Use the same admin password everywhere"
+        ],
+        "answer": "Keep credentials in protected configuration or a secret manager, not source code",
+        "explanation": "Secrets should be managed outside source control."
+      },
+      {
+        "id": "sql11.7-q3",
+        "prompt": "Does managed database hosting remove the need for backups and access control?",
+        "options": [
+          "No, responsibilities must be understood and controls still need verification",
+          "Yes, all security becomes automatic",
+          "Yes, applications no longer need authentication",
+          "No, but backups are never possible"
+        ],
+        "answer": "No, responsibilities must be understood and controls still need verification",
+        "explanation": "Managed services reduce some operational work but do not remove governance."
+      },
+      {
+        "id": "sql11.7-q4",
+        "prompt": "What is the SQL Playground's SQLite runtime intended for?",
+        "options": [
+          "Educational practice in an isolated browser environment",
+          "Hosting a shared production database",
+          "Storing real customer credentials",
+          "Replacing a managed database service"
+        ],
+        "answer": "Educational practice in an isolated browser environment",
+        "explanation": "The Playground is a learning sandbox, not production hosting."
+      },
+      {
+        "id": "sql11.7-q5",
+        "prompt": "What should be tested before a production schema migration?",
+        "options": [
+          "Backup and restore plan, migration, compatibility and rollback path",
+          "Only the page colour",
+          "Only the table name spelling",
+          "Nothing if CREATE TABLE succeeds"
+        ],
+        "answer": "Backup and restore plan, migration, compatibility and rollback path",
+        "explanation": "Production changes require recovery and rollback planning."
+      }
+    ]
+  },
+  "status": "draft"
+}
