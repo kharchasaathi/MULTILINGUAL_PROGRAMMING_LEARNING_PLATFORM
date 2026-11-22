@@ -34,9 +34,9 @@
           "id": "sql255-ex1",
           "language": "en",
           "title": "Create account and ledger tables",
-          "code": "CREATE TABLE proj25_accounts (account_id INTEGER PRIMARY KEY, account_label TEXT NOT NULL, balance_cents INTEGER NOT NULL CHECK (balance_cents >= 0)); CREATE TABLE proj25_ledger (entry_id INTEGER PRIMARY KEY, account_id INTEGER NOT NULL REFERENCES proj25_accounts(account_id), transaction_ref TEXT NOT NULL, entry_type TEXT NOT NULL CHECK (entry_type IN ('opening','debit','credit')), amount_cents INTEGER NOT NULL CHECK (amount_cents <> 0), created_at TEXT NOT NULL);",
+          "code": "CREATE TABLE proj25_accounts (account_id INTEGER PRIMARY KEY, account_label TEXT NOT NULL, balance_cents INTEGER NOT NULL CHECK (balance_cents >= 0)); CREATE TABLE proj25_ledger (entry_id INTEGER PRIMARY KEY, account_id INTEGER NOT NULL REFERENCES proj25_accounts(account_id), transaction_ref TEXT NOT NULL, entry_type TEXT NOT NULL CHECK (entry_type IN ('opening','debit','credit')), amount_cents INTEGER NOT NULL CHECK (amount_cents <> 0), created_at TEXT NOT NULL); CREATE TABLE proj25_transfer_requests (idempotency_key TEXT PRIMARY KEY, source_account_id INTEGER NOT NULL REFERENCES proj25_accounts(account_id), destination_account_id INTEGER NOT NULL REFERENCES proj25_accounts(account_id), amount_cents INTEGER NOT NULL CHECK (amount_cents > 0), CHECK (source_account_id <> destination_account_id));",
           "expectedOutput": "Tables created",
-          "explanation": "Creates account summaries and ledger entries. The signed amount is negative for debit and positive for credit; a transfer should have balanced debit/credit entries under one transaction reference.",
+          "explanation": "Creates account summaries and ledger entries. The signed amount is negative for debit and positive for credit; a transfer should have balanced debit/credit entries under one transaction reference. The request table uses a unique idempotency key and foreign keys to both accounts.",
           "runnable": true
         },
         {
@@ -52,9 +52,9 @@
           "id": "sql255-ex3",
           "language": "en",
           "title": "Transfer 2,500 cents from Asha to Bilal",
-          "code": "BEGIN; UPDATE proj25_accounts SET balance_cents = balance_cents - 2500 WHERE account_id = 1 AND balance_cents >= 2500; UPDATE proj25_accounts SET balance_cents = balance_cents + 2500 WHERE account_id = 2; INSERT INTO proj25_ledger VALUES (3, 1, 'TX-5001', 'debit', -2500, '2026-11-22T09:05:00Z'), (4, 2, 'TX-5001', 'credit', 2500, '2026-11-22T09:05:00Z'); COMMIT; SELECT account_id, balance_cents FROM proj25_accounts ORDER BY account_id;",
+          "code": "BEGIN; INSERT INTO proj25_transfer_requests VALUES ('REQ-1001', 1, 2, 2500); UPDATE proj25_accounts SET balance_cents = balance_cents - 2500 WHERE account_id = 1 AND balance_cents >= 2500; UPDATE proj25_accounts SET balance_cents = balance_cents + 2500 WHERE account_id = 2; INSERT INTO proj25_ledger VALUES (3, 1, 'TX-5001', 'debit', -2500, '2026-11-22T09:05:00Z'), (4, 2, 'TX-5001', 'credit', 2500, '2026-11-22T09:05:00Z'); COMMIT; SELECT account_id, balance_cents FROM proj25_accounts ORDER BY account_id;",
           "expectedOutput": "1 | 7500; 2 | 7500",
-          "explanation": "Executes the successful transfer path in one transaction. In production, verify that both account updates affected exactly one row before inserting ledger entries and committing; otherwise roll back. Use a unique idempotency reference to prevent duplicate transfer requests.",
+          "explanation": "Executes the successful transfer path in one transaction. In production, verify that both account updates affected exactly one row before inserting ledger entries and committing; otherwise roll back. Use a unique idempotency reference to prevent duplicate transfer requests. The request key is inserted in the same transaction, so a duplicate key aborts the retry instead of recording the same request twice.",
           "runnable": true
         },
         {
@@ -73,6 +73,15 @@
           "code": "SELECT transaction_ref, SUM(amount_cents) AS net_transfer_cents, COUNT(*) AS entry_count FROM proj25_ledger WHERE transaction_ref = 'TX-5001' GROUP BY transaction_ref;",
           "expectedOutput": "TX-5001 | 0 | 2",
           "explanation": "Checks that the transfer has two ledger entries whose signed amounts sum to zero. A production ledger should also prevent updates/deletes to posted entries and support reversal entries instead. Posted entries should be corrected with linked reversal records rather than edited or deleted.",
+          "runnable": true
+        },
+        {
+          "id": "sql255-ex6",
+          "language": "en",
+          "title": "Reject a repeated transfer request key",
+          "code": "INSERT INTO proj25_transfer_requests VALUES ('REQ-1001', 1, 2, 2500);",
+          "expectedOutput": "Error: UNIQUE constraint failed: proj25_transfer_requests.idempotency_key",
+          "explanation": "The primary key rejects a repeated idempotency key. A production service should look up the original request and return its recorded outcome; it must not execute the transfer again.",
           "runnable": true
         }
       ]
