@@ -48,6 +48,11 @@ for (const topic of topics) {
   assert.ok(lesson.stages?.practise?.independentTask?.length > 20);
   assert.ok(lesson.stages?.practise?.hints?.length >= 3);
   assert.equal(lesson.practice?.playgroundMode, "sql", "SQL lessons must use the dedicated SQL Playground");
+  for (const [label, code] of [["starterCode", lesson.practice?.starterCode], ["resetCode", lesson.practice?.resetCode]]) {
+    assert.ok(typeof code === "string" && code.trim(), topic.topicId + ": missing " + label);
+    const starterRun = spawnSync("python3", ["-c", pyRunner, JSON.stringify([{ id: topic.topicId + "-" + label, code, expectsError: false }])], { encoding: "utf8", timeout: 15000 });
+    assert.equal(starterRun.status, 0, topic.topicId + ": " + label + " SQLite execution check failed: " + (starterRun.stderr || starterRun.stdout));
+  }
   const examples = lesson.stages.explain.examples;
   assert.ok(examples?.length >= 5);
   for (const example of examples) {
