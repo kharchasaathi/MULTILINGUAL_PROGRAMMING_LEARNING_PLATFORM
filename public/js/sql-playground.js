@@ -44,7 +44,7 @@
     resetDbButton.disabled = !ready || value;
     exportButton.disabled = !ready || value;
     importButton.disabled = !ready || value;
-    runState.textContent = value ? "Running…" : "Waiting";
+    if (value) runState.textContent = "Running…";
   }
   function openStore() {
     return new Promise((resolve, reject) => {
@@ -176,6 +176,7 @@
         renderResultSets(message.resultSets || [], message.changes || 0);
         setStatus("Query completed · local database saved", "ready");
         setRunning(false);
+        runState.textContent = "Completed";
         return;
       }
       if (message.type === "error") {
@@ -188,6 +189,7 @@
         appendMessage((message.operation === "import" ? "Import error: " : "SQL error: ") + message.message, "sql-error");
         setStatus(message.operation === "import" ? "Database import failed" : "Query returned an error", "error");
         setRunning(false);
+        runState.textContent = "Error";
         return;
       }
       if (message.type === "reset-done") {
@@ -195,6 +197,7 @@
         clearResults("Local database reset. Run a statement to create tables.");
         setStatus("SQLite ready · empty local database", "ready");
         setRunning(false);
+        runState.textContent = "Database reset";
         return;
       }
       if (message.type === "import-done") {
