@@ -1,0 +1,161 @@
+{
+  "id": "sql.sql18.5.en",
+  "courseId": "sql",
+  "moduleId": "SQL18",
+  "topicId": "SQL18.5",
+  "title": "Migration Validation, Idempotency and Deployment Checks",
+  "language": "en",
+  "learningObjectives": [
+    "Explain how migration history prevents reapplying a completed version.",
+    "Define idempotency and distinguish it from blindly rerunning DDL.",
+    "Use SQLite metadata queries to validate table columns.",
+    "Verify applied migration versions and key data invariants.",
+    "Create a deployment checklist with schema, data and application checks."
+  ],
+  "prerequisites": [
+    "SQL3.2",
+    "SQL3.7",
+    "SQL12.1",
+    "SQL12.2",
+    "SQL12.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A reliable migration process validates both schema and data after applying changes. Idempotency means a deployment process can safely detect an already-applied migration and avoid applying the same non-repeatable change again.",
+      "whyItMatters": "Validation and migration history reduce deployment surprises and make database releases repeatable across environments.",
+      "analogy": "A migration is like a numbered building renovation plan: each change has a recorded step, a verification and a recovery plan.",
+      "analogyLimit": "The analogy does not model transactional DDL, locking, data backfills, version checks or application compatibility."
+    },
+    "explain": {
+      "narrative": "## Idempotency\nA migration runner should check the migration history before applying a version. Do not blindly rerun ALTER TABLE statements that would add the same column twice. Use migration version records and explicit preconditions.\n\n## Validation checks\nVerify required tables, columns, indexes, constraints, row counts and data invariants. Use PRAGMA table_info and sqlite_schema in SQLite. Run foreign_key_check when foreign keys are involved.\n\n## Deployment checklist\nTest from a representative starting schema, apply the migration, verify the target schema and data, test application compatibility, and record the exact migration version and deployment evidence.",
+      "examples": [
+        {
+          "id": "sql18.5-ex1",
+          "language": "en",
+          "title": "Create a table and migration history",
+          "code": "CREATE TABLE mig18_inventory (item_id INTEGER PRIMARY KEY, item_name TEXT NOT NULL); CREATE TABLE mig18_history (version INTEGER PRIMARY KEY, description TEXT NOT NULL);",
+          "expectedOutput": "Tables created",
+          "explanation": "This example demonstrates create a table and migration history in SQLite. Verify the migration state before and after the operation.",
+          "runnable": true
+        },
+        {
+          "id": "sql18.5-ex2",
+          "language": "en",
+          "title": "Record a baseline version idempotently",
+          "code": "INSERT INTO mig18_history VALUES (1, 'Create inventory') ON CONFLICT(version) DO NOTHING;",
+          "expectedOutput": "Baseline recorded",
+          "explanation": "This example demonstrates record a baseline version idempotently in SQLite. Verify the migration state before and after the operation.",
+          "runnable": true
+        },
+        {
+          "id": "sql18.5-ex3",
+          "language": "en",
+          "title": "Inspect the required table columns",
+          "code": "SELECT name, type FROM pragma_table_info('mig18_inventory') ORDER BY cid;",
+          "expectedOutput": "item_id | INTEGER; item_name | TEXT",
+          "explanation": "This example demonstrates inspect the required table columns in SQLite. Verify the migration state before and after the operation.",
+          "runnable": true
+        },
+        {
+          "id": "sql18.5-ex4",
+          "language": "en",
+          "title": "Verify the migration version",
+          "code": "SELECT version, description FROM mig18_history ORDER BY version;",
+          "expectedOutput": "1 | Create inventory",
+          "explanation": "This example demonstrates verify the migration version in SQLite. Verify the migration state before and after the operation.",
+          "runnable": true
+        },
+        {
+          "id": "sql18.5-ex5",
+          "language": "en",
+          "title": "Check that no foreign-key violations exist",
+          "code": "PRAGMA foreign_key_check;",
+          "expectedOutput": "No violations",
+          "explanation": "This example demonstrates check that no foreign-key violations exist in SQLite. Verify the migration state before and after the operation.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and verify the table structure, migration version and foreign-key check result.",
+      "independentTask": "Write a migration validation checklist for a customer-order database. Include table/column checks, constraints, row counts, foreign-key checks and migration history.",
+      "hints": [
+        "Check the migration history before applying a version.",
+        "Do not assume ALTER TABLE can be rerun safely.",
+        "Use PRAGMA table_info to inspect SQLite columns.",
+        "Use PRAGMA foreign_key_check to inspect referential integrity.",
+        "Verify data invariants as well as schema structure."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE mig18_inventory (item_id INTEGER PRIMARY KEY, item_name TEXT NOT NULL);\nCREATE TABLE mig18_history (version INTEGER PRIMARY KEY, description TEXT NOT NULL);\nINSERT INTO mig18_history VALUES (1, 'Create inventory') ON CONFLICT(version) DO NOTHING;\nSELECT name, type FROM pragma_table_info('mig18_inventory') ORDER BY cid;",
+    "resetCode": "CREATE TABLE mig18_inventory (item_id INTEGER PRIMARY KEY, item_name TEXT NOT NULL);\nCREATE TABLE mig18_history (version INTEGER PRIMARY KEY, description TEXT NOT NULL);\nINSERT INTO mig18_history VALUES (1, 'Create inventory') ON CONFLICT(version) DO NOTHING;\nSELECT name, type FROM pragma_table_info('mig18_inventory') ORDER BY cid;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql18.5-q1",
+        "prompt": "What does idempotency mean in migration deployment?",
+        "options": [
+          "The process can detect and avoid reapplying a completed migration",
+          "Every statement is executed twice",
+          "All tables have the same primary key",
+          "A migration always rolls back"
+        ],
+        "answer": "The process can detect and avoid reapplying a completed migration",
+        "explanation": "A migration runner uses version history and preconditions to avoid duplicate application."
+      },
+      {
+        "id": "sql18.5-q2",
+        "prompt": "Why should ALTER TABLE not be blindly rerun?",
+        "options": [
+          "The same column or constraint may already exist",
+          "It always deletes the database",
+          "It never changes schema",
+          "It automatically creates a backup"
+        ],
+        "answer": "The same column or constraint may already exist",
+        "explanation": "Repeating a non-idempotent DDL statement can fail or change the schema unexpectedly."
+      },
+      {
+        "id": "sql18.5-q3",
+        "prompt": "Which SQLite pragma inspects table columns?",
+        "options": [
+          "PRAGMA table_info",
+          "PRAGMA busy_timeout",
+          "PRAGMA optimize only",
+          "PRAGMA recursive_triggers"
+        ],
+        "answer": "PRAGMA table_info",
+        "explanation": "table_info reports column metadata for a table."
+      },
+      {
+        "id": "sql18.5-q4",
+        "prompt": "Which SQLite pragma checks foreign-key violations?",
+        "options": [
+          "PRAGMA foreign_key_check",
+          "PRAGMA index_list",
+          "PRAGMA journal_mode",
+          "PRAGMA encoding"
+        ],
+        "answer": "PRAGMA foreign_key_check",
+        "explanation": "foreign_key_check reports rows that violate foreign-key constraints."
+      },
+      {
+        "id": "sql18.5-q5",
+        "prompt": "What should a deployment validation include?",
+        "options": [
+          "Schema, data, constraints, migration history and application compatibility",
+          "Only whether the migration script file exists",
+          "Only the number of comments",
+          "Only the database theme"
+        ],
+        "answer": "Schema, data, constraints, migration history and application compatibility",
+        "explanation": "A reliable deployment validates both database state and application behaviour."
+      }
+    ]
+  },
+  "status": "draft"
+}
