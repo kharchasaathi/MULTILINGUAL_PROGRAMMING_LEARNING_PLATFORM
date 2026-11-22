@@ -25,7 +25,7 @@
       "analogyLimit": "The analogy does not represent SQL partition rules, frame boundaries, tie handling or optimizer behaviour."
     },
     "explain": {
-      "narrative": "## Three ranking functions\n- ROW_NUMBER assigns a unique sequence number to every row in the window.\n- RANK assigns the same rank to tied values and leaves gaps after ties.\n- DENSE_RANK assigns the same rank to ties but does not leave gaps.\n\n## Ties and ordering\nUse the intended business value in the ranking window. Add a tie-breaker to ROW_NUMBER when you need a deterministic sequence. Do not add a tie-breaker to RANK or DENSE_RANK if the business rule says equal scores should share a rank.\n\n## Top-N patterns\nA common pattern calculates a rank in a subquery or CTE, then filters the rank in an outer query. This is more flexible than relying on product-specific TOP or LIMIT syntax.",
+      "narrative": "## Three ranking functions\n- ROW_NUMBER assigns a unique sequence number to every row in the window.\n- RANK assigns the same rank to tied values and leaves gaps after ties.\n- DENSE_RANK assigns the same rank to ties but does not leave gaps.\n\n## Ties and ordering\nUse the intended business value in the ranking window. Add a tie-breaker to ROW_NUMBER when you need a deterministic sequence. Do not add a tie-breaker to RANK or DENSE_RANK if the business rule says equal scores should share a rank.\n\n## Top-N patterns\nA common pattern calculates a rank in a subquery or CTE, then filters the rank in an outer query. This is more flexible than relying on product-specific TOP or LIMIT syntax.\n\n### Choose the ranking rule from the business question\nROW_NUMBER is appropriate when exactly one unique sequence is required. RANK is appropriate when ties share a position and gaps after ties are meaningful. DENSE_RANK is appropriate when ties share a position but the next distinct value should receive the next consecutive rank.\n\n### Top-N rows versus top-N ranks\nFiltering ROW_NUMBER <= N returns at most N rows. Filtering RANK <= N or DENSE_RANK <= N can return more than N rows when ties occur. Decide whether the requirement means a fixed row count or a number of score/rank bands.",
       "examples": [
         {
           "id": "sql14.3-ex1",
@@ -33,7 +33,7 @@
           "title": "Create player scores",
           "code": "CREATE TABLE win14_scores (player_id INTEGER PRIMARY KEY, player_name TEXT NOT NULL, score INTEGER NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create player scores with SQLite window functions. Check the window definition and row order.",
+          "explanation": "Creates a score table with a unique player identifier, name and integer score. The unique key allows rows to be identified even when scores tie.",
           "runnable": true
         },
         {
@@ -42,7 +42,7 @@
           "title": "Insert scores including a tie",
           "code": "INSERT INTO win14_scores VALUES (1, 'Asha', 100), (2, 'Bilal', 90), (3, 'Chitra', 90), (4, 'Dinesh', 80);",
           "expectedOutput": "4 rows inserted",
-          "explanation": "This example demonstrates insert scores including a tie with SQLite window functions. Check the window definition and row order.",
+          "explanation": "Inserts four players. Bilal and Chitra both score 90, creating a tie that distinguishes RANK from DENSE_RANK.",
           "runnable": true
         },
         {
@@ -51,7 +51,7 @@
           "title": "Compare all three ranking functions",
           "code": "SELECT player_name, score, ROW_NUMBER() OVER (ORDER BY score DESC, player_name) AS row_no, RANK() OVER (ORDER BY score DESC) AS rank_no, DENSE_RANK() OVER (ORDER BY score DESC) AS dense_rank_no FROM win14_scores ORDER BY score DESC, player_name;",
           "expectedOutput": "Asha | 100 | 1 | 1 | 1; Bilal | 90 | 2 | 2 | 2; Chitra | 90 | 3 | 2 | 2; Dinesh | 80 | 4 | 4 | 3",
-          "explanation": "This example demonstrates compare all three ranking functions with SQLite window functions. Check the window definition and row order.",
+          "explanation": "Calculates three ranking values. ROW_NUMBER gives every row a unique position using score and name; RANK gives both 90-point players rank 2 and leaves rank 3 unused; DENSE_RANK gives the same tie rank but assigns the next distinct score rank 3.",
           "runnable": true
         },
         {
@@ -60,7 +60,7 @@
           "title": "Return the top two score positions using RANK",
           "code": "WITH ranked AS (SELECT player_name, score, RANK() OVER (ORDER BY score DESC) AS score_rank FROM win14_scores) SELECT player_name, score, score_rank FROM ranked WHERE score_rank <= 2 ORDER BY score_rank, player_name;",
           "expectedOutput": "Asha | 100 | 1; Bilal | 90 | 2; Chitra | 90 | 2",
-          "explanation": "This example demonstrates return the top two score positions using rank with SQLite window functions. Check the window definition and row order.",
+          "explanation": "The CTE calculates RANK using score only, so both 90-point players qualify for rank <= 2. The result contains three players even though the requested top two rank positions cover two distinct rank values.",
           "runnable": true
         },
         {
@@ -69,7 +69,7 @@
           "title": "Return the top three dense ranks",
           "code": "WITH ranked AS (SELECT player_name, score, DENSE_RANK() OVER (ORDER BY score DESC) AS score_band FROM win14_scores) SELECT player_name, score, score_band FROM ranked WHERE score_band <= 3 ORDER BY score_band, player_name;",
           "expectedOutput": "Asha | 100 | 1; Bilal | 90 | 2; Chitra | 90 | 2; Dinesh | 80 | 3",
-          "explanation": "This example demonstrates return the top three dense ranks with SQLite window functions. Check the window definition and row order.",
+          "explanation": "The CTE calculates DENSE_RANK, so the first three distinct score levels are included. Dinesh receives dense rank 3, while the two tied 90-point players share rank 2.",
           "runnable": true
         }
       ]
