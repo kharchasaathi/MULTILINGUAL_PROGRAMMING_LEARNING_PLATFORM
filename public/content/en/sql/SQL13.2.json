@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql13.2.en",
+  "courseId": "sql",
+  "moduleId": "SQL13",
+  "topicId": "SQL13.2",
+  "title": "Scalar and Correlated Subqueries",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the result requirements of a scalar subquery.",
+    "Identify an outer-query reference that makes a subquery correlated.",
+    "Use a correlated aggregate to compare each row with its group average.",
+    "Use a scalar subquery in the SELECT list to add a calculated value.",
+    "Recognize NULL results, multi-row scalar errors and performance considerations."
+  ],
+  "prerequisites": [
+    "SQL5.1",
+    "SQL9.3",
+    "SQL9.5"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A scalar subquery returns one value for use in an expression. A correlated subquery refers to columns from the outer query, so its result is logically related to the current outer row. The optimizer may choose an efficient plan, but the correlation must be understood correctly.",
+      "whyItMatters": "Scalar and correlated subqueries express comparisons against overall or per-group values, such as employees paid above their department average.",
+      "analogy": "A nested query is like a staged research task: first calculate or collect an intermediate result, then use it to answer the final question.",
+      "analogyLimit": "The analogy does not model SQL's exact cardinality rules, NULL logic, query optimizer or recursive evaluation."
+    },
+    "explain": {
+      "narrative": "## Scalar subqueries\nA scalar subquery returns one value and can appear in a SELECT expression or a comparison. If the query returns no rows, its scalar result is NULL. If it returns more than one row, SQLite reports a scalar subquery error.\n\n## Correlated subqueries\nA correlated subquery references an outer-query column. For each outer row, the nested condition is associated with that row's values. A common pattern compares an employee's salary with the average salary in that employee's department.\n\n## NULL and performance\nBe careful when a scalar subquery can return NULL. Correlated subqueries can be readable, but large workloads should be checked with EXPLAIN QUERY PLAN and appropriate indexes. An equivalent join or window query may be clearer or faster.",
+      "examples": [
+        {
+          "id": "sql13.2-ex1",
+          "language": "en",
+          "title": "Create employee data",
+          "code": "CREATE TABLE sub13_employees (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, department_id INTEGER NOT NULL, salary INTEGER NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "This example demonstrates create employee data using SQLite. Follow the inner query and outer result carefully.",
+          "runnable": true
+        },
+        {
+          "id": "sql13.2-ex2",
+          "language": "en",
+          "title": "Insert employees across two departments",
+          "code": "INSERT INTO sub13_employees VALUES (1, 'Asha', 1, 100), (2, 'Ravi', 1, 80), (3, 'Mira', 2, 90), (4, 'Noor', 2, 70);",
+          "expectedOutput": "4 rows inserted",
+          "explanation": "This example demonstrates insert employees across two departments using SQLite. Follow the inner query and outer result carefully.",
+          "runnable": true
+        },
+        {
+          "id": "sql13.2-ex3",
+          "language": "en",
+          "title": "Find employees above their own department average",
+          "code": "SELECT e.employee_name FROM sub13_employees AS e WHERE e.salary > (SELECT AVG(x.salary) FROM sub13_employees AS x WHERE x.department_id = e.department_id) ORDER BY e.employee_name;",
+          "expectedOutput": "Asha; Mira",
+          "explanation": "This example demonstrates find employees above their own department average using SQLite. Follow the inner query and outer result carefully.",
+          "runnable": true
+        },
+        {
+          "id": "sql13.2-ex4",
+          "language": "en",
+          "title": "Show the company average beside each employee",
+          "code": "SELECT employee_name, salary, (SELECT AVG(salary) FROM sub13_employees) AS company_average FROM sub13_employees ORDER BY employee_name;",
+          "expectedOutput": "Asha | 100 | 85; Mira | 90 | 85; Noor | 70 | 85; Ravi | 80 | 85",
+          "explanation": "This example demonstrates show the company average beside each employee using SQLite. Follow the inner query and outer result carefully.",
+          "runnable": true
+        },
+        {
+          "id": "sql13.2-ex5",
+          "language": "en",
+          "title": "Find each employee's department size",
+          "code": "SELECT e.employee_name, (SELECT COUNT(*) FROM sub13_employees AS x WHERE x.department_id = e.department_id) AS department_size FROM sub13_employees AS e ORDER BY e.employee_name;",
+          "expectedOutput": "Asha | 2; Mira | 2; Noor | 2; Ravi | 2",
+          "explanation": "This example demonstrates find each employee's department size using SQLite. Follow the inner query and outer result carefully.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and explain why Asha and Mira are above their own department averages, even though the query uses one correlated subquery.",
+      "independentTask": "Create departments and staff data. Use a correlated subquery to find staff whose salary is above their department average and a scalar subquery to show the company-wide average.",
+      "hints": [
+        "A scalar subquery returns one value to the outer expression.",
+        "A correlated subquery refers to a column from the outer query.",
+        "Use different table aliases for inner and outer query references.",
+        "The department comparison must match the inner department_id to the current outer row.",
+        "Inspect query plans for expensive correlated queries on large tables."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE sub13_employees (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, department_id INTEGER NOT NULL, salary INTEGER NOT NULL);\nINSERT INTO sub13_employees VALUES (1, 'Asha', 1, 100), (2, 'Ravi', 1, 80), (3, 'Mira', 2, 90), (4, 'Noor', 2, 70);\nSELECT e.employee_name FROM sub13_employees AS e WHERE e.salary > (SELECT AVG(x.salary) FROM sub13_employees AS x WHERE x.department_id = e.department_id) ORDER BY e.employee_name;",
+    "resetCode": "CREATE TABLE sub13_employees (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, department_id INTEGER NOT NULL, salary INTEGER NOT NULL);\nINSERT INTO sub13_employees VALUES (1, 'Asha', 1, 100), (2, 'Ravi', 1, 80), (3, 'Mira', 2, 90), (4, 'Noor', 2, 70);\nSELECT e.employee_name FROM sub13_employees AS e WHERE e.salary > (SELECT AVG(x.salary) FROM sub13_employees AS x WHERE x.department_id = e.department_id) ORDER BY e.employee_name;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql13.2-q1",
+        "prompt": "What makes a subquery correlated?",
+        "options": [
+          "It references a column from the outer query",
+          "It always returns multiple rows",
+          "It uses only aggregate functions",
+          "It contains a CREATE TABLE statement"
+        ],
+        "answer": "It references a column from the outer query",
+        "explanation": "A correlated subquery uses values from the current outer row."
+      },
+      {
+        "id": "sql13.2-q2",
+        "prompt": "What happens when a scalar subquery returns no rows?",
+        "options": [
+          "Its scalar result is NULL",
+          "It automatically returns zero",
+          "It deletes the outer row",
+          "It becomes a table"
+        ],
+        "answer": "Its scalar result is NULL",
+        "explanation": "A scalar subquery with no result rows evaluates to NULL."
+      },
+      {
+        "id": "sql13.2-q3",
+        "prompt": "Why does the department average query use two aliases?",
+        "options": [
+          "To distinguish the outer employee row from rows inside the subquery",
+          "To create two separate databases",
+          "To force duplicate results",
+          "To rename the department table permanently"
+        ],
+        "answer": "To distinguish the outer employee row from rows inside the subquery",
+        "explanation": "Aliases make the inner and outer references unambiguous."
+      },
+      {
+        "id": "sql13.2-q4",
+        "prompt": "What does the correlated department condition do?",
+        "options": [
+          "It calculates an average for the current employee's department",
+          "It calculates the average for every table in the database",
+          "It filters employees by name",
+          "It changes the salary values"
+        ],
+        "answer": "It calculates an average for the current employee's department",
+        "explanation": "The inner query matches its department_id to the outer row's department_id."
+      },
+      {
+        "id": "sql13.2-q5",
+        "prompt": "What should be checked when a correlated query is slow?",
+        "options": [
+          "Its execution plan and supporting indexes",
+          "Only the SQL keyword capitalization",
+          "The number of comments",
+          "The file extension of the database"
+        ],
+        "answer": "Its execution plan and supporting indexes",
+        "explanation": "Execution plans and indexes help diagnose performance."
+      }
+    ]
+  },
+  "status": "draft"
+}
