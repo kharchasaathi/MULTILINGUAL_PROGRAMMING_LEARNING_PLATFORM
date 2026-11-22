@@ -15,6 +15,7 @@ let examplesChecked = 0;
 let outputsCompared = 0;
 let statusOnlyExamples = 0;
 let dynamicOutputs = 0;
+let expectedErrors = 0;
 const pyRunner = [
   "import json, re, sqlite3, sys",
   "examples = json.loads(sys.argv[1])",
@@ -65,6 +66,7 @@ const pyRunner = [
   "compared = 0",
   "skipped = 0",
   "dynamic = 0",
+  "expected_errors = 0",
   "mismatches = []",
   "for item in examples:",
   "    result_sets = []",
@@ -79,6 +81,7 @@ const pyRunner = [
   "    except sqlite3.Error as exc:",
   "        if not item['expectsError']:",
   "            raise AssertionError(item['id'] + ': ' + str(exc)) from exc",
+  "        expected_errors += 1",
   "        continue",
   "    if not result_sets:",
   "        skipped += 1",
@@ -106,7 +109,7 @@ const pyRunner = [
   "    else:",
   "        compared += 1",
   "db.close()",
-  "print(json.dumps({'compared': compared, 'skipped': skipped, 'dynamic': dynamic, 'mismatches': mismatches}))"
+  "print(json.dumps({'compared': compared, 'skipped': skipped, 'dynamic': dynamic, 'expected_errors': expected_errors, 'mismatches': mismatches}))"
 ].join("\n");
 
 for (const topic of topics) {
@@ -166,6 +169,7 @@ for (const topic of topics) {
   outputsCompared += result.compared;
   statusOnlyExamples += result.skipped;
   dynamicOutputs += result.dynamic;
+  expectedErrors += result.expected_errors;
   assert.equal(result.mismatches.length, 0, topic.topicId + ": expectedOutput mismatch: " + JSON.stringify(result.mismatches));
 }
-console.log("SQL course validation passed: " + topics.length + " lessons, " + examplesChecked + " SQLite-executed examples, " + outputsCompared + " expected outputs compared with actual result sets, " + statusOnlyExamples + " status-only examples, " + dynamicOutputs + " runtime-dependent outputs checked by pattern, " + questionIds.size + " MCQs.");
+console.log("SQL course validation passed: " + topics.length + " lessons, " + examplesChecked + " SQLite-executed examples, " + outputsCompared + " expected outputs compared with actual result sets, " + statusOnlyExamples + " status-only examples, " + dynamicOutputs + " runtime-dependent outputs checked by pattern, " + expectedErrors + " expected-error examples, " + questionIds.size + " MCQs.");
