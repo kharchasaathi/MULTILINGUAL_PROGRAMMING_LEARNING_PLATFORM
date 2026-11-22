@@ -25,7 +25,7 @@
       "analogyLimit": "The analogy does not model SQL locking, isolation levels, storage durability or engine-specific transaction implementation."
     },
     "explain": {
-      "narrative": "## Basic transaction flow\nUse BEGIN to start a transaction, execute related statements, and use COMMIT after all required work succeeds. If a statement fails, handle the error and roll back rather than committing a partial operation.\n\n## SQLite syntax\nSQLite supports BEGIN [DEFERRED | IMMEDIATE | EXCLUSIVE], COMMIT and END. A transaction started with BEGIN remains active until COMMIT or ROLLBACK.\n\n## Transaction boundaries\nKeep transactions short. Do not wait for user input or make network requests while holding a write transaction. Use application error handling to guarantee that every successful BEGIN is paired with COMMIT or ROLLBACK.\n\n## Autocommit\nSQLite normally runs in autocommit mode when no explicit transaction is active. A standalone statement is committed automatically when it finishes successfully.",
+      "narrative": "## Basic transaction flow\nUse BEGIN to start a transaction, execute related statements, and use COMMIT after all required work succeeds. If a statement fails, handle the error and roll back rather than committing a partial operation.\n\n## SQLite syntax\nSQLite supports BEGIN [DEFERRED | IMMEDIATE | EXCLUSIVE], COMMIT and END. A transaction started with BEGIN remains active until COMMIT or ROLLBACK.\n\n## Transaction boundaries\nKeep transactions short. Do not wait for user input or make network requests while holding a write transaction. Use application error handling to guarantee that every successful BEGIN is paired with COMMIT or ROLLBACK.\n\n## Autocommit\nSQLite normally runs in autocommit mode when no explicit transaction is active. A standalone statement is committed automatically when it finishes successfully.\n\n### Transaction lifecycle\nA transaction begins with BEGIN (or a product-specific equivalent) and ends with COMMIT or ROLLBACK. Avoid leaving a transaction open while waiting for a user, network request or unrelated work. Long-running transactions can hold locks or delay cleanup and maintenance.\n\n### Autocommit and application code\nWhen no explicit transaction is active, SQLite normally commits each successful statement automatically. Application code should use structured error handling so a successful BEGIN is always followed by either COMMIT or ROLLBACK, including when a later statement throws an error.",
       "examples": [
         {
           "id": "sql12.2-ex1",
@@ -33,7 +33,7 @@
           "title": "Create an order table",
           "code": "CREATE TABLE tx12_orders (order_id INTEGER PRIMARY KEY, customer TEXT NOT NULL, order_status TEXT NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create an order table in SQLite. Observe the transaction boundary and verify the stated result.",
+          "explanation": "Creates an order table with a primary key and required customer and status values. NOT NULL prevents incomplete rows, while application logic should constrain status to an approved set if the workflow requires it.",
           "runnable": true
         },
         {
@@ -42,7 +42,7 @@
           "title": "Start and insert an order",
           "code": "BEGIN; INSERT INTO tx12_orders VALUES (1, 'Nila', 'created');",
           "expectedOutput": "1 row inserted",
-          "explanation": "This example demonstrates start and insert an order in SQLite. Observe the transaction boundary and verify the stated result.",
+          "explanation": "Starts an explicit transaction and inserts one order. The row is visible to the same connection inside the transaction, but it is not yet committed for other connections.",
           "runnable": true
         },
         {
@@ -51,7 +51,7 @@
           "title": "Commit the order",
           "code": "COMMIT;",
           "expectedOutput": "Transaction committed",
-          "explanation": "This example demonstrates commit the order in SQLite. Observe the transaction boundary and verify the stated result.",
+          "explanation": "Commits the active transaction. Once COMMIT succeeds, the order becomes durable according to the engine's configured guarantees; if the transaction had failed, the application should roll it back instead.",
           "runnable": true
         },
         {
@@ -60,7 +60,7 @@
           "title": "Read the committed order",
           "code": "SELECT order_id, customer, order_status FROM tx12_orders;",
           "expectedOutput": "1 | Nila | created",
-          "explanation": "This example demonstrates read the committed order in SQLite. Observe the transaction boundary and verify the stated result.",
+          "explanation": "Reads the order after COMMIT. The selected fields verify the stored identifier, customer and initial status.",
           "runnable": true
         },
         {
@@ -69,7 +69,7 @@
           "title": "Update and commit order status",
           "code": "BEGIN; UPDATE tx12_orders SET order_status = 'paid' WHERE order_id = 1; COMMIT; SELECT order_status FROM tx12_orders WHERE order_id = 1;",
           "expectedOutput": "paid",
-          "explanation": "This example demonstrates update and commit order status in SQLite. Observe the transaction boundary and verify the stated result.",
+          "explanation": "Begins a second transaction, changes the status, commits, and reads the new value. The SELECT after COMMIT confirms the update is part of the committed state.",
           "runnable": true
         }
       ]
