@@ -1,6 +1,8 @@
 # CodeSaathi SQL Course — Remaining Work Roadmap
 
 Last audited: 2026-11-22
+
+**User decision:** Telugu translation is explicitly deferred until the very end. Do not create or edit Telugu SQL lesson files until the user asks to begin that final phase.
 Repository: kharchasaathi/MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
 Working branch: content/sql-course-foundation
 Pull request: #13 (open; do not merge until release gates pass)
@@ -36,6 +38,7 @@ The roadmap-document commit itself must receive a fresh Actions run before its C
 ### A. Complete the W3Schools topic audit
 - [x] Build a 68-row topic-to-lesson mapping matrix for the current W3Schools SQL Tutorial, SQL Database and SQL Reference navigation.
 - [ ] Verify every mapped lesson's detailed content against its individual W3Schools source page.
+- [x] Correct SQL4.2–SQL4.7 inventory and coverage mappings against actual lesson titles; map DEFAULT to SQL4.2, UNIQUE to SQL4.3, PRIMARY KEY to SQL4.4, FOREIGN KEY to SQL4.5, CHECK to SQL4.6 and column/table-level constraints to SQL4.7.
 - [ ] Check all 81 lesson files for title accuracy, learning objectives, three learning stages, examples, practice, MCQ explanations and dialect notes.
 - [ ] Resolve source-inventory `missing_coverage` notes; distinguish required tutorial concepts from optional advanced depth and dialect-specific extensions.
 - [ ] Verify that no W3Schools topic is missing and no CodeSaathi lesson duplicates another topic unnecessarily.
@@ -57,8 +60,8 @@ These are supplementary curriculum candidates, not claims about W3Schools core n
 - [ ] Triggers, migration workflows and operational database maintenance.
 - [ ] Practical projects and a database capstone.
 
-### D. Telugu translation
-- [ ] Translate the approved English lesson set into Telugu, preserving all lesson IDs and schema.
+### D. Telugu translation — deliberately deferred to the final phase
+- [ ] Only after the user explicitly starts the final translation phase, translate the approved English lesson set into Telugu, preserving all lesson IDs and schema.
 - [ ] Translate explanations, objectives, practice, hints, assessment questions and answer explanations.
 - [ ] Preserve SQL syntax, identifiers and code output; localize only learner-facing prose.
 - [ ] Validate Telugu JSON schema, lesson parity and content completeness.
