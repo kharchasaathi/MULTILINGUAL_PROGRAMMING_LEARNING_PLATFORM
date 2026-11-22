@@ -287,6 +287,14 @@ test("SQL Playground runs SQLite in a worker, persists locally, reports errors a
   await expect(page.locator("#sqlStatus")).toHaveAttribute("data-state", "ready", { timeout: 120000 });
   await expect(page.locator("#sqlVersion")).toContainText("SQLite");
 
+  // Foreign-key enforcement must be enabled for every fresh, restored and imported Playground connection.
+  await page.locator("#sqlCode").fill("PRAGMA foreign_keys;");
+  await page.locator("#runSql").click();
+  await expect(page.locator("#sqlResults")).toContainText("1", { timeout: 15000 });
+  await page.locator("#sqlCode").fill("CREATE TABLE fk_parent (id INTEGER PRIMARY KEY); CREATE TABLE fk_child (parent_id INTEGER REFERENCES fk_parent(id)); INSERT INTO fk_child VALUES (99);");
+  await page.locator("#runSql").click();
+  await expect(page.locator("#sqlResults")).toContainText("FOREIGN KEY constraint failed", { timeout: 15000 });
+
   const createAndQuery = "CREATE TABLE learners (learner_id INTEGER PRIMARY KEY, learner_name TEXT NOT NULL, score INTEGER NOT NULL); INSERT INTO learners (learner_name, score) VALUES ('Asha', 88), ('Ravi', 76); SELECT learner_name, score FROM learners ORDER BY score DESC;";
   await page.locator("#sqlCode").fill(createAndQuery);
   await page.locator("#runSql").click();
