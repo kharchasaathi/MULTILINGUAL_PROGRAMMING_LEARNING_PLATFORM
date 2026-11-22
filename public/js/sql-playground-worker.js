@@ -113,6 +113,7 @@ self.addEventListener("message", async event => {
     await initRuntime();
     if (message.type === "init") {
       db = message.bytes ? new SQL.Database(new Uint8Array(message.bytes)) : new SQL.Database();
+      db.exec("PRAGMA foreign_keys = ON;");
       send("ready", { version: SQL.version?.libVersion || "SQLite", restored: Boolean(message.bytes) });
       return;
     }
@@ -137,6 +138,7 @@ self.addEventListener("message", async event => {
       if (!(message.bytes instanceof ArrayBuffer) || !message.bytes.byteLength) throw new Error("Choose a non-empty SQLite database file.");
       if (message.bytes.byteLength > 20 * 1024 * 1024) throw new Error("SQLite imports are limited to 20 MB.");
       const imported = new SQL.Database(new Uint8Array(message.bytes));
+      imported.exec("PRAGMA foreign_keys = ON;");
       const previous = db;
       db = imported;
       if (previous) previous.close();
@@ -147,6 +149,7 @@ self.addEventListener("message", async event => {
     if (message.type === "reset") {
       db.close();
       db = new SQL.Database();
+      db.exec("PRAGMA foreign_keys = ON;");
       const bytes = exportBytes();
       send("reset-done", { bytes }, [bytes]);
       return;
