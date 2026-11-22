@@ -68,7 +68,7 @@
           "language": "en",
           "title": "Use two foreign keys and referential actions in a junction table",
           "code": "PRAGMA foreign_keys = ON;\nCREATE TABLE c4_student (student_id INTEGER PRIMARY KEY, student_name TEXT NOT NULL);\nCREATE TABLE c4_course (course_id INTEGER PRIMARY KEY, course_title TEXT NOT NULL);\nCREATE TABLE c4_enrollment (\n  student_id INTEGER NOT NULL,\n  course_id INTEGER NOT NULL,\n  PRIMARY KEY (student_id, course_id),\n  FOREIGN KEY (student_id) REFERENCES c4_student(student_id) ON UPDATE CASCADE ON DELETE CASCADE,\n  FOREIGN KEY (course_id) REFERENCES c4_course(course_id) ON UPDATE CASCADE ON DELETE RESTRICT\n);\nINSERT INTO c4_student VALUES (1, 'Mina');\nINSERT INTO c4_course VALUES (10, 'SQL Basics');\nINSERT INTO c4_enrollment VALUES (1, 10);\nUPDATE c4_student SET student_id = 2 WHERE student_id = 1;\nSELECT student_id, course_id FROM c4_enrollment;\nDELETE FROM c4_student WHERE student_id = 2;\nSELECT COUNT(*) FROM c4_enrollment;",
-          "expectedOutput": "Uma | Research",
+          "expectedOutput": "2 | 10; 0",
           "explanation": "Enrollment references both parent tables and uses a composite primary key. ON UPDATE CASCADE propagates the changed student key. ON DELETE CASCADE removes the student's enrollment. ON DELETE RESTRICT prevents deleting a course while a child enrollment still exists. SQLite must have foreign-key enforcement enabled for this connection.",
           "runnable": true,
           "output": "2 | 10; 0"
