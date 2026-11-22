@@ -25,7 +25,7 @@
       "analogyLimit": "The analogy does not model type systems, function return types, time-zone rules, optimizer behaviour or transaction semantics."
     },
     "explain": {
-      "narrative": "## SQLite date/time representation\nSQLite date/time values are commonly stored as ISO-8601 text, Julian day numbers or Unix timestamps. Built-in functions include date(), time(), datetime(), julianday(), unixepoch() and strftime().\n\n## Server database differences\nMySQL has DATE, TIME, DATETIME and TIMESTAMP types and functions such as DATE_ADD and NOW. SQL Server has DATE, DATETIME2 and functions such as DATEADD and GETDATE. PostgreSQL has timestamp with/without time zone and interval arithmetic.\n\n## Time-zone discipline\nStore a clearly defined instant, commonly normalized to UTC, and preserve the original zone when business rules require it. Do not assume that a date string without a zone identifies a universal instant.",
+      "narrative": "## SQLite date/time representation\nSQLite date/time values are commonly stored as ISO-8601 text, Julian day numbers or Unix timestamps. Built-in functions include date(), time(), datetime(), julianday(), unixepoch() and strftime().\n\n## Server database differences\nMySQL has DATE, TIME, DATETIME and TIMESTAMP types and functions such as DATE_ADD and NOW. SQL Server has DATE, DATETIME2 and functions such as DATEADD and GETDATE. PostgreSQL has timestamp with/without time zone and interval arithmetic.\n\n## Time-zone discipline\nStore a clearly defined instant, commonly normalized to UTC, and preserve the original zone when business rules require it. Do not assume that a date string without a zone identifies a universal instant.\n\n### Date, time and time-zone semantics\nA DATE represents a calendar date; a local timestamp represents wall-clock time in a chosen zone; a UTC instant represents a point on the global timeline. Do not store a local timestamp as if it were UTC. Daylight-saving transitions and zone changes can make local-time arithmetic nontrivial.\n\n### Product-specific APIs\nSQLite uses date(), datetime(), julianday(), unixepoch() and strftime(); MySQL provides DATE_ADD and NOW(); SQL Server provides DATEADD and GETDATE(); PostgreSQL supports timestamp types and interval arithmetic. Verify return types, precision and time-zone conversions in the target engine.",
       "examples": [
         {
           "id": "sql16.4-ex1",
@@ -33,7 +33,7 @@
           "title": "Create an event date table",
           "code": "CREATE TABLE dialect16_dates (event_id INTEGER PRIMARY KEY, event_name TEXT NOT NULL, event_date TEXT NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create an event date table using SQLite. Compare its syntax with the target DBMS before migration.",
+          "explanation": "Creates an events table with ISO-formatted date text. SQLite has no dedicated DATE storage class; the chosen text representation is a convention that must be applied consistently.",
           "runnable": true
         },
         {
@@ -42,7 +42,7 @@
           "title": "Insert ISO-8601 date values",
           "code": "INSERT INTO dialect16_dates VALUES (1, 'Launch', '2026-11-22'), (2, 'Review', '2026-12-05');",
           "expectedOutput": "2 rows inserted",
-          "explanation": "This example demonstrates insert iso-8601 date values using SQLite. Compare its syntax with the target DBMS before migration.",
+          "explanation": "Inserts two date-only values in YYYY-MM-DD format. This representation sorts chronologically as text when every value follows the same fixed-width ISO format.",
           "runnable": true
         },
         {
@@ -51,7 +51,7 @@
           "title": "Extract a year with SQLite strftime",
           "code": "SELECT event_name, strftime('%Y', event_date) AS event_year FROM dialect16_dates ORDER BY event_id;",
           "expectedOutput": "Launch | 2026; Review | 2026",
-          "explanation": "This example demonstrates extract a year with sqlite strftime using SQLite. Compare its syntax with the target DBMS before migration.",
+          "explanation": "Uses SQLite strftime('%Y', ...) to extract the year component from each date. The function and format tokens are SQLite-specific and should not be copied unchanged into another DBMS.",
           "runnable": true
         },
         {
@@ -60,7 +60,7 @@
           "title": "Add days using SQLite date()",
           "code": "SELECT date('2026-11-22', '+7 days');",
           "expectedOutput": "2026-11-29",
-          "explanation": "This example demonstrates add days using sqlite date() using SQLite. Compare its syntax with the target DBMS before migration.",
+          "explanation": "Adds seven calendar days using SQLite's date() modifier syntax. The result is 2026-11-29; other engines use different date arithmetic functions or interval expressions.",
           "runnable": true
         },
         {
@@ -69,7 +69,7 @@
           "title": "Calculate a day difference",
           "code": "SELECT julianday('2026-12-05') - julianday('2026-11-22');",
           "expectedOutput": "13.0",
-          "explanation": "This example demonstrates calculate a day difference using SQLite. Compare its syntax with the target DBMS before migration.",
+          "explanation": "Subtracts Julian day values to calculate the number of days between two dates. The difference is 13 days; Julian day arithmetic is useful for elapsed-day calculations but does not replace time-zone-aware instant arithmetic.",
           "runnable": true
         }
       ]
