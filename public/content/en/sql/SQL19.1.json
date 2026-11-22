@@ -29,7 +29,7 @@
       "analogyLimit": "The analogy does not model database isolation, concurrent workloads, deployment security or recovery guarantees."
     },
     "explain": {
-      "narrative": "## Capstone scenario\nBuild a small inventory and sales database for a shop. The system must store product categories, products, customers, orders and order items. It must report sales and protect stock data.\n\n## Model the entities\nA category can contain many products. Each product belongs to one category. Give each entity a primary key and use a foreign key for the relationship.\n\n## Domain rules\nProduct names should be required, prices and stock quantities should not be negative, and category names should be unique. Use database constraints for rules that must hold regardless of which application writes the data.",
+      "narrative": "## Capstone scenario\nBuild a small inventory and sales database for a shop. The system must store product categories, products, customers, orders and order items. It must report sales and protect stock data.\n\n## Model the entities\nA category can contain many products. Each product belongs to one category. Give each entity a primary key and use a foreign key for the relationship.\n\n## Domain rules\nProduct names should be required, prices and stock quantities should not be negative, and category names should be unique. Use database constraints for rules that must hold regardless of which application writes the data.\n\n### Model review\nThe category-to-product relationship is one-to-many: one category can classify multiple products, while each product row references one category. A production model should also define whether product names or codes are unique, how discontinued products are represented, and whether price changes require an audit history.\n\n### SQLite integrity setting\nEnable and verify `PRAGMA foreign_keys = ON` on every SQLite connection used for the exercise. Test an invalid category_id to prove the runtime is enforcing the relationship.",
       "examples": [
         {
           "id": "sql19.1-ex1",
@@ -37,7 +37,7 @@
           "title": "Create product categories",
           "code": "CREATE TABLE cap19_categories (category_id INTEGER PRIMARY KEY, category_name TEXT NOT NULL UNIQUE);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create product categories in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "explanation": "Creates a category lookup table. category_id is the stable key used by other tables, while UNIQUE on category_name prevents two categories from sharing the same name. In SQLite, INTEGER PRIMARY KEY aliases the rowid.",
           "runnable": true
         },
         {
@@ -46,7 +46,7 @@
           "title": "Create products with a category relationship",
           "code": "CREATE TABLE cap19_products (product_id INTEGER PRIMARY KEY, category_id INTEGER NOT NULL REFERENCES cap19_categories(category_id), product_name TEXT NOT NULL, unit_price REAL NOT NULL CHECK (unit_price >= 0), stock_qty INTEGER NOT NULL CHECK (stock_qty >= 0));",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create products with a category relationship in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "explanation": "Creates products and references categories with a foreign key. CHECK constraints reject negative prices and stock quantities. SQLite foreign-key enforcement must be enabled for each connection with PRAGMA foreign_keys = ON; declaring REFERENCES alone does not guarantee enforcement in every SQLite connection.",
           "runnable": true
         },
         {
@@ -55,7 +55,7 @@
           "title": "Insert categories",
           "code": "INSERT INTO cap19_categories VALUES (1, 'Accessories'), (2, 'Stationery');",
           "expectedOutput": "2 rows inserted",
-          "explanation": "This example demonstrates insert categories in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "explanation": "Inserts the two category parent rows first. Parent records must exist before child product rows are inserted when foreign-key enforcement is active.",
           "runnable": true
         },
         {
@@ -64,7 +64,7 @@
           "title": "Insert products",
           "code": "INSERT INTO cap19_products VALUES (1, 1, 'USB Cable', 250, 20), (2, 1, 'Phone Case', 400, 12), (3, 2, 'Notebook', 60, 50);",
           "expectedOutput": "3 rows inserted",
-          "explanation": "This example demonstrates insert products in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "explanation": "Inserts three products and links each one to an existing category ID. The numeric values are valid under the CHECK constraints. REAL is used for a compact teaching example; production currency should use an exact decimal type where available or integer minor units to avoid binary floating-point rounding.",
           "runnable": true
         },
         {
@@ -73,7 +73,7 @@
           "title": "List products with their category",
           "code": "SELECT p.product_name, c.category_name, p.unit_price, p.stock_qty FROM cap19_products AS p JOIN cap19_categories AS c ON c.category_id = p.category_id ORDER BY p.product_id;",
           "expectedOutput": "USB Cable | Accessories | 250.0 | 20; Phone Case | Accessories | 400.0 | 12; Notebook | Stationery | 60.0 | 50",
-          "explanation": "This example demonstrates list products with their category in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "explanation": "Joins products to categories through category_id rather than matching category names. The selected columns combine product attributes with the category label, and ORDER BY product_id makes the displayed row sequence deterministic.",
           "runnable": true
         }
       ]
