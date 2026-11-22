@@ -66,23 +66,24 @@
         {
           "id": "sql4.5-ex5",
           "language": "en",
-          "title": "Join child rows to their parent",
-          "code": "SELECT c.employee_name, p.department_name FROM c4_child AS c JOIN c4_parent AS p ON p.department_id = c.department_id;",
+          "title": "Use two foreign keys and referential actions in a junction table",
+          "code": "PRAGMA foreign_keys = ON;\nCREATE TABLE c4_student (student_id INTEGER PRIMARY KEY, student_name TEXT NOT NULL);\nCREATE TABLE c4_course (course_id INTEGER PRIMARY KEY, course_title TEXT NOT NULL);\nCREATE TABLE c4_enrollment (\n  student_id INTEGER NOT NULL,\n  course_id INTEGER NOT NULL,\n  PRIMARY KEY (student_id, course_id),\n  FOREIGN KEY (student_id) REFERENCES c4_student(student_id) ON UPDATE CASCADE ON DELETE CASCADE,\n  FOREIGN KEY (course_id) REFERENCES c4_course(course_id) ON UPDATE CASCADE ON DELETE RESTRICT\n);\nINSERT INTO c4_student VALUES (1, 'Mina');\nINSERT INTO c4_course VALUES (10, 'SQL Basics');\nINSERT INTO c4_enrollment VALUES (1, 10);\nUPDATE c4_student SET student_id = 2 WHERE student_id = 1;\nSELECT student_id, course_id FROM c4_enrollment;\nDELETE FROM c4_student WHERE student_id = 2;\nSELECT COUNT(*) FROM c4_enrollment;",
           "expectedOutput": "Uma | Research",
-          "explanation": "The join follows the declared parent-child relationship.",
-          "runnable": true
+          "explanation": "Enrollment references both parent tables and uses a composite primary key. ON UPDATE CASCADE propagates the changed student key. ON DELETE CASCADE removes the student's enrollment. ON DELETE RESTRICT prevents deleting a course while a child enrollment still exists. SQLite must have foreign-key enforcement enabled for this connection.",
+          "runnable": true,
+          "output": "2 | 10; 0"
         }
       ]
     },
     "practise": {
-      "guidedTask": "Run the five examples for FOREIGN KEY Constraints and Referential Integrity in the SQL Playground. Predict each result, execute the statement, and explain which rule is being enforced.",
-      "independentTask": "Design a small original schema demonstrating FOREIGN KEY Constraints and Referential Integrity. Include at least five SQL statements, one verification query and a short explanation of the SQLite behaviour involved.",
+      "guidedTask": "Run the examples in order. For the final example, predict how the student-key update changes Enrollment, then explain why deleting the student removes the enrollment but deleting a referenced course would be restricted.",
+      "independentTask": "Build a many-to-many relationship using two parent tables and a junction table. Include both foreign keys, a composite primary key, ON UPDATE CASCADE, ON DELETE CASCADE and ON DELETE RESTRICT. Test each action with separate sample rows.",
       "hints": [
-        "Identify whether the rule applies to one column or a combination of columns.",
-        "Check whether a value is omitted, NULL or an ordinary value.",
-        "Use explicit column lists and meaningful constraint names.",
-        "For foreign keys, enable PRAGMA foreign_keys = ON in SQLite.",
-        "Test schema changes on sample data before applying them to important databases."
+        "The junction table contains one foreign key for each parent.",
+        "Use a composite primary key to prevent duplicate pairs.",
+        "ON UPDATE CASCADE propagates a changed referenced key.",
+        "ON DELETE CASCADE removes dependent child rows.",
+        "ON DELETE RESTRICT blocks deletion while dependent rows exist; enable SQLite foreign keys per connection."
       ]
     }
   },
