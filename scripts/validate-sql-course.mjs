@@ -199,7 +199,7 @@ for (const topic of topics) {
     code: example.code,
     expectedOutput: example.expectedOutput,
     expectsError: /^Error:/i.test(example.expectedOutput.trim()),
-    parameters: example.parameters ?? null
+    parameters: example.parameters ?? null,
     expectedPattern: example.expectedPattern ?? null,
   }));
   const run = spawnSync("python3", ["-c", pyRunner, JSON.stringify(payload)], { encoding: "utf8", timeout: 15000 });
