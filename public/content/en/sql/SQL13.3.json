@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql13.3.en",
+  "courseId": "sql",
+  "moduleId": "SQL13",
+  "topicId": "SQL13.3",
+  "title": "Derived Tables and Subqueries in FROM",
+  "language": "en",
+  "learningObjectives": [
+    "Define a derived table and identify its position in a FROM clause.",
+    "Use an alias for a derived table and its calculated columns.",
+    "Aggregate rows inside a derived table and filter the result in an outer query.",
+    "Join a derived result with another table-shaped query.",
+    "Choose between a derived table and a CTE for readability."
+  ],
+  "prerequisites": [
+    "SQL5.1",
+    "SQL9.3",
+    "SQL9.5"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A derived table is a subquery used as a table source in the FROM clause. It produces a temporary result set for the outer query. In SQLite, a derived table must have an alias.",
+      "whyItMatters": "Derived tables help separate a multi-step analysis into a clear inner calculation and an outer filter or join.",
+      "analogy": "A nested query is like a staged research task: first calculate or collect an intermediate result, then use it to answer the final question.",
+      "analogyLimit": "The analogy does not model SQL's exact cardinality rules, NULL logic, query optimizer or recursive evaluation."
+    },
+    "explain": {
+      "narrative": "## Derived tables\nA derived table is a SELECT statement inside FROM. The outer query reads its output as if it were a table. Give the derived table an alias and give calculated columns meaningful names.\n\n## Group then filter\nA common pattern is to calculate totals or averages in the inner query, then filter those calculated values in the outer query. This can make a multi-step report easier to read.\n\n## Alternatives\nA common table expression (CTE) can express a similar step with a name before the main SELECT. Choose a derived table for a compact local result and a CTE when a named step improves readability or is referenced more than once.",
+      "examples": [
+        {
+          "id": "sql13.3-ex1",
+          "language": "en",
+          "title": "Create sales rows",
+          "code": "CREATE TABLE sub13_sales (sale_id INTEGER PRIMARY KEY, customer TEXT NOT NULL, amount INTEGER NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "This example demonstrates create sales rows using SQLite. Follow the inner query and outer result carefully.",
+          "runnable": true
+        },
+        {
+          "id": "sql13.3-ex2",
+          "language": "en",
+          "title": "Insert customer sales",
+          "code": "INSERT INTO sub13_sales VALUES (1, 'Asha', 50), (2, 'Asha', 70), (3, 'Bilal', 40), (4, 'Bilal', 80), (5, 'Mira', 30);",
+          "expectedOutput": "5 rows inserted",
+          "explanation": "This example demonstrates insert customer sales using SQLite. Follow the inner query and outer result carefully.",
+          "runnable": true
+        },
+        {
+          "id": "sql13.3-ex3",
+          "language": "en",
+          "title": "Calculate totals in a derived table and filter outside",
+          "code": "SELECT customer, total_amount FROM (SELECT customer, SUM(amount) AS total_amount FROM sub13_sales GROUP BY customer) AS customer_totals WHERE total_amount > 100 ORDER BY customer;",
+          "expectedOutput": "Asha | 120; Bilal | 120",
+          "explanation": "This example demonstrates calculate totals in a derived table and filter outside using SQLite. Follow the inner query and outer result carefully.",
+          "runnable": true
+        },
+        {
+          "id": "sql13.3-ex4",
+          "language": "en",
+          "title": "Calculate and sort average sale by customer",
+          "code": "SELECT customer, average_amount FROM (SELECT customer, AVG(amount) AS average_amount FROM sub13_sales GROUP BY customer) AS customer_averages ORDER BY average_amount DESC, customer;",
+          "expectedOutput": "Asha | 60.0; Bilal | 60.0; Mira | 30.0",
+          "explanation": "This example demonstrates calculate and sort average sale by customer using SQLite. Follow the inner query and outer result carefully.",
+          "runnable": true
+        },
+        {
+          "id": "sql13.3-ex5",
+          "language": "en",
+          "title": "Join a derived summary to customer names",
+          "code": "SELECT s.customer, s.total_amount FROM (SELECT customer, SUM(amount) AS total_amount FROM sub13_sales GROUP BY customer) AS s JOIN (SELECT DISTINCT customer FROM sub13_sales) AS c ON c.customer = s.customer ORDER BY s.customer;",
+          "expectedOutput": "Asha | 120; Bilal | 120; Mira | 30",
+          "explanation": "This example demonstrates join a derived summary to customer names using SQLite. Follow the inner query and outer result carefully.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and explain why the outer query can filter total_amount even though that value is calculated in the inner query.",
+      "independentTask": "Create a small order dataset. Use a derived table to calculate each customer's total, then filter customers whose total exceeds a threshold and sort the result.",
+      "hints": [
+        "Place the inner SELECT in parentheses in the FROM clause.",
+        "Give the derived table an alias.",
+        "Name aggregate expressions with explicit aliases.",
+        "Filter calculated values in the outer query.",
+        "Use a CTE if naming the intermediate step would improve readability."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE sub13_sales (sale_id INTEGER PRIMARY KEY, customer TEXT NOT NULL, amount INTEGER NOT NULL);\nINSERT INTO sub13_sales VALUES (1, 'Asha', 50), (2, 'Asha', 70), (3, 'Bilal', 40), (4, 'Bilal', 80), (5, 'Mira', 30);\nSELECT customer, total_amount FROM (SELECT customer, SUM(amount) AS total_amount FROM sub13_sales GROUP BY customer) AS customer_totals WHERE total_amount > 100 ORDER BY customer;",
+    "resetCode": "CREATE TABLE sub13_sales (sale_id INTEGER PRIMARY KEY, customer TEXT NOT NULL, amount INTEGER NOT NULL);\nINSERT INTO sub13_sales VALUES (1, 'Asha', 50), (2, 'Asha', 70), (3, 'Bilal', 40), (4, 'Bilal', 80), (5, 'Mira', 30);\nSELECT customer, total_amount FROM (SELECT customer, SUM(amount) AS total_amount FROM sub13_sales GROUP BY customer) AS customer_totals WHERE total_amount > 100 ORDER BY customer;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql13.3-q1",
+        "prompt": "What is a derived table?",
+        "options": [
+          "A subquery used as a table source in FROM",
+          "A permanent table created by CREATE TABLE",
+          "A database backup",
+          "A transaction savepoint"
+        ],
+        "answer": "A subquery used as a table source in FROM",
+        "explanation": "A derived table is a query result used as a table source."
+      },
+      {
+        "id": "sql13.3-q2",
+        "prompt": "What should a derived table have in SQLite?",
+        "options": [
+          "An alias",
+          "A primary key",
+          "A trigger",
+          "A foreign database file"
+        ],
+        "answer": "An alias",
+        "explanation": "SQLite requires a name for a derived table in the FROM clause."
+      },
+      {
+        "id": "sql13.3-q3",
+        "prompt": "Where is total_amount calculated in the example?",
+        "options": [
+          "Inside the derived table's grouped SELECT",
+          "In the outer WHERE clause",
+          "In the ORDER BY clause only",
+          "In a database trigger"
+        ],
+        "answer": "Inside the derived table's grouped SELECT",
+        "explanation": "The inner query groups sales and calculates SUM(amount)."
+      },
+      {
+        "id": "sql13.3-q4",
+        "prompt": "Why can the outer query filter total_amount?",
+        "options": [
+          "The derived table exposes it as a result column",
+          "The WHERE clause changes the inner table",
+          "Aliases are stored permanently",
+          "SUM automatically creates a column in the source table"
+        ],
+        "answer": "The derived table exposes it as a result column",
+        "explanation": "The outer query reads the derived result as a table with named columns."
+      },
+      {
+        "id": "sql13.3-q5",
+        "prompt": "When might a CTE be clearer than a derived table?",
+        "options": [
+          "When a named intermediate step improves readability or is reused",
+          "When the query contains no SELECT",
+          "When the database has no tables",
+          "When every column must be NULL"
+        ],
+        "answer": "When a named intermediate step improves readability or is reused",
+        "explanation": "CTEs give a named query step that can improve complex query organization."
+      }
+    ]
+  },
+  "status": "draft"
+}
