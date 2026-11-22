@@ -25,7 +25,7 @@
       "analogyLimit": "The analogy does not model SQL locking, isolation levels, storage durability or engine-specific transaction implementation."
     },
     "explain": {
-      "narrative": "## SQLite transaction modes\n- **BEGIN DEFERRED:** starts a transaction without immediately acquiring a write reservation. A later write may need to upgrade the transaction.\n- **BEGIN IMMEDIATE:** starts a write transaction immediately and can fail with SQLITE_BUSY if another writer is active.\n- **BEGIN EXCLUSIVE:** in rollback-journal mode, prevents other connections from reading while the transaction is active; in WAL mode it behaves like IMMEDIATE for this distinction.\n\n## Isolation and WAL\nSQLite normally provides serializable isolation by serializing writes. WAL mode allows readers and a writer to overlap, but there is still only one writer at a time. Shared-cache connections with read_uncommitted are a special case. These behaviours cannot be fully demonstrated in a single-connection in-memory Playground.\n\n## Busy handling\nApplications should keep transactions short, configure a busy timeout where appropriate, handle SQLITE_BUSY, and retry only operations that are safe to retry. Do not assume that a transaction mode creates parallel writers.",
+      "narrative": "## SQLite transaction modes\n- **BEGIN DEFERRED:** starts a transaction without immediately acquiring a write reservation. A later write may need to upgrade the transaction.\n- **BEGIN IMMEDIATE:** starts a write transaction immediately and can fail with SQLITE_BUSY if another writer is active.\n- **BEGIN EXCLUSIVE:** in rollback-journal mode, prevents other connections from reading while the transaction is active; in WAL mode it behaves like IMMEDIATE for this distinction.\n\n## Isolation and WAL\nSQLite normally provides serializable isolation by serializing writes. WAL mode allows readers and a writer to overlap, but there is still only one writer at a time. Shared-cache connections with read_uncommitted are a special case. These behaviours cannot be fully demonstrated in a single-connection in-memory Playground.\n\n## Busy handling\nApplications should keep transactions short, configure a busy timeout where appropriate, handle SQLITE_BUSY, and retry only operations that are safe to retry. Do not assume that a transaction mode creates parallel writers.\n\n### Journal mode and concurrency\nSQLite serializes writes so only one writer can hold the write transaction at a time. WAL mode lets readers overlap with a writer but does not allow multiple simultaneous writers. BEGIN mode changes when a connection attempts to acquire the required lock; it does not change the one-writer rule.\n\n### Retry safely\nA busy timeout can reduce transient lock errors, but applications still need bounded retry logic and short transactions. Retry only operations designed to be safely repeated; do not duplicate external side effects or blindly replay a partially completed business workflow.",
       "examples": [
         {
           "id": "sql12.5-ex1",
@@ -33,7 +33,7 @@
           "title": "Create a table for transaction mode examples",
           "code": "CREATE TABLE tx12_modes (mode_id INTEGER PRIMARY KEY, mode_name TEXT NOT NULL, active INTEGER NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create a table for transaction mode examples in SQLite. Observe the transaction boundary and verify the stated result.",
+          "explanation": "Creates a table for comparing SQLite transaction modes. The table is empty initially, which makes the read-only deferred transaction return a predictable count.",
           "runnable": true
         },
         {
@@ -42,7 +42,7 @@
           "title": "Use a deferred transaction for a read",
           "code": "BEGIN DEFERRED; SELECT COUNT(*) AS row_count FROM tx12_modes; COMMIT;",
           "expectedOutput": "row_count = 0",
-          "explanation": "This example demonstrates use a deferred transaction for a read in SQLite. Observe the transaction boundary and verify the stated result.",
+          "explanation": "Starts a deferred transaction, runs a read and commits. BEGIN DEFERRED does not immediately reserve the writer slot; if a later write is attempted, SQLite may need to upgrade the transaction and can report SQLITE_BUSY.",
           "runnable": true
         },
         {
@@ -51,7 +51,7 @@
           "title": "Start an immediate write transaction",
           "code": "BEGIN IMMEDIATE; INSERT INTO tx12_modes VALUES (1, 'immediate', 1); COMMIT; SELECT mode_name FROM tx12_modes WHERE mode_id = 1;",
           "expectedOutput": "immediate",
-          "explanation": "This example demonstrates start an immediate write transaction in SQLite. Observe the transaction boundary and verify the stated result.",
+          "explanation": "Starts an immediate transaction, inserts one row and commits. BEGIN IMMEDIATE attempts to acquire the write transaction at the start, so contention is reported earlier rather than during a later write upgrade.",
           "runnable": true
         },
         {
@@ -60,7 +60,7 @@
           "title": "Use an exclusive transaction",
           "code": "BEGIN EXCLUSIVE; UPDATE tx12_modes SET active = 0 WHERE mode_id = 1; COMMIT; SELECT active FROM tx12_modes WHERE mode_id = 1;",
           "expectedOutput": "0",
-          "explanation": "This example demonstrates use an exclusive transaction in SQLite. Observe the transaction boundary and verify the stated result.",
+          "explanation": "Starts an exclusive transaction, updates the row and commits. In rollback-journal mode EXCLUSIVE prevents other connections from reading during the transaction; in WAL mode its distinction from IMMEDIATE is different, so the mode should not be described as a universal exclusive lock.",
           "runnable": true
         },
         {
@@ -69,7 +69,7 @@
           "title": "Inspect the configured busy timeout",
           "code": "PRAGMA busy_timeout = 2500; PRAGMA busy_timeout;",
           "expectedOutput": "2500",
-          "explanation": "This example demonstrates inspect the configured busy timeout in SQLite. Observe the transaction boundary and verify the stated result.",
+          "explanation": "Sets the busy timeout to 2500 milliseconds and reads it back. The setting controls how long SQLite waits when a lock is busy before returning SQLITE_BUSY; it does not create parallel writers or guarantee that a transaction will succeed.",
           "runnable": true
         }
       ]
