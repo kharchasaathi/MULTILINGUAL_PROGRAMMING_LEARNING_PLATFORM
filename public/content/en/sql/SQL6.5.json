@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql6.5.en",
+  "courseId": "sql",
+  "moduleId": "SQL6",
+  "topicId": "SQL6.5",
+  "title": "AVG() Aggregate Function",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of AVG().",
+    "Describe how AVG() handles NULL input values.",
+    "Write AVG() queries against a SQLite table.",
+    "Use AVG() with WHERE and GROUP BY where appropriate.",
+    "Interpret and verify aggregate result sets in practical reporting tasks."
+  ],
+  "prerequisites": [
+    "SQL5.4",
+    "SQL5.7",
+    "SQL3.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "AVG() calculates the arithmetic mean of non-NULL numeric inputs. It is computed as the sum divided by the count of non-NULL values. Filtering and grouping determine which values contribute to each average.",
+      "whyItMatters": "Aggregate summaries help answer business questions without manually processing every record. AVG() is a core tool for accurate reporting and data analysis.",
+      "analogy": "AVG() is like asking a records clerk to inspect a selected pile of receipts and report one summary value.",
+      "analogyLimit": "The analogy does not model SQL's exact NULL rules, grouping semantics, numeric type behaviour or query execution plan. The database engine defines those details."
+    },
+    "explain": {
+      "narrative": "## Core concept\nAVG() calculates the arithmetic mean of non-NULL numeric inputs. It is computed as the sum divided by the count of non-NULL values. Filtering and grouping determine which values contribute to each average.\n\n## SQLite syntax\n```sql\nSELECT AVG()(amount) AS summary_value\nFROM aggregate_orders;\n```\n\n## Sample data\nThe table contains amounts 10, 20, 15, NULL and 30 across Books and Games categories. The non-NULL total is 75 and there are four non-NULL amount values.\n\n## Query processing\nThe FROM clause identifies input rows. WHERE filters rows before aggregation. The aggregate evaluates its expression over the remaining non-NULL values. GROUP BY creates independent input groups. ORDER BY sorts the final result rows.\n\n## Worked examples\n### 1. Create the sample orders table\n```sql\nCREATE TABLE aggregate_orders (order_id INTEGER PRIMARY KEY, amount REAL, category TEXT, status TEXT);\nINSERT INTO aggregate_orders VALUES (1,10,'Books','paid'),(2,20,'Books','paid'),(3,15,'Games','pending'),(4,NULL,'Games','cancelled'),(5,30,'Books','paid');\n```\nExpected result: Five rows inserted, including one NULL amount.\n\nThere are four non-NULL amounts: 10, 20, 15 and 30.\n\n### 2. Calculate the average order amount\n```sql\nSELECT AVG(amount) AS average_amount FROM aggregate_orders;\n```\nExpected result: average_amount = 18.75\n\nThe mean is (10 + 20 + 15 + 30) / 4 = 18.75.\n\n### 3. Calculate the average paid amount\n```sql\nSELECT AVG(amount) AS average_paid_amount FROM aggregate_orders WHERE status = 'paid';\n```\nExpected result: average_paid_amount = 20\n\nThe paid values are 10, 20 and 30; their mean is 20.\n\n### 4. Calculate the average by category\n```sql\nSELECT category, AVG(amount) AS category_average FROM aggregate_orders GROUP BY category ORDER BY category;\n```\nExpected result: Books = 20; Games = 15\n\nBooks averages (10 + 20 + 30) / 3; Games has one non-NULL amount.\n\n### 5. Compare row count and non-NULL count with average\n```sql\nSELECT COUNT(*) AS rows_total, COUNT(amount) AS amounts_present, AVG(amount) AS average_amount FROM aggregate_orders;\n```\nExpected result: rows_total = 5; amounts_present = 4; average_amount = 18.75\n\nThe two counts make clear why the NULL amount does not enter the average.\n\n## NULL and empty-input behaviour\nThese examples target SQLite. MIN, MAX, SUM and AVG ignore NULL inputs; COUNT(expression) ignores NULL; COUNT(*) counts rows. For SQLite, SUM over no non-NULL inputs returns NULL, and AVG over no non-NULL inputs returns NULL. Do not replace these rules with assumptions about zero.\n\n## Common mistakes\n- Confusing COUNT(*) with COUNT(column).\n- Assuming NULL is included as zero in SUM or AVG.\n- Forgetting GROUP BY when requesting category-level summaries.\n- Filtering aggregate results with WHERE instead of HAVING.\n- Selecting ungrouped, non-aggregated columns in grouped queries.\n\n## Best practices\nName aggregate outputs with clear aliases, verify the input rows before interpreting a summary, and state the target SQL dialect when behaviour differs.",
+      "examples": [
+        {
+          "id": "sql6.5-ex1",
+          "language": "en",
+          "title": "Create the sample orders table",
+          "code": "CREATE TABLE aggregate_orders (order_id INTEGER PRIMARY KEY, amount REAL, category TEXT, status TEXT);\nINSERT INTO aggregate_orders VALUES (1,10,'Books','paid'),(2,20,'Books','paid'),(3,15,'Games','pending'),(4,NULL,'Games','cancelled'),(5,30,'Books','paid');",
+          "expectedOutput": "Five rows inserted, including one NULL amount.",
+          "explanation": "There are four non-NULL amounts: 10, 20, 15 and 30.",
+          "runnable": true
+        },
+        {
+          "id": "sql6.5-ex2",
+          "language": "en",
+          "title": "Calculate the average order amount",
+          "code": "SELECT AVG(amount) AS average_amount FROM aggregate_orders;",
+          "expectedOutput": "average_amount = 18.75",
+          "explanation": "The mean is (10 + 20 + 15 + 30) / 4 = 18.75.",
+          "runnable": true
+        },
+        {
+          "id": "sql6.5-ex3",
+          "language": "en",
+          "title": "Calculate the average paid amount",
+          "code": "SELECT AVG(amount) AS average_paid_amount FROM aggregate_orders WHERE status = 'paid';",
+          "expectedOutput": "average_paid_amount = 20",
+          "explanation": "The paid values are 10, 20 and 30; their mean is 20.",
+          "runnable": true
+        },
+        {
+          "id": "sql6.5-ex4",
+          "language": "en",
+          "title": "Calculate the average by category",
+          "code": "SELECT category, AVG(amount) AS category_average FROM aggregate_orders GROUP BY category ORDER BY category;",
+          "expectedOutput": "Books = 20; Games = 15",
+          "explanation": "Books averages (10 + 20 + 30) / 3; Games has one non-NULL amount.",
+          "runnable": true
+        },
+        {
+          "id": "sql6.5-ex5",
+          "language": "en",
+          "title": "Compare row count and non-NULL count with average",
+          "code": "SELECT COUNT(*) AS rows_total, COUNT(amount) AS amounts_present, AVG(amount) AS average_amount FROM aggregate_orders;",
+          "expectedOutput": "rows_total = 5; amounts_present = 4; average_amount = 18.75",
+          "explanation": "The two counts make clear why the NULL amount does not enter the average.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run all five AVG() examples in the SQL Playground. Predict each result first, then compare it with SQLite. Explain which input rows contribute to each aggregate.",
+      "independentTask": "Create a small table of at least six sales records with two categories and one NULL amount. Write five original queries demonstrating AVG(), including one filtered query and one grouped query. Record exact expected outputs.",
+      "hints": [
+        "Inspect the sample rows before calculating a result.",
+        "Remember that most aggregate expressions ignore NULL values; COUNT(*) is the row-count exception.",
+        "Apply WHERE before aggregation to restrict source rows.",
+        "Use GROUP BY for one summary per category.",
+        "Use deterministic ORDER BY when presenting grouped results."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE aggregate_orders (order_id INTEGER PRIMARY KEY, amount REAL, category TEXT, status TEXT);\nINSERT INTO aggregate_orders VALUES (1,10,'Books','paid'),(2,20,'Books','paid'),(3,15,'Games','pending'),(4,NULL,'Games','cancelled'),(5,30,'Books','paid');\n\nSELECT AVG()(amount) AS aggregate_result FROM aggregate_orders;",
+    "resetCode": "CREATE TABLE aggregate_orders (order_id INTEGER PRIMARY KEY, amount REAL, category TEXT, status TEXT);\nINSERT INTO aggregate_orders VALUES (1,10,'Books','paid'),(2,20,'Books','paid'),(3,15,'Games','pending'),(4,NULL,'Games','cancelled'),(5,30,'Books','paid');\n\nSELECT AVG()(amount) AS aggregate_result FROM aggregate_orders;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql6.5-q1",
+        "prompt": "What does AVG(amount) calculate?",
+        "options": [
+          "The arithmetic mean of non-NULL values",
+          "The middle sorted value",
+          "The largest value",
+          "The number of rows"
+        ],
+        "answer": "The arithmetic mean of non-NULL values",
+        "explanation": "The arithmetic mean of non-NULL values is correct because it follows the documented behaviour of AVG() in SQLite."
+      },
+      {
+        "id": "sql6.5-q2",
+        "prompt": "What is the sample table's average amount?",
+        "options": [
+          "18.75",
+          "20",
+          "75",
+          "15"
+        ],
+        "answer": "18.75",
+        "explanation": "18.75 is correct because it follows the documented behaviour of AVG() in SQLite."
+      },
+      {
+        "id": "sql6.5-q3",
+        "prompt": "Which expression counts values used by AVG(amount)?",
+        "options": [
+          "COUNT(amount)",
+          "COUNT(*)",
+          "COUNT(DISTINCT status)",
+          "SUM(status)"
+        ],
+        "answer": "COUNT(amount)",
+        "explanation": "COUNT(amount) is correct because it follows the documented behaviour of AVG() in SQLite."
+      },
+      {
+        "id": "sql6.5-q4",
+        "prompt": "How do you calculate an average for each category?",
+        "options": [
+          "GROUP BY category",
+          "ORDER BY category only",
+          "LIMIT 2",
+          "DISTINCT category only"
+        ],
+        "answer": "GROUP BY category",
+        "explanation": "GROUP BY category is correct because it follows the documented behaviour of AVG() in SQLite."
+      },
+      {
+        "id": "sql6.5-q5",
+        "prompt": "If one row has NULL amount, how does AVG treat it?",
+        "options": [
+          "It excludes that value from the calculation",
+          "It treats it as a zero",
+          "It treats it as one",
+          "It returns NULL for all groups"
+        ],
+        "answer": "It excludes that value from the calculation",
+        "explanation": "It excludes that value from the calculation is correct because it follows the documented behaviour of AVG() in SQLite."
+      }
+    ]
+  },
+  "status": "draft"
+}
