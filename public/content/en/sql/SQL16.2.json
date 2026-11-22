@@ -25,7 +25,7 @@
       "analogyLimit": "The analogy does not model type systems, function return types, time-zone rules, optimizer behaviour or transaction semantics."
     },
     "explain": {
-      "narrative": "## SQLite type affinity\nSQLite associates storage classes with values and applies type affinity based on declared column types. INTEGER, REAL, TEXT, BLOB and NUMERIC are the main storage classes. A declared type name influences affinity but does not behave exactly like a rigid server-side type system.\n\n## Server DBMS differences\nPostgreSQL, MySQL and SQL Server provide richer native types and different rules for DECIMAL precision, timestamps, time zones, booleans, JSON and binary values. The same type name can have different ranges or semantics.\n\n## Practical design\nUse exact numeric types for money in server databases, define precision and scale deliberately, store dates consistently, and validate application input. For SQLite, understand how values are stored and use constraints where the application requires stronger validation.",
+      "narrative": "## SQLite type affinity\nSQLite associates storage classes with values and applies type affinity based on declared column types. INTEGER, REAL, TEXT, BLOB and NUMERIC are the main storage classes. A declared type name influences affinity but does not behave exactly like a rigid server-side type system.\n\n## Server DBMS differences\nPostgreSQL, MySQL and SQL Server provide richer native types and different rules for DECIMAL precision, timestamps, time zones, booleans, JSON and binary values. The same type name can have different ranges or semantics.\n\n## Practical design\nUse exact numeric types for money in server databases, define precision and scale deliberately, store dates consistently, and validate application input. For SQLite, understand how values are stored and use constraints where the application requires stronger validation.\n\n### Type systems differ\nSQLite uses dynamic typing and column affinity; PostgreSQL and SQL Server use comparatively rigid native types; MySQL has its own conversion and strict-mode rules. The same declared type name can have different ranges, precision, collation and coercion behaviour.\n\n### Exact numeric and temporal design\nFor money, use an exact DECIMAL/NUMERIC type with defined precision and scale where the DBMS enforces it, or integer minor units. For time values, choose whether the column represents a calendar date, local wall time or a UTC instant, then use the target engine's appropriate type and conversion rules.",
       "examples": [
         {
           "id": "sql16.2-ex1",
@@ -33,7 +33,7 @@
           "title": "Create columns with different SQLite affinities",
           "code": "CREATE TABLE dialect16_types (integer_value INTEGER, real_value REAL, text_value TEXT, blob_value BLOB, numeric_value NUMERIC);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create columns with different sqlite affinities using SQLite. Compare its syntax with the target DBMS before migration.",
+          "explanation": "Creates columns with SQLite type affinities. SQLite derives affinity from declared type names and stores values using storage classes; it does not enforce a rigid per-column type system in the same way as PostgreSQL or SQL Server.",
           "runnable": true
         },
         {
@@ -42,7 +42,7 @@
           "title": "Insert values into typed columns",
           "code": "INSERT INTO dialect16_types VALUES (42, 3.5, 'hello', X'4142', 12.75);",
           "expectedOutput": "1 row inserted",
-          "explanation": "This example demonstrates insert values into typed columns using SQLite. Compare its syntax with the target DBMS before migration.",
+          "explanation": "Inserts an integer, real number, text string, two-byte blob and decimal-looking value. The X'4142' literal is SQLite's hexadecimal blob notation; numeric_value is stored as REAL under NUMERIC affinity for this value.",
           "runnable": true
         },
         {
@@ -51,7 +51,7 @@
           "title": "Inspect SQLite storage classes",
           "code": "SELECT typeof(integer_value), typeof(real_value), typeof(text_value), typeof(blob_value), typeof(numeric_value) FROM dialect16_types;",
           "expectedOutput": "integer | real | text | blob | real",
-          "explanation": "This example demonstrates inspect sqlite storage classes using SQLite. Compare its syntax with the target DBMS before migration.",
+          "explanation": "Calls typeof() for each column to inspect the actual SQLite storage class of the inserted value. The result shows integer, real, text, blob and real respectively, rather than merely echoing the declared type names.",
           "runnable": true
         },
         {
@@ -60,7 +60,7 @@
           "title": "Use a CHECK constraint to validate a numeric range",
           "code": "CREATE TABLE dialect16_scores (score INTEGER CHECK (score BETWEEN 0 AND 100));",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates use a check constraint to validate a numeric range using SQLite. Compare its syntax with the target DBMS before migration.",
+          "explanation": "Creates a score table with a CHECK range. CHECK evaluates the row expression during writes, but SQL CHECK constraints generally do not reject NULL unless the expression evaluates to false; use NOT NULL as well if a score is required.",
           "runnable": true
         },
         {
@@ -69,7 +69,7 @@
           "title": "Verify a stored decimal-like value",
           "code": "SELECT numeric_value, typeof(numeric_value) FROM dialect16_types;",
           "expectedOutput": "12.75 | real",
-          "explanation": "This example demonstrates verify a stored decimal-like value using SQLite. Compare its syntax with the target DBMS before migration.",
+          "explanation": "Reads the decimal-looking value and its storage class. The result confirms 12.75 is stored as a floating-point REAL value in this fixture, which is why binary floating-point should not be used as an unexamined financial representation.",
           "runnable": true
         }
       ]
