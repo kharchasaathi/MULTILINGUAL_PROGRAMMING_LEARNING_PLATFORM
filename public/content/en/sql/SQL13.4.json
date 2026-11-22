@@ -25,7 +25,7 @@
       "analogyLimit": "The analogy does not model SQL's exact cardinality rules, NULL logic, query optimizer or recursive evaluation."
     },
     "explain": {
-      "narrative": "## WITH and named query steps\nA CTE begins with WITH name AS (SELECT ...). The main statement can query that name like a table. A statement can define multiple CTEs separated by commas, and later CTEs can reference earlier ones.\n\n## CTE scope\nA CTE exists only for the single statement that follows the WITH clause. It is not a permanent table or view. SQLite supports ordinary and recursive CTEs.\n\n## CTE versus derived table\nA CTE can improve readability when a query has several logical steps or when an intermediate result is referenced more than once. It does not guarantee materialization or better performance; the optimizer decides how to execute the query.",
+      "narrative": "## WITH and named query steps\nA CTE begins with WITH name AS (SELECT ...). The main statement can query that name like a table. A statement can define multiple CTEs separated by commas, and later CTEs can reference earlier ones.\n\n## CTE scope\nA CTE exists only for the single statement that follows the WITH clause. It is not a permanent table or view. SQLite supports ordinary and recursive CTEs.\n\n## CTE versus derived table\nA CTE can improve readability when a query has several logical steps or when an intermediate result is referenced more than once. It does not guarantee materialization or better performance; the optimizer decides how to execute the query.\n\n### CTE scope and ordering\nA CTE exists only for the statement that follows its WITH clause. In a list of CTEs, later definitions can refer to earlier definitions. A CTE is not a view or permanent table and does not persist after the statement finishes.\n\n### Materialization is not guaranteed\nA CTE is primarily a query-structuring feature. The optimizer may inline, flatten or materialize it according to the engine and query. Do not assume that using WITH automatically improves performance; inspect the execution plan.",
       "examples": [
         {
           "id": "sql13.4-ex1",
@@ -33,7 +33,7 @@
           "title": "Create a CTE source table",
           "code": "CREATE TABLE sub13_cte_sales (sale_id INTEGER PRIMARY KEY, customer TEXT NOT NULL, amount INTEGER NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create a cte source table using SQLite. Follow the inner query and outer result carefully.",
+          "explanation": "Creates the base sales table. The CTE examples that follow query this persistent table; the CTE itself will not be stored as a database object.",
           "runnable": true
         },
         {
@@ -42,7 +42,7 @@
           "title": "Insert CTE sample rows",
           "code": "INSERT INTO sub13_cte_sales VALUES (1, 'Asha', 50), (2, 'Asha', 70), (3, 'Bilal', 40), (4, 'Mira', 30);",
           "expectedOutput": "4 rows inserted",
-          "explanation": "This example demonstrates insert cte sample rows using SQLite. Follow the inner query and outer result carefully.",
+          "explanation": "Inserts four sales rows. Asha's total is 120, Bilal's is 40 and Mira's is 30, providing known grouped results.",
           "runnable": true
         },
         {
@@ -51,7 +51,7 @@
           "title": "Define one CTE for customer totals",
           "code": "WITH customer_totals AS (SELECT customer, SUM(amount) AS total_amount FROM sub13_cte_sales GROUP BY customer) SELECT customer, total_amount FROM customer_totals ORDER BY customer;",
           "expectedOutput": "Asha | 120; Bilal | 40; Mira | 30",
-          "explanation": "This example demonstrates define one cte for customer totals using SQLite. Follow the inner query and outer result carefully.",
+          "explanation": "Defines a CTE named customer_totals that produces one row per customer, then selects those rows in alphabetical order. The CTE name is visible only to the statement immediately following WITH.",
           "runnable": true
         },
         {
@@ -60,7 +60,7 @@
           "title": "Chain two CTEs for a filtered report",
           "code": "WITH customer_totals AS (SELECT customer, SUM(amount) AS total_amount FROM sub13_cte_sales GROUP BY customer), high_value AS (SELECT customer, total_amount FROM customer_totals WHERE total_amount >= 40) SELECT customer, total_amount FROM high_value ORDER BY total_amount DESC, customer;",
           "expectedOutput": "Asha | 120; Bilal | 40",
-          "explanation": "This example demonstrates chain two ctes for a filtered report using SQLite. Follow the inner query and outer result carefully.",
+          "explanation": "Defines customer_totals first, then defines high_value using the earlier CTE. The outer query returns groups with totals of at least 40 and sorts by total descending with a customer tie-breaker.",
           "runnable": true
         },
         {
@@ -69,7 +69,7 @@
           "title": "Reference a CTE in a scalar summary",
           "code": "WITH customer_totals AS (SELECT customer, SUM(amount) AS total_amount FROM sub13_cte_sales GROUP BY customer) SELECT COUNT(*) AS customer_count, MAX(total_amount) AS largest_total FROM customer_totals;",
           "expectedOutput": "3 | 120",
-          "explanation": "This example demonstrates reference a cte in a scalar summary using SQLite. Follow the inner query and outer result carefully.",
+          "explanation": "Uses the CTE as an input relation for a second aggregation. COUNT(*) counts the three customer groups, while MAX(total_amount) returns the largest group total, 120.",
           "runnable": true
         }
       ]
