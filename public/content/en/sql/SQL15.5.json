@@ -25,7 +25,7 @@
       "analogyLimit": "The analogy does not model B-tree pages, query planner estimates, index maintenance or the full range of SQL access paths."
     },
     "explain": {
-      "narrative": "## Why statistics matter\nThe query planner estimates the cost of candidate strategies. Statistics about table and index contents can improve those estimates, especially when data is unevenly distributed.\n\n## ANALYZE\nANALYZE gathers statistics for tables and indexes and stores them in SQLite's statistics tables, such as sqlite_stat1. Running ANALYZE after significant data changes can help the planner make better choices.\n\n## PRAGMA optimize\nPRAGMA optimize is a recommended maintenance entry point in modern SQLite. It may decide that targeted analysis is useful. Its exact work depends on database history and version, so do not assume it always changes statistics.\n\n## Operational caution\nStatistics maintenance is not a substitute for inspecting slow queries. Re-check query plans and measure representative workloads after significant schema or data changes.",
+      "narrative": "## Why statistics matter\nThe query planner estimates the cost of candidate strategies. Statistics about table and index contents can improve those estimates, especially when data is unevenly distributed.\n\n## ANALYZE\nANALYZE gathers statistics for tables and indexes and stores them in SQLite's statistics tables, such as sqlite_stat1. Running ANALYZE after significant data changes can help the planner make better choices.\n\n## PRAGMA optimize\nPRAGMA optimize is a recommended maintenance entry point in modern SQLite. It may decide that targeted analysis is useful. Its exact work depends on database history and version, so do not assume it always changes statistics.\n\n## Operational caution\nStatistics maintenance is not a substitute for inspecting slow queries. Re-check query plans and measure representative workloads after significant schema or data changes.\n\n### Statistics are estimates\nThe planner uses collected statistics to estimate selectivity and compare possible access strategies. Statistics can become stale after substantial data changes, especially when distributions are skewed. Run maintenance according to the engine's guidance and inspect plans after important changes.\n\n### Operational limits\nANALYZE, sqlite_stat1 and PRAGMA optimize are SQLite-specific interfaces. Other DBMS products have different statistics catalogs and maintenance commands. Query tuning should use the target engine's plan tools and representative workload measurements.",
       "examples": [
         {
           "id": "sql15.5-ex1",
@@ -33,7 +33,7 @@
           "title": "Create a table for planner statistics",
           "code": "CREATE TABLE perf15_stats (record_id INTEGER PRIMARY KEY, category TEXT NOT NULL, amount INTEGER NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create a table for planner statistics in SQLite. Verify both the access strategy and the returned data.",
+          "explanation": "Creates a table with category and amount values. The primary key identifies each row, while the category index will support the sample filter.",
           "runnable": true
         },
         {
@@ -42,7 +42,7 @@
           "title": "Insert sample rows",
           "code": "INSERT INTO perf15_stats VALUES (1, 'Books', 10), (2, 'Books', 20), (3, 'Games', 30), (4, 'Games', 40), (5, 'Games', 50);",
           "expectedOutput": "5 rows inserted",
-          "explanation": "This example demonstrates insert sample rows in SQLite. Verify both the access strategy and the returned data.",
+          "explanation": "Inserts five rows across Books and Games. This small data set demonstrates the statistics workflow, but realistic planner evaluation needs representative volume and distribution.",
           "runnable": true
         },
         {
@@ -51,7 +51,7 @@
           "title": "Create an index for category lookups",
           "code": "CREATE INDEX idx_perf15_stats_category ON perf15_stats(category);",
           "expectedOutput": "Index created",
-          "explanation": "This example demonstrates create an index for category lookups in SQLite. Verify both the access strategy and the returned data.",
+          "explanation": "Creates a secondary index on category. The planner can use this index for category predicates if its estimated cost is lower than a table scan.",
           "runnable": true
         },
         {
@@ -60,7 +60,7 @@
           "title": "Gather table and index statistics",
           "code": "ANALYZE perf15_stats; SELECT tbl, idx FROM sqlite_stat1 WHERE tbl = 'perf15_stats' ORDER BY idx;",
           "expectedOutput": "perf15_stats | idx_perf15_stats_category",
-          "explanation": "This example demonstrates gather table and index statistics in SQLite. Verify both the access strategy and the returned data.",
+          "explanation": "Runs ANALYZE for the table and then reads SQLite's sqlite_stat1 metadata for the table. The statistics row describes the index distribution in a compact engine-specific format; it is not a user-facing business report.",
           "runnable": true
         },
         {
@@ -69,7 +69,7 @@
           "title": "Run SQLite's optimization maintenance entry point",
           "code": "PRAGMA optimize; SELECT COUNT(*) AS total_rows FROM perf15_stats;",
           "expectedOutput": "total_rows = 5",
-          "explanation": "This example demonstrates run sqlite's optimization maintenance entry point in SQLite. Verify both the access strategy and the returned data.",
+          "explanation": "Runs PRAGMA optimize, which may decide to perform targeted analysis based on the database's usage history and version. The following COUNT verifies that the five data rows remain; optimize is not expected to change the logical contents.",
           "runnable": true
         }
       ]
