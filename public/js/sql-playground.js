@@ -11,6 +11,7 @@
     constraint: "CREATE TABLE registrations (registration_id INTEGER PRIMARY KEY, email TEXT NOT NULL UNIQUE, age INTEGER CHECK (age >= 18));\nINSERT INTO registrations (email, age) VALUES ('asha@example.test', 22);\nSELECT * FROM registrations;"
   };
   const editor = $("sqlCode");
+  const paramsEditor = $("sqlParams");
   const results = $("sqlResults");
   const status = $("sqlStatus");
   const statusText = $("sqlStatusText");
@@ -19,6 +20,8 @@
   const stopButton = $("stopSql");
   const resetDbButton = $("resetSqlDatabase");
   const exportButton = $("exportSqlDatabase");
+  const importButton = $("importSqlDatabase");
+  const databaseFile = $("sqlDatabaseFile");
   const runState = $("sqlRunState");
   let worker = null;
   let ready = false;
@@ -39,6 +42,7 @@
     stopButton.disabled = !value;
     resetDbButton.disabled = !ready || value;
     exportButton.disabled = !ready || value;
+    importButton.disabled = !ready || value;
     runState.textContent = value ? "Running…" : "Waiting";
   }
   function openStore() {
@@ -191,6 +195,15 @@
         setRunning(false);
         return;
       }
+      if (message.type === "import-done") {
+        if (message.bytes) await saveSnapshot(message.bytes);
+        databaseFile.value = "";
+        clearResults("SQLite database imported. The imported tables and rows are now available locally.");
+        setStatus("SQLite ready · imported database saved locally", "ready");
+        setRunning(false);
+        runState.textContent = "Database imported";
+        return;
+      }
       if (message.type === "export-done") {
         if (!message.bytes) return;
         const blob = new Blob([message.bytes], { type: "application/vnd.sqlite3" });
@@ -221,10 +234,23 @@
       clearResults("SQL input is limited to 50,000 characters per run.");
       return;
     }
+    let params = null;
+    const rawParams = paramsEditor.value.trim();
+    if (rawParams) {
+      try { params = JSON.parse(rawParams); }
+      catch {
+        clearResults("Bound parameters must be valid JSON. Use an array for ? placeholders or an object for named placeholders.");
+        return;
+      }
+      if (!Array.isArray(params) && (!params || typeof params !== "object")) {
+        clearResults("Bound parameters must be a JSON array or object.");
+        return;
+      }
+    }
     clearResults("Executing SQL…");
     runId += 1;
     setRunning(true);
-    worker.postMessage({ type: "run", runId, code });
+    worker.postMessage({ type: "run", runId, code, params });
     watchdog = setTimeout(() => {
       terminateWorker();
       setStatus("Query stopped after the 8-second time limit. Restarting from the last saved database snapshot.", "error");
@@ -273,6 +299,33 @@
   });
   exportButton.addEventListener("click", () => {
     if (ready && !running) worker.postMessage({ type: "export" });
+  });
+  importButton.addEventListener("click", () => {
+    if (ready && !running) databaseFile.click();
+  });
+  databaseFile.addEventListener("change", async () => {
+    const file = databaseFile.files?.[0];
+    if (!file) return;
+    if (file.size > 20 * 1024 * 1024) {
+      appendMessage("SQLite imports are limited to 20 MB.", "sql-error");
+      databaseFile.value = "";
+      return;
+    }
+    if (!ready || running) { databaseFile.value = ""; return; }
+    if (!window.confirm("Import this SQLite file and replace the current local database? Export the current database first if you need a copy.")) {
+      databaseFile.value = "";
+      return;
+    }
+    try {
+      const bytes = await file.arrayBuffer();
+      clearResults("Importing SQLite database…");
+      setRunning(true);
+      worker.postMessage({ type: "import", bytes }, [bytes]);
+    } catch (error) {
+      databaseFile.value = "";
+      setRunning(false);
+      appendMessage("Could not read the SQLite file: " + error.message, "sql-error");
+    }
   });
   editor.addEventListener("keydown", event => {
     if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
