@@ -1,0 +1,160 @@
+{
+  "id": "sql.sql15.3.en",
+  "courseId": "sql",
+  "moduleId": "SQL15",
+  "topicId": "SQL15.3",
+  "title": "Partial Indexes and Filtered Workloads",
+  "language": "en",
+  "learningObjectives": [
+    "Define a partial index and explain how its WHERE condition limits indexed rows.",
+    "Create a partial index for a frequently queried subset.",
+    "Use a compatible query predicate to benefit from a partial index.",
+    "Explain how updates can add or remove rows from a partial index.",
+    "Recognize that partial-index support and matching rules vary by DBMS."
+  ],
+  "prerequisites": [
+    "SQL3.10",
+    "SQL5.4",
+    "SQL5.6"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A partial index contains entries only for rows that satisfy a WHERE condition in the index definition. It can reduce index size and write maintenance when queries frequently target a subset such as active records or open events.",
+      "whyItMatters": "Partial indexes can improve performance and reduce storage when a workload repeatedly filters for a well-defined subset of rows.",
+      "analogy": "An index is like a sorted lookup guide that points toward the relevant records instead of requiring every page to be read.",
+      "analogyLimit": "The analogy does not model B-tree pages, query planner estimates, index maintenance or the full range of SQL access paths."
+    },
+    "explain": {
+      "narrative": "## Partial indexes\nA partial index adds a WHERE clause to CREATE INDEX. Only rows satisfying the condition are represented in the index. Queries that use a compatible predicate can benefit from it.\n\n## Design considerations\nThe query predicate must be compatible with the partial-index condition for the optimizer to use the index. Rows outside the condition are not indexed by that partial index. Updates that move rows into or out of the condition still require index maintenance.\n\n## Portability\nPartial or filtered index syntax and optimizer rules differ across database products. The examples target SQLite; verify the feature and predicate matching in the selected DBMS.",
+      "examples": [
+        {
+          "id": "sql15.3-ex1",
+          "language": "en",
+          "title": "Create an event table",
+          "code": "CREATE TABLE perf15_events (event_id INTEGER PRIMARY KEY, event_status TEXT NOT NULL, created_at TEXT NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "This example demonstrates create an event table in SQLite. Verify both the access strategy and the returned data.",
+          "runnable": true
+        },
+        {
+          "id": "sql15.3-ex2",
+          "language": "en",
+          "title": "Insert open and closed events",
+          "code": "INSERT INTO perf15_events VALUES (1, 'open', '2026-01-01'), (2, 'closed', '2026-01-02'), (3, 'open', '2026-02-01'), (4, 'closed', '2026-02-02'), (5, 'open', '2026-03-01');",
+          "expectedOutput": "5 rows inserted",
+          "explanation": "This example demonstrates insert open and closed events in SQLite. Verify both the access strategy and the returned data.",
+          "runnable": true
+        },
+        {
+          "id": "sql15.3-ex3",
+          "language": "en",
+          "title": "Create an index only for open events",
+          "code": "CREATE INDEX idx_perf15_open_created ON perf15_events(created_at) WHERE event_status = 'open';",
+          "expectedOutput": "Index created",
+          "explanation": "This example demonstrates create an index only for open events in SQLite. Verify both the access strategy and the returned data.",
+          "runnable": true
+        },
+        {
+          "id": "sql15.3-ex4",
+          "language": "en",
+          "title": "Inspect the partial-index query plan",
+          "code": "EXPLAIN QUERY PLAN SELECT event_id FROM perf15_events WHERE event_status = 'open' AND created_at >= '2026-02-01';",
+          "expectedOutput": "Query plan uses idx_perf15_open_created",
+          "expectedPattern": "SEARCH.*USING INDEX idx_perf15_open_created",
+          "explanation": "This example demonstrates inspect the partial-index query plan in SQLite. Verify both the access strategy and the returned data.",
+          "runnable": true
+        },
+        {
+          "id": "sql15.3-ex5",
+          "language": "en",
+          "title": "Return open events in the date range",
+          "code": "SELECT event_id, created_at FROM perf15_events WHERE event_status = 'open' AND created_at >= '2026-02-01' ORDER BY created_at;",
+          "expectedOutput": "3 | 2026-02-01; 5 | 2026-03-01",
+          "explanation": "This example demonstrates return open events in the date range in SQLite. Verify both the access strategy and the returned data.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and explain why only open events are represented by the partial index.",
+      "independentTask": "Create a task table with open, closed and archived statuses. Add a partial index for open tasks and write a matching query with a plan check.",
+      "hints": [
+        "A partial index has a WHERE clause in CREATE INDEX.",
+        "Only rows satisfying the index predicate are included.",
+        "The query should use a compatible predicate.",
+        "Rows can enter or leave the index when their data changes.",
+        "Check support and syntax in the target database product."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE perf15_events (event_id INTEGER PRIMARY KEY, event_status TEXT NOT NULL, created_at TEXT NOT NULL);\nINSERT INTO perf15_events VALUES (1, 'open', '2026-01-01'), (2, 'closed', '2026-01-02'), (3, 'open', '2026-02-01'), (4, 'closed', '2026-02-02'), (5, 'open', '2026-03-01');\nCREATE INDEX idx_perf15_open_created ON perf15_events(created_at) WHERE event_status = 'open';\nSELECT event_id, created_at FROM perf15_events WHERE event_status = 'open' AND created_at >= '2026-02-01' ORDER BY created_at;",
+    "resetCode": "CREATE TABLE perf15_events (event_id INTEGER PRIMARY KEY, event_status TEXT NOT NULL, created_at TEXT NOT NULL);\nINSERT INTO perf15_events VALUES (1, 'open', '2026-01-01'), (2, 'closed', '2026-01-02'), (3, 'open', '2026-02-01'), (4, 'closed', '2026-02-02'), (5, 'open', '2026-03-01');\nCREATE INDEX idx_perf15_open_created ON perf15_events(created_at) WHERE event_status = 'open';\nSELECT event_id, created_at FROM perf15_events WHERE event_status = 'open' AND created_at >= '2026-02-01' ORDER BY created_at;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql15.3-q1",
+        "prompt": "What is a partial index?",
+        "options": [
+          "An index that includes only rows satisfying a condition",
+          "An index with half a column name",
+          "An index that cannot be used in WHERE",
+          "A temporary table"
+        ],
+        "answer": "An index that includes only rows satisfying a condition",
+        "explanation": "A partial index stores entries only for rows matching its WHERE condition."
+      },
+      {
+        "id": "sql15.3-q2",
+        "prompt": "Where is the partial-index condition written?",
+        "options": [
+          "In the WHERE clause of CREATE INDEX",
+          "In the SELECT list only",
+          "In COMMIT",
+          "In the table's primary key"
+        ],
+        "answer": "In the WHERE clause of CREATE INDEX",
+        "explanation": "SQLite partial indexes use WHERE in the index definition."
+      },
+      {
+        "id": "sql15.3-q3",
+        "prompt": "Which query is most likely to use an index for open events?",
+        "options": [
+          "A query whose predicate includes event_status = 'open'",
+          "A query that filters only unrelated columns",
+          "A query that drops the table",
+          "A query with no FROM clause"
+        ],
+        "answer": "A query whose predicate includes event_status = 'open'",
+        "explanation": "The query predicate should be compatible with the partial-index condition."
+      },
+      {
+        "id": "sql15.3-q4",
+        "prompt": "What happens when an indexed row changes from open to closed?",
+        "options": [
+          "It no longer qualifies for the partial index and the index is maintained",
+          "It remains indexed forever",
+          "The table is deleted",
+          "The index becomes a primary key"
+        ],
+        "answer": "It no longer qualifies for the partial index and the index is maintained",
+        "explanation": "Partial index membership changes as row values change."
+      },
+      {
+        "id": "sql15.3-q5",
+        "prompt": "Are partial indexes identical across every DBMS?",
+        "options": [
+          "No, syntax and optimizer matching rules can differ",
+          "Yes, every DBMS implements them identically",
+          "They exist only in spreadsheets",
+          "They cannot be used with WHERE"
+        ],
+        "answer": "No, syntax and optimizer matching rules can differ",
+        "explanation": "Always verify partial or filtered index behaviour in the target product."
+      }
+    ]
+  },
+  "status": "draft"
+}
