@@ -1,0 +1,161 @@
+{
+  "id": "sql.sql21.2.en",
+  "courseId": "sql",
+  "moduleId": "SQL21",
+  "topicId": "SQL21.2",
+  "title": "Data Export and Reporting Snapshots",
+  "language": "en",
+  "learningObjectives": [
+    "Distinguish SQL result selection from file export operations.",
+    "Create a stable reporting snapshot from transactional data.",
+    "Use explicit columns and deterministic ordering for exports.",
+    "Record export metadata without storing credentials.",
+    "Explain why CSV formatting and file delivery are handled by client or database tooling."
+  ],
+  "prerequisites": [
+    "SQL3.3",
+    "SQL11.1",
+    "SQL15.5",
+    "SQL18.5",
+    "SQL20.5"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "An export is a controlled representation of selected database data delivered to another system or file. SQL prepares the rows; the application, driver or database utility usually serializes and transfers them.",
+      "whyItMatters": "Exports are often used for reporting, finance and integrations. Unstable ordering, changing source rows or excessive columns can make an export unreliable or expose unnecessary information.",
+      "analogy": "A warehouse prepares a labelled shipment list, while the carrier packages and delivers the shipment.",
+      "analogyLimit": "A SELECT statement does not itself create a downloadable CSV file in a browser. File creation, encoding, quoting and delivery belong to a client or database utility."
+    },
+    "explain": {
+      "narrative": "## Export workflow\nChoose the exact columns and row filters, define a deterministic order, decide whether the export is a live query or a point-in-time snapshot, then serialize the result with a client or database export utility. Use an explicit schema/version for downstream consumers.\n\n## Reporting snapshots\nA snapshot table can preserve the result of a report at a chosen time. It should include a batch or snapshot identifier and a generated timestamp so later consumers can distinguish different exports.\n\n## CSV and file handling\nCSV quoting, delimiter, encoding, line endings and NULL representation are not defined by SELECT itself. The application or command-line utility handles these details. Do not put database passwords, API tokens or file-storage credentials in export metadata.",
+      "examples": [
+        {
+          "id": "sql212-ex1",
+          "language": "en",
+          "title": "Create a source sales table",
+          "code": "CREATE TABLE ops21_sales (sale_id INTEGER PRIMARY KEY, sold_on TEXT NOT NULL, region TEXT NOT NULL, amount INTEGER NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "Creates the source rows for a reporting export. The date is ISO-formatted text for this SQLite example; a production design should use the target engine's date/time type where appropriate.",
+          "runnable": true
+        },
+        {
+          "id": "sql212-ex2",
+          "language": "en",
+          "title": "Insert sample sales",
+          "code": "INSERT INTO ops21_sales VALUES (1, '2026-11-20', 'East', 120), (2, '2026-11-20', 'West', 90), (3, '2026-11-21', 'East', 80), (4, '2026-11-21', 'West', 110);",
+          "expectedOutput": "4 rows inserted",
+          "explanation": "Adds four sales records across two regions and two dates. These values provide a known total of 400.",
+          "runnable": true
+        },
+        {
+          "id": "sql212-ex3",
+          "language": "en",
+          "title": "Create a reporting snapshot table",
+          "code": "CREATE TABLE ops21_export_snapshot (snapshot_id INTEGER NOT NULL, region TEXT NOT NULL, total_amount INTEGER NOT NULL, generated_at TEXT NOT NULL, PRIMARY KEY (snapshot_id, region));",
+          "expectedOutput": "Table created",
+          "explanation": "Defines a composite key so each snapshot can contain one row per region. generated_at records when the report was materialized.",
+          "runnable": true
+        },
+        {
+          "id": "sql212-ex4",
+          "language": "en",
+          "title": "Materialize one regional report snapshot",
+          "code": "INSERT INTO ops21_export_snapshot SELECT 1, region, SUM(amount), '2026-11-22T10:00:00Z' FROM ops21_sales GROUP BY region;",
+          "expectedOutput": "2 rows inserted",
+          "explanation": "Captures the current regional totals in snapshot 1: East 200 and West 200. The inserted rows remain stable even if the source sales table changes later.",
+          "runnable": true
+        },
+        {
+          "id": "sql212-ex5",
+          "language": "en",
+          "title": "Read the snapshot in export order",
+          "code": "SELECT region, total_amount, generated_at FROM ops21_export_snapshot WHERE snapshot_id = 1 ORDER BY region;",
+          "expectedOutput": "East | 200 | 2026-11-22T10:00:00Z; West | 200 | 2026-11-22T10:00:00Z",
+          "explanation": "Returns a deterministic export dataset. A client or database utility must serialize these rows to CSV or another file format and apply the required quoting and encoding rules.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and compare the live sales table with the stored snapshot. Explain why a snapshot is useful when source data may change after an export is generated.",
+      "independentTask": "Design a monthly export snapshot with a unique batch ID, generated timestamp and one row per department. Specify the CSV encoding, NULL representation and deterministic ordering expected by the receiving system.",
+      "hints": [
+        "SELECT returns rows; client tools create files.",
+        "Use explicit columns and a stable ORDER BY.",
+        "Snapshots preserve the result at a point in time.",
+        "Record snapshot ID and generated timestamp.",
+        "Never store export credentials in metadata."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE ops21_sales (sale_id INTEGER PRIMARY KEY, sold_on TEXT NOT NULL, region TEXT NOT NULL, amount INTEGER NOT NULL);\nINSERT INTO ops21_sales VALUES (1, '2026-11-20', 'East', 120), (2, '2026-11-20', 'West', 90);\nSELECT sale_id, sold_on, region, amount FROM ops21_sales ORDER BY sale_id;",
+    "resetCode": "CREATE TABLE ops21_sales (sale_id INTEGER PRIMARY KEY, sold_on TEXT NOT NULL, region TEXT NOT NULL, amount INTEGER NOT NULL);\nINSERT INTO ops21_sales VALUES (1, '2026-11-20', 'East', 120), (2, '2026-11-20', 'West', 90);\nSELECT sale_id, sold_on, region, amount FROM ops21_sales ORDER BY sale_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql212-q1",
+        "prompt": "Does a plain SELECT statement create a CSV file?",
+        "options": [
+          "No; a client or database utility serializes the result",
+          "Yes, automatically in every DBMS",
+          "Only when the query has GROUP BY",
+          "Only in SQLite"
+        ],
+        "answer": "No; a client or database utility serializes the result",
+        "explanation": "SQL selects rows; file creation is handled by a tool or application."
+      },
+      {
+        "id": "sql212-q2",
+        "prompt": "Why create a reporting snapshot?",
+        "options": [
+          "To preserve a report result at a chosen point in time",
+          "To change the source data type",
+          "To delete old transactions",
+          "To replace the database backup"
+        ],
+        "answer": "To preserve a report result at a chosen point in time",
+        "explanation": "A snapshot makes a report reproducible after source rows change."
+      },
+      {
+        "id": "sql212-q3",
+        "prompt": "Why is ORDER BY important for an export?",
+        "options": [
+          "It provides a deterministic row sequence",
+          "It encrypts each exported row",
+          "It removes NULL values",
+          "It creates a new table"
+        ],
+        "answer": "It provides a deterministic row sequence",
+        "explanation": "A stable order supports repeatable files and comparisons."
+      },
+      {
+        "id": "sql212-q4",
+        "prompt": "Which CSV concern is not defined by SELECT itself?",
+        "options": [
+          "Quoting, encoding and line endings",
+          "Which columns are selected",
+          "Which rows satisfy WHERE",
+          "Which order is requested"
+        ],
+        "answer": "Quoting, encoding and line endings",
+        "explanation": "The serializer or export utility handles the file representation."
+      },
+      {
+        "id": "sql212-q5",
+        "prompt": "What should export metadata avoid storing?",
+        "options": [
+          "Database passwords and storage credentials",
+          "Snapshot identifiers",
+          "Generated timestamps",
+          "Source report names"
+        ],
+        "answer": "Database passwords and storage credentials",
+        "explanation": "Metadata should never become a store for access secrets."
+      }
+    ]
+  },
+  "status": "draft"
+}

@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql13.5.en",
+  "courseId": "sql",
+  "moduleId": "SQL13",
+  "topicId": "SQL13.5",
+  "title": "Recursive CTEs and Hierarchical Queries",
+  "language": "en",
+  "learningObjectives": [
+    "Identify the anchor and recursive members of a recursive CTE.",
+    "Generate a bounded sequence using WITH RECURSIVE.",
+    "Traverse a parent-child hierarchy using a recursive join.",
+    "Add depth or path information to recursive results.",
+    "Prevent unbounded recursion by defining termination and cycle checks."
+  ],
+  "prerequisites": [
+    "SQL5.1",
+    "SQL9.3",
+    "SQL9.5"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A recursive CTE is a CTE that refers to itself. It combines an anchor query that starts the recursion with a recursive query that produces the next level. Recursive CTEs can generate sequences and traverse hierarchical relationships such as organization charts or category trees.",
+      "whyItMatters": "Hierarchical data is naturally represented with parent-child relationships. Recursive CTEs let SQL traverse those relationships without writing a fixed number of joins.",
+      "analogy": "A nested query is like a staged research task: first calculate or collect an intermediate result, then use it to answer the final question.",
+      "analogyLimit": "The analogy does not model SQL's exact cardinality rules, NULL logic, query optimizer or recursive evaluation."
+    },
+    "explain": {
+      "narrative": "## Recursive structure\nA recursive CTE uses WITH RECURSIVE. Its definition contains an anchor member that produces the starting rows and a recursive member that joins the current result to the next level. UNION ALL combines the anchor and recursive rows.\n\n## Hierarchy traversal\nA table with id and parent_id columns can represent a tree. Start at a root row, then repeatedly find children whose parent_id matches the current row's id. Add a depth or path column to make the traversal understandable.\n\n## Termination and cycle safety\nThe recursive member must eventually stop. Use a clear termination condition for generated sequences. For graph-like data, track visited identifiers and prevent revisiting a node; otherwise a cycle can produce unbounded recursion. SQLite also has recursion limits.\n\n### Anchor, recursive member and termination\nThe anchor query establishes the starting rows. The recursive member derives the next level from rows already produced. A recursive query must have a termination condition or a cycle guard; otherwise it can generate excessive work or hit the engine's recursion limit.\n\n### Trees versus general graphs\nAn adjacency list naturally represents parent-child relationships, but real graph data can contain multiple paths and cycles. A visited-node strategy must account for the graph's identity and path rules. The example's text path is suitable for positive integer IDs in this fixture, not a universal graph algorithm.",
+      "examples": [
+        {
+          "id": "sql13.5-ex1",
+          "language": "en",
+          "title": "Generate a sequence from one to five",
+          "code": "WITH RECURSIVE numbers(value) AS (SELECT 1 UNION ALL SELECT value + 1 FROM numbers WHERE value < 5) SELECT value FROM numbers;",
+          "expectedOutput": "1; 2; 3; 4; 5",
+          "explanation": "Defines a recursive CTE with an anchor row of 1 and a recursive member that adds one while the current value is below 5. The WHERE condition is the termination rule, so the sequence contains exactly five values.",
+          "runnable": true
+        },
+        {
+          "id": "sql13.5-ex2",
+          "language": "en",
+          "title": "Create an employee hierarchy table",
+          "code": "CREATE TABLE sub13_org (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, parent_id INTEGER);",
+          "expectedOutput": "Table created",
+          "explanation": "Creates an adjacency-list hierarchy: employee_id identifies a node and parent_id points to its parent. A NULL parent_id identifies the root in this sample.",
+          "runnable": true
+        },
+        {
+          "id": "sql13.5-ex3",
+          "language": "en",
+          "title": "Insert a small organization tree",
+          "code": "INSERT INTO sub13_org VALUES (1, 'CEO', NULL), (2, 'Asha', 1), (3, 'Bilal', 1), (4, 'Chitra', 2);",
+          "expectedOutput": "4 rows inserted",
+          "explanation": "Inserts a four-node organization tree. CEO is the root, Asha and Bilal report to CEO, and Chitra reports to Asha.",
+          "runnable": true
+        },
+        {
+          "id": "sql13.5-ex4",
+          "language": "en",
+          "title": "Traverse the hierarchy with depth",
+          "code": "WITH RECURSIVE org_tree(employee_id, employee_name, depth) AS (SELECT employee_id, employee_name, 0 FROM sub13_org WHERE parent_id IS NULL UNION ALL SELECT child.employee_id, child.employee_name, parent.depth + 1 FROM sub13_org AS child JOIN org_tree AS parent ON child.parent_id = parent.employee_id) SELECT employee_name, depth FROM org_tree ORDER BY depth, employee_name;",
+          "expectedOutput": "CEO | 0; Asha | 1; Bilal | 1; Chitra | 2",
+          "explanation": "The anchor selects the root at depth zero. The recursive member joins each child to the parent rows already found and increases depth by one. The final ORDER BY presents the root, its children and then the next level.",
+          "runnable": true
+        },
+        {
+          "id": "sql13.5-ex5",
+          "language": "en",
+          "title": "Build a path and prevent revisiting an identifier",
+          "code": "WITH RECURSIVE org_path(employee_id, employee_name, path) AS (SELECT employee_id, employee_name, '/' || employee_id || '/' FROM sub13_org WHERE parent_id IS NULL UNION ALL SELECT child.employee_id, child.employee_name, parent.path || child.employee_id || '/' FROM sub13_org AS child JOIN org_path AS parent ON child.parent_id = parent.employee_id WHERE instr(parent.path, '/' || child.employee_id || '/') = 0) SELECT employee_name, path FROM org_path ORDER BY length(path), employee_id;",
+          "expectedOutput": "CEO | /1/; Asha | /1/2/; Bilal | /1/3/; Chitra | /1/2/4/",
+          "explanation": "Builds a slash-delimited path for each node and uses instr() to avoid adding a child identifier already present in the current path. This is a SQLite-specific string-search technique for cycle protection; path encoding must be unambiguous if identifiers can contain delimiter characters.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the sequence and organization examples. Trace the anchor row, each recursive level and the termination condition.",
+      "independentTask": "Create a category tree with at least three levels. Use a recursive CTE to list each category with its depth and path. Include a cycle-prevention condition for visited identifiers.",
+      "hints": [
+        "Use WITH RECURSIVE to declare the CTE.",
+        "The anchor query produces the starting row or rows.",
+        "The recursive member joins children to rows already found.",
+        "Add a depth counter or path string to explain the traversal.",
+        "Use a termination condition or visited-id check to prevent infinite recursion."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE sub13_org (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, parent_id INTEGER);\nINSERT INTO sub13_org VALUES (1, 'CEO', NULL), (2, 'Asha', 1), (3, 'Bilal', 1), (4, 'Chitra', 2);\nWITH RECURSIVE org_tree(employee_id, employee_name, depth) AS (\n  SELECT employee_id, employee_name, 0 FROM sub13_org WHERE parent_id IS NULL\n  UNION ALL\n  SELECT child.employee_id, child.employee_name, parent.depth + 1\n  FROM sub13_org AS child JOIN org_tree AS parent ON child.parent_id = parent.employee_id\n)\nSELECT employee_name, depth FROM org_tree ORDER BY depth, employee_name;",
+    "resetCode": "CREATE TABLE sub13_org (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, parent_id INTEGER);\nINSERT INTO sub13_org VALUES (1, 'CEO', NULL), (2, 'Asha', 1), (3, 'Bilal', 1), (4, 'Chitra', 2);\nWITH RECURSIVE org_tree(employee_id, employee_name, depth) AS (\n  SELECT employee_id, employee_name, 0 FROM sub13_org WHERE parent_id IS NULL\n  UNION ALL\n  SELECT child.employee_id, child.employee_name, parent.depth + 1\n  FROM sub13_org AS child JOIN org_tree AS parent ON child.parent_id = parent.employee_id\n)\nSELECT employee_name, depth FROM org_tree ORDER BY depth, employee_name;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql13.5-q1",
+        "prompt": "What are the two logical parts of a recursive CTE?",
+        "options": [
+          "An anchor member and a recursive member",
+          "A primary key and a foreign key",
+          "A WHERE clause and an ORDER BY clause",
+          "A trigger and a stored procedure"
+        ],
+        "answer": "An anchor member and a recursive member",
+        "explanation": "The anchor starts recursion; the recursive member generates subsequent rows."
+      },
+      {
+        "id": "sql13.5-q2",
+        "prompt": "Which keyword introduces a recursive CTE in SQLite?",
+        "options": [
+          "WITH RECURSIVE",
+          "BEGIN RECURSIVE",
+          "CREATE RECURSIVE",
+          "SELECT RECURSIVE"
+        ],
+        "answer": "WITH RECURSIVE",
+        "explanation": "SQLite uses WITH RECURSIVE for recursive common table expressions."
+      },
+      {
+        "id": "sql13.5-q3",
+        "prompt": "How does a hierarchy query find the next level?",
+        "options": [
+          "It joins child rows to the parent rows already returned",
+          "It sorts names alphabetically only",
+          "It inserts new parent records",
+          "It disables foreign keys"
+        ],
+        "answer": "It joins child rows to the parent rows already returned",
+        "explanation": "The recursive member joins child.parent_id to the current parent id."
+      },
+      {
+        "id": "sql13.5-q4",
+        "prompt": "Why should recursive queries guard against cycles?",
+        "options": [
+          "A cycle can cause recursion to continue without reaching a natural end",
+          "Cycles automatically delete rows",
+          "Cycles disable indexes",
+          "A cycle makes every result NULL"
+        ],
+        "answer": "A cycle can cause recursion to continue without reaching a natural end",
+        "explanation": "A visited-node check or other termination condition prevents unbounded recursion."
+      },
+      {
+        "id": "sql13.5-q5",
+        "prompt": "What does a depth column represent?",
+        "options": [
+          "The number of recursive levels from the anchor row",
+          "The number of columns in the table",
+          "The maximum value in the hierarchy",
+          "The transaction isolation level"
+        ],
+        "answer": "The number of recursive levels from the anchor row",
+        "explanation": "Depth records how far a row is from the starting root."
+      }
+    ]
+  },
+  "status": "draft"
+}

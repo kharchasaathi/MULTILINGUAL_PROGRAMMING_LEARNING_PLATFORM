@@ -1,0 +1,1039 @@
+{
+  "schemaVersion": 1,
+  "courseId": "sql",
+  "language": "en",
+  "title": "CodeSaathi Original SQL Code Challenges — Retail Dataset",
+  "description": "Original CodeSaathi challenge prompts mapped to W3Schools SQL challenge categories. No W3Schools challenge prompts or solutions are copied.",
+  "dataset": {
+    "id": "codesaathi-retail-v1",
+    "engine": "SQLite",
+    "setupSql": "PRAGMA foreign_keys = ON;\nCREATE TABLE customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL, active INTEGER NOT NULL CHECK(active IN (0,1)));\nINSERT INTO customers VALUES (1,'Asha','Hyderabad',1),(2,'Bilal','Vijayawada',1),(3,'Chitra','Hyderabad',0),(4,'Dinesh','Chennai',1),(5,'Farah','Mumbai',1),(6,'Gopal','Hyderabad',1);\nCREATE TABLE products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, category TEXT NOT NULL, price REAL NOT NULL CHECK(price>=0), stock_qty INTEGER NOT NULL CHECK(stock_qty>=0), discontinued INTEGER NOT NULL CHECK(discontinued IN (0,1)));\nINSERT INTO products VALUES (1,'USB Cable','Accessories',250,20,0),(2,'Phone Case','Accessories',400,12,0),(3,'Notebook','Stationery',60,50,0),(4,'Pen','Stationery',10,100,0),(5,'Old Charger','Accessories',150,0,1),(6,'Mouse','Electronics',700,8,0),(7,'Keyboard','Electronics',1200,5,0);\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL REFERENCES customers(customer_id), order_date TEXT NOT NULL, status TEXT NOT NULL, total_amount REAL NOT NULL);\nINSERT INTO orders VALUES (1,1,'2026-11-01','paid',560),(2,1,'2026-11-03','paid',180),(3,2,'2026-11-05','pending',400),(4,3,'2026-11-07','paid',70),(5,4,'2026-11-08','cancelled',0),(6,5,'2026-11-09','paid',1200);\nCREATE TABLE order_items (order_item_id INTEGER PRIMARY KEY, order_id INTEGER NOT NULL REFERENCES orders(order_id), product_id INTEGER NOT NULL REFERENCES products(product_id), quantity INTEGER NOT NULL CHECK(quantity>0), unit_price REAL NOT NULL);\nINSERT INTO order_items VALUES (1,1,1,2,250),(2,1,3,1,60),(3,2,3,3,60),(4,3,2,1,400),(5,4,4,7,10),(6,6,7,1,1200);\nCREATE TABLE employees (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, manager_id INTEGER REFERENCES employees(employee_id));\nINSERT INTO employees VALUES (1,'Nisha',NULL),(2,'Asha',1),(3,'Bilal',1),(4,'Chitra',2),(5,'Dinesh',2);\nCREATE TABLE suppliers (supplier_id INTEGER PRIMARY KEY, supplier_name TEXT NOT NULL, city TEXT NOT NULL);\nINSERT INTO suppliers VALUES (1,'Alpha','Mumbai'),(2,'Beta','Hyderabad'),(3,'Gamma','Chennai');\nCREATE TABLE archived_orders (archive_id INTEGER PRIMARY KEY, customer_id INTEGER, order_date TEXT NOT NULL, status TEXT NOT NULL, total_amount REAL NOT NULL);\nINSERT INTO archived_orders VALUES (1,1,'2026-10-01','paid',200),(2,2,'2026-10-02','paid',400),(3,5,'2026-10-03','pending',100);\nCREATE TABLE order_import (import_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL);\nINSERT INTO order_import VALUES (1,1),(2,99);\nCREATE TABLE regional_targets (region TEXT PRIMARY KEY, target INTEGER NOT NULL);\nINSERT INTO regional_targets VALUES ('East',100),('West',80);\nCREATE TABLE regional_sales (region TEXT PRIMARY KEY, sales INTEGER NOT NULL);\nINSERT INTO regional_sales VALUES ('East',90),('North',70);",
+    "notes": [
+      "Foreign-key enforcement is enabled.",
+      "Each challenge runs against a fresh copy of the dataset.",
+      "SQLite equivalents are documented for TOP, ANY and ALL.",
+      "RIGHT JOIN and FULL OUTER JOIN require SQLite 3.39 or later."
+    ]
+  },
+  "challenges": [
+    {
+      "id": "CH01",
+      "courseId": "sql",
+      "topicId": "SQL5.1",
+      "category": "SELECT",
+      "title": "SELECT — Retail Data Challenge",
+      "difficulty": "beginner",
+      "prompt": "Select customer names, cities and active flags, ordered by customer ID.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT customer_name, city, active FROM customers ORDER BY customer_id;",
+      "expectedRows": [
+        [
+          "Asha",
+          "Hyderabad",
+          1
+        ],
+        [
+          "Bilal",
+          "Vijayawada",
+          1
+        ],
+        [
+          "Chitra",
+          "Hyderabad",
+          0
+        ],
+        [
+          "Dinesh",
+          "Chennai",
+          1
+        ],
+        [
+          "Farah",
+          "Mumbai",
+          1
+        ],
+        [
+          "Gopal",
+          "Hyderabad",
+          1
+        ]
+      ],
+      "hints": [
+        "Return only the requested columns and preserve a stable order."
+      ],
+      "dialectNote": "Runnable in the supplied SQLite retail dataset."
+    },
+    {
+      "id": "CH02",
+      "courseId": "sql",
+      "topicId": "SQL5.3",
+      "category": "SELECT DISTINCT",
+      "title": "SELECT DISTINCT — Retail Data Challenge",
+      "difficulty": "beginner",
+      "prompt": "List every different customer city exactly once.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT DISTINCT city FROM customers ORDER BY city;",
+      "expectedRows": [
+        [
+          "Chennai"
+        ],
+        [
+          "Hyderabad"
+        ],
+        [
+          "Mumbai"
+        ],
+        [
+          "Vijayawada"
+        ]
+      ],
+      "hints": [
+        "DISTINCT removes duplicate result rows."
+      ],
+      "dialectNote": "Runnable in the supplied SQLite retail dataset."
+    },
+    {
+      "id": "CH03",
+      "courseId": "sql",
+      "topicId": "SQL5.4",
+      "category": "WHERE",
+      "title": "WHERE — Retail Data Challenge",
+      "difficulty": "beginner",
+      "prompt": "Find active customers only.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT customer_name FROM customers WHERE active = 1 ORDER BY customer_name;",
+      "expectedRows": [
+        [
+          "Asha"
+        ],
+        [
+          "Bilal"
+        ],
+        [
+          "Dinesh"
+        ],
+        [
+          "Farah"
+        ],
+        [
+          "Gopal"
+        ]
+      ],
+      "hints": [
+        "Filter source rows before returning them."
+      ],
+      "dialectNote": "Runnable in the supplied SQLite retail dataset."
+    },
+    {
+      "id": "CH04",
+      "courseId": "sql",
+      "topicId": "SQL5.6",
+      "category": "ORDER BY",
+      "title": "ORDER BY — Retail Data Challenge",
+      "difficulty": "beginner",
+      "prompt": "List products from highest to lowest price.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT product_name, price FROM products ORDER BY price DESC, product_name;",
+      "expectedRows": [
+        [
+          "Keyboard",
+          1200
+        ],
+        [
+          "Mouse",
+          700
+        ],
+        [
+          "Phone Case",
+          400
+        ],
+        [
+          "USB Cable",
+          250
+        ],
+        [
+          "Old Charger",
+          150
+        ],
+        [
+          "Notebook",
+          60
+        ],
+        [
+          "Pen",
+          10
+        ]
+      ],
+      "hints": [
+        "Use a tie-breaker after the main sort key."
+      ],
+      "dialectNote": "Runnable in the supplied SQLite retail dataset."
+    },
+    {
+      "id": "CH05",
+      "courseId": "sql",
+      "topicId": "SQL5.5",
+      "category": "AND",
+      "title": "AND — Retail Data Challenge",
+      "difficulty": "beginner",
+      "prompt": "Find Accessories products with more than 10 units in stock.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT product_name, price, stock_qty FROM products WHERE category = 'Accessories' AND stock_qty > 10 ORDER BY product_name;",
+      "expectedRows": [
+        [
+          "Phone Case",
+          400,
+          12
+        ],
+        [
+          "USB Cable",
+          250,
+          20
+        ]
+      ],
+      "hints": [
+        "Both conditions must be true."
+      ],
+      "dialectNote": "Runnable in the supplied SQLite retail dataset."
+    },
+    {
+      "id": "CH06",
+      "courseId": "sql",
+      "topicId": "SQL5.5",
+      "category": "OR",
+      "title": "OR — Retail Data Challenge",
+      "difficulty": "beginner",
+      "prompt": "Find customers from Hyderabad or Chennai.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT customer_name, city FROM customers WHERE city = 'Hyderabad' OR city = 'Chennai' ORDER BY customer_name;",
+      "expectedRows": [
+        [
+          "Asha",
+          "Hyderabad"
+        ],
+        [
+          "Chitra",
+          "Hyderabad"
+        ],
+        [
+          "Dinesh",
+          "Chennai"
+        ],
+        [
+          "Gopal",
+          "Hyderabad"
+        ]
+      ],
+      "hints": [
+        "Either city condition may match."
+      ],
+      "dialectNote": "Runnable in the supplied SQLite retail dataset."
+    },
+    {
+      "id": "CH07",
+      "courseId": "sql",
+      "topicId": "SQL5.5",
+      "category": "NOT",
+      "title": "NOT — Retail Data Challenge",
+      "difficulty": "beginner",
+      "prompt": "List products that are not discontinued.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT product_name FROM products WHERE NOT discontinued = 1 ORDER BY product_name;",
+      "expectedRows": [
+        [
+          "Keyboard"
+        ],
+        [
+          "Mouse"
+        ],
+        [
+          "Notebook"
+        ],
+        [
+          "Pen"
+        ],
+        [
+          "Phone Case"
+        ],
+        [
+          "USB Cable"
+        ]
+      ],
+      "hints": [
+        "Negate the discontinued condition."
+      ],
+      "dialectNote": "Runnable in the supplied SQLite retail dataset."
+    },
+    {
+      "id": "CH08",
+      "courseId": "sql",
+      "topicId": "SQL5.8",
+      "category": "SELECT TOP",
+      "title": "SELECT TOP — Retail Data Challenge",
+      "difficulty": "beginner",
+      "prompt": "Return the three most expensive products.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT product_name, price FROM products ORDER BY price DESC, product_name LIMIT 3;",
+      "expectedRows": [
+        [
+          "Keyboard",
+          1200
+        ],
+        [
+          "Mouse",
+          700
+        ],
+        [
+          "Phone Case",
+          400
+        ]
+      ],
+      "hints": [
+        "SQLite uses LIMIT; SQL Server commonly uses TOP or OFFSET/FETCH."
+      ],
+      "dialectNote": "SQLite uses LIMIT; SQL Server commonly uses TOP or OFFSET/FETCH."
+    },
+    {
+      "id": "CH09",
+      "courseId": "sql",
+      "topicId": "SQL6.1",
+      "category": "MIN()",
+      "title": "MIN() — Retail Data Challenge",
+      "difficulty": "beginner",
+      "prompt": "Find the lowest product price.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT MIN(price) FROM products;",
+      "expectedRows": [
+        [
+          10
+        ]
+      ],
+      "hints": [
+        "Use MIN over the price column."
+      ],
+      "dialectNote": "Runnable in the supplied SQLite retail dataset."
+    },
+    {
+      "id": "CH10",
+      "courseId": "sql",
+      "topicId": "SQL6.2",
+      "category": "MAX()",
+      "title": "MAX() — Retail Data Challenge",
+      "difficulty": "beginner",
+      "prompt": "Find the highest product price.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT MAX(price) FROM products;",
+      "expectedRows": [
+        [
+          1200
+        ]
+      ],
+      "hints": [
+        "Use MAX over the price column."
+      ],
+      "dialectNote": "Runnable in the supplied SQLite retail dataset."
+    },
+    {
+      "id": "CH11",
+      "courseId": "sql",
+      "topicId": "SQL6.3",
+      "category": "COUNT()",
+      "title": "COUNT() — Retail Data Challenge",
+      "difficulty": "beginner",
+      "prompt": "Count all customers.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT COUNT(*) FROM customers;",
+      "expectedRows": [
+        [
+          6
+        ]
+      ],
+      "hints": [
+        "COUNT(*) counts rows."
+      ],
+      "dialectNote": "Runnable in the supplied SQLite retail dataset."
+    },
+    {
+      "id": "CH12",
+      "courseId": "sql",
+      "topicId": "SQL6.4",
+      "category": "SUM()",
+      "title": "SUM() — Retail Data Challenge",
+      "difficulty": "beginner",
+      "prompt": "Calculate the total quantity sold across all order items.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT SUM(quantity) FROM order_items;",
+      "expectedRows": [
+        [
+          15
+        ]
+      ],
+      "hints": [
+        "SUM adds the quantity values."
+      ],
+      "dialectNote": "Runnable in the supplied SQLite retail dataset."
+    },
+    {
+      "id": "CH13",
+      "courseId": "sql",
+      "topicId": "SQL6.5",
+      "category": "AVG()",
+      "title": "AVG() — Retail Data Challenge",
+      "difficulty": "beginner",
+      "prompt": "Calculate the average product price rounded to two decimal places.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT ROUND(AVG(price), 2) FROM products;",
+      "expectedRows": [
+        [
+          395.71
+        ]
+      ],
+      "hints": [
+        "AVG ignores NULL inputs; ROUND makes the display predictable."
+      ],
+      "dialectNote": "Runnable in the supplied SQLite retail dataset."
+    },
+    {
+      "id": "CH14",
+      "courseId": "sql",
+      "topicId": "SQL7.1",
+      "category": "LIKE",
+      "title": "LIKE — Retail Data Challenge",
+      "difficulty": "beginner",
+      "prompt": "Find customers whose names begin with A.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT customer_name FROM customers WHERE customer_name LIKE 'A%' ORDER BY customer_name;",
+      "expectedRows": [
+        [
+          "Asha"
+        ]
+      ],
+      "hints": [
+        "The percent wildcard matches any sequence of characters."
+      ],
+      "dialectNote": "Runnable in the supplied SQLite retail dataset."
+    },
+    {
+      "id": "CH15",
+      "courseId": "sql",
+      "topicId": "SQL7.2",
+      "category": "Wildcards",
+      "title": "Wildcards — Retail Data Challenge",
+      "difficulty": "beginner",
+      "prompt": "Find a product whose name has any first character followed by 'ouse'.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT product_name FROM products WHERE product_name LIKE '_ouse';",
+      "expectedRows": [
+        [
+          "Mouse"
+        ]
+      ],
+      "hints": [
+        "The underscore wildcard matches exactly one character."
+      ],
+      "dialectNote": "Runnable in the supplied SQLite retail dataset."
+    },
+    {
+      "id": "CH16",
+      "courseId": "sql",
+      "topicId": "SQL7.3",
+      "category": "IN",
+      "title": "IN — Retail Data Challenge",
+      "difficulty": "beginner",
+      "prompt": "List orders whose status is paid or pending.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT order_id, status FROM orders WHERE status IN ('paid','pending') ORDER BY order_id;",
+      "expectedRows": [
+        [
+          1,
+          "paid"
+        ],
+        [
+          2,
+          "paid"
+        ],
+        [
+          3,
+          "pending"
+        ],
+        [
+          4,
+          "paid"
+        ],
+        [
+          6,
+          "paid"
+        ]
+      ],
+      "hints": [
+        "IN tests membership in a set of values."
+      ],
+      "dialectNote": "Runnable in the supplied SQLite retail dataset."
+    },
+    {
+      "id": "CH17",
+      "courseId": "sql",
+      "topicId": "SQL7.4",
+      "category": "BETWEEN",
+      "title": "BETWEEN — Retail Data Challenge",
+      "difficulty": "beginner",
+      "prompt": "Find orders dated from November 1 through November 7, 2026, inclusive.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT order_id, order_date FROM orders WHERE order_date BETWEEN '2026-11-01' AND '2026-11-07' ORDER BY order_date;",
+      "expectedRows": [
+        [
+          1,
+          "2026-11-01"
+        ],
+        [
+          2,
+          "2026-11-03"
+        ],
+        [
+          3,
+          "2026-11-05"
+        ],
+        [
+          4,
+          "2026-11-07"
+        ]
+      ],
+      "hints": [
+        "BETWEEN includes both boundary values."
+      ],
+      "dialectNote": "Runnable in the supplied SQLite retail dataset."
+    },
+    {
+      "id": "CH18",
+      "courseId": "sql",
+      "topicId": "SQL5.9",
+      "category": "Aliases",
+      "title": "Aliases — Retail Data Challenge",
+      "difficulty": "beginner",
+      "prompt": "Return active customers with output columns named buyer and location.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT customer_name AS buyer, city AS location FROM customers WHERE active = 1 ORDER BY buyer;",
+      "expectedRows": [
+        [
+          "Asha",
+          "Hyderabad"
+        ],
+        [
+          "Bilal",
+          "Vijayawada"
+        ],
+        [
+          "Dinesh",
+          "Chennai"
+        ],
+        [
+          "Farah",
+          "Mumbai"
+        ],
+        [
+          "Gopal",
+          "Hyderabad"
+        ]
+      ],
+      "hints": [
+        "Use AS to give output columns readable aliases."
+      ],
+      "dialectNote": "Runnable in the supplied SQLite retail dataset."
+    },
+    {
+      "id": "CH19",
+      "courseId": "sql",
+      "topicId": "SQL8.1",
+      "category": "Joins",
+      "title": "Joins — Retail Data Challenge",
+      "difficulty": "intermediate",
+      "prompt": "Show each order with the name of the customer who placed it.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT c.customer_name, o.order_id FROM customers c JOIN orders o ON o.customer_id = c.customer_id ORDER BY o.order_id;",
+      "expectedRows": [
+        [
+          "Asha",
+          1
+        ],
+        [
+          "Asha",
+          2
+        ],
+        [
+          "Bilal",
+          3
+        ],
+        [
+          "Chitra",
+          4
+        ],
+        [
+          "Dinesh",
+          5
+        ],
+        [
+          "Farah",
+          6
+        ]
+      ],
+      "hints": [
+        "Join on the customer key, not display text."
+      ],
+      "dialectNote": "Runnable in the supplied SQLite retail dataset."
+    },
+    {
+      "id": "CH20",
+      "courseId": "sql",
+      "topicId": "SQL8.2",
+      "category": "INNER JOIN",
+      "title": "INNER JOIN — Retail Data Challenge",
+      "difficulty": "intermediate",
+      "prompt": "List each order item with its product name, quantity and sale-time unit price.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT oi.order_id, p.product_name, oi.quantity, oi.unit_price FROM order_items oi INNER JOIN products p ON p.product_id = oi.product_id ORDER BY oi.order_item_id;",
+      "expectedRows": [
+        [
+          1,
+          "USB Cable",
+          2,
+          250
+        ],
+        [
+          1,
+          "Notebook",
+          1,
+          60
+        ],
+        [
+          2,
+          "Notebook",
+          3,
+          60
+        ],
+        [
+          3,
+          "Phone Case",
+          1,
+          400
+        ],
+        [
+          4,
+          "Pen",
+          7,
+          10
+        ],
+        [
+          6,
+          "Keyboard",
+          1,
+          1200
+        ]
+      ],
+      "hints": [
+        "INNER JOIN returns rows with matching keys in both tables."
+      ],
+      "dialectNote": "Runnable in the supplied SQLite retail dataset."
+    },
+    {
+      "id": "CH21",
+      "courseId": "sql",
+      "topicId": "SQL8.3",
+      "category": "LEFT JOIN",
+      "title": "LEFT JOIN — Retail Data Challenge",
+      "difficulty": "intermediate",
+      "prompt": "List every customer and any order ID, including customers with no orders.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT c.customer_name, o.order_id FROM customers c LEFT JOIN orders o ON o.customer_id = c.customer_id ORDER BY c.customer_id, o.order_id;",
+      "expectedRows": [
+        [
+          "Asha",
+          1
+        ],
+        [
+          "Asha",
+          2
+        ],
+        [
+          "Bilal",
+          3
+        ],
+        [
+          "Chitra",
+          4
+        ],
+        [
+          "Dinesh",
+          5
+        ],
+        [
+          "Farah",
+          6
+        ],
+        [
+          "Gopal",
+          null
+        ]
+      ],
+      "hints": [
+        "LEFT JOIN preserves all rows from the left table."
+      ],
+      "dialectNote": "Runnable in the supplied SQLite retail dataset."
+    },
+    {
+      "id": "CH22",
+      "courseId": "sql",
+      "topicId": "SQL8.4",
+      "category": "RIGHT JOIN",
+      "title": "RIGHT JOIN — Retail Data Challenge",
+      "difficulty": "intermediate",
+      "prompt": "Keep every imported order row, even when its customer ID is not in the customer table.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT i.import_id, c.customer_name FROM customers c RIGHT JOIN order_import i ON i.customer_id = c.customer_id ORDER BY i.import_id;",
+      "expectedRows": [
+        [
+          1,
+          "Asha"
+        ],
+        [
+          2,
+          null
+        ]
+      ],
+      "hints": [
+        "SQLite 3.39+ supports RIGHT JOIN; verify target engine version."
+      ],
+      "dialectNote": "Requires SQLite 3.39+ or a DBMS that supports RIGHT JOIN."
+    },
+    {
+      "id": "CH23",
+      "courseId": "sql",
+      "topicId": "SQL8.5",
+      "category": "FULL JOIN",
+      "title": "FULL JOIN — Retail Data Challenge",
+      "difficulty": "intermediate",
+      "prompt": "Show all regions from either targets or actual sales, including unmatched regions.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT COALESCE(t.region,s.region), t.target, s.sales FROM regional_targets t FULL OUTER JOIN regional_sales s ON s.region = t.region ORDER BY 1;",
+      "expectedRows": [
+        [
+          "East",
+          100,
+          90
+        ],
+        [
+          "North",
+          null,
+          70
+        ],
+        [
+          "West",
+          80,
+          null
+        ]
+      ],
+      "hints": [
+        "FULL OUTER JOIN preserves unmatched rows from both sides; SQLite 3.39+ supports it."
+      ],
+      "dialectNote": "Requires SQLite 3.39+ or a DBMS that supports FULL OUTER JOIN."
+    },
+    {
+      "id": "CH24",
+      "courseId": "sql",
+      "topicId": "SQL8.6",
+      "category": "SELF JOIN",
+      "title": "SELF JOIN — Retail Data Challenge",
+      "difficulty": "intermediate",
+      "prompt": "Show each employee and their manager, excluding the top-level employee.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT e.employee_name, m.employee_name FROM employees e JOIN employees m ON m.employee_id = e.manager_id ORDER BY e.employee_id;",
+      "expectedRows": [
+        [
+          "Asha",
+          "Nisha"
+        ],
+        [
+          "Bilal",
+          "Nisha"
+        ],
+        [
+          "Chitra",
+          "Asha"
+        ],
+        [
+          "Dinesh",
+          "Asha"
+        ]
+      ],
+      "hints": [
+        "A self join uses two aliases for the same table."
+      ],
+      "dialectNote": "Runnable in the supplied SQLite retail dataset."
+    },
+    {
+      "id": "CH25",
+      "courseId": "sql",
+      "topicId": "SQL9.1",
+      "category": "UNION",
+      "title": "UNION — Retail Data Challenge",
+      "difficulty": "intermediate",
+      "prompt": "Return a unique list of cities used by customers or suppliers.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT city FROM customers UNION SELECT city FROM suppliers ORDER BY city;",
+      "expectedRows": [
+        [
+          "Chennai"
+        ],
+        [
+          "Hyderabad"
+        ],
+        [
+          "Mumbai"
+        ],
+        [
+          "Vijayawada"
+        ]
+      ],
+      "hints": [
+        "UNION removes duplicate result rows."
+      ],
+      "dialectNote": "Runnable in the supplied SQLite retail dataset."
+    },
+    {
+      "id": "CH26",
+      "courseId": "sql",
+      "topicId": "SQL9.2",
+      "category": "UNION ALL",
+      "title": "UNION ALL — Retail Data Challenge",
+      "difficulty": "intermediate",
+      "prompt": "Combine current and archived order statuses while retaining duplicates.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT status FROM orders UNION ALL SELECT status FROM archived_orders ORDER BY status;",
+      "expectedRows": [
+        [
+          "cancelled"
+        ],
+        [
+          "paid"
+        ],
+        [
+          "paid"
+        ],
+        [
+          "paid"
+        ],
+        [
+          "paid"
+        ],
+        [
+          "paid"
+        ],
+        [
+          "paid"
+        ],
+        [
+          "pending"
+        ],
+        [
+          "pending"
+        ]
+      ],
+      "hints": [
+        "UNION ALL retains duplicates from both result sets."
+      ],
+      "dialectNote": "Runnable in the supplied SQLite retail dataset."
+    },
+    {
+      "id": "CH27",
+      "courseId": "sql",
+      "topicId": "SQL9.3",
+      "category": "GROUP BY",
+      "title": "GROUP BY — Retail Data Challenge",
+      "difficulty": "intermediate",
+      "prompt": "Count orders for each customer who has at least one order.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT c.customer_name, COUNT(o.order_id) FROM customers c JOIN orders o ON o.customer_id = c.customer_id GROUP BY c.customer_id, c.customer_name ORDER BY c.customer_name;",
+      "expectedRows": [
+        [
+          "Asha",
+          2
+        ],
+        [
+          "Bilal",
+          1
+        ],
+        [
+          "Chitra",
+          1
+        ],
+        [
+          "Dinesh",
+          1
+        ],
+        [
+          "Farah",
+          1
+        ]
+      ],
+      "hints": [
+        "Group by customer identity and name."
+      ],
+      "dialectNote": "Runnable in the supplied SQLite retail dataset."
+    },
+    {
+      "id": "CH28",
+      "courseId": "sql",
+      "topicId": "SQL9.4",
+      "category": "HAVING",
+      "title": "HAVING — Retail Data Challenge",
+      "difficulty": "intermediate",
+      "prompt": "Find customers who have placed at least two orders.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT c.customer_name, COUNT(o.order_id) FROM customers c JOIN orders o ON o.customer_id = c.customer_id GROUP BY c.customer_id, c.customer_name HAVING COUNT(o.order_id) >= 2 ORDER BY c.customer_name;",
+      "expectedRows": [
+        [
+          "Asha",
+          2
+        ]
+      ],
+      "hints": [
+        "HAVING filters groups after aggregation."
+      ],
+      "dialectNote": "Runnable in the supplied SQLite retail dataset."
+    },
+    {
+      "id": "CH29",
+      "courseId": "sql",
+      "topicId": "SQL9.5",
+      "category": "EXISTS",
+      "title": "EXISTS — Retail Data Challenge",
+      "difficulty": "intermediate",
+      "prompt": "Find customers who have placed at least one order.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT c.customer_name FROM customers c WHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id) ORDER BY c.customer_name;",
+      "expectedRows": [
+        [
+          "Asha"
+        ],
+        [
+          "Bilal"
+        ],
+        [
+          "Chitra"
+        ],
+        [
+          "Dinesh"
+        ],
+        [
+          "Farah"
+        ]
+      ],
+      "hints": [
+        "EXISTS checks whether the correlated subquery returns a row."
+      ],
+      "dialectNote": "Runnable in the supplied SQLite retail dataset."
+    },
+    {
+      "id": "CH30",
+      "courseId": "sql",
+      "topicId": "SQL9.6",
+      "category": "ANY",
+      "title": "ANY — Retail Data Challenge",
+      "difficulty": "intermediate",
+      "prompt": "Find products priced higher than at least one Accessories product. Use EXISTS as the SQLite equivalent of > ANY.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT p.product_name, p.price FROM products p WHERE EXISTS (SELECT 1 FROM products a WHERE a.category = 'Accessories' AND p.price > a.price) ORDER BY p.price DESC;",
+      "expectedRows": [
+        [
+          "Keyboard",
+          1200
+        ],
+        [
+          "Mouse",
+          700
+        ],
+        [
+          "Phone Case",
+          400
+        ],
+        [
+          "USB Cable",
+          250
+        ]
+      ],
+      "hints": [
+        "SQLite has no direct ANY operator; EXISTS expresses the non-NULL 'greater than at least one' test."
+      ],
+      "dialectNote": "SQLite has no direct ANY operator; use the documented EXISTS equivalent."
+    },
+    {
+      "id": "CH31",
+      "courseId": "sql",
+      "topicId": "SQL9.7",
+      "category": "ALL",
+      "title": "ALL — Retail Data Challenge",
+      "difficulty": "intermediate",
+      "prompt": "Find products priced higher than every Accessories product. Use NOT EXISTS as the SQLite equivalent of > ALL.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT p.product_name, p.price FROM products p WHERE NOT EXISTS (SELECT 1 FROM products a WHERE a.category = 'Accessories' AND p.price <= a.price) ORDER BY p.price DESC;",
+      "expectedRows": [
+        [
+          "Keyboard",
+          1200
+        ],
+        [
+          "Mouse",
+          700
+        ]
+      ],
+      "hints": [
+        "SQLite has no direct ALL operator; NOT EXISTS expresses the 'greater than every' test for this non-NULL dataset."
+      ],
+      "dialectNote": "SQLite has no direct ALL operator; use the documented NOT EXISTS equivalent."
+    },
+    {
+      "id": "CH32",
+      "courseId": "sql",
+      "topicId": "SQL10.3",
+      "category": "CASE",
+      "title": "CASE — Retail Data Challenge",
+      "difficulty": "intermediate",
+      "prompt": "Classify products as out, low or available based on stock quantity.",
+      "starterCode": "-- Write one SQL query that solves the challenge.\n",
+      "solutionSql": "SELECT product_name, CASE WHEN stock_qty = 0 THEN 'out' WHEN stock_qty < 10 THEN 'low' ELSE 'available' END FROM products ORDER BY product_name;",
+      "expectedRows": [
+        [
+          "Keyboard",
+          "low"
+        ],
+        [
+          "Mouse",
+          "low"
+        ],
+        [
+          "Notebook",
+          "available"
+        ],
+        [
+          "Old Charger",
+          "out"
+        ],
+        [
+          "Pen",
+          "available"
+        ],
+        [
+          "Phone Case",
+          "available"
+        ],
+        [
+          "USB Cable",
+          "available"
+        ]
+      ],
+      "hints": [
+        "CASE evaluates branches in order; the first true WHEN determines the result."
+      ],
+      "dialectNote": "Runnable in the supplied SQLite retail dataset."
+    }
+  ]
+}

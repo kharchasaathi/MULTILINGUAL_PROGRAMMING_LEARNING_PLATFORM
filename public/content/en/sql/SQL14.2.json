@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql14.2.en",
+  "courseId": "sql",
+  "moduleId": "SQL14",
+  "topicId": "SQL14.2",
+  "title": "PARTITION BY and Window Ordering",
+  "language": "en",
+  "learningObjectives": [
+    "Explain how PARTITION BY divides a window into independent groups.",
+    "Use a partitioned aggregate to calculate totals and averages per group.",
+    "Distinguish ORDER BY inside OVER from the outer query ORDER BY.",
+    "Use a tie-breaker to make ordered window calculations deterministic.",
+    "Preserve individual rows while calculating per-group summaries."
+  ],
+  "prerequisites": [
+    "SQL6.1",
+    "SQL9.3",
+    "SQL5.6"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "PARTITION BY divides rows into independent windows. ORDER BY inside OVER defines the logical order used by order-sensitive window calculations. The outer query's ORDER BY controls only how the final result is displayed.",
+      "whyItMatters": "Partitions support per-department totals, per-customer running calculations and comparisons within a group without losing individual rows.",
+      "analogy": "A window calculation is like adding a running commentary to each row while keeping the original list intact.",
+      "analogyLimit": "The analogy does not represent SQL partition rules, frame boundaries, tie handling or optimizer behaviour."
+    },
+    "explain": {
+      "narrative": "## PARTITION BY\nPARTITION BY divides the input into groups. A window aggregate is calculated separately for each partition, but each source row remains visible.\n\n## ORDER BY inside OVER\nORDER BY inside OVER defines the order used by ranking and ordered window calculations. It is not the same as the outer ORDER BY, which controls display order.\n\n## Deterministic ordering\nWhen ties are possible, add a stable tie-breaker such as a unique id if the function requires a deterministic row sequence. A window order does not guarantee final display order unless the outer query also has ORDER BY.\n\n### Partition and ordering are separate controls\nPARTITION BY defines which rows belong to the same calculation group. ORDER BY inside OVER defines the sequence used by ranking or ordered calculations. The outer ORDER BY is separate and controls only the final display order.\n\n### Tie handling\nFor ROW_NUMBER, include a stable unique tie-breaker if every row needs a repeatable position. For RANK and DENSE_RANK, omit non-business tie-breakers from the window ordering when equal business values must share a rank.",
+      "examples": [
+        {
+          "id": "sql14.2-ex1",
+          "language": "en",
+          "title": "Create regional sales data",
+          "code": "CREATE TABLE win14_regions (sale_id INTEGER PRIMARY KEY, region TEXT NOT NULL, salesperson TEXT NOT NULL, amount INTEGER NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "Creates regional sales data with a region, salesperson and amount for each sale. The primary key uniquely identifies each input row.",
+          "runnable": true
+        },
+        {
+          "id": "sql14.2-ex2",
+          "language": "en",
+          "title": "Insert two regions",
+          "code": "INSERT INTO win14_regions VALUES (1, 'East', 'Asha', 100), (2, 'East', 'Bilal', 50), (3, 'West', 'Mira', 80), (4, 'West', 'Noor', 20);",
+          "expectedOutput": "4 rows inserted",
+          "explanation": "Inserts two East sales and two West sales. East totals 150 and West totals 100, allowing each partition's calculation to be checked.",
+          "runnable": true
+        },
+        {
+          "id": "sql14.2-ex3",
+          "language": "en",
+          "title": "Calculate a total per region while preserving each sale",
+          "code": "SELECT salesperson, region, amount, SUM(amount) OVER (PARTITION BY region) AS region_total FROM win14_regions ORDER BY region, salesperson;",
+          "expectedOutput": "Asha | East | 100 | 150; Bilal | East | 50 | 150; Mira | West | 80 | 100; Noor | West | 20 | 100",
+          "explanation": "PARTITION BY region divides the rows into East and West windows. SUM is calculated separately for each region and repeated on each row in that partition; the outer ORDER BY sets the displayed order.",
+          "runnable": true
+        },
+        {
+          "id": "sql14.2-ex4",
+          "language": "en",
+          "title": "Calculate average amount per region",
+          "code": "SELECT salesperson, region, amount, AVG(amount) OVER (PARTITION BY region) AS region_average FROM win14_regions ORDER BY region, salesperson;",
+          "expectedOutput": "Asha | East | 100 | 75.0; Bilal | East | 50 | 75.0; Mira | West | 80 | 50.0; Noor | West | 20 | 50.0",
+          "explanation": "Calculates the average separately in each region. East averages 75.0 and West averages 50.0, while all four sale rows remain in the output.",
+          "runnable": true
+        },
+        {
+          "id": "sql14.2-ex5",
+          "language": "en",
+          "title": "Number sales within each region",
+          "code": "SELECT salesperson, region, ROW_NUMBER() OVER (PARTITION BY region ORDER BY amount DESC, salesperson) AS region_position FROM win14_regions ORDER BY region, region_position;",
+          "expectedOutput": "Asha | East | 1; Bilal | East | 2; Mira | West | 1; Noor | West | 2",
+          "explanation": "ROW_NUMBER assigns a sequence within each region ordered by amount descending and salesperson. The salesperson tie-breaker makes the numbering deterministic if two sales in a region have the same amount.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the regional examples. Explain why each row remains visible and why East and West receive different totals.",
+      "independentTask": "Create sales data for at least three regions. Calculate each region's total and average, then number sales within each region using a deterministic order.",
+      "hints": [
+        "PARTITION BY creates independent windows.",
+        "An aggregate is calculated separately for each partition.",
+        "ORDER BY inside OVER controls window evaluation order.",
+        "The outer ORDER BY controls final display order.",
+        "Use a stable tie-breaker when rows can share the same ordering value."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE win14_regions (sale_id INTEGER PRIMARY KEY, region TEXT NOT NULL, salesperson TEXT NOT NULL, amount INTEGER NOT NULL);\nINSERT INTO win14_regions VALUES (1, 'East', 'Asha', 100), (2, 'East', 'Bilal', 50), (3, 'West', 'Mira', 80), (4, 'West', 'Noor', 20);\nSELECT salesperson, region, amount, SUM(amount) OVER (PARTITION BY region) AS region_total FROM win14_regions ORDER BY region, salesperson;",
+    "resetCode": "CREATE TABLE win14_regions (sale_id INTEGER PRIMARY KEY, region TEXT NOT NULL, salesperson TEXT NOT NULL, amount INTEGER NOT NULL);\nINSERT INTO win14_regions VALUES (1, 'East', 'Asha', 100), (2, 'East', 'Bilal', 50), (3, 'West', 'Mira', 80), (4, 'West', 'Noor', 20);\nSELECT salesperson, region, amount, SUM(amount) OVER (PARTITION BY region) AS region_total FROM win14_regions ORDER BY region, salesperson;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql14.2-q1",
+        "prompt": "What does PARTITION BY do?",
+        "options": [
+          "Splits rows into independent window groups",
+          "Deletes rows outside the group",
+          "Creates a database index",
+          "Commits the current transaction"
+        ],
+        "answer": "Splits rows into independent window groups",
+        "explanation": "PARTITION BY creates a separate window for each partition."
+      },
+      {
+        "id": "sql14.2-q2",
+        "prompt": "Does PARTITION BY collapse rows like GROUP BY?",
+        "options": [
+          "No, it preserves the input rows",
+          "Yes, always one row per partition",
+          "Only when used with AVG",
+          "Only when used with ORDER BY"
+        ],
+        "answer": "No, it preserves the input rows",
+        "explanation": "Window functions preserve detail rows."
+      },
+      {
+        "id": "sql14.2-q3",
+        "prompt": "What does ORDER BY inside OVER control?",
+        "options": [
+          "The logical order used by the window calculation",
+          "The physical order of the database file",
+          "The order of table creation",
+          "The order of transaction commits"
+        ],
+        "answer": "The logical order used by the window calculation",
+        "explanation": "The window ORDER BY controls how order-sensitive functions evaluate rows."
+      },
+      {
+        "id": "sql14.2-q4",
+        "prompt": "What controls the final displayed order?",
+        "options": [
+          "The outer query ORDER BY",
+          "PARTITION BY only",
+          "The column's primary key automatically",
+          "The name of the CTE"
+        ],
+        "answer": "The outer query ORDER BY",
+        "explanation": "The outer ORDER BY determines the returned row order."
+      },
+      {
+        "id": "sql14.2-q5",
+        "prompt": "Why add a unique tie-breaker to window ordering?",
+        "options": [
+          "To make row sequence deterministic when sort values tie",
+          "To create duplicate rows",
+          "To disable partitions",
+          "To force NULL values"
+        ],
+        "answer": "To make row sequence deterministic when sort values tie",
+        "explanation": "A stable tie-breaker resolves otherwise ambiguous ordering among tied rows."
+      }
+    ]
+  },
+  "status": "draft"
+}

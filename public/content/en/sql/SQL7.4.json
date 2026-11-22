@@ -1,0 +1,160 @@
+{
+  "id": "sql.sql7.4.en",
+  "courseId": "sql",
+  "moduleId": "SQL7",
+  "topicId": "SQL7.4",
+  "title": "SQL BETWEEN and NOT BETWEEN Operators",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of SQL BETWEEN and NOT BETWEEN Operators.",
+    "Write valid SQLite queries that use the topic in a WHERE condition.",
+    "Interpret matching and non-matching rows from a sample table.",
+    "Combine the topic with other filtering conditions safely.",
+    "Recognize NULL and SQL dialect considerations relevant to the topic."
+  ],
+  "prerequisites": [
+    "SQL5.4",
+    "SQL5.5",
+    "SQL5.7",
+    "SQL6.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "BETWEEN tests whether a value falls within an inclusive lower and upper boundary. It is equivalent to a value greater than or equal to the lower bound and less than or equal to the upper bound. NOT BETWEEN selects values outside that inclusive range.",
+      "whyItMatters": "Range filters are common in price bands, numeric thresholds, date windows and reporting periods.",
+      "analogy": "Think of a librarian applying a clear rule to decide which records belong in a result list.",
+      "analogyLimit": "The analogy does not represent SQL's NULL logic, collation rules, optimizer decisions or product-specific pattern behaviour."
+    },
+    "explain": {
+      "narrative": "## Core concept\nBETWEEN tests whether a value falls within an inclusive lower and upper boundary. It is equivalent to a value greater than or equal to the lower bound and less than or equal to the upper bound. NOT BETWEEN selects values outside that inclusive range.\n\n## SQLite syntax\n```sql\nSELECT column_name FROM table_name WHERE column_name BETWEEN lower_value AND upper_value;\n```\n\n## Worked examples\n### 1. Create sample product data\n```sql\nCREATE TABLE range_products (product_id INTEGER PRIMARY KEY, product_name TEXT, price REAL, stock INTEGER);\nINSERT INTO range_products VALUES (1,'Notebook',45,20),(2,'Pen Set',10,80),(3,'Desk Lamp',120,12),(4,'Backpack',75,15),(5,'Ruler',10,50),(6,'Office Chair',200,5);\n```\nExpected result: Six product rows are inserted.\n\nThe sample includes boundary values and values outside the selected range.\n\n### 2. Select prices within an inclusive range\n```sql\nSELECT product_name, price FROM range_products WHERE price BETWEEN 10 AND 75 ORDER BY price, product_id;\n```\nExpected result: Pen Set | 10; Ruler | 10; Notebook | 45; Backpack | 75\n\nBoth 10 and 75 are included because BETWEEN is inclusive.\n\n### 3. Select values outside a range\n```sql\nSELECT product_name, price FROM range_products WHERE price NOT BETWEEN 10 AND 75 ORDER BY price;\n```\nExpected result: Desk Lamp | 120; Office Chair | 200\n\nNOT BETWEEN selects values below 10 or above 75.\n\n### 4. Combine BETWEEN with another condition\n```sql\nSELECT product_name, price FROM range_products WHERE price BETWEEN 10 AND 75 AND stock >= 20 ORDER BY product_id;\n```\nExpected result: Pen Set | 10; Notebook | 45; Ruler | 10\n\nThe range predicate and stock condition must both be true.\n\n### 5. Filter ISO date text in SQLite\n```sql\nCREATE TABLE range_orders (order_id INTEGER PRIMARY KEY, order_date TEXT);\nINSERT INTO range_orders VALUES (1,'2026-04-01'),(2,'2026-04-15'),(3,'2026-04-30'),(4,'2026-05-01');\nSELECT order_id, order_date FROM range_orders WHERE order_date BETWEEN '2026-04-01' AND '2026-04-30' ORDER BY order_date;\n```\nExpected result: 1 | 2026-04-01; 2 | 2026-04-15; 3 | 2026-04-30\n\nFixed-width ISO date text sorts chronologically in SQLite; date/time storage and functions differ by DBMS.\n\n## Query behaviour and limitations\nThese examples target SQLite. SQL pattern syntax, LIKE case behaviour, collation, date/time representation and support for product-specific wildcard forms can vary across DBMS products. SQLite LIKE uses % and _; do not assume SQL Server-style bracket lists are portable. Comparisons involving NULL evaluate to UNKNOWN, so NULL rows are not selected by ordinary positive or negative predicates.\n\n## Common mistakes\n- Omitting quotes around text patterns or text list values.\n- Assuming % and _ mean the same thing.\n- Treating BETWEEN as exclusive.\n- Using NOT IN without checking whether a subquery can return NULL.\n- Assuming wildcard and collation behaviour is identical across products.\n\n## Best practices\nUse explicit predicates, predictable ORDER BY clauses, representative test data and documented dialect assumptions. Inspect boundary and NULL cases before relying on a filter in a report.",
+      "examples": [
+        {
+          "id": "sql7.4-ex1",
+          "language": "en",
+          "title": "Create sample product data",
+          "code": "CREATE TABLE range_products (product_id INTEGER PRIMARY KEY, product_name TEXT, price REAL, stock INTEGER);\nINSERT INTO range_products VALUES (1,'Notebook',45,20),(2,'Pen Set',10,80),(3,'Desk Lamp',120,12),(4,'Backpack',75,15),(5,'Ruler',10,50),(6,'Office Chair',200,5);",
+          "expectedOutput": "Six product rows are inserted.",
+          "explanation": "The sample includes boundary values and values outside the selected range.",
+          "runnable": true
+        },
+        {
+          "id": "sql7.4-ex2",
+          "language": "en",
+          "title": "Select prices within an inclusive range",
+          "code": "SELECT product_name, price FROM range_products WHERE price BETWEEN 10 AND 75 ORDER BY price, product_id;",
+          "expectedOutput": "Pen Set | 10; Ruler | 10; Notebook | 45; Backpack | 75",
+          "explanation": "Both 10 and 75 are included because BETWEEN is inclusive.",
+          "runnable": true
+        },
+        {
+          "id": "sql7.4-ex3",
+          "language": "en",
+          "title": "Select values outside a range",
+          "code": "SELECT product_name, price FROM range_products WHERE price NOT BETWEEN 10 AND 75 ORDER BY price;",
+          "expectedOutput": "Desk Lamp | 120; Office Chair | 200",
+          "explanation": "NOT BETWEEN selects values below 10 or above 75.",
+          "runnable": true
+        },
+        {
+          "id": "sql7.4-ex4",
+          "language": "en",
+          "title": "Combine BETWEEN with another condition",
+          "code": "SELECT product_name, price FROM range_products WHERE price BETWEEN 10 AND 75 AND stock >= 20 ORDER BY product_id;",
+          "expectedOutput": "Notebook | 45; Pen Set | 10; Ruler | 10",
+          "explanation": "The WHERE predicates select rows 1, 2 and 5; ORDER BY product_id preserves that ID order.",
+          "runnable": true
+        },
+        {
+          "id": "sql7.4-ex5",
+          "language": "en",
+          "title": "Filter ISO date text in SQLite",
+          "code": "CREATE TABLE range_orders (order_id INTEGER PRIMARY KEY, order_date TEXT);\nINSERT INTO range_orders VALUES (1,'2026-04-01'),(2,'2026-04-15'),(3,'2026-04-30'),(4,'2026-05-01');\nSELECT order_id, order_date FROM range_orders WHERE order_date BETWEEN '2026-04-01' AND '2026-04-30' ORDER BY order_date;",
+          "expectedOutput": "1 | 2026-04-01; 2 | 2026-04-15; 3 | 2026-04-30",
+          "explanation": "Fixed-width ISO date text sorts chronologically in SQLite; date/time storage and functions differ by DBMS.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Test a price range whose lower and upper bounds match existing rows. Confirm that both boundary rows are returned, then use NOT BETWEEN and compare.",
+      "independentTask": "Create a table of at least seven exam scores or sales records. Write inclusive range, outside-range and combined range queries. Include one date-range example using the date representation supported by your chosen DBMS.",
+      "hints": [
+        "BETWEEN includes both endpoints.",
+        "BETWEEN lower AND upper is inclusive at both ends.",
+        "NOT BETWEEN is the logical complement for non-NULL values.",
+        "NULL comparisons evaluate to UNKNOWN, not TRUE.",
+        "For timestamps, an end-date literal at midnight may omit later times on that date; use a half-open interval when appropriate."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE range_products (product_id INTEGER PRIMARY KEY, product_name TEXT, price REAL, stock INTEGER);\nINSERT INTO range_products VALUES (1,'Notebook',45,20),(2,'Pen Set',10,80),(3,'Desk Lamp',120,12),(4,'Backpack',75,15),(5,'Ruler',10,50),(6,'Office Chair',200,5);\n\n-- Try the lesson query here\nSELECT * FROM range_products;",
+    "resetCode": "CREATE TABLE range_products (product_id INTEGER PRIMARY KEY, product_name TEXT, price REAL, stock INTEGER);\nINSERT INTO range_products VALUES (1,'Notebook',45,20),(2,'Pen Set',10,80),(3,'Desk Lamp',120,12),(4,'Backpack',75,15),(5,'Ruler',10,50),(6,'Office Chair',200,5);"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql7.4-q1",
+        "prompt": "Are BETWEEN boundary values included?",
+        "options": [
+          "Yes, both endpoints are included",
+          "No, both endpoints are excluded",
+          "Only the lower endpoint is included",
+          "Only the upper endpoint is included"
+        ],
+        "answer": "Yes, both endpoints are included",
+        "explanation": "BETWEEN is inclusive at both ends."
+      },
+      {
+        "id": "sql7.4-q2",
+        "prompt": "Which condition is equivalent to price BETWEEN 10 AND 20?",
+        "options": [
+          "price >= 10 AND price <= 20",
+          "price > 10 AND price < 20",
+          "price <= 10 OR price >= 20",
+          "price = 10 AND price = 20"
+        ],
+        "answer": "price >= 10 AND price <= 20",
+        "explanation": "The lower and upper comparisons are both inclusive."
+      },
+      {
+        "id": "sql7.4-q3",
+        "prompt": "What does NOT BETWEEN 10 AND 20 select?",
+        "options": [
+          "Values below 10 or above 20",
+          "Values from 10 through 20",
+          "Only the value 10",
+          "Only NULL values"
+        ],
+        "answer": "Values below 10 or above 20",
+        "explanation": "NOT BETWEEN excludes the inclusive range."
+      },
+      {
+        "id": "sql7.4-q4",
+        "prompt": "What happens when the tested expression is NULL?",
+        "options": [
+          "The predicate evaluates to UNKNOWN",
+          "NULL is always inside the range",
+          "NULL becomes zero",
+          "The query fails to parse"
+        ],
+        "answer": "The predicate evaluates to UNKNOWN",
+        "explanation": "Comparisons with NULL use SQL three-valued logic."
+      },
+      {
+        "id": "sql7.4-q5",
+        "prompt": "Why can a date-time range ending at midnight omit records later that day?",
+        "options": [
+          "The upper bound is the start of that day, not its end",
+          "BETWEEN excludes its upper endpoint",
+          "SQLite cannot store dates",
+          "ORDER BY removes later rows"
+        ],
+        "answer": "The upper bound is the start of that day, not its end",
+        "explanation": "Use an appropriate end-exclusive next-day boundary for timestamp intervals."
+      }
+    ]
+  },
+  "status": "draft"
+}

@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql5.9.en",
+  "courseId": "sql",
+  "moduleId": "SQL5",
+  "topicId": "SQL5.9",
+  "title": "Column Aliases and Table Aliases in SELECT",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of Column Aliases and Table Aliases in SELECT.",
+    "Identify the source table, selected expressions and query clauses.",
+    "Predict which rows and columns a SQLite query returns.",
+    "Recognize NULL handling, sorting and dialect-specific pagination behaviour.",
+    "Write readable SELECT queries and verify their results."
+  ],
+  "prerequisites": [
+    "SQL2.1",
+    "SQL2.5",
+    "SQL3.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "An alias assigns a temporary name to a result column or table reference within a query. AS is commonly used to make aliases explicit; aliases do not rename the stored schema object.",
+      "whyItMatters": "Aliases improve result headings and make joins or expressions easier to read, especially when table names or calculations are lengthy.",
+      "analogy": "An alias is a short display label used for one task, not a permanent change to the object's official name.",
+      "analogyLimit": "The analogy simplifies query processing. Actual results follow SQL expression rules, three-valued NULL logic, collation, and the selected database engine's query semantics."
+    },
+    "explain": {
+      "narrative": "## Core idea\nAn alias assigns a temporary name to a result column or table reference within a query. AS is commonly used to make aliases explicit; aliases do not rename the stored schema object.\n\n## Why this matters\nAliases improve result headings and make joins or expressions easier to read, especially when table names or calculations are lengthy.\n\n## How to use it\nWrite the SELECT list to describe the output, identify the source with FROM, add a WHERE predicate when rows need filtering, and use ORDER BY to define the result sequence. SQLite pagination uses LIMIT and OFFSET. Use a stable sort key when a query is paginated.\n\n## SQLite and dialect notes\nThese runnable examples target SQLite. SELECT, WHERE, DISTINCT, ORDER BY, NULL predicates and aliases are broadly familiar SQL features, but details such as collations, NULL ordering, Boolean values and pagination syntax can vary. SQLite uses LIMIT/OFFSET; SQL Server commonly supports TOP or OFFSET/FETCH. Do not assume these forms are interchangeable.\n\n## Worked examples\n### 1. Create a simple order table\n```sql\nCREATE TABLE s59_orders (order_id INTEGER, buyer_name TEXT, unit_price REAL, units INTEGER); INSERT INTO s59_orders VALUES (1,'Ari',25.0,3),(2,'Bea',18.0,5),(3,'Chet',40.0,2);\n```\nExpected result: 3 rows inserted\n\nThe table includes fields used for column and table aliases.\n\n### 2. Alias a result column\n```sql\nSELECT buyer_name AS customer FROM s59_orders ORDER BY order_id;\n```\nExpected result: customer: Ari; Bea; Chet\n\nThe result heading is customer, while the stored column remains buyer_name.\n\n### 3. Alias a calculated column\n```sql\nSELECT order_id, unit_price * units AS line_total FROM s59_orders ORDER BY order_id;\n```\nExpected result: 1 | 75; 2 | 90; 3 | 80\n\nThe expression is given a readable result label.\n\n### 4. Use a table alias\n```sql\nSELECT o.order_id, o.buyer_name FROM s59_orders AS o ORDER BY o.order_id;\n```\nExpected result: 1 | Ari; 2 | Bea; 3 | Chet\n\nThe alias o is a short reference to the table in this query.\n\n### 5. Use aliases without AS in SQLite\n```sql\nSELECT buyer_name customer, units AS quantity FROM s59_orders ORDER BY order_id;\n```\nExpected result: Ari | 3; Bea | 5; Chet | 2\n\nSQLite permits AS to be omitted in common alias syntax, but explicit AS can improve readability.\n\n## Common mistakes\n- Using SELECT * when only a few columns are needed.\n- Assuming DISTINCT deletes duplicate source records.\n- Using = NULL instead of IS NULL.\n- Mixing AND and OR without parentheses.\n- Assuming result order without ORDER BY.\n- Paginating without a deterministic sort key.\n- Copying LIMIT syntax into a DBMS that expects TOP or FETCH FIRST.\n\n## Good practice\nUse explicit columns, clear aliases, NULL-aware predicates, parentheses for compound logic, and a unique tie-breaker for paginated results. Test dialect-specific SQL in the target engine.",
+      "examples": [
+        {
+          "id": "sql5.9-ex1",
+          "language": "en",
+          "title": "Create a simple order table",
+          "code": "CREATE TABLE s59_orders (order_id INTEGER, buyer_name TEXT, unit_price REAL, units INTEGER); INSERT INTO s59_orders VALUES (1,'Ari',25.0,3),(2,'Bea',18.0,5),(3,'Chet',40.0,2);",
+          "expectedOutput": "3 rows inserted",
+          "explanation": "The table includes fields used for column and table aliases.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.9-ex2",
+          "language": "en",
+          "title": "Alias a result column",
+          "code": "SELECT buyer_name AS customer FROM s59_orders ORDER BY order_id;",
+          "expectedOutput": "customer: Ari; Bea; Chet",
+          "explanation": "The result heading is customer, while the stored column remains buyer_name.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.9-ex3",
+          "language": "en",
+          "title": "Alias a calculated column",
+          "code": "SELECT order_id, unit_price * units AS line_total FROM s59_orders ORDER BY order_id;",
+          "expectedOutput": "1 | 75; 2 | 90; 3 | 80",
+          "explanation": "The expression is given a readable result label.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.9-ex4",
+          "language": "en",
+          "title": "Use a table alias",
+          "code": "SELECT o.order_id, o.buyer_name FROM s59_orders AS o ORDER BY o.order_id;",
+          "expectedOutput": "1 | Ari; 2 | Bea; 3 | Chet",
+          "explanation": "The alias o is a short reference to the table in this query.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.9-ex5",
+          "language": "en",
+          "title": "Use aliases without AS in SQLite",
+          "code": "SELECT buyer_name customer, units AS quantity FROM s59_orders ORDER BY order_id;",
+          "expectedOutput": "Ari | 3; Bea | 5; Chet | 2",
+          "explanation": "SQLite permits AS to be omitted in common alias syntax, but explicit AS can improve readability.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the five examples for Column Aliases and Table Aliases in SELECT in the SQL Playground. Before each run, identify the SELECT list, source, filters, sort keys and row limit where applicable. Predict the output and compare it with the SQLite result.",
+      "independentTask": "Create an original SQLite query task that demonstrates Column Aliases and Table Aliases in SELECT. Include a small table, at least five SQL statements, a verification query and a short explanation of any dialect-specific behaviour.",
+      "hints": [
+        "Read the SELECT list to identify the output columns.",
+        "Check the source table and each WHERE predicate.",
+        "Use parentheses when combining AND and OR conditions.",
+        "Use IS NULL or IS NOT NULL for missing values.",
+        "Add ORDER BY before LIMIT/OFFSET when predictable pagination is required."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE s59_orders (order_id INTEGER, buyer_name TEXT, unit_price REAL, units INTEGER); INSERT INTO s59_orders VALUES (1,'Ari',25.0,3),(2,'Bea',18.0,5),(3,'Chet',40.0,2);\n\nSELECT buyer_name AS customer FROM s59_orders ORDER BY order_id;\n\nSELECT order_id, unit_price * units AS line_total FROM s59_orders ORDER BY order_id;\n\nSELECT o.order_id, o.buyer_name FROM s59_orders AS o ORDER BY o.order_id;\n\nSELECT buyer_name customer, units AS quantity FROM s59_orders ORDER BY order_id;",
+    "resetCode": "CREATE TABLE s59_orders (order_id INTEGER, buyer_name TEXT, unit_price REAL, units INTEGER); INSERT INTO s59_orders VALUES (1,'Ari',25.0,3),(2,'Bea',18.0,5),(3,'Chet',40.0,2);\n\nSELECT buyer_name AS customer FROM s59_orders ORDER BY order_id;\n\nSELECT order_id, unit_price * units AS line_total FROM s59_orders ORDER BY order_id;\n\nSELECT o.order_id, o.buyer_name FROM s59_orders AS o ORDER BY o.order_id;\n\nSELECT buyer_name customer, units AS quantity FROM s59_orders ORDER BY order_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql5.9-q1",
+        "prompt": "What does a column alias change?",
+        "options": [
+          "The result column label for that query",
+          "The stored table column name permanently",
+          "The database filename",
+          "The column's data type"
+        ],
+        "answer": "The result column label for that query",
+        "explanation": "A column alias is a query-level output name."
+      },
+      {
+        "id": "sql5.9-q2",
+        "prompt": "What does a table alias provide?",
+        "options": [
+          "A shorter reference to a table within the query",
+          "A permanent table rename",
+          "A new index",
+          "A foreign-key constraint"
+        ],
+        "answer": "A shorter reference to a table within the query",
+        "explanation": "Table aliases simplify query references."
+      },
+      {
+        "id": "sql5.9-q3",
+        "prompt": "Which keyword commonly introduces an alias?",
+        "options": [
+          "AS",
+          "ON",
+          "BY",
+          "INTO"
+        ],
+        "answer": "AS",
+        "explanation": "AS makes the alias assignment explicit."
+      },
+      {
+        "id": "sql5.9-q4",
+        "prompt": "Does SELECT buyer_name AS customer rename the stored column?",
+        "options": [
+          "No",
+          "Yes, permanently",
+          "Only if the table has no primary key",
+          "Only in a transaction"
+        ],
+        "answer": "No",
+        "explanation": "The alias changes only the query result label."
+      },
+      {
+        "id": "sql5.9-q5",
+        "prompt": "Why alias a calculated expression?",
+        "options": [
+          "To give the result a clear heading",
+          "To disable arithmetic",
+          "To remove the source table",
+          "To create a view automatically"
+        ],
+        "answer": "To give the result a clear heading",
+        "explanation": "A descriptive alias makes calculated output easier to interpret."
+      }
+    ]
+  },
+  "status": "draft"
+}

@@ -1,0 +1,161 @@
+{
+  "id": "sql.sql20.4.en",
+  "courseId": "sql",
+  "moduleId": "SQL20",
+  "topicId": "SQL20.4",
+  "title": "Sensitive Data Handling and Audit Trails",
+  "language": "en",
+  "learningObjectives": [
+    "Identify sensitive fields that should not appear in routine query output.",
+    "Apply data minimization to SELECT statements.",
+    "Create an audit table for security-relevant changes.",
+    "Record before-and-after values without exposing unnecessary personal data.",
+    "Explain audit access, integrity and retention requirements."
+  ],
+  "prerequisites": [
+    "SQL1.1",
+    "SQL4.1",
+    "SQL11.4",
+    "SQL11.5",
+    "SQL11.6"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Sensitive-data handling limits what is collected, stored, displayed and retained. Audit trails record who changed what and when so important actions can be investigated.",
+      "whyItMatters": "A technically correct query can still create a privacy incident if it returns credentials, payment data or unnecessary personal information.",
+      "analogy": "A visitor log records that a restricted room was entered without publishing the contents of every file in that room.",
+      "analogyLimit": "An audit table is not tamper-proof merely because it is in a database. Administrators, backups, retention rules and application trust boundaries still matter."
+    },
+    "explain": {
+      "narrative": "## Data minimization\nCollect only information needed for a defined purpose. Use explicit column lists instead of SELECT * in sensitive workflows. Mask or omit identifiers in logs and user-facing screens when full values are unnecessary.\n\n## Audit records\nAn audit record commonly includes an event identifier, subject key, action, timestamp, actor reference and a carefully selected before/after value. Do not copy entire sensitive rows into audit tables without a retention and access plan.\n\n## Integrity and privacy\nRestrict audit-table writes and reads, protect logs from unauthorized modification, define retention periods and ensure audit records do not become a second uncontrolled store of personal data. Database triggers can capture changes, but their behaviour and security properties vary by engine.\n\n## Password and payment data\nPassword verification belongs in a dedicated password-hashing system. Payment card data and secrets require specialized compliance and protection; do not store raw secrets in ordinary application tables or demonstration logs.",
+      "examples": [
+        {
+          "id": "sql204-ex1",
+          "language": "en",
+          "title": "Create a minimal customer profile table",
+          "code": "CREATE TABLE sec20_customers (customer_id INTEGER PRIMARY KEY, display_name TEXT NOT NULL, contact_email TEXT NOT NULL, marketing_opt_in INTEGER NOT NULL CHECK (marketing_opt_in IN (0,1)));",
+          "expectedOutput": "Table created",
+          "explanation": "Stores only a display name, contact email and consent flag for this example. Real systems should define purpose, retention and access rules for each personal-data field.",
+          "runnable": true
+        },
+        {
+          "id": "sql204-ex2",
+          "language": "en",
+          "title": "Insert two demonstration customer profiles",
+          "code": "INSERT INTO sec20_customers VALUES (1, 'Asha', 'asha@example.test', 1), (2, 'Bilal', 'bilal@example.test', 0);",
+          "expectedOutput": "2 rows inserted",
+          "explanation": "Adds sample profiles with synthetic example.test addresses. Do not use real customer contact details in a public learning database.",
+          "runnable": true
+        },
+        {
+          "id": "sql204-ex3",
+          "language": "en",
+          "title": "Return only fields needed for a contact list",
+          "code": "SELECT customer_id, display_name FROM sec20_customers WHERE marketing_opt_in = 1 ORDER BY customer_id;",
+          "expectedOutput": "1 | Asha",
+          "explanation": "Selects only the identifier and display name for opted-in customers. The contact email is not returned because this particular view does not need it.",
+          "runnable": true
+        },
+        {
+          "id": "sql204-ex4",
+          "language": "en",
+          "title": "Create a focused change-audit table",
+          "code": "CREATE TABLE sec20_customer_audit (audit_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL, field_name TEXT NOT NULL, old_value TEXT, new_value TEXT, actor_ref TEXT NOT NULL, event_time TEXT NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "Stores a targeted field-change record. The audit schema deliberately avoids copying the complete customer row and uses actor_ref rather than storing an authentication secret.",
+          "runnable": true
+        },
+        {
+          "id": "sql204-ex5",
+          "language": "en",
+          "title": "Update consent and record the corresponding audit event",
+          "code": "BEGIN; UPDATE sec20_customers SET marketing_opt_in = 0 WHERE customer_id = 1; INSERT INTO sec20_customer_audit VALUES (1, 1, 'marketing_opt_in', '1', '0', 'admin-17', '2026-11-22T10:00:00Z'); COMMIT; SELECT field_name, old_value, new_value FROM sec20_customer_audit WHERE customer_id = 1;",
+          "expectedOutput": "marketing_opt_in | 1 | 0",
+          "explanation": "Updates the consent flag and inserts a corresponding audit event in the same transaction. In production, capture the actor and timestamp from trusted server context, verify the update affected exactly one row and restrict access to the audit table.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and compare the customer list with the audit table. Identify which personal field is intentionally omitted from the list and why the audit stores a narrow field-level change.",
+      "independentTask": "Design an audit trail for a change to an employee's department. Include actor, event time, subject key and before/after department identifiers. Explain how you would restrict audit reads and define retention.",
+      "hints": [
+        "Use explicit SELECT columns in sensitive workflows.",
+        "Do not store plaintext passwords or raw secrets.",
+        "Keep audit events narrow and purpose-specific.",
+        "Record audit and business changes in one transaction where appropriate.",
+        "Define access controls and retention for audit data."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE sec20_customers (customer_id INTEGER PRIMARY KEY, display_name TEXT NOT NULL, contact_email TEXT NOT NULL, marketing_opt_in INTEGER NOT NULL CHECK (marketing_opt_in IN (0,1)));\nINSERT INTO sec20_customers VALUES (1, 'Asha', 'asha@example.test', 1), (2, 'Bilal', 'bilal@example.test', 0);\nSELECT customer_id, display_name FROM sec20_customers WHERE marketing_opt_in = 1;",
+    "resetCode": "CREATE TABLE sec20_customers (customer_id INTEGER PRIMARY KEY, display_name TEXT NOT NULL, contact_email TEXT NOT NULL, marketing_opt_in INTEGER NOT NULL CHECK (marketing_opt_in IN (0,1)));\nINSERT INTO sec20_customers VALUES (1, 'Asha', 'asha@example.test', 1), (2, 'Bilal', 'bilal@example.test', 0);\nSELECT customer_id, display_name FROM sec20_customers WHERE marketing_opt_in = 1;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql204-q1",
+        "prompt": "What is data minimization?",
+        "options": [
+          "Collect and expose only data needed for a defined purpose",
+          "Return every column for convenience",
+          "Copy every row into an audit table",
+          "Keep all data forever"
+        ],
+        "answer": "Collect and expose only data needed for a defined purpose",
+        "explanation": "Minimization reduces privacy exposure and unnecessary retention."
+      },
+      {
+        "id": "sql204-q2",
+        "prompt": "Why prefer explicit columns to SELECT * in a sensitive report?",
+        "options": [
+          "It avoids exposing fields the report does not need",
+          "It disables constraints",
+          "It automatically encrypts results",
+          "It creates a database backup"
+        ],
+        "answer": "It avoids exposing fields the report does not need",
+        "explanation": "Explicit projection limits the data returned to the caller."
+      },
+      {
+        "id": "sql204-q3",
+        "prompt": "What should a useful audit event normally identify?",
+        "options": [
+          "The subject, action, actor reference and event time",
+          "The user's plaintext password",
+          "Every secret in the row",
+          "Only the current row count"
+        ],
+        "answer": "The subject, action, actor reference and event time",
+        "explanation": "Audit events should be attributable and relevant to the change."
+      },
+      {
+        "id": "sql204-q4",
+        "prompt": "Does an audit table automatically become tamper-proof?",
+        "options": [
+          "No; access, integrity and retention controls are still required",
+          "Yes, because it has a primary key",
+          "Only if it has a TEXT column",
+          "Yes, after an index is created"
+        ],
+        "answer": "No; access, integrity and retention controls are still required",
+        "explanation": "Database access controls and operational processes protect audit integrity."
+      },
+      {
+        "id": "sql204-q5",
+        "prompt": "Why write a business update and its audit row in one transaction?",
+        "options": [
+          "So both changes commit or roll back together",
+          "To make the query run without indexes",
+          "To avoid checking affected rows",
+          "To expose the audit table publicly"
+        ],
+        "answer": "So both changes commit or roll back together",
+        "explanation": "A single transaction helps keep the business state and audit evidence consistent."
+      }
+    ]
+  },
+  "status": "draft"
+}

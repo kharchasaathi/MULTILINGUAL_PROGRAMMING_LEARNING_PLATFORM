@@ -1,0 +1,161 @@
+{
+  "id": "sql.sql23.3.en",
+  "courseId": "sql",
+  "moduleId": "SQL23",
+  "topicId": "SQL23.3",
+  "title": "SQL Server T-SQL Features and Portability",
+  "language": "en",
+  "learningObjectives": [
+    "Recognize T-SQL row-limiting and identity syntax.",
+    "Explain the difference between ISNULL and COALESCE at a high level.",
+    "Identify DATEADD, OUTPUT and TRY_CONVERT as SQL Server features.",
+    "Use portable CASE and relational query patterns where possible.",
+    "Test T-SQL behaviour against the target SQL Server version and compatibility level."
+  ],
+  "prerequisites": [
+    "SQL16.1",
+    "SQL16.2",
+    "SQL16.3",
+    "SQL16.4",
+    "SQL16.5"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "SQL Server uses Transact-SQL (T-SQL), which extends SQL with product-specific data types, procedural features, row-limiting, date functions and DML output clauses.",
+      "whyItMatters": "T-SQL syntax and behaviour differ from SQLite, PostgreSQL and MySQL. Explicit dialect labels prevent learners from treating SQL Server extensions as universal SQL.",
+      "analogy": "A standard road map has local road signs added by a city; drivers need to know which signs belong to that city.",
+      "analogyLimit": "T-SQL syntax, compatibility level and database settings can change feature availability and behaviour."
+    },
+    "explain": {
+      "narrative": "## Common T-SQL extensions\nSQL Server commonly uses `IDENTITY(seed, increment)` for generated values, `TOP (n)` for row limiting, `DATEADD()` for date arithmetic, `OUTPUT inserted...` or `deleted...` to return changed rows, and `TRY_CONVERT()` for safer type conversion.\n\n## NULL fallback functions\nSQL Server provides ISNULL and also supports COALESCE. Their type-resolution and return-type rules are not identical in every context; choose deliberately and test the result type.\n\n## Pagination\nSQL Server supports `ORDER BY ... OFFSET ... FETCH NEXT ...` for paging. TOP and OFFSET/FETCH require a meaningful order for deterministic results.\n\n## Runnable examples\nThe examples use SQLite-compatible SQL patterns. SQL Server-only forms are described here as T-SQL references and must be executed against SQL Server to validate their exact behaviour.",
+      "examples": [
+        {
+          "id": "sql233-ex1",
+          "language": "en",
+          "title": "Create a portable employee table",
+          "code": "CREATE TABLE dialect23_employees (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, department TEXT NOT NULL, salary INTEGER NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "Creates an employee relation. SQL Server commonly uses INT IDENTITY(1,1) for a generated key and NVARCHAR for Unicode text.",
+          "runnable": true
+        },
+        {
+          "id": "sql233-ex2",
+          "language": "en",
+          "title": "Insert employee rows",
+          "code": "INSERT INTO dialect23_employees VALUES (1, 'Asha', 'Sales', 60000), (2, 'Bilal', 'Support', 52000), (3, 'Chitra', 'Sales', 65000);",
+          "expectedOutput": "3 rows inserted",
+          "explanation": "Adds three employees. In T-SQL, an INSERT with IDENTITY normally omits the identity column unless IDENTITY_INSERT is deliberately enabled.",
+          "runnable": true
+        },
+        {
+          "id": "sql233-ex3",
+          "language": "en",
+          "title": "Return the top two salaries in SQLite-compatible syntax",
+          "code": "SELECT employee_name, salary FROM dialect23_employees ORDER BY salary DESC, employee_id LIMIT 2;",
+          "expectedOutput": "Chitra | 65000; Asha | 60000",
+          "explanation": "SQLite uses LIMIT here. The equivalent SQL Server pattern is `SELECT TOP (2) ... ORDER BY salary DESC, employee_id`.",
+          "runnable": true
+        },
+        {
+          "id": "sql233-ex4",
+          "language": "en",
+          "title": "Use COALESCE to provide a missing department label",
+          "code": "SELECT employee_name, COALESCE(department, 'Unassigned') AS department_label FROM dialect23_employees ORDER BY employee_id;",
+          "expectedOutput": "Asha | Sales; Bilal | Support; Chitra | Sales",
+          "explanation": "COALESCE is supported by SQL Server and SQLite. SQL Server also provides ISNULL, but its return-type rules can differ from COALESCE.",
+          "runnable": true
+        },
+        {
+          "id": "sql233-ex5",
+          "language": "en",
+          "title": "Classify salaries with CASE",
+          "code": "SELECT employee_name, CASE WHEN salary >= 60000 THEN 'Senior band' ELSE 'Standard band' END AS salary_band FROM dialect23_employees ORDER BY employee_id;",
+          "expectedOutput": "Asha | Senior band; Bilal | Standard band; Chitra | Senior band",
+          "explanation": "Uses a portable searched CASE expression. The same business classification can be expressed in T-SQL without relying on a vendor-only function.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and rewrite the top-two query using T-SQL TOP. Explain why the ORDER BY must remain present in both forms.",
+      "independentTask": "Write a T-SQL reference query that uses DATEADD to calculate a due date and OUTPUT inserted values after an update. Label it as SQL Server-only and define a portable alternative.",
+      "hints": [
+        "T-SQL is SQL Server's dialect.",
+        "TOP and IDENTITY are SQL Server syntax.",
+        "DATEADD performs date arithmetic in T-SQL.",
+        "OUTPUT can return rows changed by DML.",
+        "Compatibility level can affect feature availability."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE dialect23_employees (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, salary INTEGER NOT NULL);\nINSERT INTO dialect23_employees VALUES (1, 'Asha', 60000), (2, 'Bilal', 52000), (3, 'Chitra', 65000);\nSELECT employee_name, salary FROM dialect23_employees ORDER BY salary DESC, employee_id LIMIT 2;",
+    "resetCode": "CREATE TABLE dialect23_employees (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, salary INTEGER NOT NULL);\nINSERT INTO dialect23_employees VALUES (1, 'Asha', 60000), (2, 'Bilal', 52000), (3, 'Chitra', 65000);\nSELECT employee_name, salary FROM dialect23_employees ORDER BY salary DESC, employee_id LIMIT 2;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql233-q1",
+        "prompt": "Which dialect is used by Microsoft SQL Server?",
+        "options": [
+          "T-SQL",
+          "PL/SQL only",
+          "SQLite SQL",
+          "Mongo query language"
+        ],
+        "answer": "T-SQL",
+        "explanation": "SQL Server uses Transact-SQL."
+      },
+      {
+        "id": "sql233-q2",
+        "prompt": "Which syntax limits rows in a common SQL Server query?",
+        "options": [
+          "TOP (n)",
+          "LIMIT n",
+          "ROWNUM only",
+          "AUTO_INCREMENT"
+        ],
+        "answer": "TOP (n)",
+        "explanation": "TOP is a common T-SQL row-limiting construct."
+      },
+      {
+        "id": "sql233-q3",
+        "prompt": "What does DATEADD do in T-SQL?",
+        "options": [
+          "Adds a specified date/time interval",
+          "Creates an identity column",
+          "Deletes old rows",
+          "Returns changed rows"
+        ],
+        "answer": "Adds a specified date/time interval",
+        "explanation": "DATEADD performs date/time arithmetic."
+      },
+      {
+        "id": "sql233-q4",
+        "prompt": "What does the OUTPUT clause support?",
+        "options": [
+          "Returning rows affected by a DML statement",
+          "Sorting a SELECT result",
+          "Creating a database backup",
+          "Declaring a CTE"
+        ],
+        "answer": "Returning rows affected by a DML statement",
+        "explanation": "OUTPUT can expose inserted/deleted row values during DML."
+      },
+      {
+        "id": "sql233-q5",
+        "prompt": "Why compare ISNULL and COALESCE carefully in SQL Server?",
+        "options": [
+          "Their type-resolution and return-type rules can differ",
+          "ISNULL creates an index",
+          "COALESCE is unsupported in SQL Server",
+          "Both always return the same type in every case"
+        ],
+        "answer": "Their type-resolution and return-type rules can differ",
+        "explanation": "Choose based on the expression types and desired result type."
+      }
+    ]
+  },
+  "status": "draft"
+}

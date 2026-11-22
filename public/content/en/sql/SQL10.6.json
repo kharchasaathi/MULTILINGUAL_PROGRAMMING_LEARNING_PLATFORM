@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql10.6.en",
+  "courseId": "sql",
+  "moduleId": "SQL10",
+  "topicId": "SQL10.6",
+  "title": "SQL Comments: Single-Line and Multi-Line",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of SQL Comments: Single-Line and Multi-Line.",
+    "Write SQLite-compatible SQL for the topic or a clearly labelled equivalent.",
+    "Predict result rows using the lesson's sample data.",
+    "Identify dialect limitations, NULL behaviour and common errors.",
+    "Apply the topic to a practical data task."
+  ],
+  "prerequisites": [
+    "SQL5.1",
+    "SQL5.4",
+    "SQL9.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "SQL comments are explanatory text ignored by the SQL engine. The common forms are a double-hyphen line comment and a slash-star block comment. Exact comment placement and nesting support can vary by database and client tooling.",
+      "whyItMatters": "Comments explain intent, assumptions and safety-sensitive conditions, making queries easier to review, maintain and debug.",
+      "analogy": "Think of a SQL query as a carefully specified instruction for selecting or shaping rows in a database.",
+      "analogyLimit": "The analogy does not model SQL evaluation order, transaction guarantees, NULL logic or DBMS-specific implementation details."
+    },
+    "explain": {
+      "narrative": "## Comment forms\nA line comment begins with `--` and continues to the end of the line. A block comment begins with `/*` and ends with `*/`; it can span lines. Put comments around—not inside—string literals. Comments do not change query results. Avoid relying on nested block comments because support varies.\n\n## Common mistakes\n- Assuming syntax is identical across all database engines.\n- Omitting explicit column lists when moving data.\n- Ignoring NULL, constraints or result ordering.\n- Treating a documented dialect example as executable SQLite syntax.\n\n## Best practices\nUse explicit columns, test against the target DBMS/version, keep setup scripts repeatable, and verify results with SELECT queries.",
+      "examples": [
+        {
+          "id": "sql10.6-ex1",
+          "language": "en",
+          "title": "Add a line comment before a query",
+          "code": "DROP TABLE IF EXISTS scores;\nCREATE TABLE scores (student TEXT, score INTEGER);\nINSERT INTO scores VALUES ('Asha',88),('Bilal',72);\n-- Show learners who scored at least 80\nSELECT student,score FROM scores WHERE score>=80 ORDER BY student;",
+          "expectedOutput": "Asha | 88",
+          "explanation": "The -- comment documents the purpose and is ignored by SQLite.",
+          "runnable": true
+        },
+        {
+          "id": "sql10.6-ex2",
+          "language": "en",
+          "title": "Add an inline explanation after a selected column",
+          "code": "DROP TABLE IF EXISTS products;\nCREATE TABLE products (product_name TEXT, price INTEGER);\nINSERT INTO products VALUES ('Keyboard',1200),('Mouse',600);\nSELECT product_name, price -- amount stored in whole currency units\nFROM products ORDER BY product_name;",
+          "expectedOutput": "Keyboard | 1200; Mouse | 600",
+          "explanation": "A line comment can follow SQL text; the query continues on the next line.",
+          "runnable": true
+        },
+        {
+          "id": "sql10.6-ex3",
+          "language": "en",
+          "title": "Use a block comment for multiple lines",
+          "code": "DROP TABLE IF EXISTS orders;\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, amount INTEGER);\nINSERT INTO orders VALUES (1,250),(2,900);\n/* Report only high-value orders.\n   This comment spans two lines. */\nSELECT order_id,amount FROM orders WHERE amount>=500 ORDER BY order_id;",
+          "expectedOutput": "2 | 900",
+          "explanation": "A block comment is enclosed by /* and */ and can cover multiple lines.",
+          "runnable": true
+        },
+        {
+          "id": "sql10.6-ex4",
+          "language": "en",
+          "title": "Document a calculation",
+          "code": "DROP TABLE IF EXISTS invoices;\nCREATE TABLE invoices (invoice_id INTEGER PRIMARY KEY, subtotal INTEGER);\nINSERT INTO invoices VALUES (1,1000),(2,500);\nSELECT invoice_id,subtotal,subtotal*0.18 AS tax_amount -- illustrative 18 percent tax calculation\nFROM invoices ORDER BY invoice_id;",
+          "expectedOutput": "1 | 1000 | 180.0; 2 | 500 | 90.0",
+          "explanation": "A short comment records the business assumption behind a calculated expression.",
+          "runnable": true
+        },
+        {
+          "id": "sql10.6-ex5",
+          "language": "en",
+          "title": "Comment out a statement during debugging",
+          "code": "DROP TABLE IF EXISTS flags;\nCREATE TABLE flags (flag_id INTEGER PRIMARY KEY, enabled INTEGER);\nINSERT INTO flags VALUES (1,1),(2,0);\n-- SELECT * FROM flags WHERE enabled=0;\nSELECT flag_id FROM flags WHERE enabled=1 ORDER BY flag_id;",
+          "expectedOutput": "1",
+          "explanation": "A commented-out statement is not executed; remove temporary debugging comments before finalizing production SQL.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the five examples in order. Before each run, predict the result and explain how SQL Comments: Single-Line and Multi-Line affects it.",
+      "independentTask": "Create your own small dataset and write three new queries using SQL Comments: Single-Line and Multi-Line. Include one boundary case and document the expected output.",
+      "hints": [
+        "Read the target DBMS syntax notes before running an example.",
+        "Use explicit column names and aliases where they improve clarity.",
+        "Check NULL values separately from zero and empty strings.",
+        "Use ORDER BY when the display order matters.",
+        "Compare the returned rows with your prediction after execution."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "DROP TABLE IF EXISTS scores;\nCREATE TABLE scores (student TEXT, score INTEGER);\nINSERT INTO scores VALUES ('Asha',88),('Bilal',72);\n-- Show learners who scored at least 80\nSELECT student,score FROM scores WHERE score>=80 ORDER BY student;",
+    "resetCode": "DROP TABLE IF EXISTS scores;\nCREATE TABLE scores (student TEXT, score INTEGER);\nINSERT INTO scores VALUES ('Asha',88),('Bilal',72);\n-- Show learners who scored at least 80\nSELECT student,score FROM scores WHERE score>=80 ORDER BY student;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql10.6-q1",
+        "prompt": "Which marker starts a common SQL single-line comment?",
+        "options": [
+          "--",
+          "/*",
+          "*/",
+          "//"
+        ],
+        "answer": "--",
+        "explanation": "A double hyphen starts a line comment in SQLite and many SQL dialects."
+      },
+      {
+        "id": "sql10.6-q2",
+        "prompt": "Which pair encloses a common block comment?",
+        "options": [
+          "/* and */",
+          "-- and ;",
+          "// and //",
+          "# and # in every DBMS"
+        ],
+        "answer": "/* and */",
+        "explanation": "Block comments begin with /* and end with */."
+      },
+      {
+        "id": "sql10.6-q3",
+        "prompt": "What happens to a valid SQL comment during execution?",
+        "options": [
+          "The SQL engine ignores the comment text",
+          "The comment is stored as a result row",
+          "The comment updates every table",
+          "The comment runs as a separate statement"
+        ],
+        "answer": "The SQL engine ignores the comment text",
+        "explanation": "Comments are explanatory text and do not change query results."
+      },
+      {
+        "id": "sql10.6-q4",
+        "prompt": "Why should nested block comments be avoided in portable SQL?",
+        "options": [
+          "Nested block-comment support varies across engines and tools",
+          "Nested comments always create tables",
+          "They turn comments into string literals",
+          "They disable ORDER BY"
+        ],
+        "answer": "Nested block-comment support varies across engines and tools",
+        "explanation": "Not every DBMS or SQL client supports nested block comments consistently."
+      },
+      {
+        "id": "sql10.6-q5",
+        "prompt": "Does text that looks like a comment inside a quoted string become a SQL comment?",
+        "options": [
+          "No, it is part of the string literal",
+          "Yes, every -- sequence ends the query",
+          "Yes, every /* sequence is removed",
+          "Only when the string is numeric"
+        ],
+        "answer": "No, it is part of the string literal",
+        "explanation": "Comment markers inside a quoted string are data, not comment delimiters."
+      }
+    ]
+  },
+  "status": "draft"
+}

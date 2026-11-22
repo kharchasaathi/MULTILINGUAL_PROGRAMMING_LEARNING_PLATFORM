@@ -1,0 +1,160 @@
+{
+  "id": "sql.sql7.3.en",
+  "courseId": "sql",
+  "moduleId": "SQL7",
+  "topicId": "SQL7.3",
+  "title": "SQL IN and NOT IN Operators",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of SQL IN and NOT IN Operators.",
+    "Write valid SQLite queries that use the topic in a WHERE condition.",
+    "Interpret matching and non-matching rows from a sample table.",
+    "Combine the topic with other filtering conditions safely.",
+    "Recognize NULL and SQL dialect considerations relevant to the topic."
+  ],
+  "prerequisites": [
+    "SQL5.4",
+    "SQL5.5",
+    "SQL5.7",
+    "SQL6.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "IN tests whether an expression equals at least one value in a list or in the result of a subquery. NOT IN tests the opposite membership condition. IN is often clearer than a long chain of OR comparisons. NULL values require care because SQL uses three-valued logic.",
+      "whyItMatters": "Membership filters are useful for selecting records belonging to a chosen set of categories, statuses, locations or related records.",
+      "analogy": "Think of a librarian applying a clear rule to decide which records belong in a result list.",
+      "analogyLimit": "The analogy does not represent SQL's NULL logic, collation rules, optimizer decisions or product-specific pattern behaviour."
+    },
+    "explain": {
+      "narrative": "## Core concept\nIN tests whether an expression equals at least one value in a list or in the result of a subquery. NOT IN tests the opposite membership condition. IN is often clearer than a long chain of OR comparisons. NULL values require care because SQL uses three-valued logic.\n\n## SQLite syntax\n```sql\nSELECT column_name FROM table_name WHERE column_name IN (value1, value2);\n```\n\n## Worked examples\n### 1. Create sample order data\n```sql\nCREATE TABLE membership_orders (order_id INTEGER PRIMARY KEY, customer_name TEXT, country TEXT, status TEXT);\nINSERT INTO membership_orders VALUES (1,'Asha','India','paid'),(2,'Ben','UK','pending'),(3,'Chitra','India','shipped'),(4,'Dara','Canada','paid'),(5,'Evan','UK','cancelled'),(6,'Farah','UAE','paid');\n```\nExpected result: Six order rows are inserted.\n\nThe sample supports list membership and exclusion queries.\n\n### 2. Select rows matching a list\n```sql\nSELECT customer_name, country FROM membership_orders WHERE country IN ('India','UK') ORDER BY order_id;\n```\nExpected result: Asha | India; Ben | UK; Chitra | India; Evan | UK\n\nIN succeeds when country matches any listed value.\n\n### 3. Rewrite OR conditions with IN\n```sql\nSELECT order_id FROM membership_orders WHERE status = 'paid' OR status = 'shipped' ORDER BY order_id;\n```\nExpected result: 1; 3; 4; 6\n\nThis OR form is equivalent to status IN ('paid','shipped').\n\n### 4. Exclude a set of countries\n```sql\nSELECT customer_name, country FROM membership_orders WHERE country NOT IN ('India','UK') ORDER BY order_id;\n```\nExpected result: Dara | Canada; Farah | UAE\n\nNOT IN keeps values that are not equal to any listed value; NULL needs separate thought.\n\n### 5. Use IN with a subquery\n```sql\nSELECT customer_name FROM membership_orders WHERE country IN (SELECT country FROM membership_orders WHERE status = 'shipped') ORDER BY customer_name;\n```\nExpected result: Asha; Chitra\n\nThe subquery returns India, so customers whose country is India are selected.\n\n## Query behaviour and limitations\nThese examples target SQLite. SQL pattern syntax, LIKE case behaviour, collation, date/time representation and support for product-specific wildcard forms can vary across DBMS products. SQLite LIKE uses % and _; do not assume SQL Server-style bracket lists are portable. Comparisons involving NULL evaluate to UNKNOWN, so NULL rows are not selected by ordinary positive or negative predicates.\n\n## Common mistakes\n- Omitting quotes around text patterns or text list values.\n- Assuming % and _ mean the same thing.\n- Treating BETWEEN as exclusive.\n- Using NOT IN without checking whether a subquery can return NULL.\n- Assuming wildcard and collation behaviour is identical across products.\n\n## Best practices\nUse explicit predicates, predictable ORDER BY clauses, representative test data and documented dialect assumptions. Inspect boundary and NULL cases before relying on a filter in a report.",
+      "examples": [
+        {
+          "id": "sql7.3-ex1",
+          "language": "en",
+          "title": "Create sample order data",
+          "code": "CREATE TABLE membership_orders (order_id INTEGER PRIMARY KEY, customer_name TEXT, country TEXT, status TEXT);\nINSERT INTO membership_orders VALUES (1,'Asha','India','paid'),(2,'Ben','UK','pending'),(3,'Chitra','India','shipped'),(4,'Dara','Canada','paid'),(5,'Evan','UK','cancelled'),(6,'Farah','UAE','paid');",
+          "expectedOutput": "Six order rows are inserted.",
+          "explanation": "The sample supports list membership and exclusion queries.",
+          "runnable": true
+        },
+        {
+          "id": "sql7.3-ex2",
+          "language": "en",
+          "title": "Select rows matching a list",
+          "code": "SELECT customer_name, country FROM membership_orders WHERE country IN ('India','UK') ORDER BY order_id;",
+          "expectedOutput": "Asha | India; Ben | UK; Chitra | India; Evan | UK",
+          "explanation": "IN succeeds when country matches any listed value.",
+          "runnable": true
+        },
+        {
+          "id": "sql7.3-ex3",
+          "language": "en",
+          "title": "Rewrite OR conditions with IN",
+          "code": "SELECT order_id FROM membership_orders WHERE status = 'paid' OR status = 'shipped' ORDER BY order_id;",
+          "expectedOutput": "1; 3; 4; 6",
+          "explanation": "This OR form is equivalent to status IN ('paid','shipped').",
+          "runnable": true
+        },
+        {
+          "id": "sql7.3-ex4",
+          "language": "en",
+          "title": "Exclude a set of countries",
+          "code": "SELECT customer_name, country FROM membership_orders WHERE country NOT IN ('India','UK') ORDER BY order_id;",
+          "expectedOutput": "Dara | Canada; Farah | UAE",
+          "explanation": "NOT IN keeps values that are not equal to any listed value; NULL needs separate thought.",
+          "runnable": true
+        },
+        {
+          "id": "sql7.3-ex5",
+          "language": "en",
+          "title": "Use IN with a subquery",
+          "code": "SELECT customer_name FROM membership_orders WHERE country IN (SELECT country FROM membership_orders WHERE status = 'shipped') ORDER BY customer_name;",
+          "expectedOutput": "Asha; Chitra",
+          "explanation": "The subquery returns India, so customers whose country is India are selected.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the list query, add another country, then compare it with an equivalent OR expression. Next, change IN to NOT IN and explain which rows remain.",
+      "independentTask": "Create a course_enrolments table with learner, course and status columns. Write membership queries for several courses, excluded statuses and a subquery-based selection.",
+      "hints": [
+        "Text values need single quotes; numeric values normally do not.",
+        "IN is a concise alternative to repeated equality checks joined by OR.",
+        "A subquery used by IN should return one column.",
+        "If a NOT IN subquery can return NULL, results may be surprising; consider NOT EXISTS for nullable data.",
+        "IN does not replace NULL checks; use IS NULL or IS NOT NULL."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE membership_orders (order_id INTEGER PRIMARY KEY, customer_name TEXT, country TEXT, status TEXT);\nINSERT INTO membership_orders VALUES (1,'Asha','India','paid'),(2,'Ben','UK','pending'),(3,'Chitra','India','shipped'),(4,'Dara','Canada','paid'),(5,'Evan','UK','cancelled'),(6,'Farah','UAE','paid');\n\n-- Try the lesson query here\nSELECT * FROM membership_orders;",
+    "resetCode": "CREATE TABLE membership_orders (order_id INTEGER PRIMARY KEY, customer_name TEXT, country TEXT, status TEXT);\nINSERT INTO membership_orders VALUES (1,'Asha','India','paid'),(2,'Ben','UK','pending'),(3,'Chitra','India','shipped'),(4,'Dara','Canada','paid'),(5,'Evan','UK','cancelled'),(6,'Farah','UAE','paid');"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql7.3-q1",
+        "prompt": "What does IN test?",
+        "options": [
+          "Whether a value matches any member of a set",
+          "Whether a value lies between two bounds only",
+          "Whether text matches a wildcard pattern",
+          "Whether rows are sorted"
+        ],
+        "answer": "Whether a value matches any member of a set",
+        "explanation": "IN is a membership predicate."
+      },
+      {
+        "id": "sql7.3-q2",
+        "prompt": "Which condition is equivalent to country IN ('India','UK')?",
+        "options": [
+          "country = 'India' OR country = 'UK'",
+          "country = 'India' AND country = 'UK'",
+          "country LIKE 'India,UK'",
+          "country BETWEEN 'India' AND 'UK'"
+        ],
+        "answer": "country = 'India' OR country = 'UK'",
+        "explanation": "IN is shorthand for alternatives joined by OR."
+      },
+      {
+        "id": "sql7.3-q3",
+        "prompt": "What does NOT IN do?",
+        "options": [
+          "Selects values outside the listed set",
+          "Selects only NULL values",
+          "Sorts in reverse order",
+          "Removes duplicate rows"
+        ],
+        "answer": "Selects values outside the listed set",
+        "explanation": "NOT IN negates the membership test."
+      },
+      {
+        "id": "sql7.3-q4",
+        "prompt": "What is a key risk with NOT IN and a subquery that returns NULL?",
+        "options": [
+          "The predicate can evaluate to UNKNOWN and filter rows unexpectedly",
+          "The query automatically deletes rows",
+          "The subquery is always ignored",
+          "The database converts NULL to zero"
+        ],
+        "answer": "The predicate can evaluate to UNKNOWN and filter rows unexpectedly",
+        "explanation": "SQL's three-valued logic affects NOT IN when NULL appears."
+      },
+      {
+        "id": "sql7.3-q5",
+        "prompt": "How many columns should a scalar IN subquery return?",
+        "options": [
+          "One",
+          "Zero",
+          "Exactly two",
+          "Any number without restriction"
+        ],
+        "answer": "One",
+        "explanation": "The comparison needs one result value per subquery row."
+      }
+    ]
+  },
+  "status": "draft"
+}

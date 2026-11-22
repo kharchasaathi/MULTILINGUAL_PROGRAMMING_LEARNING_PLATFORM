@@ -1,0 +1,161 @@
+{
+  "id": "sql.sql24.1.en",
+  "courseId": "sql",
+  "moduleId": "SQL24",
+  "topicId": "SQL24.1",
+  "title": "Requirements Analysis and Relational Schema Planning",
+  "language": "en",
+  "learningObjectives": [
+    "Translate a small business requirement into entities and relationships.",
+    "Choose primary and foreign keys for related tables.",
+    "Represent one-to-many relationships without repeating parent data.",
+    "Use constraints to encode required fields and valid states.",
+    "Verify the schema with a practical join and grouped report."
+  ],
+  "prerequisites": [
+    "SQL3.2",
+    "SQL4.1",
+    "SQL8.1",
+    "SQL9.3",
+    "SQL12.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Requirements analysis identifies the people, events, rules and reports a database must support. The schema turns those requirements into entities, keys, relationships and constraints.",
+      "whyItMatters": "Starting with a clear data model reduces duplicated data and prevents missing relationships from being patched into queries later.",
+      "analogy": "A building plan identifies rooms, doors and load-bearing walls before construction begins.",
+      "analogyLimit": "A relational schema does not capture every workflow rule; some requirements belong in application logic, triggers or operational processes."
+    },
+    "explain": {
+      "narrative": "## Start from the business questions\nFor a service desk, the system must identify customers, record support tickets, track ticket status and priority, and report open work by customer. Those requirements suggest separate customer and ticket entities.\n\n## Model relationships\nOne customer can open many tickets, so tickets store customer_id as a foreign key. Customer name and contact details remain in the customer table rather than being repeated on every ticket.\n\n## Encode invariants\nUse NOT NULL for required values, UNIQUE for stable business identifiers, CHECK for controlled states and FOREIGN KEY for relationships. Enable SQLite foreign-key enforcement on each connection.\n\n## Validate against real questions\nAfter creating the schema, insert representative data and write the joins and reports the application needs. If a required report is awkward or duplicates data, revisit the model before adding more columns.",
+      "examples": [
+        {
+          "id": "sql241-ex1",
+          "language": "en",
+          "title": "Create customer and support-ticket entities",
+          "code": "CREATE TABLE prj24_customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, email TEXT NOT NULL UNIQUE); CREATE TABLE prj24_tickets (ticket_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL REFERENCES prj24_customers(customer_id), subject TEXT NOT NULL, priority INTEGER NOT NULL CHECK (priority BETWEEN 1 AND 5), status TEXT NOT NULL CHECK (status IN ('open','in_progress','closed')));",
+          "expectedOutput": "Tables created",
+          "explanation": "Creates two entities and a one-to-many relationship. Customer details are stored once; each ticket references its customer through a foreign key.",
+          "runnable": true
+        },
+        {
+          "id": "sql241-ex2",
+          "language": "en",
+          "title": "Insert customers and representative tickets",
+          "code": "INSERT INTO prj24_customers VALUES (1, 'Asha', 'asha@example.test'), (2, 'Bilal', 'bilal@example.test'); INSERT INTO prj24_tickets VALUES (101, 1, 'Cannot sign in', 5, 'open'), (102, 1, 'Invoice question', 2, 'in_progress'), (103, 2, 'App is slow', 4, 'open');",
+          "expectedOutput": "5 rows inserted",
+          "explanation": "Adds two customers and three tickets. The data covers two priorities and two statuses for reporting practice.",
+          "runnable": true
+        },
+        {
+          "id": "sql241-ex3",
+          "language": "en",
+          "title": "List open tickets with their customer",
+          "code": "SELECT t.ticket_id, c.customer_name, t.subject, t.priority FROM prj24_tickets AS t JOIN prj24_customers AS c ON c.customer_id = t.customer_id WHERE t.status = 'open' ORDER BY t.priority DESC, t.ticket_id;",
+          "expectedOutput": "101 | Asha | Cannot sign in | 5; 103 | Bilal | App is slow | 4",
+          "explanation": "Joins ticket events to customer details and filters open work. The ticket_id tie-breaker keeps the report deterministic.",
+          "runnable": true
+        },
+        {
+          "id": "sql241-ex4",
+          "language": "en",
+          "title": "Count tickets by status",
+          "code": "SELECT status, COUNT(*) AS ticket_count FROM prj24_tickets GROUP BY status ORDER BY status;",
+          "expectedOutput": "in_progress | 1; open | 2",
+          "explanation": "Groups the three ticket rows by status. Because no closed row exists, no closed group is returned; the result contains only statuses present in the data. GROUP BY returns only groups represented by source rows; it does not synthesize a closed group with a zero count.",
+          "runnable": true
+        },
+        {
+          "id": "sql241-ex5",
+          "language": "en",
+          "title": "Close one ticket and verify the new state",
+          "code": "UPDATE prj24_tickets SET status = 'closed' WHERE ticket_id = 101; SELECT ticket_id, status FROM prj24_tickets WHERE ticket_id = 101;",
+          "expectedOutput": "101 | closed",
+          "explanation": "Updates one ticket using its primary key and verifies the resulting state. Production code should check that exactly one row was updated.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and draw the customer-to-ticket relationship. Explain why customer_name belongs in the customer table rather than being copied into every ticket row.",
+      "independentTask": "Extend the model with ticket_comments. Define its primary key, foreign key, required fields and a query that returns each ticket with its latest comment.",
+      "hints": [
+        "Start from required business questions and reports.",
+        "Separate entities that have independent identity.",
+        "Use foreign keys for one-to-many relationships.",
+        "Use CHECK for controlled states and ranges.",
+        "Test the schema with representative joins and reports."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "PRAGMA foreign_keys = ON;\nCREATE TABLE prj24_customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, email TEXT NOT NULL UNIQUE);\nCREATE TABLE prj24_tickets (ticket_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL REFERENCES prj24_customers(customer_id), subject TEXT NOT NULL, priority INTEGER NOT NULL CHECK (priority BETWEEN 1 AND 5), status TEXT NOT NULL);\nINSERT INTO prj24_customers VALUES (1, 'Asha', 'asha@example.test');\nINSERT INTO prj24_tickets VALUES (101, 1, 'Cannot sign in', 5, 'open');\nSELECT t.ticket_id, c.customer_name, t.subject FROM prj24_tickets t JOIN prj24_customers c ON c.customer_id=t.customer_id;",
+    "resetCode": "PRAGMA foreign_keys = ON;\nCREATE TABLE prj24_customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, email TEXT NOT NULL UNIQUE);\nCREATE TABLE prj24_tickets (ticket_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL REFERENCES prj24_customers(customer_id), subject TEXT NOT NULL, priority INTEGER NOT NULL CHECK (priority BETWEEN 1 AND 5), status TEXT NOT NULL);\nINSERT INTO prj24_customers VALUES (1, 'Asha', 'asha@example.test');\nINSERT INTO prj24_tickets VALUES (101, 1, 'Cannot sign in', 5, 'open');\nSELECT t.ticket_id, c.customer_name, t.subject FROM prj24_tickets t JOIN prj24_customers c ON c.customer_id=t.customer_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql241-q1",
+        "prompt": "What should requirements analysis identify first?",
+        "options": [
+          "Business entities, rules and required reports",
+          "Only the preferred SQL keyword case",
+          "Only the number of indexes",
+          "Only the UI colour scheme"
+        ],
+        "answer": "Business entities, rules and required reports",
+        "explanation": "The schema should be driven by data needs and business questions."
+      },
+      {
+        "id": "sql241-q2",
+        "prompt": "How is a one-to-many customer-ticket relationship represented?",
+        "options": [
+          "Store customer_id as a foreign key in tickets",
+          "Copy the customer row into every ticket",
+          "Store all ticket IDs in one text field",
+          "Use a CROSS JOIN"
+        ],
+        "answer": "Store customer_id as a foreign key in tickets",
+        "explanation": "Each ticket references one customer; a customer can have many tickets."
+      },
+      {
+        "id": "sql241-q3",
+        "prompt": "Why use a UNIQUE constraint on email?",
+        "options": [
+          "To prevent duplicate email values in the table",
+          "To sort email values",
+          "To encrypt email values",
+          "To create a backup"
+        ],
+        "answer": "To prevent duplicate email values in the table",
+        "explanation": "UNIQUE enforces a uniqueness rule on stored values."
+      },
+      {
+        "id": "sql241-q4",
+        "prompt": "What does CHECK(priority BETWEEN 1 AND 5) enforce?",
+        "options": [
+          "Priority values must be within the allowed range",
+          "Every ticket must be closed",
+          "Each customer must have five tickets",
+          "Priority must be text"
+        ],
+        "answer": "Priority values must be within the allowed range",
+        "explanation": "CHECK validates the row expression when data is written."
+      },
+      {
+        "id": "sql241-q5",
+        "prompt": "Why verify a schema with joins and reports?",
+        "options": [
+          "To confirm it supports real application questions correctly",
+          "To avoid creating primary keys",
+          "To remove all constraints",
+          "To make every query return one row"
+        ],
+        "answer": "To confirm it supports real application questions correctly",
+        "explanation": "A design must support its intended reads and relationships."
+      }
+    ]
+  },
+  "status": "draft"
+}

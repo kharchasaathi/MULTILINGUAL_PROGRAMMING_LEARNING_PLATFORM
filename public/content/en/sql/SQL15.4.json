@@ -1,0 +1,160 @@
+{
+  "id": "sql.sql15.4.en",
+  "courseId": "sql",
+  "moduleId": "SQL15",
+  "topicId": "SQL15.4",
+  "title": "Covering Indexes and Read-Query Design",
+  "language": "en",
+  "learningObjectives": [
+    "Define a covering index and explain how it can avoid table-row lookups.",
+    "Identify the columns a query needs for filtering and output.",
+    "Create a selective covering index for a read-heavy query.",
+    "Use EXPLAIN QUERY PLAN to identify USING COVERING INDEX.",
+    "Explain the storage and write-maintenance cost of wider indexes."
+  ],
+  "prerequisites": [
+    "SQL3.10",
+    "SQL5.4",
+    "SQL5.6"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A covering index contains all columns needed by a query's search conditions and selected output. The engine may be able to answer the query from the index without looking up the table row, reducing additional table access.",
+      "whyItMatters": "Covering indexes can improve read-heavy workloads, but wider indexes use more storage and increase write costs.",
+      "analogy": "An index is like a sorted lookup guide that points toward the relevant records instead of requiring every page to be read.",
+      "analogyLimit": "The analogy does not model B-tree pages, query planner estimates, index maintenance or the full range of SQL access paths."
+    },
+    "explain": {
+      "narrative": "## Covering index concept\nAn index can cover a query when it contains the columns used by the query's filters and output. SQLite may report USING COVERING INDEX in EXPLAIN QUERY PLAN when it can satisfy the query from the index alone.\n\n## Design trade-offs\nAdding output columns to an index can make it wider. Wider indexes consume more pages and increase maintenance work. Use covering indexes selectively for frequent, measured queries.\n\n## Verify the plan\nUse EXPLAIN QUERY PLAN to confirm whether the index is covering for the specific query. A change to the SELECT list or WHERE clause can change whether the index covers the query.\n\n### Covering is query-specific\nAn index covers a query only when it contains all columns needed for the filters, joins and output (plus any required ordering). Adding a new selected column can make the same query no longer covered.\n\n### Cost of wider indexes\nCovering indexes can reduce table lookups, but they consume more storage and increase work on INSERT, UPDATE and DELETE. Add included or trailing columns only for measured high-value read paths.",
+      "examples": [
+        {
+          "id": "sql15.4-ex1",
+          "language": "en",
+          "title": "Create a customer payment table",
+          "code": "CREATE TABLE perf15_payments (payment_id INTEGER PRIMARY KEY, customer TEXT NOT NULL, payment_status TEXT NOT NULL, amount INTEGER NOT NULL, note TEXT);",
+          "expectedOutput": "Table created",
+          "explanation": "Creates a payments table with customer, status, amount and a note. The report query will filter on customer and status and return amount only.",
+          "runnable": true
+        },
+        {
+          "id": "sql15.4-ex2",
+          "language": "en",
+          "title": "Insert sample payments",
+          "code": "INSERT INTO perf15_payments VALUES (1, 'Asha', 'paid', 100, 'card'), (2, 'Asha', 'open', 50, 'cash'), (3, 'Bilal', 'paid', 80, 'bank'), (4, 'Mira', 'paid', 70, 'card');",
+          "expectedOutput": "4 rows inserted",
+          "explanation": "Inserts four payments. Only Asha's first row matches customer = 'Asha' and payment_status = 'paid'.",
+          "runnable": true
+        },
+        {
+          "id": "sql15.4-ex3",
+          "language": "en",
+          "title": "Create an index that covers a frequent report",
+          "code": "CREATE INDEX idx_perf15_cover ON perf15_payments(customer, payment_status, amount);",
+          "expectedOutput": "Index created",
+          "explanation": "Creates an index containing both filter columns and the selected amount. Because the query's required values are all present in the index, SQLite may be able to answer it without looking up the full table row.",
+          "runnable": true
+        },
+        {
+          "id": "sql15.4-ex4",
+          "language": "en",
+          "title": "Inspect the covering-index plan",
+          "code": "EXPLAIN QUERY PLAN SELECT amount FROM perf15_payments WHERE customer = 'Asha' AND payment_status = 'paid';",
+          "expectedOutput": "Query plan uses a covering index",
+          "expectedPattern": "USING COVERING INDEX idx_perf15_cover",
+          "explanation": "Displays the query plan for the covered report. Look for a covering-index access description in the actual plan; exact text is version-dependent and a tiny table may lead the optimizer to choose a scan instead.",
+          "runnable": true
+        },
+        {
+          "id": "sql15.4-ex5",
+          "language": "en",
+          "title": "Run the covered report query",
+          "code": "SELECT amount FROM perf15_payments WHERE customer = 'Asha' AND payment_status = 'paid';",
+          "expectedOutput": "100",
+          "explanation": "Returns the amount 100 for Asha's paid payment. This is the logical result whether SQLite uses the covering index or another valid access path.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and identify which query columns are present in the covering index.",
+      "independentTask": "Choose a frequent report query from a sample table. Design a covering index, inspect its plan and explain why adding more columns may not always be beneficial.",
+      "hints": [
+        "A covering index includes filter and output columns required by a query.",
+        "EXPLAIN QUERY PLAN may show USING COVERING INDEX.",
+        "A covering index can avoid an additional table lookup.",
+        "Wider indexes consume more storage and increase write work.",
+        "Measure a real query workload before adding covering columns."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE perf15_payments (payment_id INTEGER PRIMARY KEY, customer TEXT NOT NULL, payment_status TEXT NOT NULL, amount INTEGER NOT NULL, note TEXT);\nINSERT INTO perf15_payments VALUES (1, 'Asha', 'paid', 100, 'card'), (2, 'Asha', 'open', 50, 'cash'), (3, 'Bilal', 'paid', 80, 'bank'), (4, 'Mira', 'paid', 70, 'card');\nCREATE INDEX idx_perf15_cover ON perf15_payments(customer, payment_status, amount);\nSELECT amount FROM perf15_payments WHERE customer = 'Asha' AND payment_status = 'paid';",
+    "resetCode": "CREATE TABLE perf15_payments (payment_id INTEGER PRIMARY KEY, customer TEXT NOT NULL, payment_status TEXT NOT NULL, amount INTEGER NOT NULL, note TEXT);\nINSERT INTO perf15_payments VALUES (1, 'Asha', 'paid', 100, 'card'), (2, 'Asha', 'open', 50, 'cash'), (3, 'Bilal', 'paid', 80, 'bank'), (4, 'Mira', 'paid', 70, 'card');\nCREATE INDEX idx_perf15_cover ON perf15_payments(customer, payment_status, amount);\nSELECT amount FROM perf15_payments WHERE customer = 'Asha' AND payment_status = 'paid';"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql15.4-q1",
+        "prompt": "What is a covering index?",
+        "options": [
+          "An index containing all columns needed by a query's filters and output",
+          "An index that encrypts every row",
+          "An index with no key columns",
+          "A table that contains only views"
+        ],
+        "answer": "An index containing all columns needed by a query's filters and output",
+        "explanation": "A covering index can satisfy a query using index entries alone."
+      },
+      {
+        "id": "sql15.4-q2",
+        "prompt": "What can USING COVERING INDEX indicate?",
+        "options": [
+          "The query can be answered from the index without an extra table lookup",
+          "The index is corrupted",
+          "The table has been dropped",
+          "The query returned no rows"
+        ],
+        "answer": "The query can be answered from the index without an extra table lookup",
+        "explanation": "The plan detail identifies an index that covers the query."
+      },
+      {
+        "id": "sql15.4-q3",
+        "prompt": "Which columns should a covering index include?",
+        "options": [
+          "The columns needed for filtering and selected output",
+          "Every column in every table",
+          "Only columns with NULL values",
+          "Only comments"
+        ],
+        "answer": "The columns needed for filtering and selected output",
+        "explanation": "A covering index should include the query's required search and result columns."
+      },
+      {
+        "id": "sql15.4-q4",
+        "prompt": "What is a downside of wider covering indexes?",
+        "options": [
+          "More storage and write-maintenance cost",
+          "They remove all indexes",
+          "They prevent SELECT statements",
+          "They disable transactions"
+        ],
+        "answer": "More storage and write-maintenance cost",
+        "explanation": "Wider indexes consume more pages and require more update work."
+      },
+      {
+        "id": "sql15.4-q5",
+        "prompt": "When should a covering index be added?",
+        "options": [
+          "When measured read patterns justify its cost",
+          "For every query automatically",
+          "Only when a table has one row",
+          "Whenever a column is named id"
+        ],
+        "answer": "When measured read patterns justify its cost",
+        "explanation": "Index design should be based on measured workload needs."
+      }
+    ]
+  },
+  "status": "draft"
+}

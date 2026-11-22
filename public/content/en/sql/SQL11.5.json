@@ -1,0 +1,170 @@
+{
+  "id": "sql.sql11.5.en",
+  "courseId": "sql",
+  "moduleId": "SQL11",
+  "topicId": "SQL11.5",
+  "title": "SQL Parameters and Bound Values",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and practical behaviour of SQL Parameters and Bound Values.",
+    "Identify which database engine or application layer performs the operation.",
+    "Predict the result of the SQLite examples before running them.",
+    "Recognize security, recovery, portability and operational limitations.",
+    "Apply the concept safely in a realistic database workflow."
+  ],
+  "prerequisites": [
+    "SQL1.2",
+    "SQL2.1",
+    "SQL3.1",
+    "SQL3.2",
+    "SQL5.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A parameter is a placeholder for a value supplied separately from SQL text by an application or database interface. Common placeholder styles include question marks and named parameters, but syntax and APIs vary. Parameters are values, not pieces of SQL grammar.",
+      "whyItMatters": "Parameters make queries reusable, keep data separate from commands and help applications handle user input safely.",
+      "analogy": "Think of a database workflow as a carefully controlled service desk: each operation has a defined responsibility, input and verification step.",
+      "analogyLimit": "The analogy does not model SQL grammar, database transaction isolation, driver APIs, security boundaries or DBMS-specific implementation details."
+    },
+    "explain": {
+      "narrative": "## Parameter placeholders\nDatabase APIs commonly support positional placeholders such as ? and named placeholders such as :customer_id or @customer_id. The application prepares a statement and supplies values through a binding API. Placeholder syntax, parameter numbering and type handling depend on the driver and DBMS.\n\n## Values versus identifiers\nA bound parameter can represent a value in a predicate or INSERT. It generally cannot replace a table name, column name, keyword or sort direction. For dynamic identifiers, choose from a fixed allow-list and quote identifiers using the database driver's supported mechanism.\n\n## CodeSaathi Playground parameter panel\nThe SQL Playground now has a **Bound parameters (JSON)** field. Leave it empty for a normal multi-statement script. For a parameterized query, enter one SQL statement with ? placeholders and a JSON array such as [\"Hyderabad\"]. You can also use a named placeholder such as :city with a JSON object whose key includes the placeholder name, for example {\":city\":\"Hyderabad\"}. Parameter mode intentionally accepts exactly one SQL statement.\n\n## Security\nThe database engine binds values separately from SQL syntax. Do not build SQL by concatenating untrusted input. Bound values do not safely substitute table names or other identifiers; use a fixed allow-list for dynamic identifiers.\n\n## Worked examples\nThe examples use bound values where marked. For those examples, copy the SQL into the editor and the listed JSON array into the Bound parameters field. Setup statements remain ordinary SQL.",
+      "examples": [
+        {
+          "id": "sql11.5-ex1",
+          "language": "en",
+          "title": "Create a parameter table",
+          "code": "CREATE TABLE parameter_people (id INTEGER PRIMARY KEY, name TEXT NOT NULL, city TEXT NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "Create the table before using bound values.",
+          "runnable": true
+        },
+        {
+          "id": "sql11.5-ex2",
+          "language": "en",
+          "title": "Insert sample people",
+          "code": "INSERT INTO parameter_people VALUES (1, 'Asha', 'Hyderabad'), (2, 'Bilal', 'Vijayawada'), (3, 'Ananya', 'Hyderabad');",
+          "expectedOutput": "3 rows inserted",
+          "explanation": "The insert is a regular statement; no user input is concatenated into SQL.",
+          "runnable": true
+        },
+        {
+          "id": "sql11.5-ex3",
+          "language": "en",
+          "title": "Bind a city value with a positional placeholder",
+          "code": "SELECT name FROM parameter_people WHERE city = ? ORDER BY name;",
+          "expectedOutput": "Ananya; Asha",
+          "parameters": [
+            "Hyderabad"
+          ],
+          "explanation": "Enter [\"Hyderabad\"] in the Bound parameters JSON field. SQLite receives the city as a bound value.",
+          "runnable": true
+        },
+        {
+          "id": "sql11.5-ex4",
+          "language": "en",
+          "title": "Bind a different city value",
+          "code": "SELECT name FROM parameter_people WHERE city = ?;",
+          "expectedOutput": "Bilal",
+          "parameters": [
+            "Vijayawada"
+          ],
+          "explanation": "Reuse the same query shape with a different bound value.",
+          "runnable": true
+        },
+        {
+          "id": "sql11.5-ex5",
+          "language": "en",
+          "title": "Bind a LIKE pattern",
+          "code": "SELECT name FROM parameter_people WHERE name LIKE ? ORDER BY name;",
+          "expectedOutput": "Ananya; Asha",
+          "parameters": [
+            "A%"
+          ],
+          "explanation": "The entire pattern is bound as a value; it is not concatenated into the SQL statement.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run all five examples for SQL Parameters and Bound Values. Before running each one, state what the statement or application operation does, predict the result and explain any SQLite-specific limitation.",
+      "independentTask": "Create a small original scenario for SQL Parameters and Bound Values. Write at least five statements or a documented application workflow, include a safety or verification step, and explain which parts are specific to SQLite or another DBMS.",
+      "hints": [
+        "Read the engine and version notes before choosing syntax.",
+        "Keep user-provided values separate from SQL command text.",
+        "Use explicit names and columns so the operation is easy to review.",
+        "Check the result with a SELECT or integrity/health query.",
+        "For operational changes, document backup, restore and rollback requirements."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "-- Application template: SELECT name FROM parameter_people WHERE city = ?;\nDROP TABLE IF EXISTS parameter_people; CREATE TABLE parameter_people(id INTEGER PRIMARY KEY,name TEXT,city TEXT); INSERT INTO parameter_people VALUES(1,'Asha','Hyderabad'),(2,'Bilal','Vijayawada'); SELECT name FROM parameter_people WHERE city='Hyderabad';",
+    "resetCode": "-- Application template: SELECT name FROM parameter_people WHERE city = ?;\nDROP TABLE IF EXISTS parameter_people; CREATE TABLE parameter_people(id INTEGER PRIMARY KEY,name TEXT,city TEXT); INSERT INTO parameter_people VALUES(1,'Asha','Hyderabad'),(2,'Bilal','Vijayawada'); SELECT name FROM parameter_people WHERE city='Hyderabad';"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql11.5-q1",
+        "prompt": "What does a bound parameter represent?",
+        "options": [
+          "A data value supplied separately from SQL text",
+          "A new SQL keyword",
+          "A table definition",
+          "A database permission"
+        ],
+        "answer": "A data value supplied separately from SQL text",
+        "explanation": "Parameters supply values independently of the SQL command structure."
+      },
+      {
+        "id": "sql11.5-q2",
+        "prompt": "Which is a common positional placeholder?",
+        "options": [
+          "?",
+          "#value#",
+          "<value>",
+          "TABLE"
+        ],
+        "answer": "?",
+        "explanation": "Question-mark placeholders are common in SQLite and many database APIs."
+      },
+      {
+        "id": "sql11.5-q3",
+        "prompt": "Can a parameter normally replace ORDER BY DESC?",
+        "options": [
+          "No, it binds values rather than SQL keywords",
+          "Yes, always",
+          "Only for empty tables",
+          "Only in SQLite views"
+        ],
+        "answer": "No, it binds values rather than SQL keywords",
+        "explanation": "Parameters are for values, not arbitrary SQL grammar."
+      },
+      {
+        "id": "sql11.5-q4",
+        "prompt": "Why are named parameters useful?",
+        "options": [
+          "They make a query's value placeholders easier to identify",
+          "They automatically create indexes",
+          "They encrypt every column",
+          "They remove the need for a database connection"
+        ],
+        "answer": "They make a query's value placeholders easier to identify",
+        "explanation": "Names can make multi-parameter statements more readable."
+      },
+      {
+        "id": "sql11.5-q5",
+        "prompt": "What should an application use for a dynamic sort column?",
+        "options": [
+          "A strict allow-list of permitted identifiers",
+          "A user string concatenated without checks",
+          "A value parameter in every DBMS",
+          "A password field"
+        ],
+        "answer": "A strict allow-list of permitted identifiers",
+        "explanation": "Parameters cannot bind identifiers; allow-listing controls permitted choices."
+      }
+    ]
+  },
+  "status": "draft"
+}

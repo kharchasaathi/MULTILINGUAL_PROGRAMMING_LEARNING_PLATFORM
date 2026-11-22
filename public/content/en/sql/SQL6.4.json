@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql6.4.en",
+  "courseId": "sql",
+  "moduleId": "SQL6",
+  "topicId": "SQL6.4",
+  "title": "SUM() Aggregate Function",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of SUM().",
+    "Describe how SUM() handles NULL input values.",
+    "Write SUM() queries against a SQLite table.",
+    "Use SUM() with WHERE and GROUP BY where appropriate.",
+    "Interpret and verify aggregate result sets in practical reporting tasks."
+  ],
+  "prerequisites": [
+    "SQL5.4",
+    "SQL5.7",
+    "SQL3.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "SUM() adds the non-NULL numeric values in its input set. It can summarize all qualifying rows or calculate a separate total for each group. NULL inputs are ignored; if there are no non-NULL inputs, SQLite returns NULL.",
+      "whyItMatters": "Aggregate summaries help answer business questions without manually processing every record. SUM() is a core tool for accurate reporting and data analysis.",
+      "analogy": "SUM() is like asking a records clerk to inspect a selected pile of receipts and report one summary value.",
+      "analogyLimit": "The analogy does not model SQL's exact NULL rules, grouping semantics, numeric type behaviour or query execution plan. The database engine defines those details."
+    },
+    "explain": {
+      "narrative": "## Core concept\nSUM() adds the non-NULL numeric values in its input set. It can summarize all qualifying rows or calculate a separate total for each group. NULL inputs are ignored; if there are no non-NULL inputs, SQLite returns NULL.\n\n## SQLite syntax\n```sql\nSELECT SUM(amount) AS summary_value\nFROM aggregate_orders_4;\n```\n\n## Sample data\nThe table contains amounts 10, 20, 15, NULL and 30 across Books and Games categories. The non-NULL total is 75 and there are four non-NULL amount values.\n\n## Query processing\nThe FROM clause identifies input rows. WHERE filters rows before aggregation. The aggregate evaluates its expression over the remaining non-NULL values. GROUP BY creates independent input groups. ORDER BY sorts the final result rows.\n\n## Worked examples\n### 1. Create the sample orders table\n```sql\nCREATE TABLE aggregate_orders_4 (order_id INTEGER PRIMARY KEY, amount REAL, category TEXT, status TEXT);\nINSERT INTO aggregate_orders_4 VALUES (1,10,'Books','paid'),(2,20,'Books','paid'),(3,15,'Games','pending'),(4,NULL,'Games','cancelled'),(5,30,'Books','paid');\n```\nExpected result: Five rows inserted, including one NULL amount.\n\nFour numeric amounts are available to be summed.\n\n### 2. Calculate the total amount\n```sql\nSELECT SUM(amount) AS total_amount FROM aggregate_orders_4;\n```\nExpected result: total_amount = 75\n\n10 + 20 + 15 + 30 equals 75; NULL is ignored.\n\n### 3. Calculate total paid amount\n```sql\nSELECT SUM(amount) AS paid_total FROM aggregate_orders_4 WHERE status = 'paid';\n```\nExpected result: paid_total = 60\n\nOnly the three paid rows contribute: 10 + 20 + 30.\n\n### 4. Calculate totals by category\n```sql\nSELECT category, SUM(amount) AS category_total FROM aggregate_orders_4 GROUP BY category ORDER BY category;\n```\nExpected result: Books = 60; Games = 15\n\nSUM is calculated independently for each category.\n\n### 5. Calculate total and row count together\n```sql\nSELECT COUNT(*) AS order_count, SUM(amount) AS total_amount FROM aggregate_orders_4;\n```\nExpected result: order_count = 5; total_amount = 75\n\nCOUNT(*) includes every row while SUM ignores the NULL amount.\n\n## NULL and empty-input behaviour\nThese examples target SQLite. MIN, MAX, SUM and AVG ignore NULL inputs; COUNT(expression) ignores NULL; COUNT(*) counts rows. For SQLite, SUM over no non-NULL inputs returns NULL, and AVG over no non-NULL inputs returns NULL. Do not replace these rules with assumptions about zero.\n\n## Common mistakes\n- Confusing COUNT(*) with COUNT(column).\n- Assuming NULL is included as zero in SUM or AVG.\n- Forgetting GROUP BY when requesting category-level summaries.\n- Filtering aggregate results with WHERE instead of HAVING.\n- Selecting ungrouped, non-aggregated columns in grouped queries.\n\n## Best practices\nName aggregate outputs with clear aliases, verify the input rows before interpreting a summary, and state the target SQL dialect when behaviour differs.",
+      "examples": [
+        {
+          "id": "sql6.4-ex1",
+          "language": "en",
+          "title": "Create the sample orders table",
+          "code": "CREATE TABLE aggregate_orders_4 (order_id INTEGER PRIMARY KEY, amount REAL, category TEXT, status TEXT);\nINSERT INTO aggregate_orders_4 VALUES (1,10,'Books','paid'),(2,20,'Books','paid'),(3,15,'Games','pending'),(4,NULL,'Games','cancelled'),(5,30,'Books','paid');",
+          "expectedOutput": "Five rows inserted, including one NULL amount.",
+          "explanation": "Four numeric amounts are available to be summed.",
+          "runnable": true
+        },
+        {
+          "id": "sql6.4-ex2",
+          "language": "en",
+          "title": "Calculate the total amount",
+          "code": "SELECT SUM(amount) AS total_amount FROM aggregate_orders_4;",
+          "expectedOutput": "total_amount = 75",
+          "explanation": "10 + 20 + 15 + 30 equals 75; NULL is ignored.",
+          "runnable": true
+        },
+        {
+          "id": "sql6.4-ex3",
+          "language": "en",
+          "title": "Calculate total paid amount",
+          "code": "SELECT SUM(amount) AS paid_total FROM aggregate_orders_4 WHERE status = 'paid';",
+          "expectedOutput": "paid_total = 60",
+          "explanation": "Only the three paid rows contribute: 10 + 20 + 30.",
+          "runnable": true
+        },
+        {
+          "id": "sql6.4-ex4",
+          "language": "en",
+          "title": "Calculate totals by category",
+          "code": "SELECT category, SUM(amount) AS category_total FROM aggregate_orders_4 GROUP BY category ORDER BY category;",
+          "expectedOutput": "Books = 60; Games = 15",
+          "explanation": "SUM is calculated independently for each category.",
+          "runnable": true
+        },
+        {
+          "id": "sql6.4-ex5",
+          "language": "en",
+          "title": "Calculate total and row count together",
+          "code": "SELECT COUNT(*) AS order_count, SUM(amount) AS total_amount FROM aggregate_orders_4;",
+          "expectedOutput": "order_count = 5; total_amount = 75",
+          "explanation": "COUNT(*) includes every row while SUM ignores the NULL amount.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run all five SUM() examples in the SQL Playground. Predict each result first, then compare it with SQLite. Explain which input rows contribute to each aggregate.",
+      "independentTask": "Create a small table of at least six sales records with two categories and one NULL amount. Write five original queries demonstrating SUM(), including one filtered query and one grouped query. Record exact expected outputs.",
+      "hints": [
+        "Inspect the sample rows before calculating a result.",
+        "Remember that most aggregate expressions ignore NULL values; COUNT(*) is the row-count exception.",
+        "Apply WHERE before aggregation to restrict source rows.",
+        "Use GROUP BY for one summary per category.",
+        "Use deterministic ORDER BY when presenting grouped results."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE aggregate_orders_4 (order_id INTEGER PRIMARY KEY, amount REAL, category TEXT, status TEXT);\nINSERT INTO aggregate_orders_4 VALUES (1,10,'Books','paid'),(2,20,'Books','paid'),(3,15,'Games','pending'),(4,NULL,'Games','cancelled'),(5,30,'Books','paid');\n\nSELECT SUM(amount) AS aggregate_result FROM aggregate_orders_4;",
+    "resetCode": "CREATE TABLE aggregate_orders_4 (order_id INTEGER PRIMARY KEY, amount REAL, category TEXT, status TEXT);\nINSERT INTO aggregate_orders_4 VALUES (1,10,'Books','paid'),(2,20,'Books','paid'),(3,15,'Games','pending'),(4,NULL,'Games','cancelled'),(5,30,'Books','paid');\n\nSELECT SUM(amount) AS aggregate_result FROM aggregate_orders_4;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql6.4-q1",
+        "prompt": "What does SUM(amount) calculate?",
+        "options": [
+          "The total of non-NULL amount values",
+          "The largest amount",
+          "The number of rows",
+          "The average amount"
+        ],
+        "answer": "The total of non-NULL amount values",
+        "explanation": "The total of non-NULL amount values is correct because it follows the documented behaviour of SUM() in SQLite."
+      },
+      {
+        "id": "sql6.4-q2",
+        "prompt": "What is the sample table's total amount?",
+        "options": [
+          "75",
+          "60",
+          "30",
+          "5"
+        ],
+        "answer": "75",
+        "explanation": "75 is correct because it follows the documented behaviour of SUM() in SQLite."
+      },
+      {
+        "id": "sql6.4-q3",
+        "prompt": "Does SUM include NULL as zero?",
+        "options": [
+          "NULL inputs are ignored by the aggregate",
+          "NULL always makes the result zero",
+          "NULL is counted as one",
+          "The query must fail"
+        ],
+        "answer": "NULL inputs are ignored by the aggregate",
+        "explanation": "NULL inputs are ignored by the aggregate is correct because it follows the documented behaviour of SUM() in SQLite."
+      },
+      {
+        "id": "sql6.4-q4",
+        "prompt": "Which clause creates a separate sum for each category?",
+        "options": [
+          "GROUP BY category",
+          "ORDER BY category",
+          "DISTINCT category",
+          "LIMIT 2"
+        ],
+        "answer": "GROUP BY category",
+        "explanation": "GROUP BY category is correct because it follows the documented behaviour of SUM() in SQLite."
+      },
+      {
+        "id": "sql6.4-q5",
+        "prompt": "What does SUM return when there are no non-NULL input values in SQLite?",
+        "options": [
+          "NULL",
+          "0",
+          "-1",
+          "An empty string"
+        ],
+        "answer": "NULL",
+        "explanation": "NULL is correct because it follows the documented behaviour of SUM() in SQLite."
+      }
+    ]
+  },
+  "status": "draft"
+}

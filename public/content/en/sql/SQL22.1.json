@@ -1,0 +1,162 @@
+{
+  "id": "sql.sql22.1.en",
+  "courseId": "sql",
+  "moduleId": "SQL22",
+  "topicId": "SQL22.1",
+  "title": "Query Execution Plans and Cost Concepts",
+  "language": "en",
+  "learningObjectives": [
+    "Explain why a database optimizer creates an execution plan.",
+    "Read a basic SQLite EXPLAIN QUERY PLAN result.",
+    "Distinguish a table scan from an indexed search.",
+    "Explain why plan text can vary with engine versions and statistics.",
+    "Use result correctness and plan evidence together when tuning a query."
+  ],
+  "prerequisites": [
+    "SQL5.1",
+    "SQL8.1",
+    "SQL15.1",
+    "SQL15.2",
+    "SQL15.5"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A query execution plan describes how the database intends to obtain the requested rows. The optimizer compares candidate access paths and chooses one using estimates about data, indexes and operation costs.",
+      "whyItMatters": "Understanding a plan helps explain why a query reads many rows, uses an index, sorts intermediate results or performs repeated lookups.",
+      "analogy": "A delivery planner chooses a route based on road conditions and destination locations.",
+      "analogyLimit": "An execution plan is an estimate or strategy description, not a guaranteed elapsed time. Actual performance also depends on cache state, concurrency, storage and data volume."
+    },
+    "explain": {
+      "narrative": "## Query planning\nThe optimizer transforms a declarative SQL request into an execution strategy. Depending on the engine, a plan can include scans, index lookups, joins, sorts, aggregates and temporary structures.\n\n## SQLite plan inspection\nEXPLAIN QUERY PLAN gives a high-level description of SQLite's chosen strategy. A SCAN indicates that rows are visited through a scan; SEARCH indicates that a constraint is used to narrow access. Exact plan text can change with SQLite versions, indexes and statistics.\n\n## Cost and correctness\nThe optimizer estimates work; it does not know every runtime condition. Always verify that a rewritten query returns the same rows and values, then measure representative workloads. A plan that uses an index is not automatically faster for every data distribution.",
+      "examples": [
+        {
+          "id": "sql221-ex1",
+          "language": "en",
+          "title": "Create an order table with a primary key",
+          "code": "CREATE TABLE perf22_orders (order_id INTEGER PRIMARY KEY, customer_code TEXT NOT NULL, status TEXT NOT NULL, amount INTEGER NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "Creates an order table. The INTEGER PRIMARY KEY gives SQLite an indexed row identifier that can support direct key lookups.",
+          "runnable": true
+        },
+        {
+          "id": "sql221-ex2",
+          "language": "en",
+          "title": "Generate a reproducible order set",
+          "code": "WITH RECURSIVE seq(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM seq WHERE n < 100) INSERT INTO perf22_orders SELECT n, 'C-' || printf('%03d', n % 20), CASE WHEN n % 10 = 0 THEN 'review' ELSE 'paid' END, n * 5 FROM seq;",
+          "expectedOutput": "100 rows inserted",
+          "explanation": "Creates 100 rows with a predictable distribution: ten review orders and ninety paid orders. The sample is useful for demonstrating access paths, not for production benchmarking.",
+          "runnable": true
+        },
+        {
+          "id": "sql221-ex3",
+          "language": "en",
+          "title": "Inspect a primary-key lookup plan",
+          "code": "EXPLAIN QUERY PLAN SELECT status, amount FROM perf22_orders WHERE order_id = 50;",
+          "expectedOutput": "Plan uses an INTEGER PRIMARY KEY search",
+          "explanation": "The primary-key equality predicate allows SQLite to locate the row directly through the rowid alias. The exact plan wording is version-dependent.",
+          "runnable": true,
+          "expectedPattern": "INTEGER PRIMARY KEY"
+        },
+        {
+          "id": "sql221-ex4",
+          "language": "en",
+          "title": "Return the requested order",
+          "code": "SELECT order_id, status, amount FROM perf22_orders WHERE order_id = 50;",
+          "expectedOutput": "50 | review | 250",
+          "explanation": "Returns the one matching order. The result verifies the query's logical behaviour separately from the plan description.",
+          "runnable": true
+        },
+        {
+          "id": "sql221-ex5",
+          "language": "en",
+          "title": "Compare a selective filter with its result count",
+          "code": "SELECT COUNT(*) AS review_orders FROM perf22_orders WHERE status = 'review';",
+          "expectedOutput": "review_orders = 10",
+          "explanation": "Counts the ten review orders. Whether a status index is useful depends on selectivity, table size and workload; the optimizer may reasonably scan a small table.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the plan and result examples. Identify the predicate used for the primary-key search and explain why plan wording should not be hard-coded across SQLite versions.",
+      "independentTask": "Choose a query from a project, capture EXPLAIN QUERY PLAN before and after adding a suitable index, verify identical results and record the observed plan differences.",
+      "hints": [
+        "A plan describes an access strategy, not a guaranteed duration.",
+        "SCAN and SEARCH indicate different access approaches.",
+        "A primary key can support direct lookup.",
+        "Plan wording varies by engine version and statistics.",
+        "Verify results and measure representative data."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE perf22_orders (order_id INTEGER PRIMARY KEY, customer_code TEXT NOT NULL, status TEXT NOT NULL, amount INTEGER NOT NULL);\nINSERT INTO perf22_orders VALUES (1, 'C-001', 'paid', 100), (2, 'C-002', 'review', 200);\nEXPLAIN QUERY PLAN SELECT status, amount FROM perf22_orders WHERE order_id = 2;",
+    "resetCode": "CREATE TABLE perf22_orders (order_id INTEGER PRIMARY KEY, customer_code TEXT NOT NULL, status TEXT NOT NULL, amount INTEGER NOT NULL);\nINSERT INTO perf22_orders VALUES (1, 'C-001', 'paid', 100), (2, 'C-002', 'review', 200);\nEXPLAIN QUERY PLAN SELECT status, amount FROM perf22_orders WHERE order_id = 2;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql221-q1",
+        "prompt": "What is an execution plan?",
+        "options": [
+          "A description of how the engine intends to obtain query results",
+          "A backup of the database file",
+          "A list of all user passwords",
+          "A CSV export format"
+        ],
+        "answer": "A description of how the engine intends to obtain query results",
+        "explanation": "The optimizer selects an access and operation strategy for a query."
+      },
+      {
+        "id": "sql221-q2",
+        "prompt": "What does SEARCH generally indicate in SQLite's query plan?",
+        "options": [
+          "A constrained lookup that narrows the rows visited",
+          "A full database backup",
+          "A SQL syntax error",
+          "A table deletion"
+        ],
+        "answer": "A constrained lookup that narrows the rows visited",
+        "explanation": "SEARCH commonly indicates an indexed or otherwise constrained lookup."
+      },
+      {
+        "id": "sql221-q3",
+        "prompt": "Does an index always make a query faster?",
+        "options": [
+          "No; selectivity, table size and workload matter",
+          "Yes, every index always helps",
+          "Only when the table has no primary key",
+          "Only for DELETE"
+        ],
+        "answer": "No; selectivity, table size and workload matter",
+        "explanation": "The optimizer may correctly choose a scan when it is cheaper."
+      },
+      {
+        "id": "sql221-q4",
+        "prompt": "Why can EXPLAIN QUERY PLAN text change?",
+        "options": [
+          "Engine version, schema, statistics and data can change the chosen plan",
+          "SQL keywords randomly change case",
+          "The query result is encrypted",
+          "The table name is too short"
+        ],
+        "answer": "Engine version, schema, statistics and data can change the chosen plan",
+        "explanation": "Plan output is diagnostic and should not be treated as a permanent string contract."
+      },
+      {
+        "id": "sql221-q5",
+        "prompt": "What should accompany plan inspection during tuning?",
+        "options": [
+          "Result-equivalence checks and representative measurements",
+          "Only a larger index",
+          "Removing all WHERE clauses",
+          "Assuming the new plan is faster"
+        ],
+        "answer": "Result-equivalence checks and representative measurements",
+        "explanation": "Tuning must preserve correctness and demonstrate performance on relevant workloads."
+      }
+    ]
+  },
+  "status": "draft"
+}

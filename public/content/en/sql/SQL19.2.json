@@ -1,0 +1,163 @@
+{
+  "id": "sql.sql19.2.en",
+  "courseId": "sql",
+  "moduleId": "SQL19",
+  "topicId": "SQL19.2",
+  "title": "Capstone Schema: Customers, Orders and Order Items",
+  "language": "en",
+  "learningObjectives": [
+    "Model customers, orders and order items as related entities.",
+    "Create foreign keys for customer, order and product relationships.",
+    "Explain why order items store the unit price at the time of sale.",
+    "Use CHECK constraints for positive quantities and non-negative prices.",
+    "Calculate an order total from quantity multiplied by unit price."
+  ],
+  "prerequisites": [
+    "SQL3.2",
+    "SQL4.1",
+    "SQL8.2",
+    "SQL9.3",
+    "SQL12.2",
+    "SQL14.1",
+    "SQL15.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "An order belongs to a customer, and an order can contain multiple order items. Each order item references a product and stores the quantity and sale-time unit price. Keeping order items separate supports multi-product orders and preserves the price charged at the time of sale.",
+      "whyItMatters": "A normalized order model supports accurate receipts, reporting and stock movements without storing multiple products in one order row.",
+      "analogy": "A database capstone is like a complete shop workflow: records, rules, operations and reports must all work together.",
+      "analogyLimit": "The analogy does not model database isolation, concurrent workloads, deployment security or recovery guarantees."
+    },
+    "explain": {
+      "narrative": "## Customer and order entities\nA customer can place many orders. Each order references one customer. An order item belongs to one order and references one product.\n\n## Preserve sale-time values\nStore the unit price charged on the order item. Product catalogue prices can change later; historical orders should continue to show the price agreed at purchase time.\n\n## Integrity rules\nUse foreign keys for customer, order and product relationships. Use CHECK(quantity > 0) and CHECK(unit_price >= 0). Enable SQLite foreign-key enforcement for the connection when testing these rules.\n\n### Relationship and history design\nThe schema uses separate customer, order-header and order-item entities to avoid repeating customer and order attributes on every line. `unit_price` belongs on the order item because it records the agreed price at the time of sale, not necessarily the current product price.\n\n### Portability and safety\n`INSERT OR IGNORE` is SQLite-specific. Prefer explicit conflict targets or carefully handled constraint errors when porting to another engine. Verify the affected-row count for seed operations and enable SQLite foreign-key enforcement before testing invalid references.\n\n## SQLite foreign-key enforcement\nEnable PRAGMA foreign_keys = ON for the connection before inserting related rows. CodeSaathi's Playground enables it automatically. The examples use INSERT OR IGNORE only to make the capstone setup repeatable; production code should prefer targeted conflict handling and must not hide unrelated constraint failures.",
+      "examples": [
+        {
+          "id": "sql19.2-ex1",
+          "language": "en",
+          "title": "Ensure category and product tables exist",
+          "code": "CREATE TABLE IF NOT EXISTS cap19_categories (category_id INTEGER PRIMARY KEY, category_name TEXT NOT NULL UNIQUE); CREATE TABLE IF NOT EXISTS cap19_products (product_id INTEGER PRIMARY KEY, category_id INTEGER NOT NULL REFERENCES cap19_categories(category_id), product_name TEXT NOT NULL, unit_price REAL NOT NULL CHECK (unit_price >= 0), stock_qty INTEGER NOT NULL CHECK (stock_qty >= 0));",
+          "expectedOutput": "Product schema ready",
+          "explanation": "Creates the category and product parent tables only when they do not already exist. IF NOT EXISTS avoids an already-exists error, but it does not compare an existing table's definition with the requested definition; schema migrations should inspect and validate the actual columns and constraints.",
+          "runnable": true
+        },
+        {
+          "id": "sql19.2-ex2",
+          "language": "en",
+          "title": "Ensure sample products exist",
+          "code": "INSERT OR IGNORE INTO cap19_categories VALUES (1, 'Accessories'), (2, 'Stationery'); INSERT OR IGNORE INTO cap19_products VALUES (1, 1, 'USB Cable', 250, 20), (2, 1, 'Phone Case', 400, 12), (3, 2, 'Notebook', 60, 50);",
+          "expectedOutput": "Sample products ready",
+          "explanation": "Seeds category and product rows using SQLite's INSERT OR IGNORE form. It can suppress more than duplicate-key conflicts, including other constraint violations, so it should not be used as a blanket error handler in production imports. The referenced category rows are inserted before products.",
+          "runnable": true
+        },
+        {
+          "id": "sql19.2-ex3",
+          "language": "en",
+          "title": "Create customers, orders and order items",
+          "code": "CREATE TABLE IF NOT EXISTS cap19_customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, phone TEXT UNIQUE); CREATE TABLE IF NOT EXISTS cap19_orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL REFERENCES cap19_customers(customer_id), order_date TEXT NOT NULL, order_status TEXT NOT NULL); CREATE TABLE IF NOT EXISTS cap19_order_items (order_item_id INTEGER PRIMARY KEY, order_id INTEGER NOT NULL REFERENCES cap19_orders(order_id), product_id INTEGER NOT NULL REFERENCES cap19_products(product_id), quantity INTEGER NOT NULL CHECK (quantity > 0), unit_price REAL NOT NULL CHECK (unit_price >= 0));",
+          "expectedOutput": "Order schema ready",
+          "explanation": "Creates three related tables. A customer can own many orders; each order can contain many order items; each order item references one product. CHECK constraints require positive quantities and non-negative sale-time unit prices. Foreign-key enforcement must be enabled on the SQLite connection.",
+          "runnable": true
+        },
+        {
+          "id": "sql19.2-ex4",
+          "language": "en",
+          "title": "Insert a customer and an order",
+          "code": "INSERT OR IGNORE INTO cap19_customers VALUES (1, 'Asha', '9000000001'); INSERT OR IGNORE INTO cap19_orders VALUES (1, 1, '2026-11-22', 'created');",
+          "expectedOutput": "Customer and order ready",
+          "explanation": "Inserts a customer before the order that references customer_id 1. INSERT OR IGNORE makes this seed repeatable for this sample key, but an ignored row should be checked rather than assumed to contain the intended values.",
+          "runnable": true
+        },
+        {
+          "id": "sql19.2-ex5",
+          "language": "en",
+          "title": "Add order items and calculate the order total",
+          "code": "INSERT OR IGNORE INTO cap19_order_items VALUES (1, 1, 1, 2, 250), (2, 1, 3, 3, 60); SELECT order_id, SUM(quantity * unit_price) AS order_total FROM cap19_order_items GROUP BY order_id;",
+          "expectedOutput": "1 | 680.0",
+          "explanation": "Inserts two order items and calculates the order total by summing quantity multiplied by the unit price captured on each item. The result is 2 × 250 + 3 × 60 = 680. Storing the sale-time unit price preserves historical order value if the catalogue price later changes.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples after SQL19.1's product tables are available. Trace the customer-to-order-to-order-item relationships and calculate the receipt total.",
+      "independentTask": "Extend the capstone with a payment table. Decide whether an order can have multiple payments and design the keys and constraints accordingly.",
+      "hints": [
+        "One customer can have many orders.",
+        "One order can have many order items.",
+        "Each order item references one product.",
+        "Store the sale-time unit price in the order item.",
+        "Calculate line totals as quantity multiplied by unit_price."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "PRAGMA foreign_keys = ON;\nCREATE TABLE IF NOT EXISTS cap19_categories (category_id INTEGER PRIMARY KEY, category_name TEXT NOT NULL UNIQUE);\nCREATE TABLE IF NOT EXISTS cap19_products (product_id INTEGER PRIMARY KEY, category_id INTEGER NOT NULL REFERENCES cap19_categories(category_id), product_name TEXT NOT NULL, unit_price REAL NOT NULL CHECK (unit_price >= 0), stock_qty INTEGER NOT NULL CHECK (stock_qty >= 0));\nINSERT OR IGNORE INTO cap19_categories VALUES (1, 'Accessories'), (2, 'Stationery');\nINSERT OR IGNORE INTO cap19_products VALUES (1, 1, 'USB Cable', 250, 20), (2, 1, 'Phone Case', 400, 12), (3, 2, 'Notebook', 60, 50);\nCREATE TABLE IF NOT EXISTS cap19_customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, phone TEXT UNIQUE);\nCREATE TABLE IF NOT EXISTS cap19_orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL REFERENCES cap19_customers(customer_id), order_date TEXT NOT NULL, order_status TEXT NOT NULL);\nCREATE TABLE IF NOT EXISTS cap19_order_items (order_item_id INTEGER PRIMARY KEY, order_id INTEGER NOT NULL REFERENCES cap19_orders(order_id), product_id INTEGER NOT NULL REFERENCES cap19_products(product_id), quantity INTEGER NOT NULL CHECK (quantity > 0), unit_price REAL NOT NULL CHECK (unit_price >= 0));",
+    "resetCode": "PRAGMA foreign_keys = ON;\nCREATE TABLE IF NOT EXISTS cap19_categories (category_id INTEGER PRIMARY KEY, category_name TEXT NOT NULL UNIQUE);\nCREATE TABLE IF NOT EXISTS cap19_products (product_id INTEGER PRIMARY KEY, category_id INTEGER NOT NULL REFERENCES cap19_categories(category_id), product_name TEXT NOT NULL, unit_price REAL NOT NULL CHECK (unit_price >= 0), stock_qty INTEGER NOT NULL CHECK (stock_qty >= 0));\nINSERT OR IGNORE INTO cap19_categories VALUES (1, 'Accessories'), (2, 'Stationery');\nINSERT OR IGNORE INTO cap19_products VALUES (1, 1, 'USB Cable', 250, 20), (2, 1, 'Phone Case', 400, 12), (3, 2, 'Notebook', 60, 50);\nCREATE TABLE IF NOT EXISTS cap19_customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, phone TEXT UNIQUE);\nCREATE TABLE IF NOT EXISTS cap19_orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL REFERENCES cap19_customers(customer_id), order_date TEXT NOT NULL, order_status TEXT NOT NULL);\nCREATE TABLE IF NOT EXISTS cap19_order_items (order_item_id INTEGER PRIMARY KEY, order_id INTEGER NOT NULL REFERENCES cap19_orders(order_id), product_id INTEGER NOT NULL REFERENCES cap19_products(product_id), quantity INTEGER NOT NULL CHECK (quantity > 0), unit_price REAL NOT NULL CHECK (unit_price >= 0));"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql19.2-q1",
+        "prompt": "What does an order item represent?",
+        "options": [
+          "One product line within an order",
+          "A customer account",
+          "A product category",
+          "A database migration"
+        ],
+        "answer": "One product line within an order",
+        "explanation": "An order item stores one product and quantity within an order."
+      },
+      {
+        "id": "sql19.2-q2",
+        "prompt": "Why store unit_price on the order item?",
+        "options": [
+          "To preserve the price charged when the sale occurred",
+          "To overwrite the product catalogue price",
+          "To avoid using foreign keys",
+          "To make all products free"
+        ],
+        "answer": "To preserve the price charged when the sale occurred",
+        "explanation": "Historical order values should not change when catalogue prices change."
+      },
+      {
+        "id": "sql19.2-q3",
+        "prompt": "Which key links an order to its customer?",
+        "options": [
+          "customer_id foreign key",
+          "product_id primary key",
+          "unit_price index",
+          "order_date default"
+        ],
+        "answer": "customer_id foreign key",
+        "explanation": "The order references the customer who placed it."
+      },
+      {
+        "id": "sql19.2-q4",
+        "prompt": "What does CHECK(quantity > 0) enforce?",
+        "options": [
+          "Each order item has a positive quantity",
+          "Every order has zero items",
+          "The customer name is unique",
+          "The order date is current"
+        ],
+        "answer": "Each order item has a positive quantity",
+        "explanation": "The check constraint rejects zero or negative quantities."
+      },
+      {
+        "id": "sql19.2-q5",
+        "prompt": "How is an order total calculated from line items?",
+        "options": [
+          "SUM(quantity * unit_price)",
+          "COUNT(product_name) only",
+          "MIN(order_date)",
+          "AVG(customer_id)"
+        ],
+        "answer": "SUM(quantity * unit_price)",
+        "explanation": "The total is the sum of each line's quantity multiplied by its sale-time unit price."
+      }
+    ]
+  },
+  "status": "draft"
+}

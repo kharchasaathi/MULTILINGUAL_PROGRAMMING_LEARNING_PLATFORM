@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql13.1.en",
+  "courseId": "sql",
+  "moduleId": "SQL13",
+  "topicId": "SQL13.1",
+  "title": "Subquery Fundamentals and Nested Queries",
+  "language": "en",
+  "learningObjectives": [
+    "Define a subquery and identify where it can appear in a SQL statement.",
+    "Distinguish scalar, multi-row and table-shaped subquery results.",
+    "Use a scalar subquery to compare rows with an aggregate value.",
+    "Explain how the outer query consumes a nested query's result.",
+    "Write readable nested queries with clear aliases and result expectations."
+  ],
+  "prerequisites": [
+    "SQL5.1",
+    "SQL9.3",
+    "SQL9.5"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A subquery is a SELECT statement nested inside another SQL statement. It can produce a scalar value, a set of values or a derived result table. The outer query uses the subquery result as part of its filtering, projection or source data.",
+      "whyItMatters": "Subqueries let a query compare rows with a calculated value, reuse a filtered result or express a multi-step question without manually copying intermediate results.",
+      "analogy": "A nested query is like a staged research task: first calculate or collect an intermediate result, then use it to answer the final question.",
+      "analogyLimit": "The analogy does not model SQL's exact cardinality rules, NULL logic, query optimizer or recursive evaluation."
+    },
+    "explain": {
+      "narrative": "## What is a subquery?\nA subquery is a query nested inside another SQL statement. It is usually enclosed in parentheses and can appear in WHERE, SELECT or FROM. The context determines whether it must return one scalar value, a list of values or a table-shaped result.\n\n## Scalar and multi-row results\nA scalar subquery returns one column and at most one row when used as a scalar expression. A subquery used with IN can return multiple values. A derived table in FROM produces rows and columns for the outer query.\n\n## Evaluation and readability\nThe database optimizer may transform a subquery into another execution strategy. Do not assume every subquery is executed once per outer row; inspect plans when performance matters. Give derived columns clear aliases and keep nesting understandable.\n\n### Match the subquery to its context\nA scalar context expects one value; an IN predicate can consume a one-column set; and a FROM clause can consume a table-shaped result. A scalar subquery that returns no rows evaluates to NULL in SQLite, while a scalar subquery that returns multiple rows raises an error.\n\n### Optimizer note\nThe SQL text describes logical relationships, not a guaranteed execution order. The optimizer may flatten or transform subqueries. Compare plans and indexes before assuming a correlated or nested form is slower than a join.",
+      "examples": [
+        {
+          "id": "sql13.1-ex1",
+          "language": "en",
+          "title": "Create an orders table",
+          "code": "CREATE TABLE sub13_orders (order_id INTEGER PRIMARY KEY, customer TEXT NOT NULL, amount REAL NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "Creates an orders table with a numeric key, required customer name and amount. The sample uses REAL for simplicity; financial systems should choose exact decimal storage or integer minor units and define currency explicitly.",
+          "runnable": true
+        },
+        {
+          "id": "sql13.1-ex2",
+          "language": "en",
+          "title": "Insert sample orders",
+          "code": "INSERT INTO sub13_orders VALUES (1, 'Asha', 90), (2, 'Bilal', 40), (3, 'Chitra', 70), (4, 'Dinesh', 110);",
+          "expectedOutput": "4 rows inserted",
+          "explanation": "Inserts four orders with amounts 90, 40, 70 and 110. The arithmetic average is 77.5, which establishes the threshold used by the next query.",
+          "runnable": true
+        },
+        {
+          "id": "sql13.1-ex3",
+          "language": "en",
+          "title": "Compare each order with the overall average",
+          "code": "SELECT customer FROM sub13_orders WHERE amount > (SELECT AVG(amount) FROM sub13_orders) ORDER BY customer;",
+          "expectedOutput": "Asha; Dinesh",
+          "explanation": "The inner query calculates one scalar value, AVG(amount), across the whole table. The outer query compares each order amount with that 77.5 threshold and returns Asha and Dinesh. The ORDER BY makes the names deterministic.",
+          "runnable": true
+        },
+        {
+          "id": "sql13.1-ex4",
+          "language": "en",
+          "title": "Return a scalar value from a subquery",
+          "code": "SELECT (SELECT MAX(amount) FROM sub13_orders) AS largest_amount;",
+          "expectedOutput": "largest_amount = 110",
+          "explanation": "The nested SELECT returns one value: the maximum order amount, 110. Because the subquery is scalar, it can be used as a column expression in the outer SELECT.",
+          "runnable": true
+        },
+        {
+          "id": "sql13.1-ex5",
+          "language": "en",
+          "title": "Compare rows with a scalar minimum",
+          "code": "SELECT customer, amount FROM sub13_orders WHERE amount = (SELECT MIN(amount) FROM sub13_orders);",
+          "expectedOutput": "Bilal | 40",
+          "explanation": "The scalar MIN subquery returns 40. The outer predicate selects the order whose amount equals that minimum; if several orders tied for the minimum, all matching customers would be returned.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the five examples. Predict the overall average, then identify which customers have an amount greater than that scalar subquery result.",
+      "independentTask": "Create a product table and write three queries: one comparing price with the average price, one returning the maximum price as a scalar, and one selecting rows equal to the minimum price.",
+      "hints": [
+        "A subquery is a complete query nested inside another statement.",
+        "Use parentheses around a subquery expression.",
+        "A scalar subquery should return one column and at most one row.",
+        "Aggregate functions can produce useful scalar values.",
+        "Use aliases and formatting to make nested queries easier to read."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE sub13_orders (order_id INTEGER PRIMARY KEY, customer TEXT NOT NULL, amount REAL NOT NULL);\nINSERT INTO sub13_orders VALUES (1, 'Asha', 90), (2, 'Bilal', 40), (3, 'Chitra', 70), (4, 'Dinesh', 110);\nSELECT customer FROM sub13_orders WHERE amount > (SELECT AVG(amount) FROM sub13_orders) ORDER BY customer;",
+    "resetCode": "CREATE TABLE sub13_orders (order_id INTEGER PRIMARY KEY, customer TEXT NOT NULL, amount REAL NOT NULL);\nINSERT INTO sub13_orders VALUES (1, 'Asha', 90), (2, 'Bilal', 40), (3, 'Chitra', 70), (4, 'Dinesh', 110);\nSELECT customer FROM sub13_orders WHERE amount > (SELECT AVG(amount) FROM sub13_orders) ORDER BY customer;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql13.1-q1",
+        "prompt": "What is a subquery?",
+        "options": [
+          "A SELECT query nested inside another SQL statement",
+          "A database backup file",
+          "A constraint that prevents duplicates",
+          "A type of index"
+        ],
+        "answer": "A SELECT query nested inside another SQL statement",
+        "explanation": "A subquery is a query nested within an outer SQL statement."
+      },
+      {
+        "id": "sql13.1-q2",
+        "prompt": "Where can a subquery appear?",
+        "options": [
+          "In contexts such as WHERE, SELECT and FROM",
+          "Only after ORDER BY",
+          "Only in CREATE TABLE",
+          "Only inside a comment"
+        ],
+        "answer": "In contexts such as WHERE, SELECT and FROM",
+        "explanation": "Subqueries can be used in several expression and table-source contexts."
+      },
+      {
+        "id": "sql13.1-q3",
+        "prompt": "What should a scalar subquery return?",
+        "options": [
+          "One column and at most one row",
+          "Any number of columns and rows",
+          "Exactly two rows",
+          "Only text values"
+        ],
+        "answer": "One column and at most one row",
+        "explanation": "A scalar expression requires a single value."
+      },
+      {
+        "id": "sql13.1-q4",
+        "prompt": "What does the average subquery in the example calculate?",
+        "options": [
+          "The average amount across all orders",
+          "The highest customer name",
+          "The number of tables",
+          "The total number of indexes"
+        ],
+        "answer": "The average amount across all orders",
+        "explanation": "AVG(amount) returns one scalar average used by the outer filter."
+      },
+      {
+        "id": "sql13.1-q5",
+        "prompt": "Why should nested queries use clear aliases?",
+        "options": [
+          "To make derived values and query structure easier to understand",
+          "To disable NULL values",
+          "To force a specific execution plan",
+          "To replace all table names"
+        ],
+        "answer": "To make derived values and query structure easier to understand",
+        "explanation": "Aliases improve readability and clarify the meaning of derived columns."
+      }
+    ]
+  },
+  "status": "draft"
+}

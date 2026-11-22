@@ -1,0 +1,161 @@
+{
+  "id": "sql.sql24.2.en",
+  "courseId": "sql",
+  "moduleId": "SQL24",
+  "topicId": "SQL24.2",
+  "title": "Safe CRUD Workflows and Data Modification",
+  "language": "en",
+  "learningObjectives": [
+    "Perform INSERT, SELECT, UPDATE and DELETE operations safely.",
+    "Use primary-key and business predicates to target intended rows.",
+    "Check the effect of a data modification before continuing.",
+    "Use transactions for multi-statement business changes.",
+    "Prefer soft deletion where audit or recovery requirements demand it."
+  ],
+  "prerequisites": [
+    "SQL3.2",
+    "SQL4.1",
+    "SQL8.1",
+    "SQL9.3",
+    "SQL12.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "CRUD represents the core lifecycle of stored data: create, read, update and delete. Safe workflows target exact rows, validate inputs and verify the result.",
+      "whyItMatters": "An UPDATE or DELETE without a correct predicate can change far more records than intended.",
+      "analogy": "Editing a single contact card requires checking the person's identity before saving or removing it.",
+      "analogyLimit": "A WHERE clause reduces accidental changes but does not replace authorization, transaction handling, backups or application-level validation."
+    },
+    "explain": {
+      "narrative": "## Safe CRUD sequence\nIdentify the target row using a stable key, validate the requested values, execute the statement, inspect the affected-row count and read back the result when needed. Use explicit column lists for INSERT and SELECT.\n\n## UPDATE and DELETE safeguards\nNever run a destructive statement against production data without reviewing the predicate and expected row count. A transaction can provide a rollback path before COMMIT. For records that must remain auditable, use a status or deleted_at field rather than physically deleting the row.\n\n## Authorization\nA correct key does not prove the caller may modify the record. Enforce authorization in the trusted service layer and scope updates by tenant/owner when the data model requires it.",
+      "examples": [
+        {
+          "id": "sql242-ex1",
+          "language": "en",
+          "title": "Create an asset register",
+          "code": "CREATE TABLE prj24_assets (asset_id INTEGER PRIMARY KEY, asset_name TEXT NOT NULL, quantity INTEGER NOT NULL CHECK (quantity >= 0), asset_state TEXT NOT NULL CHECK (asset_state IN ('active','retired')));",
+          "expectedOutput": "Table created",
+          "explanation": "Defines an asset table with required values and constraints. The CHECK rules reject negative quantity and unsupported states.",
+          "runnable": true
+        },
+        {
+          "id": "sql242-ex2",
+          "language": "en",
+          "title": "Create three asset records",
+          "code": "INSERT INTO prj24_assets VALUES (1, 'Laptop', 8, 'active'), (2, 'Projector', 2, 'active'), (3, 'Old Printer', 0, 'retired');",
+          "expectedOutput": "3 rows inserted",
+          "explanation": "Adds two active assets and one retired asset. The explicit column order makes the insert's intent clear.",
+          "runnable": true
+        },
+        {
+          "id": "sql242-ex3",
+          "language": "en",
+          "title": "Read one asset by its primary key",
+          "code": "SELECT asset_id, asset_name, quantity, asset_state FROM prj24_assets WHERE asset_id = 2;",
+          "expectedOutput": "2 | Projector | 2 | active",
+          "explanation": "Reads a single asset by its unique key. Avoid returning unnecessary fields when a screen only needs a small projection.",
+          "runnable": true
+        },
+        {
+          "id": "sql242-ex4",
+          "language": "en",
+          "title": "Update quantity for the selected asset",
+          "code": "UPDATE prj24_assets SET quantity = quantity - 1 WHERE asset_id = 2 AND quantity >= 1; SELECT asset_id, quantity FROM prj24_assets WHERE asset_id = 2;",
+          "expectedOutput": "2 | 1",
+          "explanation": "Decrements quantity only when the asset exists and has at least one unit. Application code should verify exactly one row changed before reporting success.",
+          "runnable": true
+        },
+        {
+          "id": "sql242-ex5",
+          "language": "en",
+          "title": "Retire an asset without deleting its history",
+          "code": "UPDATE prj24_assets SET asset_state = 'retired' WHERE asset_id = 1; SELECT asset_id, asset_name, asset_state FROM prj24_assets WHERE asset_id = 1;",
+          "expectedOutput": "1 | Laptop | retired",
+          "explanation": "Uses a status change instead of physical deletion so the asset record remains available for audit and historical reports.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and identify the predicates that protect the UPDATE statements. Explain why retiring a record may be safer than deleting it.",
+      "independentTask": "Create a customer CRUD workflow with a soft-delete flag. Write an update that changes one customer only when the authenticated tenant matches and verify the affected-row count.",
+      "hints": [
+        "Use explicit columns in INSERT and SELECT.",
+        "Target rows with stable keys and required scope predicates.",
+        "Check affected-row counts before reporting success.",
+        "Use transactions for multi-statement changes.",
+        "Consider soft deletion when history must be retained."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE prj24_assets (asset_id INTEGER PRIMARY KEY, asset_name TEXT NOT NULL, quantity INTEGER NOT NULL CHECK (quantity >= 0), asset_state TEXT NOT NULL);\nINSERT INTO prj24_assets VALUES (1, 'Laptop', 8, 'active'), (2, 'Projector', 2, 'active');\nUPDATE prj24_assets SET quantity = quantity - 1 WHERE asset_id = 2 AND quantity >= 1;\nSELECT asset_id, asset_name, quantity FROM prj24_assets ORDER BY asset_id;",
+    "resetCode": "CREATE TABLE prj24_assets (asset_id INTEGER PRIMARY KEY, asset_name TEXT NOT NULL, quantity INTEGER NOT NULL CHECK (quantity >= 0), asset_state TEXT NOT NULL);\nINSERT INTO prj24_assets VALUES (1, 'Laptop', 8, 'active'), (2, 'Projector', 2, 'active');\nUPDATE prj24_assets SET quantity = quantity - 1 WHERE asset_id = 2 AND quantity >= 1;\nSELECT asset_id, asset_name, quantity FROM prj24_assets ORDER BY asset_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql242-q1",
+        "prompt": "What does CRUD stand for?",
+        "options": [
+          "Create, Read, Update and Delete",
+          "Create, Run, Undo and Deploy",
+          "Copy, Rename, Update and Drop",
+          "Commit, Rollback, Use and Describe"
+        ],
+        "answer": "Create, Read, Update and Delete",
+        "explanation": "CRUD names the four basic data lifecycle operations."
+      },
+      {
+        "id": "sql242-q2",
+        "prompt": "Why include a WHERE clause in UPDATE?",
+        "options": [
+          "To restrict which rows are changed",
+          "To create a primary key",
+          "To sort the result",
+          "To encrypt the table"
+        ],
+        "answer": "To restrict which rows are changed",
+        "explanation": "Without a suitable predicate, an UPDATE can affect every row."
+      },
+      {
+        "id": "sql242-q3",
+        "prompt": "What should application code check after a targeted UPDATE?",
+        "options": [
+          "The affected-row count",
+          "Only the SQL text length",
+          "The browser theme",
+          "The number of columns in the table"
+        ],
+        "answer": "The affected-row count",
+        "explanation": "The row count helps detect missing or unexpected targets."
+      },
+      {
+        "id": "sql242-q4",
+        "prompt": "When is soft deletion useful?",
+        "options": [
+          "When audit or historical records must remain available",
+          "When every table must be empty",
+          "When foreign keys are disabled",
+          "When sorting is required"
+        ],
+        "answer": "When audit or historical records must remain available",
+        "explanation": "A status flag can preserve historical context while hiding a record from active workflows."
+      },
+      {
+        "id": "sql242-q5",
+        "prompt": "Does a primary key alone prove authorization?",
+        "options": [
+          "No; the trusted application must still check permission",
+          "Yes, every key is an access token",
+          "Only if it is an integer",
+          "Only after an index is added"
+        ],
+        "answer": "No; the trusted application must still check permission",
+        "explanation": "Identification of a row and permission to modify it are separate concerns."
+      }
+    ]
+  },
+  "status": "draft"
+}

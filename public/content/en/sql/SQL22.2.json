@@ -1,0 +1,162 @@
+{
+  "id": "sql.sql22.2.en",
+  "courseId": "sql",
+  "moduleId": "SQL22",
+  "topicId": "SQL22.2",
+  "title": "Efficient Joins and Join Execution Strategies",
+  "language": "en",
+  "learningObjectives": [
+    "Explain why join order and join algorithms affect query cost.",
+    "Recognize nested-loop, hash-join and merge-join concepts.",
+    "Use indexes on join keys where they match real workloads.",
+    "Inspect a SQLite join plan without assuming other engines use the same strategy.",
+    "Verify that join rewrites preserve row counts and relationships."
+  ],
+  "prerequisites": [
+    "SQL5.1",
+    "SQL8.1",
+    "SQL15.1",
+    "SQL15.2",
+    "SQL15.5"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A join combines related rows from two or more tables. Database engines may use different physical algorithms to perform the logical join, selected according to data size, indexes, ordering and optimizer estimates.",
+      "whyItMatters": "Poor join conditions or access paths can multiply rows or repeatedly scan large tables, making reports slow and results incorrect.",
+      "analogy": "Matching two lists is faster when both lists have a useful lookup key or are already sorted by the same key.",
+      "analogyLimit": "A logical JOIN clause does not force a particular physical algorithm. SQLite's plan vocabulary differs from server engines that expose hash or merge joins."
+    },
+    "explain": {
+      "narrative": "## Logical joins and physical strategies\nSQL describes which rows should match; the optimizer chooses how to find them. Common physical strategies include nested-loop joins, hash joins and merge joins. A nested-loop strategy repeatedly probes one input for each row of another; a hash strategy builds a lookup structure; a merge strategy walks ordered inputs.\n\n## SQLite behaviour\nSQLite commonly implements joins using nested scans and can use indexes to accelerate inner lookups. EXPLAIN QUERY PLAN shows scan/search steps rather than the same operator labels used by PostgreSQL or SQL Server.\n\n## Join tuning\nIndex foreign-key and join columns when query patterns justify it. Filter early when it reduces input size, avoid accidental many-to-many multiplication, and inspect actual row counts. Do not add indexes or force join order without measuring.",
+      "examples": [
+        {
+          "id": "sql222-ex1",
+          "language": "en",
+          "title": "Create customers and order rows",
+          "code": "CREATE TABLE perf22_customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL); CREATE TABLE perf22_customer_orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL, amount INTEGER NOT NULL);",
+          "expectedOutput": "Tables created",
+          "explanation": "Creates parent and child tables for a one-to-many join. The sample omits a declared foreign key to keep the lesson focused on join execution; a production schema should enforce the relationship.",
+          "runnable": true
+        },
+        {
+          "id": "sql222-ex2",
+          "language": "en",
+          "title": "Insert related sample records",
+          "code": "INSERT INTO perf22_customers VALUES (1, 'Asha'), (2, 'Bilal'), (3, 'Chitra'); INSERT INTO perf22_customer_orders VALUES (101, 1, 100), (102, 1, 50), (103, 2, 80);",
+          "expectedOutput": "6 rows inserted",
+          "explanation": "Adds three customers and three orders. Asha has two orders, Bilal has one and Chitra has none.",
+          "runnable": true
+        },
+        {
+          "id": "sql222-ex3",
+          "language": "en",
+          "title": "Create an index on the join key",
+          "code": "CREATE INDEX idx_perf22_orders_customer ON perf22_customer_orders(customer_id);",
+          "expectedOutput": "Index created",
+          "explanation": "Creates a lookup path for orders by customer_id. Whether the planner uses it depends on query shape and estimated cost.",
+          "runnable": true
+        },
+        {
+          "id": "sql222-ex4",
+          "language": "en",
+          "title": "Inspect the join plan",
+          "code": "EXPLAIN QUERY PLAN SELECT c.customer_name, o.order_id FROM perf22_customers AS c JOIN perf22_customer_orders AS o ON o.customer_id = c.customer_id WHERE c.customer_id = 1;",
+          "expectedOutput": "Plan references the customer-order index",
+          "explanation": "Shows the access steps for a filtered join. SQLite may report a SEARCH using idx_perf22_orders_customer; exact output wording depends on version.",
+          "runnable": true,
+          "expectedPattern": "idx_perf22_orders_customer"
+        },
+        {
+          "id": "sql222-ex5",
+          "language": "en",
+          "title": "Return matching customer orders",
+          "code": "SELECT c.customer_name, o.order_id, o.amount FROM perf22_customers AS c JOIN perf22_customer_orders AS o ON o.customer_id = c.customer_id WHERE c.customer_id = 1 ORDER BY o.order_id;",
+          "expectedOutput": "Asha | 101 | 100; Asha | 102 | 50",
+          "explanation": "Returns the two orders for Asha. The join condition matches the customer key; ORDER BY makes the output deterministic.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the join plan and result query. Explain how the customer_id index can support repeated order lookups and why Chitra is absent from an INNER JOIN.",
+      "independentTask": "Compare an INNER JOIN and LEFT JOIN for a report that must include customers with no orders. Inspect the plan and verify that each customer appears the expected number of times.",
+      "hints": [
+        "The optimizer chooses a physical join strategy.",
+        "SQLite commonly uses nested scans and indexed lookups.",
+        "Index join keys when workload justifies it.",
+        "A one-to-many join can return multiple rows per parent.",
+        "Verify cardinality before and after a join rewrite."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE perf22_customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL);\nCREATE TABLE perf22_customer_orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL, amount INTEGER NOT NULL);\nINSERT INTO perf22_customers VALUES (1, 'Asha'), (2, 'Bilal');\nINSERT INTO perf22_customer_orders VALUES (101, 1, 100), (102, 1, 50);\nSELECT c.customer_name, o.order_id FROM perf22_customers c JOIN perf22_customer_orders o ON o.customer_id = c.customer_id ORDER BY o.order_id;",
+    "resetCode": "CREATE TABLE perf22_customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL);\nCREATE TABLE perf22_customer_orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL, amount INTEGER NOT NULL);\nINSERT INTO perf22_customers VALUES (1, 'Asha'), (2, 'Bilal');\nINSERT INTO perf22_customer_orders VALUES (101, 1, 100), (102, 1, 50);\nSELECT c.customer_name, o.order_id FROM perf22_customers c JOIN perf22_customer_orders o ON o.customer_id = c.customer_id ORDER BY o.order_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql222-q1",
+        "prompt": "Which is a common physical join strategy?",
+        "options": [
+          "Nested-loop join",
+          "CSV join",
+          "Password join",
+          "Index-only backup"
+        ],
+        "answer": "Nested-loop join",
+        "explanation": "Nested-loop, hash and merge joins are common physical strategies."
+      },
+      {
+        "id": "sql222-q2",
+        "prompt": "What does an index on the child join key help with?",
+        "options": [
+          "Finding matching child rows for a parent key",
+          "Encrypting the child table",
+          "Removing duplicate parent records automatically",
+          "Changing INNER JOIN into LEFT JOIN"
+        ],
+        "answer": "Finding matching child rows for a parent key",
+        "explanation": "An index can accelerate lookups on the foreign/join key."
+      },
+      {
+        "id": "sql222-q3",
+        "prompt": "Does SQL JOIN syntax force a hash join?",
+        "options": [
+          "No; the optimizer chooses a physical strategy",
+          "Yes, every JOIN uses hashing",
+          "Only SQLite forces hash joins",
+          "Only when ORDER BY is present"
+        ],
+        "answer": "No; the optimizer chooses a physical strategy",
+        "explanation": "Logical SQL does not prescribe the physical join algorithm."
+      },
+      {
+        "id": "sql222-q4",
+        "prompt": "Why can a one-to-many join return several rows per parent?",
+        "options": [
+          "Each matching child row produces a joined row",
+          "The primary key is ignored",
+          "The query engine duplicates all rows",
+          "The WHERE clause is missing"
+        ],
+        "answer": "Each matching child row produces a joined row",
+        "explanation": "The result grain depends on the relationship cardinality."
+      },
+      {
+        "id": "sql222-q5",
+        "prompt": "What is essential when rewriting a join for performance?",
+        "options": [
+          "Verify row counts and result equivalence",
+          "Remove all join conditions",
+          "Assume the index is always selected",
+          "Use SELECT * for every table"
+        ],
+        "answer": "Verify row counts and result equivalence",
+        "explanation": "A faster query that changes the intended result is incorrect."
+      }
+    ]
+  },
+  "status": "draft"
+}

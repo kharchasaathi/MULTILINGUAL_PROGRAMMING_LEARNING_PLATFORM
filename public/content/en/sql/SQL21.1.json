@@ -1,0 +1,162 @@
+{
+  "id": "sql.sql21.1.en",
+  "courseId": "sql",
+  "moduleId": "SQL21",
+  "topicId": "SQL21.1",
+  "title": "Data Import Staging and Validation",
+  "language": "en",
+  "learningObjectives": [
+    "Explain why imported data should first enter a staging area.",
+    "Separate raw source values from validated target columns.",
+    "Detect malformed and out-of-range values before conversion.",
+    "Move only valid rows into constrained target tables.",
+    "Record rejected rows for correction instead of silently discarding them."
+  ],
+  "prerequisites": [
+    "SQL3.3",
+    "SQL11.1",
+    "SQL15.5",
+    "SQL18.5",
+    "SQL20.5"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A staging table temporarily holds incoming data in a form close to the source. Validation checks its shape and business rules before accepted rows are inserted into production tables.",
+      "whyItMatters": "Directly importing untrusted values into final tables can cause partial loads, type surprises, duplicate records or silent data loss.",
+      "analogy": "An airport baggage screening area checks each item before it enters the secure departure system.",
+      "analogyLimit": "A staging table does not validate data automatically. Rules, rejected-row handling, transaction boundaries and source reconciliation must be designed."
+    },
+    "explain": {
+      "narrative": "## Staging workflow\nA controlled import commonly follows these steps: load source values into staging, validate required fields and formats, detect duplicates and invalid relationships, move accepted rows into target tables, and preserve rejected rows with a reason for correction.\n\n## Type conversion\nSQLite uses dynamic typing and CAST can convert text to numeric values, but invalid strings may convert to zero rather than raise an error. Validate the raw text before casting. In rigidly typed DBMS products, use safe conversion functions and explicit error handling supported by that engine.\n\n## Reconciliation\nCompare source row counts with accepted and rejected counts. Record the import batch identifier, source reference, load time and validation status. Do not silently discard invalid rows or report a successful import merely because an INSERT statement ran.\n\n### Rejected-row handling\nA production import should preserve rejected records with an import batch ID, source row reference and stable validation code such as INVALID_AMOUNT or UNKNOWN_CUSTOMER. Restrict access to raw rejected data, redact secrets and define a retention period. Re-run only corrected rows under an idempotent batch process so retries do not duplicate accepted records.",
+      "examples": [
+        {
+          "id": "sql211-ex1",
+          "language": "en",
+          "title": "Create raw staging and validated order tables",
+          "code": "CREATE TABLE ops21_stage (source_row INTEGER PRIMARY KEY, customer_code TEXT NOT NULL, raw_amount TEXT NOT NULL); CREATE TABLE ops21_orders (order_id INTEGER PRIMARY KEY, customer_code TEXT NOT NULL, amount INTEGER NOT NULL CHECK (amount > 0));",
+          "expectedOutput": "Tables created",
+          "explanation": "The staging table preserves source values as text. The target table enforces a positive integer amount, so only validated values should be transferred.",
+          "runnable": true
+        },
+        {
+          "id": "sql211-ex2",
+          "language": "en",
+          "title": "Load a mixed-quality source batch",
+          "code": "INSERT INTO ops21_stage VALUES (1, 'C-101', '125'), (2, 'C-102', 'bad'), (3, 'C-103', '80'), (4, 'C-104', '-10');",
+          "expectedOutput": "4 rows inserted",
+          "explanation": "Loads two valid and two invalid amount strings. Keeping raw values makes the rejected input inspectable and allows a corrected re-import.",
+          "runnable": true
+        },
+        {
+          "id": "sql211-ex3",
+          "language": "en",
+          "title": "Identify malformed and non-positive amounts",
+          "code": "SELECT source_row, customer_code, raw_amount FROM ops21_stage WHERE trim(raw_amount) = '' OR raw_amount GLOB '*[^0-9]*' OR CAST(raw_amount AS INTEGER) <= 0 ORDER BY source_row;",
+          "expectedOutput": "2 | C-102 | bad; 4 | C-104 | -10",
+          "explanation": "Checks for empty text, non-digit characters and non-positive numeric values before loading the target. The GLOB rule is appropriate for this simple unsigned-integer source format; decimals, signs and locale-specific numbers need a different parser.",
+          "runnable": true
+        },
+        {
+          "id": "sql211-ex4",
+          "language": "en",
+          "title": "Insert only valid rows into the target",
+          "code": "INSERT INTO ops21_orders (order_id, customer_code, amount) SELECT source_row, customer_code, CAST(raw_amount AS INTEGER) FROM ops21_stage WHERE trim(raw_amount) <> '' AND raw_amount NOT GLOB '*[^0-9]*' AND CAST(raw_amount AS INTEGER) > 0;",
+          "expectedOutput": "2 rows inserted",
+          "explanation": "Transfers only positive digit-only values and converts them after validation. A production import should also detect duplicate source IDs, validate customer references and record the batch outcome.",
+          "runnable": true
+        },
+        {
+          "id": "sql211-ex5",
+          "language": "en",
+          "title": "Reconcile the accepted target rows",
+          "code": "SELECT order_id, customer_code, amount FROM ops21_orders ORDER BY order_id;",
+          "expectedOutput": "1 | C-101 | 125; 3 | C-103 | 80",
+          "explanation": "Shows the two accepted records. Reconcile accepted plus rejected counts against the four source rows so no input silently disappears.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples in order. Identify which source rows were rejected and explain why CAST should occur only after the raw text passes the required format checks.",
+      "independentTask": "Add an import_batch_id and a rejected-row reason table. Write a validation query for duplicate customer codes and report source, accepted and rejected row counts for one batch.",
+      "hints": [
+        "Preserve raw source values in staging.",
+        "Validate text before casting it to a number.",
+        "Keep rejected rows and their reasons for correction.",
+        "Use constraints on the final target table as a second line of defence.",
+        "Reconcile source, accepted and rejected counts.",
+        "Keep rejected rows with a batch ID and stable validation reason so a corrected import can be audited and retried safely."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE ops21_stage (source_row INTEGER PRIMARY KEY, customer_code TEXT NOT NULL, raw_amount TEXT NOT NULL);\nINSERT INTO ops21_stage VALUES (1, 'C-101', '125'), (2, 'C-102', 'bad'), (3, 'C-103', '80');\nSELECT source_row, customer_code, raw_amount FROM ops21_stage WHERE raw_amount GLOB '*[^0-9]*';",
+    "resetCode": "CREATE TABLE ops21_stage (source_row INTEGER PRIMARY KEY, customer_code TEXT NOT NULL, raw_amount TEXT NOT NULL);\nINSERT INTO ops21_stage VALUES (1, 'C-101', '125'), (2, 'C-102', 'bad'), (3, 'C-103', '80');\nSELECT source_row, customer_code, raw_amount FROM ops21_stage WHERE raw_amount GLOB '*[^0-9]*';"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql211-q1",
+        "prompt": "What is the main purpose of a staging table?",
+        "options": [
+          "To hold incoming data while it is validated",
+          "To replace every production table",
+          "To encrypt the database automatically",
+          "To store only query plans"
+        ],
+        "answer": "To hold incoming data while it is validated",
+        "explanation": "Staging separates raw source data from accepted production records."
+      },
+      {
+        "id": "sql211-q2",
+        "prompt": "Why validate raw numeric text before CAST in SQLite?",
+        "options": [
+          "Invalid text can convert to zero instead of raising an error",
+          "CAST always encrypts values",
+          "SQLite rejects every text value",
+          "CAST creates a backup"
+        ],
+        "answer": "Invalid text can convert to zero instead of raising an error",
+        "explanation": "SQLite's permissive conversion behaviour makes pre-validation important."
+      },
+      {
+        "id": "sql211-q3",
+        "prompt": "What should happen to rejected import rows?",
+        "options": [
+          "Preserve them with a reason for correction",
+          "Delete them immediately without a record",
+          "Insert them into the target anyway",
+          "Change them to zero"
+        ],
+        "answer": "Preserve them with a reason for correction",
+        "explanation": "A rejected-row record supports reconciliation and remediation."
+      },
+      {
+        "id": "sql211-q4",
+        "prompt": "Which check helps prevent silent data loss?",
+        "options": [
+          "Reconcile source count with accepted and rejected counts",
+          "Count only the accepted rows",
+          "Drop the staging table before review",
+          "Use SELECT * without a filter"
+        ],
+        "answer": "Reconcile source count with accepted and rejected counts",
+        "explanation": "Every source row should be accounted for."
+      },
+      {
+        "id": "sql211-q5",
+        "prompt": "Why keep constraints on the final target table?",
+        "options": [
+          "They provide a final integrity check even after staging validation",
+          "They replace all import validation",
+          "They guarantee the source file is correct",
+          "They make duplicate data impossible in every case"
+        ],
+        "answer": "They provide a final integrity check even after staging validation",
+        "explanation": "Database constraints protect the target against invalid writes from other paths."
+      }
+    ]
+  },
+  "status": "draft"
+}

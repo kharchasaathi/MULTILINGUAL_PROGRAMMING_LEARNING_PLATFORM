@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql5.1.en",
+  "courseId": "sql",
+  "moduleId": "SQL5",
+  "topicId": "SQL5.1",
+  "title": "The SQL SELECT Statement and Result Sets",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of The SQL SELECT Statement and Result Sets.",
+    "Identify the source table, selected expressions and query clauses.",
+    "Predict which rows and columns a SQLite query returns.",
+    "Recognize NULL handling, sorting and dialect-specific pagination behaviour.",
+    "Write readable SELECT queries and verify their results."
+  ],
+  "prerequisites": [
+    "SQL2.1",
+    "SQL2.5",
+    "SQL3.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "SELECT retrieves a result set from a table or evaluates expressions. A query names the columns to return and the source table; it does not change stored rows.",
+      "whyItMatters": "Reading data is the foundation of reporting, analysis and application screens. Understanding the result set helps learners request only the information they need.",
+      "analogy": "SELECT is like choosing which fields to display from a register without changing the original register.",
+      "analogyLimit": "The analogy simplifies query processing. Actual results follow SQL expression rules, three-valued NULL logic, collation, and the selected database engine's query semantics."
+    },
+    "explain": {
+      "narrative": "## Core idea\nSELECT retrieves a result set from a table or evaluates expressions. A query names the columns to return and the source table; it does not change stored rows.\n\n## Why this matters\nReading data is the foundation of reporting, analysis and application screens. Understanding the result set helps learners request only the information they need.\n\n## How to use it\nWrite the SELECT list to describe the output, identify the source with FROM, add a WHERE predicate when rows need filtering, and use ORDER BY to define the result sequence. SQLite pagination uses LIMIT and OFFSET. Use a stable sort key when a query is paginated.\n\n## SQLite and dialect notes\nThese runnable examples target SQLite. SELECT, WHERE, DISTINCT, ORDER BY, NULL predicates and aliases are broadly familiar SQL features, but details such as collations, NULL ordering, Boolean values and pagination syntax can vary. SQLite uses LIMIT/OFFSET; SQL Server commonly supports TOP or OFFSET/FETCH. Do not assume these forms are interchangeable.\n\n## Worked examples\n### 1. Create a small product table\n```sql\nCREATE TABLE s51_products (product_id INTEGER, product_name TEXT, price REAL, category TEXT); INSERT INTO s51_products VALUES (1,'Notebook',45,'Stationery'),(2,'Pen',12,'Stationery'),(3,'Bottle',120,'Accessories');\n```\nExpected result: 3 rows inserted\n\nThe table provides sample rows for the SELECT queries.\n\n### 2. Return every column\n```sql\nSELECT * FROM s51_products ORDER BY product_id;\n```\nExpected result: 3 rows with all four columns\n\nThe asterisk requests every column in the table.\n\n### 3. Return selected columns\n```sql\nSELECT product_name, price FROM s51_products ORDER BY product_id;\n```\nExpected result: Notebook | 45; Pen | 12; Bottle | 120\n\nThe result contains only the two named columns.\n\n### 4. Return a calculated expression\n```sql\nSELECT product_name, price * 2 AS double_price FROM s51_products ORDER BY product_id;\n```\nExpected result: Notebook | 90; Pen | 24; Bottle | 240\n\nA SELECT list can include expressions as well as stored columns.\n\n### 5. Return a constant alongside table data\n```sql\nSELECT product_name, 'available' AS stock_note FROM s51_products ORDER BY product_id;\n```\nExpected result: Notebook | available; Pen | available; Bottle | available\n\nA literal can be returned as a result column for every selected row.\n\n## Common mistakes\n- Using SELECT * when only a few columns are needed.\n- Assuming DISTINCT deletes duplicate source records.\n- Using = NULL instead of IS NULL.\n- Mixing AND and OR without parentheses.\n- Assuming result order without ORDER BY.\n- Paginating without a deterministic sort key.\n- Copying LIMIT syntax into a DBMS that expects TOP or FETCH FIRST.\n\n## Good practice\nUse explicit columns, clear aliases, NULL-aware predicates, parentheses for compound logic, and a unique tie-breaker for paginated results. Test dialect-specific SQL in the target engine.",
+      "examples": [
+        {
+          "id": "sql5.1-ex1",
+          "language": "en",
+          "title": "Create a small product table",
+          "code": "CREATE TABLE s51_products (product_id INTEGER, product_name TEXT, price REAL, category TEXT); INSERT INTO s51_products VALUES (1,'Notebook',45,'Stationery'),(2,'Pen',12,'Stationery'),(3,'Bottle',120,'Accessories');",
+          "expectedOutput": "3 rows inserted",
+          "explanation": "The table provides sample rows for the SELECT queries.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.1-ex2",
+          "language": "en",
+          "title": "Return every column",
+          "code": "SELECT * FROM s51_products ORDER BY product_id;",
+          "expectedOutput": "1 | Notebook | 45.0 | Stationery; 2 | Pen | 12.0 | Stationery; 3 | Bottle | 120.0 | Accessories",
+          "explanation": "SELECT * returns every column; the expected output lists all four columns for each of the three rows.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.1-ex3",
+          "language": "en",
+          "title": "Return selected columns",
+          "code": "SELECT product_name, price FROM s51_products ORDER BY product_id;",
+          "expectedOutput": "Notebook | 45.0; Pen | 12.0; Bottle | 120.0",
+          "explanation": "The result contains only the two named columns.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.1-ex4",
+          "language": "en",
+          "title": "Return a calculated expression",
+          "code": "SELECT product_name, price * 2 AS double_price FROM s51_products ORDER BY product_id;",
+          "expectedOutput": "Notebook | 90.0; Pen | 24.0; Bottle | 240.0",
+          "explanation": "A SELECT list can include expressions as well as stored columns.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.1-ex5",
+          "language": "en",
+          "title": "Return a constant alongside table data",
+          "code": "SELECT product_name, 'available' AS stock_note FROM s51_products ORDER BY product_id;",
+          "expectedOutput": "Notebook | available; Pen | available; Bottle | available",
+          "explanation": "A literal can be returned as a result column for every selected row.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the five examples for The SQL SELECT Statement and Result Sets in the SQL Playground. Before each run, identify the SELECT list, source, filters, sort keys and row limit where applicable. Predict the output and compare it with the SQLite result.",
+      "independentTask": "Create an original SQLite query task that demonstrates The SQL SELECT Statement and Result Sets. Include a small table, at least five SQL statements, a verification query and a short explanation of any dialect-specific behaviour.",
+      "hints": [
+        "Read the SELECT list to identify the output columns.",
+        "Check the source table and each WHERE predicate.",
+        "Use parentheses when combining AND and OR conditions.",
+        "Use IS NULL or IS NOT NULL for missing values.",
+        "Add ORDER BY before LIMIT/OFFSET when predictable pagination is required."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE s51_products (product_id INTEGER, product_name TEXT, price REAL, category TEXT); INSERT INTO s51_products VALUES (1,'Notebook',45,'Stationery'),(2,'Pen',12,'Stationery'),(3,'Bottle',120,'Accessories');\n\nSELECT * FROM s51_products ORDER BY product_id;\n\nSELECT product_name, price FROM s51_products ORDER BY product_id;\n\nSELECT product_name, price * 2 AS double_price FROM s51_products ORDER BY product_id;\n\nSELECT product_name, 'available' AS stock_note FROM s51_products ORDER BY product_id;",
+    "resetCode": "CREATE TABLE s51_products (product_id INTEGER, product_name TEXT, price REAL, category TEXT); INSERT INTO s51_products VALUES (1,'Notebook',45,'Stationery'),(2,'Pen',12,'Stationery'),(3,'Bottle',120,'Accessories');\n\nSELECT * FROM s51_products ORDER BY product_id;\n\nSELECT product_name, price FROM s51_products ORDER BY product_id;\n\nSELECT product_name, price * 2 AS double_price FROM s51_products ORDER BY product_id;\n\nSELECT product_name, 'available' AS stock_note FROM s51_products ORDER BY product_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql5.1-q1",
+        "prompt": "Which SQL statement retrieves rows from a table?",
+        "options": [
+          "SELECT",
+          "UPDATE",
+          "DROP",
+          "ALTER"
+        ],
+        "answer": "SELECT",
+        "explanation": "SELECT requests data and returns a result set."
+      },
+      {
+        "id": "sql5.1-q2",
+        "prompt": "What does SELECT * request?",
+        "options": [
+          "All columns from the selected source",
+          "Only the first column",
+          "Only primary-key columns",
+          "All tables in the database"
+        ],
+        "answer": "All columns from the selected source",
+        "explanation": "The asterisk is shorthand for every column in the source."
+      },
+      {
+        "id": "sql5.1-q3",
+        "prompt": "Does a normal SELECT change stored table rows?",
+        "options": [
+          "No",
+          "Yes, it deletes them",
+          "Yes, it updates them",
+          "Yes, it renames the table"
+        ],
+        "answer": "No",
+        "explanation": "SELECT reads data unless it is combined with a data-changing construct."
+      },
+      {
+        "id": "sql5.1-q4",
+        "prompt": "What does a SELECT list contain?",
+        "options": [
+          "Columns and expressions to return",
+          "Only table constraints",
+          "Only index names",
+          "Only database filenames"
+        ],
+        "answer": "Columns and expressions to return",
+        "explanation": "The list determines the result columns."
+      },
+      {
+        "id": "sql5.1-q5",
+        "prompt": "Why can selecting named columns be preferable to SELECT *?",
+        "options": [
+          "It makes the requested output explicit",
+          "It always changes the table structure",
+          "It disables sorting",
+          "It removes duplicate records"
+        ],
+        "answer": "It makes the requested output explicit",
+        "explanation": "Explicit columns make queries clearer and less sensitive to schema changes."
+      }
+    ]
+  },
+  "status": "draft"
+}

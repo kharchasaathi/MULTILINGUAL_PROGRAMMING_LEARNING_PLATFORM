@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql8.7.en",
+  "courseId": "sql",
+  "moduleId": "SQL8",
+  "topicId": "SQL8.7",
+  "title": "SQL CROSS JOIN",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the Cartesian-product behaviour of CROSS JOIN.",
+    "Write explicit CROSS JOIN queries between two input tables.",
+    "Calculate the expected row count from the sizes of both inputs.",
+    "Filter and calculate values across generated combinations.",
+    "Recognize the performance risks of unexpectedly large Cartesian products."
+  ],
+  "prerequisites": [
+    "SQL5.4",
+    "SQL5.6",
+    "SQL5.9"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "CROSS JOIN combines every row from the first table with every row from the second table. If the inputs contain m and n rows, the result contains m × n rows. It does not require a matching-key condition.",
+      "whyItMatters": "Cartesian products are useful for generating combinations such as products by regions, dates by shifts, or students by available sessions. They can also create unexpectedly large results if used without care.",
+      "analogy": "Imagine pairing every item in one short list with every option in another list.",
+      "analogyLimit": "The analogy does not show how quickly row counts grow when both lists become large or how filters and duplicate input rows affect the result."
+    },
+    "explain": {
+      "narrative": "## Core concept\nCROSS JOIN combines every row from the first table with every row from the second table. If the inputs contain m and n rows, the result contains m × n rows. It does not require a matching-key condition.\n\n## SQLite syntax\n```sql\nSELECT columns\nFROM table_a\nCROSS JOIN table_b;\n```\n\n## Worked examples\n### 1. Create the two independent input tables\n```sql\nDROP TABLE IF EXISTS regions;\nDROP TABLE IF EXISTS products;\nCREATE TABLE products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, base_price INTEGER NOT NULL);\nCREATE TABLE regions (region_id INTEGER PRIMARY KEY, region_name TEXT NOT NULL, shipping_fee INTEGER NOT NULL);\nINSERT INTO products VALUES (1,'Notebook',50),(2,'Desk Lamp',200);\nINSERT INTO regions VALUES (1,'North',20),(2,'South',25),(3,'East',15);\nSELECT (SELECT COUNT(*) FROM products) AS product_count, (SELECT COUNT(*) FROM regions) AS region_count;\n```\nExpected result: 2 | 3\n\nThe sample contains two products and three shipping regions.\n\n### 2. Generate every product and region combination\n```sql\nDROP TABLE IF EXISTS regions;\nDROP TABLE IF EXISTS products;\nCREATE TABLE products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, base_price INTEGER NOT NULL);\nCREATE TABLE regions (region_id INTEGER PRIMARY KEY, region_name TEXT NOT NULL, shipping_fee INTEGER NOT NULL);\nINSERT INTO products VALUES (1,'Notebook',50),(2,'Desk Lamp',200);\nINSERT INTO regions VALUES (1,'North',20),(2,'South',25),(3,'East',15);\nSELECT p.product_name, r.region_name FROM products AS p CROSS JOIN regions AS r ORDER BY p.product_id, r.region_id;\n```\nExpected result: Notebook | North; Notebook | South; Notebook | East; Desk Lamp | North; Desk Lamp | South; Desk Lamp | East\n\nA CROSS JOIN returns the Cartesian product: two product rows multiplied by three region rows gives six combinations.\n\n### 3. Calculate a regional price for each combination\n```sql\nDROP TABLE IF EXISTS regions;\nDROP TABLE IF EXISTS products;\nCREATE TABLE products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, base_price INTEGER NOT NULL);\nCREATE TABLE regions (region_id INTEGER PRIMARY KEY, region_name TEXT NOT NULL, shipping_fee INTEGER NOT NULL);\nINSERT INTO products VALUES (1,'Notebook',50),(2,'Desk Lamp',200);\nINSERT INTO regions VALUES (1,'North',20),(2,'South',25),(3,'East',15);\nSELECT p.product_name, r.region_name, p.base_price + r.shipping_fee AS delivered_price FROM products AS p CROSS JOIN regions AS r ORDER BY p.product_id, r.region_id;\n```\nExpected result: Notebook | North | 70; Notebook | South | 75; Notebook | East | 65; Desk Lamp | North | 220; Desk Lamp | South | 225; Desk Lamp | East | 215\n\nThe result can be used to create a product-by-region pricing matrix.\n\n### 4. Filter combinations after the Cartesian product\n```sql\nDROP TABLE IF EXISTS regions;\nDROP TABLE IF EXISTS products;\nCREATE TABLE products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, base_price INTEGER NOT NULL);\nCREATE TABLE regions (region_id INTEGER PRIMARY KEY, region_name TEXT NOT NULL, shipping_fee INTEGER NOT NULL);\nINSERT INTO products VALUES (1,'Notebook',50),(2,'Desk Lamp',200);\nINSERT INTO regions VALUES (1,'North',20),(2,'South',25),(3,'East',15);\nSELECT p.product_name, r.region_name FROM products AS p CROSS JOIN regions AS r WHERE r.shipping_fee <= 20 ORDER BY p.product_id, r.region_id;\n```\nExpected result: Notebook | North; Notebook | East; Desk Lamp | North; Desk Lamp | East\n\nThe WHERE condition reduces the generated combinations to regions whose fee is at most 20.\n\n### 5. Count combinations for each product\n```sql\nDROP TABLE IF EXISTS regions;\nDROP TABLE IF EXISTS products;\nCREATE TABLE products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, base_price INTEGER NOT NULL);\nCREATE TABLE regions (region_id INTEGER PRIMARY KEY, region_name TEXT NOT NULL, shipping_fee INTEGER NOT NULL);\nINSERT INTO products VALUES (1,'Notebook',50),(2,'Desk Lamp',200);\nINSERT INTO regions VALUES (1,'North',20),(2,'South',25),(3,'East',15);\nSELECT p.product_name, COUNT(r.region_id) AS available_regions FROM products AS p CROSS JOIN regions AS r GROUP BY p.product_id, p.product_name ORDER BY p.product_id;\n```\nExpected result: Notebook | 3; Desk Lamp | 3\n\nEach product is paired with every region, so each product has three combinations.\n\n## Query behaviour and safety\nA CROSS JOIN has no ON condition. Every row on the left is paired with every row on the right. An accidental comma-separated FROM list or a missing join predicate can produce the same kind of Cartesian multiplication; explicit JOIN syntax makes the intended operation easier to review. The output size is the product of input row counts, before later filtering. If either table is unexpectedly large, the result can consume substantial time and memory. Use explicit CROSS JOIN syntax to make the Cartesian intent clear.\n\n## Common mistakes\n- Forgetting that the row count multiplies.\n- Using CROSS JOIN when a key-based INNER JOIN was intended.\n- Assuming output order without ORDER BY.\n- Failing to filter a generated combination set when only a subset is required.\n- Overlooking duplicate rows in either input.\n\n## Best practices\nEstimate m × n before running a query. Use small controlled inputs for learning. Add clear filters and select only needed columns. For large production workloads, review the query plan and resource impact before generating combinations.",
+      "examples": [
+        {
+          "id": "sql8.7-ex1",
+          "language": "en",
+          "title": "Create the two independent input tables",
+          "code": "DROP TABLE IF EXISTS regions;\nDROP TABLE IF EXISTS products;\nCREATE TABLE products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, base_price INTEGER NOT NULL);\nCREATE TABLE regions (region_id INTEGER PRIMARY KEY, region_name TEXT NOT NULL, shipping_fee INTEGER NOT NULL);\nINSERT INTO products VALUES (1,'Notebook',50),(2,'Desk Lamp',200);\nINSERT INTO regions VALUES (1,'North',20),(2,'South',25),(3,'East',15);\nSELECT (SELECT COUNT(*) FROM products) AS product_count, (SELECT COUNT(*) FROM regions) AS region_count;",
+          "expectedOutput": "2 | 3",
+          "explanation": "The sample contains two products and three shipping regions.",
+          "runnable": true
+        },
+        {
+          "id": "sql8.7-ex2",
+          "language": "en",
+          "title": "Generate every product and region combination",
+          "code": "DROP TABLE IF EXISTS regions;\nDROP TABLE IF EXISTS products;\nCREATE TABLE products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, base_price INTEGER NOT NULL);\nCREATE TABLE regions (region_id INTEGER PRIMARY KEY, region_name TEXT NOT NULL, shipping_fee INTEGER NOT NULL);\nINSERT INTO products VALUES (1,'Notebook',50),(2,'Desk Lamp',200);\nINSERT INTO regions VALUES (1,'North',20),(2,'South',25),(3,'East',15);\nSELECT p.product_name, r.region_name FROM products AS p CROSS JOIN regions AS r ORDER BY p.product_id, r.region_id;",
+          "expectedOutput": "Notebook | North; Notebook | South; Notebook | East; Desk Lamp | North; Desk Lamp | South; Desk Lamp | East",
+          "explanation": "A CROSS JOIN returns the Cartesian product: two product rows multiplied by three region rows gives six combinations.",
+          "runnable": true
+        },
+        {
+          "id": "sql8.7-ex3",
+          "language": "en",
+          "title": "Calculate a regional price for each combination",
+          "code": "DROP TABLE IF EXISTS regions;\nDROP TABLE IF EXISTS products;\nCREATE TABLE products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, base_price INTEGER NOT NULL);\nCREATE TABLE regions (region_id INTEGER PRIMARY KEY, region_name TEXT NOT NULL, shipping_fee INTEGER NOT NULL);\nINSERT INTO products VALUES (1,'Notebook',50),(2,'Desk Lamp',200);\nINSERT INTO regions VALUES (1,'North',20),(2,'South',25),(3,'East',15);\nSELECT p.product_name, r.region_name, p.base_price + r.shipping_fee AS delivered_price FROM products AS p CROSS JOIN regions AS r ORDER BY p.product_id, r.region_id;",
+          "expectedOutput": "Notebook | North | 70; Notebook | South | 75; Notebook | East | 65; Desk Lamp | North | 220; Desk Lamp | South | 225; Desk Lamp | East | 215",
+          "explanation": "The result can be used to create a product-by-region pricing matrix.",
+          "runnable": true
+        },
+        {
+          "id": "sql8.7-ex4",
+          "language": "en",
+          "title": "Filter combinations after the Cartesian product",
+          "code": "DROP TABLE IF EXISTS regions;\nDROP TABLE IF EXISTS products;\nCREATE TABLE products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, base_price INTEGER NOT NULL);\nCREATE TABLE regions (region_id INTEGER PRIMARY KEY, region_name TEXT NOT NULL, shipping_fee INTEGER NOT NULL);\nINSERT INTO products VALUES (1,'Notebook',50),(2,'Desk Lamp',200);\nINSERT INTO regions VALUES (1,'North',20),(2,'South',25),(3,'East',15);\nSELECT p.product_name, r.region_name FROM products AS p CROSS JOIN regions AS r WHERE r.shipping_fee <= 20 ORDER BY p.product_id, r.region_id;",
+          "expectedOutput": "Notebook | North; Notebook | East; Desk Lamp | North; Desk Lamp | East",
+          "explanation": "The WHERE condition reduces the generated combinations to regions whose fee is at most 20.",
+          "runnable": true
+        },
+        {
+          "id": "sql8.7-ex5",
+          "language": "en",
+          "title": "Count combinations for each product",
+          "code": "DROP TABLE IF EXISTS regions;\nDROP TABLE IF EXISTS products;\nCREATE TABLE products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, base_price INTEGER NOT NULL);\nCREATE TABLE regions (region_id INTEGER PRIMARY KEY, region_name TEXT NOT NULL, shipping_fee INTEGER NOT NULL);\nINSERT INTO products VALUES (1,'Notebook',50),(2,'Desk Lamp',200);\nINSERT INTO regions VALUES (1,'North',20),(2,'South',25),(3,'East',15);\nSELECT p.product_name, COUNT(r.region_id) AS available_regions FROM products AS p CROSS JOIN regions AS r GROUP BY p.product_id, p.product_name ORDER BY p.product_id;",
+          "expectedOutput": "Notebook | 3; Desk Lamp | 3",
+          "explanation": "Each product is paired with every region, so each product has three combinations.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the sample setup and predict the row count before running the CROSS JOIN. Add a WHERE condition to keep only one region, then compare the new count.",
+      "independentTask": "Create a table of at least four courses and another table of three time slots. Generate all course-slot combinations, calculate a booking fee, filter selected time slots, and explain the expected row count before execution.",
+      "hints": [
+        "Multiply the row counts to predict the Cartesian result size.",
+        "CROSS JOIN does not use ON.",
+        "Use aliases to make column references clear.",
+        "Use WHERE to reduce combinations after generation.",
+        "Use ORDER BY when the display order matters."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "DROP TABLE IF EXISTS regions;\nDROP TABLE IF EXISTS products;\nCREATE TABLE products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, base_price INTEGER NOT NULL);\nCREATE TABLE regions (region_id INTEGER PRIMARY KEY, region_name TEXT NOT NULL, shipping_fee INTEGER NOT NULL);\nINSERT INTO products VALUES (1,'Notebook',50),(2,'Desk Lamp',200);\nINSERT INTO regions VALUES (1,'North',20),(2,'South',25),(3,'East',15);\n\nSELECT p.product_name, r.region_name, p.base_price + r.shipping_fee AS delivered_price\nFROM products AS p CROSS JOIN regions AS r\nORDER BY p.product_id, r.region_id;",
+    "resetCode": "DROP TABLE IF EXISTS regions;\nDROP TABLE IF EXISTS products;\nCREATE TABLE products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, base_price INTEGER NOT NULL);\nCREATE TABLE regions (region_id INTEGER PRIMARY KEY, region_name TEXT NOT NULL, shipping_fee INTEGER NOT NULL);\nINSERT INTO products VALUES (1,'Notebook',50),(2,'Desk Lamp',200);\nINSERT INTO regions VALUES (1,'North',20),(2,'South',25),(3,'East',15);"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql8.7-q1",
+        "prompt": "What does CROSS JOIN return?",
+        "options": [
+          "Every combination of rows from both inputs",
+          "Only rows with equal keys",
+          "All rows from the left input only",
+          "Only rows that contain NULL"
+        ],
+        "answer": "Every combination of rows from both inputs",
+        "explanation": "A Cartesian product pairs each left row with each right row."
+      },
+      {
+        "id": "sql8.7-q2",
+        "prompt": "If the first table has 4 rows and the second has 3, how many rows are produced?",
+        "options": [
+          "12",
+          "7",
+          "4",
+          "3"
+        ],
+        "answer": "12",
+        "explanation": "The Cartesian product has 4 × 3 = 12 row pairs."
+      },
+      {
+        "id": "sql8.7-q3",
+        "prompt": "Does a CROSS JOIN require an ON condition?",
+        "options": [
+          "No",
+          "Yes, always",
+          "Only when both tables have primary keys",
+          "Only in SQLite"
+        ],
+        "answer": "No",
+        "explanation": "CROSS JOIN generates all combinations and does not use a matching predicate."
+      },
+      {
+        "id": "sql8.7-q4",
+        "prompt": "Which clause can reduce the combinations returned?",
+        "options": [
+          "WHERE",
+          "CREATE",
+          "DROP",
+          "COMMIT"
+        ],
+        "answer": "WHERE",
+        "explanation": "WHERE filters the generated row combinations."
+      },
+      {
+        "id": "sql8.7-q5",
+        "prompt": "What is a major risk of an unintended CROSS JOIN?",
+        "options": [
+          "A very large Cartesian result",
+          "Automatic deletion of source rows",
+          "Loss of primary keys",
+          "Conversion of all values to NULL"
+        ],
+        "answer": "A very large Cartesian result",
+        "explanation": "The number of result rows is the product of the two input row counts."
+      }
+    ]
+  },
+  "status": "draft"
+}

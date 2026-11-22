@@ -1,0 +1,171 @@
+{
+  "id": "sql.sql11.6.en",
+  "courseId": "sql",
+  "moduleId": "SQL11",
+  "topicId": "SQL11.6",
+  "title": "SQL Prepared Statements: Prepare, Bind and Execute",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and practical behaviour of SQL Prepared Statements: Prepare, Bind and Execute.",
+    "Identify which database engine or application layer performs the operation.",
+    "Predict the result of the SQLite examples before running them.",
+    "Recognize security, recovery, portability and operational limitations.",
+    "Apply the concept safely in a realistic database workflow."
+  ],
+  "prerequisites": [
+    "SQL1.2",
+    "SQL2.1",
+    "SQL3.1",
+    "SQL3.2",
+    "SQL5.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A prepared statement separates a fixed SQL template from values supplied later. The application prepares the statement, binds values to placeholders and executes it. This helps prevent injection and can reduce repeated parsing overhead, depending on the driver and database engine.",
+      "whyItMatters": "Prepared statements are a core safe database programming technique for repeated queries, inserts and updates that use user-supplied values.",
+      "analogy": "Think of a database workflow as a carefully controlled service desk: each operation has a defined responsibility, input and verification step.",
+      "analogyLimit": "The analogy does not model SQL grammar, database transaction isolation, driver APIs, security boundaries or DBMS-specific implementation details."
+    },
+    "explain": {
+      "narrative": "## Three-stage workflow\nPrepare a query template containing placeholders. Bind each value through the database API using the expected data type. Execute the prepared statement; it may be reused with different values. In MySQLi, for example, applications use prepare(), bind_param() and execute(). Other drivers expose different APIs.\n\n## CodeSaathi Playground\nThe Playground's Bound parameters (JSON) field prepares and binds one SQL statement using sql.js. Use a JSON array for positional ? placeholders, or a JSON object for named placeholders such as :person_id. Parameterized mode rejects multiple statements; clear the parameter field before running a multi-statement setup script.\n\n## Security properties\nPrepared statements keep parameter values separate from SQL syntax. They are a primary defence against SQL injection when the query structure itself is trusted. They do not make unsafe dynamic identifiers safe, and they do not replace authorization, validation or least-privilege access.\n\n## Worked examples\nFor examples with parameters, copy the SQL into the editor and enter the listed JSON array in the Bound parameters field. The examples run against SQLite; host-language driver APIs and other DBMS commands have their own syntax.",
+      "examples": [
+        {
+          "id": "sql11.6-ex1",
+          "language": "en",
+          "title": "Create a prepared-statement table",
+          "code": "CREATE TABLE prepared_people (id INTEGER PRIMARY KEY, name TEXT NOT NULL, city TEXT NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "The table is created before the parameterized statements.",
+          "runnable": true
+        },
+        {
+          "id": "sql11.6-ex2",
+          "language": "en",
+          "title": "Insert sample rows",
+          "code": "INSERT INTO prepared_people VALUES (1, 'Asha', 'Hyderabad'), (2, 'Bilal', 'Vijayawada');",
+          "expectedOutput": "2 rows inserted",
+          "explanation": "This setup statement inserts two sample records.",
+          "runnable": true
+        },
+        {
+          "id": "sql11.6-ex3",
+          "language": "en",
+          "title": "Prepare and bind a read query",
+          "code": "SELECT name FROM prepared_people WHERE id = ?;",
+          "expectedOutput": "Asha",
+          "parameters": [
+            1
+          ],
+          "explanation": "The id is supplied separately as a bound value. Enter [1] in the parameter field.",
+          "runnable": true
+        },
+        {
+          "id": "sql11.6-ex4",
+          "language": "en",
+          "title": "Bind values in an UPDATE and return the changed row",
+          "code": "UPDATE prepared_people SET city = ? WHERE id = ? RETURNING name, city;",
+          "expectedOutput": "Asha | Chennai",
+          "parameters": [
+            "Chennai",
+            1
+          ],
+          "explanation": "Both the new city and target id are bound values. RETURNING displays the updated row in SQLite.",
+          "runnable": true
+        },
+        {
+          "id": "sql11.6-ex5",
+          "language": "en",
+          "title": "Bind a DELETE target carefully",
+          "code": "DELETE FROM prepared_people WHERE id = ? RETURNING id;",
+          "expectedOutput": "2",
+          "parameters": [
+            2
+          ],
+          "explanation": "The identifier is bound as a value and the WHERE clause limits which row is deleted.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run all five examples for SQL Prepared Statements: Prepare, Bind and Execute. Before running each one, state what the statement or application operation does, predict the result and explain any SQLite-specific limitation.",
+      "independentTask": "Create a small original scenario for SQL Prepared Statements: Prepare, Bind and Execute. Write at least five statements or a documented application workflow, include a safety or verification step, and explain which parts are specific to SQLite or another DBMS.",
+      "hints": [
+        "Read the engine and version notes before choosing syntax.",
+        "Keep user-provided values separate from SQL command text.",
+        "Use explicit names and columns so the operation is easy to review.",
+        "Check the result with a SELECT or integrity/health query.",
+        "For operational changes, document backup, restore and rollback requirements."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "-- Prepared template: SELECT name FROM prepared_people WHERE id = ?;\nDROP TABLE IF EXISTS prepared_people; CREATE TABLE prepared_people(id INTEGER PRIMARY KEY,name TEXT); INSERT INTO prepared_people VALUES(1,'Asha'),(2,'Bilal'); SELECT name FROM prepared_people WHERE id=1;",
+    "resetCode": "-- Prepared template: SELECT name FROM prepared_people WHERE id = ?;\nDROP TABLE IF EXISTS prepared_people; CREATE TABLE prepared_people(id INTEGER PRIMARY KEY,name TEXT); INSERT INTO prepared_people VALUES(1,'Asha'),(2,'Bilal'); SELECT name FROM prepared_people WHERE id=1;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql11.6-q1",
+        "prompt": "What is the first step in the prepared-statement workflow?",
+        "options": [
+          "Prepare a SQL template with placeholders",
+          "Concatenate user input",
+          "Drop the target table",
+          "Disable constraints"
+        ],
+        "answer": "Prepare a SQL template with placeholders",
+        "explanation": "The application first prepares a fixed SQL statement."
+      },
+      {
+        "id": "sql11.6-q2",
+        "prompt": "What does bind do?",
+        "options": [
+          "Associates supplied values with placeholders",
+          "Creates a database file",
+          "Changes the table name",
+          "Runs an unrestricted script"
+        ],
+        "answer": "Associates supplied values with placeholders",
+        "explanation": "Binding supplies values separately from SQL text."
+      },
+      {
+        "id": "sql11.6-q3",
+        "prompt": "Why can a prepared statement be reused?",
+        "options": [
+          "The same query structure can execute with different bound values",
+          "It permanently stores every result row",
+          "It automatically changes table schemas",
+          "It disables SQL parsing forever"
+        ],
+        "answer": "The same query structure can execute with different bound values",
+        "explanation": "Applications can bind new values and execute the template again."
+      },
+      {
+        "id": "sql11.6-q4",
+        "prompt": "Do prepared statements automatically authorize a user to read a row?",
+        "options": [
+          "No, authorization must be checked separately",
+          "Yes, every placeholder grants access",
+          "Only for SELECT *",
+          "Yes, if the value is an integer"
+        ],
+        "answer": "No, authorization must be checked separately",
+        "explanation": "Parameterization prevents injection but is not an access-control policy."
+      },
+      {
+        "id": "sql11.6-q5",
+        "prompt": "Can a prepared statement safely accept an arbitrary user-supplied table name as a value parameter?",
+        "options": [
+          "No, identifiers are SQL structure and need allow-listing",
+          "Yes, all drivers bind identifiers",
+          "Only when using INSERT",
+          "Yes, if quoted with single quotes"
+        ],
+        "answer": "No, identifiers are SQL structure and need allow-listing",
+        "explanation": "Bound parameters represent values, not identifiers."
+      }
+    ]
+  },
+  "status": "draft"
+}

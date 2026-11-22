@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql10.5.en",
+  "courseId": "sql",
+  "moduleId": "SQL10",
+  "topicId": "SQL10.5",
+  "title": "SQL Stored Procedures and SQLite Alternatives",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of SQL Stored Procedures and SQLite Alternatives.",
+    "Write SQLite-compatible SQL for the topic or a clearly labelled equivalent.",
+    "Predict result rows using the lesson's sample data.",
+    "Identify dialect limitations, NULL behaviour and common errors.",
+    "Apply the topic to a practical data task."
+  ],
+  "prerequisites": [
+    "SQL5.1",
+    "SQL5.4",
+    "SQL9.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A stored procedure is a named routine stored in a database and invoked to perform a sequence of operations. Procedure syntax, parameters, variables and invocation commands vary by DBMS. SQLite has no native CREATE PROCEDURE or CALL statement, so SQL Playground cannot execute stored procedures.",
+      "whyItMatters": "Stored procedures can centralize repeatable business operations, enforce consistent workflows and reduce duplicated SQL. Learners must also know when a database engine does not provide this feature.",
+      "analogy": "Think of a SQL query as a carefully specified instruction for selecting or shaping rows in a database.",
+      "analogyLimit": "The analogy does not model SQL evaluation order, transaction guarantees, NULL logic or DBMS-specific implementation details."
+    },
+    "explain": {
+      "narrative": "## Stored procedure concept\nA procedure is a database routine that can accept parameters and execute one or more statements. MySQL commonly uses CREATE PROCEDURE ... BEGIN ... END and CALL; SQL Server uses CREATE PROCEDURE and EXEC; PostgreSQL supports procedures with CALL and also functions. These syntaxes are not interchangeable.\n\n## MySQL-style illustration (not executable in SQLite)\n```sql\nDELIMITER //\nCREATE PROCEDURE GetOrdersForCustomer(IN p_customer_id INT)\nBEGIN\n  SELECT order_id, amount\n  FROM orders\n  WHERE customer_id = p_customer_id;\nEND //\nDELIMITER ;\nCALL GetOrdersForCustomer(7);\n```\n\nSQLite deliberately has no stored-procedure language. The examples below run in SQLite and demonstrate adjacent database techniques—views, transactions, triggers and temporary tables. They are alternatives or building blocks, not stored procedures. In an application, reusable parameterized SQL can be prepared and invoked by application code.\n\n## Common mistakes\n- Assuming syntax is identical across all database engines.\n- Omitting explicit column lists when moving data.\n- Ignoring NULL, constraints or result ordering.\n- Treating a documented dialect example as executable SQLite syntax.\n\n## Best practices\nUse explicit columns, test against the target DBMS/version, keep setup scripts repeatable, and verify results with SELECT queries.",
+      "examples": [
+        {
+          "id": "sql10.5-ex1",
+          "language": "en",
+          "title": "Use a view for a reusable query",
+          "code": "DROP TABLE IF EXISTS orders;\nDROP VIEW IF EXISTS customer_orders;\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER, amount INTEGER);\nINSERT INTO orders VALUES (1,7,500),(2,8,300),(3,7,900);\nCREATE VIEW customer_orders AS SELECT order_id,customer_id,amount FROM orders;\nSELECT order_id,amount FROM customer_orders WHERE customer_id=7 ORDER BY order_id;",
+          "expectedOutput": "1 | 500; 3 | 900",
+          "explanation": "A view stores a reusable query definition, but it is not a parameterized stored procedure.",
+          "runnable": true
+        },
+        {
+          "id": "sql10.5-ex2",
+          "language": "en",
+          "title": "Group multiple statements in a transaction",
+          "code": "DROP TABLE IF EXISTS wallets;\nCREATE TABLE wallets (wallet_id INTEGER PRIMARY KEY, balance INTEGER);\nINSERT INTO wallets VALUES (1,1000),(2,500);\nBEGIN;\nUPDATE wallets SET balance=balance-200 WHERE wallet_id=1;\nUPDATE wallets SET balance=balance+200 WHERE wallet_id=2;\nCOMMIT;\nSELECT wallet_id,balance FROM wallets ORDER BY wallet_id;",
+          "expectedOutput": "1 | 800; 2 | 700",
+          "explanation": "A transaction groups statements atomically; it does not create a callable database routine.",
+          "runnable": true
+        },
+        {
+          "id": "sql10.5-ex3",
+          "language": "en",
+          "title": "Use a trigger for automatic database-side work",
+          "code": "DROP TABLE IF EXISTS products;\nDROP TABLE IF EXISTS price_audit;\nCREATE TABLE products (product_id INTEGER PRIMARY KEY, price INTEGER);\nCREATE TABLE price_audit (product_id INTEGER, old_price INTEGER, new_price INTEGER);\nINSERT INTO products VALUES (1,100);\nCREATE TRIGGER log_price_change AFTER UPDATE OF price ON products BEGIN INSERT INTO price_audit VALUES (OLD.product_id,OLD.price,NEW.price);\nEND;\nUPDATE products SET price=125 WHERE product_id=1;\nSELECT product_id,old_price,new_price FROM price_audit;",
+          "expectedOutput": "1 | 100 | 125",
+          "explanation": "A trigger runs automatically after a matching event; it is different from a procedure explicitly called by a client.",
+          "runnable": true
+        },
+        {
+          "id": "sql10.5-ex4",
+          "language": "en",
+          "title": "Use a temporary table for a multi-step workflow",
+          "code": "DROP TABLE IF EXISTS orders;\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER, amount INTEGER);\nINSERT INTO orders VALUES (1,7,500),(2,8,300),(3,7,900);\nCREATE TEMP TABLE customer_totals AS SELECT customer_id,SUM(amount) AS total_amount FROM orders GROUP BY customer_id;\nSELECT customer_id,total_amount FROM customer_totals ORDER BY customer_id;",
+          "expectedOutput": "7 | 1400; 8 | 300",
+          "explanation": "A temporary table can hold intermediate results for a connection-local workflow.",
+          "runnable": true
+        },
+        {
+          "id": "sql10.5-ex5",
+          "language": "en",
+          "title": "Keep reusable reporting logic in a view",
+          "code": "DROP TABLE IF EXISTS payments;\nDROP VIEW IF EXISTS payment_totals;\nCREATE TABLE payments (payment_id INTEGER PRIMARY KEY, region TEXT, amount INTEGER);\nINSERT INTO payments VALUES (1,'East',200),(2,'East',300),(3,'West',400);\nCREATE VIEW payment_totals AS SELECT region,SUM(amount) AS total_amount FROM payments GROUP BY region;\nSELECT region,total_amount FROM payment_totals WHERE total_amount>=400 ORDER BY region;",
+          "expectedOutput": "East | 500; West | 400",
+          "explanation": "A view can centralize reporting logic; application code still supplies filters and parameters.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the five examples in order. Before each run, predict the result and explain how SQL Stored Procedures and SQLite Alternatives affects it.",
+      "independentTask": "Create your own small dataset and write three new queries using SQL Stored Procedures and SQLite Alternatives. Include one boundary case and document the expected output.",
+      "hints": [
+        "Read the target DBMS syntax notes before running an example.",
+        "Use explicit column names and aliases where they improve clarity.",
+        "Check NULL values separately from zero and empty strings.",
+        "Use ORDER BY when the display order matters.",
+        "Compare the returned rows with your prediction after execution."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "DROP TABLE IF EXISTS orders;\nDROP VIEW IF EXISTS customer_orders;\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER, amount INTEGER);\nINSERT INTO orders VALUES (1,7,500),(2,8,300),(3,7,900);\nCREATE VIEW customer_orders AS SELECT order_id,customer_id,amount FROM orders;\nSELECT order_id,amount FROM customer_orders WHERE customer_id=7 ORDER BY order_id;",
+    "resetCode": "DROP TABLE IF EXISTS orders;\nDROP VIEW IF EXISTS customer_orders;\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER, amount INTEGER);\nINSERT INTO orders VALUES (1,7,500),(2,8,300),(3,7,900);\nCREATE VIEW customer_orders AS SELECT order_id,customer_id,amount FROM orders;\nSELECT order_id,amount FROM customer_orders WHERE customer_id=7 ORDER BY order_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql10.5-q1",
+        "prompt": "Which statement about SQLite stored procedures is correct?",
+        "options": [
+          "SQLite has no native CREATE PROCEDURE or CALL feature",
+          "SQLite uses MySQL DELIMITER syntax",
+          "SQLite supports CREATE PROCEDURE in every version",
+          "SQLite automatically turns triggers into procedures"
+        ],
+        "answer": "SQLite has no native CREATE PROCEDURE or CALL feature",
+        "explanation": "SQLite is an embedded database engine without a native stored-procedure language."
+      },
+      {
+        "id": "sql10.5-q2",
+        "prompt": "Which command is commonly used to invoke a MySQL stored procedure?",
+        "options": [
+          "CALL procedure_name(...)",
+          "RUN PROCEDURE procedure_name(...)",
+          "EXECUTE VIEW procedure_name(...)",
+          "START ROUTINE procedure_name(...)"
+        ],
+        "answer": "CALL procedure_name(...)",
+        "explanation": "MySQL uses CALL to invoke a stored procedure."
+      },
+      {
+        "id": "sql10.5-q3",
+        "prompt": "How does a view differ from a parameterized stored procedure?",
+        "options": [
+          "A view stores a query definition and does not itself accept procedure parameters",
+          "A view executes arbitrary procedural blocks",
+          "A view always modifies rows",
+          "A view is identical to CALL"
+        ],
+        "answer": "A view stores a query definition and does not itself accept procedure parameters",
+        "explanation": "A view is a reusable query definition, not a parameterized routine."
+      },
+      {
+        "id": "sql10.5-q4",
+        "prompt": "What triggers a database trigger?",
+        "options": [
+          "A configured table event such as INSERT, UPDATE or DELETE",
+          "A user calling CALL on SQLite",
+          "A SELECT alias",
+          "A SQL comment"
+        ],
+        "answer": "A configured table event such as INSERT, UPDATE or DELETE",
+        "explanation": "Triggers run automatically when their configured event occurs."
+      },
+      {
+        "id": "sql10.5-q5",
+        "prompt": "What does a transaction provide for a group of SQL statements?",
+        "options": [
+          "Atomic commit or rollback of the grouped changes",
+          "A reusable named procedure automatically",
+          "A permanent query parameter",
+          "Automatic creation of stored routines"
+        ],
+        "answer": "Atomic commit or rollback of the grouped changes",
+        "explanation": "Transactions group operations so they can be committed together or rolled back."
+      }
+    ]
+  },
+  "status": "draft"
+}

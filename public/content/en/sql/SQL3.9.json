@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql3.9.en",
+  "courseId": "sql",
+  "moduleId": "SQL3",
+  "topicId": "SQL3.9",
+  "title": "AUTO INCREMENT and Identity Columns",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of auto increment and identity columns.",
+    "Identify the statement, target object and affected columns or rows.",
+    "Predict the result of the SQLite examples before running them.",
+    "Recognize destructive operations and database-product differences.",
+    "Apply safe, readable and maintainable database practices."
+  ],
+  "prerequisites": [
+    "SQL1.3",
+    "SQL2.1",
+    "SQL2.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Many databases can generate numeric key values automatically. Learn SQLite's INTEGER PRIMARY KEY behaviour, the optional AUTOINCREMENT keyword and how other DBMS products express identity columns.",
+      "whyItMatters": "Database and table operations define where data lives, how records are maintained and how safely a schema can evolve. Incorrect commands can cause data loss or break dependent application code.",
+      "analogy": "Think of a database as a filing room: tables are labelled cabinets, rows are records and schema changes alter the cabinet structure.",
+      "analogyLimit": "This analogy does not describe database files, transactions, indexes, permissions or the engine-specific rules that govern real SQL operations."
+    },
+    "explain": {
+      "narrative": "## Concept\nMany databases can generate numeric key values automatically. Learn SQLite's INTEGER PRIMARY KEY behaviour, the optional AUTOINCREMENT keyword and how other DBMS products express identity columns.\n\n## How the operation works\nIdentify whether the statement changes a database connection, defines a schema object, inserts or changes records, or removes a schema object. Check the target DBMS documentation because database-level commands, data types and ALTER TABLE capabilities vary across products. The runnable examples in this lesson target SQLite.\n\n## Important SQLite differences\nSQLite databases are files opened by an application or API; SQLite does not implement server-style CREATE DATABASE or USE statements. ATTACH DATABASE makes another database available to one connection. SQLite's INTEGER PRIMARY KEY and AUTOINCREMENT behaviour differs from MySQL AUTO_INCREMENT and SQL Server/PostgreSQL identity mechanisms. DROP COLUMN availability depends on SQLite version.\n\n## Worked examples\n### 1. Create a table with an automatically assigned rowid key\n```sql\nCREATE TABLE generated_ids (id INTEGER PRIMARY KEY, label TEXT NOT NULL); INSERT INTO generated_ids (label) VALUES ('first');\n```\nExpected result: `1 row inserted`\n\nIn an ordinary SQLite rowid table, INTEGER PRIMARY KEY aliases the rowid and can be assigned automatically.\n\n### 2. Insert another row without specifying the key\n```sql\nINSERT INTO generated_ids (label) VALUES ('second');\n```\nExpected result: `1 row inserted`\n\nSQLite chooses another available integer key.\n\n### 3. Read the generated keys\n```sql\nSELECT id, label FROM generated_ids ORDER BY id;\n```\nExpected result: `1 | first\\n2 | second`\n\nThe query displays the generated key values.\n\n### 4. Create a table with AUTOINCREMENT\n```sql\nCREATE TABLE permanent_ids (id INTEGER PRIMARY KEY AUTOINCREMENT, label TEXT NOT NULL); INSERT INTO permanent_ids (label) VALUES ('record');\n```\nExpected result: `1 row inserted`\n\nAUTOINCREMENT changes rowid reuse behaviour and adds overhead; it is not required for ordinary automatic integer keys.\n\n### 5. Compare generated values across tables\n```sql\nSELECT (SELECT id FROM generated_ids WHERE label = 'second') AS ordinary_key, (SELECT id FROM permanent_ids WHERE label = 'record') AS auto_key;\n```\nExpected result: `ordinary_key | auto_key\\n2 | 1`\n\nEach table maintains its own key sequence. Other DBMSs use different identity or auto-increment syntax.\n\n## Safe database practices\n- Use explicit column lists for INSERT statements.\n- Preview rows with the same WHERE condition before UPDATE or DELETE.\n- Use transactions and tested backups for important data changes.\n- Review dependencies before ALTER TABLE or DROP TABLE.\n- Add indexes based on measured query patterns, not by default on every column.\n- Never assume server-style database commands work in SQLite.\n\n## Common mistakes\n- Running CREATE DATABASE or USE in SQLite.\n- Omitting a WHERE clause from UPDATE or DELETE unintentionally.\n- Assuming CREATE TABLE IF NOT EXISTS migrates an existing schema.\n- Using AUTOINCREMENT without understanding its additional guarantee and cost.\n- Dropping tables or indexes without checking dependencies.",
+      "examples": [
+        {
+          "id": "sql3.9-ex1",
+          "language": "en",
+          "title": "Create a table with an automatically assigned rowid key",
+          "code": "CREATE TABLE generated_ids (id INTEGER PRIMARY KEY, label TEXT NOT NULL); INSERT INTO generated_ids (label) VALUES ('first');",
+          "expectedOutput": "1 row inserted",
+          "explanation": "In an ordinary SQLite rowid table, INTEGER PRIMARY KEY aliases the rowid and can be assigned automatically.",
+          "runnable": true
+        },
+        {
+          "id": "sql3.9-ex2",
+          "language": "en",
+          "title": "Insert another row without specifying the key",
+          "code": "INSERT INTO generated_ids (label) VALUES ('second');",
+          "expectedOutput": "1 row inserted",
+          "explanation": "SQLite chooses another available integer key.",
+          "runnable": true
+        },
+        {
+          "id": "sql3.9-ex3",
+          "language": "en",
+          "title": "Read the generated keys",
+          "code": "SELECT id, label FROM generated_ids ORDER BY id;",
+          "expectedOutput": "1 | first\\n2 | second",
+          "explanation": "The query displays the generated key values.",
+          "runnable": true
+        },
+        {
+          "id": "sql3.9-ex4",
+          "language": "en",
+          "title": "Create a table with AUTOINCREMENT",
+          "code": "CREATE TABLE permanent_ids (id INTEGER PRIMARY KEY AUTOINCREMENT, label TEXT NOT NULL); INSERT INTO permanent_ids (label) VALUES ('record');",
+          "expectedOutput": "1 row inserted",
+          "explanation": "AUTOINCREMENT changes rowid reuse behaviour and adds overhead; it is not required for ordinary automatic integer keys.",
+          "runnable": true
+        },
+        {
+          "id": "sql3.9-ex5",
+          "language": "en",
+          "title": "Compare generated values across tables",
+          "code": "SELECT (SELECT id FROM generated_ids WHERE label = 'second') AS ordinary_key, (SELECT id FROM permanent_ids WHERE label = 'record') AS auto_key;",
+          "expectedOutput": "ordinary_key | auto_key\\n2 | 1",
+          "explanation": "Each table maintains its own key sequence. Other DBMSs use different identity or auto-increment syntax.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the five examples for AUTO INCREMENT and Identity Columns in the SQL Playground. Before each statement, identify the object and rows it may affect, predict the outcome, then inspect the result.",
+      "independentTask": "Create a small original database task that demonstrates AUTO INCREMENT and Identity Columns. Write at least five statements, include one safety check or verification query, and explain any SQLite-specific syntax.",
+      "hints": [
+        "Read the target database, table and column names carefully.",
+        "Use explicit column lists and meaningful identifiers.",
+        "Preview the affected rows before broad UPDATE or DELETE operations.",
+        "Check SQLite and other DBMS version differences before schema changes.",
+        "Use backups or transactions before destructive production operations."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE generated_ids (id INTEGER PRIMARY KEY, label TEXT NOT NULL); INSERT INTO generated_ids (label) VALUES ('first');\n\nINSERT INTO generated_ids (label) VALUES ('second');\n\nSELECT id, label FROM generated_ids ORDER BY id;\n\nCREATE TABLE permanent_ids (id INTEGER PRIMARY KEY AUTOINCREMENT, label TEXT NOT NULL); INSERT INTO permanent_ids (label) VALUES ('record');\n\nSELECT (SELECT id FROM generated_ids WHERE label = 'second') AS ordinary_key, (SELECT id FROM permanent_ids WHERE label = 'record') AS auto_key;",
+    "resetCode": "CREATE TABLE generated_ids (id INTEGER PRIMARY KEY, label TEXT NOT NULL); INSERT INTO generated_ids (label) VALUES ('first');\n\nINSERT INTO generated_ids (label) VALUES ('second');\n\nSELECT id, label FROM generated_ids ORDER BY id;\n\nCREATE TABLE permanent_ids (id INTEGER PRIMARY KEY AUTOINCREMENT, label TEXT NOT NULL); INSERT INTO permanent_ids (label) VALUES ('record');\n\nSELECT (SELECT id FROM generated_ids WHERE label = 'second') AS ordinary_key, (SELECT id FROM permanent_ids WHERE label = 'record') AS auto_key;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql3.9-q1",
+        "prompt": "What does INTEGER PRIMARY KEY do in an ordinary SQLite rowid table?",
+        "options": [
+          "Aliases the rowid and can receive an automatically generated integer",
+          "Creates a text UUID",
+          "Disables row insertion",
+          "Makes every column unique"
+        ],
+        "answer": "Aliases the rowid and can receive an automatically generated integer",
+        "explanation": "INTEGER PRIMARY KEY aliases rowid in an ordinary SQLite rowid table."
+      },
+      {
+        "id": "sql3.9-q2",
+        "prompt": "Is AUTOINCREMENT required for automatic integer keys in SQLite?",
+        "options": [
+          "No",
+          "Yes, always",
+          "Only for text keys",
+          "Only for temporary tables"
+        ],
+        "answer": "No",
+        "explanation": "INTEGER PRIMARY KEY already generates rowids; AUTOINCREMENT changes reuse rules."
+      },
+      {
+        "id": "sql3.9-q3",
+        "prompt": "What is the main effect of SQLite AUTOINCREMENT?",
+        "options": [
+          "It prevents reuse of previously generated rowid values in the documented cases",
+          "It encrypts the key",
+          "It creates a foreign key",
+          "It resets the counter on every insert"
+        ],
+        "answer": "It prevents reuse of previously generated rowid values in the documented cases",
+        "explanation": "AUTOINCREMENT changes the algorithm so previously used rowids are not reused."
+      },
+      {
+        "id": "sql3.9-q4",
+        "prompt": "Do all DBMS products use SQLite's AUTOINCREMENT syntax?",
+        "options": [
+          "No",
+          "Yes, identical syntax everywhere",
+          "Only PostgreSQL does",
+          "Only browser databases do"
+        ],
+        "answer": "No",
+        "explanation": "Identity and auto-increment syntax differs among database products."
+      },
+      {
+        "id": "sql3.9-q5",
+        "prompt": "Why avoid AUTOINCREMENT when it is not needed?",
+        "options": [
+          "It adds overhead and stronger non-reuse behaviour may be unnecessary",
+          "It prevents primary keys",
+          "It makes inserts impossible",
+          "It converts integers to text"
+        ],
+        "answer": "It adds overhead and stronger non-reuse behaviour may be unnecessary",
+        "explanation": "SQLite documentation recommends avoiding AUTOINCREMENT unless its specific guarantee is needed."
+      }
+    ]
+  },
+  "status": "draft"
+}

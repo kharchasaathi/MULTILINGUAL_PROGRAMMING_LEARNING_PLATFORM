@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql3.1.en",
+  "courseId": "sql",
+  "moduleId": "SQL3",
+  "topicId": "SQL3.1",
+  "title": "Database Creation, Selection and Connections",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of database creation, selection and connections.",
+    "Identify the statement, target object and affected columns or rows.",
+    "Predict the result of the SQLite examples before running them.",
+    "Recognize destructive operations and database-product differences.",
+    "Apply safe, readable and maintainable database practices."
+  ],
+  "prerequisites": [
+    "SQL1.3",
+    "SQL2.1",
+    "SQL2.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Database creation and selection commands differ across database products. Learn the purpose of CREATE DATABASE and USE, and how SQLite represents database files and attached databases instead of those server-style commands.",
+      "whyItMatters": "Database and table operations define where data lives, how records are maintained and how safely a schema can evolve. Incorrect commands can cause data loss or break dependent application code.",
+      "analogy": "Think of a database as a filing room: tables are labelled cabinets, rows are records and schema changes alter the cabinet structure.",
+      "analogyLimit": "This analogy does not describe database files, transactions, indexes, permissions or the engine-specific rules that govern real SQL operations."
+    },
+    "explain": {
+      "narrative": "## Concept\nDatabase creation and selection commands differ across database products. Learn the purpose of CREATE DATABASE and USE, and how SQLite represents database files and attached databases instead of those server-style commands.\n\n## How the operation works\nIdentify whether the statement changes a database connection, defines a schema object, inserts or changes records, or removes a schema object. Check the target DBMS documentation because database-level commands, data types and ALTER TABLE capabilities vary across products. The runnable examples in this lesson target SQLite.\n\n## Important SQLite differences\nSQLite databases are files opened by an application or API; SQLite does not implement server-style CREATE DATABASE or USE statements. ATTACH DATABASE makes another database available to one connection. SQLite's INTEGER PRIMARY KEY and AUTOINCREMENT behaviour differs from MySQL AUTO_INCREMENT and SQL Server/PostgreSQL identity mechanisms. DROP COLUMN availability depends on SQLite version.\n\n## Worked examples\n### 1. Attach a named in-memory database\n```sql\nATTACH DATABASE ':memory:' AS training;\n```\nExpected result: `Database attached`\n\nSQLite ATTACH makes another database available under a schema name for this connection.\n\n### 2. Create a table in the attached database\n```sql\nCREATE TABLE training.learners (learner_id INTEGER PRIMARY KEY, learner_name TEXT NOT NULL);\n```\nExpected result: `Table created`\n\nA schema-qualified table name identifies the attached database.\n\n### 3. Insert a row into the attached database\n```sql\nINSERT INTO training.learners VALUES (1, 'Asha');\n```\nExpected result: `1 row inserted`\n\nThe table can be populated using its schema-qualified name.\n\n### 4. List tables in the attached database\n```sql\nSELECT name FROM training.sqlite_master WHERE type = 'table';\n```\nExpected result: `name\\nlearners`\n\nEach SQLite database has its own sqlite_master catalog table.\n\n### 5. Detach the database\n```sql\nDETACH DATABASE training;\n```\nExpected result: `Database detached`\n\nDETACH removes the attached database from this connection; it does not delete an external database file.\n\n## Safe database practices\n- Use explicit column lists for INSERT statements.\n- Preview rows with the same WHERE condition before UPDATE or DELETE.\n- Use transactions and tested backups for important data changes.\n- Review dependencies before ALTER TABLE or DROP TABLE.\n- Add indexes based on measured query patterns, not by default on every column.\n- Never assume server-style database commands work in SQLite.\n\n## Common mistakes\n- Running CREATE DATABASE or USE in SQLite.\n- Omitting a WHERE clause from UPDATE or DELETE unintentionally.\n- Assuming CREATE TABLE IF NOT EXISTS migrates an existing schema.\n- Using AUTOINCREMENT without understanding its additional guarantee and cost.\n- Dropping tables or indexes without checking dependencies.",
+      "examples": [
+        {
+          "id": "sql3.1-ex1",
+          "language": "en",
+          "title": "Attach a named in-memory database",
+          "code": "ATTACH DATABASE ':memory:' AS training;",
+          "expectedOutput": "Database attached",
+          "explanation": "SQLite ATTACH makes another database available under a schema name for this connection.",
+          "runnable": true
+        },
+        {
+          "id": "sql3.1-ex2",
+          "language": "en",
+          "title": "Create a table in the attached database",
+          "code": "CREATE TABLE training.learners (learner_id INTEGER PRIMARY KEY, learner_name TEXT NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "A schema-qualified table name identifies the attached database.",
+          "runnable": true
+        },
+        {
+          "id": "sql3.1-ex3",
+          "language": "en",
+          "title": "Insert a row into the attached database",
+          "code": "INSERT INTO training.learners VALUES (1, 'Asha');",
+          "expectedOutput": "1 row inserted",
+          "explanation": "The table can be populated using its schema-qualified name.",
+          "runnable": true
+        },
+        {
+          "id": "sql3.1-ex4",
+          "language": "en",
+          "title": "List tables in the attached database",
+          "code": "SELECT name FROM training.sqlite_master WHERE type = 'table';",
+          "expectedOutput": "name\\nlearners",
+          "explanation": "Each SQLite database has its own sqlite_master catalog table.",
+          "runnable": true
+        },
+        {
+          "id": "sql3.1-ex5",
+          "language": "en",
+          "title": "Detach the database",
+          "code": "DETACH DATABASE training;",
+          "expectedOutput": "Database detached",
+          "explanation": "DETACH removes the attached database from this connection; it does not delete an external database file.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the five examples for Database Creation, Selection and Connections in the SQL Playground. Before each statement, identify the object and rows it may affect, predict the outcome, then inspect the result.",
+      "independentTask": "Create a small original database task that demonstrates Database Creation, Selection and Connections. Write at least five statements, include one safety check or verification query, and explain any SQLite-specific syntax.",
+      "hints": [
+        "Read the target database, table and column names carefully.",
+        "Use explicit column lists and meaningful identifiers.",
+        "Preview the affected rows before broad UPDATE or DELETE operations.",
+        "Check SQLite and other DBMS version differences before schema changes.",
+        "Use backups or transactions before destructive production operations."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "ATTACH DATABASE ':memory:' AS training;\n\nCREATE TABLE training.learners (learner_id INTEGER PRIMARY KEY, learner_name TEXT NOT NULL);\n\nINSERT INTO training.learners VALUES (1, 'Asha');\n\nSELECT name FROM training.sqlite_master WHERE type = 'table';\n\nDETACH DATABASE training;",
+    "resetCode": "ATTACH DATABASE ':memory:' AS training;\n\nCREATE TABLE training.learners (learner_id INTEGER PRIMARY KEY, learner_name TEXT NOT NULL);\n\nINSERT INTO training.learners VALUES (1, 'Asha');\n\nSELECT name FROM training.sqlite_master WHERE type = 'table';\n\nDETACH DATABASE training;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql3.1-q1",
+        "prompt": "Which command creates a database in many server DBMS products?",
+        "options": [
+          "CREATE DATABASE",
+          "CREATE TABLE",
+          "INSERT DATABASE",
+          "ADD SCHEMA FILE"
+        ],
+        "answer": "CREATE DATABASE",
+        "explanation": "CREATE DATABASE is supported by many server products, but SQLite uses database files and does not implement that statement."
+      },
+      {
+        "id": "sql3.1-q2",
+        "prompt": "Which command selects a database in MySQL?",
+        "options": [
+          "USE database_name",
+          "SELECT DATABASE_FILE",
+          "OPEN DATABASE",
+          "ATTACH TABLE"
+        ],
+        "answer": "USE database_name",
+        "explanation": "MySQL uses USE to select the default database for a session."
+      },
+      {
+        "id": "sql3.1-q3",
+        "prompt": "How does SQLite commonly create a database?",
+        "options": [
+          "By opening or creating a database file through the application or API",
+          "By running CREATE DATABASE",
+          "By running USE",
+          "By creating a schema in a cloud server"
+        ],
+        "answer": "By opening or creating a database file through the application or API",
+        "explanation": "SQLite databases are files; its SQL language does not include server-style CREATE DATABASE or USE."
+      },
+      {
+        "id": "sql3.1-q4",
+        "prompt": "What does ATTACH DATABASE do in SQLite?",
+        "options": [
+          "Makes another database available under a schema name for the connection",
+          "Deletes the main database",
+          "Creates a SQL user",
+          "Starts a transaction"
+        ],
+        "answer": "Makes another database available under a schema name for the connection",
+        "explanation": "ATTACH adds another database to the current SQLite connection."
+      },
+      {
+        "id": "sql3.1-q5",
+        "prompt": "Does DETACH DATABASE delete the underlying database file?",
+        "options": [
+          "No",
+          "Yes, always",
+          "Only if the table is empty",
+          "Only in MySQL"
+        ],
+        "answer": "No",
+        "explanation": "DETACH only removes the database from the connection; it is not a file deletion command."
+      }
+    ]
+  },
+  "status": "draft"
+}

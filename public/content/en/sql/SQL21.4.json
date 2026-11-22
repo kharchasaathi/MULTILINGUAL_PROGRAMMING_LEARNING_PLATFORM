@@ -1,0 +1,161 @@
+{
+  "id": "sql.sql21.4.en",
+  "courseId": "sql",
+  "moduleId": "SQL21",
+  "topicId": "SQL21.4",
+  "title": "Storage Maintenance and Database Statistics",
+  "language": "en",
+  "learningObjectives": [
+    "Explain why database maintenance is scheduled.",
+    "Use ANALYZE to collect SQLite planner statistics.",
+    "Use PRAGMA optimize as an engine-specific maintenance entry point.",
+    "Inspect query plans after maintenance.",
+    "Recognize the storage and locking implications of maintenance operations."
+  ],
+  "prerequisites": [
+    "SQL3.3",
+    "SQL11.1",
+    "SQL15.5",
+    "SQL18.5",
+    "SQL20.5"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Database maintenance keeps storage structures and planner statistics in a useful state as data changes. Maintenance tasks must be selected for the target engine and run with an awareness of workload impact.",
+      "whyItMatters": "Outdated statistics or fragmented storage can affect query planning and resource use, while poorly timed maintenance can compete with application traffic.",
+      "analogy": "A library periodically re-shelves books and updates its catalogue so items remain easy to find.",
+      "analogyLimit": "SQLite commands such as ANALYZE and PRAGMA optimize do not map one-to-one to maintenance commands in PostgreSQL, MySQL or SQL Server."
+    },
+    "explain": {
+      "narrative": "## Statistics and query planning\nThe optimizer estimates how many rows a predicate will match and compares possible plans. ANALYZE collects table and index statistics that can improve those estimates. SQLite stores statistics in internal tables such as sqlite_stat1.\n\n## PRAGMA optimize\nPRAGMA optimize is SQLite's recommended entry point for targeted optimization work. It may decide that analysis is useful based on database history and version; it does not necessarily perform work every time.\n\n## Maintenance scheduling\nMaintenance can consume CPU, disk I/O and locks. Schedule it based on workload and engine guidance, monitor duration and failures, and verify query plans after significant data changes. Never assume a maintenance command improves every query.\n\n### Statistics row shape\nSQLite may store both table-wide and index-specific statistics in sqlite_stat1. The exact rows depend on which objects were analyzed and whether statistics are available. Query the idx column explicitly when a lesson needs to isolate an index's statistics.",
+      "examples": [
+        {
+          "id": "sql214-ex1",
+          "language": "en",
+          "title": "Create an event table for maintenance examples",
+          "code": "CREATE TABLE ops21_events (event_id INTEGER PRIMARY KEY, event_type TEXT NOT NULL, event_day TEXT NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "Creates a table whose event_type column will be indexed for a common filter pattern.",
+          "runnable": true
+        },
+        {
+          "id": "sql214-ex2",
+          "language": "en",
+          "title": "Generate a representative event set",
+          "code": "WITH RECURSIVE seq(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM seq WHERE n < 50) INSERT INTO ops21_events SELECT n, CASE WHEN n % 2 = 0 THEN 'login' ELSE 'payment' END, '2026-11-' || printf('%02d', (n % 28) + 1) FROM seq;",
+          "expectedOutput": "50 rows inserted",
+          "explanation": "Generates 50 deterministic sample rows. This is a small test fixture; production plan decisions require representative data volume and distribution.",
+          "runnable": true
+        },
+        {
+          "id": "sql214-ex3",
+          "language": "en",
+          "title": "Create an index for event-type filtering",
+          "code": "CREATE INDEX idx_ops21_event_type ON ops21_events(event_type);",
+          "expectedOutput": "Index created",
+          "explanation": "Adds an index that the planner may use for event_type predicates. Every index adds storage and write-maintenance cost.",
+          "runnable": true
+        },
+        {
+          "id": "sql214-ex4",
+          "language": "en",
+          "title": "Collect statistics and inspect the recorded table/index entry",
+          "code": "ANALYZE ops21_events; SELECT tbl, idx FROM sqlite_stat1 WHERE tbl = 'ops21_events' AND idx IS NOT NULL ORDER BY idx;",
+          "expectedOutput": "ops21_events | idx_ops21_event_type",
+          "explanation": "Runs ANALYZE and reads the index-specific SQLite statistics row. The idx IS NOT NULL filter deliberately excludes a possible table-wide statistics row, keeping this example focused on the created index. Statistics details and row availability depend on the analyzed schema and data.",
+          "runnable": true
+        },
+        {
+          "id": "sql214-ex5",
+          "language": "en",
+          "title": "Run SQLite's optimization entry point and verify source rows remain",
+          "code": "PRAGMA optimize; SELECT COUNT(*) AS event_rows FROM ops21_events;",
+          "expectedOutput": "event_rows = 50",
+          "explanation": "Runs PRAGMA optimize, which may perform targeted analysis depending on engine version and history, then verifies the table still contains 50 events. Maintenance should not change the logical business rows.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run ANALYZE and PRAGMA optimize. Inspect sqlite_stat1 and explain why its exact statistics values should not be used as a fixed expected output across every dataset.",
+      "independentTask": "Choose a frequently filtered table from a project. Propose an index, gather statistics, compare EXPLAIN QUERY PLAN before and after, and document write/storage trade-offs.",
+      "hints": [
+        "Statistics help the optimizer estimate row counts.",
+        "ANALYZE gathers table and index statistics in SQLite.",
+        "PRAGMA optimize may do nothing when no work is needed.",
+        "Use representative data when comparing plans.",
+        "Maintenance consumes resources and should be scheduled."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE ops21_events (event_id INTEGER PRIMARY KEY, event_type TEXT NOT NULL);\nINSERT INTO ops21_events VALUES (1, 'login'), (2, 'payment'), (3, 'login');\nCREATE INDEX idx_ops21_event_type ON ops21_events(event_type);\nANALYZE ops21_events;\nEXPLAIN QUERY PLAN SELECT event_id FROM ops21_events WHERE event_type = 'login';",
+    "resetCode": "CREATE TABLE ops21_events (event_id INTEGER PRIMARY KEY, event_type TEXT NOT NULL);\nINSERT INTO ops21_events VALUES (1, 'login'), (2, 'payment'), (3, 'login');\nCREATE INDEX idx_ops21_event_type ON ops21_events(event_type);\nANALYZE ops21_events;\nEXPLAIN QUERY PLAN SELECT event_id FROM ops21_events WHERE event_type = 'login';"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql214-q1",
+        "prompt": "What does ANALYZE collect in SQLite?",
+        "options": [
+          "Statistics used by the query planner",
+          "User passwords",
+          "CSV delimiters",
+          "Backup encryption keys"
+        ],
+        "answer": "Statistics used by the query planner",
+        "explanation": "Statistics help the optimizer estimate candidate plan costs."
+      },
+      {
+        "id": "sql214-q2",
+        "prompt": "Does PRAGMA optimize always change the database?",
+        "options": [
+          "No; it may decide no optimization work is needed",
+          "Yes, it always rebuilds every index",
+          "Only when there are no tables",
+          "It deletes all statistics"
+        ],
+        "answer": "No; it may decide no optimization work is needed",
+        "explanation": "Its actions depend on database history and engine version."
+      },
+      {
+        "id": "sql214-q3",
+        "prompt": "Why use representative data for plan testing?",
+        "options": [
+          "Data volume and distribution influence optimizer choices",
+          "It makes SQL keywords case-sensitive",
+          "It disables foreign keys",
+          "It guarantees a specific plan string"
+        ],
+        "answer": "Data volume and distribution influence optimizer choices",
+        "explanation": "A tiny fixture can lead to a different plan from production."
+      },
+      {
+        "id": "sql214-q4",
+        "prompt": "What is a cost of adding indexes?",
+        "options": [
+          "More storage and write-maintenance work",
+          "Automatic encryption",
+          "Removal of all table scans",
+          "Guaranteed faster inserts"
+        ],
+        "answer": "More storage and write-maintenance work",
+        "explanation": "Indexes must be maintained as rows change."
+      },
+      {
+        "id": "sql214-q5",
+        "prompt": "What should follow a major data or schema change?",
+        "options": [
+          "Recheck plans and measure important workloads",
+          "Assume every query is faster",
+          "Drop all constraints",
+          "Remove ORDER BY clauses"
+        ],
+        "answer": "Recheck plans and measure important workloads",
+        "explanation": "Plan and performance behaviour can change as the data changes."
+      }
+    ]
+  },
+  "status": "draft"
+}

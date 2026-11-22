@@ -1,0 +1,161 @@
+{
+  "id": "sql.sql21.5.en",
+  "courseId": "sql",
+  "moduleId": "SQL21",
+  "topicId": "SQL21.5",
+  "title": "High Availability, Replication and Disaster Recovery",
+  "language": "en",
+  "learningObjectives": [
+    "Distinguish high availability from backup and disaster recovery.",
+    "Explain primary and replica roles at a conceptual level.",
+    "Measure a recorded replication checkpoint delay.",
+    "Define recovery point and recovery time objectives.",
+    "Use restore-test records to assess recovery readiness."
+  ],
+  "prerequisites": [
+    "SQL3.3",
+    "SQL11.1",
+    "SQL15.5",
+    "SQL18.5",
+    "SQL20.5"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "High availability reduces service interruption, replication copies changes between database instances, and disaster recovery restores service after a major failure. They solve related but different operational problems.",
+      "whyItMatters": "A replica can copy accidental deletion or corruption, while a backup can be too old or untested. Reliable recovery needs multiple controls and measurable objectives.",
+      "analogy": "A second power source keeps a building running during an outage, while an emergency plan restores operations after the building is damaged.",
+      "analogyLimit": "A SQLite table that records replica checkpoints or restore tests is only a teaching model; it does not implement replication, failover or disaster recovery."
+    },
+    "explain": {
+      "narrative": "## Availability and replication\nHigh availability aims to keep a service available during component failures. Replication maintains copies of database changes on other nodes, but replication lag and failover correctness must be monitored. Replication is not a substitute for independent backups.\n\n## RPO and RTO\nRecovery Point Objective (RPO) describes the maximum acceptable data-loss window. Recovery Time Objective (RTO) describes the target time to restore service. Both should be defined by business impact and tested during recovery exercises.\n\n## Disaster recovery evidence\nRecord restore drills, measured RPO/RTO, validation outcome and responsible operator. A successful test should verify application-level data and service behaviour, not merely that a database file opened.\n\n## Engine boundary\nSQLite is an embedded database and does not provide a built-in server replication/failover cluster. Its journal/WAL and backup facilities solve different problems. PostgreSQL, MySQL and SQL Server provide product-specific replication and HA technologies that require separate configuration and operational testing.",
+      "examples": [
+        {
+          "id": "sql215-ex1",
+          "language": "en",
+          "title": "Create a restore-drill history table",
+          "code": "CREATE TABLE ops21_restore_drills (drill_id INTEGER PRIMARY KEY, tested_at TEXT NOT NULL, restore_status TEXT NOT NULL CHECK (restore_status IN ('passed','failed')), rpo_minutes INTEGER NOT NULL CHECK (rpo_minutes >= 0), rto_minutes INTEGER NOT NULL CHECK (rto_minutes >= 0));",
+          "expectedOutput": "Table created",
+          "explanation": "Stores measured recovery exercise outcomes. RPO and RTO are recorded as minutes for this teaching example; production records should also identify the recovery scope and tested backup chain.",
+          "runnable": true
+        },
+        {
+          "id": "sql215-ex2",
+          "language": "en",
+          "title": "Record three recovery exercises",
+          "code": "INSERT INTO ops21_restore_drills VALUES (1, '2026-10-01T08:00:00Z', 'passed', 15, 42), (2, '2026-11-01T08:00:00Z', 'failed', 60, 0), (3, '2026-11-20T08:00:00Z', 'passed', 10, 35);",
+          "expectedOutput": "3 rows inserted",
+          "explanation": "Records two successful restore drills and one failed drill. A failed test should trigger corrective work and a repeat test rather than being hidden by a later successful record.",
+          "runnable": true
+        },
+        {
+          "id": "sql215-ex3",
+          "language": "en",
+          "title": "Read the most recent recovery exercise",
+          "code": "SELECT tested_at, restore_status, rpo_minutes, rto_minutes FROM ops21_restore_drills ORDER BY tested_at DESC LIMIT 1;",
+          "expectedOutput": "2026-11-20T08:00:00Z | passed | 10 | 35",
+          "explanation": "Returns the latest drill. The measured RPO is 10 minutes and RTO is 35 minutes; compare these values with approved business objectives.",
+          "runnable": true
+        },
+        {
+          "id": "sql215-ex4",
+          "language": "en",
+          "title": "Count failed recovery exercises",
+          "code": "SELECT COUNT(*) AS failed_drills FROM ops21_restore_drills WHERE restore_status = 'failed';",
+          "expectedOutput": "failed_drills = 1",
+          "explanation": "Counts failed restore exercises. An operational dashboard should alert on failures and track remediation to closure.",
+          "runnable": true
+        },
+        {
+          "id": "sql215-ex5",
+          "language": "en",
+          "title": "Estimate replica checkpoint delay from recorded timestamps",
+          "code": "CREATE TABLE ops21_replica_checkpoints (replica_name TEXT PRIMARY KEY, last_applied_at TEXT NOT NULL); INSERT INTO ops21_replica_checkpoints VALUES ('replica-east', '2026-11-22T09:55:00Z'); SELECT CAST(ROUND((julianday('2026-11-22T10:00:00Z') - julianday(last_applied_at)) * 1440, 0) AS INTEGER) AS lag_minutes FROM ops21_replica_checkpoints WHERE replica_name = 'replica-east';",
+          "expectedOutput": "5",
+          "explanation": "Calculates a five-minute difference between a reference primary timestamp and a recorded replica checkpoint. This is a metadata calculation only; it does not create or monitor an actual replica and the reference timestamp must come from a trusted clock.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the restore-drill examples and compare the latest RPO/RTO with a hypothetical target of 15 minutes RPO and 45 minutes RTO. Explain why the failed drill still requires remediation.",
+      "independentTask": "Design an HA and disaster-recovery scorecard with replica lag, last successful backup, latest restore test, RPO, RTO and unresolved failures. State which values require a real DBMS/monitoring integration.",
+      "hints": [
+        "HA, replication and backup/recovery are different controls.",
+        "A replica may reproduce accidental changes or corruption.",
+        "RPO measures acceptable data loss; RTO measures restore time.",
+        "Record and remediate failed restore tests.",
+        "SQLite checkpoint metadata does not implement replication."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE ops21_restore_drills (drill_id INTEGER PRIMARY KEY, tested_at TEXT NOT NULL, restore_status TEXT NOT NULL, rpo_minutes INTEGER NOT NULL, rto_minutes INTEGER NOT NULL);\nINSERT INTO ops21_restore_drills VALUES (1, '2026-11-01T08:00:00Z', 'passed', 10, 35), (2, '2026-11-20T08:00:00Z', 'failed', 60, 0);\nSELECT tested_at, restore_status, rpo_minutes, rto_minutes FROM ops21_restore_drills ORDER BY tested_at DESC;",
+    "resetCode": "CREATE TABLE ops21_restore_drills (drill_id INTEGER PRIMARY KEY, tested_at TEXT NOT NULL, restore_status TEXT NOT NULL, rpo_minutes INTEGER NOT NULL, rto_minutes INTEGER NOT NULL);\nINSERT INTO ops21_restore_drills VALUES (1, '2026-11-01T08:00:00Z', 'passed', 10, 35), (2, '2026-11-20T08:00:00Z', 'failed', 60, 0);\nSELECT tested_at, restore_status, rpo_minutes, rto_minutes FROM ops21_restore_drills ORDER BY tested_at DESC;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql215-q1",
+        "prompt": "What does RPO measure?",
+        "options": [
+          "The acceptable data-loss window",
+          "The time to display a query result",
+          "The number of database tables",
+          "The number of replica servers only"
+        ],
+        "answer": "The acceptable data-loss window",
+        "explanation": "RPO describes how much recent data the business can afford to lose."
+      },
+      {
+        "id": "sql215-q2",
+        "prompt": "What does RTO measure?",
+        "options": [
+          "The target time to restore service",
+          "The age of the oldest SQL lesson",
+          "The number of rows in a backup table",
+          "The delay between two SELECT statements"
+        ],
+        "answer": "The target time to restore service",
+        "explanation": "RTO is the target recovery duration."
+      },
+      {
+        "id": "sql215-q3",
+        "prompt": "Is replication a substitute for independent backups?",
+        "options": [
+          "No; replicas can copy accidental deletion or corruption",
+          "Yes, always",
+          "Only in SQLite",
+          "Only when the replica is read-only"
+        ],
+        "answer": "No; replicas can copy accidental deletion or corruption",
+        "explanation": "Backups provide a separate recovery path from live replication."
+      },
+      {
+        "id": "sql215-q4",
+        "prompt": "What should happen after a failed restore drill?",
+        "options": [
+          "Investigate, remediate and repeat the test",
+          "Delete the failed drill record",
+          "Increase the RPO without approval",
+          "Assume the next backup will work"
+        ],
+        "answer": "Investigate, remediate and repeat the test",
+        "explanation": "Recovery failures need tracked corrective action."
+      },
+      {
+        "id": "sql215-q5",
+        "prompt": "Does a SQLite checkpoint metadata table implement replication?",
+        "options": [
+          "No; it only stores teaching metadata",
+          "Yes, it creates a replica automatically",
+          "Yes, it configures failover",
+          "Only when indexed"
+        ],
+        "answer": "No; it only stores teaching metadata",
+        "explanation": "Actual replication requires engine-specific infrastructure and configuration."
+      }
+    ]
+  },
+  "status": "draft"
+}

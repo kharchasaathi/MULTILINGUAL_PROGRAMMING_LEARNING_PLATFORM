@@ -1,0 +1,161 @@
+{
+  "id": "sql.sql24.3.en",
+  "courseId": "sql",
+  "moduleId": "SQL24",
+  "topicId": "SQL24.3",
+  "title": "Multi-Table Business Reporting and Aggregation",
+  "language": "en",
+  "learningObjectives": [
+    "Define the intended grain of a business report.",
+    "Join customer, order and line-item data without multiplying totals accidentally.",
+    "Calculate line and order totals with aggregate functions.",
+    "Use GROUP BY and HAVING for grouped reports.",
+    "Verify report totals against source records."
+  ],
+  "prerequisites": [
+    "SQL3.2",
+    "SQL4.1",
+    "SQL8.1",
+    "SQL9.3",
+    "SQL12.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A business report combines related entities and summarizes measures at a defined level, such as one row per customer, order, product or month.",
+      "whyItMatters": "Reports drive operational and financial decisions. Incorrect join cardinality or grouping can double-count revenue and mislead decision-makers.",
+      "analogy": "A shop receipt lists individual items, while a monthly report groups those receipts into totals by customer or product.",
+      "analogyLimit": "Aggregates can hide detail and NULL values. The report must define whether cancelled, pending or returned transactions are included."
+    },
+    "explain": {
+      "narrative": "## Define the report grain\nBefore writing a query, state what one output row represents. Joining an order header to order items creates one row per line item, not one row per order. Summing an order-level total after that join can duplicate the total for every item.\n\n## Aggregate at the right level\nCalculate line revenue as quantity multiplied by unit price, then group by the desired dimension. Use HAVING to filter groups after aggregation and WHERE to filter source rows before grouping.\n\n## Reconciliation\nCompare totals with a trusted source calculation, account for cancelled or returned orders, and test customers or products with no matching rows. Keep a deterministic ORDER BY for exported reports.\n\n### Numeric precision in business reports\nFor monetary reports, use an exact DECIMAL/NUMERIC type with a defined precision and scale on engines that enforce it, or store integer minor units with an explicit currency code. Avoid floating-point storage for financial totals unless the rounding model is deliberate and documented. Apply rounding at a defined business boundary, not arbitrarily to every source row.",
+      "examples": [
+        {
+          "id": "sql243-ex1",
+          "language": "en",
+          "title": "Create customer, order and line-item tables",
+          "code": "CREATE TABLE prj24_report_customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL); CREATE TABLE prj24_report_orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL, order_status TEXT NOT NULL); CREATE TABLE prj24_report_items (item_id INTEGER PRIMARY KEY, order_id INTEGER NOT NULL, product_name TEXT NOT NULL, quantity INTEGER NOT NULL CHECK (quantity > 0), unit_price INTEGER NOT NULL CHECK (unit_price >= 0));",
+          "expectedOutput": "Tables created",
+          "explanation": "Separates customers, order headers and line items. The report's line-level revenue comes from quantity multiplied by unit_price.",
+          "runnable": true
+        },
+        {
+          "id": "sql243-ex2",
+          "language": "en",
+          "title": "Insert sample customer orders and lines",
+          "code": "INSERT INTO prj24_report_customers VALUES (1, 'Asha'), (2, 'Bilal'); INSERT INTO prj24_report_orders VALUES (101, 1, 'paid'), (102, 1, 'pending'), (103, 2, 'paid'); INSERT INTO prj24_report_items VALUES (1, 101, 'Cable', 2, 250), (2, 101, 'Notebook', 1, 60), (3, 102, 'Mouse', 1, 700), (4, 103, 'Case', 1, 400);",
+          "expectedOutput": "9 rows inserted",
+          "explanation": "Adds two customers, three orders and four lines. Order 101 has two lines with revenue 560; order 102 is pending and order 103 is paid.",
+          "runnable": true
+        },
+        {
+          "id": "sql243-ex3",
+          "language": "en",
+          "title": "Calculate paid revenue per customer",
+          "code": "SELECT c.customer_name, SUM(i.quantity * i.unit_price) AS paid_revenue FROM prj24_report_customers AS c JOIN prj24_report_orders AS o ON o.customer_id = c.customer_id JOIN prj24_report_items AS i ON i.order_id = o.order_id WHERE o.order_status = 'paid' GROUP BY c.customer_id, c.customer_name ORDER BY paid_revenue DESC, c.customer_name;",
+          "expectedOutput": "Asha | 560; Bilal | 400",
+          "explanation": "Filters to paid orders before grouping. Revenue is calculated from line items, avoiding duplication of order-header totals. For real financial reporting, use exact numeric storage or integer minor units and document currency and rounding rules.",
+          "runnable": true
+        },
+        {
+          "id": "sql243-ex4",
+          "language": "en",
+          "title": "Find customers whose paid revenue reaches 500",
+          "code": "SELECT c.customer_name, SUM(i.quantity * i.unit_price) AS paid_revenue FROM prj24_report_customers AS c JOIN prj24_report_orders AS o ON o.customer_id = c.customer_id JOIN prj24_report_items AS i ON i.order_id = o.order_id WHERE o.order_status = 'paid' GROUP BY c.customer_id, c.customer_name HAVING SUM(i.quantity * i.unit_price) >= 500 ORDER BY paid_revenue DESC;",
+          "expectedOutput": "Asha | 560",
+          "explanation": "HAVING filters grouped customer totals after SUM is calculated. Asha qualifies with 560; Bilal's 400 is excluded.",
+          "runnable": true
+        },
+        {
+          "id": "sql243-ex5",
+          "language": "en",
+          "title": "Count orders by status",
+          "code": "SELECT order_status, COUNT(*) AS order_count FROM prj24_report_orders GROUP BY order_status ORDER BY order_status;",
+          "expectedOutput": "paid | 2; pending | 1",
+          "explanation": "Counts order headers rather than line items, so the result has one count per order. Choosing the correct source table is part of defining report grain.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the report queries and explain why the paid revenue query joins line items but the order-count query does not. Reconcile Asha's total from the two lines in order 101.",
+      "independentTask": "Build a monthly revenue report by product category. Define whether pending, cancelled and returned orders are included, and test the total against a line-level calculation.",
+      "hints": [
+        "Write down one-row-per-what before grouping.",
+        "Order headers and line items have different grain.",
+        "Calculate line revenue from quantity and unit price.",
+        "Use WHERE before grouping and HAVING after grouping.",
+        "Reconcile aggregate totals against source rows."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE prj24_report_orders (order_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, order_status TEXT NOT NULL);\nCREATE TABLE prj24_report_items (item_id INTEGER PRIMARY KEY, order_id INTEGER NOT NULL, quantity INTEGER NOT NULL, unit_price INTEGER NOT NULL);\nINSERT INTO prj24_report_orders VALUES (101, 'Asha', 'paid'), (102, 'Bilal', 'paid');\nINSERT INTO prj24_report_items VALUES (1, 101, 2, 250), (2, 101, 1, 60), (3, 102, 1, 400);\nSELECT o.customer_name, SUM(i.quantity * i.unit_price) AS revenue FROM prj24_report_orders o JOIN prj24_report_items i ON i.order_id=o.order_id GROUP BY o.customer_name ORDER BY revenue DESC;",
+    "resetCode": "CREATE TABLE prj24_report_orders (order_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, order_status TEXT NOT NULL);\nCREATE TABLE prj24_report_items (item_id INTEGER PRIMARY KEY, order_id INTEGER NOT NULL, quantity INTEGER NOT NULL, unit_price INTEGER NOT NULL);\nINSERT INTO prj24_report_orders VALUES (101, 'Asha', 'paid'), (102, 'Bilal', 'paid');\nINSERT INTO prj24_report_items VALUES (1, 101, 2, 250), (2, 101, 1, 60), (3, 102, 1, 400);\nSELECT o.customer_name, SUM(i.quantity * i.unit_price) AS revenue FROM prj24_report_orders o JOIN prj24_report_items i ON i.order_id=o.order_id GROUP BY o.customer_name ORDER BY revenue DESC;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql243-q1",
+        "prompt": "What is report grain?",
+        "options": [
+          "What one output row represents",
+          "The SQL file size",
+          "The number of indexes",
+          "The database version"
+        ],
+        "answer": "What one output row represents",
+        "explanation": "Defining grain prevents incorrect aggregation and duplication."
+      },
+      {
+        "id": "sql243-q2",
+        "prompt": "Why can joining order headers to order items duplicate order totals?",
+        "options": [
+          "Each order header matches multiple line rows",
+          "A primary key cannot be joined",
+          "SUM always repeats values",
+          "ORDER BY changes totals"
+        ],
+        "answer": "Each order header matches multiple line rows",
+        "explanation": "The join result has one row per matching line item."
+      },
+      {
+        "id": "sql243-q3",
+        "prompt": "Which expression calculates line revenue?",
+        "options": [
+          "quantity * unit_price",
+          "order_id + customer_id",
+          "COUNT(*) / status",
+          "MAX(product_name)"
+        ],
+        "answer": "quantity * unit_price",
+        "explanation": "Line revenue is the quantity multiplied by the unit price."
+      },
+      {
+        "id": "sql243-q4",
+        "prompt": "When is HAVING applied?",
+        "options": [
+          "After groups are formed",
+          "Before FROM",
+          "Before WHERE",
+          "Only after LIMIT"
+        ],
+        "answer": "After groups are formed",
+        "explanation": "HAVING filters aggregated groups."
+      },
+      {
+        "id": "sql243-q5",
+        "prompt": "Which table should be counted for number of orders?",
+        "options": [
+          "Order headers",
+          "Order items",
+          "Product categories",
+          "Customer names repeated in the join"
+        ],
+        "answer": "Order headers",
+        "explanation": "One row per order is stored in the order-header table."
+      }
+    ]
+  },
+  "status": "draft"
+}

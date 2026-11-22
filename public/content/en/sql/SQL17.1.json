@@ -1,0 +1,160 @@
+{
+  "id": "sql.sql17.1.en",
+  "courseId": "sql",
+  "moduleId": "SQL17",
+  "topicId": "SQL17.1",
+  "title": "Trigger Fundamentals and AFTER INSERT",
+  "language": "en",
+  "learningObjectives": [
+    "Define a database trigger and identify its event and timing.",
+    "Describe SQLite's row-level INSERT, UPDATE and DELETE triggers.",
+    "Create an AFTER INSERT trigger that writes an audit record.",
+    "Explain the NEW reference in an INSERT trigger.",
+    "Identify the maintainability risks of hidden trigger side effects."
+  ],
+  "prerequisites": [
+    "SQL3.2",
+    "SQL3.3",
+    "SQL3.5",
+    "SQL4.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A trigger is a database object that runs automatically when a specified event occurs on a table or view. SQLite supports row-level triggers for INSERT, UPDATE and DELETE events, with BEFORE and AFTER timing.",
+      "whyItMatters": "Triggers can enforce or record rules close to the data, but hidden side effects can make applications harder to understand and test.",
+      "analogy": "A trigger is like an automatic rule attached to a data event: it runs when the specified change occurs, even if the application did not call it directly.",
+      "analogyLimit": "The analogy does not model OLD/NEW row values, transaction timing, recursive execution or DBMS-specific trigger semantics."
+    },
+    "explain": {
+      "narrative": "## What is a trigger?\nA trigger is stored SQL that executes automatically when its defined event occurs. SQLite supports BEFORE and AFTER triggers for INSERT, UPDATE and DELETE on tables, and INSTEAD OF triggers on views.\n\n## AFTER INSERT\nAn AFTER INSERT trigger runs after a row has been inserted successfully. A common use is writing an audit record that captures the new row's key and event time.\n\n## Use triggers deliberately\nTriggers can centralize data-side effects, but they are less visible than application code. Document trigger behaviour, test it with the application workflow and avoid duplicating business logic in multiple layers.\n\n### Event and row context\nAn AFTER INSERT trigger runs after each qualifying row has been inserted. SQLite exposes the inserted row through NEW; OLD is not available for INSERT events. A trigger has no independent COMMIT boundary: its work is part of the statement's transaction, so a trigger error can cause the statement to fail.\n\n### Design checks\nUse a narrow WHEN condition where possible, keep audit writes small, and test multi-row INSERT statements because row triggers can run once per affected row. Do not assume identical trigger syntax or timing across database products.",
+      "examples": [
+        {
+          "id": "sql17.1-ex1",
+          "language": "en",
+          "title": "Create an orders table",
+          "code": "CREATE TABLE trg17_orders (order_id INTEGER PRIMARY KEY, customer TEXT NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "Defines the orders table used by the trigger example. The INTEGER PRIMARY KEY identifies each order; customer is required, so an insert that omits it or supplies NULL is rejected.",
+          "runnable": true
+        },
+        {
+          "id": "sql17.1-ex2",
+          "language": "en",
+          "title": "Create an audit table",
+          "code": "CREATE TABLE trg17_order_audit (audit_id INTEGER PRIMARY KEY, order_id INTEGER NOT NULL, action_name TEXT NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "Stores a durable audit record independently of the live orders table. The audit row deliberately stores the order identifier and event name rather than referencing the order with a foreign key, so the audit can remain after a later order deletion.",
+          "runnable": true
+        },
+        {
+          "id": "sql17.1-ex3",
+          "language": "en",
+          "title": "Create an AFTER INSERT trigger",
+          "code": "CREATE TRIGGER trg17_order_insert AFTER INSERT ON trg17_orders BEGIN INSERT INTO trg17_order_audit(order_id, action_name) VALUES (NEW.order_id, 'INSERT'); END;",
+          "expectedOutput": "Trigger created",
+          "explanation": "Attaches an AFTER INSERT trigger to trg17_orders. Once an order row has been inserted successfully, NEW.order_id supplies its generated or explicit key and the trigger writes one audit row. The trigger body is part of the same statement transaction.",
+          "runnable": true
+        },
+        {
+          "id": "sql17.1-ex4",
+          "language": "en",
+          "title": "Insert an order",
+          "code": "INSERT INTO trg17_orders VALUES (1, 'Asha');",
+          "expectedOutput": "1 row inserted",
+          "explanation": "Inserts one order. Because the AFTER INSERT trigger fires for this row, the database also inserts an audit record with order_id 1 and action_name INSERT before the statement completes.",
+          "runnable": true
+        },
+        {
+          "id": "sql17.1-ex5",
+          "language": "en",
+          "title": "Read the automatically created audit row",
+          "code": "SELECT order_id, action_name FROM trg17_order_audit;",
+          "expectedOutput": "1 | INSERT",
+          "explanation": "Reads the audit table to verify the side effect. The expected row proves that the trigger copied the inserted order key and recorded the event; it does not mean the audit table is a separate transaction.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and trace how inserting one order automatically creates one audit record.",
+      "independentTask": "Create a customer table and an AFTER INSERT trigger that writes a minimal audit row containing the new customer ID and action name.",
+      "hints": [
+        "A trigger is attached to a table or view.",
+        "AFTER INSERT runs after a successful row insertion.",
+        "NEW refers to the inserted row's values.",
+        "Keep audit records small and avoid storing secrets unnecessarily.",
+        "Document trigger side effects for application developers."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE trg17_orders (order_id INTEGER PRIMARY KEY, customer TEXT NOT NULL);\nCREATE TABLE trg17_order_audit (audit_id INTEGER PRIMARY KEY, order_id INTEGER NOT NULL, action_name TEXT NOT NULL);\nCREATE TRIGGER trg17_order_insert AFTER INSERT ON trg17_orders BEGIN INSERT INTO trg17_order_audit(order_id, action_name) VALUES (NEW.order_id, 'INSERT'); END;\nINSERT INTO trg17_orders VALUES (1, 'Asha');\nSELECT order_id, action_name FROM trg17_order_audit;",
+    "resetCode": "CREATE TABLE trg17_orders (order_id INTEGER PRIMARY KEY, customer TEXT NOT NULL);\nCREATE TABLE trg17_order_audit (audit_id INTEGER PRIMARY KEY, order_id INTEGER NOT NULL, action_name TEXT NOT NULL);\nCREATE TRIGGER trg17_order_insert AFTER INSERT ON trg17_orders BEGIN INSERT INTO trg17_order_audit(order_id, action_name) VALUES (NEW.order_id, 'INSERT'); END;\nINSERT INTO trg17_orders VALUES (1, 'Asha');\nSELECT order_id, action_name FROM trg17_order_audit;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql17.1-q1",
+        "prompt": "What is a database trigger?",
+        "options": [
+          "Stored SQL that runs automatically when a defined event occurs",
+          "A query that must be run manually",
+          "A type of index",
+          "A database backup"
+        ],
+        "answer": "Stored SQL that runs automatically when a defined event occurs",
+        "explanation": "Triggers execute automatically when their event and timing conditions are met."
+      },
+      {
+        "id": "sql17.1-q2",
+        "prompt": "Which events can SQLite table triggers respond to?",
+        "options": [
+          "INSERT, UPDATE and DELETE",
+          "SELECT only",
+          "CREATE DATABASE only",
+          "COMMIT only"
+        ],
+        "answer": "INSERT, UPDATE and DELETE",
+        "explanation": "SQLite table triggers support INSERT, UPDATE and DELETE events."
+      },
+      {
+        "id": "sql17.1-q3",
+        "prompt": "When does an AFTER INSERT trigger run?",
+        "options": [
+          "After a row is successfully inserted",
+          "Before the database file opens",
+          "Only when a SELECT runs",
+          "After every transaction"
+        ],
+        "answer": "After a row is successfully inserted",
+        "explanation": "AFTER INSERT runs after the insert operation."
+      },
+      {
+        "id": "sql17.1-q4",
+        "prompt": "What does NEW refer to in an INSERT trigger?",
+        "options": [
+          "The row being inserted",
+          "The previous table definition",
+          "The last database backup",
+          "The old row before deletion"
+        ],
+        "answer": "The row being inserted",
+        "explanation": "NEW exposes values from the new row."
+      },
+      {
+        "id": "sql17.1-q5",
+        "prompt": "What is one risk of triggers?",
+        "options": [
+          "They can create hidden side effects that are harder to trace",
+          "They cannot run automatically",
+          "They always delete indexes",
+          "They disable transactions"
+        ],
+        "answer": "They can create hidden side effects that are harder to trace",
+        "explanation": "Automatic side effects need documentation and testing."
+      }
+    ]
+  },
+  "status": "draft"
+}

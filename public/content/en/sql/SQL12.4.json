@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql12.4.en",
+  "courseId": "sql",
+  "moduleId": "SQL12",
+  "topicId": "SQL12.4",
+  "title": "SAVEPOINT, ROLLBACK TO and RELEASE",
+  "language": "en",
+  "learningObjectives": [
+    "Create a named savepoint inside a transaction.",
+    "Use ROLLBACK TO to undo only work after a savepoint.",
+    "Use RELEASE to remove a savepoint marker.",
+    "Explain why releasing a savepoint does not commit the outer transaction.",
+    "Design a partial-recovery workflow for optional database work."
+  ],
+  "prerequisites": [
+    "SQL3.3",
+    "SQL3.5",
+    "SQL4.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A savepoint marks a named position inside a transaction. ROLLBACK TO returns the transaction to that position without ending the outer transaction. RELEASE removes the savepoint marker; the outer transaction still needs COMMIT or ROLLBACK.",
+      "whyItMatters": "Savepoints support partial recovery inside a larger operation, allowing an application to undo one optional step while keeping earlier valid work.",
+      "analogy": "A transaction is like a sealed work packet: its related steps are accepted together or returned for correction.",
+      "analogyLimit": "The analogy does not model SQL locking, isolation levels, storage durability or engine-specific transaction implementation."
+    },
+    "explain": {
+      "narrative": "## Savepoints\nSAVEPOINT name creates a named marker within the current transaction. ROLLBACK TO name undoes work performed after that marker while leaving the outer transaction active. RELEASE name removes the marker.\n\n## Nested work is not an independent commit\nSQLite savepoints can be nested. Releasing an inner savepoint does not commit the outer transaction. The outermost transaction is completed by COMMIT or ROLLBACK.\n\n## Practical workflow\nUse a savepoint around an optional sub-operation. If it fails, roll back to the savepoint and continue with the valid outer work. If it succeeds, release the savepoint and commit the transaction when all required work is complete.\n\n### Savepoint scope\nSAVEPOINT creates a named rollback marker within the current transaction. ROLLBACK TO rewinds changes made after the marker but keeps the transaction open. RELEASE removes the marker; releasing the outermost savepoint can complete the transaction, but releasing an inner savepoint does not commit the outer transaction.\n\n### Practical use\nUse savepoints for optional sub-operations that can fail independently while the main business operation remains valid. Give savepoints clear names, release them deliberately, and ensure the outer transaction still ends with COMMIT or ROLLBACK.",
+      "examples": [
+        {
+          "id": "sql12.4-ex1",
+          "language": "en",
+          "title": "Create a table for staged work",
+          "code": "CREATE TABLE tx12_save_items (item_id INTEGER PRIMARY KEY, item_name TEXT NOT NULL, quantity INTEGER NOT NULL); INSERT INTO tx12_save_items VALUES (1, 'Base item', 10);",
+          "expectedOutput": "Table created; 1 row inserted",
+          "explanation": "Creates the table and inserts a baseline row. The baseline is outside the later transaction, so it should remain even when optional work is rolled back.",
+          "runnable": true
+        },
+        {
+          "id": "sql12.4-ex2",
+          "language": "en",
+          "title": "Begin a transaction and add a required row",
+          "code": "BEGIN; INSERT INTO tx12_save_items VALUES (2, 'Required item', 5);",
+          "expectedOutput": "1 row inserted",
+          "explanation": "Begins an outer transaction and inserts a required row. This row is before the savepoint and therefore remains after a rollback to that later marker.",
+          "runnable": true
+        },
+        {
+          "id": "sql12.4-ex3",
+          "language": "en",
+          "title": "Create a savepoint before optional work",
+          "code": "SAVEPOINT optional_step; INSERT INTO tx12_save_items VALUES (3, 'Optional item', 2);",
+          "expectedOutput": "Savepoint created; 1 row inserted",
+          "explanation": "Creates a named savepoint, then inserts optional work. The savepoint marks the point to which the current transaction can partially rewind; it is not an independent nested commit.",
+          "runnable": true
+        },
+        {
+          "id": "sql12.4-ex4",
+          "language": "en",
+          "title": "Roll back only the optional work and release the marker",
+          "code": "ROLLBACK TO optional_step; RELEASE optional_step; SELECT item_id, item_name FROM tx12_save_items ORDER BY item_id;",
+          "expectedOutput": "1 | Base item; 2 | Required item",
+          "explanation": "ROLLBACK TO removes the optional row but leaves the outer transaction active. RELEASE removes the savepoint marker, and the SELECT shows the baseline and required rows still present.",
+          "runnable": true
+        },
+        {
+          "id": "sql12.4-ex5",
+          "language": "en",
+          "title": "Commit the outer transaction",
+          "code": "COMMIT; SELECT COUNT(*) AS saved_rows FROM tx12_save_items;",
+          "expectedOutput": "saved_rows = 2",
+          "explanation": "Commits the outer transaction and counts the saved rows. The count of two confirms that the baseline and required row were committed while the optional row was discarded.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Insert a required row, create a savepoint, insert an optional row, roll back to the savepoint, release it, and commit the required work.",
+      "independentTask": "Build a transaction that records an order and then attempts an optional discount allocation. Use a savepoint so the order can still be committed if the discount step is abandoned.",
+      "hints": [
+        "A savepoint exists inside an outer transaction.",
+        "ROLLBACK TO keeps the outer transaction active.",
+        "RELEASE removes a savepoint marker but does not commit the outer transaction.",
+        "After rollback to a savepoint, release it when no longer needed.",
+        "Finish the outer transaction with COMMIT or ROLLBACK."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE tx12_save_items (item_id INTEGER PRIMARY KEY, item_name TEXT NOT NULL, quantity INTEGER NOT NULL);\nINSERT INTO tx12_save_items VALUES (1, 'Base item', 10);\nBEGIN;\nINSERT INTO tx12_save_items VALUES (2, 'Required item', 5);\nSAVEPOINT optional_step;\nINSERT INTO tx12_save_items VALUES (3, 'Optional item', 2);\nROLLBACK TO optional_step;\nRELEASE optional_step;\nCOMMIT;\nSELECT item_id, item_name FROM tx12_save_items ORDER BY item_id;",
+    "resetCode": "CREATE TABLE tx12_save_items (item_id INTEGER PRIMARY KEY, item_name TEXT NOT NULL, quantity INTEGER NOT NULL);\nINSERT INTO tx12_save_items VALUES (1, 'Base item', 10);\nBEGIN;\nINSERT INTO tx12_save_items VALUES (2, 'Required item', 5);\nSAVEPOINT optional_step;\nINSERT INTO tx12_save_items VALUES (3, 'Optional item', 2);\nROLLBACK TO optional_step;\nRELEASE optional_step;\nCOMMIT;\nSELECT item_id, item_name FROM tx12_save_items ORDER BY item_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql12.4-q1",
+        "prompt": "Which statement creates a named savepoint?",
+        "options": [
+          "SAVEPOINT name",
+          "BEGIN name",
+          "COMMIT name",
+          "CREATE INDEX name"
+        ],
+        "answer": "SAVEPOINT name",
+        "explanation": "SAVEPOINT creates a named marker within the active transaction."
+      },
+      {
+        "id": "sql12.4-q2",
+        "prompt": "What does ROLLBACK TO do?",
+        "options": [
+          "Undo changes after a savepoint while keeping the outer transaction active",
+          "Commit the whole transaction",
+          "Delete the savepoint's table",
+          "Close the database connection"
+        ],
+        "answer": "Undo changes after a savepoint while keeping the outer transaction active",
+        "explanation": "ROLLBACK TO returns to the savepoint and leaves the outer transaction active."
+      },
+      {
+        "id": "sql12.4-q3",
+        "prompt": "Does RELEASE savepoint commit the outer transaction?",
+        "options": [
+          "No",
+          "Yes, always",
+          "Only when the savepoint is named main",
+          "Only when no rows were inserted"
+        ],
+        "answer": "No",
+        "explanation": "RELEASE removes the marker; the outer transaction still needs COMMIT or ROLLBACK."
+      },
+      {
+        "id": "sql12.4-q4",
+        "prompt": "What is a useful savepoint use case?",
+        "options": [
+          "Undo an optional sub-operation while preserving earlier required work",
+          "Back up the entire database file",
+          "Create a primary key",
+          "Change a column's data type"
+        ],
+        "answer": "Undo an optional sub-operation while preserving earlier required work",
+        "explanation": "Savepoints allow partial recovery inside a larger transaction."
+      },
+      {
+        "id": "sql12.4-q5",
+        "prompt": "How is the outer transaction completed after savepoint work?",
+        "options": [
+          "With COMMIT or ROLLBACK",
+          "With RELEASE only",
+          "With SELECT",
+          "With PRAGMA table_info"
+        ],
+        "answer": "With COMMIT or ROLLBACK",
+        "explanation": "The outer transaction still needs an explicit completion statement."
+      }
+    ]
+  },
+  "status": "draft"
+}

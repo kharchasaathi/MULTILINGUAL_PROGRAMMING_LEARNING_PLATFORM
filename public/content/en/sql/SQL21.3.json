@@ -1,0 +1,161 @@
+{
+  "id": "sql.sql21.3.en",
+  "courseId": "sql",
+  "moduleId": "SQL21",
+  "topicId": "SQL21.3",
+  "title": "Database Monitoring, Logs and Integrity Checks",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose of routine database health checks.",
+    "Run SQLite integrity and foreign-key checks.",
+    "Inspect database schema metadata for operational diagnostics.",
+    "Record non-secret operational events.",
+    "Distinguish diagnostic queries from monitoring and alerting systems."
+  ],
+  "prerequisites": [
+    "SQL3.3",
+    "SQL11.1",
+    "SQL15.5",
+    "SQL18.5",
+    "SQL20.5"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Database monitoring observes health, availability, errors, resource use and data integrity over time. SQL diagnostics can inspect the current database state, while a monitoring system collects and alerts on those observations.",
+      "whyItMatters": "A database may continue responding while data integrity, storage, query performance or backup health is deteriorating.",
+      "analogy": "A vehicle dashboard shows warning indicators, while a mechanic investigates the underlying fault.",
+      "analogyLimit": "A one-time integrity query is not continuous monitoring, and SQLite-specific PRAGMA checks are not interchangeable with server DBMS monitoring views."
+    },
+    "explain": {
+      "narrative": "## Health checks\nIntegrity checks detect structural corruption; foreign-key checks find referential violations; schema inspection confirms expected objects exist. Run them on a schedule appropriate to the database and workload, and investigate non-healthy results.\n\n## Operational events\nRecord non-secret events such as import failures, maintenance completion and restore-test outcomes. Avoid logging passwords, tokens, encryption keys or unnecessary personal data.\n\n## Monitoring versus diagnosis\nA diagnostic SELECT reports what is true at query time. Monitoring adds collection cadence, thresholds, alert routing, retention and an operator response process. For server databases, use the product's system catalog, performance views and log facilities.",
+      "examples": [
+        {
+          "id": "sql213-ex1",
+          "language": "en",
+          "title": "Create parent and child tables with a foreign key",
+          "code": "PRAGMA foreign_keys = ON; CREATE TABLE ops21_departments (department_id INTEGER PRIMARY KEY, department_name TEXT NOT NULL UNIQUE); CREATE TABLE ops21_staff (staff_id INTEGER PRIMARY KEY, staff_name TEXT NOT NULL, department_id INTEGER NOT NULL REFERENCES ops21_departments(department_id));",
+          "expectedOutput": "Tables created",
+          "explanation": "Enables foreign-key enforcement for this SQLite connection and creates related tables. SQLite foreign-key enforcement is connection-specific; verify it is enabled for every connection that writes these tables.",
+          "runnable": true
+        },
+        {
+          "id": "sql213-ex2",
+          "language": "en",
+          "title": "Insert valid parent and child rows",
+          "code": "INSERT INTO ops21_departments VALUES (1, 'Sales'), (2, 'Support'); INSERT INTO ops21_staff VALUES (1, 'Asha', 1), (2, 'Bilal', 2), (3, 'Chitra', 1);",
+          "expectedOutput": "5 rows inserted",
+          "explanation": "Inserts two departments and three staff rows. Parent records are created before child records so the foreign-key references are valid.",
+          "runnable": true
+        },
+        {
+          "id": "sql213-ex3",
+          "language": "en",
+          "title": "Run SQLite's structural integrity check",
+          "code": "PRAGMA integrity_check;",
+          "expectedOutput": "ok",
+          "explanation": "Asks SQLite to check database structure and index consistency. The normal healthy result is the text ok; this is a diagnostic check, not a substitute for tested backups.",
+          "runnable": true
+        },
+        {
+          "id": "sql213-ex4",
+          "language": "en",
+          "title": "Count foreign-key violations",
+          "code": "SELECT COUNT(*) AS fk_violations FROM pragma_foreign_key_check;",
+          "expectedOutput": "fk_violations = 0",
+          "explanation": "Uses SQLite's table-valued foreign_key_check pragma to count referential violations. A zero count indicates no violations were reported by this check.",
+          "runnable": true
+        },
+        {
+          "id": "sql213-ex5",
+          "language": "en",
+          "title": "Inspect application tables in the schema catalogue",
+          "code": "SELECT name, type FROM sqlite_schema WHERE type IN ('table','view') AND name NOT LIKE 'sqlite_%' ORDER BY type, name;",
+          "expectedOutput": "ops21_departments | table; ops21_staff | table",
+          "explanation": "Lists user-created tables and views while excluding SQLite's internal schema objects. Server DBMS products expose different catalog views and metadata queries.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the integrity and foreign-key checks. Explain why a healthy structural check does not prove that business values are correct or that backups can be restored.",
+      "independentTask": "Create an operational event table with event_type, severity, event_time and a non-secret detail code. Write queries for the latest failures and for the count of high-severity events in a date range.",
+      "hints": [
+        "Integrity check and foreign-key check test different things.",
+        "Enable SQLite foreign keys on every writing connection.",
+        "Schema catalogues are product-specific.",
+        "Do not place secrets in diagnostic logs.",
+        "Monitoring requires collection, thresholds and alert response."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "PRAGMA foreign_keys = ON;\nCREATE TABLE ops21_departments (department_id INTEGER PRIMARY KEY, department_name TEXT NOT NULL UNIQUE);\nINSERT INTO ops21_departments VALUES (1, 'Sales'), (2, 'Support');\nPRAGMA integrity_check;",
+    "resetCode": "PRAGMA foreign_keys = ON;\nCREATE TABLE ops21_departments (department_id INTEGER PRIMARY KEY, department_name TEXT NOT NULL UNIQUE);\nINSERT INTO ops21_departments VALUES (1, 'Sales'), (2, 'Support');\nPRAGMA integrity_check;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql213-q1",
+        "prompt": "What does PRAGMA integrity_check examine in SQLite?",
+        "options": [
+          "Database structural and index consistency",
+          "Application login passwords",
+          "Every business rule in the application",
+          "Network latency"
+        ],
+        "answer": "Database structural and index consistency",
+        "explanation": "It checks database structure, not every application-level rule."
+      },
+      {
+        "id": "sql213-q2",
+        "prompt": "What does PRAGMA foreign_key_check report?",
+        "options": [
+          "Foreign-key violations",
+          "Unused SQL keywords",
+          "Slow HTTP requests",
+          "CSV quoting errors"
+        ],
+        "answer": "Foreign-key violations",
+        "explanation": "It checks referential integrity constraints."
+      },
+      {
+        "id": "sql213-q3",
+        "prompt": "Why enable SQLite foreign_keys on each connection?",
+        "options": [
+          "The setting is connection-specific",
+          "It is enabled globally by every CREATE TABLE",
+          "It changes SELECT sorting",
+          "It creates a database user"
+        ],
+        "answer": "The setting is connection-specific",
+        "explanation": "Applications must enable it on each connection that relies on foreign keys."
+      },
+      {
+        "id": "sql213-q4",
+        "prompt": "What is the difference between a diagnostic query and monitoring?",
+        "options": [
+          "Monitoring adds repeated collection, thresholds, alerts and response",
+          "A diagnostic query always runs continuously",
+          "Monitoring only means SELECT *",
+          "There is no difference"
+        ],
+        "answer": "Monitoring adds repeated collection, thresholds, alerts and response",
+        "explanation": "A one-time query is not an operational monitoring system."
+      },
+      {
+        "id": "sql213-q5",
+        "prompt": "What should operational logs avoid?",
+        "options": [
+          "Passwords, tokens and encryption keys",
+          "Event type",
+          "Severity",
+          "Timestamp"
+        ],
+        "answer": "Passwords, tokens and encryption keys",
+        "explanation": "Logs must be designed to avoid leaking secrets."
+      }
+    ]
+  },
+  "status": "draft"
+}

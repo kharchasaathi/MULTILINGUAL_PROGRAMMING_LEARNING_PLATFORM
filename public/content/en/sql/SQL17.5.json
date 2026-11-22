@@ -1,0 +1,160 @@
+{
+  "id": "sql.sql17.5.en",
+  "courseId": "sql",
+  "moduleId": "SQL17",
+  "topicId": "SQL17.5",
+  "title": "Trigger Maintenance, Recursion and Safe Design",
+  "language": "en",
+  "learningObjectives": [
+    "Explain how one trigger can cause another trigger to fire.",
+    "Use PRAGMA recursive_triggers to inspect SQLite recursive-trigger configuration.",
+    "Avoid relying on undocumented trigger execution order.",
+    "Maintain triggers with clear names, focused bodies and tests.",
+    "Remove an obsolete trigger with DROP TRIGGER."
+  ],
+  "prerequisites": [
+    "SQL3.2",
+    "SQL3.3",
+    "SQL3.5",
+    "SQL4.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Triggers are schema objects that should be named, documented, tested and maintained like application code. Recursive trigger behaviour and execution order are product-specific. SQLite exposes PRAGMA recursive_triggers to control recursive trigger firing.",
+      "whyItMatters": "Uncontrolled or undocumented triggers can create loops, unexpected writes and difficult debugging. Safe maintenance makes data-side effects predictable.",
+      "analogy": "A trigger is like an automatic rule attached to a data event: it runs when the specified change occurs, even if the application did not call it directly.",
+      "analogyLimit": "The analogy does not model OLD/NEW row values, transaction timing, recursive execution or DBMS-specific trigger semantics."
+    },
+    "explain": {
+      "narrative": "## Trigger recursion\nA trigger can cause another trigger to fire by changing a table that has its own trigger. SQLite's PRAGMA recursive_triggers controls recursive trigger behaviour for a connection. The default configuration should not be assumed; set and inspect it when the application depends on it.\n\n## Ordering and portability\nDo not rely on undocumented trigger execution order when multiple triggers respond to the same event. Some DBMS products have different trigger granularity and ordering rules. Test on the target engine.\n\n## Maintenance\nUse descriptive trigger names, keep trigger bodies focused, include tests for both success and failure paths, and remove obsolete triggers with DROP TRIGGER. Document side effects near the table schema.\n\n### Recursive trigger behaviour\nA trigger can cause another trigger to run when its body changes a table that has a trigger of its own. SQLite's recursive_triggers setting controls recursive trigger firing for the current connection. Avoid depending on undocumented order when multiple triggers respond to the same event.\n\n### Maintenance checklist\nName triggers by table and event, document their side effects, test successful and rejected paths, review recursion, and remove obsolete trigger objects deliberately. Dropping a trigger does not reverse earlier data changes or remove audit history.",
+      "examples": [
+        {
+          "id": "sql17.5-ex1",
+          "language": "en",
+          "title": "Create a table for trigger maintenance",
+          "code": "CREATE TABLE trg17_notes (note_id INTEGER PRIMARY KEY, note_text TEXT NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "Creates a small notes table to demonstrate trigger lifecycle management. note_text is required so each note has meaningful content.",
+          "runnable": true
+        },
+        {
+          "id": "sql17.5-ex2",
+          "language": "en",
+          "title": "Create a simple insert audit table",
+          "code": "CREATE TABLE trg17_note_audit (audit_id INTEGER PRIMARY KEY, note_id INTEGER NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "Creates a separate audit table for note identifiers. A production audit schema should also record event time and actor context when those values are reliably available from the application.",
+          "runnable": true
+        },
+        {
+          "id": "sql17.5-ex3",
+          "language": "en",
+          "title": "Create a focused trigger",
+          "code": "CREATE TRIGGER trg17_note_insert AFTER INSERT ON trg17_notes BEGIN INSERT INTO trg17_note_audit(note_id) VALUES (NEW.note_id); END;",
+          "expectedOutput": "Trigger created",
+          "explanation": "Creates an AFTER INSERT trigger that copies the new note identifier into the audit table. NEW refers to the row that was just inserted; the trigger body runs as part of the insert statement.",
+          "runnable": true
+        },
+        {
+          "id": "sql17.5-ex4",
+          "language": "en",
+          "title": "Set and inspect recursive trigger configuration",
+          "code": "PRAGMA recursive_triggers = OFF; PRAGMA recursive_triggers;",
+          "expectedOutput": "0",
+          "explanation": "Sets SQLite's recursive_triggers connection setting to OFF and then reads it back. The result 0 confirms that recursive trigger firing is disabled for this connection; this setting is connection-specific and must not be assumed to configure every database client.",
+          "runnable": true
+        },
+        {
+          "id": "sql17.5-ex5",
+          "language": "en",
+          "title": "Drop the obsolete trigger and verify its removal",
+          "code": "DROP TRIGGER trg17_note_insert; SELECT COUNT(*) FROM sqlite_schema WHERE type = 'trigger' AND name = 'trg17_note_insert';",
+          "expectedOutput": "0",
+          "explanation": "Drops the named trigger, then queries sqlite_schema to count any remaining trigger with that name. A result of 0 verifies removal of the trigger object; it does not delete the audit rows already written.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and inspect recursive-trigger configuration. Then remove the trigger and verify that it no longer exists.",
+      "independentTask": "Design a trigger maintenance checklist for a production database, including naming, recursion, order, testing, audit privacy and removal of obsolete triggers.",
+      "hints": [
+        "Triggers can cause other triggers to run through additional writes.",
+        "PRAGMA recursive_triggers controls recursive trigger behaviour in SQLite.",
+        "Do not depend on undocumented execution order.",
+        "Keep trigger bodies focused and well named.",
+        "Use DROP TRIGGER to remove an obsolete trigger."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE trg17_notes (note_id INTEGER PRIMARY KEY, note_text TEXT NOT NULL);\nCREATE TABLE trg17_note_audit (audit_id INTEGER PRIMARY KEY, note_id INTEGER NOT NULL);\nCREATE TRIGGER trg17_note_insert AFTER INSERT ON trg17_notes BEGIN INSERT INTO trg17_note_audit(note_id) VALUES (NEW.note_id); END;\nPRAGMA recursive_triggers = OFF;\nPRAGMA recursive_triggers;",
+    "resetCode": "CREATE TABLE trg17_notes (note_id INTEGER PRIMARY KEY, note_text TEXT NOT NULL);\nCREATE TABLE trg17_note_audit (audit_id INTEGER PRIMARY KEY, note_id INTEGER NOT NULL);\nCREATE TRIGGER trg17_note_insert AFTER INSERT ON trg17_notes BEGIN INSERT INTO trg17_note_audit(note_id) VALUES (NEW.note_id); END;\nPRAGMA recursive_triggers = OFF;\nPRAGMA recursive_triggers;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql17.5-q1",
+        "prompt": "What can cause trigger recursion?",
+        "options": [
+          "A trigger writes to a table that has another trigger",
+          "A SELECT query has an alias",
+          "A table has a primary key",
+          "A comment contains SQL words"
+        ],
+        "answer": "A trigger writes to a table that has another trigger",
+        "explanation": "Trigger side effects can activate other triggers."
+      },
+      {
+        "id": "sql17.5-q2",
+        "prompt": "Which SQLite pragma controls recursive trigger behaviour?",
+        "options": [
+          "PRAGMA recursive_triggers",
+          "PRAGMA foreign_keys",
+          "PRAGMA table_info",
+          "PRAGMA busy_timeout"
+        ],
+        "answer": "PRAGMA recursive_triggers",
+        "explanation": "recursive_triggers controls recursive trigger firing for a connection."
+      },
+      {
+        "id": "sql17.5-q3",
+        "prompt": "Should an application rely on undocumented trigger order?",
+        "options": [
+          "No, ordering rules differ and must be verified",
+          "Yes, all products use the same order",
+          "Only when triggers have short names",
+          "Only when tables have no indexes"
+        ],
+        "answer": "No, ordering rules differ and must be verified",
+        "explanation": "Do not depend on undocumented or product-specific trigger ordering."
+      },
+      {
+        "id": "sql17.5-q4",
+        "prompt": "What is a good trigger maintenance practice?",
+        "options": [
+          "Use descriptive names, focused bodies and automated tests",
+          "Create many hidden triggers without documentation",
+          "Put all application logic in one trigger",
+          "Never remove unused triggers"
+        ],
+        "answer": "Use descriptive names, focused bodies and automated tests",
+        "explanation": "Triggers should be treated as maintained schema code."
+      },
+      {
+        "id": "sql17.5-q5",
+        "prompt": "Which statement removes a trigger?",
+        "options": [
+          "DROP TRIGGER",
+          "DELETE TRIGGER ROW",
+          "REMOVE INDEX",
+          "ROLLBACK TRIGGER"
+        ],
+        "answer": "DROP TRIGGER",
+        "explanation": "DROP TRIGGER removes a trigger schema object."
+      }
+    ]
+  },
+  "status": "draft"
+}

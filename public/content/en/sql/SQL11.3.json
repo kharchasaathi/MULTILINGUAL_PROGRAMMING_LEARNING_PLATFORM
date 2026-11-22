@@ -1,0 +1,161 @@
+{
+  "id": "sql.sql11.3.en",
+  "courseId": "sql",
+  "moduleId": "SQL11",
+  "topicId": "SQL11.3",
+  "title": "SQL Views and Reusable Queries",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and practical behaviour of SQL Views and Reusable Queries.",
+    "Identify which database engine or application layer performs the operation.",
+    "Predict the result of the SQLite examples before running them.",
+    "Recognize security, recovery, portability and operational limitations.",
+    "Apply the concept safely in a realistic database workflow."
+  ],
+  "prerequisites": [
+    "SQL1.2",
+    "SQL2.1",
+    "SQL3.1",
+    "SQL3.2",
+    "SQL5.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A view is a named query exposed like a virtual table. A normal SQLite view stores its SELECT definition rather than a separate copy of the result rows. Views can simplify repeated queries and expose selected columns, but they do not automatically provide authorization or guarantee performance.",
+      "whyItMatters": "Views can present consistent reporting logic, hide irrelevant columns from application queries and make complex joins easier to reuse.",
+      "analogy": "Think of a database workflow as a carefully controlled service desk: each operation has a defined responsibility, input and verification step.",
+      "analogyLimit": "The analogy does not model SQL grammar, database transaction isolation, driver APIs, security boundaries or DBMS-specific implementation details."
+    },
+    "explain": {
+      "narrative": "## What a view represents\nCREATE VIEW defines a named SELECT statement. Querying the view runs its defining query against the underlying tables; a normal SQLite view does not store a separate result set. Use DROP VIEW to remove it. Some database products support materialized views, but SQLite's ordinary views are not materialized views.\n\n## Creating and using a view\nGive views clear names, use explicit column lists and qualify ambiguous columns in joins. A view can be queried with WHERE and ORDER BY like a table. SQLite supports INSTEAD OF triggers for certain writes through views, but simple updatability rules differ across products.\n\n## Security and maintenance\nA view is not a substitute for database permissions, parameterized queries or application authorization. Changes to underlying tables can affect dependent views. Test view definitions during schema migrations and avoid SELECT * in long-lived view definitions.\n\n## Worked examples\nThe five original SQLite examples below are executable in the CodeSaathi SQL Playground. Any host-language API or other DBMS command is explicitly labelled as explanatory rather than runnable.",
+      "examples": [
+        {
+          "id": "sql11.3-ex1",
+          "language": "en",
+          "title": "Create a simple view",
+          "code": "DROP VIEW IF EXISTS active_products; DROP TABLE IF EXISTS view_products; CREATE TABLE view_products(id INTEGER PRIMARY KEY, name TEXT, active INTEGER); INSERT INTO view_products VALUES(1,'Notebook',1),(2,'Old stock',0); CREATE VIEW active_products AS SELECT id,name FROM view_products WHERE active=1; SELECT id,name FROM active_products;",
+          "expectedOutput": "1 | Notebook",
+          "explanation": "A view stores a query definition and returns rows matching its SELECT.",
+          "runnable": true
+        },
+        {
+          "id": "sql11.3-ex2",
+          "language": "en",
+          "title": "Filter a view result",
+          "code": "DROP VIEW IF EXISTS city_customers; DROP TABLE IF EXISTS view_customers; CREATE TABLE view_customers(id INTEGER PRIMARY KEY, name TEXT, city TEXT); INSERT INTO view_customers VALUES(1,'Asha','Hyderabad'),(2,'Bilal','Vijayawada'); CREATE VIEW city_customers AS SELECT id,name,city FROM view_customers; SELECT name FROM city_customers WHERE city='Hyderabad';",
+          "expectedOutput": "Asha",
+          "explanation": "A view can be queried with ordinary SELECT filtering.",
+          "runnable": true
+        },
+        {
+          "id": "sql11.3-ex3",
+          "language": "en",
+          "title": "Join tables through a view",
+          "code": "DROP VIEW IF EXISTS order_summary; DROP TABLE IF EXISTS view_orders; DROP TABLE IF EXISTS view_clients; CREATE TABLE view_clients(id INTEGER PRIMARY KEY,name TEXT); CREATE TABLE view_orders(id INTEGER PRIMARY KEY,client_id INTEGER,total INTEGER); INSERT INTO view_clients VALUES(1,'Mira'),(2,'Ravi'); INSERT INTO view_orders VALUES(10,1,250),(11,2,400); CREATE VIEW order_summary AS SELECT o.id, c.name, o.total FROM view_orders o JOIN view_clients c ON c.id=o.client_id; SELECT name,total FROM order_summary ORDER BY total;",
+          "expectedOutput": "Mira | 250; Ravi | 400",
+          "explanation": "A view can package a join into a reusable named query.",
+          "runnable": true
+        },
+        {
+          "id": "sql11.3-ex4",
+          "language": "en",
+          "title": "Replace a view definition",
+          "code": "DROP VIEW IF EXISTS product_names; DROP TABLE IF EXISTS view_items; CREATE TABLE view_items(id INTEGER PRIMARY KEY,name TEXT,price INTEGER); INSERT INTO view_items VALUES(1,'Pen',10),(2,'Book',80); CREATE VIEW product_names AS SELECT name FROM view_items; DROP VIEW product_names; CREATE VIEW product_names AS SELECT name,price FROM view_items; SELECT name,price FROM product_names ORDER BY price;",
+          "expectedOutput": "Pen | 10; Book | 80",
+          "explanation": "SQLite supports dropping and recreating a view; CREATE OR REPLACE VIEW is not SQLite syntax.",
+          "runnable": true
+        },
+        {
+          "id": "sql11.3-ex5",
+          "language": "en",
+          "title": "Inspect a view definition",
+          "code": "DROP VIEW IF EXISTS view_status; DROP TABLE IF EXISTS view_tasks; CREATE TABLE view_tasks(id INTEGER PRIMARY KEY,status TEXT); CREATE VIEW view_status AS SELECT status,COUNT(*) AS total FROM view_tasks GROUP BY status; SELECT type,name FROM sqlite_schema WHERE type='view' AND name='view_status';",
+          "expectedOutput": "view | view_status",
+          "explanation": "sqlite_schema contains the stored SQL definition and metadata for views.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run all five examples for SQL Views and Reusable Queries. Before running each one, state what the statement or application operation does, predict the result and explain any SQLite-specific limitation.",
+      "independentTask": "Create a small original scenario for SQL Views and Reusable Queries. Write at least five statements or a documented application workflow, include a safety or verification step, and explain which parts are specific to SQLite or another DBMS.",
+      "hints": [
+        "Read the engine and version notes before choosing syntax.",
+        "Keep user-provided values separate from SQL command text.",
+        "Use explicit names and columns so the operation is easy to review.",
+        "Check the result with a SELECT or integrity/health query.",
+        "For operational changes, document backup, restore and rollback requirements."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "DROP VIEW IF EXISTS active_products; DROP TABLE IF EXISTS view_products; CREATE TABLE view_products(id INTEGER PRIMARY KEY, name TEXT, active INTEGER); INSERT INTO view_products VALUES(1,'Notebook',1),(2,'Old stock',0); CREATE VIEW active_products AS SELECT id,name FROM view_products WHERE active=1; SELECT id,name FROM active_products;",
+    "resetCode": "DROP VIEW IF EXISTS active_products; DROP TABLE IF EXISTS view_products; CREATE TABLE view_products(id INTEGER PRIMARY KEY, name TEXT, active INTEGER); INSERT INTO view_products VALUES(1,'Notebook',1),(2,'Old stock',0); CREATE VIEW active_products AS SELECT id,name FROM view_products WHERE active=1; SELECT id,name FROM active_products;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql11.3-q1",
+        "prompt": "What does a normal SQLite view store?",
+        "options": [
+          "A SELECT definition",
+          "A separate physical copy of all result rows",
+          "A backup file",
+          "An index only"
+        ],
+        "answer": "A SELECT definition",
+        "explanation": "A normal view is a named query, not a materialized result copy."
+      },
+      {
+        "id": "sql11.3-q2",
+        "prompt": "Which statement creates a view?",
+        "options": [
+          "CREATE VIEW",
+          "MAKE VIEW",
+          "BUILD QUERY",
+          "INSERT VIEW"
+        ],
+        "answer": "CREATE VIEW",
+        "explanation": "CREATE VIEW defines the named query."
+      },
+      {
+        "id": "sql11.3-q3",
+        "prompt": "How do you remove a view in SQLite?",
+        "options": [
+          "DROP VIEW",
+          "DROP TABLE",
+          "DELETE VIEW",
+          "REMOVE QUERY"
+        ],
+        "answer": "DROP VIEW",
+        "explanation": "DROP VIEW removes the view definition."
+      },
+      {
+        "id": "sql11.3-q4",
+        "prompt": "Does a view automatically enforce user authorization?",
+        "options": [
+          "No, permissions and application authorization must be designed separately",
+          "Yes, every view encrypts its rows",
+          "Yes, it blocks all writes",
+          "No, but it always hides every column"
+        ],
+        "answer": "No, permissions and application authorization must be designed separately",
+        "explanation": "A view alone is not an authorization boundary."
+      },
+      {
+        "id": "sql11.3-q5",
+        "prompt": "What is a key difference between a normal and materialized view?",
+        "options": [
+          "A materialized view stores results; a normal SQLite view stores a query definition",
+          "A normal view always stores a backup",
+          "A materialized view cannot be queried",
+          "They are identical in every DBMS"
+        ],
+        "answer": "A materialized view stores results; a normal SQLite view stores a query definition",
+        "explanation": "Materialized views persist computed results; ordinary SQLite views do not."
+      }
+    ]
+  },
+  "status": "draft"
+}

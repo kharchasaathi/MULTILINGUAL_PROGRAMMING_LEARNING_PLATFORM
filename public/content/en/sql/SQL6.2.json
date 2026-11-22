@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql6.2.en",
+  "courseId": "sql",
+  "moduleId": "SQL6",
+  "topicId": "SQL6.2",
+  "title": "MAX() Aggregate Function",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of MAX().",
+    "Describe how MAX() handles NULL input values.",
+    "Write MAX() queries against a SQLite table.",
+    "Use MAX() with WHERE and GROUP BY where appropriate.",
+    "Interpret and verify aggregate result sets in practical reporting tasks."
+  ],
+  "prerequisites": [
+    "SQL5.4",
+    "SQL5.7",
+    "SQL3.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "MAX() returns the greatest non-NULL value in an expression across all qualifying rows or within each group. It is commonly used to find the highest score, latest date or largest transaction amount. NULL inputs are ignored.",
+      "whyItMatters": "Aggregate summaries help answer business questions without manually processing every record. MAX() is a core tool for accurate reporting and data analysis.",
+      "analogy": "MAX() is like asking a records clerk to inspect a selected pile of receipts and report one summary value.",
+      "analogyLimit": "The analogy does not model SQL's exact NULL rules, grouping semantics, numeric type behaviour or query execution plan. The database engine defines those details."
+    },
+    "explain": {
+      "narrative": "## Core concept\nMAX() returns the greatest non-NULL value in an expression across all qualifying rows or within each group. It is commonly used to find the highest score, latest date or largest transaction amount. NULL inputs are ignored.\n\n## SQLite syntax\n```sql\nSELECT MAX(amount) AS summary_value\nFROM aggregate_orders_2;\n```\n\n## Sample data\nThe table contains amounts 10, 20, 15, NULL and 30 across Books and Games categories. The non-NULL total is 75 and there are four non-NULL amount values.\n\n## Query processing\nThe FROM clause identifies input rows. WHERE filters rows before aggregation. The aggregate evaluates its expression over the remaining non-NULL values. GROUP BY creates independent input groups. ORDER BY sorts the final result rows.\n\n## Worked examples\n### 1. Create the sample orders table\n```sql\nCREATE TABLE aggregate_orders_2 (order_id INTEGER PRIMARY KEY, amount REAL, category TEXT, status TEXT);\nINSERT INTO aggregate_orders_2 VALUES (1,10,'Books','paid'),(2,20,'Books','paid'),(3,15,'Games','pending'),(4,NULL,'Games','cancelled'),(5,30,'Books','paid');\n```\nExpected result: Five rows inserted, including one NULL amount.\n\nThe same compact dataset supports all maximum examples.\n\n### 2. Find the largest order amount\n```sql\nSELECT MAX(amount) AS largest_amount FROM aggregate_orders_2;\n```\nExpected result: largest_amount = 30\n\nMAX returns the greatest non-NULL amount.\n\n### 3. Find the largest amount among paid orders\n```sql\nSELECT MAX(amount) AS largest_paid_amount FROM aggregate_orders_2 WHERE status = 'paid';\n```\nExpected result: largest_paid_amount = 30\n\nThe WHERE clause limits the input rows to paid orders.\n\n### 4. Find the maximum amount by category\n```sql\nSELECT category, MAX(amount) AS maximum_amount FROM aggregate_orders_2 GROUP BY category ORDER BY category;\n```\nExpected result: Books = 30; Games = 15\n\nMAX is evaluated separately for each category.\n\n### 5. Compare minimum and maximum values\n```sql\nSELECT MIN(amount) AS minimum_amount, MAX(amount) AS maximum_amount FROM aggregate_orders_2;\n```\nExpected result: minimum_amount = 10; maximum_amount = 30\n\nTwo aggregate expressions can summarize the same input set.\n\n## NULL and empty-input behaviour\nThese examples target SQLite. MIN, MAX, SUM and AVG ignore NULL inputs; COUNT(expression) ignores NULL; COUNT(*) counts rows. For SQLite, SUM over no non-NULL inputs returns NULL, and AVG over no non-NULL inputs returns NULL. Do not replace these rules with assumptions about zero.\n\n## Common mistakes\n- Confusing COUNT(*) with COUNT(column).\n- Assuming NULL is included as zero in SUM or AVG.\n- Forgetting GROUP BY when requesting category-level summaries.\n- Filtering aggregate results with WHERE instead of HAVING.\n- Selecting ungrouped, non-aggregated columns in grouped queries.\n\n## Best practices\nName aggregate outputs with clear aliases, verify the input rows before interpreting a summary, and state the target SQL dialect when behaviour differs.",
+      "examples": [
+        {
+          "id": "sql6.2-ex1",
+          "language": "en",
+          "title": "Create the sample orders table",
+          "code": "CREATE TABLE aggregate_orders_2 (order_id INTEGER PRIMARY KEY, amount REAL, category TEXT, status TEXT);\nINSERT INTO aggregate_orders_2 VALUES (1,10,'Books','paid'),(2,20,'Books','paid'),(3,15,'Games','pending'),(4,NULL,'Games','cancelled'),(5,30,'Books','paid');",
+          "expectedOutput": "Five rows inserted, including one NULL amount.",
+          "explanation": "The same compact dataset supports all maximum examples.",
+          "runnable": true
+        },
+        {
+          "id": "sql6.2-ex2",
+          "language": "en",
+          "title": "Find the largest order amount",
+          "code": "SELECT MAX(amount) AS largest_amount FROM aggregate_orders_2;",
+          "expectedOutput": "largest_amount = 30",
+          "explanation": "MAX returns the greatest non-NULL amount.",
+          "runnable": true
+        },
+        {
+          "id": "sql6.2-ex3",
+          "language": "en",
+          "title": "Find the largest amount among paid orders",
+          "code": "SELECT MAX(amount) AS largest_paid_amount FROM aggregate_orders_2 WHERE status = 'paid';",
+          "expectedOutput": "largest_paid_amount = 30",
+          "explanation": "The WHERE clause limits the input rows to paid orders.",
+          "runnable": true
+        },
+        {
+          "id": "sql6.2-ex4",
+          "language": "en",
+          "title": "Find the maximum amount by category",
+          "code": "SELECT category, MAX(amount) AS maximum_amount FROM aggregate_orders_2 GROUP BY category ORDER BY category;",
+          "expectedOutput": "Books = 30; Games = 15",
+          "explanation": "MAX is evaluated separately for each category.",
+          "runnable": true
+        },
+        {
+          "id": "sql6.2-ex5",
+          "language": "en",
+          "title": "Compare minimum and maximum values",
+          "code": "SELECT MIN(amount) AS minimum_amount, MAX(amount) AS maximum_amount FROM aggregate_orders_2;",
+          "expectedOutput": "minimum_amount = 10; maximum_amount = 30",
+          "explanation": "Two aggregate expressions can summarize the same input set.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run all five MAX() examples in the SQL Playground. Predict each result first, then compare it with SQLite. Explain which input rows contribute to each aggregate.",
+      "independentTask": "Create a small table of at least six sales records with two categories and one NULL amount. Write five original queries demonstrating MAX(), including one filtered query and one grouped query. Record exact expected outputs.",
+      "hints": [
+        "Inspect the sample rows before calculating a result.",
+        "Remember that most aggregate expressions ignore NULL values; COUNT(*) is the row-count exception.",
+        "Apply WHERE before aggregation to restrict source rows.",
+        "Use GROUP BY for one summary per category.",
+        "Use deterministic ORDER BY when presenting grouped results."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE aggregate_orders_2 (order_id INTEGER PRIMARY KEY, amount REAL, category TEXT, status TEXT);\nINSERT INTO aggregate_orders_2 VALUES (1,10,'Books','paid'),(2,20,'Books','paid'),(3,15,'Games','pending'),(4,NULL,'Games','cancelled'),(5,30,'Books','paid');\n\nSELECT MAX(amount) AS aggregate_result FROM aggregate_orders_2;",
+    "resetCode": "CREATE TABLE aggregate_orders_2 (order_id INTEGER PRIMARY KEY, amount REAL, category TEXT, status TEXT);\nINSERT INTO aggregate_orders_2 VALUES (1,10,'Books','paid'),(2,20,'Books','paid'),(3,15,'Games','pending'),(4,NULL,'Games','cancelled'),(5,30,'Books','paid');\n\nSELECT MAX(amount) AS aggregate_result FROM aggregate_orders_2;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql6.2-q1",
+        "prompt": "What does MAX(amount) return?",
+        "options": [
+          "The greatest non-NULL amount",
+          "The smallest amount",
+          "The average amount",
+          "The number of non-NULL values"
+        ],
+        "answer": "The greatest non-NULL amount",
+        "explanation": "The greatest non-NULL amount is correct because it follows the documented behaviour of MAX() in SQLite."
+      },
+      {
+        "id": "sql6.2-q2",
+        "prompt": "How are NULL values treated by MAX?",
+        "options": [
+          "They are ignored",
+          "They are always greatest",
+          "They are converted to zero",
+          "They cause every query to fail"
+        ],
+        "answer": "They are ignored",
+        "explanation": "They are ignored is correct because it follows the documented behaviour of MAX() in SQLite."
+      },
+      {
+        "id": "sql6.2-q3",
+        "prompt": "Which query finds the highest paid order amount?",
+        "options": [
+          "SELECT MAX(amount) FROM aggregate_orders_2 WHERE status = 'paid';",
+          "SELECT MIN(amount) FROM aggregate_orders_2;",
+          "SELECT COUNT(amount) FROM aggregate_orders_2;",
+          "SELECT SUM(amount) FROM aggregate_orders_2;"
+        ],
+        "answer": "SELECT MAX(amount) FROM aggregate_orders_2 WHERE status = 'paid';",
+        "explanation": "SELECT MAX(amount) FROM aggregate_orders_2 WHERE status = 'paid'; is correct because it follows the documented behaviour of MAX() in SQLite."
+      },
+      {
+        "id": "sql6.2-q4",
+        "prompt": "How can MAX produce one result per category?",
+        "options": [
+          "GROUP BY category",
+          "ORDER BY category only",
+          "DISTINCT amount",
+          "LIMIT 1"
+        ],
+        "answer": "GROUP BY category",
+        "explanation": "GROUP BY category is correct because it follows the documented behaviour of MAX() in SQLite."
+      },
+      {
+        "id": "sql6.2-q5",
+        "prompt": "Which statement is true about MIN and MAX together?",
+        "options": [
+          "Both can appear in one SELECT list",
+          "They cannot be used together",
+          "They both modify stored rows",
+          "They require a trigger"
+        ],
+        "answer": "Both can appear in one SELECT list",
+        "explanation": "Both can appear in one SELECT list is correct because it follows the documented behaviour of MAX() in SQLite."
+      }
+    ]
+  },
+  "status": "draft"
+}

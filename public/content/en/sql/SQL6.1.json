@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql6.1.en",
+  "courseId": "sql",
+  "moduleId": "SQL6",
+  "topicId": "SQL6.1",
+  "title": "MIN() Aggregate Function",
+  "language": "en",
+  "learningObjectives": [
+    "Explain what SQL aggregate functions do and how MIN() differs from MAX(), COUNT(), SUM() and AVG().",
+    "Describe how MIN() handles NULL input values.",
+    "Write MIN() queries against a SQLite table.",
+    "Use MIN() with WHERE and GROUP BY where appropriate.",
+    "Interpret and verify aggregate result sets in practical reporting tasks."
+  ],
+  "prerequisites": [
+    "SQL5.4",
+    "SQL5.7",
+    "SQL3.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "An aggregate function calculates one summary value from a set of input rows or from each group of rows. Common SQL aggregates are MIN() (smallest value), MAX() (largest value), COUNT() (row or non-NULL value count), SUM() (total) and AVG() (arithmetic mean). This lesson introduces aggregate functions and then focuses on MIN(). MIN() returns the smallest non-NULL value in an expression across the rows in a group. If no non-NULL input exists, the result is NULL.",
+      "whyItMatters": "Aggregate functions turn many detail rows into useful summaries for reporting and analysis. Knowing the differences between MIN, MAX, COUNT, SUM and AVG prevents incorrect totals, counts and comparisons.",
+      "analogy": "MIN() is like asking a records clerk to inspect a selected pile of receipts and report one summary value.",
+      "analogyLimit": "The analogy does not model SQL's exact NULL rules, grouping semantics, numeric type behaviour or query execution plan. The database engine defines those details."
+    },
+    "explain": {
+      "narrative": "## What is an aggregate function?\\nAn aggregate function calculates one summary value from a set of rows, or one value for each group. W3Schools introduces five common functions: MIN() finds the smallest value, MAX() the largest, COUNT() counts rows or non-NULL expression values, SUM() totals numeric values, and AVG() calculates their arithmetic mean. These functions are commonly combined with GROUP BY. Most aggregate functions ignore NULL input values; COUNT(*) is the important row-count exception. The next SQL6 lessons explain each function separately.\\n\\n## Core concept\nMIN() returns the smallest non-NULL value in an expression across the rows in a group. It is useful for finding the lowest price, earliest date or minimum measurement. If no non-NULL input exists, the result is NULL.\n\n## SQLite syntax\n```sql\nSELECT MIN(amount) AS summary_value\nFROM aggregate_orders_1;\n```\n\n## Sample data\nThe table contains amounts 10, 20, 15, NULL and 30 across Books and Games categories. The non-NULL total is 75 and there are four non-NULL amount values.\n\n## Query processing\nThe FROM clause identifies input rows. WHERE filters rows before aggregation. The aggregate evaluates its expression over the remaining non-NULL values. GROUP BY creates independent input groups. ORDER BY sorts the final result rows.\n\n## Worked examples\n### 1. Create the sample orders table\n```sql\nCREATE TABLE aggregate_orders_1 (order_id INTEGER PRIMARY KEY, amount REAL, category TEXT, status TEXT);\nINSERT INTO aggregate_orders_1 VALUES (1,10,'Books','paid'),(2,20,'Books','paid'),(3,15,'Games','pending'),(4,NULL,'Games','cancelled'),(5,30,'Books','paid');\n```\nExpected result: Five rows inserted, including one NULL amount.\n\nThe sample data includes four numeric amounts and one missing amount.\n\n### 2. Find the smallest order amount\n```sql\nSELECT MIN(amount) AS smallest_amount FROM aggregate_orders_1;\n```\nExpected result: smallest_amount = 10\n\nMIN ignores NULL and returns the lowest non-NULL amount.\n\n### 3. Find the lowest amount for paid orders\n```sql\nSELECT MIN(amount) AS smallest_paid_amount FROM aggregate_orders_1 WHERE status = 'paid';\n```\nExpected result: smallest_paid_amount = 10\n\nWHERE filters rows before the aggregate is calculated.\n\n### 4. Find the minimum amount in each category\n```sql\nSELECT category, MIN(amount) AS minimum_amount FROM aggregate_orders_1 GROUP BY category ORDER BY category;\n```\nExpected result: Books = 10; Games = 15\n\nEach group receives its own minimum; the NULL amount does not replace 15.\n\n### 5. Check a group with no non-NULL amounts\n```sql\nSELECT MIN(amount) AS minimum_amount FROM aggregate_orders_1 WHERE status = 'cancelled';\n```\nExpected result: minimum_amount = NULL\n\nAn aggregate over rows whose expression values are all NULL returns NULL.\n\n## NULL and empty-input behaviour\nThese examples target SQLite. MIN, MAX, SUM and AVG ignore NULL inputs; COUNT(expression) ignores NULL; COUNT(*) counts rows. For SQLite, SUM over no non-NULL inputs returns NULL, and AVG over no non-NULL inputs returns NULL. Do not replace these rules with assumptions about zero.\n\n## Common mistakes\n- Confusing COUNT(*) with COUNT(column).\n- Assuming NULL is included as zero in SUM or AVG.\n- Forgetting GROUP BY when requesting category-level summaries.\n- Filtering aggregate results with WHERE instead of HAVING.\n- Selecting ungrouped, non-aggregated columns in grouped queries.\n\n## Best practices\nName aggregate outputs with clear aliases, verify the input rows before interpreting a summary, and state the target SQL dialect when behaviour differs.",
+      "examples": [
+        {
+          "id": "sql6.1-ex1",
+          "language": "en",
+          "title": "Create the sample orders table",
+          "code": "CREATE TABLE aggregate_orders_1 (order_id INTEGER PRIMARY KEY, amount REAL, category TEXT, status TEXT);\nINSERT INTO aggregate_orders_1 VALUES (1,10,'Books','paid'),(2,20,'Books','paid'),(3,15,'Games','pending'),(4,NULL,'Games','cancelled'),(5,30,'Books','paid');",
+          "expectedOutput": "Five rows inserted, including one NULL amount.",
+          "explanation": "The sample data includes four numeric amounts and one missing amount.",
+          "runnable": true
+        },
+        {
+          "id": "sql6.1-ex2",
+          "language": "en",
+          "title": "Find the smallest order amount",
+          "code": "SELECT MIN(amount) AS smallest_amount FROM aggregate_orders_1;",
+          "expectedOutput": "smallest_amount = 10",
+          "explanation": "MIN ignores NULL and returns the lowest non-NULL amount.",
+          "runnable": true
+        },
+        {
+          "id": "sql6.1-ex3",
+          "language": "en",
+          "title": "Find the lowest amount for paid orders",
+          "code": "SELECT MIN(amount) AS smallest_paid_amount FROM aggregate_orders_1 WHERE status = 'paid';",
+          "expectedOutput": "smallest_paid_amount = 10",
+          "explanation": "WHERE filters rows before the aggregate is calculated.",
+          "runnable": true
+        },
+        {
+          "id": "sql6.1-ex4",
+          "language": "en",
+          "title": "Find the minimum amount in each category",
+          "code": "SELECT category, MIN(amount) AS minimum_amount FROM aggregate_orders_1 GROUP BY category ORDER BY category;",
+          "expectedOutput": "Books = 10; Games = 15",
+          "explanation": "Each group receives its own minimum; the NULL amount does not replace 15.",
+          "runnable": true
+        },
+        {
+          "id": "sql6.1-ex5",
+          "language": "en",
+          "title": "Check a group with no non-NULL amounts",
+          "code": "SELECT MIN(amount) AS minimum_amount FROM aggregate_orders_1 WHERE status = 'cancelled';",
+          "expectedOutput": "minimum_amount = NULL",
+          "explanation": "An aggregate over rows whose expression values are all NULL returns NULL.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "First identify the role of MIN(), MAX(), COUNT(), SUM() and AVG() from the aggregate overview. Then run all five MIN() examples in the SQL Playground. Predict each result first, then compare it with SQLite.",
+      "independentTask": "Create a small table of at least six sales records with two categories and one NULL amount. Write five original queries demonstrating MIN(), MAX(), COUNT(), SUM() and AVG(), including one filtered query and one grouped query. Record exact expected outputs.",
+      "hints": [
+        "Inspect the sample rows before calculating a result.",
+        "Remember that most aggregate expressions ignore NULL values; COUNT(*) is the row-count exception.",
+        "Apply WHERE before aggregation to restrict source rows.",
+        "Use GROUP BY for one summary per category.",
+        "Use deterministic ORDER BY when presenting grouped results."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE aggregate_orders_1 (order_id INTEGER PRIMARY KEY, amount REAL, category TEXT, status TEXT);\nINSERT INTO aggregate_orders_1 VALUES (1,10,'Books','paid'),(2,20,'Books','paid'),(3,15,'Games','pending'),(4,NULL,'Games','cancelled'),(5,30,'Books','paid');\n\nSELECT MIN(amount) AS aggregate_result FROM aggregate_orders_1;",
+    "resetCode": "CREATE TABLE aggregate_orders_1 (order_id INTEGER PRIMARY KEY, amount REAL, category TEXT, status TEXT);\nINSERT INTO aggregate_orders_1 VALUES (1,10,'Books','paid'),(2,20,'Books','paid'),(3,15,'Games','pending'),(4,NULL,'Games','cancelled'),(5,30,'Books','paid');\n\nSELECT MIN(amount) AS aggregate_result FROM aggregate_orders_1;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql6.1-q1",
+        "prompt": "What does MIN(amount) return?",
+        "options": [
+          "The smallest non-NULL amount",
+          "The largest amount",
+          "The number of rows",
+          "The sum of amounts"
+        ],
+        "answer": "The smallest non-NULL amount",
+        "explanation": "The smallest non-NULL amount is correct because it follows the documented behaviour of MIN() in SQLite."
+      },
+      {
+        "id": "sql6.1-q2",
+        "prompt": "Does MIN include NULL as the smallest value?",
+        "options": [
+          "No, NULL inputs are ignored",
+          "Yes, NULL is always smallest",
+          "Only when sorted",
+          "Only with DISTINCT"
+        ],
+        "answer": "No, NULL inputs are ignored",
+        "explanation": "No, NULL inputs are ignored is correct because it follows the documented behaviour of MIN() in SQLite."
+      },
+      {
+        "id": "sql6.1-q3",
+        "prompt": "Which clause filters rows before MIN is calculated?",
+        "options": [
+          "WHERE",
+          "HAVING",
+          "ORDER BY",
+          "LIMIT"
+        ],
+        "answer": "WHERE",
+        "explanation": "WHERE is correct because it follows the documented behaviour of MIN() in SQLite."
+      },
+      {
+        "id": "sql6.1-q4",
+        "prompt": "How do you calculate a minimum for each category?",
+        "options": [
+          "GROUP BY category",
+          "ORDER BY category",
+          "DISTINCT category",
+          "LIMIT category"
+        ],
+        "answer": "GROUP BY category",
+        "explanation": "GROUP BY category is correct because it follows the documented behaviour of MIN() in SQLite."
+      },
+      {
+        "id": "sql6.1-q5",
+        "prompt": "What does MIN return when every input is NULL?",
+        "options": [
+          "NULL",
+          "0",
+          "An empty string",
+          "The row count"
+        ],
+        "answer": "NULL",
+        "explanation": "NULL is correct because it follows the documented behaviour of MIN() in SQLite."
+      }
+    ]
+  },
+  "status": "draft"
+}

@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql10.3.en",
+  "courseId": "sql",
+  "moduleId": "SQL10",
+  "topicId": "SQL10.3",
+  "title": "SQL CASE Expression",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of SQL CASE Expression.",
+    "Write SQLite-compatible SQL for the topic or a clearly labelled equivalent.",
+    "Predict result rows using the lesson's sample data.",
+    "Identify dialect limitations, NULL behaviour and common errors.",
+    "Apply the topic to a practical data task."
+  ],
+  "prerequisites": [
+    "SQL5.1",
+    "SQL5.4",
+    "SQL9.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "CASE evaluates conditions in order and returns the result for the first matching WHEN branch. ELSE provides a fallback; without ELSE, unmatched rows return NULL. CASE can appear in SELECT, ORDER BY, aggregate expressions and other value expressions.",
+      "whyItMatters": "CASE lets a query classify, label and calculate values conditionally without changing stored data.",
+      "analogy": "Think of a SQL query as a carefully specified instruction for selecting or shaping rows in a database.",
+      "analogyLimit": "The analogy does not model SQL evaluation order, transaction guarantees, NULL logic or DBMS-specific implementation details."
+    },
+    "explain": {
+      "narrative": "## Searched CASE syntax\n```sql\nCASE\n  WHEN condition THEN result\n  WHEN another_condition THEN another_result\n  ELSE fallback_result\nEND\n```\n\nA CASE expression returns one value for each input row. Conditions are tested from top to bottom, so order matters. A simple CASE compares one expression with WHEN values. CASE is an expression, not a control-flow statement that executes multiple SQL statements. SQLite supports CASE.\n\n## Common mistakes\n- Assuming syntax is identical across all database engines.\n- Omitting explicit column lists when moving data.\n- Ignoring NULL, constraints or result ordering.\n- Treating a documented dialect example as executable SQLite syntax.\n\n## Best practices\nUse explicit columns, test against the target DBMS/version, keep setup scripts repeatable, and verify results with SELECT queries.",
+      "examples": [
+        {
+          "id": "sql10.3-ex1",
+          "language": "en",
+          "title": "Classify salary bands",
+          "code": "DROP TABLE IF EXISTS staff;\nCREATE TABLE staff (staff_id INTEGER PRIMARY KEY, full_name TEXT, salary INTEGER);\nINSERT INTO staff VALUES (1,'Asha',42000),(2,'Bilal',65000),(3,'Chitra',90000);\nSELECT full_name, CASE WHEN salary<50000 THEN 'Entry' WHEN salary<80000 THEN 'Mid' ELSE 'Senior' END AS salary_band FROM staff ORDER BY staff_id;",
+          "expectedOutput": "Asha | Entry; Bilal | Mid; Chitra | Senior",
+          "explanation": "The first matching WHEN determines the label for each employee.",
+          "runnable": true
+        },
+        {
+          "id": "sql10.3-ex2",
+          "language": "en",
+          "title": "Use a simple CASE to label status codes",
+          "code": "DROP TABLE IF EXISTS tickets;\nCREATE TABLE tickets (ticket_id INTEGER PRIMARY KEY, status_code INTEGER);\nINSERT INTO tickets VALUES (1,1),(2,2),(3,3),(4,9);\nSELECT ticket_id, CASE status_code WHEN 1 THEN 'Open' WHEN 2 THEN 'In progress' WHEN 3 THEN 'Closed' ELSE 'Unknown' END AS status_label FROM tickets ORDER BY ticket_id;",
+          "expectedOutput": "1 | Open; 2 | In progress; 3 | Closed; 4 | Unknown",
+          "explanation": "Simple CASE compares one expression against each WHEN value.",
+          "runnable": true
+        },
+        {
+          "id": "sql10.3-ex3",
+          "language": "en",
+          "title": "Sort rows using a custom priority",
+          "code": "DROP TABLE IF EXISTS tasks;\nCREATE TABLE tasks (task_id INTEGER PRIMARY KEY, task_name TEXT, priority TEXT);\nINSERT INTO tasks VALUES (1,'Backup','Low'),(2,'Fix outage','High'),(3,'Update guide','Medium');\nSELECT task_name,priority FROM tasks ORDER BY CASE priority WHEN 'High' THEN 1 WHEN 'Medium' THEN 2 ELSE 3 END, task_name;",
+          "expectedOutput": "Fix outage | High; Update guide | Medium; Backup | Low",
+          "explanation": "CASE in ORDER BY maps text priorities to a custom numeric order.",
+          "runnable": true
+        },
+        {
+          "id": "sql10.3-ex4",
+          "language": "en",
+          "title": "Count conditional outcomes with aggregate CASE",
+          "code": "DROP TABLE IF EXISTS payments;\nCREATE TABLE payments (payment_id INTEGER PRIMARY KEY, amount INTEGER);\nINSERT INTO payments VALUES (1,1200),(2,400),(3,900),(4,250);\nSELECT SUM(CASE WHEN amount>=800 THEN 1 ELSE 0 END) AS large_payments, COUNT(*) AS all_payments FROM payments;",
+          "expectedOutput": "2 | 4",
+          "explanation": "CASE returns 1 or 0 per row, and SUM counts rows meeting the condition.",
+          "runnable": true
+        },
+        {
+          "id": "sql10.3-ex5",
+          "language": "en",
+          "title": "Handle NULL explicitly in CASE",
+          "code": "DROP TABLE IF EXISTS contacts;\nCREATE TABLE contacts (contact_id INTEGER PRIMARY KEY, phone TEXT);\nINSERT INTO contacts VALUES (1,'98765'),(2,NULL);\nSELECT contact_id, CASE WHEN phone IS NULL THEN 'Missing phone' ELSE 'Available' END AS phone_status FROM contacts ORDER BY contact_id;",
+          "expectedOutput": "1 | Available; 2 | Missing phone",
+          "explanation": "Use IS NULL in a CASE condition; equality with NULL does not test missing values.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the five examples in order. Before each run, predict the result and explain how SQL CASE Expression affects it.",
+      "independentTask": "Create your own small dataset and write three new queries using SQL CASE Expression. Include one boundary case and document the expected output.",
+      "hints": [
+        "Read the target DBMS syntax notes before running an example.",
+        "Use explicit column names and aliases where they improve clarity.",
+        "Check NULL values separately from zero and empty strings.",
+        "Use ORDER BY when the display order matters.",
+        "Compare the returned rows with your prediction after execution."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "DROP TABLE IF EXISTS staff;\nCREATE TABLE staff (staff_id INTEGER PRIMARY KEY, full_name TEXT, salary INTEGER);\nINSERT INTO staff VALUES (1,'Asha',42000),(2,'Bilal',65000),(3,'Chitra',90000);\nSELECT full_name, CASE WHEN salary<50000 THEN 'Entry' WHEN salary<80000 THEN 'Mid' ELSE 'Senior' END AS salary_band FROM staff ORDER BY staff_id;",
+    "resetCode": "DROP TABLE IF EXISTS staff;\nCREATE TABLE staff (staff_id INTEGER PRIMARY KEY, full_name TEXT, salary INTEGER);\nINSERT INTO staff VALUES (1,'Asha',42000),(2,'Bilal',65000),(3,'Chitra',90000);\nSELECT full_name, CASE WHEN salary<50000 THEN 'Entry' WHEN salary<80000 THEN 'Mid' ELSE 'Senior' END AS salary_band FROM staff ORDER BY staff_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql10.3-q1",
+        "prompt": "When multiple WHEN conditions match, which CASE result is returned?",
+        "options": [
+          "The result for the first matching WHEN",
+          "The result for the last matching WHEN",
+          "All matching results concatenated",
+          "No result is returned"
+        ],
+        "answer": "The result for the first matching WHEN",
+        "explanation": "CASE evaluates WHEN branches in order and returns the first match."
+      },
+      {
+        "id": "sql10.3-q2",
+        "prompt": "What happens when no WHEN matches and ELSE is omitted?",
+        "options": [
+          "CASE returns NULL",
+          "CASE returns zero",
+          "The statement deletes the row",
+          "SQLite raises an error every time"
+        ],
+        "answer": "CASE returns NULL",
+        "explanation": "Without ELSE, an unmatched CASE expression evaluates to NULL."
+      },
+      {
+        "id": "sql10.3-q3",
+        "prompt": "What does a simple CASE compare?",
+        "options": [
+          "One expression against the values in its WHEN clauses",
+          "Several unrelated Boolean conditions",
+          "A table name against a column name",
+          "Only NULL values"
+        ],
+        "answer": "One expression against the values in its WHEN clauses",
+        "explanation": "Simple CASE uses one base expression and compares it with WHEN values."
+      },
+      {
+        "id": "sql10.3-q4",
+        "prompt": "Which CASE form is suitable for conditions such as salary < 50000?",
+        "options": [
+          "Searched CASE with WHEN salary < 50000",
+          "Simple CASE with no base expression",
+          "CASE TABLE",
+          "CASE INTO"
+        ],
+        "answer": "Searched CASE with WHEN salary < 50000",
+        "explanation": "Searched CASE allows each WHEN clause to contain a condition."
+      },
+      {
+        "id": "sql10.3-q5",
+        "prompt": "What is a valid use of CASE in ORDER BY?",
+        "options": [
+          "Map priority labels to numeric ranks for custom sorting",
+          "Create a permanent index automatically",
+          "Change the stored priority column",
+          "Replace the FROM clause"
+        ],
+        "answer": "Map priority labels to numeric ranks for custom sorting",
+        "explanation": "CASE can return sort keys that define a custom ordering."
+      }
+    ]
+  },
+  "status": "draft"
+}

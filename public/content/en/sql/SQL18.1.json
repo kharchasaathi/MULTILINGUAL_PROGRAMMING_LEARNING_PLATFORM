@@ -1,0 +1,161 @@
+{
+  "id": "sql.sql18.1.en",
+  "courseId": "sql",
+  "moduleId": "SQL18",
+  "topicId": "SQL18.1",
+  "title": "Schema Migrations and Versioning Concepts",
+  "language": "en",
+  "learningObjectives": [
+    "Define a schema migration and give examples of structural changes.",
+    "Explain why migration versions are recorded in a history table.",
+    "Describe how deployment tooling identifies pending migrations.",
+    "Identify safety checks before applying a production migration.",
+    "Verify the resulting schema and data after a migration."
+  ],
+  "prerequisites": [
+    "SQL3.2",
+    "SQL3.7",
+    "SQL12.1",
+    "SQL12.2",
+    "SQL12.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A schema migration is a controlled change to database structure or reference data. Migration systems record which changes have been applied so an application can move a database from one known schema version to another.",
+      "whyItMatters": "Versioned migrations make database changes repeatable, reviewable and safer across development, staging and production environments.",
+      "analogy": "A migration is like a numbered building renovation plan: each change has a recorded step, a verification and a recovery plan.",
+      "analogyLimit": "The analogy does not model transactional DDL, locking, data backfills, version checks or application compatibility."
+    },
+    "explain": {
+      "narrative": "## What is a migration?\nA migration is a versioned change to schema or carefully managed reference data. Examples include adding a column, creating an index, introducing a constraint or backfilling a new field.\n\n## Migration history\nA migration tool stores applied versions in a schema-history table. During deployment it compares available migrations with applied versions and runs only those that are pending.\n\n## Safe migration principles\nBack up important data, test on a copy, use transactions where supported, make changes compatible with the application rollout, and verify the resulting schema and data. A migration should be reviewed like application code.\n\n### Migration ledger and schema drift\nA migration is a controlled, ordered change to a database schema or its data. Teams commonly keep an append-only migration ledger containing a version identifier, description and application time. The ledger is not proof that the live schema still matches the intended version: manual changes, interrupted deployment steps and out-of-band restores can create schema drift.\n\n### Safe rollout\nBack up the database, test the migration on a representative copy, apply it with a known deployment process, and verify both the schema and data afterwards. SQLite examples here are not universal CREATE DATABASE or migration-tool syntax.\n\n### Re-running a migration safely\nA migration runner should track each migration's identity and apply a version only when it has not already been recorded. Do not rely on CREATE TABLE IF NOT EXISTS alone: it suppresses an already-exists error but cannot detect a table with an incorrect definition. Compare the live schema with the expected schema before marking a migration successful.",
+      "examples": [
+        {
+          "id": "sql18.1-ex1",
+          "language": "en",
+          "title": "Create an application table",
+          "code": "CREATE TABLE mig18_users (user_id INTEGER PRIMARY KEY, user_name TEXT NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "Creates the initial user table. IF NOT EXISTS makes the DDL safe to reapply when the table already exists, but it does not verify that an existing table has the expected columns; migration validation must inspect the schema separately.",
+          "runnable": true
+        },
+        {
+          "id": "sql18.1-ex2",
+          "language": "en",
+          "title": "Insert baseline users",
+          "code": "INSERT INTO mig18_users VALUES (1, 'Asha'), (2, 'Bilal');",
+          "expectedOutput": "2 rows inserted",
+          "explanation": "Inserts two baseline users. A migration should preserve existing production rows and should be tested against representative data volumes; this small seed set is only a reproducible teaching fixture.",
+          "runnable": true
+        },
+        {
+          "id": "sql18.1-ex3",
+          "language": "en",
+          "title": "Create a migration history table",
+          "code": "CREATE TABLE mig18_history (version INTEGER PRIMARY KEY, description TEXT NOT NULL, applied_at TEXT NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "Creates a version table that records which schema changes have been applied. A primary key on version prevents the same version number from being recorded twice.",
+          "runnable": true
+        },
+        {
+          "id": "sql18.1-ex4",
+          "language": "en",
+          "title": "Record the baseline schema version",
+          "code": "INSERT INTO mig18_history VALUES (1, 'Create users table', '2026-11-22T00:00:00Z');",
+          "expectedOutput": "1 row inserted",
+          "explanation": "Records version 1 with a description and timestamp. The timestamp is illustrative UTC text; production migration tools should use a consistent clock and format, and should not infer successful migration solely from the presence of a row.",
+          "runnable": true
+        },
+        {
+          "id": "sql18.1-ex5",
+          "language": "en",
+          "title": "Inspect applied migrations",
+          "code": "SELECT version, description FROM mig18_history ORDER BY version;",
+          "expectedOutput": "1 | Create users table",
+          "explanation": "Reads the migration ledger in version order. The ledger provides evidence of recorded migrations, but it should be reconciled with the actual schema because manual changes or partially failed deployments can cause drift.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and explain how the history table records the baseline schema version.",
+      "independentTask": "Design a migration-history table for a small application. Record two sequential schema versions and describe how deployment tooling decides which migration to apply next.",
+      "hints": [
+        "A migration is a versioned schema or data change.",
+        "Record each applied version exactly once.",
+        "Keep migration scripts under source control.",
+        "Test migrations on a copy before production.",
+        "Verify both schema and data after applying a migration."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE IF NOT EXISTS mig18_users (user_id INTEGER PRIMARY KEY, user_name TEXT NOT NULL);\nINSERT INTO mig18_users VALUES (1, 'Asha'), (2, 'Bilal');\nCREATE TABLE IF NOT EXISTS mig18_history (version INTEGER PRIMARY KEY, description TEXT NOT NULL, applied_at TEXT NOT NULL);\nINSERT INTO mig18_history VALUES (1, 'Create users table', '2026-11-22T00:00:00Z');\nSELECT version, description FROM mig18_history ORDER BY version;",
+    "resetCode": "CREATE TABLE IF NOT EXISTS mig18_users (user_id INTEGER PRIMARY KEY, user_name TEXT NOT NULL);\nINSERT INTO mig18_users VALUES (1, 'Asha'), (2, 'Bilal');\nCREATE TABLE IF NOT EXISTS mig18_history (version INTEGER PRIMARY KEY, description TEXT NOT NULL, applied_at TEXT NOT NULL);\nINSERT INTO mig18_history VALUES (1, 'Create users table', '2026-11-22T00:00:00Z');\nSELECT version, description FROM mig18_history ORDER BY version;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql18.1-q1",
+        "prompt": "What is a schema migration?",
+        "options": [
+          "A controlled, versioned change to database structure or managed data",
+          "A SELECT query only",
+          "A backup file extension",
+          "A database user account"
+        ],
+        "answer": "A controlled, versioned change to database structure or managed data",
+        "explanation": "A migration changes schema or managed data in a controlled versioned step."
+      },
+      {
+        "id": "sql18.1-q2",
+        "prompt": "Why keep a migration history table?",
+        "options": [
+          "To record which migration versions have already been applied",
+          "To store every query result",
+          "To replace all indexes",
+          "To prevent users from logging in"
+        ],
+        "answer": "To record which migration versions have already been applied",
+        "explanation": "Migration history lets deployment tooling identify completed versions."
+      },
+      {
+        "id": "sql18.1-q3",
+        "prompt": "What should happen before a production migration?",
+        "options": [
+          "Test the change on a copy and plan recovery",
+          "Run it without review",
+          "Delete the migration history",
+          "Disable all constraints permanently"
+        ],
+        "answer": "Test the change on a copy and plan recovery",
+        "explanation": "Testing and recovery planning reduce deployment risk."
+      },
+      {
+        "id": "sql18.1-q4",
+        "prompt": "What should be verified after a migration?",
+        "options": [
+          "The resulting schema and data",
+          "Only the file name",
+          "Only SQL keyword capitalization",
+          "The browser theme"
+        ],
+        "answer": "The resulting schema and data",
+        "explanation": "A migration is complete only when the intended schema and data are verified."
+      },
+      {
+        "id": "sql18.1-q5",
+        "prompt": "How should migration scripts be maintained?",
+        "options": [
+          "Versioned and reviewed like application code",
+          "Edited manually without history",
+          "Stored only in a developer's memory",
+          "Deleted after every deployment"
+        ],
+        "answer": "Versioned and reviewed like application code",
+        "explanation": "Version control and review make migrations repeatable and auditable."
+      }
+    ]
+  },
+  "status": "draft"
+}

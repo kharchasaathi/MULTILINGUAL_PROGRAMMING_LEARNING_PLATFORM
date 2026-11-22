@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql4.3.en",
+  "courseId": "sql",
+  "moduleId": "SQL4",
+  "topicId": "SQL4.3",
+  "title": "UNIQUE Constraints",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of unique constraints.",
+    "Identify the rule, affected columns and expected write behaviour.",
+    "Predict the outcome of valid inserts and schema operations.",
+    "Recognize SQLite-specific behaviour and cross-DBMS differences.",
+    "Apply safe data-integrity and schema-migration practices."
+  ],
+  "prerequisites": [
+    "SQL3.2",
+    "SQL3.3",
+    "SQL3.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "UNIQUE prevents duplicate non-NULL key values in a column or a declared combination of columns. It is useful for identifiers such as email addresses and for preventing duplicate pairs.",
+      "whyItMatters": "Duplicate business identifiers can cause ambiguous records, failed account matching and inconsistent reporting.",
+      "analogy": "A UNIQUE rule is like reserving each registration code for one record only.",
+      "analogyLimit": "The analogy simplifies database behaviour. Actual constraint enforcement follows SQL NULL semantics, transaction rules and the selected database engine's implementation."
+    },
+    "explain": {
+      "narrative": "## Concept\nUNIQUE prevents duplicate non-NULL key values in a column or a declared combination of columns. It is useful for identifiers such as email addresses and for preventing duplicate pairs.\n\n## Why this matters\nDuplicate business identifiers can cause ambiguous records, failed account matching and inconsistent reporting.\n\n## Practical rules\nUse explicit column lists, test both valid and invalid cases in an isolated database, and keep engine-specific behaviour visible. Constraints protect writes, but they do not replace application-level validation or a safe migration plan.\n\n## Worked examples\n### 1. Create a table with a unique email\n```sql\nCREATE TABLE c4_unique (id INTEGER PRIMARY KEY, email TEXT NOT NULL UNIQUE, display_name TEXT NOT NULL);\n```\nExpected result: `Table created`\n\nThe email column cannot contain duplicate non-NULL values.\n\n### 2. Insert a first email\n```sql\nINSERT INTO c4_unique VALUES (1, 'a@example.test', 'Ari');\n```\nExpected result: `1 row inserted`\n\nThe first occurrence of the email is accepted.\n\n### 3. Insert a different email\n```sql\nINSERT INTO c4_unique VALUES (2, 'b@example.test', 'Bea');\n```\nExpected result: `1 row inserted`\n\nA distinct email satisfies the uniqueness rule.\n\n### 4. Create a table with a composite UNIQUE rule\n```sql\nCREATE TABLE c4_membership (member_id INTEGER, group_id INTEGER, joined_on TEXT, UNIQUE (member_id, group_id));\n```\nExpected result: `Table created`\n\nThe pair of member_id and group_id must be unique together.\n\n### 5. Inspect the unique index metadata\n```sql\nSELECT name FROM pragma_index_list('c4_unique') ORDER BY name;\n```\nExpected result: `sqlite_autoindex_c4_unique_1`\n\nSQLite creates an internal unique index to enforce the table constraint.\n\n## Common mistakes\n- Confusing an omitted column with an explicit NULL value.\n- Assuming UNIQUE automatically means NOT NULL.\n- Treating a composite key as separate single-column rules.\n- Forgetting to enable SQLite foreign-key enforcement for a connection.\n- Assuming every DBMS supports the same ALTER TABLE constraint syntax.\n\n## Safe practice\nTest migrations against a copy, inspect existing data, use transactions where supported, and keep a recoverable backup before changing important schemas.",
+      "examples": [
+        {
+          "id": "sql4.3-ex1",
+          "language": "en",
+          "title": "Create a table with a unique email",
+          "code": "CREATE TABLE c4_unique (id INTEGER PRIMARY KEY, email TEXT NOT NULL UNIQUE, display_name TEXT NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "The email column cannot contain duplicate non-NULL values.",
+          "runnable": true
+        },
+        {
+          "id": "sql4.3-ex2",
+          "language": "en",
+          "title": "Insert a first email",
+          "code": "INSERT INTO c4_unique VALUES (1, 'a@example.test', 'Ari');",
+          "expectedOutput": "1 row inserted",
+          "explanation": "The first occurrence of the email is accepted.",
+          "runnable": true
+        },
+        {
+          "id": "sql4.3-ex3",
+          "language": "en",
+          "title": "Insert a different email",
+          "code": "INSERT INTO c4_unique VALUES (2, 'b@example.test', 'Bea');",
+          "expectedOutput": "1 row inserted",
+          "explanation": "A distinct email satisfies the uniqueness rule.",
+          "runnable": true
+        },
+        {
+          "id": "sql4.3-ex4",
+          "language": "en",
+          "title": "Create a table with a composite UNIQUE rule",
+          "code": "CREATE TABLE c4_membership (member_id INTEGER, group_id INTEGER, joined_on TEXT, UNIQUE (member_id, group_id));",
+          "expectedOutput": "Table created",
+          "explanation": "The pair of member_id and group_id must be unique together.",
+          "runnable": true
+        },
+        {
+          "id": "sql4.3-ex5",
+          "language": "en",
+          "title": "Inspect the unique index metadata",
+          "code": "SELECT name FROM pragma_index_list('c4_unique') ORDER BY name;",
+          "expectedOutput": "sqlite_autoindex_c4_unique_1",
+          "explanation": "SQLite creates an internal unique index to enforce the table constraint.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the five examples for UNIQUE Constraints in the SQL Playground. Predict each result, execute the statement, and explain which rule is being enforced.",
+      "independentTask": "Design a small original schema demonstrating UNIQUE Constraints. Include at least five SQL statements, one verification query and a short explanation of the SQLite behaviour involved.",
+      "hints": [
+        "Identify whether the rule applies to one column or a combination of columns.",
+        "Check whether a value is omitted, NULL or an ordinary value.",
+        "Use explicit column lists and meaningful constraint names.",
+        "For foreign keys, enable PRAGMA foreign_keys = ON in SQLite.",
+        "Test schema changes on sample data before applying them to important databases."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE c4_unique (id INTEGER PRIMARY KEY, email TEXT NOT NULL UNIQUE, display_name TEXT NOT NULL);\n\nINSERT INTO c4_unique VALUES (1, 'a@example.test', 'Ari');\n\nINSERT INTO c4_unique VALUES (2, 'b@example.test', 'Bea');\n\nCREATE TABLE c4_membership (member_id INTEGER, group_id INTEGER, joined_on TEXT, UNIQUE (member_id, group_id));\n\nSELECT name FROM pragma_index_list('c4_unique') ORDER BY name;",
+    "resetCode": "CREATE TABLE c4_unique (id INTEGER PRIMARY KEY, email TEXT NOT NULL UNIQUE, display_name TEXT NOT NULL);\n\nINSERT INTO c4_unique VALUES (1, 'a@example.test', 'Ari');\n\nINSERT INTO c4_unique VALUES (2, 'b@example.test', 'Bea');\n\nCREATE TABLE c4_membership (member_id INTEGER, group_id INTEGER, joined_on TEXT, UNIQUE (member_id, group_id));\n\nSELECT name FROM pragma_index_list('c4_unique') ORDER BY name;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql4.3-q1",
+        "prompt": "What does UNIQUE prevent?",
+        "options": [
+          "Duplicate key values in the constrained column or column set",
+          "All NULL values in every column",
+          "Updates to every row",
+          "Creation of indexes"
+        ],
+        "answer": "Duplicate key values in the constrained column or column set",
+        "explanation": "A UNIQUE constraint enforces distinct key values."
+      },
+      {
+        "id": "sql4.3-q2",
+        "prompt": "What is a composite UNIQUE constraint?",
+        "options": [
+          "A uniqueness rule across a combination of columns",
+          "A rule that every column must be text",
+          "A primary key with an automatic sequence",
+          "A view over duplicate rows"
+        ],
+        "answer": "A uniqueness rule across a combination of columns",
+        "explanation": "The combination, rather than each column individually, must be unique."
+      },
+      {
+        "id": "sql4.3-q3",
+        "prompt": "Can a table have multiple UNIQUE constraints?",
+        "options": [
+          "Yes",
+          "No, only one is allowed",
+          "Only if there is no primary key",
+          "Only on integer columns"
+        ],
+        "answer": "Yes",
+        "explanation": "A table may define multiple alternate unique keys."
+      },
+      {
+        "id": "sql4.3-q4",
+        "prompt": "Does UNIQUE mean the column is automatically NOT NULL in SQLite?",
+        "options": [
+          "No",
+          "Yes, in every case",
+          "Only for TEXT",
+          "Only when the table has two rows"
+        ],
+        "answer": "No",
+        "explanation": "SQLite permits NULL values in a UNIQUE column; use NOT NULL as well when required."
+      },
+      {
+        "id": "sql4.3-q5",
+        "prompt": "What database object may SQLite create internally to enforce UNIQUE?",
+        "options": [
+          "A unique index",
+          "A trigger for every SELECT",
+          "A separate database file",
+          "A foreign schema"
+        ],
+        "answer": "A unique index",
+        "explanation": "SQLite commonly uses an internal unique index for a UNIQUE constraint."
+      }
+    ]
+  },
+  "status": "draft"
+}

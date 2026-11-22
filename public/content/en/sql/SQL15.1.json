@@ -1,0 +1,160 @@
+{
+  "id": "sql.sql15.1.en",
+  "courseId": "sql",
+  "moduleId": "SQL15",
+  "topicId": "SQL15.1",
+  "title": "Index Fundamentals and Query Plans",
+  "language": "en",
+  "learningObjectives": [
+    "Explain how an index can reduce the work needed to locate rows.",
+    "Describe the storage and write-performance trade-offs of indexes.",
+    "Use EXPLAIN QUERY PLAN to inspect a SQLite query strategy.",
+    "Distinguish a table scan from an index search in a query plan.",
+    "Verify that an indexed query still returns the correct rows."
+  ],
+  "prerequisites": [
+    "SQL3.10",
+    "SQL5.4",
+    "SQL5.6"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "An index is a separate data structure that helps a database locate rows without scanning every row in a table. Indexes can speed up suitable reads, but they require storage and add work to INSERT, UPDATE and DELETE operations. A query plan describes how the engine intends to access data.",
+      "whyItMatters": "Understanding indexes helps developers balance read performance with write cost, storage and maintenance.",
+      "analogy": "An index is like a sorted lookup guide that points toward the relevant records instead of requiring every page to be read.",
+      "analogyLimit": "The analogy does not model B-tree pages, query planner estimates, index maintenance or the full range of SQL access paths."
+    },
+    "explain": {
+      "narrative": "## Index fundamentals\nAn index stores searchable key values and references to table rows. An index on a frequently filtered column can reduce the rows the engine must inspect. An index is not automatically useful for every query; selectivity, table size, query shape and statistics matter.\n\n## Query plans\nEXPLAIN QUERY PLAN in SQLite shows whether a query uses a table scan or an index search. The exact wording and plan details can vary with SQLite versions and schema statistics, so treat plans as diagnostic evidence rather than fixed output strings.\n\n## Trade-offs\nIndexes use storage and must be maintained when indexed data changes. Too many or poorly chosen indexes can slow writes and make maintenance more expensive.\n\n### Selectivity and plan evidence\nAn index is more likely to help when a predicate narrows the search to a relatively small part of a large table. A low-selectivity column may still be useful in a composite or covering index, but the optimizer can correctly choose a table scan when reading most rows is cheaper.\n\n### Measure before and after\nUse the same representative data and query parameters when comparing plans or timing. EXPLAIN QUERY PLAN is diagnostic output, not a benchmark and not a guarantee that the query is faster.",
+      "examples": [
+        {
+          "id": "sql15.1-ex1",
+          "language": "en",
+          "title": "Create an orders table",
+          "code": "CREATE TABLE perf15_orders (order_id INTEGER PRIMARY KEY, customer TEXT NOT NULL, amount INTEGER NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "Creates an orders table with a primary key and required customer and amount columns. The primary-key index is created automatically by SQLite; the next index is a separate access path for customer lookups.",
+          "runnable": true
+        },
+        {
+          "id": "sql15.1-ex2",
+          "language": "en",
+          "title": "Generate 200 sample orders",
+          "code": "WITH RECURSIVE seq(value) AS (SELECT 1 UNION ALL SELECT value + 1 FROM seq WHERE value < 200) INSERT INTO perf15_orders SELECT value, printf('Customer%03d', value % 20), value FROM seq;",
+          "expectedOutput": "200 rows inserted",
+          "explanation": "Uses a recursive CTE to generate values 1 through 200 and inserts one order per value. printf creates repeatable customer labels, so each of 20 customers appears ten times and the data set is large enough to demonstrate a non-unique lookup index.",
+          "runnable": true
+        },
+        {
+          "id": "sql15.1-ex3",
+          "language": "en",
+          "title": "Create an index for customer lookups",
+          "code": "CREATE INDEX idx_perf15_customer ON perf15_orders(customer);",
+          "expectedOutput": "Index created",
+          "explanation": "Creates a secondary index on customer. The index stores customer keys with references to matching rows, allowing the planner to consider an indexed search instead of scanning every order.",
+          "runnable": true
+        },
+        {
+          "id": "sql15.1-ex4",
+          "language": "en",
+          "title": "Inspect the query plan for a customer lookup",
+          "code": "EXPLAIN QUERY PLAN SELECT order_id, amount FROM perf15_orders WHERE customer = 'Customer007';",
+          "expectedOutput": "Query plan uses idx_perf15_customer",
+          "expectedPattern": "SEARCH.*USING INDEX idx_perf15_customer",
+          "explanation": "EXPLAIN QUERY PLAN displays SQLite's chosen access strategy for the customer predicate. The expected description is conceptual: exact plan text varies by SQLite version, schema statistics and data distribution, so inspect the actual output rather than relying on one fixed string.",
+          "runnable": true
+        },
+        {
+          "id": "sql15.1-ex5",
+          "language": "en",
+          "title": "Measure the matching rows",
+          "code": "SELECT COUNT(*) AS matching_orders, SUM(amount) AS total_amount FROM perf15_orders WHERE customer = 'Customer007';",
+          "expectedOutput": "10 | 970",
+          "explanation": "Counts the ten rows for Customer007 and sums their order_id values, which total 970. This query verifies the matching data independently of the plan; an index should not change the logical result.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and inspect the query plan. Identify the index name and compare the plan evidence with the exact rows returned.",
+      "independentTask": "Create a table with at least 100 rows, add an index on a frequently filtered column, inspect the query plan and verify the query result. Explain the write and storage trade-offs.",
+      "hints": [
+        "Indexes help locate rows using indexed key values.",
+        "Create an index on columns used by selective filters or joins.",
+        "Use EXPLAIN QUERY PLAN to inspect access strategy.",
+        "Plan wording can vary by SQLite version; inspect the detail column.",
+        "Always verify query results, not just the plan."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE perf15_orders (order_id INTEGER PRIMARY KEY, customer TEXT NOT NULL, amount INTEGER NOT NULL);\nWITH RECURSIVE seq(value) AS (SELECT 1 UNION ALL SELECT value + 1 FROM seq WHERE value < 200) INSERT INTO perf15_orders SELECT value, printf('Customer%03d', value % 20), value FROM seq;\nCREATE INDEX idx_perf15_customer ON perf15_orders(customer);\nEXPLAIN QUERY PLAN SELECT order_id, amount FROM perf15_orders WHERE customer = 'Customer007';",
+    "resetCode": "CREATE TABLE perf15_orders (order_id INTEGER PRIMARY KEY, customer TEXT NOT NULL, amount INTEGER NOT NULL);\nWITH RECURSIVE seq(value) AS (SELECT 1 UNION ALL SELECT value + 1 FROM seq WHERE value < 200) INSERT INTO perf15_orders SELECT value, printf('Customer%03d', value % 20), value FROM seq;\nCREATE INDEX idx_perf15_customer ON perf15_orders(customer);\nEXPLAIN QUERY PLAN SELECT order_id, amount FROM perf15_orders WHERE customer = 'Customer007';"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql15.1-q1",
+        "prompt": "What is a common purpose of an index?",
+        "options": [
+          "To help locate matching rows without scanning the entire table",
+          "To store SQL comments",
+          "To replace every primary key",
+          "To commit transactions"
+        ],
+        "answer": "To help locate matching rows without scanning the entire table",
+        "explanation": "Indexes provide an access path for suitable lookups."
+      },
+      {
+        "id": "sql15.1-q2",
+        "prompt": "What is one cost of adding indexes?",
+        "options": [
+          "Additional storage and maintenance work on writes",
+          "All SELECT statements become slower",
+          "The table cannot be updated",
+          "The database loses constraints"
+        ],
+        "answer": "Additional storage and maintenance work on writes",
+        "explanation": "Indexes consume storage and must be maintained when data changes."
+      },
+      {
+        "id": "sql15.1-q3",
+        "prompt": "Which SQLite statement displays a query plan?",
+        "options": [
+          "EXPLAIN QUERY PLAN",
+          "SHOW TRANSACTION",
+          "DESCRIBE INDEXES ONLY",
+          "PRAGMA COMMIT"
+        ],
+        "answer": "EXPLAIN QUERY PLAN",
+        "explanation": "EXPLAIN QUERY PLAN shows the chosen query strategy."
+      },
+      {
+        "id": "sql15.1-q4",
+        "prompt": "What does SEARCH USING INDEX generally indicate?",
+        "options": [
+          "The plan uses an index to find matching rows",
+          "The table is being deleted",
+          "The query is always incorrect",
+          "The index is ignored"
+        ],
+        "answer": "The plan uses an index to find matching rows",
+        "explanation": "The plan detail indicates an index-based lookup."
+      },
+      {
+        "id": "sql15.1-q5",
+        "prompt": "Should every column receive an index?",
+        "options": [
+          "No, indexes should be chosen for actual query patterns and trade-offs",
+          "Yes, every column needs five indexes",
+          "Only text columns can be indexed",
+          "Indexes have no write cost"
+        ],
+        "answer": "No, indexes should be chosen for actual query patterns and trade-offs",
+        "explanation": "Index design should reflect workload, selectivity and maintenance cost."
+      }
+    ]
+  },
+  "status": "draft"
+}

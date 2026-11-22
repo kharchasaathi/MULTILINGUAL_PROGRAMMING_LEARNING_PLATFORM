@@ -1,0 +1,160 @@
+{
+  "id": "sql.sql9.4.en",
+  "courseId": "sql",
+  "moduleId": "SQL9",
+  "topicId": "SQL9.4",
+  "title": "SQL HAVING Clause",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of SQL HAVING Clause.",
+    "Write valid SQLite queries that demonstrate the topic or a documented equivalent.",
+    "Predict result rows using the supplied sample data.",
+    "Identify common mistakes and important NULL or duplicate behaviour.",
+    "Choose an appropriate query pattern for a practical reporting task."
+  ],
+  "prerequisites": [
+    "SQL5.1",
+    "SQL5.4",
+    "SQL6.1",
+    "SQL8.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "HAVING filters groups after GROUP BY has formed them. It is commonly used with aggregate expressions such as COUNT, SUM and AVG. WHERE filters individual input rows before grouping; HAVING filters the resulting groups.",
+      "whyItMatters": "HAVING is useful when a report should show only customers with several orders, departments above a payroll threshold or categories whose average score meets a target.",
+      "analogy": "Think of a database report as carefully combining or grouping rows from well-labelled registers to answer a specific question.",
+      "analogyLimit": "The analogy does not model SQL's exact evaluation rules, duplicate semantics, three-valued NULL logic or dialect-specific features."
+    },
+    "explain": {
+      "narrative": "## Core concept\nHAVING filters groups after GROUP BY has formed them. It is commonly used with aggregate expressions such as COUNT, SUM and AVG. WHERE filters individual input rows before grouping; HAVING filters the resulting groups.\n\n## Syntax\n```sql\nSELECT grouping_column, aggregate_function(value_column)\nFROM table_name\nGROUP BY grouping_column\nHAVING aggregate_condition;\n```\n\n## SQLite sample database\nThe following examples use a small fictional dataset. Each worked example starts with a repeatable setup script so it can be run independently in the SQL Playground.\n\n## Worked examples\n### 1. Show customers with at least two orders\n```sql\nDROP TABLE IF EXISTS orders;\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL, amount NUMERIC NOT NULL);\nINSERT INTO orders VALUES (1,'Asha','Rajahmundry',120),(2,'Bilal','Hyderabad',200),(3,'Asha','Rajahmundry',80),(4,'Chitra','Vijayawada',150),(5,'Bilal','Hyderabad',100),(6,'Dev','Mumbai',90);\nSELECT customer_name, COUNT(*) AS order_count FROM orders GROUP BY customer_name HAVING COUNT(*) >= 2 ORDER BY customer_name;\n```\nExpected result: Asha | 2; Bilal | 2\n\nHAVING evaluates the order count for each customer group.\n\n### 2. Show cities whose sales exceed a threshold\n```sql\nDROP TABLE IF EXISTS orders;\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL, amount NUMERIC NOT NULL);\nINSERT INTO orders VALUES (1,'Asha','Rajahmundry',120),(2,'Bilal','Hyderabad',200),(3,'Asha','Rajahmundry',80),(4,'Chitra','Vijayawada',150),(5,'Bilal','Hyderabad',100),(6,'Dev','Mumbai',90);\nSELECT city, SUM(amount) AS city_total FROM orders GROUP BY city HAVING SUM(amount) > 150 ORDER BY city;\n```\nExpected result: Hyderabad | 300; Rajahmundry | 200\n\nOnly city groups whose total is greater than 150 remain.\n\n### 3. Combine WHERE and HAVING\n```sql\nDROP TABLE IF EXISTS orders;\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL, amount NUMERIC NOT NULL);\nINSERT INTO orders VALUES (1,'Asha','Rajahmundry',120),(2,'Bilal','Hyderabad',200),(3,'Asha','Rajahmundry',80),(4,'Chitra','Vijayawada',150),(5,'Bilal','Hyderabad',100),(6,'Dev','Mumbai',90);\nSELECT city, SUM(amount) AS qualifying_total FROM orders WHERE amount >= 100 GROUP BY city HAVING SUM(amount) >= 150 ORDER BY city;\n```\nExpected result: Hyderabad | 300; Vijayawada | 150\n\nWHERE removes small individual orders first; HAVING then filters the remaining city totals.\n\n### 4. Filter groups using an average\n```sql\nDROP TABLE IF EXISTS orders;\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL, amount NUMERIC NOT NULL);\nINSERT INTO orders VALUES (1,'Asha','Rajahmundry',120),(2,'Bilal','Hyderabad',200),(3,'Asha','Rajahmundry',80),(4,'Chitra','Vijayawada',150),(5,'Bilal','Hyderabad',100),(6,'Dev','Mumbai',90);\nSELECT city, ROUND(AVG(amount), 2) AS average_order FROM orders GROUP BY city HAVING AVG(amount) >= 125 ORDER BY city;\n```\nExpected result: Hyderabad | 150; Vijayawada | 150\n\nHAVING can filter groups by an average aggregate.\n\n### 5. Keep groups whose order count is not one\n```sql\nDROP TABLE IF EXISTS orders;\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL, amount NUMERIC NOT NULL);\nINSERT INTO orders VALUES (1,'Asha','Rajahmundry',120),(2,'Bilal','Hyderabad',200),(3,'Asha','Rajahmundry',80),(4,'Chitra','Vijayawada',150),(5,'Bilal','Hyderabad',100),(6,'Dev','Mumbai',90);\nSELECT customer_name, COUNT(*) AS order_count FROM orders GROUP BY customer_name HAVING COUNT(*) <> 1 ORDER BY customer_name;\n```\nExpected result: Asha | 2; Bilal | 2\n\nThe condition removes one-order customer groups.\n\n## Query behaviour and dialect notes\nThe examples target SQLite and use portable core SQL syntax. Column positions and compatible data types must align across set-operation branches. Result order is not guaranteed without an outer ORDER BY.\n\n## Common mistakes\n- Selecting a non-aggregated column that is not grouped.\n- Confusing row-level WHERE filtering with group-level HAVING filtering.\n- Forgetting that WHERE is applied before grouping.\n- Grouping by too few columns for the intended report.\n- Assuming groups are returned in a particular order without ORDER BY.\n\n## Best practices\nUse explicit aliases and readable predicates. Test edge cases such as missing matches, duplicate values, empty sets and NULLs. Keep the database dialect visible whenever a feature is not portable.",
+      "examples": [
+        {
+          "id": "sql9.4-ex1",
+          "language": "en",
+          "title": "Show customers with at least two orders",
+          "code": "DROP TABLE IF EXISTS orders;\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL, amount NUMERIC NOT NULL);\nINSERT INTO orders VALUES (1,'Asha','Rajahmundry',120),(2,'Bilal','Hyderabad',200),(3,'Asha','Rajahmundry',80),(4,'Chitra','Vijayawada',150),(5,'Bilal','Hyderabad',100),(6,'Dev','Mumbai',90);\nSELECT customer_name, COUNT(*) AS order_count FROM orders GROUP BY customer_name HAVING COUNT(*) >= 2 ORDER BY customer_name;",
+          "expectedOutput": "Asha | 2; Bilal | 2",
+          "explanation": "HAVING evaluates the order count for each customer group.",
+          "runnable": true
+        },
+        {
+          "id": "sql9.4-ex2",
+          "language": "en",
+          "title": "Show cities whose sales exceed a threshold",
+          "code": "DROP TABLE IF EXISTS orders;\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL, amount NUMERIC NOT NULL);\nINSERT INTO orders VALUES (1,'Asha','Rajahmundry',120),(2,'Bilal','Hyderabad',200),(3,'Asha','Rajahmundry',80),(4,'Chitra','Vijayawada',150),(5,'Bilal','Hyderabad',100),(6,'Dev','Mumbai',90);\nSELECT city, SUM(amount) AS city_total FROM orders GROUP BY city HAVING SUM(amount) > 150 ORDER BY city;",
+          "expectedOutput": "Hyderabad | 300; Rajahmundry | 200",
+          "explanation": "Only city groups whose total is greater than 150 remain.",
+          "runnable": true
+        },
+        {
+          "id": "sql9.4-ex3",
+          "language": "en",
+          "title": "Combine WHERE and HAVING",
+          "code": "DROP TABLE IF EXISTS orders;\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL, amount NUMERIC NOT NULL);\nINSERT INTO orders VALUES (1,'Asha','Rajahmundry',120),(2,'Bilal','Hyderabad',200),(3,'Asha','Rajahmundry',80),(4,'Chitra','Vijayawada',150),(5,'Bilal','Hyderabad',100),(6,'Dev','Mumbai',90);\nSELECT city, SUM(amount) AS qualifying_total FROM orders WHERE amount >= 100 GROUP BY city HAVING SUM(amount) >= 150 ORDER BY city;",
+          "expectedOutput": "Hyderabad | 300; Vijayawada | 150",
+          "explanation": "WHERE removes small individual orders first; HAVING then filters the remaining city totals.",
+          "runnable": true
+        },
+        {
+          "id": "sql9.4-ex4",
+          "language": "en",
+          "title": "Filter groups using an average",
+          "code": "DROP TABLE IF EXISTS orders;\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL, amount NUMERIC NOT NULL);\nINSERT INTO orders VALUES (1,'Asha','Rajahmundry',120),(2,'Bilal','Hyderabad',200),(3,'Asha','Rajahmundry',80),(4,'Chitra','Vijayawada',150),(5,'Bilal','Hyderabad',100),(6,'Dev','Mumbai',90);\nSELECT city, ROUND(AVG(amount), 2) AS average_order FROM orders GROUP BY city HAVING AVG(amount) >= 125 ORDER BY city;",
+          "expectedOutput": "Hyderabad | 150; Vijayawada | 150",
+          "explanation": "HAVING can filter groups by an average aggregate.",
+          "runnable": true
+        },
+        {
+          "id": "sql9.4-ex5",
+          "language": "en",
+          "title": "Keep groups whose order count is not one",
+          "code": "DROP TABLE IF EXISTS orders;\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL, amount NUMERIC NOT NULL);\nINSERT INTO orders VALUES (1,'Asha','Rajahmundry',120),(2,'Bilal','Hyderabad',200),(3,'Asha','Rajahmundry',80),(4,'Chitra','Vijayawada',150),(5,'Bilal','Hyderabad',100),(6,'Dev','Mumbai',90);\nSELECT customer_name, COUNT(*) AS order_count FROM orders GROUP BY customer_name HAVING COUNT(*) <> 1 ORDER BY customer_name;",
+          "expectedOutput": "Asha | 2; Bilal | 2",
+          "explanation": "The condition removes one-order customer groups.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run a grouped order count, then add HAVING COUNT(*) >= 2. Next add WHERE amount >= 100 before GROUP BY and compare the result.",
+      "independentTask": "Build a sales report grouped by sales_rep and region. Use WHERE to restrict the reporting period and HAVING to retain only groups with a minimum order count and revenue total.",
+      "hints": [
+        "HAVING is applied to groups, not individual source rows.",
+        "WHERE normally cannot use aggregate functions in its condition.",
+        "HAVING can be used with aggregate expressions.",
+        "Use both clauses when row-level and group-level filters are needed.",
+        "Ensure selected non-aggregate columns are grouped."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "DROP TABLE IF EXISTS orders;\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL, amount NUMERIC NOT NULL);\nINSERT INTO orders VALUES (1,'Asha','Rajahmundry',120),(2,'Bilal','Hyderabad',200),(3,'Asha','Rajahmundry',80),(4,'Chitra','Vijayawada',150),(5,'Bilal','Hyderabad',100),(6,'Dev','Mumbai',90);\n\n-- Try the lesson's first query\nSELECT customer_name, COUNT(*) AS order_count FROM orders GROUP BY customer_name HAVING COUNT(*) >= 2 ORDER BY customer_name;",
+    "resetCode": "DROP TABLE IF EXISTS orders;\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL, amount NUMERIC NOT NULL);\nINSERT INTO orders VALUES (1,'Asha','Rajahmundry',120),(2,'Bilal','Hyderabad',200),(3,'Asha','Rajahmundry',80),(4,'Chitra','Vijayawada',150),(5,'Bilal','Hyderabad',100),(6,'Dev','Mumbai',90);"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql9.4-q1",
+        "prompt": "What does HAVING filter?",
+        "options": [
+          "Groups produced by GROUP BY",
+          "Individual source rows before grouping",
+          "Database tables before creation",
+          "Column names in the SELECT list"
+        ],
+        "answer": "Groups produced by GROUP BY",
+        "explanation": "HAVING evaluates conditions against groups."
+      },
+      {
+        "id": "sql9.4-q2",
+        "prompt": "Which clause should filter individual orders before aggregation?",
+        "options": [
+          "WHERE",
+          "HAVING",
+          "ORDER BY",
+          "UNION"
+        ],
+        "answer": "WHERE",
+        "explanation": "WHERE restricts source rows before grouping."
+      },
+      {
+        "id": "sql9.4-q3",
+        "prompt": "Which clause can filter groups using COUNT(*) >= 2?",
+        "options": [
+          "HAVING",
+          "WHERE",
+          "FROM",
+          "LIMIT"
+        ],
+        "answer": "HAVING",
+        "explanation": "HAVING can apply aggregate conditions to groups."
+      },
+      {
+        "id": "sql9.4-q4",
+        "prompt": "What is the effect of using WHERE amount >= 100 and HAVING SUM(amount) >= 150?",
+        "options": [
+          "It filters individual orders first, then filters group totals",
+          "It filters totals before reading rows",
+          "It changes the stored amount values",
+          "It removes the GROUP BY operation"
+        ],
+        "answer": "It filters individual orders first, then filters group totals",
+        "explanation": "WHERE and HAVING act at different logical stages."
+      },
+      {
+        "id": "sql9.4-q5",
+        "prompt": "Can HAVING be used without an explicit GROUP BY in supported SQL engines?",
+        "options": [
+          "Yes, it can apply to the single implicit aggregate group",
+          "No, it is always invalid",
+          "Only in SQLite when a table is empty",
+          "Only with ORDER BY"
+        ],
+        "answer": "Yes, it can apply to the single implicit aggregate group",
+        "explanation": "An aggregate query without GROUP BY can form one implicit group; dialect details should be checked."
+      }
+    ]
+  },
+  "status": "draft"
+}

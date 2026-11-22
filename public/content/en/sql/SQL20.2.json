@@ -1,0 +1,161 @@
+{
+  "id": "sql.sql20.2.en",
+  "courseId": "sql",
+  "moduleId": "SQL20",
+  "topicId": "SQL20.2",
+  "title": "Roles, Permissions and Authorization Models",
+  "language": "en",
+  "learningObjectives": [
+    "Explain role-based access control (RBAC).",
+    "Model users, roles and permissions with relational tables.",
+    "Use junction tables to represent many-to-many assignments.",
+    "Query the effective permissions assigned through a role.",
+    "Distinguish application-level RBAC tables from native DBMS GRANT and REVOKE statements."
+  ],
+  "prerequisites": [
+    "SQL1.1",
+    "SQL4.1",
+    "SQL11.4",
+    "SQL11.5",
+    "SQL11.6"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Role-based access control assigns permissions to named roles and assigns users to those roles. The effective permissions for a user are derived through these relationships.",
+      "whyItMatters": "Centralizing permissions in roles is easier to audit and maintain than hard-coding access decisions separately for every user.",
+      "analogy": "A job title groups the access a staff member needs, rather than granting each door key individually.",
+      "analogyLimit": "An application role table does not enforce access at the database engine boundary. Native GRANT/REVOKE and role syntax differ by DBMS; SQLite does not implement server-side roles."
+    },
+    "explain": {
+      "narrative": "## RBAC structure\nA typical RBAC model contains users, roles, permissions, a user-role junction table and a role-permission junction table. The junction tables represent many-to-many relationships: one user can hold several roles, and one role can be assigned to many users.\n\n## Effective permissions\nA permission is effective when it is connected to one of the user's assigned roles. Query this relationship for display or policy evaluation, but enforce the result in a trusted application/service boundary.\n\n## Native database privileges\nPostgreSQL, MySQL, SQL Server and Oracle provide product-specific principals, roles and GRANT/REVOKE features. Syntax and object-level privileges differ. SQLite has no equivalent server-side user/role system; this lesson's runnable SQLite examples model application authorization metadata only.\n\n## Safe design\nUse stable IDs, unique role and permission names, foreign keys, auditable assignment changes and a deny-by-default policy. Re-check authorization on every sensitive operation rather than trusting a hidden UI control.",
+      "examples": [
+        {
+          "id": "sql202-ex1",
+          "language": "en",
+          "title": "Create role and permission catalogues",
+          "code": "CREATE TABLE sec20_roles (role_id INTEGER PRIMARY KEY, role_name TEXT NOT NULL UNIQUE); CREATE TABLE sec20_permissions (permission_id INTEGER PRIMARY KEY, permission_code TEXT NOT NULL UNIQUE);",
+          "expectedOutput": "Tables created",
+          "explanation": "Creates lookup tables for roles and permission codes. Unique constraints prevent duplicate names and permission identifiers.",
+          "runnable": true
+        },
+        {
+          "id": "sql202-ex2",
+          "language": "en",
+          "title": "Seed roles and permissions",
+          "code": "INSERT INTO sec20_roles VALUES (1, 'analyst'), (2, 'viewer'); INSERT INTO sec20_permissions VALUES (1, 'report.read'), (2, 'report.export'), (3, 'user.manage');",
+          "expectedOutput": "Role and permission catalogues seeded",
+          "explanation": "Adds two roles and three permission codes. These are application policy labels, not native SQLite privileges.",
+          "runnable": true
+        },
+        {
+          "id": "sql202-ex3",
+          "language": "en",
+          "title": "Create user and assignment relationships",
+          "code": "CREATE TABLE sec20_app_users (user_id INTEGER PRIMARY KEY, login_name TEXT NOT NULL UNIQUE); CREATE TABLE sec20_user_roles (user_id INTEGER NOT NULL REFERENCES sec20_app_users(user_id), role_id INTEGER NOT NULL REFERENCES sec20_roles(role_id), PRIMARY KEY (user_id, role_id)); CREATE TABLE sec20_role_permissions (role_id INTEGER NOT NULL REFERENCES sec20_roles(role_id), permission_id INTEGER NOT NULL REFERENCES sec20_permissions(permission_id), PRIMARY KEY (role_id, permission_id)); INSERT INTO sec20_app_users VALUES (1, 'asha'), (2, 'bilal'); INSERT INTO sec20_user_roles VALUES (1, 1), (2, 2); INSERT INTO sec20_role_permissions VALUES (1, 1), (1, 2), (2, 1);",
+          "expectedOutput": "RBAC relationships created",
+          "explanation": "Creates composite primary keys to prevent duplicate assignments, then assigns Asha the analyst role, Bilal the viewer role, and maps permissions to roles. Enable SQLite foreign-key enforcement for actual referential checks.",
+          "runnable": true
+        },
+        {
+          "id": "sql202-ex4",
+          "language": "en",
+          "title": "List each user's assigned roles",
+          "code": "SELECT u.login_name, r.role_name FROM sec20_app_users AS u JOIN sec20_user_roles AS ur ON ur.user_id = u.user_id JOIN sec20_roles AS r ON r.role_id = ur.role_id ORDER BY u.login_name;",
+          "expectedOutput": "asha | analyst; bilal | viewer",
+          "explanation": "Joins the user-role bridge table to display the role assignments. The bridge table supports multiple roles per user without repeating user or role details.",
+          "runnable": true
+        },
+        {
+          "id": "sql202-ex5",
+          "language": "en",
+          "title": "Resolve the read permission for each user",
+          "code": "SELECT u.login_name, p.permission_code FROM sec20_app_users AS u JOIN sec20_user_roles AS ur ON ur.user_id = u.user_id JOIN sec20_role_permissions AS rp ON rp.role_id = ur.role_id JOIN sec20_permissions AS p ON p.permission_id = rp.permission_id WHERE p.permission_code = 'report.read' ORDER BY u.login_name;",
+          "expectedOutput": "asha | report.read; bilal | report.read",
+          "explanation": "Traverses both junction tables to calculate which users inherit report.read. The application must still check this policy at the protected service boundary; the SELECT itself does not prevent a direct database write.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples in order. Draw the two many-to-many relationships and explain why composite keys prevent duplicate user-role and role-permission assignments.",
+      "independentTask": "Add a publisher role with report.read and report.publish permissions. Assign it to a user and query all effective permissions. Explain how an administrator would audit and revoke the assignment.",
+      "hints": [
+        "Roles group permission codes.",
+        "Use junction tables for many-to-many assignments.",
+        "Composite primary keys prevent duplicate mappings.",
+        "Native GRANT/REVOKE syntax is DBMS-specific.",
+        "An application policy query is not a substitute for DBMS-enforced privileges."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE sec20_roles (role_id INTEGER PRIMARY KEY, role_name TEXT NOT NULL UNIQUE);\nCREATE TABLE sec20_permissions (permission_id INTEGER PRIMARY KEY, permission_code TEXT NOT NULL UNIQUE);\nINSERT INTO sec20_roles VALUES (1, 'analyst'), (2, 'viewer');\nINSERT INTO sec20_permissions VALUES (1, 'report.read'), (2, 'report.export');\nSELECT role_name FROM sec20_roles ORDER BY role_name;",
+    "resetCode": "CREATE TABLE sec20_roles (role_id INTEGER PRIMARY KEY, role_name TEXT NOT NULL UNIQUE);\nCREATE TABLE sec20_permissions (permission_id INTEGER PRIMARY KEY, permission_code TEXT NOT NULL UNIQUE);\nINSERT INTO sec20_roles VALUES (1, 'analyst'), (2, 'viewer');\nINSERT INTO sec20_permissions VALUES (1, 'report.read'), (2, 'report.export');\nSELECT role_name FROM sec20_roles ORDER BY role_name;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql202-q1",
+        "prompt": "What does RBAC stand for?",
+        "options": [
+          "Role-based access control",
+          "Row-based aggregate calculation",
+          "Relational backup and copy",
+          "Runtime database access cache"
+        ],
+        "answer": "Role-based access control",
+        "explanation": "RBAC assigns permissions to roles and users to roles."
+      },
+      {
+        "id": "sql202-q2",
+        "prompt": "Which table models users assigned to many roles?",
+        "options": [
+          "A user-role junction table",
+          "A single text column of role names",
+          "A duplicate users table for each role",
+          "A query result alias"
+        ],
+        "answer": "A user-role junction table",
+        "explanation": "The bridge table represents the many-to-many relationship."
+      },
+      {
+        "id": "sql202-q3",
+        "prompt": "What prevents duplicate user-role assignments in the example?",
+        "options": [
+          "Composite primary key on user_id and role_id",
+          "ORDER BY",
+          "A comment",
+          "A nullable role name"
+        ],
+        "answer": "Composite primary key on user_id and role_id",
+        "explanation": "The composite key enforces uniqueness for each pair."
+      },
+      {
+        "id": "sql202-q4",
+        "prompt": "Do application RBAC tables enforce SQLite database file permissions?",
+        "options": [
+          "No; they model application policy only",
+          "Yes, automatically",
+          "Only when the table is named roles",
+          "Only after VACUUM"
+        ],
+        "answer": "No; they model application policy only",
+        "explanation": "SQLite does not enforce server-style database roles from application tables."
+      },
+      {
+        "id": "sql202-q5",
+        "prompt": "What is GRANT used for in DBMS products that support it?",
+        "options": [
+          "Assigning privileges to a database principal or role",
+          "Generating a primary key",
+          "Creating a CTE",
+          "Sorting query results"
+        ],
+        "answer": "Assigning privileges to a database principal or role",
+        "explanation": "GRANT gives specified permissions, with syntax varying by engine."
+      }
+    ]
+  },
+  "status": "draft"
+}

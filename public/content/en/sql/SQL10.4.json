@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql10.4.en",
+  "courseId": "sql",
+  "moduleId": "SQL10",
+  "topicId": "SQL10.4",
+  "title": "SQL NULL Functions: COALESCE, IFNULL and NULLIF",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of SQL NULL Functions: COALESCE, IFNULL and NULLIF.",
+    "Write SQLite-compatible SQL for the topic or a clearly labelled equivalent.",
+    "Predict result rows using the lesson's sample data.",
+    "Identify dialect limitations, NULL behaviour and common errors.",
+    "Apply the topic to a practical data task."
+  ],
+  "prerequisites": [
+    "SQL5.1",
+    "SQL5.4",
+    "SQL9.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "NULL-handling functions let queries substitute a fallback for missing values or turn a selected value into NULL. COALESCE returns the first non-NULL argument; SQLite IFNULL takes two arguments; NULLIF returns NULL when its two arguments compare equal. Similar functions have different names and details across DBMS products.",
+      "whyItMatters": "Explicit NULL handling makes reports, calculations and comparisons predictable when data is incomplete or when zero/empty values need special treatment.",
+      "analogy": "Think of a SQL query as a carefully specified instruction for selecting or shaping rows in a database.",
+      "analogyLimit": "The analogy does not model SQL evaluation order, transaction guarantees, NULL logic or DBMS-specific implementation details."
+    },
+    "explain": {
+      "narrative": "## Core functions\n- COALESCE(a,b,c) returns the first non-NULL argument and is supported by SQLite and major DBMS products.\n- IFNULL(a,b) is SQLite's two-argument form; MySQL also has IFNULL. SQL Server uses ISNULL with different type rules; Oracle commonly uses NVL.\n- NULLIF(a,b) returns NULL when a equals b; otherwise it returns a.\n\nDo not confuse NULL with 0 or an empty string. Arithmetic involving NULL normally produces NULL. Use these functions deliberately and check result types in the target DBMS. W3Schools' SQL NULL Functions topic includes multiple product-specific forms.\n\n## Common mistakes\n- Assuming syntax is identical across all database engines.\n- Omitting explicit column lists when moving data.\n- Ignoring NULL, constraints or result ordering.\n- Treating a documented dialect example as executable SQLite syntax.\n\n## Best practices\nUse explicit columns, test against the target DBMS/version, keep setup scripts repeatable, and verify results with SELECT queries.",
+      "examples": [
+        {
+          "id": "sql10.4-ex1",
+          "language": "en",
+          "title": "Use COALESCE to show a fallback",
+          "code": "DROP TABLE IF EXISTS contacts;\nCREATE TABLE contacts (contact_id INTEGER PRIMARY KEY, display_name TEXT, city TEXT);\nINSERT INTO contacts VALUES (1,'Asha','Rajahmundry'),(2,'Bilal',NULL),(3,'Chitra','Vijayawada');\nSELECT display_name,COALESCE(city,'City not provided') AS city_label FROM contacts ORDER BY contact_id;",
+          "expectedOutput": "Asha | Rajahmundry; Bilal | City not provided; Chitra | Vijayawada",
+          "explanation": "COALESCE returns the first argument that is not NULL.",
+          "runnable": true
+        },
+        {
+          "id": "sql10.4-ex2",
+          "language": "en",
+          "title": "Use IFNULL for a two-choice fallback",
+          "code": "DROP TABLE IF EXISTS inventory;\nCREATE TABLE inventory (item_id INTEGER PRIMARY KEY, item_name TEXT, reorder_level INTEGER);\nINSERT INTO inventory VALUES (1,'Cable',10),(2,'Adapter',NULL);\nSELECT item_name,IFNULL(reorder_level,0) AS reorder_level FROM inventory ORDER BY item_id;",
+          "expectedOutput": "Cable | 10; Adapter | 0",
+          "explanation": "SQLite IFNULL accepts exactly two arguments and returns the fallback when the first is NULL.",
+          "runnable": true
+        },
+        {
+          "id": "sql10.4-ex3",
+          "language": "en",
+          "title": "Use NULLIF to avoid division by zero",
+          "code": "DROP TABLE IF EXISTS targets;\nCREATE TABLE targets (team TEXT, achieved INTEGER, target INTEGER);\nINSERT INTO targets VALUES ('East',80,100),('West',30,0);\nSELECT team,ROUND(100.0*achieved/NULLIF(target,0),1) AS achievement_percent FROM targets ORDER BY team;",
+          "expectedOutput": "East | 80.0; West | NULL",
+          "explanation": "NULLIF(target,0) returns NULL for a zero denominator, avoiding a divide-by-zero calculation.",
+          "runnable": true
+        },
+        {
+          "id": "sql10.4-ex4",
+          "language": "en",
+          "title": "Choose the first available contact field",
+          "code": "DROP TABLE IF EXISTS people;\nCREATE TABLE people (person_id INTEGER PRIMARY KEY, mobile TEXT, email TEXT, office_phone TEXT);\nINSERT INTO people VALUES (1,'90001',NULL,'40001'),(2,NULL,'b@example.test','40002'),(3,NULL,NULL,'40003');\nSELECT person_id,COALESCE(mobile,email,office_phone,'No contact') AS preferred_contact FROM people ORDER BY person_id;",
+          "expectedOutput": "1 | 90001; 2 | b@example.test; 3 | 40003",
+          "explanation": "COALESCE checks arguments from left to right and returns the first available contact.",
+          "runnable": true
+        },
+        {
+          "id": "sql10.4-ex5",
+          "language": "en",
+          "title": "Keep NULL distinct from a real zero",
+          "code": "DROP TABLE IF EXISTS readings;\nCREATE TABLE readings (reading_id INTEGER PRIMARY KEY, value INTEGER);\nINSERT INTO readings VALUES (1,0),(2,NULL),(3,15);\nSELECT reading_id,CASE WHEN value IS NULL THEN 'Not recorded' WHEN value=0 THEN 'Recorded zero' ELSE 'Recorded value' END AS reading_state FROM readings ORDER BY reading_id;",
+          "expectedOutput": "1 | Recorded zero; 2 | Not recorded; 3 | Recorded value",
+          "explanation": "NULLIF and COALESCE should not erase the meaningful difference between a recorded zero and missing data.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the five examples in order. Before each run, predict the result and explain how SQL NULL Functions: COALESCE, IFNULL and NULLIF affects it.",
+      "independentTask": "Create your own small dataset and write three new queries using SQL NULL Functions: COALESCE, IFNULL and NULLIF. Include one boundary case and document the expected output.",
+      "hints": [
+        "Read the target DBMS syntax notes before running an example.",
+        "Use explicit column names and aliases where they improve clarity.",
+        "Check NULL values separately from zero and empty strings.",
+        "Use ORDER BY when the display order matters.",
+        "Compare the returned rows with your prediction after execution."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "DROP TABLE IF EXISTS contacts;\nCREATE TABLE contacts (contact_id INTEGER PRIMARY KEY, display_name TEXT, city TEXT);\nINSERT INTO contacts VALUES (1,'Asha','Rajahmundry'),(2,'Bilal',NULL),(3,'Chitra','Vijayawada');\nSELECT display_name,COALESCE(city,'City not provided') AS city_label FROM contacts ORDER BY contact_id;",
+    "resetCode": "DROP TABLE IF EXISTS contacts;\nCREATE TABLE contacts (contact_id INTEGER PRIMARY KEY, display_name TEXT, city TEXT);\nINSERT INTO contacts VALUES (1,'Asha','Rajahmundry'),(2,'Bilal',NULL),(3,'Chitra','Vijayawada');\nSELECT display_name,COALESCE(city,'City not provided') AS city_label FROM contacts ORDER BY contact_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql10.4-q1",
+        "prompt": "What does COALESCE return?",
+        "options": [
+          "The first non-NULL argument",
+          "The last argument regardless of NULL",
+          "Always zero",
+          "The number of NULL arguments"
+        ],
+        "answer": "The first non-NULL argument",
+        "explanation": "COALESCE scans arguments from left to right and returns the first non-NULL value."
+      },
+      {
+        "id": "sql10.4-q2",
+        "prompt": "How many arguments does SQLite IFNULL accept?",
+        "options": [
+          "Two",
+          "One",
+          "Three or more only",
+          "Exactly four"
+        ],
+        "answer": "Two",
+        "explanation": "SQLite IFNULL(X,Y) is a two-argument NULL fallback function."
+      },
+      {
+        "id": "sql10.4-q3",
+        "prompt": "When does NULLIF(a,b) return NULL?",
+        "options": [
+          "When a and b compare equal",
+          "Whenever a is zero",
+          "Whenever b is greater than a",
+          "Only when both values are text"
+        ],
+        "answer": "When a and b compare equal",
+        "explanation": "NULLIF returns NULL when its two arguments are equal."
+      },
+      {
+        "id": "sql10.4-q4",
+        "prompt": "Why use NULLIF(target,0) as a denominator?",
+        "options": [
+          "It converts a zero denominator to NULL and avoids a divide-by-zero calculation",
+          "It converts every nonzero denominator to zero",
+          "It deletes rows with zero targets",
+          "It rounds the result to an integer"
+        ],
+        "answer": "It converts a zero denominator to NULL and avoids a divide-by-zero calculation",
+        "explanation": "NULLIF returns NULL for a zero target, so the division result is NULL."
+      },
+      {
+        "id": "sql10.4-q5",
+        "prompt": "How should a query test whether a column is missing?",
+        "options": [
+          "Use IS NULL",
+          "Use = NULL",
+          "Use <> NULL",
+          "Use LIKE NULL"
+        ],
+        "answer": "Use IS NULL",
+        "explanation": "SQL NULL comparisons use three-valued logic; IS NULL is the correct test."
+      }
+    ]
+  },
+  "status": "draft"
+}

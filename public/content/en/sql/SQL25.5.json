@@ -1,0 +1,162 @@
+{
+  "id": "sql.sql25.5.en",
+  "courseId": "sql",
+  "moduleId": "SQL25",
+  "topicId": "SQL25.5",
+  "title": "Capstone Project: Banking Accounts and Transaction Ledger",
+  "language": "en",
+  "learningObjectives": [
+    "Design account and ledger tables with referential integrity.",
+    "Represent transfers as balanced debit and credit ledger entries.",
+    "Use a transaction to update both account balances and ledger records.",
+    "Reconcile stored balances against ledger movements.",
+    "Define authorization, idempotency, concurrency and audit requirements."
+  ],
+  "prerequisites": [
+    "SQL1.1",
+    "SQL3.2",
+    "SQL4.1",
+    "SQL8.1",
+    "SQL12.1",
+    "SQL20.4"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A banking ledger records each account movement as a durable debit or credit event. Account balances are operational summaries that should reconcile to the ledger.",
+      "whyItMatters": "Financial transfers must not create or destroy value when one side of a multi-step operation fails.",
+      "analogy": "A double-entry cash book records both sides of a transfer so the movement can be checked and reconciled.",
+      "analogyLimit": "This is an educational transaction model, not a banking system. Real financial systems require immutable ledgers, currency rules, idempotency, strong authentication, concurrency controls and regulatory safeguards."
+    },
+    "explain": {
+      "narrative": "## Capstone brief\nBuild a small banking transfer database with accounts and ledger entries. A transfer moves funds from one account to another, records a debit and credit with the same transaction reference, and preserves an auditable history.\n\n## ER design\nAccounts have stable account IDs and non-negative balance_cents. Ledger entries reference an account and record a signed amount: positive for credit and negative for debit. Each transfer reference should contain balanced entries whose sum is zero.\n\n## Transaction workflow\nWithin one transaction, validate the source account and available balance, debit the source, credit the destination and insert both ledger entries. Application code must check that each required update affected exactly one row and roll back if any check fails. Use an idempotency key to prevent duplicate transfer requests.\n\n## Reconciliation and security\nCompare each account's stored balance with the sum of its ledger entries. Restrict access to account and transaction data, audit every administrative action, protect credentials and encryption keys, and test concurrent transfers and rollback paths. Document the ER diagram, invariants, test evidence and known limitations.\n\n### Immutable ledger and retry safety\nAfter a transfer is posted, do not silently edit or delete its ledger entries. Correct mistakes with linked reversal or compensating entries and retain the original reference. A request idempotency key must be stored under a UNIQUE constraint and checked within the same transaction so a client retry cannot apply the same transfer twice.",
+      "examples": [
+        {
+          "id": "sql255-ex1",
+          "language": "en",
+          "title": "Create account and ledger tables",
+          "code": "CREATE TABLE proj25_accounts (account_id INTEGER PRIMARY KEY, account_label TEXT NOT NULL, balance_cents INTEGER NOT NULL CHECK (balance_cents >= 0)); CREATE TABLE proj25_ledger (entry_id INTEGER PRIMARY KEY, account_id INTEGER NOT NULL REFERENCES proj25_accounts(account_id), transaction_ref TEXT NOT NULL, entry_type TEXT NOT NULL CHECK (entry_type IN ('opening','debit','credit')), amount_cents INTEGER NOT NULL CHECK (amount_cents <> 0), created_at TEXT NOT NULL);",
+          "expectedOutput": "Tables created",
+          "explanation": "Creates account summaries and ledger entries. The signed amount is negative for debit and positive for credit; a transfer should have balanced debit/credit entries under one transaction reference.",
+          "runnable": true
+        },
+        {
+          "id": "sql255-ex2",
+          "language": "en",
+          "title": "Open two accounts and record opening balances",
+          "code": "INSERT INTO proj25_accounts VALUES (1, 'Asha', 10000), (2, 'Bilal', 5000); INSERT INTO proj25_ledger VALUES (1, 1, 'OPEN-1', 'opening', 10000, '2026-11-22T09:00:00Z'), (2, 2, 'OPEN-2', 'opening', 5000, '2026-11-22T09:00:00Z');",
+          "expectedOutput": "4 rows inserted",
+          "explanation": "Creates two accounts with opening balances of 10,000 and 5,000 cents and matching opening ledger entries. The account and ledger values should reconcile from the start.",
+          "runnable": true
+        },
+        {
+          "id": "sql255-ex3",
+          "language": "en",
+          "title": "Transfer 2,500 cents from Asha to Bilal",
+          "code": "BEGIN; UPDATE proj25_accounts SET balance_cents = balance_cents - 2500 WHERE account_id = 1 AND balance_cents >= 2500; UPDATE proj25_accounts SET balance_cents = balance_cents + 2500 WHERE account_id = 2; INSERT INTO proj25_ledger VALUES (3, 1, 'TX-5001', 'debit', -2500, '2026-11-22T09:05:00Z'), (4, 2, 'TX-5001', 'credit', 2500, '2026-11-22T09:05:00Z'); COMMIT; SELECT account_id, balance_cents FROM proj25_accounts ORDER BY account_id;",
+          "expectedOutput": "1 | 7500; 2 | 7500",
+          "explanation": "Executes the successful transfer path in one transaction. In production, verify that both account updates affected exactly one row before inserting ledger entries and committing; otherwise roll back. Use a unique idempotency reference to prevent duplicate transfer requests.",
+          "runnable": true
+        },
+        {
+          "id": "sql255-ex4",
+          "language": "en",
+          "title": "Reconcile account balances against ledger totals",
+          "code": "SELECT a.account_id, a.balance_cents, SUM(l.amount_cents) AS ledger_balance_cents FROM proj25_accounts AS a JOIN proj25_ledger AS l ON l.account_id = a.account_id GROUP BY a.account_id, a.balance_cents ORDER BY a.account_id;",
+          "expectedOutput": "1 | 7500 | 7500; 2 | 7500 | 7500",
+          "explanation": "Compares each stored account balance with the sum of its opening and transfer ledger entries. Matching totals indicate the sample accounts reconcile.",
+          "runnable": true
+        },
+        {
+          "id": "sql255-ex5",
+          "language": "en",
+          "title": "Verify that the transfer's debit and credit balance to zero",
+          "code": "SELECT transaction_ref, SUM(amount_cents) AS net_transfer_cents, COUNT(*) AS entry_count FROM proj25_ledger WHERE transaction_ref = 'TX-5001' GROUP BY transaction_ref;",
+          "expectedOutput": "TX-5001 | 0 | 2",
+          "explanation": "Checks that the transfer has two ledger entries whose signed amounts sum to zero. A production ledger should also prevent updates/deletes to posted entries and support reversal entries instead. Posted entries should be corrected with linked reversal records rather than edited or deleted.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the transfer example and reconcile both accounts. Explain why the debit and credit must be recorded in the same transaction and why the application must inspect both affected-row counts.",
+      "independentTask": "Extend the capstone with currency_code, idempotency_keys and transfer_status. Design tests for insufficient funds, missing destination account, duplicate requests, concurrent transfers and ledger tampering.",
+      "hints": [
+        "Store financial values in integer minor units or exact decimal types.",
+        "Record both sides of a transfer under one transaction reference.",
+        "Check every required UPDATE affected exactly one row before COMMIT.",
+        "Use idempotency keys to prevent duplicate requests.",
+        "Reconcile account balances to the immutable ledger."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE proj25_accounts (account_id INTEGER PRIMARY KEY, account_label TEXT NOT NULL, balance_cents INTEGER NOT NULL CHECK (balance_cents >= 0));\nCREATE TABLE proj25_ledger (entry_id INTEGER PRIMARY KEY, account_id INTEGER NOT NULL, transaction_ref TEXT NOT NULL, entry_type TEXT NOT NULL, amount_cents INTEGER NOT NULL, created_at TEXT NOT NULL);\nINSERT INTO proj25_accounts VALUES (1, 'Asha', 10000), (2, 'Bilal', 5000);\nINSERT INTO proj25_ledger VALUES (1, 1, 'OPEN-1', 'opening', 10000, '2026-11-22T09:00:00Z'), (2, 2, 'OPEN-2', 'opening', 5000, '2026-11-22T09:00:00Z');\nSELECT a.account_id, a.balance_cents, SUM(l.amount_cents) AS ledger_balance FROM proj25_accounts a JOIN proj25_ledger l ON l.account_id=a.account_id GROUP BY a.account_id, a.balance_cents;",
+    "resetCode": "CREATE TABLE proj25_accounts (account_id INTEGER PRIMARY KEY, account_label TEXT NOT NULL, balance_cents INTEGER NOT NULL CHECK (balance_cents >= 0));\nCREATE TABLE proj25_ledger (entry_id INTEGER PRIMARY KEY, account_id INTEGER NOT NULL, transaction_ref TEXT NOT NULL, entry_type TEXT NOT NULL, amount_cents INTEGER NOT NULL, created_at TEXT NOT NULL);\nINSERT INTO proj25_accounts VALUES (1, 'Asha', 10000), (2, 'Bilal', 5000);\nINSERT INTO proj25_ledger VALUES (1, 1, 'OPEN-1', 'opening', 10000, '2026-11-22T09:00:00Z'), (2, 2, 'OPEN-2', 'opening', 5000, '2026-11-22T09:00:00Z');\nSELECT a.account_id, a.balance_cents, SUM(l.amount_cents) AS ledger_balance FROM proj25_accounts a JOIN proj25_ledger l ON l.account_id=a.account_id GROUP BY a.account_id, a.balance_cents;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql255-q1",
+        "prompt": "What is the purpose of a ledger entry?",
+        "options": [
+          "To record an account movement as an auditable event",
+          "To store a user's password",
+          "To replace the account table",
+          "To sort accounts alphabetically"
+        ],
+        "answer": "To record an account movement as an auditable event",
+        "explanation": "The ledger preserves the history of debits and credits."
+      },
+      {
+        "id": "sql255-q2",
+        "prompt": "What should the two sides of a transfer sum to?",
+        "options": [
+          "Zero when debit is negative and credit is positive",
+          "The source account balance",
+          "The number of accounts",
+          "The transfer timestamp"
+        ],
+        "answer": "Zero when debit is negative and credit is positive",
+        "explanation": "Balanced transfer entries have equal and opposite signed amounts."
+      },
+      {
+        "id": "sql255-q3",
+        "prompt": "Why must the transfer updates and ledger inserts share a transaction?",
+        "options": [
+          "So partial transfer state cannot be committed",
+          "To make the SQL shorter",
+          "To remove foreign keys",
+          "To avoid checking affected rows"
+        ],
+        "answer": "So partial transfer state cannot be committed",
+        "explanation": "Atomicity keeps the account summaries and ledger entries consistent."
+      },
+      {
+        "id": "sql255-q4",
+        "prompt": "What is an idempotency key used for?",
+        "options": [
+          "Preventing the same transfer request from being applied twice",
+          "Sorting ledger rows",
+          "Encrypting account balances",
+          "Creating a database index"
+        ],
+        "answer": "Preventing the same transfer request from being applied twice",
+        "explanation": "A unique request key helps make retries safe."
+      },
+      {
+        "id": "sql255-q5",
+        "prompt": "How should a posted ledger correction normally be represented?",
+        "options": [
+          "As a reversal or compensating entry with an audit trail",
+          "By silently deleting the original entry",
+          "By changing the account label",
+          "By dropping the ledger table"
+        ],
+        "answer": "As a reversal or compensating entry with an audit trail",
+        "explanation": "Immutable ledger history preserves the audit trail."
+      }
+    ]
+  },
+  "status": "draft"
+}

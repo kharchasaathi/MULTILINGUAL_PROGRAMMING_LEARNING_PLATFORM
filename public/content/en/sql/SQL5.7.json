@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql5.7.en",
+  "courseId": "sql",
+  "moduleId": "SQL5",
+  "topicId": "SQL5.7",
+  "title": "SQL NULL Values with IS NULL and IS NOT NULL",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of SQL NULL Values with IS NULL and IS NOT NULL.",
+    "Identify the source table, selected expressions and query clauses.",
+    "Predict which rows and columns a SQLite query returns.",
+    "Recognize NULL handling, sorting and dialect-specific pagination behaviour.",
+    "Write readable SELECT queries and verify their results."
+  ],
+  "prerequisites": [
+    "SQL2.1",
+    "SQL2.5",
+    "SQL3.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "NULL represents a missing or unknown value, not zero or an empty string. Equality comparisons with NULL do not evaluate to TRUE; use IS NULL and IS NOT NULL to test whether a value is absent.",
+      "whyItMatters": "Correct NULL handling prevents missing information from being silently excluded or misclassified in filters and reports.",
+      "analogy": "NULL is like an unanswered field on a form: it is not the same as entering zero or an empty response.",
+      "analogyLimit": "The analogy simplifies query processing. Actual results follow SQL expression rules, three-valued NULL logic, collation, and the selected database engine's query semantics."
+    },
+    "explain": {
+      "narrative": "## Core idea\nNULL represents a missing or unknown value, not zero or an empty string. Equality comparisons with NULL do not evaluate to TRUE; use IS NULL and IS NOT NULL to test whether a value is absent.\n\n## Why this matters\nCorrect NULL handling prevents missing information from being silently excluded or misclassified in filters and reports.\n\n## How to use it\nWrite the SELECT list to describe the output, identify the source with FROM, add a WHERE predicate when rows need filtering, and use ORDER BY to define the result sequence. SQLite pagination uses LIMIT and OFFSET. Use a stable sort key when a query is paginated.\n\n## SQLite and dialect notes\nThese runnable examples target SQLite. SELECT, WHERE, DISTINCT, ORDER BY, NULL predicates and aliases are broadly familiar SQL features, but details such as collations, NULL ordering, Boolean values and pagination syntax can vary. SQLite uses LIMIT/OFFSET; SQL Server commonly supports TOP or OFFSET/FETCH. Do not assume these forms are interchangeable.\n\n## Worked examples\n### 1. Create a contacts table containing NULL values\n```sql\nCREATE TABLE s57_contacts (contact_id INTEGER, contact_name TEXT, phone TEXT, email TEXT); INSERT INTO s57_contacts VALUES (1,'Ira','9000011111','ira@example.test'),(2,'Noel',NULL,'noel@example.test'),(3,'Uma','9000033333',NULL),(4,'Vik',NULL,NULL);\n```\nExpected result: 4 rows inserted\n\nSome phone and email values are intentionally unknown.\n\n### 2. Find rows with a missing phone\n```sql\nSELECT contact_name FROM s57_contacts WHERE phone IS NULL ORDER BY contact_id;\n```\nExpected result: Noel; Vik\n\nIS NULL matches rows where the phone value is absent.\n\n### 3. Find rows with a present email\n```sql\nSELECT contact_name FROM s57_contacts WHERE email IS NOT NULL ORDER BY contact_id;\n```\nExpected result: Ira; Noel\n\nIS NOT NULL selects values that are not NULL.\n\n### 4. Compare NULL using equality\n```sql\nSELECT contact_name FROM s57_contacts WHERE phone = NULL;\n```\nExpected result: 0 rows\n\nThe equality predicate does not test for NULL; it evaluates to UNKNOWN.\n\n### 5. Count missing phone values\n```sql\nSELECT COUNT(*) AS missing_phone_count FROM s57_contacts WHERE phone IS NULL;\n```\nExpected result: 2\n\nIS NULL can be used with aggregate functions to count missing values.\n\n## Common mistakes\n- Using SELECT * when only a few columns are needed.\n- Assuming DISTINCT deletes duplicate source records.\n- Using = NULL instead of IS NULL.\n- Mixing AND and OR without parentheses.\n- Assuming result order without ORDER BY.\n- Paginating without a deterministic sort key.\n- Copying LIMIT syntax into a DBMS that expects TOP or FETCH FIRST.\n\n## Good practice\nUse explicit columns, clear aliases, NULL-aware predicates, parentheses for compound logic, and a unique tie-breaker for paginated results. Test dialect-specific SQL in the target engine.",
+      "examples": [
+        {
+          "id": "sql5.7-ex1",
+          "language": "en",
+          "title": "Create a contacts table containing NULL values",
+          "code": "CREATE TABLE s57_contacts (contact_id INTEGER, contact_name TEXT, phone TEXT, email TEXT); INSERT INTO s57_contacts VALUES (1,'Ira','9000011111','ira@example.test'),(2,'Noel',NULL,'noel@example.test'),(3,'Uma','9000033333',NULL),(4,'Vik',NULL,NULL);",
+          "expectedOutput": "4 rows inserted",
+          "explanation": "Some phone and email values are intentionally unknown.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.7-ex2",
+          "language": "en",
+          "title": "Find rows with a missing phone",
+          "code": "SELECT contact_name FROM s57_contacts WHERE phone IS NULL ORDER BY contact_id;",
+          "expectedOutput": "Noel; Vik",
+          "explanation": "IS NULL matches rows where the phone value is absent.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.7-ex3",
+          "language": "en",
+          "title": "Find rows with a present email",
+          "code": "SELECT contact_name FROM s57_contacts WHERE email IS NOT NULL ORDER BY contact_id;",
+          "expectedOutput": "Ira; Noel",
+          "explanation": "IS NOT NULL selects values that are not NULL.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.7-ex4",
+          "language": "en",
+          "title": "Compare NULL using equality",
+          "code": "SELECT contact_name FROM s57_contacts WHERE phone = NULL;",
+          "expectedOutput": "0 rows",
+          "explanation": "The equality predicate does not test for NULL; it evaluates to UNKNOWN.",
+          "runnable": true
+        },
+        {
+          "id": "sql5.7-ex5",
+          "language": "en",
+          "title": "Count missing phone values",
+          "code": "SELECT COUNT(*) AS missing_phone_count FROM s57_contacts WHERE phone IS NULL;",
+          "expectedOutput": "2",
+          "explanation": "IS NULL can be used with aggregate functions to count missing values.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the five examples for SQL NULL Values with IS NULL and IS NOT NULL in the SQL Playground. Before each run, identify the SELECT list, source, filters, sort keys and row limit where applicable. Predict the output and compare it with the SQLite result.",
+      "independentTask": "Create an original SQLite query task that demonstrates SQL NULL Values with IS NULL and IS NOT NULL. Include a small table, at least five SQL statements, a verification query and a short explanation of any dialect-specific behaviour.",
+      "hints": [
+        "Read the SELECT list to identify the output columns.",
+        "Check the source table and each WHERE predicate.",
+        "Use parentheses when combining AND and OR conditions.",
+        "Use IS NULL or IS NOT NULL for missing values.",
+        "Add ORDER BY before LIMIT/OFFSET when predictable pagination is required."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE s57_contacts (contact_id INTEGER, contact_name TEXT, phone TEXT, email TEXT); INSERT INTO s57_contacts VALUES (1,'Ira','9000011111','ira@example.test'),(2,'Noel',NULL,'noel@example.test'),(3,'Uma','9000033333',NULL),(4,'Vik',NULL,NULL);\n\nSELECT contact_name FROM s57_contacts WHERE phone IS NULL ORDER BY contact_id;\n\nSELECT contact_name FROM s57_contacts WHERE email IS NOT NULL ORDER BY contact_id;\n\nSELECT contact_name FROM s57_contacts WHERE phone = NULL;\n\nSELECT COUNT(*) AS missing_phone_count FROM s57_contacts WHERE phone IS NULL;",
+    "resetCode": "CREATE TABLE s57_contacts (contact_id INTEGER, contact_name TEXT, phone TEXT, email TEXT); INSERT INTO s57_contacts VALUES (1,'Ira','9000011111','ira@example.test'),(2,'Noel',NULL,'noel@example.test'),(3,'Uma','9000033333',NULL),(4,'Vik',NULL,NULL);\n\nSELECT contact_name FROM s57_contacts WHERE phone IS NULL ORDER BY contact_id;\n\nSELECT contact_name FROM s57_contacts WHERE email IS NOT NULL ORDER BY contact_id;\n\nSELECT contact_name FROM s57_contacts WHERE phone = NULL;\n\nSELECT COUNT(*) AS missing_phone_count FROM s57_contacts WHERE phone IS NULL;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql5.7-q1",
+        "prompt": "What does SQL NULL usually represent?",
+        "options": [
+          "A missing or unknown value",
+          "The number zero",
+          "An empty string in every DBMS",
+          "A Boolean false value"
+        ],
+        "answer": "A missing or unknown value",
+        "explanation": "NULL represents absence or unknown information."
+      },
+      {
+        "id": "sql5.7-q2",
+        "prompt": "Which predicate correctly finds NULL values?",
+        "options": [
+          "phone IS NULL",
+          "phone = NULL",
+          "phone == 'NULL'",
+          "phone IS EMPTY"
+        ],
+        "answer": "phone IS NULL",
+        "explanation": "IS NULL is the correct test for a NULL value."
+      },
+      {
+        "id": "sql5.7-q3",
+        "prompt": "What does IS NOT NULL find?",
+        "options": [
+          "Rows where the expression has a non-NULL value",
+          "Rows where every column is empty",
+          "Only numeric zeros",
+          "Rows where a table has no index"
+        ],
+        "answer": "Rows where the expression has a non-NULL value",
+        "explanation": "IS NOT NULL checks that a value is present."
+      },
+      {
+        "id": "sql5.7-q4",
+        "prompt": "Why does phone = NULL not find missing phone values?",
+        "options": [
+          "The comparison evaluates to UNKNOWN, not TRUE",
+          "NULL is always converted to zero",
+          "The WHERE clause ignores text columns",
+          "The query creates a new table"
+        ],
+        "answer": "The comparison evaluates to UNKNOWN, not TRUE",
+        "explanation": "SQL uses three-valued logic for NULL comparisons."
+      },
+      {
+        "id": "sql5.7-q5",
+        "prompt": "Is an empty string always the same as NULL?",
+        "options": [
+          "No",
+          "Yes, in every SQL database",
+          "Only in SQLite",
+          "Only when DISTINCT is used"
+        ],
+        "answer": "No",
+        "explanation": "An empty string is a value; NULL represents missing or unknown information."
+      }
+    ]
+  },
+  "status": "draft"
+}

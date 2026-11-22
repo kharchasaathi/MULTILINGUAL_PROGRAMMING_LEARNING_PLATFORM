@@ -1,0 +1,160 @@
+{
+  "id": "sql.sql9.6.en",
+  "courseId": "sql",
+  "moduleId": "SQL9",
+  "topicId": "SQL9.6",
+  "title": "SQL ANY and SOME Operators",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of SQL ANY and SOME Operators.",
+    "Write valid SQLite queries that demonstrate the topic or a documented equivalent.",
+    "Predict result rows using the supplied sample data.",
+    "Identify common mistakes and important NULL or duplicate behaviour.",
+    "Choose an appropriate query pattern for a practical reporting task."
+  ],
+  "prerequisites": [
+    "SQL5.1",
+    "SQL5.4",
+    "SQL6.1",
+    "SQL8.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "ANY (also called SOME in SQL) is used with a comparison operator and a subquery. The comparison is true when it is true for at least one value returned by the subquery. If the subquery is empty, ANY is false. NULL values can produce UNKNOWN when no comparison is true.",
+      "whyItMatters": "ANY is useful when a value should be compared with a set of candidate values, such as finding products priced above at least one price in a selected category.",
+      "analogy": "Think of a database report as carefully combining or grouping rows from well-labelled registers to answer a specific question.",
+      "analogyLimit": "The analogy does not model SQL's exact evaluation rules, duplicate semantics, three-valued NULL logic or dialect-specific features."
+    },
+    "explain": {
+      "narrative": "## Core concept\nANY (also called SOME in SQL) is used with a comparison operator and a subquery. The comparison is true when it is true for at least one value returned by the subquery. If the subquery is empty, ANY is false. NULL values can produce UNKNOWN when no comparison is true.\n\n## Syntax\n```sql\n-- Dialect support varies; PostgreSQL and MySQL support quantified comparisons.\nSELECT columns\nFROM outer_table AS o\nWHERE o.value > ANY (SELECT value FROM comparison_table);\n```\n\n## SQLite sample database\nThe following examples use a small fictional dataset. Each worked example starts with a repeatable setup script so it can be run independently in the SQL Playground.\n\n## Worked examples\n### 1. Find products priced above at least one target (EXISTS rewrite)\n```sql\nDROP TABLE IF EXISTS products;\nDROP TABLE IF EXISTS price_targets;\nCREATE TABLE products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, price NUMERIC NOT NULL);\nCREATE TABLE price_targets (target_price NUMERIC NOT NULL);\nINSERT INTO products VALUES (1,'Notebook',40),(2,'Pen Set',15),(3,'Desk Lamp',120),(4,'Backpack',90);\nINSERT INTO price_targets VALUES (20),(50),(100);\nSELECT p.product_name, p.price FROM products AS p WHERE EXISTS (SELECT 1 FROM price_targets AS t WHERE p.price > t.target_price) ORDER BY p.price;\n```\nExpected result: Notebook | 40; Backpack | 90; Desk Lamp | 120\n\nFor this non-NULL target set, EXISTS expresses the ANY comparison: at least one target is lower than the product price.\n\n### 2. Find products cheaper than at least one target\n```sql\nDROP TABLE IF EXISTS products;\nDROP TABLE IF EXISTS price_targets;\nCREATE TABLE products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, price NUMERIC NOT NULL);\nCREATE TABLE price_targets (target_price NUMERIC NOT NULL);\nINSERT INTO products VALUES (1,'Notebook',40),(2,'Pen Set',15),(3,'Desk Lamp',120),(4,'Backpack',90);\nINSERT INTO price_targets VALUES (20),(50),(100);\nSELECT p.product_name, p.price FROM products AS p WHERE EXISTS (SELECT 1 FROM price_targets AS t WHERE p.price < t.target_price) ORDER BY p.price;\n```\nExpected result: Pen Set | 15; Notebook | 40; Backpack | 90\n\nA product qualifies when its price is lower than one or more target prices.\n\n### 3. Compare with any target using a scalar minimum\n```sql\nDROP TABLE IF EXISTS products;\nDROP TABLE IF EXISTS price_targets;\nCREATE TABLE products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, price NUMERIC NOT NULL);\nCREATE TABLE price_targets (target_price NUMERIC NOT NULL);\nINSERT INTO products VALUES (1,'Notebook',40),(2,'Pen Set',15),(3,'Desk Lamp',120),(4,'Backpack',90);\nINSERT INTO price_targets VALUES (20),(50),(100);\nSELECT product_name, price FROM products WHERE price > (SELECT MIN(target_price) FROM price_targets) ORDER BY price;\n```\nExpected result: Notebook | 40; Backpack | 90; Desk Lamp | 120\n\nFor a non-empty set with no NULL values, greater than ANY is equivalent to greater than the minimum value.\n\n### 4. Find products that match at least one exact target\n```sql\nDROP TABLE IF EXISTS products;\nDROP TABLE IF EXISTS price_targets;\nCREATE TABLE products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, price NUMERIC NOT NULL);\nCREATE TABLE price_targets (target_price NUMERIC NOT NULL);\nINSERT INTO products VALUES (1,'Notebook',40),(2,'Pen Set',15),(3,'Desk Lamp',120),(4,'Backpack',90);\nINSERT INTO price_targets VALUES (20),(50),(100);\nSELECT p.product_name, p.price FROM products AS p WHERE EXISTS (SELECT 1 FROM price_targets AS t WHERE p.price = t.target_price) ORDER BY p.price;\n```\nExpected result: No rows\n\nNo product price equals any target price, so the existence test returns no products.\n\n### 5. Find products above at least one selected target\n```sql\nDROP TABLE IF EXISTS products;\nDROP TABLE IF EXISTS price_targets;\nCREATE TABLE products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, price NUMERIC NOT NULL);\nCREATE TABLE price_targets (target_price NUMERIC NOT NULL);\nINSERT INTO products VALUES (1,'Notebook',40),(2,'Pen Set',15),(3,'Desk Lamp',120),(4,'Backpack',90);\nINSERT INTO price_targets VALUES (20),(50),(100);\nSELECT p.product_name FROM products AS p WHERE EXISTS (SELECT 1 FROM price_targets AS t WHERE t.target_price >= 50 AND p.price > t.target_price) ORDER BY p.product_id;\n```\nExpected result: Desk Lamp; Backpack\n\nThe subquery can filter the comparison set before testing whether any comparison succeeds.\n\n## Query behaviour and dialect notes\nQuantified comparison syntax (ANY/SOME/ALL) is not supported by SQLite. The runnable SQLite exercises use logically equivalent EXISTS or NOT EXISTS rewrites over the supplied non-NULL values. PostgreSQL and MySQL support quantified comparisons; verify the exact feature and syntax against the target database version. Empty subqueries and NULL values require separate reasoning and are not interchangeable with simple MIN/MAX rewrites.\n\n## Common mistakes\n- Assuming SQLite accepts ANY/SOME/ALL quantified syntax.\n- Treating ANY as ALL or confusing their truth conditions.\n- Ignoring empty-subquery behaviour.\n- Applying MIN/MAX rewrites when NULLs or empty sets change the semantics.\n- Forgetting that a single counterexample defeats an ALL comparison.\n\n## Best practices\nUse explicit aliases and readable predicates. Test edge cases such as missing matches, duplicate values, empty sets and NULLs. Keep the database dialect visible whenever a feature is not portable.",
+      "examples": [
+        {
+          "id": "sql9.6-ex1",
+          "language": "en",
+          "title": "Find products priced above at least one target (EXISTS rewrite)",
+          "code": "DROP TABLE IF EXISTS products;\nDROP TABLE IF EXISTS price_targets;\nCREATE TABLE products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, price NUMERIC NOT NULL);\nCREATE TABLE price_targets (target_price NUMERIC NOT NULL);\nINSERT INTO products VALUES (1,'Notebook',40),(2,'Pen Set',15),(3,'Desk Lamp',120),(4,'Backpack',90);\nINSERT INTO price_targets VALUES (20),(50),(100);\nSELECT p.product_name, p.price FROM products AS p WHERE EXISTS (SELECT 1 FROM price_targets AS t WHERE p.price > t.target_price) ORDER BY p.price;",
+          "expectedOutput": "Notebook | 40; Backpack | 90; Desk Lamp | 120",
+          "explanation": "For this non-NULL target set, EXISTS expresses the ANY comparison: at least one target is lower than the product price.",
+          "runnable": true
+        },
+        {
+          "id": "sql9.6-ex2",
+          "language": "en",
+          "title": "Find products cheaper than at least one target",
+          "code": "DROP TABLE IF EXISTS products;\nDROP TABLE IF EXISTS price_targets;\nCREATE TABLE products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, price NUMERIC NOT NULL);\nCREATE TABLE price_targets (target_price NUMERIC NOT NULL);\nINSERT INTO products VALUES (1,'Notebook',40),(2,'Pen Set',15),(3,'Desk Lamp',120),(4,'Backpack',90);\nINSERT INTO price_targets VALUES (20),(50),(100);\nSELECT p.product_name, p.price FROM products AS p WHERE EXISTS (SELECT 1 FROM price_targets AS t WHERE p.price < t.target_price) ORDER BY p.price;",
+          "expectedOutput": "Pen Set | 15; Notebook | 40; Backpack | 90",
+          "explanation": "A product qualifies when its price is lower than one or more target prices.",
+          "runnable": true
+        },
+        {
+          "id": "sql9.6-ex3",
+          "language": "en",
+          "title": "Compare with any target using a scalar minimum",
+          "code": "DROP TABLE IF EXISTS products;\nDROP TABLE IF EXISTS price_targets;\nCREATE TABLE products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, price NUMERIC NOT NULL);\nCREATE TABLE price_targets (target_price NUMERIC NOT NULL);\nINSERT INTO products VALUES (1,'Notebook',40),(2,'Pen Set',15),(3,'Desk Lamp',120),(4,'Backpack',90);\nINSERT INTO price_targets VALUES (20),(50),(100);\nSELECT product_name, price FROM products WHERE price > (SELECT MIN(target_price) FROM price_targets) ORDER BY price;",
+          "expectedOutput": "Notebook | 40; Backpack | 90; Desk Lamp | 120",
+          "explanation": "For a non-empty set with no NULL values, greater than ANY is equivalent to greater than the minimum value.",
+          "runnable": true
+        },
+        {
+          "id": "sql9.6-ex4",
+          "language": "en",
+          "title": "Find products that match at least one exact target",
+          "code": "DROP TABLE IF EXISTS products;\nDROP TABLE IF EXISTS price_targets;\nCREATE TABLE products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, price NUMERIC NOT NULL);\nCREATE TABLE price_targets (target_price NUMERIC NOT NULL);\nINSERT INTO products VALUES (1,'Notebook',40),(2,'Pen Set',15),(3,'Desk Lamp',120),(4,'Backpack',90);\nINSERT INTO price_targets VALUES (20),(50),(100);\nSELECT p.product_name, p.price FROM products AS p WHERE EXISTS (SELECT 1 FROM price_targets AS t WHERE p.price = t.target_price) ORDER BY p.price;",
+          "expectedOutput": "No rows",
+          "explanation": "No product price equals any target price, so the existence test returns no products.",
+          "runnable": true
+        },
+        {
+          "id": "sql9.6-ex5",
+          "language": "en",
+          "title": "Find products above at least one selected target",
+          "code": "DROP TABLE IF EXISTS products;\nDROP TABLE IF EXISTS price_targets;\nCREATE TABLE products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, price NUMERIC NOT NULL);\nCREATE TABLE price_targets (target_price NUMERIC NOT NULL);\nINSERT INTO products VALUES (1,'Notebook',40),(2,'Pen Set',15),(3,'Desk Lamp',120),(4,'Backpack',90);\nINSERT INTO price_targets VALUES (20),(50),(100);\nSELECT p.product_name FROM products AS p WHERE EXISTS (SELECT 1 FROM price_targets AS t WHERE t.target_price >= 50 AND p.price > t.target_price) ORDER BY p.product_id;",
+          "expectedOutput": "Desk Lamp; Backpack",
+          "explanation": "The subquery can filter the comparison set before testing whether any comparison succeeds.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Study the ANY syntax in the explanation. Run the equivalent correlated EXISTS queries in the SQLite Playground, then compare the result with a MIN-based rewrite on the supplied non-NULL data.",
+      "independentTask": "Create candidates and qualifying_scores tables. Write a portable SQLite EXISTS rewrite for candidates scoring above at least one qualifying score. Then document the equivalent ANY syntax for a DBMS that supports quantified comparisons.",
+      "hints": [
+        "ANY requires a comparison operator followed by a subquery.",
+        "ANY is true when at least one comparison is true.",
+        "SOME is a synonym for ANY in supported SQL dialects.",
+        "SQLite does not implement quantified ANY/SOME syntax; use EXISTS for the executable exercises.",
+        "MIN rewrites require a non-empty comparison set and careful NULL handling."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "DROP TABLE IF EXISTS products;\nDROP TABLE IF EXISTS price_targets;\nCREATE TABLE products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, price NUMERIC NOT NULL);\nCREATE TABLE price_targets (target_price NUMERIC NOT NULL);\nINSERT INTO products VALUES (1,'Notebook',40),(2,'Pen Set',15),(3,'Desk Lamp',120),(4,'Backpack',90);\nINSERT INTO price_targets VALUES (20),(50),(100);\n\n-- Try the lesson's first query\nSELECT p.product_name, p.price FROM products AS p WHERE EXISTS (SELECT 1 FROM price_targets AS t WHERE p.price > t.target_price) ORDER BY p.price;",
+    "resetCode": "DROP TABLE IF EXISTS products;\nDROP TABLE IF EXISTS price_targets;\nCREATE TABLE products (product_id INTEGER PRIMARY KEY, product_name TEXT NOT NULL, price NUMERIC NOT NULL);\nCREATE TABLE price_targets (target_price NUMERIC NOT NULL);\nINSERT INTO products VALUES (1,'Notebook',40),(2,'Pen Set',15),(3,'Desk Lamp',120),(4,'Backpack',90);\nINSERT INTO price_targets VALUES (20),(50),(100);"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql9.6-q1",
+        "prompt": "When is an ANY comparison true?",
+        "options": [
+          "When the comparison is true for at least one subquery value",
+          "Only when it is true for every subquery value",
+          "Only when the subquery returns one row",
+          "When the subquery is empty"
+        ],
+        "answer": "When the comparison is true for at least one subquery value",
+        "explanation": "ANY requires at least one successful comparison."
+      },
+      {
+        "id": "sql9.6-q2",
+        "prompt": "Which keyword is a synonym for ANY in supported SQL dialects?",
+        "options": [
+          "SOME",
+          "EVERY",
+          "EACHROW",
+          "MATCHALL"
+        ],
+        "answer": "SOME",
+        "explanation": "SOME is an alternative spelling for ANY."
+      },
+      {
+        "id": "sql9.6-q3",
+        "prompt": "Which portable SQLite pattern can express an ANY comparison?",
+        "options": [
+          "A correlated EXISTS query",
+          "A CREATE TABLE statement",
+          "A DELETE without WHERE",
+          "An ORDER BY clause"
+        ],
+        "answer": "A correlated EXISTS query",
+        "explanation": "EXISTS can test whether any comparison row satisfies the condition."
+      },
+      {
+        "id": "sql9.6-q4",
+        "prompt": "What is true about ANY over an empty subquery?",
+        "options": [
+          "It is false",
+          "It is true",
+          "It always returns NULL",
+          "It raises a syntax error in every DBMS"
+        ],
+        "answer": "It is false",
+        "explanation": "No value can satisfy the comparison when the subquery returns no rows."
+      },
+      {
+        "id": "sql9.6-q5",
+        "prompt": "Why must NULL values be considered in quantified comparisons?",
+        "options": [
+          "A comparison involving NULL can evaluate to UNKNOWN",
+          "NULL is always treated as zero",
+          "NULL rows are always duplicates",
+          "NULL automatically makes ANY true"
+        ],
+        "answer": "A comparison involving NULL can evaluate to UNKNOWN",
+        "explanation": "SQL uses three-valued logic for comparisons involving NULL."
+      }
+    ]
+  },
+  "status": "draft"
+}

@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql4.6.en",
+  "courseId": "sql",
+  "moduleId": "SQL4",
+  "topicId": "SQL4.6",
+  "title": "CHECK Constraints",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of check constraints.",
+    "Identify the rule, affected columns and expected write behaviour.",
+    "Predict the outcome of valid inserts and schema operations.",
+    "Recognize SQLite-specific behaviour and cross-DBMS differences.",
+    "Apply safe data-integrity and schema-migration practices."
+  ],
+  "prerequisites": [
+    "SQL3.2",
+    "SQL3.3",
+    "SQL3.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "CHECK evaluates a Boolean condition for each inserted or updated row. The write is rejected when the condition evaluates to false; SQL NULL semantics mean a condition that evaluates to NULL is not the same as false, so pair CHECK with NOT NULL when required.",
+      "whyItMatters": "CHECK rules enforce domain requirements such as non-negative quantities, allowed ratings and valid ranges close to the stored data.",
+      "analogy": "A CHECK constraint is like a measuring gauge that accepts only values inside the permitted range.",
+      "analogyLimit": "The analogy simplifies database behaviour. Actual constraint enforcement follows SQL NULL semantics, transaction rules and the selected database engine's implementation."
+    },
+    "explain": {
+      "narrative": "## Concept\nCHECK evaluates a Boolean condition for each inserted or updated row. The write is rejected when the condition evaluates to false; SQL NULL semantics mean a condition that evaluates to NULL is not the same as false, so pair CHECK with NOT NULL when required.\n\n## Why this matters\nCHECK rules enforce domain requirements such as non-negative quantities, allowed ratings and valid ranges close to the stored data.\n\n## Practical rules\nUse explicit column lists, test both valid and invalid cases in an isolated database, and keep engine-specific behaviour visible. Constraints protect writes, but they do not replace application-level validation or a safe migration plan.\n\n## Worked examples\n### 1. Create a table with range and membership checks\n```sql\nCREATE TABLE c4_check (item_id INTEGER PRIMARY KEY, quantity INTEGER NOT NULL CHECK (quantity >= 0), rating INTEGER CHECK (rating BETWEEN 1 AND 5), state TEXT CHECK (state IN ('new', 'active', 'closed')));\n```\nExpected result: `Table created`\n\nEach CHECK defines a rule for values in the row.\n\n### 2. Insert a row within all allowed ranges\n```sql\nINSERT INTO c4_check VALUES (1, 4, 5, 'active');\n```\nExpected result: `1 row inserted`\n\nAll supplied values satisfy their checks.\n\n### 3. Insert a row at a permitted boundary\n```sql\nINSERT INTO c4_check VALUES (2, 0, 1, 'new');\n```\nExpected result: `1 row inserted`\n\nThe lower boundary values are included in the conditions.\n\n### 4. Query the valid rows\n```sql\nSELECT item_id, quantity, rating FROM c4_check ORDER BY item_id;\n```\nExpected result: `1 | 4 | 5; 2 | 0 | 1`\n\nBoth rows satisfy the declared conditions.\n\n### 5. Count records meeting the domain rule\n```sql\nSELECT COUNT(*) FROM c4_check WHERE quantity >= 0 AND rating BETWEEN 1 AND 5;\n```\nExpected result: `2`\n\nThe query expresses the same domain conditions for inspection.\n\n## Common mistakes\n- Confusing an omitted column with an explicit NULL value.\n- Assuming UNIQUE automatically means NOT NULL.\n- Treating a composite key as separate single-column rules.\n- Forgetting to enable SQLite foreign-key enforcement for a connection.\n- Assuming every DBMS supports the same ALTER TABLE constraint syntax.\n\n## Safe practice\nTest migrations against a copy, inspect existing data, use transactions where supported, and keep a recoverable backup before changing important schemas.",
+      "examples": [
+        {
+          "id": "sql4.6-ex1",
+          "language": "en",
+          "title": "Create a table with range and membership checks",
+          "code": "CREATE TABLE c4_check (item_id INTEGER PRIMARY KEY, quantity INTEGER NOT NULL CHECK (quantity >= 0), rating INTEGER CHECK (rating BETWEEN 1 AND 5), state TEXT CHECK (state IN ('new', 'active', 'closed')));",
+          "expectedOutput": "Table created",
+          "explanation": "Each CHECK defines a rule for values in the row.",
+          "runnable": true
+        },
+        {
+          "id": "sql4.6-ex2",
+          "language": "en",
+          "title": "Insert a row within all allowed ranges",
+          "code": "INSERT INTO c4_check VALUES (1, 4, 5, 'active');",
+          "expectedOutput": "1 row inserted",
+          "explanation": "All supplied values satisfy their checks.",
+          "runnable": true
+        },
+        {
+          "id": "sql4.6-ex3",
+          "language": "en",
+          "title": "Insert a row at a permitted boundary",
+          "code": "INSERT INTO c4_check VALUES (2, 0, 1, 'new');",
+          "expectedOutput": "1 row inserted",
+          "explanation": "The lower boundary values are included in the conditions.",
+          "runnable": true
+        },
+        {
+          "id": "sql4.6-ex4",
+          "language": "en",
+          "title": "Query the valid rows",
+          "code": "SELECT item_id, quantity, rating FROM c4_check ORDER BY item_id;",
+          "expectedOutput": "1 | 4 | 5; 2 | 0 | 1",
+          "explanation": "Both rows satisfy the declared conditions.",
+          "runnable": true
+        },
+        {
+          "id": "sql4.6-ex5",
+          "language": "en",
+          "title": "Count records meeting the domain rule",
+          "code": "SELECT COUNT(*) FROM c4_check WHERE quantity >= 0 AND rating BETWEEN 1 AND 5;",
+          "expectedOutput": "2",
+          "explanation": "The query expresses the same domain conditions for inspection.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the five examples for CHECK Constraints in the SQL Playground. Predict each result, execute the statement, and explain which rule is being enforced.",
+      "independentTask": "Design a small original schema demonstrating CHECK Constraints. Include at least five SQL statements, one verification query and a short explanation of the SQLite behaviour involved.",
+      "hints": [
+        "Identify whether the rule applies to one column or a combination of columns.",
+        "Check whether a value is omitted, NULL or an ordinary value.",
+        "Use explicit column lists and meaningful constraint names.",
+        "For foreign keys, enable PRAGMA foreign_keys = ON in SQLite.",
+        "Test schema changes on sample data before applying them to important databases."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE c4_check (item_id INTEGER PRIMARY KEY, quantity INTEGER NOT NULL CHECK (quantity >= 0), rating INTEGER CHECK (rating BETWEEN 1 AND 5), state TEXT CHECK (state IN ('new', 'active', 'closed')));\n\nINSERT INTO c4_check VALUES (1, 4, 5, 'active');\n\nINSERT INTO c4_check VALUES (2, 0, 1, 'new');\n\nSELECT item_id, quantity, rating FROM c4_check ORDER BY item_id;\n\nSELECT COUNT(*) FROM c4_check WHERE quantity >= 0 AND rating BETWEEN 1 AND 5;",
+    "resetCode": "CREATE TABLE c4_check (item_id INTEGER PRIMARY KEY, quantity INTEGER NOT NULL CHECK (quantity >= 0), rating INTEGER CHECK (rating BETWEEN 1 AND 5), state TEXT CHECK (state IN ('new', 'active', 'closed')));\n\nINSERT INTO c4_check VALUES (1, 4, 5, 'active');\n\nINSERT INTO c4_check VALUES (2, 0, 1, 'new');\n\nSELECT item_id, quantity, rating FROM c4_check ORDER BY item_id;\n\nSELECT COUNT(*) FROM c4_check WHERE quantity >= 0 AND rating BETWEEN 1 AND 5;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql4.6-q1",
+        "prompt": "What does CHECK enforce?",
+        "options": [
+          "A Boolean condition on inserted or updated row values",
+          "A sort order",
+          "A connection to another database",
+          "A unique identifier automatically"
+        ],
+        "answer": "A Boolean condition on inserted or updated row values",
+        "explanation": "CHECK validates values against its condition."
+      },
+      {
+        "id": "sql4.6-q2",
+        "prompt": "Which expression permits values from 1 through 5 inclusive?",
+        "options": [
+          "CHECK (rating BETWEEN 1 AND 5)",
+          "CHECK (rating = 1 OR 5)",
+          "CHECK (rating > 5)",
+          "CHECK (rating IS NULL)"
+        ],
+        "answer": "CHECK (rating BETWEEN 1 AND 5)",
+        "explanation": "BETWEEN includes both endpoints."
+      },
+      {
+        "id": "sql4.6-q3",
+        "prompt": "What is a useful companion to CHECK when NULL must be forbidden?",
+        "options": [
+          "NOT NULL",
+          "ORDER BY",
+          "DISTINCT",
+          "LIMIT"
+        ],
+        "answer": "NOT NULL",
+        "explanation": "CHECK alone does not express the separate requirement that a value be present."
+      },
+      {
+        "id": "sql4.6-q4",
+        "prompt": "When is a CHECK condition evaluated?",
+        "options": [
+          "When rows are inserted or updated",
+          "Only when a table is created",
+          "Only during SELECT",
+          "Only when an index is dropped"
+        ],
+        "answer": "When rows are inserted or updated",
+        "explanation": "The database validates the row when a write changes it."
+      },
+      {
+        "id": "sql4.6-q5",
+        "prompt": "Which is a sensible CHECK rule for a quantity?",
+        "options": [
+          "quantity >= 0",
+          "quantity = 'blue'",
+          "quantity LIKE 'table'",
+          "quantity ORDER BY 2"
+        ],
+        "answer": "quantity >= 0",
+        "explanation": "A non-negative quantity is a clear domain rule."
+      }
+    ]
+  },
+  "status": "draft"
+}

@@ -1,0 +1,162 @@
+{
+  "id": "sql.sql25.1.en",
+  "courseId": "sql",
+  "moduleId": "SQL25",
+  "topicId": "SQL25.1",
+  "title": "Project: Student Records Management Database",
+  "language": "en",
+  "learningObjectives": [
+    "Translate student-management requirements into relational entities.",
+    "Create student, course and enrollment tables with keys and constraints.",
+    "Write enrollment and grade reports using joins and aggregates.",
+    "Update student results safely and verify the change.",
+    "Define project testing, privacy and documentation deliverables."
+  ],
+  "prerequisites": [
+    "SQL1.1",
+    "SQL3.2",
+    "SQL4.1",
+    "SQL8.1",
+    "SQL12.1",
+    "SQL20.4"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A student records system manages student identities, course catalogues and enrollment outcomes. A normalized design separates students and courses from the many-to-many enrollment relationship.",
+      "whyItMatters": "A school database must preserve student identity, avoid duplicate enrollment and report results accurately across terms and courses.",
+      "analogy": "A school office keeps student files separately from course catalogues, then links them through enrollment records.",
+      "analogyLimit": "The sample is a teaching model; a real system also needs academic terms, grading policies, access control, retention and privacy rules."
+    },
+    "explain": {
+      "narrative": "## Project brief\nBuild a student records database that stores students, courses and enrollments with grades. Required reports include course rosters, average grades and each student's enrollment history.\n\n## ER design and schema\nStudents and courses have independent primary keys. Enrollments is a junction table with a composite primary key `(student_id, course_id)` and foreign keys to both parent tables. A grade is constrained to the permitted range.\n\n## Implementation and tests\nCreate the schema, seed synthetic records, run enrollment and grade reports, update a grade and verify that duplicate enrollment and invalid grades are rejected. Test a student with no enrollment and a course with no students.\n\n## Security, performance and documentation\nRestrict access to student records, avoid exposing unnecessary personal data, index the enrollment foreign keys when workload justifies it, and document the ER diagram, grading policy, assumptions and test evidence.",
+      "examples": [
+        {
+          "id": "sql251-ex1",
+          "language": "en",
+          "title": "Create students, courses and enrollments",
+          "code": "CREATE TABLE proj25_students (student_id INTEGER PRIMARY KEY, student_name TEXT NOT NULL, email TEXT NOT NULL UNIQUE); CREATE TABLE proj25_courses (course_id INTEGER PRIMARY KEY, course_code TEXT NOT NULL UNIQUE, course_title TEXT NOT NULL); CREATE TABLE proj25_enrollments (student_id INTEGER NOT NULL REFERENCES proj25_students(student_id), course_id INTEGER NOT NULL REFERENCES proj25_courses(course_id), grade INTEGER CHECK (grade BETWEEN 0 AND 100), PRIMARY KEY (student_id, course_id));",
+          "expectedOutput": "Tables created",
+          "explanation": "Creates two parent entities and a junction table. The composite key prevents a student from being enrolled in the same course twice.",
+          "runnable": true
+        },
+        {
+          "id": "sql251-ex2",
+          "language": "en",
+          "title": "Seed students, courses and enrollments",
+          "code": "INSERT INTO proj25_students VALUES (1, 'Asha', 'asha@example.test'), (2, 'Bilal', 'bilal@example.test'); INSERT INTO proj25_courses VALUES (10, 'SQL101', 'Database Basics'), (20, 'WEB101', 'Web Foundations'); INSERT INTO proj25_enrollments VALUES (1, 10, 88), (1, 20, 92), (2, 10, 76);",
+          "expectedOutput": "6 rows inserted",
+          "explanation": "Adds two students, two courses and three enrollment outcomes. The data gives Asha two courses and Bilal one.",
+          "runnable": true
+        },
+        {
+          "id": "sql251-ex3",
+          "language": "en",
+          "title": "Generate a course roster with grades",
+          "code": "SELECT c.course_code, c.course_title, s.student_name, e.grade FROM proj25_enrollments AS e JOIN proj25_students AS s ON s.student_id = e.student_id JOIN proj25_courses AS c ON c.course_id = e.course_id ORDER BY c.course_code, s.student_name;",
+          "expectedOutput": "SQL101 | Database Basics | Asha | 88; SQL101 | Database Basics | Bilal | 76; WEB101 | Web Foundations | Asha | 92",
+          "explanation": "Joins the junction table to both parent entities to produce one row per enrollment. Ordering by course and student makes the roster deterministic.",
+          "runnable": true
+        },
+        {
+          "id": "sql251-ex4",
+          "language": "en",
+          "title": "Summarize enrollment count and average grade per course",
+          "code": "SELECT c.course_code, COUNT(e.student_id) AS enrolled_count, ROUND(AVG(e.grade), 1) AS average_grade FROM proj25_courses AS c LEFT JOIN proj25_enrollments AS e ON e.course_id = c.course_id GROUP BY c.course_id, c.course_code ORDER BY c.course_code;",
+          "expectedOutput": "SQL101 | 2 | 82.0; WEB101 | 1 | 92.0",
+          "explanation": "Uses a LEFT JOIN so a course with no enrollment would still appear. COUNT(e.student_id) counts matching enrollment rows rather than the preserved course row.",
+          "runnable": true
+        },
+        {
+          "id": "sql251-ex5",
+          "language": "en",
+          "title": "Update a grade and verify the student result",
+          "code": "UPDATE proj25_enrollments SET grade = 90 WHERE student_id = 1 AND course_id = 10; SELECT s.student_name, c.course_code, e.grade FROM proj25_enrollments AS e JOIN proj25_students AS s ON s.student_id = e.student_id JOIN proj25_courses AS c ON c.course_id = e.course_id WHERE e.student_id = 1 AND e.course_id = 10;",
+          "expectedOutput": "Asha | SQL101 | 90",
+          "explanation": "Updates one enrollment using both parts of the composite key and reads the value back. The application should check that exactly one row was changed.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the project examples and explain why enrollments is a junction table. Verify Asha's course roster and the SQL101 average before and after the grade update.",
+      "independentTask": "Extend the project with academic_terms and an enrollment term key. Add a report for a student's transcript ordered by term and course, then define tests for duplicate enrollment and invalid grades.",
+      "hints": [
+        "Students and courses are separate entities.",
+        "Enrollments models a many-to-many relationship.",
+        "Use a composite key to prevent duplicate enrollment.",
+        "Use LEFT JOIN to preserve courses with no students.",
+        "Protect student data and document grading rules."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE proj25_students (student_id INTEGER PRIMARY KEY, student_name TEXT NOT NULL, email TEXT NOT NULL UNIQUE);\nCREATE TABLE proj25_courses (course_id INTEGER PRIMARY KEY, course_code TEXT NOT NULL UNIQUE, course_title TEXT NOT NULL);\nCREATE TABLE proj25_enrollments (student_id INTEGER NOT NULL, course_id INTEGER NOT NULL, grade INTEGER CHECK (grade BETWEEN 0 AND 100), PRIMARY KEY (student_id, course_id));\nINSERT INTO proj25_students VALUES (1, 'Asha', 'asha@example.test');\nINSERT INTO proj25_courses VALUES (10, 'SQL101', 'Database Basics');\nINSERT INTO proj25_enrollments VALUES (1, 10, 88);\nSELECT s.student_name, c.course_code, e.grade FROM proj25_enrollments e JOIN proj25_students s ON s.student_id=e.student_id JOIN proj25_courses c ON c.course_id=e.course_id;",
+    "resetCode": "CREATE TABLE proj25_students (student_id INTEGER PRIMARY KEY, student_name TEXT NOT NULL, email TEXT NOT NULL UNIQUE);\nCREATE TABLE proj25_courses (course_id INTEGER PRIMARY KEY, course_code TEXT NOT NULL UNIQUE, course_title TEXT NOT NULL);\nCREATE TABLE proj25_enrollments (student_id INTEGER NOT NULL, course_id INTEGER NOT NULL, grade INTEGER CHECK (grade BETWEEN 0 AND 100), PRIMARY KEY (student_id, course_id));\nINSERT INTO proj25_students VALUES (1, 'Asha', 'asha@example.test');\nINSERT INTO proj25_courses VALUES (10, 'SQL101', 'Database Basics');\nINSERT INTO proj25_enrollments VALUES (1, 10, 88);\nSELECT s.student_name, c.course_code, e.grade FROM proj25_enrollments e JOIN proj25_students s ON s.student_id=e.student_id JOIN proj25_courses c ON c.course_id=e.course_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql251-q1",
+        "prompt": "Which table represents the many-to-many student-course relationship?",
+        "options": [
+          "Enrollments",
+          "Students",
+          "Courses",
+          "Grades as a text field"
+        ],
+        "answer": "Enrollments",
+        "explanation": "The enrollment junction table links students and courses."
+      },
+      {
+        "id": "sql251-q2",
+        "prompt": "What does the composite primary key prevent?",
+        "options": [
+          "Duplicate enrollment for the same student and course",
+          "A student taking different courses",
+          "A course having many students",
+          "A grade being numeric"
+        ],
+        "answer": "Duplicate enrollment for the same student and course",
+        "explanation": "The pair must be unique."
+      },
+      {
+        "id": "sql251-q3",
+        "prompt": "Why use LEFT JOIN in the course summary?",
+        "options": [
+          "To retain courses even when no enrollment exists",
+          "To remove courses without students",
+          "To update grades",
+          "To encrypt student names"
+        ],
+        "answer": "To retain courses even when no enrollment exists",
+        "explanation": "LEFT JOIN preserves every course row."
+      },
+      {
+        "id": "sql251-q4",
+        "prompt": "What is the purpose of CHECK(grade BETWEEN 0 AND 100)?",
+        "options": [
+          "To enforce the permitted grade range",
+          "To sort grades",
+          "To count students",
+          "To create a foreign key"
+        ],
+        "answer": "To enforce the permitted grade range",
+        "explanation": "CHECK validates the grade value against the defined range."
+      },
+      {
+        "id": "sql251-q5",
+        "prompt": "Which security practice is appropriate for student records?",
+        "options": [
+          "Restrict access and expose only necessary personal fields",
+          "Publish every email address in reports",
+          "Use SELECT * for all screens",
+          "Store passwords in the grade table"
+        ],
+        "answer": "Restrict access and expose only necessary personal fields",
+        "explanation": "Student data requires least-privilege access and data minimization."
+      }
+    ]
+  },
+  "status": "draft"
+}

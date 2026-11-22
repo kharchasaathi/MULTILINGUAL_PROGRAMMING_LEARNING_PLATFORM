@@ -1,0 +1,161 @@
+{
+  "id": "sql.sql11.1.en",
+  "courseId": "sql",
+  "moduleId": "SQL11",
+  "topicId": "SQL11.1",
+  "title": "SQL Database Backup and Recovery",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and practical behaviour of SQL Database Backup and Recovery.",
+    "Identify which database engine or application layer performs the operation.",
+    "Predict the result of the SQLite examples before running them.",
+    "Recognize security, recovery, portability and operational limitations.",
+    "Apply the concept safely in a realistic database workflow."
+  ],
+  "prerequisites": [
+    "SQL1.2",
+    "SQL2.1",
+    "SQL3.1",
+    "SQL3.2",
+    "SQL5.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A database backup is a recoverable copy of database content and, when required, its schema and transaction state. Backup commands are not universal SQL. W3Schools presents BACKUP DATABASE for SQL Server; SQLite uses its online backup API, command-line .backup command or carefully planned file-level procedures. The SQL Playground uses an in-memory SQLite database and cannot create a durable backup file.",
+      "whyItMatters": "Backups protect against accidental deletion, hardware failure, corruption and unsafe deployments. A backup is useful only when it can be restored and checked.",
+      "analogy": "Think of a database workflow as a carefully controlled service desk: each operation has a defined responsibility, input and verification step.",
+      "analogyLimit": "The analogy does not model SQL grammar, database transaction isolation, driver APIs, security boundaries or DBMS-specific implementation details."
+    },
+    "explain": {
+      "narrative": "## Backup is an operational responsibility\nA backup is a separate recoverable copy of a database. SQL Server supports BACKUP DATABASE with a destination device and options such as DIFFERENTIAL. SQLite does not implement the SQL Server BACKUP DATABASE statement. SQLite applications should use the Online Backup API; the sqlite3 command-line shell provides the .backup command. A raw file copy must account for active connections, journal mode and WAL files.\n\n## What to verify\nChoose a backup method supported by the DBMS, store copies separately from the source, protect sensitive backup files, retain multiple restore points and regularly test restores. A successful copy operation alone does not prove that the backup is usable.\n\n## SQLite Playground boundary\nThe Playground is an in-memory SQLite runtime. Its runnable examples demonstrate integrity checks, transaction boundaries and restore-readiness checks; they do not create a durable backup artifact. SQL Server BACKUP DATABASE syntax is shown only as a dialect example and must not be run in SQLite.\n\n## Worked examples\nThe five original SQLite examples below are executable in the CodeSaathi SQL Playground. Any host-language API or other DBMS command is explicitly labelled as explanatory rather than runnable.",
+      "examples": [
+        {
+          "id": "sql11.1-ex1",
+          "language": "en",
+          "title": "Integrity check before a backup",
+          "code": "PRAGMA integrity_check;",
+          "expectedOutput": "ok",
+          "explanation": "integrity_check asks SQLite to check database structure. It is a diagnostic, not a backup.",
+          "runnable": true
+        },
+        {
+          "id": "sql11.1-ex2",
+          "language": "en",
+          "title": "Quick integrity check",
+          "code": "PRAGMA quick_check;",
+          "expectedOutput": "ok",
+          "explanation": "quick_check performs a faster subset of integrity checks.",
+          "runnable": true
+        },
+        {
+          "id": "sql11.1-ex3",
+          "language": "en",
+          "title": "Record a consistent logical snapshot query",
+          "code": "DROP TABLE IF EXISTS backup_demo; CREATE TABLE backup_demo(id INTEGER PRIMARY KEY, item TEXT, qty INTEGER); INSERT INTO backup_demo VALUES(1,'Pens',12),(2,'Books',7); SELECT id,item,qty FROM backup_demo ORDER BY id;",
+          "expectedOutput": "1 | Pens | 12; 2 | Books | 7",
+          "explanation": "A restore plan should include the data and schema needed by the application; this query verifies representative records.",
+          "runnable": true
+        },
+        {
+          "id": "sql11.1-ex4",
+          "language": "en",
+          "title": "Check object definitions",
+          "code": "DROP TABLE IF EXISTS backup_schema; CREATE TABLE backup_schema(id INTEGER PRIMARY KEY, label TEXT NOT NULL); SELECT type,name FROM sqlite_schema WHERE name='backup_schema';",
+          "expectedOutput": "table | backup_schema",
+          "explanation": "sqlite_schema can be inspected to verify that expected schema objects exist.",
+          "runnable": true
+        },
+        {
+          "id": "sql11.1-ex5",
+          "language": "en",
+          "title": "Verify a transaction's committed state",
+          "code": "DROP TABLE IF EXISTS backup_tx; CREATE TABLE backup_tx(id INTEGER PRIMARY KEY, amount INTEGER); BEGIN; INSERT INTO backup_tx VALUES(1,50); COMMIT; SELECT SUM(amount) FROM backup_tx;",
+          "expectedOutput": "50",
+          "explanation": "A backup and recovery plan must consider transaction consistency and committed data.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run all five examples for SQL Database Backup and Recovery. Before running each one, state what the statement or application operation does, predict the result and explain any SQLite-specific limitation.",
+      "independentTask": "Create a small original scenario for SQL Database Backup and Recovery. Write at least five statements or a documented application workflow, include a safety or verification step, and explain which parts are specific to SQLite or another DBMS.",
+      "hints": [
+        "Read the engine and version notes before choosing syntax.",
+        "Keep user-provided values separate from SQL command text.",
+        "Use explicit names and columns so the operation is easy to review.",
+        "Check the result with a SELECT or integrity/health query.",
+        "For operational changes, document backup, restore and rollback requirements."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "PRAGMA integrity_check;",
+    "resetCode": "PRAGMA integrity_check;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql11.1-q1",
+        "prompt": "Which command does W3Schools show for SQL Server database backups?",
+        "options": [
+          "BACKUP DATABASE",
+          "CREATE SNAPSHOT",
+          "COPY TABLE",
+          "SAVE DATABASE"
+        ],
+        "answer": "BACKUP DATABASE",
+        "explanation": "SQL Server supports BACKUP DATABASE; syntax and options are product-specific."
+      },
+      {
+        "id": "sql11.1-q2",
+        "prompt": "Which SQLite facility is designed for copying a live database safely?",
+        "options": [
+          "Online Backup API",
+          "CREATE DATABASE",
+          "SELECT INTO",
+          "DROP TABLE"
+        ],
+        "answer": "Online Backup API",
+        "explanation": "SQLite's Online Backup API is designed for controlled database copying."
+      },
+      {
+        "id": "sql11.1-q3",
+        "prompt": "Does PRAGMA integrity_check create a backup file?",
+        "options": [
+          "No, it checks database integrity",
+          "Yes, it writes a .bak file",
+          "It exports every table",
+          "It encrypts the database"
+        ],
+        "answer": "No, it checks database integrity",
+        "explanation": "Integrity checks are diagnostics, not backup operations."
+      },
+      {
+        "id": "sql11.1-q4",
+        "prompt": "Why store backups separately from the source device?",
+        "options": [
+          "To reduce the risk that one failure destroys both copies",
+          "To make SQL queries faster",
+          "To avoid primary keys",
+          "To disable transactions"
+        ],
+        "answer": "To reduce the risk that one failure destroys both copies",
+        "explanation": "A separate failure domain protects against device loss."
+      },
+      {
+        "id": "sql11.1-q5",
+        "prompt": "What proves a backup is useful?",
+        "options": [
+          "A tested restore succeeds and data is verified",
+          "The filename ends in .bak",
+          "The copy command returned once",
+          "The source database is still open"
+        ],
+        "answer": "A tested restore succeeds and data is verified",
+        "explanation": "Restore testing verifies that the backup can actually be recovered."
+      }
+    ]
+  },
+  "status": "draft"
+}

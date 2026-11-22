@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql3.3.en",
+  "courseId": "sql",
+  "moduleId": "SQL3",
+  "topicId": "SQL3.3",
+  "title": "INSERT INTO: Adding Single Rows",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of insert into: adding single rows.",
+    "Identify the statement, target object and affected columns or rows.",
+    "Predict the result of the SQLite examples before running them.",
+    "Recognize destructive operations and database-product differences.",
+    "Apply safe, readable and maintainable database practices."
+  ],
+  "prerequisites": [
+    "SQL1.3",
+    "SQL2.1",
+    "SQL2.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "INSERT INTO adds new records to a table. Learn explicit column lists, VALUES, default values and how to verify inserted records.",
+      "whyItMatters": "Database and table operations define where data lives, how records are maintained and how safely a schema can evolve. Incorrect commands can cause data loss or break dependent application code.",
+      "analogy": "Think of a database as a filing room: tables are labelled cabinets, rows are records and schema changes alter the cabinet structure.",
+      "analogyLimit": "This analogy does not describe database files, transactions, indexes, permissions or the engine-specific rules that govern real SQL operations."
+    },
+    "explain": {
+      "narrative": "## Concept\nINSERT INTO adds new records to a table. Learn explicit column lists, VALUES, default values and how to verify inserted records.\n\n## How the operation works\nIdentify whether the statement changes a database connection, defines a schema object, inserts or changes records, or removes a schema object. Check the target DBMS documentation because database-level commands, data types and ALTER TABLE capabilities vary across products. The runnable examples in this lesson target SQLite.\n\n## Important SQLite differences\nSQLite databases are files opened by an application or API; SQLite does not implement server-style CREATE DATABASE or USE statements. ATTACH DATABASE makes another database available to one connection. SQLite's INTEGER PRIMARY KEY and AUTOINCREMENT behaviour differs from MySQL AUTO_INCREMENT and SQL Server/PostgreSQL identity mechanisms. DROP COLUMN availability depends on SQLite version.\n\n## Worked examples\n### 1. Create a small customer table\n```sql\nCREATE TABLE customers_insert (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT);\n```\nExpected result: `Table created`\n\nThe table provides a target for the insert examples.\n\n### 2. Insert one complete row\n```sql\nINSERT INTO customers_insert VALUES (1, 'Asha', 'Kakinada');\n```\nExpected result: `1 row inserted`\n\nVALUES supplies one value for each column in table order.\n\n### 3. Insert using an explicit column list\n```sql\nINSERT INTO customers_insert (customer_id, customer_name) VALUES (2, 'Ravi');\n```\nExpected result: `1 row inserted`\n\nColumns omitted from the list receive their default value, or NULL if no default applies and the column allows it.\n\n### 4. Create and insert a row using a default\n```sql\nCREATE TABLE delivery_options (option_id INTEGER PRIMARY KEY, option_name TEXT NOT NULL, active INTEGER NOT NULL DEFAULT 1); INSERT INTO delivery_options (option_id, option_name) VALUES (1, 'Standard');\n```\nExpected result: `1 row inserted`\n\nThe active column receives its declared default because it was omitted from the insert list.\n\n### 5. Verify inserted customer rows\n```sql\nSELECT customer_id, customer_name, city FROM customers_insert ORDER BY customer_id;\n```\nExpected result: `1 | Asha | Kakinada\\n2 | Ravi | NULL`\n\nA SELECT query confirms which values were stored.\n\n## Safe database practices\n- Use explicit column lists for INSERT statements.\n- Preview rows with the same WHERE condition before UPDATE or DELETE.\n- Use transactions and tested backups for important data changes.\n- Review dependencies before ALTER TABLE or DROP TABLE.\n- Add indexes based on measured query patterns, not by default on every column.\n- Never assume server-style database commands work in SQLite.\n\n## Common mistakes\n- Running CREATE DATABASE or USE in SQLite.\n- Omitting a WHERE clause from UPDATE or DELETE unintentionally.\n- Assuming CREATE TABLE IF NOT EXISTS migrates an existing schema.\n- Using AUTOINCREMENT without understanding its additional guarantee and cost.\n- Dropping tables or indexes without checking dependencies.",
+      "examples": [
+        {
+          "id": "sql3.3-ex1",
+          "language": "en",
+          "title": "Create a small customer table",
+          "code": "CREATE TABLE customers_insert (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT);",
+          "expectedOutput": "Table created",
+          "explanation": "The table provides a target for the insert examples.",
+          "runnable": true
+        },
+        {
+          "id": "sql3.3-ex2",
+          "language": "en",
+          "title": "Insert one complete row",
+          "code": "INSERT INTO customers_insert VALUES (1, 'Asha', 'Kakinada');",
+          "expectedOutput": "1 row inserted",
+          "explanation": "VALUES supplies one value for each column in table order.",
+          "runnable": true
+        },
+        {
+          "id": "sql3.3-ex3",
+          "language": "en",
+          "title": "Insert using an explicit column list",
+          "code": "INSERT INTO customers_insert (customer_id, customer_name) VALUES (2, 'Ravi');",
+          "expectedOutput": "1 row inserted",
+          "explanation": "Columns omitted from the list receive their default value, or NULL if no default applies and the column allows it.",
+          "runnable": true
+        },
+        {
+          "id": "sql3.3-ex4",
+          "language": "en",
+          "title": "Create and insert a row using a default",
+          "code": "CREATE TABLE delivery_options (option_id INTEGER PRIMARY KEY, option_name TEXT NOT NULL, active INTEGER NOT NULL DEFAULT 1); INSERT INTO delivery_options (option_id, option_name) VALUES (1, 'Standard');",
+          "expectedOutput": "1 row inserted",
+          "explanation": "The active column receives its declared default because it was omitted from the insert list.",
+          "runnable": true
+        },
+        {
+          "id": "sql3.3-ex5",
+          "language": "en",
+          "title": "Verify inserted customer rows",
+          "code": "SELECT customer_id, customer_name, city FROM customers_insert ORDER BY customer_id;",
+          "expectedOutput": "1 | Asha | Kakinada\\n2 | Ravi | NULL",
+          "explanation": "A SELECT query confirms which values were stored.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the five examples for INSERT INTO: Adding Single Rows in the SQL Playground. Before each statement, identify the object and rows it may affect, predict the outcome, then inspect the result.",
+      "independentTask": "Create a small original database task that demonstrates INSERT INTO: Adding Single Rows. Write at least five statements, include one safety check or verification query, and explain any SQLite-specific syntax.",
+      "hints": [
+        "Read the target database, table and column names carefully.",
+        "Use explicit column lists and meaningful identifiers.",
+        "Preview the affected rows before broad UPDATE or DELETE operations.",
+        "Check SQLite and other DBMS version differences before schema changes.",
+        "Use backups or transactions before destructive production operations."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE customers_insert (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT);\n\nINSERT INTO customers_insert VALUES (1, 'Asha', 'Kakinada');\n\nINSERT INTO customers_insert (customer_id, customer_name) VALUES (2, 'Ravi');\n\nCREATE TABLE delivery_options (option_id INTEGER PRIMARY KEY, option_name TEXT NOT NULL, active INTEGER NOT NULL DEFAULT 1); INSERT INTO delivery_options (option_id, option_name) VALUES (1, 'Standard');\n\nSELECT customer_id, customer_name, city FROM customers_insert ORDER BY customer_id;",
+    "resetCode": "CREATE TABLE customers_insert (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT);\n\nINSERT INTO customers_insert VALUES (1, 'Asha', 'Kakinada');\n\nINSERT INTO customers_insert (customer_id, customer_name) VALUES (2, 'Ravi');\n\nCREATE TABLE delivery_options (option_id INTEGER PRIMARY KEY, option_name TEXT NOT NULL, active INTEGER NOT NULL DEFAULT 1); INSERT INTO delivery_options (option_id, option_name) VALUES (1, 'Standard');\n\nSELECT customer_id, customer_name, city FROM customers_insert ORDER BY customer_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql3.3-q1",
+        "prompt": "Which SQL statement adds a row to an existing table?",
+        "options": [
+          "INSERT INTO",
+          "CREATE ROW",
+          "ADD DATABASE",
+          "UPDATE TABLE"
+        ],
+        "answer": "INSERT INTO",
+        "explanation": "INSERT INTO adds one or more records to an existing table."
+      },
+      {
+        "id": "sql3.3-q2",
+        "prompt": "Why specify a column list in INSERT?",
+        "options": [
+          "It makes the mapping between values and columns explicit",
+          "It drops omitted columns",
+          "It disables constraints",
+          "It sorts the table"
+        ],
+        "answer": "It makes the mapping between values and columns explicit",
+        "explanation": "An explicit column list is clearer and more resilient to schema changes."
+      },
+      {
+        "id": "sql3.3-q3",
+        "prompt": "What happens to an omitted column with a DEFAULT value?",
+        "options": [
+          "The declared default is used",
+          "The entire row is deleted",
+          "The column becomes a primary key",
+          "The database ignores all constraints"
+        ],
+        "answer": "The declared default is used",
+        "explanation": "An omitted column receives its default when one is declared."
+      },
+      {
+        "id": "sql3.3-q4",
+        "prompt": "What happens if a required NOT NULL column has no value or default?",
+        "options": [
+          "The insert is rejected",
+          "The database invents a value",
+          "The table is renamed",
+          "The row is always inserted"
+        ],
+        "answer": "The insert is rejected",
+        "explanation": "A NOT NULL constraint requires a non-NULL value."
+      },
+      {
+        "id": "sql3.3-q5",
+        "prompt": "How can you verify an inserted row?",
+        "options": [
+          "Run a SELECT query with a suitable condition",
+          "Run DROP TABLE",
+          "Read the browser cache",
+          "Change the column type"
+        ],
+        "answer": "Run a SELECT query with a suitable condition",
+        "explanation": "A SELECT query can inspect the inserted data."
+      }
+    ]
+  },
+  "status": "draft"
+}

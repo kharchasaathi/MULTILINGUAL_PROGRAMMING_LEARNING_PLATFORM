@@ -1,5 +1,5 @@
-const CACHE_NAME = "codesaathi-v10";
-const APP_SHELL = ["/", "/index.html", "/c-compiler.html", "/styles.css", "/app.js", "/js/i18n.js", "/js/lessons/lesson-template.js", "/js/lessons/curriculum-loader.js", "/content/curriculum-index.json", "/manifest.webmanifest", "/icon.svg"];
+const CACHE_NAME = "codesaathi-v11";
+const APP_SHELL = ["/", "/index.html", "/c-compiler.html", "/sql-playground.html", "/styles.css", "/app.js", "/js/i18n.js", "/js/lessons/lesson-template.js", "/js/lessons/curriculum-loader.js", "/content/curriculum-index.json", "/manifest.webmanifest", "/icon.svg"];
 const NETWORK_FIRST = new Set(APP_SHELL);
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));

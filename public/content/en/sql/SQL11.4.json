@@ -1,0 +1,161 @@
+{
+  "id": "sql.sql11.4.en",
+  "courseId": "sql",
+  "moduleId": "SQL11",
+  "topicId": "SQL11.4",
+  "title": "SQL Injection Risks and Defensive Query Design",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and practical behaviour of SQL Injection Risks and Defensive Query Design.",
+    "Identify which database engine or application layer performs the operation.",
+    "Predict the result of the SQLite examples before running them.",
+    "Recognize security, recovery, portability and operational limitations.",
+    "Apply the concept safely in a realistic database workflow."
+  ],
+  "prerequisites": [
+    "SQL1.2",
+    "SQL2.1",
+    "SQL3.1",
+    "SQL3.2",
+    "SQL5.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "SQL injection occurs when untrusted input is combined with SQL command text so that the input can change the query's meaning. The primary defence is parameterized queries or prepared statements. Validation, least privilege and safe error handling provide additional protection; escaping alone is not a reliable primary defence.",
+      "whyItMatters": "Injection can expose, alter or delete data and may compromise an application. Safe query construction is essential whenever an application accepts user-controlled values.",
+      "analogy": "Think of a database workflow as a carefully controlled service desk: each operation has a defined responsibility, input and verification step.",
+      "analogyLimit": "The analogy does not model SQL grammar, database transaction isolation, driver APIs, security boundaries or DBMS-specific implementation details."
+    },
+    "explain": {
+      "narrative": "## How injection happens\nAn application becomes vulnerable when it concatenates untrusted text into SQL syntax. An attacker may supply quotes or operators that alter the intended WHERE condition. A login check, search field or URL parameter can become an attack path if treated as executable SQL.\n\n## Primary defence: bind values\nUse parameterized queries so SQL structure is fixed and user input is transmitted as data. Never build SQL by concatenating a user's name, password, search term or identifier into a statement. Validate input for business rules, but validation does not replace parameter binding.\n\n## Additional safeguards\nUse least-privilege database accounts, avoid exposing raw database errors, keep database libraries updated, log suspicious activity safely and test negative cases. Parameters bind values, not SQL identifiers or keywords; dynamic table names or sort directions require allow-lists and safe identifier handling. The SQL Playground executes SQL scripts and does not expose application-language parameter binding, so the examples illustrate data-versus-code boundaries without pretending to execute a host-language prepared statement.\n\n## Worked examples\nThe five original SQLite examples below are executable in the CodeSaathi SQL Playground. Any host-language API or other DBMS command is explicitly labelled as explanatory rather than runnable.",
+      "examples": [
+        {
+          "id": "sql11.4-ex1",
+          "language": "en",
+          "title": "Store a quote as ordinary data",
+          "code": "DROP TABLE IF EXISTS injection_notes; CREATE TABLE injection_notes(note TEXT); INSERT INTO injection_notes VALUES('user typed: '' OR 1=1 --'); SELECT note FROM injection_notes;",
+          "expectedOutput": "user typed: ' OR 1=1 --",
+          "explanation": "A quote and SQL-looking text remain data when they are inside a correctly quoted literal.",
+          "runnable": true
+        },
+        {
+          "id": "sql11.4-ex2",
+          "language": "en",
+          "title": "Compare exact data rather than constructing SQL",
+          "code": "DROP TABLE IF EXISTS injection_users; CREATE TABLE injection_users(username TEXT,password_hash TEXT); INSERT INTO injection_users VALUES('asha','hash-a'),('bilal','hash-b'); SELECT username FROM injection_users WHERE username='asha' AND password_hash='hash-a';",
+          "expectedOutput": "asha",
+          "explanation": "The SQL structure is fixed; application code should bind the supplied values rather than concatenate them.",
+          "runnable": true
+        },
+        {
+          "id": "sql11.4-ex3",
+          "language": "en",
+          "title": "Demonstrate why a tautology is dangerous",
+          "code": "DROP TABLE IF EXISTS injection_accounts; CREATE TABLE injection_accounts(id INTEGER PRIMARY KEY, owner TEXT); INSERT INTO injection_accounts VALUES(1,'Asha'),(2,'Bilal'); SELECT COUNT(*) FROM injection_accounts WHERE 1=1;",
+          "expectedOutput": "2",
+          "explanation": "A condition that is always true returns every row; unsafe concatenation can accidentally create such a condition.",
+          "runnable": true
+        },
+        {
+          "id": "sql11.4-ex4",
+          "language": "en",
+          "title": "Use a restrictive predicate",
+          "code": "DROP TABLE IF EXISTS injection_accounts; CREATE TABLE injection_accounts(id INTEGER PRIMARY KEY, owner TEXT); INSERT INTO injection_accounts VALUES(1,'Asha'),(2,'Bilal'); SELECT owner FROM injection_accounts WHERE id=1;",
+          "expectedOutput": "Asha",
+          "explanation": "A fixed predicate demonstrates the intended narrow result; in an application, bind the id value.",
+          "runnable": true
+        },
+        {
+          "id": "sql11.4-ex5",
+          "language": "en",
+          "title": "Limit exposed data in a query",
+          "code": "DROP TABLE IF EXISTS injection_profiles; CREATE TABLE injection_profiles(id INTEGER PRIMARY KEY, display_name TEXT, private_note TEXT); INSERT INTO injection_profiles VALUES(1,'Mira','private'),(2,'Ravi','private'); SELECT id,display_name FROM injection_profiles WHERE id=1;",
+          "expectedOutput": "1 | Mira",
+          "explanation": "Selecting only required columns reduces accidental exposure, though authorization must still be enforced.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run all five examples for SQL Injection Risks and Defensive Query Design. Before running each one, state what the statement or application operation does, predict the result and explain any SQLite-specific limitation.",
+      "independentTask": "Create a small original scenario for SQL Injection Risks and Defensive Query Design. Write at least five statements or a documented application workflow, include a safety or verification step, and explain which parts are specific to SQLite or another DBMS.",
+      "hints": [
+        "Read the engine and version notes before choosing syntax.",
+        "Keep user-provided values separate from SQL command text.",
+        "Use explicit names and columns so the operation is easy to review.",
+        "Check the result with a SELECT or integrity/health query.",
+        "For operational changes, document backup, restore and rollback requirements."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "DROP TABLE IF EXISTS injection_notes; CREATE TABLE injection_notes(note TEXT); INSERT INTO injection_notes VALUES('user typed: '' OR 1=1 --'); SELECT note FROM injection_notes;",
+    "resetCode": "DROP TABLE IF EXISTS injection_notes; CREATE TABLE injection_notes(note TEXT); INSERT INTO injection_notes VALUES('user typed: '' OR 1=1 --'); SELECT note FROM injection_notes;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql11.4-q1",
+        "prompt": "What causes SQL injection?",
+        "options": [
+          "Untrusted input changes SQL command structure",
+          "A table has many rows",
+          "A query uses ORDER BY",
+          "A database has an index"
+        ],
+        "answer": "Untrusted input changes SQL command structure",
+        "explanation": "Injection occurs when input is interpreted as SQL syntax."
+      },
+      {
+        "id": "sql11.4-q2",
+        "prompt": "What is the primary defence against SQL injection?",
+        "options": [
+          "Parameterized queries or prepared statements",
+          "Removing all spaces from input",
+          "Hiding the submit button",
+          "Using SELECT *"
+        ],
+        "answer": "Parameterized queries or prepared statements",
+        "explanation": "Binding values separately keeps them from becoming SQL syntax."
+      },
+      {
+        "id": "sql11.4-q3",
+        "prompt": "Can a parameter placeholder usually stand for a table name?",
+        "options": [
+          "No, parameters bind data values, not SQL identifiers",
+          "Yes, in every DBMS",
+          "Only when the table is empty",
+          "Only inside ORDER BY"
+        ],
+        "answer": "No, parameters bind data values, not SQL identifiers",
+        "explanation": "Dynamic identifiers require an allow-list and safe query construction."
+      },
+      {
+        "id": "sql11.4-q4",
+        "prompt": "Why is escaping alone not the preferred defence?",
+        "options": [
+          "Correct escaping is context- and DBMS-dependent; binding is safer",
+          "Escaping always deletes data",
+          "SQL has no string literals",
+          "Escaping makes queries slower in every case"
+        ],
+        "answer": "Correct escaping is context- and DBMS-dependent; binding is safer",
+        "explanation": "Parameter binding is the recommended primary defence."
+      },
+      {
+        "id": "sql11.4-q5",
+        "prompt": "What does least privilege mean?",
+        "options": [
+          "Give an application account only the permissions it needs",
+          "Give every user administrator access",
+          "Disable backups",
+          "Allow every query to modify schema"
+        ],
+        "answer": "Give an application account only the permissions it needs",
+        "explanation": "Least privilege limits damage if an application flaw occurs."
+      }
+    ]
+  },
+  "status": "draft"
+}

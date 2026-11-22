@@ -1,0 +1,161 @@
+{
+  "id": "sql.sql23.4.en",
+  "courseId": "sql",
+  "moduleId": "SQL23",
+  "topicId": "SQL23.4",
+  "title": "Oracle SQL Features and Portability",
+  "language": "en",
+  "learningObjectives": [
+    "Recognize common Oracle SQL syntax and built-in functions.",
+    "Explain the traditional DUAL table use and modern alternatives.",
+    "Identify NVL, SYSDATE, sequences and FETCH FIRST as Oracle-specific or product-specific features.",
+    "Compare Oracle MERGE with portable insert/update workflows.",
+    "Label Oracle-only syntax and test it in the target Oracle version."
+  ],
+  "prerequisites": [
+    "SQL16.1",
+    "SQL16.2",
+    "SQL16.3",
+    "SQL16.4",
+    "SQL16.5"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Oracle Database provides SQL with Oracle-specific functions, sequence objects, data types and procedural extensions. Some syntax is standard in modern versions while other features remain vendor-specific.",
+      "whyItMatters": "Oracle applications often rely on sequences, NVL, date functions and MERGE. These constructs need deliberate translation when moving to another DBMS.",
+      "analogy": "A professional toolkit includes specialized attachments designed for one machine model.",
+      "analogyLimit": "Oracle version, compatibility settings and data types affect syntax and behaviour; a similar feature in another DBMS may not be semantically identical."
+    },
+    "explain": {
+      "narrative": "## Oracle-specific features\nOracle applications commonly use sequences for generated identifiers, `NVL()` for a two-argument NULL fallback, `SYSDATE` for the database server date/time and `DUAL` for selecting an expression without a user table. Modern Oracle versions support row limiting with `FETCH FIRST`.\n\n## MERGE and procedural code\nOracle supports MERGE for conditional insert/update logic and PL/SQL for stored program units. MERGE semantics and concurrency edge cases differ among DBMS products, so test the exact workflow.\n\n## Portable alternatives\nCOALESCE is broadly standardized; CASE is portable conditional logic; explicit table queries avoid depending on DUAL when the target engine permits SELECT expressions without FROM. Identity columns and sequences need engine-specific migration planning.\n\n## Runnable examples\nThe examples use SQLite-compatible core SQL. Oracle-only syntax is shown as labelled reference material and is not executed by the SQLite Playground.",
+      "examples": [
+        {
+          "id": "sql234-ex1",
+          "language": "en",
+          "title": "Create a portable inventory table",
+          "code": "CREATE TABLE dialect23_inventory (item_id INTEGER PRIMARY KEY, item_name TEXT NOT NULL, quantity INTEGER NOT NULL CHECK (quantity >= 0));",
+          "expectedOutput": "Table created",
+          "explanation": "Creates a simple inventory relation. Oracle may use NUMBER and an identity column or sequence-backed key depending on the schema design.",
+          "runnable": true
+        },
+        {
+          "id": "sql234-ex2",
+          "language": "en",
+          "title": "Insert inventory rows",
+          "code": "INSERT INTO dialect23_inventory VALUES (1, 'Cable', 20), (2, 'Notebook', 50);",
+          "expectedOutput": "2 rows inserted",
+          "explanation": "Adds two inventory rows. In Oracle, generated keys may use identity columns or sequences, and INSERT syntax should be adapted accordingly.",
+          "runnable": true
+        },
+        {
+          "id": "sql234-ex3",
+          "language": "en",
+          "title": "Use COALESCE for a missing label",
+          "code": "SELECT item_name, COALESCE(CAST(quantity AS TEXT), 'Unknown') AS quantity_label FROM dialect23_inventory ORDER BY item_id;",
+          "expectedOutput": "Cable | 20; Notebook | 50",
+          "explanation": "Shows a broadly supported NULL fallback. Oracle's NVL is a common vendor-specific alternative, but implicit conversion and result type should be checked.",
+          "runnable": true
+        },
+        {
+          "id": "sql234-ex4",
+          "language": "en",
+          "title": "Calculate a portable conditional stock label",
+          "code": "SELECT item_name, CASE WHEN quantity = 0 THEN 'Out of stock' WHEN quantity < 10 THEN 'Low stock' ELSE 'Available' END AS stock_state FROM dialect23_inventory ORDER BY item_id;",
+          "expectedOutput": "Cable | Available; Notebook | Available",
+          "explanation": "Uses searched CASE, a portable conditional expression. Oracle supports CASE as well as procedural IF statements inside PL/SQL blocks.",
+          "runnable": true
+        },
+        {
+          "id": "sql234-ex5",
+          "language": "en",
+          "title": "Aggregate inventory quantities",
+          "code": "SELECT COUNT(*) AS item_count, SUM(quantity) AS total_units FROM dialect23_inventory;",
+          "expectedOutput": "item_count = 2; total_units = 70",
+          "explanation": "Uses standard aggregate functions. Oracle and SQLite both support COUNT and SUM, though numeric result types can differ.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and compare COALESCE with Oracle NVL in the narrative. Explain why a sequence-backed identifier is not automatically interchangeable with SQLite INTEGER PRIMARY KEY.",
+      "independentTask": "Prepare an Oracle-specific reference example using a sequence, SYSDATE and FETCH FIRST. For each feature, document the closest PostgreSQL, MySQL or SQLite alternative and any semantic difference.",
+      "hints": [
+        "Oracle has sequences and identity columns.",
+        "NVL is an Oracle-specific NULL function; COALESCE is widely supported.",
+        "SYSDATE returns the database server date/time.",
+        "DUAL is traditionally used for expression-only SELECT statements.",
+        "Test MERGE and sequence behaviour on the target Oracle version."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE dialect23_inventory (item_id INTEGER PRIMARY KEY, item_name TEXT NOT NULL, quantity INTEGER NOT NULL);\nINSERT INTO dialect23_inventory VALUES (1, 'Cable', 20), (2, 'Notebook', 50);\nSELECT item_name, CASE WHEN quantity < 10 THEN 'Low stock' ELSE 'Available' END AS stock_state FROM dialect23_inventory ORDER BY item_id;",
+    "resetCode": "CREATE TABLE dialect23_inventory (item_id INTEGER PRIMARY KEY, item_name TEXT NOT NULL, quantity INTEGER NOT NULL);\nINSERT INTO dialect23_inventory VALUES (1, 'Cable', 20), (2, 'Notebook', 50);\nSELECT item_name, CASE WHEN quantity < 10 THEN 'Low stock' ELSE 'Available' END AS stock_state FROM dialect23_inventory ORDER BY item_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql234-q1",
+        "prompt": "Which function is commonly used by Oracle for a NULL fallback?",
+        "options": [
+          "NVL()",
+          "IFNULL() only",
+          "DATEADD()",
+          "TOP()"
+        ],
+        "answer": "NVL()",
+        "explanation": "NVL is a common Oracle-specific function."
+      },
+      {
+        "id": "sql234-q2",
+        "prompt": "What is SYSDATE in Oracle?",
+        "options": [
+          "The database server's current date/time",
+          "A generated sequence number",
+          "A row-limiting clause",
+          "A join algorithm"
+        ],
+        "answer": "The database server's current date/time",
+        "explanation": "SYSDATE returns the database server date/time."
+      },
+      {
+        "id": "sql234-q3",
+        "prompt": "What is DUAL traditionally used for?",
+        "options": [
+          "Selecting an expression without querying a user table",
+          "Storing every sequence",
+          "Creating an index",
+          "Starting a transaction"
+        ],
+        "answer": "Selecting an expression without querying a user table",
+        "explanation": "DUAL is a one-row special table used for expression-only queries."
+      },
+      {
+        "id": "sql234-q4",
+        "prompt": "Which feature generates identifiers in Oracle schemas?",
+        "options": [
+          "Sequences",
+          "LIMIT",
+          "PRAGMA",
+          "AUTO_INCREMENT only"
+        ],
+        "answer": "Sequences",
+        "explanation": "Oracle sequences are commonly used to generate unique values."
+      },
+      {
+        "id": "sql234-q5",
+        "prompt": "Why should Oracle MERGE be tested on the target version?",
+        "options": [
+          "Its syntax and concurrency behaviour are product-specific",
+          "It is identical to SELECT",
+          "It always disables constraints",
+          "It is a SQLite pragma"
+        ],
+        "answer": "Its syntax and concurrency behaviour are product-specific",
+        "explanation": "MERGE semantics and edge cases differ between database engines."
+      }
+    ]
+  },
+  "status": "draft"
+}

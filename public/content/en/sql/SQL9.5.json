@@ -1,0 +1,160 @@
+{
+  "id": "sql.sql9.5.en",
+  "courseId": "sql",
+  "moduleId": "SQL9",
+  "topicId": "SQL9.5",
+  "title": "SQL EXISTS Operator",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of SQL EXISTS Operator.",
+    "Write valid SQLite queries that demonstrate the topic or a documented equivalent.",
+    "Predict result rows using the supplied sample data.",
+    "Identify common mistakes and important NULL or duplicate behaviour.",
+    "Choose an appropriate query pattern for a practical reporting task."
+  ],
+  "prerequisites": [
+    "SQL5.1",
+    "SQL5.4",
+    "SQL6.1",
+    "SQL8.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "EXISTS tests whether a subquery returns at least one row. NOT EXISTS tests whether it returns no rows. The subquery is commonly correlated to the current outer row, and the values selected inside it do not determine the truth of EXISTS.",
+      "whyItMatters": "EXISTS is useful for finding customers who have orders, products that have never been ordered, or parent records that have related child records.",
+      "analogy": "Think of a database report as carefully combining or grouping rows from well-labelled registers to answer a specific question.",
+      "analogyLimit": "The analogy does not model SQL's exact evaluation rules, duplicate semantics, three-valued NULL logic or dialect-specific features."
+    },
+    "explain": {
+      "narrative": "## Core concept\nEXISTS tests whether a subquery returns at least one row. NOT EXISTS tests whether it returns no rows. The subquery is commonly correlated to the current outer row, and the values selected inside it do not determine the truth of EXISTS.\n\n## Syntax\n```sql\nSELECT columns\nFROM outer_table AS o\nWHERE EXISTS (\n  SELECT 1 FROM related_table AS r\n  WHERE r.key = o.key\n);\n```\n\n## SQLite sample database\nThe following examples use a small fictional dataset. Each worked example starts with a repeatable setup script so it can be run independently in the SQL Playground.\n\n## Worked examples\n### 1. Find customers who have at least one order\n```sql\nDROP TABLE IF EXISTS orders;\nDROP TABLE IF EXISTS customers;\nCREATE TABLE customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL, amount NUMERIC NOT NULL);\nINSERT INTO customers VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada'),(4,'Dev','Mumbai');\nINSERT INTO orders VALUES (101,1,120),(102,1,80),(103,3,150);\nSELECT c.customer_name FROM customers AS c WHERE EXISTS (SELECT 1 FROM orders AS o WHERE o.customer_id = c.customer_id) ORDER BY c.customer_id;\n```\nExpected result: Asha; Chitra\n\nThe correlated subquery checks for at least one matching order for each customer.\n\n### 2. Find customers with no orders\n```sql\nDROP TABLE IF EXISTS orders;\nDROP TABLE IF EXISTS customers;\nCREATE TABLE customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL, amount NUMERIC NOT NULL);\nINSERT INTO customers VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada'),(4,'Dev','Mumbai');\nINSERT INTO orders VALUES (101,1,120),(102,1,80),(103,3,150);\nSELECT c.customer_name FROM customers AS c WHERE NOT EXISTS (SELECT 1 FROM orders AS o WHERE o.customer_id = c.customer_id) ORDER BY c.customer_id;\n```\nExpected result: Bilal; Dev\n\nNOT EXISTS is true when the correlated subquery finds no matching order.\n\n### 3. Find customers with an order above a threshold\n```sql\nDROP TABLE IF EXISTS orders;\nDROP TABLE IF EXISTS customers;\nCREATE TABLE customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL, amount NUMERIC NOT NULL);\nINSERT INTO customers VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada'),(4,'Dev','Mumbai');\nINSERT INTO orders VALUES (101,1,120),(102,1,80),(103,3,150);\nSELECT c.customer_name FROM customers AS c WHERE EXISTS (SELECT 1 FROM orders AS o WHERE o.customer_id = c.customer_id AND o.amount > 100) ORDER BY c.customer_id;\n```\nExpected result: Chitra\n\nThe amount condition is evaluated inside the existence test.\n\n### 4. Use EXISTS with an additional outer filter\n```sql\nDROP TABLE IF EXISTS orders;\nDROP TABLE IF EXISTS customers;\nCREATE TABLE customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL, amount NUMERIC NOT NULL);\nINSERT INTO customers VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada'),(4,'Dev','Mumbai');\nINSERT INTO orders VALUES (101,1,120),(102,1,80),(103,3,150);\nSELECT c.customer_name FROM customers AS c WHERE c.city = 'Rajahmundry' AND EXISTS (SELECT 1 FROM orders AS o WHERE o.customer_id = c.customer_id) ORDER BY c.customer_id;\n```\nExpected result: Asha\n\nThe outer city condition and correlated existence condition must both be true.\n\n### 5. Return each qualifying customer once\n```sql\nDROP TABLE IF EXISTS orders;\nDROP TABLE IF EXISTS customers;\nCREATE TABLE customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL, amount NUMERIC NOT NULL);\nINSERT INTO customers VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada'),(4,'Dev','Mumbai');\nINSERT INTO orders VALUES (101,1,120),(102,1,80),(103,3,150);\nSELECT c.customer_id, c.customer_name FROM customers AS c WHERE EXISTS (SELECT 1 FROM orders AS o WHERE o.customer_id = c.customer_id) ORDER BY c.customer_id;\n```\nExpected result: 1 | Asha; 3 | Chitra\n\nEXISTS filters the customer rows; it does not multiply them when a customer has multiple matching orders.\n\n## Query behaviour and dialect notes\nThe examples target SQLite and use portable core SQL syntax. Column positions and compatible data types must align across set-operation branches. Result order is not guaranteed without an outer ORDER BY.\n\n## Common mistakes\n- Writing an uncorrelated subquery when the requirement is per outer row.\n- Using NOT IN without considering NULL values.\n- Assuming EXISTS returns the matching child rows; it filters outer rows.\n- Joining child rows when only existence is required and then needing DISTINCT.\n- Forgetting that NOT EXISTS means no matching row exists.\n\n## Best practices\nUse explicit aliases and readable predicates. Test edge cases such as missing matches, duplicate values, empty sets and NULLs. Keep the database dialect visible whenever a feature is not portable.",
+      "examples": [
+        {
+          "id": "sql9.5-ex1",
+          "language": "en",
+          "title": "Find customers who have at least one order",
+          "code": "DROP TABLE IF EXISTS orders;\nDROP TABLE IF EXISTS customers;\nCREATE TABLE customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL, amount NUMERIC NOT NULL);\nINSERT INTO customers VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada'),(4,'Dev','Mumbai');\nINSERT INTO orders VALUES (101,1,120),(102,1,80),(103,3,150);\nSELECT c.customer_name FROM customers AS c WHERE EXISTS (SELECT 1 FROM orders AS o WHERE o.customer_id = c.customer_id) ORDER BY c.customer_id;",
+          "expectedOutput": "Asha; Chitra",
+          "explanation": "The correlated subquery checks for at least one matching order for each customer.",
+          "runnable": true
+        },
+        {
+          "id": "sql9.5-ex2",
+          "language": "en",
+          "title": "Find customers with no orders",
+          "code": "DROP TABLE IF EXISTS orders;\nDROP TABLE IF EXISTS customers;\nCREATE TABLE customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL, amount NUMERIC NOT NULL);\nINSERT INTO customers VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada'),(4,'Dev','Mumbai');\nINSERT INTO orders VALUES (101,1,120),(102,1,80),(103,3,150);\nSELECT c.customer_name FROM customers AS c WHERE NOT EXISTS (SELECT 1 FROM orders AS o WHERE o.customer_id = c.customer_id) ORDER BY c.customer_id;",
+          "expectedOutput": "Bilal; Dev",
+          "explanation": "NOT EXISTS is true when the correlated subquery finds no matching order.",
+          "runnable": true
+        },
+        {
+          "id": "sql9.5-ex3",
+          "language": "en",
+          "title": "Find customers with an order above a threshold",
+          "code": "DROP TABLE IF EXISTS orders;\nDROP TABLE IF EXISTS customers;\nCREATE TABLE customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL, amount NUMERIC NOT NULL);\nINSERT INTO customers VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada'),(4,'Dev','Mumbai');\nINSERT INTO orders VALUES (101,1,120),(102,1,80),(103,3,150);\nSELECT c.customer_name FROM customers AS c WHERE EXISTS (SELECT 1 FROM orders AS o WHERE o.customer_id = c.customer_id AND o.amount > 100) ORDER BY c.customer_id;",
+          "expectedOutput": "Chitra",
+          "explanation": "The amount condition is evaluated inside the existence test.",
+          "runnable": true
+        },
+        {
+          "id": "sql9.5-ex4",
+          "language": "en",
+          "title": "Use EXISTS with an additional outer filter",
+          "code": "DROP TABLE IF EXISTS orders;\nDROP TABLE IF EXISTS customers;\nCREATE TABLE customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL, amount NUMERIC NOT NULL);\nINSERT INTO customers VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada'),(4,'Dev','Mumbai');\nINSERT INTO orders VALUES (101,1,120),(102,1,80),(103,3,150);\nSELECT c.customer_name FROM customers AS c WHERE c.city = 'Rajahmundry' AND EXISTS (SELECT 1 FROM orders AS o WHERE o.customer_id = c.customer_id) ORDER BY c.customer_id;",
+          "expectedOutput": "Asha",
+          "explanation": "The outer city condition and correlated existence condition must both be true.",
+          "runnable": true
+        },
+        {
+          "id": "sql9.5-ex5",
+          "language": "en",
+          "title": "Return each qualifying customer once",
+          "code": "DROP TABLE IF EXISTS orders;\nDROP TABLE IF EXISTS customers;\nCREATE TABLE customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL, amount NUMERIC NOT NULL);\nINSERT INTO customers VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada'),(4,'Dev','Mumbai');\nINSERT INTO orders VALUES (101,1,120),(102,1,80),(103,3,150);\nSELECT c.customer_id, c.customer_name FROM customers AS c WHERE EXISTS (SELECT 1 FROM orders AS o WHERE o.customer_id = c.customer_id) ORDER BY c.customer_id;",
+          "expectedOutput": "1 | Asha; 3 | Chitra",
+          "explanation": "EXISTS filters the customer rows; it does not multiply them when a customer has multiple matching orders.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the EXISTS query for customers with orders, then change EXISTS to NOT EXISTS. Add an amount condition inside the subquery and predict which customers remain.",
+      "independentTask": "Create departments and employees tables. Write queries to find departments with employees, departments without employees, departments with a high-paid employee, and employees whose department has at least one active project.",
+      "hints": [
+        "Use a correlated condition that refers to the outer row.",
+        "SELECT 1 is a conventional projection inside EXISTS.",
+        "EXISTS asks whether at least one row is returned.",
+        "NOT EXISTS is useful for anti-join questions.",
+        "EXISTS does not duplicate outer rows when multiple matches exist."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "DROP TABLE IF EXISTS orders;\nDROP TABLE IF EXISTS customers;\nCREATE TABLE customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL, amount NUMERIC NOT NULL);\nINSERT INTO customers VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada'),(4,'Dev','Mumbai');\nINSERT INTO orders VALUES (101,1,120),(102,1,80),(103,3,150);\n\n-- Try the lesson's first query\nSELECT c.customer_name FROM customers AS c WHERE EXISTS (SELECT 1 FROM orders AS o WHERE o.customer_id = c.customer_id) ORDER BY c.customer_id;",
+    "resetCode": "DROP TABLE IF EXISTS orders;\nDROP TABLE IF EXISTS customers;\nCREATE TABLE customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER NOT NULL, amount NUMERIC NOT NULL);\nINSERT INTO customers VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada'),(4,'Dev','Mumbai');\nINSERT INTO orders VALUES (101,1,120),(102,1,80),(103,3,150);"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql9.5-q1",
+        "prompt": "What does EXISTS test?",
+        "options": [
+          "Whether a subquery returns at least one row",
+          "Whether a table contains a primary key",
+          "Whether two columns have identical names",
+          "Whether a query changes stored data"
+        ],
+        "answer": "Whether a subquery returns at least one row",
+        "explanation": "EXISTS is a Boolean test for the presence of at least one row."
+      },
+      {
+        "id": "sql9.5-q2",
+        "prompt": "What does NOT EXISTS return true for?",
+        "options": [
+          "When the subquery returns no rows",
+          "When the subquery returns two or more rows",
+          "Only when the subquery returns NULL",
+          "Only when the outer table is empty"
+        ],
+        "answer": "When the subquery returns no rows",
+        "explanation": "NOT EXISTS is true when no matching row is found."
+      },
+      {
+        "id": "sql9.5-q3",
+        "prompt": "Why is a correlated subquery useful with EXISTS?",
+        "options": [
+          "It checks related rows for the current outer row",
+          "It creates a permanent copy of the outer table",
+          "It automatically sorts the outer result",
+          "It disables indexes"
+        ],
+        "answer": "It checks related rows for the current outer row",
+        "explanation": "The inner query references a value from the current outer row."
+      },
+      {
+        "id": "sql9.5-q4",
+        "prompt": "Does EXISTS depend on the values selected inside the subquery?",
+        "options": [
+          "No, it depends on whether at least one row is returned",
+          "Yes, it only works with SELECT *",
+          "Yes, it only works with numeric values",
+          "It requires the subquery to return exactly one column"
+        ],
+        "answer": "No, it depends on whether at least one row is returned",
+        "explanation": "The projected values are not used to determine the existence result."
+      },
+      {
+        "id": "sql9.5-q5",
+        "prompt": "What is a common use of NOT EXISTS?",
+        "options": [
+          "Find parent rows that have no matching child rows",
+          "Calculate the average of every column",
+          "Rename a table",
+          "Remove duplicate rows from a UNION"
+        ],
+        "answer": "Find parent rows that have no matching child rows",
+        "explanation": "NOT EXISTS is a natural anti-match pattern."
+      }
+    ]
+  },
+  "status": "draft"
+}

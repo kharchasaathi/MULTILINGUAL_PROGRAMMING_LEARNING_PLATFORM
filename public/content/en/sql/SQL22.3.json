@@ -1,0 +1,162 @@
+{
+  "id": "sql.sql22.3.en",
+  "courseId": "sql",
+  "moduleId": "SQL22",
+  "topicId": "SQL22.3",
+  "title": "Sargable Predicates and Query Refactoring",
+  "language": "en",
+  "learningObjectives": [
+    "Explain what makes a predicate searchable by an index.",
+    "Recognize function-wrapped indexed columns that can inhibit index use.",
+    "Rewrite date filters as half-open ranges when appropriate.",
+    "Compare alternative query forms without changing results.",
+    "Use query plans to verify whether a refactoring helps."
+  ],
+  "prerequisites": [
+    "SQL5.1",
+    "SQL8.1",
+    "SQL15.1",
+    "SQL15.2",
+    "SQL15.5"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A sargable predicate allows the optimizer to use an index efficiently to locate qualifying rows. Applying a function or conversion to an indexed column can prevent a simple index range lookup.",
+      "whyItMatters": "Well-shaped predicates can reduce the number of rows read, especially on large tables with useful indexes.",
+      "analogy": "Searching a phone book by the printed surname is easier than rewriting every surname before comparing it.",
+      "analogyLimit": "Whether a predicate is sargable depends on the engine, data type, collation, expression indexes and optimizer transformations."
+    },
+    "explain": {
+      "narrative": "## Search-argument predicates\nA predicate is often sargable when the indexed column is compared directly with a constant or bound value using equality or a range. Applying a function to the column can make the engine evaluate the expression for many rows instead of using a simple index range.\n\n## Date range pattern\nFor timestamps stored in a consistent sortable format, a half-open interval uses `>= start` and `< next_period_start`. It avoids applying a date-extraction function to every stored value and handles the boundary without overlapping adjacent periods.\n\n## Refactoring discipline\nCompare the original and rewritten result sets, including NULLs and boundary values. An expression index or computed column may be appropriate in some engines, but syntax and optimizer support differ.",
+      "examples": [
+        {
+          "id": "sql223-ex1",
+          "language": "en",
+          "title": "Create event timestamps and an index",
+          "code": "CREATE TABLE perf22_events (event_id INTEGER PRIMARY KEY, created_at TEXT NOT NULL, event_type TEXT NOT NULL); CREATE INDEX idx_perf22_created_at ON perf22_events(created_at);",
+          "expectedOutput": "Table and index created",
+          "explanation": "Creates an indexed ISO timestamp column. The index can support range searches when the stored text uses one consistent sortable format.",
+          "runnable": true
+        },
+        {
+          "id": "sql223-ex2",
+          "language": "en",
+          "title": "Insert events across two months",
+          "code": "INSERT INTO perf22_events VALUES (1, '2026-10-31T23:00:00Z', 'login'), (2, '2026-11-01T00:00:00Z', 'login'), (3, '2026-11-12T09:30:00Z', 'payment'), (4, '2026-11-30T23:59:59Z', 'logout'), (5, '2026-12-01T00:00:00Z', 'login');",
+          "expectedOutput": "5 rows inserted",
+          "explanation": "Adds events just before, within and just after November. Boundary rows make the date-range behaviour explicit.",
+          "runnable": true
+        },
+        {
+          "id": "sql223-ex3",
+          "language": "en",
+          "title": "Inspect a half-open timestamp range plan",
+          "code": "EXPLAIN QUERY PLAN SELECT event_id FROM perf22_events WHERE created_at >= '2026-11-01T00:00:00Z' AND created_at < '2026-12-01T00:00:00Z';",
+          "expectedOutput": "Plan references the created_at index",
+          "explanation": "Shows a range predicate directly on the indexed column. SQLite may use idx_perf22_created_at; exact plan wording depends on engine version.",
+          "runnable": true,
+          "expectedPattern": "idx_perf22_created_at"
+        },
+        {
+          "id": "sql223-ex4",
+          "language": "en",
+          "title": "Return November events with a half-open range",
+          "code": "SELECT event_id, event_type FROM perf22_events WHERE created_at >= '2026-11-01T00:00:00Z' AND created_at < '2026-12-01T00:00:00Z' ORDER BY created_at;",
+          "expectedOutput": "2 | login; 3 | payment; 4 | logout",
+          "explanation": "Selects three November events, including the final second of the month and excluding December 1. The half-open interval avoids overlap with the next month.",
+          "runnable": true
+        },
+        {
+          "id": "sql223-ex5",
+          "language": "en",
+          "title": "Compare with a function-wrapped date filter",
+          "code": "SELECT COUNT(*) AS november_events FROM perf22_events WHERE substr(created_at, 1, 7) = '2026-11';",
+          "expectedOutput": "november_events = 3",
+          "explanation": "Returns the same three events for this fixed ISO text format, but applying substr() to the indexed column may prevent a simple range search. Use an expression index only when the target engine and workload justify it.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Compare the half-open range query with the substr() query. Confirm both return three rows, then inspect their plans and explain the possible index-access difference.",
+      "independentTask": "Rewrite a query that filters YEAR(order_date) = 2026 as a date range using the first day of 2026 and first day of 2027. Test boundary rows and NULL behaviour.",
+      "hints": [
+        "Compare the indexed column directly with constants or bound values.",
+        "Use half-open intervals for adjacent time periods.",
+        "Function-wrapped columns may inhibit simple index range scans.",
+        "Expression indexes are product-specific.",
+        "Verify result equivalence, boundaries and NULLs."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE perf22_events (event_id INTEGER PRIMARY KEY, created_at TEXT NOT NULL);\nCREATE INDEX idx_perf22_created_at ON perf22_events(created_at);\nINSERT INTO perf22_events VALUES (1, '2026-11-01T00:00:00Z'), (2, '2026-11-30T23:59:59Z'), (3, '2026-12-01T00:00:00Z');\nSELECT event_id FROM perf22_events WHERE created_at >= '2026-11-01T00:00:00Z' AND created_at < '2026-12-01T00:00:00Z' ORDER BY event_id;",
+    "resetCode": "CREATE TABLE perf22_events (event_id INTEGER PRIMARY KEY, created_at TEXT NOT NULL);\nCREATE INDEX idx_perf22_created_at ON perf22_events(created_at);\nINSERT INTO perf22_events VALUES (1, '2026-11-01T00:00:00Z'), (2, '2026-11-30T23:59:59Z'), (3, '2026-12-01T00:00:00Z');\nSELECT event_id FROM perf22_events WHERE created_at >= '2026-11-01T00:00:00Z' AND created_at < '2026-12-01T00:00:00Z' ORDER BY event_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql223-q1",
+        "prompt": "What is a sargable predicate?",
+        "options": [
+          "A predicate that can support efficient index searching",
+          "A predicate that always uses a full scan",
+          "A SQL comment",
+          "A table constraint that stores passwords"
+        ],
+        "answer": "A predicate that can support efficient index searching",
+        "explanation": "Sargable predicates let the optimizer use suitable index access paths."
+      },
+      {
+        "id": "sql223-q2",
+        "prompt": "Why can substr(created_at,1,7) inhibit a simple index range search?",
+        "options": [
+          "The function is applied to the indexed column",
+          "It contains a string literal",
+          "It uses SELECT COUNT",
+          "It has an alias"
+        ],
+        "answer": "The function is applied to the indexed column",
+        "explanation": "The engine may need to compute the expression for rows rather than use a simple key range."
+      },
+      {
+        "id": "sql223-q3",
+        "prompt": "What is a half-open date interval?",
+        "options": [
+          "Greater than or equal to start and less than next period start",
+          "Greater than start and less than or equal to end",
+          "Between two inclusive timestamps only",
+          "A query without WHERE"
+        ],
+        "answer": "Greater than or equal to start and less than next period start",
+        "explanation": "Half-open ranges avoid overlap between adjacent periods."
+      },
+      {
+        "id": "sql223-q4",
+        "prompt": "What should be checked after query refactoring?",
+        "options": [
+          "Same results, including boundary and NULL cases",
+          "Only the query length",
+          "Only whether an index exists",
+          "Whether all columns are selected"
+        ],
+        "answer": "Same results, including boundary and NULL cases",
+        "explanation": "Performance changes must preserve the intended semantics."
+      },
+      {
+        "id": "sql223-q5",
+        "prompt": "Can expression indexes help function-based predicates?",
+        "options": [
+          "Sometimes, depending on DBMS and workload",
+          "Never in any DBMS",
+          "They always eliminate all scans",
+          "Only when the column is NULL"
+        ],
+        "answer": "Sometimes, depending on DBMS and workload",
+        "explanation": "Expression-index support and optimizer matching are product-specific."
+      }
+    ]
+  },
+  "status": "draft"
+}

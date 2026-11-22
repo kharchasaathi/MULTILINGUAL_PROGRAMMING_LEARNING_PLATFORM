@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql10.7.en",
+  "courseId": "sql",
+  "moduleId": "SQL10",
+  "topicId": "SQL10.7",
+  "title": "SQL Operators: Arithmetic, Comparison, Logical and Concatenation",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of SQL Operators: Arithmetic, Comparison, Logical and Concatenation.",
+    "Write SQLite-compatible SQL for the topic or a clearly labelled equivalent.",
+    "Predict result rows using the lesson's sample data.",
+    "Identify dialect limitations, NULL behaviour and common errors.",
+    "Apply the topic to a practical data task."
+  ],
+  "prerequisites": [
+    "SQL5.1",
+    "SQL5.4",
+    "SQL9.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "SQL operators combine values and expressions or test conditions. Common groups include arithmetic, comparison, logical, membership, range, pattern and concatenation operators. Operator precedence and supported symbols vary by DBMS, so parentheses improve clarity.",
+      "whyItMatters": "Operators make queries useful for calculations, filtering, comparisons and combining text values.",
+      "analogy": "Think of a SQL query as a carefully specified instruction for selecting or shaping rows in a database.",
+      "analogyLimit": "The analogy does not model SQL evaluation order, transaction guarantees, NULL logic or DBMS-specific implementation details."
+    },
+    "explain": {
+      "narrative": "## Operator groups\nArithmetic: `+`, `-`, `*`, `/`, `%` (remainder in SQLite). Comparison: `=`, `<>`, `!=`, `<`, `>`, `<=`, `>=`. Logical: `AND`, `OR`, `NOT`. Other common predicates include `IN`, `BETWEEN`, `LIKE` and `IS NULL`. SQLite concatenates text with `||`; other DBMS products may use different concatenation operators or functions. Use parentheses to make mixed conditions unambiguous.\n\n## Common mistakes\n- Assuming syntax is identical across all database engines.\n- Omitting explicit column lists when moving data.\n- Ignoring NULL, constraints or result ordering.\n- Treating a documented dialect example as executable SQLite syntax.\n\n## Best practices\nUse explicit columns, test against the target DBMS/version, keep setup scripts repeatable, and verify results with SELECT queries.",
+      "examples": [
+        {
+          "id": "sql10.7-ex1",
+          "language": "en",
+          "title": "Calculate line totals with arithmetic operators",
+          "code": "DROP TABLE IF EXISTS order_items;\nCREATE TABLE order_items (item_id INTEGER PRIMARY KEY, quantity INTEGER, unit_price REAL);\nINSERT INTO order_items VALUES (1,3,120.0),(2,2,75.0);\nSELECT item_id,quantity*unit_price AS line_total,quantity*unit_price-50 AS after_discount FROM order_items ORDER BY item_id;",
+          "expectedOutput": "1 | 360.0 | 310.0; 2 | 150.0 | 100.0",
+          "explanation": "Multiplication and subtraction calculate totals; parentheses can clarify more complex formulas.",
+          "runnable": true
+        },
+        {
+          "id": "sql10.7-ex2",
+          "language": "en",
+          "title": "Filter with comparison operators",
+          "code": "DROP TABLE IF EXISTS applicants;\nCREATE TABLE applicants (applicant_id INTEGER PRIMARY KEY, age INTEGER, score INTEGER);\nINSERT INTO applicants VALUES (1,22,80),(2,17,95),(3,30,65);\nSELECT applicant_id FROM applicants WHERE age>=18 AND score<>65 ORDER BY applicant_id;",
+          "expectedOutput": "1",
+          "explanation": "Only applicant 1 is at least 18 and has a score other than 65; applicant 2 is under 18 and applicant 3 has score 65.",
+          "runnable": true
+        },
+        {
+          "id": "sql10.7-ex3",
+          "language": "en",
+          "title": "Combine logical conditions with parentheses",
+          "code": "DROP TABLE IF EXISTS tickets;\nCREATE TABLE tickets (ticket_id INTEGER PRIMARY KEY, priority TEXT, status TEXT);\nINSERT INTO tickets VALUES (1,'High','Open'),(2,'Low','Open'),(3,'High','Closed'),(4,'Medium','Open');\nSELECT ticket_id FROM tickets WHERE (priority='High' OR priority='Medium') AND status='Open' ORDER BY ticket_id;",
+          "expectedOutput": "1; 4",
+          "explanation": "Parentheses make the intended OR group evaluate before the AND condition.",
+          "runnable": true
+        },
+        {
+          "id": "sql10.7-ex4",
+          "language": "en",
+          "title": "Concatenate text with SQLite's operator",
+          "code": "DROP TABLE IF EXISTS people;\nCREATE TABLE people (first_name TEXT, last_name TEXT);\nINSERT INTO people VALUES ('Asha','Rao'),('Bilal','Khan');\nSELECT first_name || ' ' || last_name AS full_name FROM people ORDER BY last_name;",
+          "expectedOutput": "Bilal Khan; Asha Rao",
+          "explanation": "ORDER BY last_name sorts Khan before Rao, so Bilal appears before Asha.",
+          "runnable": true
+        },
+        {
+          "id": "sql10.7-ex5",
+          "language": "en",
+          "title": "Use remainder and range predicates",
+          "code": "DROP TABLE IF EXISTS numbers;\nCREATE TABLE numbers (value INTEGER);\nINSERT INTO numbers VALUES (2),(5),(8),(11);\nSELECT value FROM numbers WHERE value BETWEEN 2 AND 10 AND value%2=0 ORDER BY value;",
+          "expectedOutput": "2; 8",
+          "explanation": "BETWEEN is inclusive, and % returns the remainder in SQLite; both conditions must be true.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the five examples in order. Before each run, predict the result and explain how SQL Operators: Arithmetic, Comparison, Logical and Concatenation affects it.",
+      "independentTask": "Create your own small dataset and write three new queries using SQL Operators: Arithmetic, Comparison, Logical and Concatenation. Include one boundary case and document the expected output.",
+      "hints": [
+        "Read the target DBMS syntax notes before running an example.",
+        "Use explicit column names and aliases where they improve clarity.",
+        "Check NULL values separately from zero and empty strings.",
+        "Use ORDER BY when the display order matters.",
+        "Compare the returned rows with your prediction after execution."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "DROP TABLE IF EXISTS order_items;\nCREATE TABLE order_items (item_id INTEGER PRIMARY KEY, quantity INTEGER, unit_price REAL);\nINSERT INTO order_items VALUES (1,3,120.0),(2,2,75.0);\nSELECT item_id,quantity*unit_price AS line_total,quantity*unit_price-50 AS after_discount FROM order_items ORDER BY item_id;",
+    "resetCode": "DROP TABLE IF EXISTS order_items;\nCREATE TABLE order_items (item_id INTEGER PRIMARY KEY, quantity INTEGER, unit_price REAL);\nINSERT INTO order_items VALUES (1,3,120.0),(2,2,75.0);\nSELECT item_id,quantity*unit_price AS line_total,quantity*unit_price-50 AS after_discount FROM order_items ORDER BY item_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql10.7-q1",
+        "prompt": "Which operator concatenates text in SQLite?",
+        "options": [
+          "||",
+          "+",
+          "%",
+          "&&"
+        ],
+        "answer": "||",
+        "explanation": "SQLite uses the double-pipe operator for string concatenation."
+      },
+      {
+        "id": "sql10.7-q2",
+        "prompt": "What does the % operator return in SQLite integer arithmetic?",
+        "options": [
+          "The remainder",
+          "The percentage formatted as text",
+          "The quotient",
+          "The row count"
+        ],
+        "answer": "The remainder",
+        "explanation": "The percent sign is the remainder operator in SQLite expressions."
+      },
+      {
+        "id": "sql10.7-q3",
+        "prompt": "Why use parentheses in a condition mixing AND and OR?",
+        "options": [
+          "To make the intended logical grouping explicit",
+          "To force every comparison to become text",
+          "To remove NULL values",
+          "To sort the result"
+        ],
+        "answer": "To make the intended logical grouping explicit",
+        "explanation": "Parentheses clarify grouping and avoid relying on precedence assumptions."
+      },
+      {
+        "id": "sql10.7-q4",
+        "prompt": "Which logical expression selects open tickets with either High or Medium priority?",
+        "options": [
+          "(priority='High' OR priority='Medium') AND status='Open'",
+          "priority='High' OR priority='Medium' AND status='Open' always means the same thing",
+          "priority='High' AND priority='Medium'",
+          "NOT priority='High' AND status='Closed'"
+        ],
+        "answer": "(priority='High' OR priority='Medium') AND status='Open'",
+        "explanation": "The parentheses group the two priority alternatives before applying the status condition."
+      },
+      {
+        "id": "sql10.7-q5",
+        "prompt": "Which operator tests whether a value is within an inclusive range?",
+        "options": [
+          "BETWEEN",
+          "LIKE",
+          "IS NULL",
+          "||"
+        ],
+        "answer": "BETWEEN",
+        "explanation": "BETWEEN includes both its lower and upper endpoints."
+      }
+    ]
+  },
+  "status": "draft"
+}

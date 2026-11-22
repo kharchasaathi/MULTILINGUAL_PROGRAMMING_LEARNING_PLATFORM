@@ -1,0 +1,160 @@
+{
+  "id": "sql.sql8.5.en",
+  "courseId": "sql",
+  "moduleId": "SQL8",
+  "topicId": "SQL8.5",
+  "title": "SQL FULL OUTER JOIN",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and row-preservation behaviour of SQL FULL OUTER JOIN.",
+    "Write valid SQLite queries using the join and an explicit ON condition.",
+    "Predict the effect of matching, unmatched and one-to-many rows.",
+    "Interpret NULL-extended columns and distinguish unmatched rows from matched values.",
+    "Recognize SQL dialect and database-version compatibility considerations."
+  ],
+  "prerequisites": [
+    "SQL1.5",
+    "SQL5.9",
+    "SQL5.4",
+    "SQL5.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "FULL OUTER JOIN preserves all rows from both inputs. Matching pairs are combined; an unmatched left row has NULLs for right-side columns, and an unmatched right row has NULLs for left-side columns. Multiple matches produce multiple paired rows.",
+      "whyItMatters": "It is useful for reconciliation, comparing two datasets, and identifying records that exist on only one side of a relationship.",
+      "analogy": "It is like combining two complete lists, pairing entries with the same key and retaining unmatched entries from either list.",
+      "analogyLimit": "The analogy does not show duplicate-key multiplication, three-valued logic, or differences in support among database engines."
+    },
+    "explain": {
+      "narrative": "## Core concept\nFULL OUTER JOIN preserves all rows from both inputs. Matching pairs are combined; an unmatched left row has NULLs for right-side columns, and an unmatched right row has NULLs for left-side columns. Multiple matches produce multiple paired rows.\n\n## SQLite syntax\n```sql\nDROP TABLE IF EXISTS orders;\nDROP TABLE IF EXISTS customers;\nSELECT a.columns, b.columns\\nFROM table_a AS a\\nFULL OUTER JOIN table_b AS b ON a.key_column = b.key_column;\n```\n\n## Sample schema and data\nThe examples use a small customers table and an orders table. customer_id is the relationship key. The sample deliberately includes two customers without orders and one order whose customer_id has no matching customer. This lets you observe both matching and unmatched rows.\n\n## Worked examples\n### 1. Create and inspect both inputs\n```sql\nDROP TABLE IF EXISTS orders;\nDROP TABLE IF EXISTS customers;\nCREATE TABLE customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT);\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER, order_total NUMERIC NOT NULL);\nINSERT INTO customers VALUES (1,'Asha Rao','Rajahmundry'),(2,'Bilal Khan','Hyderabad'),(3,'Chitra Das','Vijayawada'),(4,'Dev Patel','Mumbai');\nINSERT INTO orders VALUES (101,1,120),(102,1,80),(103,3,50),(104,9,40);\nSELECT (SELECT COUNT(*) FROM customers) AS customers, (SELECT COUNT(*) FROM orders) AS orders;\n```\nExpected result: 4 | 4\n\nThe sample includes customers without orders and an order without a customer.\n\n### 2. Preserve rows from both tables\n```sql\nDROP TABLE IF EXISTS orders;\nDROP TABLE IF EXISTS customers;\nCREATE TABLE customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT);\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER, order_total NUMERIC NOT NULL);\nINSERT INTO customers VALUES (1,'Asha Rao','Rajahmundry'),(2,'Bilal Khan','Hyderabad'),(3,'Chitra Das','Vijayawada'),(4,'Dev Patel','Mumbai');\nINSERT INTO orders VALUES (101,1,120),(102,1,80),(103,3,50),(104,9,40);\nSELECT c.customer_name, o.order_id FROM customers AS c FULL OUTER JOIN orders AS o ON c.customer_id = o.customer_id ORDER BY COALESCE(c.customer_id, o.customer_id), o.order_id;\n```\nExpected result: Asha Rao | 101; Asha Rao | 102; Bilal Khan | NULL; Chitra Das | 103; Dev Patel | NULL; NULL | 104\n\nThe result contains matched pairs plus unmatched customers and unmatched orders.\n\n### 3. Find only unmatched rows from either side\n```sql\nDROP TABLE IF EXISTS orders;\nDROP TABLE IF EXISTS customers;\nCREATE TABLE customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT);\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER, order_total NUMERIC NOT NULL);\nINSERT INTO customers VALUES (1,'Asha Rao','Rajahmundry'),(2,'Bilal Khan','Hyderabad'),(3,'Chitra Das','Vijayawada'),(4,'Dev Patel','Mumbai');\nINSERT INTO orders VALUES (101,1,120),(102,1,80),(103,3,50),(104,9,40);\nSELECT c.customer_name, o.order_id FROM customers AS c FULL OUTER JOIN orders AS o ON c.customer_id = o.customer_id WHERE c.customer_id IS NULL OR o.order_id IS NULL ORDER BY COALESCE(c.customer_id, o.customer_id);\n```\nExpected result: Bilal Khan | NULL; Dev Patel | NULL; NULL | 104\n\nThe NULL test on each table's non-nullable primary key identifies which side lacks a partner.\n\n### 4. Reconcile row counts by match status\n```sql\nDROP TABLE IF EXISTS orders;\nDROP TABLE IF EXISTS customers;\nCREATE TABLE customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT);\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER, order_total NUMERIC NOT NULL);\nINSERT INTO customers VALUES (1,'Asha Rao','Rajahmundry'),(2,'Bilal Khan','Hyderabad'),(3,'Chitra Das','Vijayawada'),(4,'Dev Patel','Mumbai');\nINSERT INTO orders VALUES (101,1,120),(102,1,80),(103,3,50),(104,9,40);\nSELECT CASE WHEN c.customer_id IS NOT NULL AND o.order_id IS NOT NULL THEN 'matched' WHEN c.customer_id IS NOT NULL THEN 'customer_only' ELSE 'order_only' END AS match_status, COUNT(*) AS rows_in_group FROM customers AS c FULL OUTER JOIN orders AS o ON c.customer_id = o.customer_id GROUP BY match_status ORDER BY match_status;\n```\nExpected result: customer_only | 2; matched | 3; order_only | 1\n\nThe CASE expression classifies each result row into matched and unmatched groups.\n\n### 5. Compare full join with a left join\n```sql\nDROP TABLE IF EXISTS orders;\nDROP TABLE IF EXISTS customers;\nCREATE TABLE customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT);\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER, order_total NUMERIC NOT NULL);\nINSERT INTO customers VALUES (1,'Asha Rao','Rajahmundry'),(2,'Bilal Khan','Hyderabad'),(3,'Chitra Das','Vijayawada'),(4,'Dev Patel','Mumbai');\nINSERT INTO orders VALUES (101,1,120),(102,1,80),(103,3,50),(104,9,40);\nSELECT c.customer_name, o.order_id FROM customers AS c FULL OUTER JOIN orders AS o ON c.customer_id = o.customer_id WHERE c.customer_id IS NULL ORDER BY o.order_id;\n```\nExpected result: NULL | 104\n\nA LEFT JOIN cannot preserve right-only rows; the full join can. SQLite added RIGHT and FULL OUTER JOIN support in version 3.39.0.\n\n## Query behaviour, NULLs and dialect notes\nThe examples target SQLite. A join predicate that evaluates to TRUE forms a matching pair; FALSE or UNKNOWN does not. Outer joins create NULL-extended columns for missing partners. Use a non-nullable key from the missing side when detecting unmatched rows. Do not assume RIGHT or FULL OUTER JOIN exists in every engine version: SQLite supports them from 3.39.0; older SQLite releases can express a RIGHT JOIN by reversing inputs and using LEFT JOIN. For older engines without FULL OUTER JOIN, a carefully constructed UNION ALL of a left join and right-only rows may be required. Always verify the target DBMS documentation.\n\n## Common mistakes\n- Joining on the wrong columns or omitting part of a composite relationship.\n- Forgetting that one-to-many matches produce multiple output rows.\n- Using SELECT * in a report with repeated column names.\n- Filtering a nullable right-side column in WHERE and unintentionally removing unmatched rows from a LEFT JOIN.\n- Counting rows with COUNT(*) when COUNT(right_table.primary_key) is needed to count matches.\n\n## Best practices\nUse explicit JOIN syntax, meaningful aliases, qualified column names and a deliberate ON condition. Test with matched, unmatched and duplicate-match data. Add ORDER BY when output order matters; SQL does not guarantee row order without it.\n",
+      "examples": [
+        {
+          "id": "sql8.5-ex1",
+          "language": "en",
+          "title": "Create and inspect both inputs",
+          "code": "DROP TABLE IF EXISTS orders;\nDROP TABLE IF EXISTS customers;\nCREATE TABLE customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT);\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER, order_total NUMERIC NOT NULL);\nINSERT INTO customers VALUES (1,'Asha Rao','Rajahmundry'),(2,'Bilal Khan','Hyderabad'),(3,'Chitra Das','Vijayawada'),(4,'Dev Patel','Mumbai');\nINSERT INTO orders VALUES (101,1,120),(102,1,80),(103,3,50),(104,9,40);\nSELECT (SELECT COUNT(*) FROM customers) AS customers, (SELECT COUNT(*) FROM orders) AS orders;",
+          "expectedOutput": "4 | 4",
+          "explanation": "The sample includes customers without orders and an order without a customer.",
+          "runnable": true
+        },
+        {
+          "id": "sql8.5-ex2",
+          "language": "en",
+          "title": "Preserve rows from both tables",
+          "code": "DROP TABLE IF EXISTS orders;\nDROP TABLE IF EXISTS customers;\nCREATE TABLE customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT);\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER, order_total NUMERIC NOT NULL);\nINSERT INTO customers VALUES (1,'Asha Rao','Rajahmundry'),(2,'Bilal Khan','Hyderabad'),(3,'Chitra Das','Vijayawada'),(4,'Dev Patel','Mumbai');\nINSERT INTO orders VALUES (101,1,120),(102,1,80),(103,3,50),(104,9,40);\nSELECT c.customer_name, o.order_id FROM customers AS c FULL OUTER JOIN orders AS o ON c.customer_id = o.customer_id ORDER BY COALESCE(c.customer_id, o.customer_id), o.order_id;",
+          "expectedOutput": "Asha Rao | 101; Asha Rao | 102; Bilal Khan | NULL; Chitra Das | 103; Dev Patel | NULL; NULL | 104",
+          "explanation": "The result contains matched pairs plus unmatched customers and unmatched orders.",
+          "runnable": true
+        },
+        {
+          "id": "sql8.5-ex3",
+          "language": "en",
+          "title": "Find only unmatched rows from either side",
+          "code": "DROP TABLE IF EXISTS orders;\nDROP TABLE IF EXISTS customers;\nCREATE TABLE customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT);\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER, order_total NUMERIC NOT NULL);\nINSERT INTO customers VALUES (1,'Asha Rao','Rajahmundry'),(2,'Bilal Khan','Hyderabad'),(3,'Chitra Das','Vijayawada'),(4,'Dev Patel','Mumbai');\nINSERT INTO orders VALUES (101,1,120),(102,1,80),(103,3,50),(104,9,40);\nSELECT c.customer_name, o.order_id FROM customers AS c FULL OUTER JOIN orders AS o ON c.customer_id = o.customer_id WHERE c.customer_id IS NULL OR o.order_id IS NULL ORDER BY COALESCE(c.customer_id, o.customer_id);",
+          "expectedOutput": "Bilal Khan | NULL; Dev Patel | NULL; NULL | 104",
+          "explanation": "The NULL test on each table's non-nullable primary key identifies which side lacks a partner.",
+          "runnable": true
+        },
+        {
+          "id": "sql8.5-ex4",
+          "language": "en",
+          "title": "Reconcile row counts by match status",
+          "code": "DROP TABLE IF EXISTS orders;\nDROP TABLE IF EXISTS customers;\nCREATE TABLE customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT);\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER, order_total NUMERIC NOT NULL);\nINSERT INTO customers VALUES (1,'Asha Rao','Rajahmundry'),(2,'Bilal Khan','Hyderabad'),(3,'Chitra Das','Vijayawada'),(4,'Dev Patel','Mumbai');\nINSERT INTO orders VALUES (101,1,120),(102,1,80),(103,3,50),(104,9,40);\nSELECT CASE WHEN c.customer_id IS NOT NULL AND o.order_id IS NOT NULL THEN 'matched' WHEN c.customer_id IS NOT NULL THEN 'customer_only' ELSE 'order_only' END AS match_status, COUNT(*) AS rows_in_group FROM customers AS c FULL OUTER JOIN orders AS o ON c.customer_id = o.customer_id GROUP BY match_status ORDER BY match_status;",
+          "expectedOutput": "customer_only | 2; matched | 3; order_only | 1",
+          "explanation": "The CASE expression classifies each result row into matched and unmatched groups.",
+          "runnable": true
+        },
+        {
+          "id": "sql8.5-ex5",
+          "language": "en",
+          "title": "Compare full join with a left join",
+          "code": "DROP TABLE IF EXISTS orders;\nDROP TABLE IF EXISTS customers;\nCREATE TABLE customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT);\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER, order_total NUMERIC NOT NULL);\nINSERT INTO customers VALUES (1,'Asha Rao','Rajahmundry'),(2,'Bilal Khan','Hyderabad'),(3,'Chitra Das','Vijayawada'),(4,'Dev Patel','Mumbai');\nINSERT INTO orders VALUES (101,1,120),(102,1,80),(103,3,50),(104,9,40);\nSELECT c.customer_name, o.order_id FROM customers AS c FULL OUTER JOIN orders AS o ON c.customer_id = o.customer_id WHERE c.customer_id IS NULL ORDER BY o.order_id;",
+          "expectedOutput": "NULL | 104",
+          "explanation": "A LEFT JOIN cannot preserve right-only rows; the full join can. SQLite added RIGHT and FULL OUTER JOIN support in version 3.39.0.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the shared setup and execute each SQL FULL OUTER JOIN example. Before each query, mark which customer and order rows you expect to remain; then compare your prediction with the actual result.",
+      "independentTask": "Create departments and employees tables with at least five departments and six employees. Include at least one department with no employees and one employee with no department. Write five queries using the join type from this lesson, including one aggregate and one unmatched-row report.",
+      "hints": [
+        "Start by identifying which table must be preserved.",
+        "Write the ON predicate using the actual relationship keys.",
+        "Add ORDER BY for deterministic output.",
+        "Use a non-nullable primary key to detect a missing match.",
+        "Check the DBMS version before relying on RIGHT or FULL OUTER JOIN."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT);\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER, order_total NUMERIC NOT NULL);\nINSERT INTO customers VALUES (1,'Asha Rao','Rajahmundry'),(2,'Bilal Khan','Hyderabad'),(3,'Chitra Das','Vijayawada'),(4,'Dev Patel','Mumbai');\nINSERT INTO orders VALUES (101,1,120),(102,1,80),(103,3,50),(104,9,40);\n\n-- Run the lesson query below\nSELECT c.customer_name, o.order_id\nFROM customers AS c\nFULL OUTER JOIN orders AS o ON c.customer_id = o.customer_id\nORDER BY COALESCE(c.customer_id, o.customer_id), o.order_id;",
+    "resetCode": "CREATE TABLE customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT);\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer_id INTEGER, order_total NUMERIC NOT NULL);\nINSERT INTO customers VALUES (1,'Asha Rao','Rajahmundry'),(2,'Bilal Khan','Hyderabad'),(3,'Chitra Das','Vijayawada'),(4,'Dev Patel','Mumbai');\nINSERT INTO orders VALUES (101,1,120),(102,1,80),(103,3,50),(104,9,40);"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql8.5-q1",
+        "prompt": "What does this join preserve?",
+        "options": [
+          "All rows from both inputs",
+          "Every row from the left input only",
+          "Every row from the right input only",
+          "Only rows with NULL values"
+        ],
+        "answer": "All rows from both inputs",
+        "explanation": "The selected join type determines which unmatched rows remain."
+      },
+      {
+        "id": "sql8.5-q2",
+        "prompt": "Where is the relationship between the input rows normally specified?",
+        "options": [
+          "ON clause",
+          "ORDER BY clause",
+          "GROUP BY clause",
+          "LIMIT clause"
+        ],
+        "answer": "ON clause",
+        "explanation": "ON contains the join predicate that determines matching pairs."
+      },
+      {
+        "id": "sql8.5-q3",
+        "prompt": "What can happen when one row matches two rows on the other side?",
+        "options": [
+          "The row can appear twice in the result",
+          "SQL silently removes one match",
+          "The query always fails",
+          "The join changes to CROSS JOIN"
+        ],
+        "answer": "The row can appear twice in the result",
+        "explanation": "A join returns matching row pairs, so one-to-many relationships multiply output rows."
+      },
+      {
+        "id": "sql8.5-q4",
+        "prompt": "What is a safe way to avoid ambiguous column references?",
+        "options": [
+          "Qualify columns with table names or aliases",
+          "Remove the ON clause",
+          "Use SELECT * always",
+          "Rename every column after the query"
+        ],
+        "answer": "Qualify columns with table names or aliases",
+        "explanation": "Qualified names identify which input supplies a column."
+      },
+      {
+        "id": "sql8.5-q5",
+        "prompt": "What should be checked when using this join across database engines?",
+        "options": [
+          "Syntax and engine-version support",
+          "Only the editor font",
+          "Only table row order",
+          "Whether column names are uppercase"
+        ],
+        "answer": "Syntax and engine-version support",
+        "explanation": "Join support and syntax details can vary by engine and version."
+      }
+    ]
+  },
+  "status": "draft"
+}

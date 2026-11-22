@@ -1,0 +1,161 @@
+{
+  "id": "sql.sql22.4.en",
+  "courseId": "sql",
+  "moduleId": "SQL22",
+  "topicId": "SQL22.4",
+  "title": "Pagination and Large Result Set Strategies",
+  "language": "en",
+  "learningObjectives": [
+    "Explain why large OFFSET values can become expensive.",
+    "Use deterministic ordering with LIMIT and OFFSET.",
+    "Implement keyset pagination using a stable unique key.",
+    "Recognize how concurrent inserts can affect offset-based pages.",
+    "Choose a pagination strategy based on navigation requirements."
+  ],
+  "prerequisites": [
+    "SQL5.1",
+    "SQL8.1",
+    "SQL15.1",
+    "SQL15.2",
+    "SQL15.5"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Pagination divides a large ordered result set into smaller pages. Offset pagination skips a number of rows, while keyset pagination continues after the last key returned by the previous page.",
+      "whyItMatters": "Large result sets can be expensive to transfer and render, and unstable pagination can cause repeated or missing rows as data changes.",
+      "analogy": "Offset pagination counts every item from the beginning; keyset pagination resumes from a bookmark.",
+      "analogyLimit": "Keyset pagination needs a stable ordering key and may not support arbitrary page-number jumps as easily as OFFSET."
+    },
+    "explain": {
+      "narrative": "## Offset pagination\nLIMIT and OFFSET are easy to understand, but the engine may still need to walk past many skipped rows. A stable ORDER BY is essential; without it, pages can be inconsistent.\n\n## Keyset pagination\nKeyset pagination uses the last seen sort key as the next page's starting point, for example `WHERE event_id > last_id ORDER BY event_id LIMIT n`. It can avoid repeatedly skipping earlier rows and is useful for forward navigation.\n\n## Consistency under change\nOffset pages can shift when rows are inserted or deleted before the offset. Keyset pages are more stable when the ordering key is immutable and unique, but updates to sort keys and concurrent changes still require a documented consistency policy.",
+      "examples": [
+        {
+          "id": "sql224-ex1",
+          "language": "en",
+          "title": "Create a sequence of support events",
+          "code": "CREATE TABLE perf22_page_events (event_id INTEGER PRIMARY KEY, event_label TEXT NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "Uses an immutable integer key as the pagination order. A unique stable key is important for repeatable pages.",
+          "runnable": true
+        },
+        {
+          "id": "sql224-ex2",
+          "language": "en",
+          "title": "Insert six events",
+          "code": "INSERT INTO perf22_page_events VALUES (1, 'A'), (2, 'B'), (3, 'C'), (4, 'D'), (5, 'E'), (6, 'F');",
+          "expectedOutput": "6 rows inserted",
+          "explanation": "Adds six rows so the first and second page boundaries are easy to inspect.",
+          "runnable": true
+        },
+        {
+          "id": "sql224-ex3",
+          "language": "en",
+          "title": "Read the first offset page",
+          "code": "SELECT event_id, event_label FROM perf22_page_events ORDER BY event_id LIMIT 3 OFFSET 0;",
+          "expectedOutput": "1 | A; 2 | B; 3 | C",
+          "explanation": "Returns the first three rows in key order. The ORDER BY makes the page deterministic.",
+          "runnable": true
+        },
+        {
+          "id": "sql224-ex4",
+          "language": "en",
+          "title": "Read the second offset page",
+          "code": "SELECT event_id, event_label FROM perf22_page_events ORDER BY event_id LIMIT 3 OFFSET 3;",
+          "expectedOutput": "4 | D; 5 | E; 6 | F",
+          "explanation": "Skips the first three ordered rows and returns the next three. Large offsets can require increasing amounts of work as the page number grows.",
+          "runnable": true
+        },
+        {
+          "id": "sql224-ex5",
+          "language": "en",
+          "title": "Read the next page using the last seen key",
+          "code": "SELECT event_id, event_label FROM perf22_page_events WHERE event_id > 3 ORDER BY event_id LIMIT 3;",
+          "expectedOutput": "4 | D; 5 | E; 6 | F",
+          "explanation": "Uses the last event_id from the previous page as a continuation key. This keyset pattern avoids counting and skipping earlier rows.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run both second-page queries. Explain why the results match in this static fixture and how an insert before the offset could shift later pages.",
+      "independentTask": "Design keyset pagination for orders ordered by created_at and order_id. Use both columns as a composite continuation key so equal timestamps do not create skipped rows.",
+      "hints": [
+        "Always specify a stable ORDER BY.",
+        "Large OFFSET values may require scanning skipped rows.",
+        "Keyset pagination resumes after the last seen key.",
+        "Use a unique tie-breaker when sort values can repeat.",
+        "Document consistency expectations when rows change during paging."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE perf22_page_events (event_id INTEGER PRIMARY KEY, event_label TEXT NOT NULL);\nINSERT INTO perf22_page_events VALUES (1, 'A'), (2, 'B'), (3, 'C'), (4, 'D'), (5, 'E'), (6, 'F');\nSELECT event_id, event_label FROM perf22_page_events WHERE event_id > 3 ORDER BY event_id LIMIT 3;",
+    "resetCode": "CREATE TABLE perf22_page_events (event_id INTEGER PRIMARY KEY, event_label TEXT NOT NULL);\nINSERT INTO perf22_page_events VALUES (1, 'A'), (2, 'B'), (3, 'C'), (4, 'D'), (5, 'E'), (6, 'F');\nSELECT event_id, event_label FROM perf22_page_events WHERE event_id > 3 ORDER BY event_id LIMIT 3;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql224-q1",
+        "prompt": "What does OFFSET do?",
+        "options": [
+          "Skips a specified number of ordered rows",
+          "Creates a new index",
+          "Changes a table's primary key",
+          "Encrypts the result set"
+        ],
+        "answer": "Skips a specified number of ordered rows",
+        "explanation": "OFFSET skips rows before returning the requested page."
+      },
+      {
+        "id": "sql224-q2",
+        "prompt": "Why can a large OFFSET be expensive?",
+        "options": [
+          "The engine may need to walk past many earlier rows",
+          "It always deletes earlier rows",
+          "It disables the primary key",
+          "It creates a new table"
+        ],
+        "answer": "The engine may need to walk past many earlier rows",
+        "explanation": "The skipped rows may still need to be visited."
+      },
+      {
+        "id": "sql224-q3",
+        "prompt": "What is keyset pagination based on?",
+        "options": [
+          "A continuation predicate using the last seen sort key",
+          "A random page number only",
+          "A query without ORDER BY",
+          "The number of columns in SELECT"
+        ],
+        "answer": "A continuation predicate using the last seen sort key",
+        "explanation": "Keyset pagination resumes from the last key returned."
+      },
+      {
+        "id": "sql224-q4",
+        "prompt": "What is needed for deterministic pagination?",
+        "options": [
+          "A stable ORDER BY with a unique tie-breaker",
+          "SELECT * only",
+          "No WHERE clause",
+          "A random sort"
+        ],
+        "answer": "A stable ORDER BY with a unique tie-breaker",
+        "explanation": "A unique order prevents ambiguous page boundaries."
+      },
+      {
+        "id": "sql224-q5",
+        "prompt": "Which pagination method is often better for deep forward navigation?",
+        "options": [
+          "Keyset pagination",
+          "A very large OFFSET",
+          "A query without a sort",
+          "Repeated full-table exports"
+        ],
+        "answer": "Keyset pagination",
+        "explanation": "Keyset pagination can avoid repeatedly skipping earlier rows."
+      }
+    ]
+  },
+  "status": "draft"
+}

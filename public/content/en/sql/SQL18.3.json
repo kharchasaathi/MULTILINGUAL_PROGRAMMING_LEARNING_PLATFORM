@@ -1,0 +1,161 @@
+{
+  "id": "sql.sql18.3.en",
+  "courseId": "sql",
+  "moduleId": "SQL18",
+  "topicId": "SQL18.3",
+  "title": "Data Backfills and Safe Constraint Rollouts",
+  "language": "en",
+  "learningObjectives": [
+    "Define a data backfill and explain why existing rows may need updates.",
+    "Perform a bounded backfill using a stable key range.",
+    "Make a backfill restartable by targeting only rows that remain incomplete.",
+    "Verify completeness before tightening a constraint.",
+    "Describe batching, monitoring and locking considerations for large tables."
+  ],
+  "prerequisites": [
+    "SQL3.2",
+    "SQL3.7",
+    "SQL12.1",
+    "SQL12.2",
+    "SQL12.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A backfill updates existing rows to meet a new data requirement. Large backfills may need batching, progress tracking and careful locking. Constraints should be introduced only after existing data has been checked and corrected.",
+      "whyItMatters": "Adding a NOT NULL, UNIQUE or foreign-key rule before old data complies can cause a migration to fail or block application writes.",
+      "analogy": "A migration is like a numbered building renovation plan: each change has a recorded step, a verification and a recovery plan.",
+      "analogyLimit": "The analogy does not model transactional DDL, locking, data backfills, version checks or application compatibility."
+    },
+    "explain": {
+      "narrative": "## Backfill workflow\nAdd the new field in a compatible way, deploy code that can handle both old and new values, populate existing rows, verify completeness, and only then tighten constraints if the target DBMS supports the required alteration.\n\n## Large datasets\nFor large tables, backfill in bounded batches using a stable key range. Track progress, monitor locks and write load, and make the process restartable.\n\n## Constraint rollout\nBefore adding UNIQUE, CHECK or foreign-key constraints, query for duplicates, invalid values and orphan rows. Clean the data first, then add or validate the constraint using the target DBMS's supported migration approach.\n\n### Backfill strategy\nA backfill populates newly introduced or previously missing values for existing records. Use a predicate that targets only rows still needing work, and consider stable key ranges or bounded batches to limit locks, transaction duration and replication lag. Make the operation restartable and record progress when the data set is large.\n\n### Constraint rollout gate\nBefore changing a nullable column to NOT NULL or adding a CHECK constraint, count and inspect violating rows, decide how to repair them, and validate the full data set. A zero-NULL count is necessary for a NOT NULL rule but may not establish business correctness.",
+      "examples": [
+        {
+          "id": "sql18.3-ex1",
+          "language": "en",
+          "title": "Create a customer table with a nullable segment",
+          "code": "CREATE TABLE mig18_customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, segment TEXT);",
+          "expectedOutput": "Table created",
+          "explanation": "Creates a customer table with a nullable segment. The nullable column represents a staged rollout in which old records may not yet have the new attribute.",
+          "runnable": true
+        },
+        {
+          "id": "sql18.3-ex2",
+          "language": "en",
+          "title": "Insert legacy rows without a segment",
+          "code": "INSERT INTO mig18_customers(customer_id, customer_name) VALUES (1, 'Asha'), (2, 'Bilal'), (3, 'Mira');",
+          "expectedOutput": "3 rows inserted",
+          "explanation": "Inserts three legacy-style records without segment values. Because segment is omitted and has no default, each inserted row begins with NULL in that column.",
+          "runnable": true
+        },
+        {
+          "id": "sql18.3-ex3",
+          "language": "en",
+          "title": "Backfill existing rows in a bounded key range",
+          "code": "UPDATE mig18_customers SET segment = 'standard' WHERE segment IS NULL AND customer_id BETWEEN 1 AND 2;",
+          "expectedOutput": "2 rows updated",
+          "explanation": "Backfills only customer IDs 1 and 2. The IS NULL predicate avoids overwriting values already supplied by an application, while the bounded key range allows a large migration to be divided into controlled batches.",
+          "runnable": true
+        },
+        {
+          "id": "sql18.3-ex4",
+          "language": "en",
+          "title": "Complete the remaining backfill",
+          "code": "UPDATE mig18_customers SET segment = 'standard' WHERE segment IS NULL;",
+          "expectedOutput": "1 row updated",
+          "explanation": "Backfills any remaining NULL segment values. In a large production table, repeatable batches, progress checkpoints and workload monitoring may be safer than one unbounded update.",
+          "runnable": true
+        },
+        {
+          "id": "sql18.3-ex5",
+          "language": "en",
+          "title": "Verify no customer remains without a segment",
+          "code": "SELECT COUNT(*) AS missing_segments FROM mig18_customers WHERE segment IS NULL;",
+          "expectedOutput": "missing_segments = 0",
+          "explanation": "Counts rows that still have NULL segments. A zero result is a validation gate before enforcing NOT NULL; it does not by itself prove every value is semantically correct.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and trace how the first update handles a bounded range and the second update completes the remaining rows.",
+      "independentTask": "Create a table with 100 sample rows and a new nullable status column. Backfill in key ranges, verify completion and describe how you would resume safely after a failure.",
+      "hints": [
+        "Backfills update existing rows to meet a new data rule.",
+        "Use a stable key range for bounded batches.",
+        "Target rows that are still incomplete so reruns are safe.",
+        "Verify there are no NULL or invalid values before adding stricter constraints.",
+        "Monitor locks and application write load for large tables."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE IF NOT EXISTS mig18_customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, segment TEXT);\nINSERT INTO mig18_customers(customer_id, customer_name) VALUES (1, 'Asha'), (2, 'Bilal'), (3, 'Mira');\nUPDATE mig18_customers SET segment = 'standard' WHERE segment IS NULL AND customer_id BETWEEN 1 AND 2;\nUPDATE mig18_customers SET segment = 'standard' WHERE segment IS NULL;\nSELECT COUNT(*) AS missing_segments FROM mig18_customers WHERE segment IS NULL;",
+    "resetCode": "CREATE TABLE IF NOT EXISTS mig18_customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, segment TEXT);\nINSERT INTO mig18_customers(customer_id, customer_name) VALUES (1, 'Asha'), (2, 'Bilal'), (3, 'Mira');\nUPDATE mig18_customers SET segment = 'standard' WHERE segment IS NULL AND customer_id BETWEEN 1 AND 2;\nUPDATE mig18_customers SET segment = 'standard' WHERE segment IS NULL;\nSELECT COUNT(*) AS missing_segments FROM mig18_customers WHERE segment IS NULL;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql18.3-q1",
+        "prompt": "What is a data backfill?",
+        "options": [
+          "Updating existing rows to populate or transform data for a new schema requirement",
+          "Dropping all old rows",
+          "Creating a new index only",
+          "Exporting a database file"
+        ],
+        "answer": "Updating existing rows to populate or transform data for a new schema requirement",
+        "explanation": "A backfill updates legacy data to satisfy a new requirement."
+      },
+      {
+        "id": "sql18.3-q2",
+        "prompt": "Why use bounded batches for a large backfill?",
+        "options": [
+          "To control load, lock duration and recovery progress",
+          "To make SQL syntax shorter",
+          "To remove the need for a WHERE clause",
+          "To disable transactions"
+        ],
+        "answer": "To control load, lock duration and recovery progress",
+        "explanation": "Batches can reduce operational impact and make progress recoverable."
+      },
+      {
+        "id": "sql18.3-q3",
+        "prompt": "What makes a backfill restartable?",
+        "options": [
+          "It targets rows that are still incomplete and records progress",
+          "It updates every row blindly on every run",
+          "It deletes the migration history",
+          "It uses random identifiers"
+        ],
+        "answer": "It targets rows that are still incomplete and records progress",
+        "explanation": "A restartable backfill can safely continue after interruption."
+      },
+      {
+        "id": "sql18.3-q4",
+        "prompt": "What should be checked before adding a UNIQUE constraint?",
+        "options": [
+          "Whether duplicate values already exist",
+          "Whether comments are uppercase",
+          "Whether every table has a view",
+          "Whether the database has a theme"
+        ],
+        "answer": "Whether duplicate values already exist",
+        "explanation": "Existing duplicates can prevent a UNIQUE constraint from being added."
+      },
+      {
+        "id": "sql18.3-q5",
+        "prompt": "When should a NOT NULL constraint be tightened?",
+        "options": [
+          "After existing rows have been backfilled and verified",
+          "Before adding the new column",
+          "Before testing the migration",
+          "Only after dropping the table"
+        ],
+        "answer": "After existing rows have been backfilled and verified",
+        "explanation": "Existing data must comply before the constraint can be safely enforced."
+      }
+    ]
+  },
+  "status": "draft"
+}

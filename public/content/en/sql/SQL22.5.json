@@ -1,0 +1,161 @@
+{
+  "id": "sql.sql22.5.en",
+  "courseId": "sql",
+  "moduleId": "SQL22",
+  "topicId": "SQL22.5",
+  "title": "Query Performance Testing and Regression Analysis",
+  "language": "en",
+  "learningObjectives": [
+    "Distinguish query correctness from query performance.",
+    "Measure execution time in a reliable client or benchmark harness.",
+    "Use repeatable data and parameters for comparisons.",
+    "Record performance measurements with workload context.",
+    "Detect regressions without relying on a single timing sample."
+  ],
+  "prerequisites": [
+    "SQL5.1",
+    "SQL8.1",
+    "SQL15.1",
+    "SQL15.2",
+    "SQL15.5"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Performance testing measures how a query behaves under a defined workload. A reliable comparison controls data, parameters, cache conditions, concurrency and measurement method.",
+      "whyItMatters": "A query that is fast on a tiny sample may become slow at production scale, and one timing sample can be distorted by caching or background work.",
+      "analogy": "A runner's time is meaningful only when the distance, conditions and timing method are consistent.",
+      "analogyLimit": "SQL itself does not provide a portable, reliable wall-clock benchmark for every engine. The client or benchmark harness should measure elapsed time and record environment details."
+    },
+    "explain": {
+      "narrative": "## Benchmark discipline\nDefine the query, parameters, data volume, expected result, concurrency level and measurement method. Warm-up runs, repeated measurements and percentile summaries are more useful than a single fastest run.\n\n## Correctness before speed\nCompare the result sets before comparing timings. A faster query that drops rows, changes NULL handling or alters aggregation is not a valid optimization.\n\n## Record context\nStore query version, test dataset, engine/version, run timestamp, row count and measured duration. The duration should come from a monotonic client-side timer or engine-specific profiling tool, not from an arbitrary SQL expression.\n\n## Regression review\nCompare medians or percentiles over repeated runs and investigate material regressions. Re-check plans after schema or statistics changes and avoid asserting exact elapsed milliseconds in a lesson's expected SQL output.\n\n### Timer choice\nUse a monotonic high-resolution timer supplied by the browser or runtime when measuring elapsed duration. Wall-clock time can jump because of clock synchronization or manual adjustment. Keep warm-up samples separate, repeat the workload and report a distribution such as median and p95.",
+      "examples": [
+        {
+          "id": "sql225-ex1",
+          "language": "en",
+          "title": "Create a table for repeatable benchmark data",
+          "code": "CREATE TABLE perf22_benchmark_rows (row_id INTEGER PRIMARY KEY, category TEXT NOT NULL, amount INTEGER NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "Creates a small benchmark fixture. Performance conclusions from this fixture are illustrative only; production tuning needs representative data size and distribution.",
+          "runnable": true
+        },
+        {
+          "id": "sql225-ex2",
+          "language": "en",
+          "title": "Generate 200 deterministic benchmark rows",
+          "code": "WITH RECURSIVE seq(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM seq WHERE n < 200) INSERT INTO perf22_benchmark_rows SELECT n, CASE WHEN n % 5 = 0 THEN 'rare' ELSE 'common' END, n * 10 FROM seq;",
+          "expectedOutput": "200 rows inserted",
+          "explanation": "Creates 40 rare and 160 common rows. Deterministic data allows the same query to be compared across test runs.",
+          "runnable": true
+        },
+        {
+          "id": "sql225-ex3",
+          "language": "en",
+          "title": "Create a benchmark index",
+          "code": "CREATE INDEX idx_perf22_benchmark_category ON perf22_benchmark_rows(category);",
+          "expectedOutput": "Index created",
+          "explanation": "Adds an index for category filtering. Measure whether it helps the tested query rather than assuming it is always beneficial.",
+          "runnable": true
+        },
+        {
+          "id": "sql225-ex4",
+          "language": "en",
+          "title": "Record client-measured query runs",
+          "code": "CREATE TABLE perf22_query_runs (run_id INTEGER PRIMARY KEY, query_version TEXT NOT NULL, engine_version TEXT NOT NULL, dataset_label TEXT NOT NULL, elapsed_ms REAL NOT NULL CHECK (elapsed_ms >= 0), measured_at TEXT NOT NULL); INSERT INTO perf22_query_runs VALUES (1, 'v1', 'SQLite 3.46.1', '200-row-fixture', 2.4, '2026-11-22T10:00:00Z'), (2, 'v1', 'SQLite 3.46.1', '200-row-fixture', 2.1, '2026-11-22T10:01:00Z'), (3, 'v2', 'SQLite 3.46.1', '200-row-fixture', 1.8, '2026-11-22T10:02:00Z'), (4, 'v2', 'SQLite 3.46.1', '200-row-fixture', 1.9, '2026-11-22T10:03:00Z');",
+          "expectedOutput": "4 benchmark records inserted",
+          "explanation": "Stores example timing observations produced by a client-side benchmark harness. The values are synthetic teaching data; SQL did not measure its own elapsed time. A real harness should use a monotonic high-resolution timer, run warm-up and repeated samples, and record the exact parameters and environment. Do not use wall-clock timestamps as elapsed-time measurements.",
+          "runnable": true
+        },
+        {
+          "id": "sql225-ex5",
+          "language": "en",
+          "title": "Compare average recorded durations by query version",
+          "code": "SELECT query_version, ROUND(AVG(elapsed_ms), 2) AS average_ms FROM perf22_query_runs GROUP BY query_version ORDER BY query_version;",
+          "expectedOutput": "v1 | 2.25; v2 | 1.85",
+          "explanation": "Calculates the average of the stored measurements: v1 averages 2.25 ms and v2 averages 1.85 ms. A real decision should use more repetitions, percentiles, result-equivalence checks and the same test conditions.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and calculate the two averages. Explain why the numbers are labelled synthetic and what a real benchmark must control before claiming an improvement.",
+      "independentTask": "Create a benchmark plan for a slow report. Include at least 10 repeated runs, a warm-up policy, fixed parameters, result comparison, engine version, median/p95 reporting and a rollback threshold.",
+      "hints": [
+        "Correctness checks come before timing comparisons.",
+        "Use repeatable data and identical parameters.",
+        "Measure elapsed time in the client or benchmark harness.",
+        "Use repeated samples and percentiles, not one run.",
+        "Record engine version, dataset and query version."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE perf22_query_runs (run_id INTEGER PRIMARY KEY, query_version TEXT NOT NULL, elapsed_ms REAL NOT NULL);\nINSERT INTO perf22_query_runs VALUES (1, 'v1', 2.4), (2, 'v1', 2.1), (3, 'v2', 1.8), (4, 'v2', 1.9);\nSELECT query_version, ROUND(AVG(elapsed_ms), 2) AS average_ms FROM perf22_query_runs GROUP BY query_version ORDER BY query_version;",
+    "resetCode": "CREATE TABLE perf22_query_runs (run_id INTEGER PRIMARY KEY, query_version TEXT NOT NULL, elapsed_ms REAL NOT NULL);\nINSERT INTO perf22_query_runs VALUES (1, 'v1', 2.4), (2, 'v1', 2.1), (3, 'v2', 1.8), (4, 'v2', 1.9);\nSELECT query_version, ROUND(AVG(elapsed_ms), 2) AS average_ms FROM perf22_query_runs GROUP BY query_version ORDER BY query_version;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql225-q1",
+        "prompt": "What should be checked before comparing query speed?",
+        "options": [
+          "That the queries return equivalent results",
+          "That the query strings have equal length",
+          "That both use SELECT *",
+          "That one query has more joins"
+        ],
+        "answer": "That the queries return equivalent results",
+        "explanation": "Performance is not an improvement if the result changes incorrectly."
+      },
+      {
+        "id": "sql225-q2",
+        "prompt": "Where should portable elapsed-time measurement usually occur?",
+        "options": [
+          "In a client or benchmark harness using a reliable timer",
+          "In an arbitrary SQL expression",
+          "In a comment",
+          "In the ORDER BY clause"
+        ],
+        "answer": "In a client or benchmark harness using a reliable timer",
+        "explanation": "SQL timing facilities differ by engine; a client harness provides controlled measurement."
+      },
+      {
+        "id": "sql225-q3",
+        "prompt": "Why repeat benchmark runs?",
+        "options": [
+          "To reduce the influence of noise and cache variation",
+          "To guarantee the fastest result",
+          "To make indexes unnecessary",
+          "To change the query semantics"
+        ],
+        "answer": "To reduce the influence of noise and cache variation",
+        "explanation": "Repeated runs support more robust comparisons."
+      },
+      {
+        "id": "sql225-q4",
+        "prompt": "Which summary is often more useful than the single fastest run?",
+        "options": [
+          "Median and percentile measurements",
+          "The minimum only",
+          "The first run only",
+          "The row count of the query text"
+        ],
+        "answer": "Median and percentile measurements",
+        "explanation": "Percentiles help describe typical and tail latency."
+      },
+      {
+        "id": "sql225-q5",
+        "prompt": "What context should a benchmark record?",
+        "options": [
+          "Engine version, dataset, query version and parameters",
+          "Only the developer's name",
+          "Only the SQL keyword count",
+          "The browser theme"
+        ],
+        "answer": "Engine version, dataset, query version and parameters",
+        "explanation": "Context makes measurements reproducible and interpretable."
+      }
+    ]
+  },
+  "status": "draft"
+}

@@ -1,0 +1,164 @@
+{
+  "id": "sql.sql20.3.en",
+  "courseId": "sql",
+  "moduleId": "SQL20",
+  "topicId": "SQL20.3",
+  "title": "Least Privilege and Tenant-Scoped Data Access",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the least-privilege principle.",
+    "Filter records by a trusted tenant or ownership identifier.",
+    "Use bound parameters rather than concatenating untrusted values.",
+    "Recognize why a WHERE predicate alone is not a complete authorization boundary.",
+    "Design tests for cross-tenant access attempts."
+  ],
+  "prerequisites": [
+    "SQL1.1",
+    "SQL4.1",
+    "SQL11.4",
+    "SQL11.5",
+    "SQL11.6"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Least privilege gives each identity only the data and operations required for its task. Multi-tenant queries must scope every read and write to an authorized tenant or owner.",
+      "whyItMatters": "A missing tenant predicate can expose one customer's records to another customer even when the SQL syntax is otherwise valid.",
+      "analogy": "A tenant-specific filing cabinet should show only the folders assigned to that tenant.",
+      "analogyLimit": "A query filter is only effective when the tenant identity comes from a trusted authorization decision. A user-controlled tenant_id is not proof of permission."
+    },
+    "explain": {
+      "narrative": "## Least privilege\nGrant only the minimum data and actions required for a task. Prefer narrow queries, restricted service methods and explicit tenant/owner predicates. Avoid returning entire rows when a screen needs only a few columns.\n\n## Parameterized queries\nUse prepared statements with bound values for data supplied by a user. Parameters protect values from being interpreted as SQL syntax; they do not replace authorization checks and cannot usually substitute table or column identifiers.\n\n## Tenant isolation\nDerive the tenant identity from a trusted authenticated context, then bind it as a parameter. Do not trust a tenant_id supplied directly by a browser request without verifying that the authenticated principal belongs to it.\n\n## SQLite and row-level security\nSQLite does not provide built-in server-style row-level security policies. The runnable examples demonstrate scoped query patterns only. In a server DBMS, use native row-level security or permission mechanisms where suitable and still test application authorization.",
+      "examples": [
+        {
+          "id": "sql203-ex1",
+          "language": "en",
+          "title": "Create tenant-scoped documents",
+          "code": "CREATE TABLE sec20_documents (document_id INTEGER PRIMARY KEY, tenant_id INTEGER NOT NULL, title TEXT NOT NULL, visibility TEXT NOT NULL CHECK (visibility IN ('private','shared')));",
+          "expectedOutput": "Table created",
+          "explanation": "Defines tenant_id as a required scope key. A production schema should reference a tenant table and enforce ownership/authorization through the chosen DBMS and service architecture.",
+          "runnable": true
+        },
+        {
+          "id": "sql203-ex2",
+          "language": "en",
+          "title": "Insert records for two tenants",
+          "code": "INSERT INTO sec20_documents VALUES (1, 7, 'Budget draft', 'private'), (2, 7, 'Q4 report', 'shared'), (3, 9, 'Acquisition plan', 'private');",
+          "expectedOutput": "3 rows inserted",
+          "explanation": "Creates two records for tenant 7 and one for tenant 9. The data makes cross-tenant leakage visible in the next query.",
+          "runnable": true
+        },
+        {
+          "id": "sql203-ex3",
+          "language": "en",
+          "title": "Read tenant records with a bound parameter",
+          "code": "SELECT title, visibility FROM sec20_documents WHERE tenant_id = ? ORDER BY document_id;",
+          "expectedOutput": "Budget draft | private; Q4 report | shared",
+          "explanation": "Uses a positional parameter for the tenant identifier. The validator binds the value 7 separately from the SQL text; application code must obtain that value from trusted authorization context.",
+          "runnable": true,
+          "parameters": [
+            7
+          ]
+        },
+        {
+          "id": "sql203-ex4",
+          "language": "en",
+          "title": "Count records visible to a tenant",
+          "code": "SELECT COUNT(*) AS visible_documents FROM sec20_documents WHERE tenant_id = 7 AND visibility IN ('private','shared');",
+          "expectedOutput": "visible_documents = 2",
+          "explanation": "Counts only rows belonging to tenant 7. The visibility predicate is illustrative; real access rules may also depend on user membership, document sharing and operation type.",
+          "runnable": true
+        },
+        {
+          "id": "sql203-ex5",
+          "language": "en",
+          "title": "Test for an unexpected cross-tenant result",
+          "code": "SELECT COUNT(*) AS leaked_rows FROM sec20_documents WHERE tenant_id = 7 AND document_id = 3;",
+          "expectedOutput": "leaked_rows = 0",
+          "explanation": "Checks that a document belonging to tenant 9 is not returned under tenant 7's scope. Include negative cross-tenant tests in automated authorization suites.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and change the bound tenant parameter from 7 to 9. Explain why the query safely changes its value but still relies on trusted application authorization.",
+      "independentTask": "Create a tenant-scoped invoices table. Write parameterized SELECT and UPDATE statements that include tenant_id and invoice_id, then define tests for attempts to access another tenant's invoice.",
+      "hints": [
+        "Apply least privilege to both data and operations.",
+        "Bind user-supplied values as parameters.",
+        "Derive tenant identity from trusted authentication context.",
+        "A SQL WHERE clause is not a substitute for authorization.",
+        "Test both allowed and denied cross-tenant cases."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE sec20_documents (document_id INTEGER PRIMARY KEY, tenant_id INTEGER NOT NULL, title TEXT NOT NULL, visibility TEXT NOT NULL);\nINSERT INTO sec20_documents VALUES (1, 7, 'Budget draft', 'private'), (2, 7, 'Q4 report', 'shared'), (3, 9, 'Acquisition plan', 'private');\nSELECT title FROM sec20_documents WHERE tenant_id = 7 ORDER BY document_id;",
+    "resetCode": "CREATE TABLE sec20_documents (document_id INTEGER PRIMARY KEY, tenant_id INTEGER NOT NULL, title TEXT NOT NULL, visibility TEXT NOT NULL);\nINSERT INTO sec20_documents VALUES (1, 7, 'Budget draft', 'private'), (2, 7, 'Q4 report', 'shared'), (3, 9, 'Acquisition plan', 'private');\nSELECT title FROM sec20_documents WHERE tenant_id = 7 ORDER BY document_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql203-q1",
+        "prompt": "What does least privilege mean?",
+        "options": [
+          "Grant only the access needed for the task",
+          "Give every user administrator rights",
+          "Hide the database menu",
+          "Use the largest possible role"
+        ],
+        "answer": "Grant only the access needed for the task",
+        "explanation": "Least privilege reduces the impact of mistakes and compromised accounts."
+      },
+      {
+        "id": "sql203-q2",
+        "prompt": "Where should a tenant identifier come from for an authorized query?",
+        "options": [
+          "A trusted authenticated context after authorization",
+          "An unverified browser field",
+          "A SQL comment",
+          "The table's row count"
+        ],
+        "answer": "A trusted authenticated context after authorization",
+        "explanation": "The server must establish which tenant the authenticated principal may access."
+      },
+      {
+        "id": "sql203-q3",
+        "prompt": "Why use a bound parameter for tenant_id?",
+        "options": [
+          "It keeps the supplied value separate from SQL syntax",
+          "It automatically grants access",
+          "It encrypts the database file",
+          "It creates a new database user"
+        ],
+        "answer": "It keeps the supplied value separate from SQL syntax",
+        "explanation": "Prepared statements prevent a value from being parsed as part of the SQL statement."
+      },
+      {
+        "id": "sql203-q4",
+        "prompt": "Does a parameterized query alone prevent cross-tenant access?",
+        "options": [
+          "No; authorization and tenant scoping must also be correct",
+          "Yes, always",
+          "Only in SQLite",
+          "Only when ORDER BY is used"
+        ],
+        "answer": "No; authorization and tenant scoping must also be correct",
+        "explanation": "Parameterization protects query construction, not the business authorization decision."
+      },
+      {
+        "id": "sql203-q5",
+        "prompt": "What should a cross-tenant security test verify?",
+        "options": [
+          "A tenant cannot read or change another tenant's records",
+          "Every tenant has the same record count",
+          "All queries return every row",
+          "The database contains no indexes"
+        ],
+        "answer": "A tenant cannot read or change another tenant's records",
+        "explanation": "Negative authorization tests are essential to tenant isolation."
+      }
+    ]
+  },
+  "status": "draft"
+}
