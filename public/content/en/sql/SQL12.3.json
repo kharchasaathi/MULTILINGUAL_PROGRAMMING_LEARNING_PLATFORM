@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql12.3.en",
+  "courseId": "sql",
+  "moduleId": "SQL12",
+  "topicId": "SQL12.3",
+  "title": "ROLLBACK and Handling Failed Transactions",
+  "language": "en",
+  "learningObjectives": [
+    "Explain what ROLLBACK does to an active transaction.",
+    "Demonstrate that uncommitted updates are discarded after rollback.",
+    "Use rollback when a multi-step operation cannot be completed safely.",
+    "Distinguish rollback from compensating transactions after a commit.",
+    "Write a safe error-handling sequence for transaction failures."
+  ],
+  "prerequisites": [
+    "SQL3.3",
+    "SQL3.5",
+    "SQL4.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "ROLLBACK cancels the changes made by the current uncommitted transaction. It restores the database to the state it had before that transaction began, subject to the engine's transaction semantics.",
+      "whyItMatters": "Error handling is part of database correctness. An application must not commit a partially completed order, payment, stock movement or account transfer.",
+      "analogy": "A transaction is like a sealed work packet: its related steps are accepted together or returned for correction.",
+      "analogyLimit": "The analogy does not model SQL locking, isolation levels, storage durability or engine-specific transaction implementation."
+    },
+    "explain": {
+      "narrative": "## ROLLBACK\nROLLBACK ends the active transaction and discards its uncommitted changes. It is commonly used when validation, a constraint, or a later statement fails.\n\n## Example workflow\nBegin a transaction, update related rows, verify required conditions, and commit only if the operation is valid. If any required step fails, roll back the whole unit.\n\n## Important distinction\nROLLBACK cannot undo changes that have already been committed. If an application needs to compensate for a committed business operation, it must run a new compensating transaction.\n\n## Safe error handling\nApplications should use try/catch or equivalent error handling around transaction work and guarantee rollback on failure. Avoid silently ignoring errors and continuing to COMMIT.",
+      "examples": [
+        {
+          "id": "sql12.3-ex1",
+          "language": "en",
+          "title": "Create stock table",
+          "code": "CREATE TABLE tx12_stock (item_id INTEGER PRIMARY KEY, item_name TEXT NOT NULL, quantity INTEGER NOT NULL CHECK (quantity >= 0));",
+          "expectedOutput": "Table created",
+          "explanation": "This example demonstrates create stock table in SQLite. Observe the transaction boundary and verify the stated result.",
+          "runnable": true
+        },
+        {
+          "id": "sql12.3-ex2",
+          "language": "en",
+          "title": "Insert starting stock",
+          "code": "INSERT INTO tx12_stock VALUES (1, 'Keyboard', 8);",
+          "expectedOutput": "1 row inserted",
+          "explanation": "This example demonstrates insert starting stock in SQLite. Observe the transaction boundary and verify the stated result.",
+          "runnable": true
+        },
+        {
+          "id": "sql12.3-ex3",
+          "language": "en",
+          "title": "Begin a stock reduction",
+          "code": "BEGIN; UPDATE tx12_stock SET quantity = quantity - 3 WHERE item_id = 1; SELECT quantity FROM tx12_stock WHERE item_id = 1;",
+          "expectedOutput": "5",
+          "explanation": "This example demonstrates begin a stock reduction in SQLite. Observe the transaction boundary and verify the stated result.",
+          "runnable": true
+        },
+        {
+          "id": "sql12.3-ex4",
+          "language": "en",
+          "title": "Roll back the uncommitted reduction",
+          "code": "ROLLBACK; SELECT quantity FROM tx12_stock WHERE item_id = 1;",
+          "expectedOutput": "8",
+          "explanation": "This example demonstrates roll back the uncommitted reduction in SQLite. Observe the transaction boundary and verify the stated result.",
+          "runnable": true
+        },
+        {
+          "id": "sql12.3-ex5",
+          "language": "en",
+          "title": "Confirm no negative quantity was committed",
+          "code": "SELECT COUNT(*) AS invalid_rows FROM tx12_stock WHERE quantity < 0;",
+          "expectedOutput": "invalid_rows = 0",
+          "explanation": "This example demonstrates confirm no negative quantity was committed in SQLite. Observe the transaction boundary and verify the stated result.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Reduce stock inside a transaction, inspect the temporary value, roll back, and verify that the original quantity is restored.",
+      "independentTask": "Create a payment-and-invoice scenario. Demonstrate a failure path that rolls back both related changes and explain why a committed payment would require a compensating transaction instead.",
+      "hints": [
+        "ROLLBACK only affects the current uncommitted transaction.",
+        "Do not issue COMMIT after a required operation has failed.",
+        "Verify the stored value after rollback.",
+        "A committed transaction cannot be undone by a later ROLLBACK.",
+        "Use a new compensating transaction for business corrections after commit."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE tx12_stock (item_id INTEGER PRIMARY KEY, item_name TEXT NOT NULL, quantity INTEGER NOT NULL CHECK (quantity >= 0));\nINSERT INTO tx12_stock VALUES (1, 'Keyboard', 8);\nBEGIN;\nUPDATE tx12_stock SET quantity = quantity - 3 WHERE item_id = 1;\nROLLBACK;\nSELECT quantity FROM tx12_stock WHERE item_id = 1;",
+    "resetCode": "CREATE TABLE tx12_stock (item_id INTEGER PRIMARY KEY, item_name TEXT NOT NULL, quantity INTEGER NOT NULL CHECK (quantity >= 0));\nINSERT INTO tx12_stock VALUES (1, 'Keyboard', 8);\nBEGIN;\nUPDATE tx12_stock SET quantity = quantity - 3 WHERE item_id = 1;\nROLLBACK;\nSELECT quantity FROM tx12_stock WHERE item_id = 1;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql12.3-q1",
+        "prompt": "What does ROLLBACK do?",
+        "options": [
+          "Discards changes in the current uncommitted transaction",
+          "Commits all changes",
+          "Creates a table",
+          "Adds an index"
+        ],
+        "answer": "Discards changes in the current uncommitted transaction",
+        "explanation": "ROLLBACK cancels the active transaction's uncommitted changes."
+      },
+      {
+        "id": "sql12.3-q2",
+        "prompt": "Can ROLLBACK undo a transaction that was already committed?",
+        "options": [
+          "No, a new compensating transaction is needed",
+          "Yes, at any later time",
+          "Only if the table has no primary key",
+          "Only after VACUUM"
+        ],
+        "answer": "No, a new compensating transaction is needed",
+        "explanation": "Once committed, the original transaction is complete; business correction needs new work."
+      },
+      {
+        "id": "sql12.3-q3",
+        "prompt": "When should an application normally roll back?",
+        "options": [
+          "When a required step fails before the transaction is committed",
+          "After every SELECT",
+          "Before every CREATE TABLE",
+          "Whenever an alias is used"
+        ],
+        "answer": "When a required step fails before the transaction is committed",
+        "explanation": "Rollback is the safe failure path for an incomplete transaction."
+      },
+      {
+        "id": "sql12.3-q4",
+        "prompt": "What should be checked after a rollback?",
+        "options": [
+          "That the database returned to the expected pre-transaction state",
+          "That the SQL keywords are uppercase",
+          "That the database has no indexes",
+          "That all rows are deleted"
+        ],
+        "answer": "That the database returned to the expected pre-transaction state",
+        "explanation": "Verification confirms the intended state was restored."
+      },
+      {
+        "id": "sql12.3-q5",
+        "prompt": "What is a compensating transaction?",
+        "options": [
+          "A new transaction that reverses or corrects a previously committed business action",
+          "A command that reopens an old transaction",
+          "A synonym for SAVEPOINT",
+          "A database backup file"
+        ],
+        "answer": "A new transaction that reverses or corrects a previously committed business action",
+        "explanation": "Committed work is corrected by new, explicit business operations."
+      }
+    ]
+  },
+  "status": "draft"
+}
