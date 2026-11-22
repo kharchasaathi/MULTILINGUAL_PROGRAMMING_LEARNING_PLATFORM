@@ -16,6 +16,7 @@ let outputsCompared = 0;
 let statusOnlyExamples = 0;
 let dynamicOutputs = 0;
 let expectedErrors = 0;
+let statusStateAssertions = 0;
 const pyRunner = [
   "import json, re, sqlite3, sys",
   "examples = json.loads(sys.argv[1])",
@@ -72,10 +73,23 @@ const pyRunner = [
   "    result_sets = []",
   "    try:",
   "        for statement in statements(item['code']):",
+  "            before_changes = db.total_changes",
+  "            before_schema = tuple(db.execute(\"SELECT type,name,tbl_name,sql FROM sqlite_schema ORDER BY type,name\").fetchall())",
   "            cursor = db.execute(statement)",
   "            if cursor.description is not None:",
   "                result_sets.append(([column[0] for column in cursor.description], cursor.fetchall()))",
   "            cursor.close()",
+  "            if cursor.description is None and not item['expectsError']:",
+  "                upper = statement.strip().upper()",
+  "                after_schema = tuple(db.execute(\"SELECT type,name,tbl_name,sql FROM sqlite_schema ORDER BY type,name\").fetchall())",
+  "                changed = db.total_changes - before_changes",
+  "                if re.search(r\"\\b(CREATE|DROP|ALTER|REINDEX)\\b\", upper):",
+  "                    assert after_schema != before_schema or \"IF EXISTS\" in upper or \"IF NOT EXISTS\" in upper, item['id'] + \" schema operation did not produce or confirm the requested state\"",
+  "                    status_state_assertions += 1",
+  "                elif re.search(r\"\\b(INSERT|UPDATE|DELETE|REPLACE)\\b\", upper):",
+  "                    expected_zero = bool(re.search(r\"\\b0\\s+rows?\\b\", item['expectedOutput'], re.I))",
+  "                    assert changed > 0 or expected_zero, item['id'] + \" data operation did not change rows\"",
+  "                    status_state_assertions += 1",
   "        if item['expectsError']:",
   "            raise AssertionError('Expected SQL error but statement succeeded: ' + item['id'])",
   "    except sqlite3.Error as exc:",
@@ -172,4 +186,4 @@ for (const topic of topics) {
   expectedErrors += result.expected_errors;
   assert.equal(result.mismatches.length, 0, topic.topicId + ": expectedOutput mismatch: " + JSON.stringify(result.mismatches));
 }
-console.log("SQL course validation passed: " + topics.length + " lessons, " + examplesChecked + " SQLite-executed examples, " + outputsCompared + " expected outputs compared with actual result sets, " + statusOnlyExamples + " status-only examples, " + dynamicOutputs + " runtime-dependent outputs checked by pattern, " + expectedErrors + " expected-error examples, " + questionIds.size + " MCQs.");
+console.log("SQL course validation passed: " + topics.length + " lessons, " + examplesChecked + " SQLite-executed examples, " + outputsCompared + " expected outputs compared with actual result sets, " + statusOnlyExamples + " status-only examples, " + statusStateAssertions + " database-state assertions for status-only statements, " + dynamicOutputs + " runtime-dependent outputs checked by pattern, " + expectedErrors + " expected-error examples, " + questionIds.size + " MCQs.");
