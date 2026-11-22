@@ -26,7 +26,7 @@
       "analogyLimit": "The analogy does not model OLD/NEW row values, transaction timing, recursive execution or DBMS-specific trigger semantics."
     },
     "explain": {
-      "narrative": "## AFTER DELETE\nAn AFTER DELETE trigger runs after a row has been deleted. OLD exposes the deleted row's values; there is no NEW row for a DELETE event.\n\n## Audit design\nA delete audit can preserve the deleted key, a few relevant fields and an action label. Avoid copying sensitive fields unless the retention and access policy explicitly requires them.\n\n## Cascades and triggers\nForeign-key cascades can cause additional row changes. Understand whether the target DBMS fires triggers for cascaded actions and test the exact engine/version. Do not assume identical behaviour across products.",
+      "narrative": "## AFTER DELETE\nAn AFTER DELETE trigger runs after a row has been deleted. OLD exposes the deleted row's values; there is no NEW row for a DELETE event.\n\n## Audit design\nA delete audit can preserve the deleted key, a few relevant fields and an action label. Avoid copying sensitive fields unless the retention and access policy explicitly requires them.\n\n## Cascades and triggers\nForeign-key cascades can cause additional row changes. Understand whether the target DBMS fires triggers for cascaded actions and test the exact engine/version. Do not assume identical behaviour across products.\n\n### Deleted-row values\nFor DELETE triggers, OLD contains the row being removed and NEW is not available. An AFTER DELETE trigger can copy OLD values into an audit table after the delete operation has taken place. Because the audit row is written in the same transaction, rolling back the transaction also rolls back the audit insert.\n\n### Privacy and retention\nAudit tables can preserve personal or commercially sensitive data beyond the lifetime of the live row. Define access controls, retention periods and lawful deletion procedures before using this pattern in production.",
       "examples": [
         {
           "id": "sql17.4-ex1",
@@ -34,7 +34,7 @@
           "title": "Create a member table",
           "code": "CREATE TABLE trg17_members (member_id INTEGER PRIMARY KEY, member_name TEXT NOT NULL, status TEXT NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create a member table using SQLite triggers. Verify the event, timing and affected rows.",
+          "explanation": "Creates the live member table. Its status is required, and member_id identifies each member.",
           "runnable": true
         },
         {
@@ -43,7 +43,7 @@
           "title": "Create a deletion audit table",
           "code": "CREATE TABLE trg17_member_deletes (audit_id INTEGER PRIMARY KEY, member_id INTEGER NOT NULL, member_name TEXT NOT NULL, old_status TEXT NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create a deletion audit table using SQLite triggers. Verify the event, timing and affected rows.",
+          "explanation": "Creates an audit table that copies the deleted member's identifier, name and former status. It has no foreign key to trg17_members because the referenced live row is expected to be deleted.",
           "runnable": true
         },
         {
@@ -52,7 +52,7 @@
           "title": "Insert a member",
           "code": "INSERT INTO trg17_members VALUES (1, 'Mira', 'active');",
           "expectedOutput": "1 row inserted",
-          "explanation": "This example demonstrates insert a member using SQLite triggers. Verify the event, timing and affected rows.",
+          "explanation": "Seeds a member row so the DELETE trigger has a concrete OLD row to inspect.",
           "runnable": true
         },
         {
@@ -61,7 +61,7 @@
           "title": "Create an AFTER DELETE trigger",
           "code": "CREATE TRIGGER trg17_member_delete AFTER DELETE ON trg17_members BEGIN INSERT INTO trg17_member_deletes(member_id, member_name, old_status) VALUES (OLD.member_id, OLD.member_name, OLD.status); END;",
           "expectedOutput": "Trigger created",
-          "explanation": "This example demonstrates create an after delete trigger using SQLite triggers. Verify the event, timing and affected rows.",
+          "explanation": "Creates an AFTER DELETE trigger. Once a member is deleted, OLD.member_id, OLD.member_name and OLD.status still expose the values from the deleted row, allowing the trigger to preserve an audit snapshot.",
           "runnable": true
         },
         {
@@ -70,7 +70,7 @@
           "title": "Delete the member and inspect the audit",
           "code": "DELETE FROM trg17_members WHERE member_id = 1; SELECT member_id, member_name, old_status FROM trg17_member_deletes;",
           "expectedOutput": "1 | Mira | active",
-          "explanation": "This example demonstrates delete the member and inspect the audit using SQLite triggers. Verify the event, timing and affected rows.",
+          "explanation": "Deletes only member_id 1 and then reads the audit table. The output verifies both effects: the live row is removed and its former values are retained in the audit table. In production, restrict audit access because copied personal data may be sensitive.",
           "runnable": true
         }
       ]
