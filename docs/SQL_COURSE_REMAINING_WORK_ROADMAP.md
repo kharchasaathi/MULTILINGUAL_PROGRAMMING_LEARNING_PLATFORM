@@ -13,13 +13,13 @@ Current audited branch HEAD before this roadmap commit: 60e3e2c0189da3f51474f481
 - 126 English SQL lesson JSON files are present across SQL1–SQL20 (81 original lessons across SQL1–SQL11, five-lesson supplementary modules SQL12–SQL19, and five SQL20 security/access-control lessons).
 - 126 SQL curriculum-index topics, 131 source-inventory records and 126 SQL progress-tracker rows are present.
 - `docs/SQL_W3SCHOOLS_EXERCISE_COVERAGE.csv` records 60 official exercise categories mapped to existing CodeSaathi topics. This is a mapping audit, not a claim that original exercise content is complete.
-- `docs/SQL_W3SCHOOLS_CHALLENGE_COVERAGE.csv` maps all 32 currently listed W3Schools SQL Code Challenge categories to existing CodeSaathi topic IDs. The first 32 original CodeSaathi challenge tasks are authored in `public/content/en/sql/sql-code-challenges.json`; hidden-test, grading and UI integration still need validation.
+- `docs/SQL_W3SCHOOLS_CHALLENGE_COVERAGE.csv` maps all 32 currently listed W3Schools SQL Code Challenge categories to existing CodeSaathi topic IDs. The 32 original CodeSaathi challenge tasks are authored in `public/content/en/sql/sql-code-challenges.json`; reference solutions execute successfully in isolated SQLite databases (run #45009052445). Hidden tests, grading and UI integration remain pending.
 - The new `docs/SQL_W3SCHOOLS_COVERAGE_MATRIX.csv` maps 72 W3Schools navigation/reference topics to existing CodeSaathi lesson IDs:
   - 45 SQL Tutorial topics
   - 21 SQL Database topics
   - 6 SQL Reference topics (Data Types, Keywords, Quick Reference, MySQL Functions, SQL Server Functions and MS Access Functions)
 - Mapping is a coverage index, not editorial sign-off. Every mapped lesson remains draft pending technical/editorial review.
-- Latest SQL validation PASS on PR merge commit for head `396619aec9c2e506858c4f863ea5fba69fa91b7b` (run #45009019323, SQL workflow #656): 126 lessons; 630 SQLite-executed examples; 394 expected outputs compared; 225 status-only examples; 925 database-state assertions; 7 runtime-dependent outputs checked by pattern; 4 expected-error examples; 630 MCQs.
+- Latest SQL validation PASS on commit `cf9839e0bc5520c563a520ef3fc5cca15df67644` (run #45009159130): 126 lessons; 630 SQLite-executed examples; 394 expected outputs compared; 225 status-only examples; 925 database-state assertions; 7 runtime-dependent outputs checked by pattern; 4 expected-error examples; 630 MCQs. The same run also validates all 32 original SQL code challenges.
 - SQL Playground is implemented with browser-side SQLite. Final feature/security/browser audit remains pending.
 - Telugu SQL lesson translations are not complete.
 - No production deployment has been performed.
