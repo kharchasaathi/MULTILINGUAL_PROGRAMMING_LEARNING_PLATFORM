@@ -27,7 +27,7 @@
       "analogyLimit": "SQLite commands such as ANALYZE and PRAGMA optimize do not map one-to-one to maintenance commands in PostgreSQL, MySQL or SQL Server."
     },
     "explain": {
-      "narrative": "## Statistics and query planning\nThe optimizer estimates how many rows a predicate will match and compares possible plans. ANALYZE collects table and index statistics that can improve those estimates. SQLite stores statistics in internal tables such as sqlite_stat1.\n\n## PRAGMA optimize\nPRAGMA optimize is SQLite's recommended entry point for targeted optimization work. It may decide that analysis is useful based on database history and version; it does not necessarily perform work every time.\n\n## Maintenance scheduling\nMaintenance can consume CPU, disk I/O and locks. Schedule it based on workload and engine guidance, monitor duration and failures, and verify query plans after significant data changes. Never assume a maintenance command improves every query.",
+      "narrative": "## Statistics and query planning\nThe optimizer estimates how many rows a predicate will match and compares possible plans. ANALYZE collects table and index statistics that can improve those estimates. SQLite stores statistics in internal tables such as sqlite_stat1.\n\n## PRAGMA optimize\nPRAGMA optimize is SQLite's recommended entry point for targeted optimization work. It may decide that analysis is useful based on database history and version; it does not necessarily perform work every time.\n\n## Maintenance scheduling\nMaintenance can consume CPU, disk I/O and locks. Schedule it based on workload and engine guidance, monitor duration and failures, and verify query plans after significant data changes. Never assume a maintenance command improves every query.\n\n### Statistics row shape\nSQLite may store both table-wide and index-specific statistics in sqlite_stat1. The exact rows depend on which objects were analyzed and whether statistics are available. Query the idx column explicitly when a lesson needs to isolate an index's statistics.",
       "examples": [
         {
           "id": "sql214-ex1",
@@ -60,9 +60,9 @@
           "id": "sql214-ex4",
           "language": "en",
           "title": "Collect statistics and inspect the recorded table/index entry",
-          "code": "ANALYZE ops21_events; SELECT tbl, idx FROM sqlite_stat1 WHERE tbl = 'ops21_events' ORDER BY idx IS NULL, idx;",
+          "code": "ANALYZE ops21_events; SELECT tbl, idx FROM sqlite_stat1 WHERE tbl = 'ops21_events' AND idx IS NOT NULL ORDER BY idx;",
           "expectedOutput": "ops21_events | idx_ops21_event_type",
-          "explanation": "Runs ANALYZE and reads the index-specific statistics entry from SQLite's statistics table. SQLite may not create a separate table-wide row when index statistics are available; exact statistics values are intentionally not hard-coded.",
+          "explanation": "Runs ANALYZE and reads the index-specific SQLite statistics row. The idx IS NOT NULL filter deliberately excludes a possible table-wide statistics row, keeping this example focused on the created index. Statistics details and row availability depend on the analyzed schema and data.",
           "runnable": true
         },
         {
