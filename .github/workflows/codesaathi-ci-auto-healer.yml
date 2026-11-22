@@ -38,7 +38,12 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const eventRun = context.payload.workflow_run;
-            const runId = Number(eventRun?.id || context.payload.inputs?.run_id);
+            const suppliedRunId = eventRun?.id || context.payload.inputs?.run_id;
+            if (context.eventName === 'workflow_dispatch' && !suppliedRunId) {
+              core.info('No run ID supplied; manual inspection was skipped.');
+              return;
+            }
+            const runId = Number(suppliedRunId);
             if (!Number.isSafeInteger(runId) || runId <= 0) {
               core.setFailed('A valid failed workflow run ID is required.');
               return;
