@@ -25,7 +25,7 @@
       "analogyLimit": "The analogy does not model SQL locking, isolation levels, storage durability or engine-specific transaction implementation."
     },
     "explain": {
-      "narrative": "## Savepoints\nSAVEPOINT name creates a named marker within the current transaction. ROLLBACK TO name undoes work performed after that marker while leaving the outer transaction active. RELEASE name removes the marker.\n\n## Nested work is not an independent commit\nSQLite savepoints can be nested. Releasing an inner savepoint does not commit the outer transaction. The outermost transaction is completed by COMMIT or ROLLBACK.\n\n## Practical workflow\nUse a savepoint around an optional sub-operation. If it fails, roll back to the savepoint and continue with the valid outer work. If it succeeds, release the savepoint and commit the transaction when all required work is complete.",
+      "narrative": "## Savepoints\nSAVEPOINT name creates a named marker within the current transaction. ROLLBACK TO name undoes work performed after that marker while leaving the outer transaction active. RELEASE name removes the marker.\n\n## Nested work is not an independent commit\nSQLite savepoints can be nested. Releasing an inner savepoint does not commit the outer transaction. The outermost transaction is completed by COMMIT or ROLLBACK.\n\n## Practical workflow\nUse a savepoint around an optional sub-operation. If it fails, roll back to the savepoint and continue with the valid outer work. If it succeeds, release the savepoint and commit the transaction when all required work is complete.\n\n### Savepoint scope\nSAVEPOINT creates a named rollback marker within the current transaction. ROLLBACK TO rewinds changes made after the marker but keeps the transaction open. RELEASE removes the marker; releasing the outermost savepoint can complete the transaction, but releasing an inner savepoint does not commit the outer transaction.\n\n### Practical use\nUse savepoints for optional sub-operations that can fail independently while the main business operation remains valid. Give savepoints clear names, release them deliberately, and ensure the outer transaction still ends with COMMIT or ROLLBACK.",
       "examples": [
         {
           "id": "sql12.4-ex1",
@@ -33,7 +33,7 @@
           "title": "Create a table for staged work",
           "code": "CREATE TABLE tx12_save_items (item_id INTEGER PRIMARY KEY, item_name TEXT NOT NULL, quantity INTEGER NOT NULL); INSERT INTO tx12_save_items VALUES (1, 'Base item', 10);",
           "expectedOutput": "Table created; 1 row inserted",
-          "explanation": "This example demonstrates create a table for staged work in SQLite. Observe the transaction boundary and verify the stated result.",
+          "explanation": "Creates the table and inserts a baseline row. The baseline is outside the later transaction, so it should remain even when optional work is rolled back.",
           "runnable": true
         },
         {
@@ -42,7 +42,7 @@
           "title": "Begin a transaction and add a required row",
           "code": "BEGIN; INSERT INTO tx12_save_items VALUES (2, 'Required item', 5);",
           "expectedOutput": "1 row inserted",
-          "explanation": "This example demonstrates begin a transaction and add a required row in SQLite. Observe the transaction boundary and verify the stated result.",
+          "explanation": "Begins an outer transaction and inserts a required row. This row is before the savepoint and therefore remains after a rollback to that later marker.",
           "runnable": true
         },
         {
@@ -51,7 +51,7 @@
           "title": "Create a savepoint before optional work",
           "code": "SAVEPOINT optional_step; INSERT INTO tx12_save_items VALUES (3, 'Optional item', 2);",
           "expectedOutput": "Savepoint created; 1 row inserted",
-          "explanation": "This example demonstrates create a savepoint before optional work in SQLite. Observe the transaction boundary and verify the stated result.",
+          "explanation": "Creates a named savepoint, then inserts optional work. The savepoint marks the point to which the current transaction can partially rewind; it is not an independent nested commit.",
           "runnable": true
         },
         {
@@ -60,7 +60,7 @@
           "title": "Roll back only the optional work and release the marker",
           "code": "ROLLBACK TO optional_step; RELEASE optional_step; SELECT item_id, item_name FROM tx12_save_items ORDER BY item_id;",
           "expectedOutput": "1 | Base item; 2 | Required item",
-          "explanation": "This example demonstrates roll back only the optional work and release the marker in SQLite. Observe the transaction boundary and verify the stated result.",
+          "explanation": "ROLLBACK TO removes the optional row but leaves the outer transaction active. RELEASE removes the savepoint marker, and the SELECT shows the baseline and required rows still present.",
           "runnable": true
         },
         {
@@ -69,7 +69,7 @@
           "title": "Commit the outer transaction",
           "code": "COMMIT; SELECT COUNT(*) AS saved_rows FROM tx12_save_items;",
           "expectedOutput": "saved_rows = 2",
-          "explanation": "This example demonstrates commit the outer transaction in SQLite. Observe the transaction boundary and verify the stated result.",
+          "explanation": "Commits the outer transaction and counts the saved rows. The count of two confirms that the baseline and required row were committed while the optional row was discarded.",
           "runnable": true
         }
       ]
