@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile, readdir } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
@@ -12,20 +12,75 @@ for (const required of ["SQL1","SQL2","SQL3","SQL4","SQL5"]) assert.ok(topics.so
 const topicIds = new Set();
 const questionIds = new Set();
 let examplesChecked = 0;
+let outputsCompared = 0;
+let statusOnlyExamples = 0;
 const pyRunner = [
-  "import json, sqlite3, sys",
+  "import json, re, sqlite3, sys",
   "examples = json.loads(sys.argv[1])",
   "db = sqlite3.connect(':memory:')",
   "db.execute('PRAGMA foreign_keys = ON')",
+  "def statements(script):",
+  "    pending = ''",
+  "    for char in script:",
+  "        pending += char",
+  "        if char == ';' and sqlite3.complete_statement(pending):",
+  "            if pending.strip(): yield pending.strip()",
+  "            pending = ''",
+  "    if pending.strip(): yield pending.strip()",
+  "def cell(value):",
+  "    if value is None: return 'NULL'",
+  "    if isinstance(value, bytes): return '0x' + value.hex()",
+  "    return str(value)",
+  "def norm(value):",
+  "    value = value.replace('\\r\\n', '\\n').replace('\\r', '\\n')",
+  "    value = re.sub(r'\\s*\\|\\s*', '|', value)",
+  "    value = re.sub(r'\\s*=\\s*', '=', value)",
+  "    value = re.sub(r'\\s*;\\s*', ';', value)",
+  "    return re.sub(r'\\s+', ' ', value).strip()",
+  "def output_variants(columns, rows):",
+  "    values = [[cell(v) for v in row] for row in rows]",
+  "    if not values: return set()",
+  "    row_pipe = [' | '.join(row) for row in values]",
+  "    variants = {'; '.join(row_pipe)}",
+  "    if len(columns) == 1:",
+  "        variants.add('; '.join(row[0] for row in values))",
+  "    if len(values) == 1 and len(columns) == 1:",
+  "        variants.add(str(columns[0]) + ' = ' + values[0][0])",
+  "    if len(columns) == 2:",
+  "        variants.add('; '.join(row[0] + ' = ' + row[1] for row in values))",
+  "    variants.add(' | '.join(columns) + '\\n' + '; '.join(row_pipe))",
+  "    if len(columns) == 1:",
+  "        variants.add(str(columns[0]) + '\\n' + '; '.join(row[0] for row in values))",
+  "    return {norm(v) for v in variants}",
+  "compared = 0",
+  "skipped = 0",
+  "mismatches = []",
   "for item in examples:",
+  "    last_columns = None",
+  "    last_rows = None",
   "    try:",
-  "        db.executescript(item['code'])",
+  "        for statement in statements(item['code']):",
+  "            cursor = db.execute(statement)",
+  "            if cursor.description is not None:",
+  "                last_columns = [column[0] for column in cursor.description]",
+  "                last_rows = cursor.fetchall()",
   "        if item['expectsError']:",
   "            raise AssertionError('Expected SQL error but statement succeeded: ' + item['id'])",
   "    except sqlite3.Error as exc:",
   "        if not item['expectsError']:",
   "            raise AssertionError(item['id'] + ': ' + str(exc)) from exc",
-  "db.close()"
+  "        continue",
+  "    if last_columns is None:",
+  "        skipped += 1",
+  "        continue",
+  "    expected = norm(item['expectedOutput'])",
+  "    actual = output_variants(last_columns, last_rows or [])",
+  "    if expected not in actual:",
+  "        mismatches.append({'id': item['id'], 'expected': item['expectedOutput'], 'columns': last_columns, 'rows': [[cell(v) for v in row] for row in (last_rows or [])], 'accepted': sorted(actual)[:4]})",
+  "    else:",
+  "        compared += 1",
+  "db.close()",
+  "print(json.dumps({'compared': compared, 'skipped': skipped, 'mismatches': mismatches}))"
 ].join("\n");
 
 for (const topic of topics) {
@@ -50,7 +105,7 @@ for (const topic of topics) {
   assert.equal(lesson.practice?.playgroundMode, "sql", "SQL lessons must use the dedicated SQL Playground");
   for (const [label, code] of [["starterCode", lesson.practice?.starterCode], ["resetCode", lesson.practice?.resetCode]]) {
     assert.ok(typeof code === "string" && code.trim(), topic.topicId + ": missing " + label);
-    const starterRun = spawnSync("python3", ["-c", pyRunner, JSON.stringify([{ id: topic.topicId + "-" + label, code, expectsError: false }])], { encoding: "utf8", timeout: 15000 });
+    const starterRun = spawnSync("python3", ["-c", pyRunner, JSON.stringify([{ id: topic.topicId + "-" + label, code, expectedOutput: "", expectsError: false }])], { encoding: "utf8", timeout: 15000 });
     assert.equal(starterRun.status, 0, topic.topicId + ": " + label + " SQLite execution check failed: " + (starterRun.stderr || starterRun.stdout));
   }
   const examples = lesson.stages.explain.examples;
@@ -76,9 +131,14 @@ for (const topic of topics) {
   const payload = examples.map((example) => ({
     id: example.id,
     code: example.code,
+    expectedOutput: example.expectedOutput,
     expectsError: /^Error:/i.test(example.expectedOutput.trim())
   }));
   const run = spawnSync("python3", ["-c", pyRunner, JSON.stringify(payload)], { encoding: "utf8", timeout: 15000 });
-  assert.equal(run.status, 0, topic.topicId + ": SQLite execution check failed: " + (run.stderr || run.stdout));
+  assert.equal(run.status, 0, topic.topicId + ": SQLite execution/output check failed: " + (run.stderr || run.stdout));
+  const result = JSON.parse(run.stdout);
+  outputsCompared += result.compared;
+  statusOnlyExamples += result.skipped;
+  assert.equal(result.mismatches.length, 0, topic.topicId + ": expectedOutput mismatch: " + JSON.stringify(result.mismatches));
 }
-console.log("SQL course validation passed: " + topics.length + " lessons, " + examplesChecked + " SQLite-executed examples, " + questionIds.size + " MCQs.");
+console.log("SQL course validation passed: " + topics.length + " lessons, " + examplesChecked + " SQLite-executed examples, " + outputsCompared + " expected outputs compared with actual result sets, " + statusOnlyExamples + " status-only examples, " + questionIds.size + " MCQs.");
