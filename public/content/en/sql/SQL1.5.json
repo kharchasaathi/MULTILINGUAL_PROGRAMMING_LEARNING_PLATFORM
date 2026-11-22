@@ -62,23 +62,23 @@
         {
           "id": "sql1.5-ex5",
           "language": "en",
-          "title": "Model a many-to-many relationship",
-          "code": "CREATE TABLE Course (course_id INTEGER PRIMARY KEY, title TEXT NOT NULL);\nCREATE TABLE Enrollment (student_id INTEGER, course_id INTEGER, PRIMARY KEY (student_id, course_id), FOREIGN KEY (course_id) REFERENCES Course(course_id));",
-          "expectedOutput": "Tables created",
-          "explanation": "A junction table stores associations. A production Enrollment table would also reference a Student primary key; the example focuses on the course-side relationship and composite identity.",
+          "title": "Build a many-to-many junction table with both foreign keys",
+          "code": "CREATE TABLE Student (student_id INTEGER PRIMARY KEY, student_name TEXT NOT NULL);\nCREATE TABLE Course (course_id INTEGER PRIMARY KEY, course_title TEXT NOT NULL);\nCREATE TABLE Enrollment (\n  student_id INTEGER NOT NULL,\n  course_id INTEGER NOT NULL,\n  enrolled_on TEXT NOT NULL,\n  PRIMARY KEY (student_id, course_id),\n  FOREIGN KEY (student_id) REFERENCES Student(student_id) ON UPDATE CASCADE ON DELETE CASCADE,\n  FOREIGN KEY (course_id) REFERENCES Course(course_id) ON UPDATE CASCADE ON DELETE RESTRICT\n);",
+          "expectedOutput": "Student, Course and Enrollment tables created",
+          "explanation": "The junction table references both parent tables. Its composite primary key prevents duplicate enrollment pairs. Updating a parent key cascades to Enrollment; deleting a student cascades to their enrollments, while deleting a course is restricted while enrollments still reference it. SQLite foreign-key enforcement must be enabled for the connection.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Study the five examples for Foreign Keys and Table Relationships. For each example, identify the SQL statement, predict its effect or result, then verify it in a compatible SQL engine when available.",
-      "independentTask": "Create a small relational database scenario that demonstrates Foreign Keys and Table Relationships. Write at least three queries or statements, explain the expected result, and identify any assumptions about the database dialect.",
+      "guidedTask": "Run the five examples in order. In the junction-table example, identify both parent references, explain why the composite primary key is needed, and compare ON UPDATE CASCADE, ON DELETE CASCADE and ON DELETE RESTRICT.",
+      "independentTask": "Create Student, Course and Enrollment tables. Make Enrollment reference both parent keys, use a composite primary key to prevent duplicate pairs, and choose appropriate ON UPDATE and ON DELETE actions. Insert sample rows and predict which parent deletions are allowed.",
       "hints": [
-        "Read the statement from its first keyword and identify the target object.",
-        "Check table and column names against the schema before running a query.",
-        "Use explicit column names when they make the query clearer.",
-        "Predict the result before executing; then compare it with the actual result.",
-        "Check the target database engine's documentation for dialect-specific behaviour."
+        "A many-to-many relationship needs a junction table.",
+        "The junction table must reference both parent tables, not only one.",
+        "A composite primary key can prevent duplicate parent-key pairs.",
+        "ON DELETE CASCADE removes dependent child rows; ON DELETE RESTRICT blocks a parent deletion while child rows exist.",
+        "In SQLite, enable PRAGMA foreign_keys = ON for each connection before relying on enforcement."
       ]
     }
   },
