@@ -27,7 +27,7 @@
       "analogyLimit": "The analogy does not model transactional DDL, locking, data backfills, version checks or application compatibility."
     },
     "explain": {
-      "narrative": "## Transactional migration\nA migration can begin a transaction, apply schema changes, backfill data, update the migration history and commit only after all checks pass. If a required step fails, roll back the uncommitted work.\n\n## DDL portability\nSQLite supports transactional schema changes in many cases. Other products have different DDL transaction rules; some statements implicitly commit or cannot be rolled back. Never assume a migration transaction behaves identically across DBMS products.\n\n## Recovery planning\nA rollback script is not always the reverse of a forward migration. Dropping a newly added column can lose data written after deployment. Prefer forward-compatible changes, backups and tested recovery procedures.",
+      "narrative": "## Transactional migration\nA migration can begin a transaction, apply schema changes, backfill data, update the migration history and commit only after all checks pass. If a required step fails, roll back the uncommitted work.\n\n## DDL portability\nSQLite supports transactional schema changes in many cases. Other products have different DDL transaction rules; some statements implicitly commit or cannot be rolled back. Never assume a migration transaction behaves identically across DBMS products.\n\n## Recovery planning\nA rollback script is not always the reverse of a forward migration. Dropping a newly added column can lose data written after deployment. Prefer forward-compatible changes, backups and tested recovery procedures.\n\n### Transactional DDL is product-specific\nA migration may combine schema and data changes, but whether DDL participates in a transaction depends on the DBMS and the particular command. SQLite supports transactional schema changes for the demonstrated ALTER TABLE operation. Other engines may implicitly commit, restrict, or otherwise handle DDL differently.\n\n### Rollback planning\nA rollback plan should state whether the reverse change is safe, whether data loss is possible, and how application versions remain compatible. For destructive schema changes, a forward-fix migration is often safer than attempting to reconstruct dropped data.",
       "examples": [
         {
           "id": "sql18.4-ex1",
@@ -35,7 +35,7 @@
           "title": "Create an account table",
           "code": "CREATE TABLE mig18_accounts (account_id INTEGER PRIMARY KEY, balance INTEGER NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create an account table in SQLite. Verify the migration state before and after the operation.",
+          "explanation": "Creates the account table used to demonstrate a transactional schema change. The balance is stored as an integer for this fixture; real systems must define currency precision and units explicitly.",
           "runnable": true
         },
         {
@@ -44,7 +44,7 @@
           "title": "Insert a starting balance",
           "code": "INSERT INTO mig18_accounts VALUES (1, 100);",
           "expectedOutput": "1 row inserted",
-          "explanation": "This example demonstrates insert a starting balance in SQLite. Verify the migration state before and after the operation.",
+          "explanation": "Inserts one account with a starting balance. This row is used to verify that rollback preserves the original data.",
           "runnable": true
         },
         {
@@ -53,7 +53,7 @@
           "title": "Begin a migration and add a temporary column",
           "code": "BEGIN; ALTER TABLE mig18_accounts ADD COLUMN note TEXT; UPDATE mig18_accounts SET note = 'migration candidate';",
           "expectedOutput": "Migration changes staged",
-          "explanation": "This example demonstrates begin a migration and add a temporary column in SQLite. Verify the migration state before and after the operation.",
+          "explanation": "Begins a transaction, adds a nullable note column and updates the row. These changes remain uncommitted so the next statement can demonstrate rollback of both schema and data changes in SQLite.",
           "runnable": true
         },
         {
@@ -62,7 +62,7 @@
           "title": "Roll back the uncommitted migration",
           "code": "ROLLBACK;",
           "expectedOutput": "Migration rolled back",
-          "explanation": "This example demonstrates roll back the uncommitted migration in SQLite. Verify the migration state before and after the operation.",
+          "explanation": "Rolls back the open transaction. In SQLite, this example's transactional ALTER TABLE change is rolled back along with the update; DDL transaction guarantees differ across DBMS products and operations.",
           "runnable": true
         },
         {
@@ -71,7 +71,7 @@
           "title": "Verify the column and original row remain unchanged",
           "code": "SELECT COUNT(*) FROM pragma_table_info('mig18_accounts') WHERE name = 'note'; SELECT balance FROM mig18_accounts WHERE account_id = 1;",
           "expectedOutput": "0; 100",
-          "explanation": "This example demonstrates verify the column and original row remain unchanged in SQLite. Verify the migration state before and after the operation.",
+          "explanation": "Inspects pragma_table_info to confirm the note column is absent, then reads the original balance. The expected output verifies that both the schema change and data update were undone.",
           "runnable": true
         }
       ]
