@@ -1,0 +1,160 @@
+{
+  "id": "sql.sql8.6.en",
+  "courseId": "sql",
+  "moduleId": "SQL8",
+  "topicId": "SQL8.6",
+  "title": "SQL SELF JOIN",
+  "language": "en",
+  "learningObjectives": [
+    "Explain how a table can be joined to itself using separate aliases.",
+    "Write self-join queries with explicit JOIN and ON clauses.",
+    "Use self joins to model employee-manager and other hierarchical relationships.",
+    "Avoid self-matches and mirrored duplicate pairs when comparing rows.",
+    "Recognize NULL manager references and dialect-neutral self-join behaviour."
+  ],
+  "prerequisites": [
+    "SQL1.5",
+    "SQL5.9",
+    "SQL5.4",
+    "SQL5.7"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A self join is an ordinary join in which the same table is used as both inputs. Different aliases represent different roles for rows from that one table. A common example is an employees table where manager_id refers to employee_id in the same table.",
+      "whyItMatters": "Self joins support employee hierarchies, category parent-child trees, referral relationships, and comparisons between records in the same entity set.",
+      "analogy": "Imagine comparing two different roles on one roster: one copy represents an employee and another represents that employee's manager.",
+      "analogyLimit": "The analogy does not capture SQL row-pair generation, NULL handling, duplicate matches or the need to define a precise relationship predicate."
+    },
+    "explain": {
+      "narrative": "## Core concept\nA self join is an ordinary join in which the same table is used as both inputs. Different aliases represent different roles for rows from that one table. A common example is an employees table where manager_id refers to employee_id in the same table.\n\n## SQLite syntax\n```sql\nSELECT e.employee_name, m.employee_name\nFROM employees AS e\nINNER JOIN employees AS m\n  ON e.manager_id = m.employee_id;\n```\n\n## Sample schema and data\nThe examples use one employees table. manager_id is a self-referencing relationship. The top-level employee has a NULL manager_id.\n\n## Worked examples\n### 1. Create an employee hierarchy\n```sql\nCREATE TABLE employees (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, manager_id INTEGER, department TEXT NOT NULL, city TEXT NOT NULL, salary INTEGER NOT NULL);\nINSERT INTO employees VALUES (1,'Priya Sen',NULL,'Sales','Hyderabad',90000),(2,'Rahul Das',1,'Sales','Hyderabad',65000),(3,'Sara Ali',1,'Engineering','Vijayawada',72000),(4,'Omar Khan',2,'Sales','Hyderabad',52000),(5,'Tara Roy',2,'Engineering','Vijayawada',58000);\nSELECT COUNT(*) AS employee_count FROM employees;\n```\nExpected result: 5\n\nThe manager_id column refers to another row in the same employees table; NULL identifies the top-level employee.\n\n### 2. Pair each employee with their manager\n```sql\nCREATE TABLE employees (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, manager_id INTEGER, department TEXT NOT NULL, city TEXT NOT NULL, salary INTEGER NOT NULL);\nINSERT INTO employees VALUES (1,'Priya Sen',NULL,'Sales','Hyderabad',90000),(2,'Rahul Das',1,'Sales','Hyderabad',65000),(3,'Sara Ali',1,'Engineering','Vijayawada',72000),(4,'Omar Khan',2,'Sales','Hyderabad',52000),(5,'Tara Roy',2,'Engineering','Vijayawada',58000);\nSELECT e.employee_name AS employee, m.employee_name AS manager FROM employees AS e INNER JOIN employees AS m ON e.manager_id = m.employee_id ORDER BY e.employee_id;\n```\nExpected result: Rahul Das | Priya Sen; Sara Ali | Priya Sen; Omar Khan | Rahul Das; Tara Roy | Rahul Das\n\nThe table is referenced twice with different aliases. Employees without a manager are omitted by the inner join.\n\n### 3. Find distinct pairs of coworkers in the same city\n```sql\nCREATE TABLE employees (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, manager_id INTEGER, department TEXT NOT NULL, city TEXT NOT NULL, salary INTEGER NOT NULL);\nINSERT INTO employees VALUES (1,'Priya Sen',NULL,'Sales','Hyderabad',90000),(2,'Rahul Das',1,'Sales','Hyderabad',65000),(3,'Sara Ali',1,'Engineering','Vijayawada',72000),(4,'Omar Khan',2,'Sales','Hyderabad',52000),(5,'Tara Roy',2,'Engineering','Vijayawada',58000);\nSELECT a.employee_name AS employee_a, b.employee_name AS employee_b, a.city FROM employees AS a INNER JOIN employees AS b ON a.city = b.city AND a.employee_id < b.employee_id ORDER BY a.employee_id, b.employee_id;\n```\nExpected result: Priya Sen | Rahul Das | Hyderabad; Priya Sen | Omar Khan | Hyderabad; Priya Sen | Tara Roy | Hyderabad; Rahul Das | Omar Khan | Hyderabad; Rahul Das | Tara Roy | Hyderabad; Omar Khan | Tara Roy | Hyderabad; Sara Ali | Tara Roy | Vijayawada\n\nThe less-than key comparison avoids pairing a row with itself and avoids returning each pair twice.\n\n### 4. Compare salaries with the manager\n```sql\nCREATE TABLE employees (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, manager_id INTEGER, department TEXT NOT NULL, city TEXT NOT NULL, salary INTEGER NOT NULL);\nINSERT INTO employees VALUES (1,'Priya Sen',NULL,'Sales','Hyderabad',90000),(2,'Rahul Das',1,'Sales','Hyderabad',65000),(3,'Sara Ali',1,'Engineering','Vijayawada',72000),(4,'Omar Khan',2,'Sales','Hyderabad',52000),(5,'Tara Roy',2,'Engineering','Vijayawada',58000);\nSELECT e.employee_name, e.salary AS employee_salary, m.employee_name AS manager, m.salary AS manager_salary FROM employees AS e INNER JOIN employees AS m ON e.manager_id = m.employee_id WHERE e.salary < m.salary ORDER BY e.employee_id;\n```\nExpected result: Rahul Das | 65000 | Priya Sen | 90000; Sara Ali | 72000 | Priya Sen | 90000; Omar Khan | 52000 | Rahul Das | 65000; Tara Roy | 58000 | Rahul Das | 65000\n\nA second alias lets the query compare two roles from the same underlying table.\n\n### 5. Count direct reports for every employee\n```sql\nCREATE TABLE employees (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, manager_id INTEGER, department TEXT NOT NULL, city TEXT NOT NULL, salary INTEGER NOT NULL);\nINSERT INTO employees VALUES (1,'Priya Sen',NULL,'Sales','Hyderabad',90000),(2,'Rahul Das',1,'Sales','Hyderabad',65000),(3,'Sara Ali',1,'Engineering','Vijayawada',72000),(4,'Omar Khan',2,'Sales','Hyderabad',52000),(5,'Tara Roy',2,'Engineering','Vijayawada',58000);\nSELECT m.employee_name AS manager, COUNT(e.employee_id) AS direct_reports FROM employees AS m LEFT JOIN employees AS e ON e.manager_id = m.employee_id GROUP BY m.employee_id, m.employee_name ORDER BY m.employee_id;\n```\nExpected result: Priya Sen | 2; Rahul Das | 2; Sara Ali | 0; Omar Khan | 0; Tara Roy | 0\n\nA self LEFT JOIN retains employees who have no direct reports; COUNT on the employee key returns zero.\n\n## Query behaviour and NULLs\nAliases do not create physical copies of the table; they name two logical references in the query. The ON condition defines which row in one role relates to a row in the other role. An INNER self join excludes rows without a match; a LEFT self join can preserve them. Comparisons with NULL are UNKNOWN, so a NULL manager_id does not match an employee_id using equality.\n\n## Common mistakes\n- Using the same alias for both references.\n- Omitting the ON condition and accidentally generating a Cartesian product.\n- Joining manager_id to the wrong key.\n- Forgetting that a one-to-many hierarchy can produce several rows per manager.\n- Returning mirrored pairs twice when comparing two employees.\n\n## Best practices\nUse descriptive role aliases such as employee and manager. Use a primary key to identify rows. Add a strict ordering condition such as a.employee_id < b.employee_id when you want each unordered pair only once. Add ORDER BY when deterministic display order is required.",
+      "examples": [
+        {
+          "id": "sql8.6-ex1",
+          "language": "en",
+          "title": "Create an employee hierarchy",
+          "code": "CREATE TABLE employees (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, manager_id INTEGER, department TEXT NOT NULL, city TEXT NOT NULL, salary INTEGER NOT NULL);\nINSERT INTO employees VALUES (1,'Priya Sen',NULL,'Sales','Hyderabad',90000),(2,'Rahul Das',1,'Sales','Hyderabad',65000),(3,'Sara Ali',1,'Engineering','Vijayawada',72000),(4,'Omar Khan',2,'Sales','Hyderabad',52000),(5,'Tara Roy',2,'Engineering','Vijayawada',58000);\nSELECT COUNT(*) AS employee_count FROM employees;",
+          "expectedOutput": "5",
+          "explanation": "The manager_id column refers to another row in the same employees table; NULL identifies the top-level employee.",
+          "runnable": true
+        },
+        {
+          "id": "sql8.6-ex2",
+          "language": "en",
+          "title": "Pair each employee with their manager",
+          "code": "CREATE TABLE employees (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, manager_id INTEGER, department TEXT NOT NULL, city TEXT NOT NULL, salary INTEGER NOT NULL);\nINSERT INTO employees VALUES (1,'Priya Sen',NULL,'Sales','Hyderabad',90000),(2,'Rahul Das',1,'Sales','Hyderabad',65000),(3,'Sara Ali',1,'Engineering','Vijayawada',72000),(4,'Omar Khan',2,'Sales','Hyderabad',52000),(5,'Tara Roy',2,'Engineering','Vijayawada',58000);\nSELECT e.employee_name AS employee, m.employee_name AS manager FROM employees AS e INNER JOIN employees AS m ON e.manager_id = m.employee_id ORDER BY e.employee_id;",
+          "expectedOutput": "Rahul Das | Priya Sen; Sara Ali | Priya Sen; Omar Khan | Rahul Das; Tara Roy | Rahul Das",
+          "explanation": "The table is referenced twice with different aliases. Employees without a manager are omitted by the inner join.",
+          "runnable": true
+        },
+        {
+          "id": "sql8.6-ex3",
+          "language": "en",
+          "title": "Find distinct pairs of coworkers in the same city",
+          "code": "CREATE TABLE employees (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, manager_id INTEGER, department TEXT NOT NULL, city TEXT NOT NULL, salary INTEGER NOT NULL);\nINSERT INTO employees VALUES (1,'Priya Sen',NULL,'Sales','Hyderabad',90000),(2,'Rahul Das',1,'Sales','Hyderabad',65000),(3,'Sara Ali',1,'Engineering','Vijayawada',72000),(4,'Omar Khan',2,'Sales','Hyderabad',52000),(5,'Tara Roy',2,'Engineering','Vijayawada',58000);\nSELECT a.employee_name AS employee_a, b.employee_name AS employee_b, a.city FROM employees AS a INNER JOIN employees AS b ON a.city = b.city AND a.employee_id < b.employee_id ORDER BY a.employee_id, b.employee_id;",
+          "expectedOutput": "Priya Sen | Rahul Das | Hyderabad; Priya Sen | Omar Khan | Hyderabad; Priya Sen | Tara Roy | Hyderabad; Rahul Das | Omar Khan | Hyderabad; Rahul Das | Tara Roy | Hyderabad; Omar Khan | Tara Roy | Hyderabad; Sara Ali | Tara Roy | Vijayawada",
+          "explanation": "The less-than key comparison avoids pairing a row with itself and avoids returning each pair twice.",
+          "runnable": true
+        },
+        {
+          "id": "sql8.6-ex4",
+          "language": "en",
+          "title": "Compare salaries with the manager",
+          "code": "CREATE TABLE employees (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, manager_id INTEGER, department TEXT NOT NULL, city TEXT NOT NULL, salary INTEGER NOT NULL);\nINSERT INTO employees VALUES (1,'Priya Sen',NULL,'Sales','Hyderabad',90000),(2,'Rahul Das',1,'Sales','Hyderabad',65000),(3,'Sara Ali',1,'Engineering','Vijayawada',72000),(4,'Omar Khan',2,'Sales','Hyderabad',52000),(5,'Tara Roy',2,'Engineering','Vijayawada',58000);\nSELECT e.employee_name, e.salary AS employee_salary, m.employee_name AS manager, m.salary AS manager_salary FROM employees AS e INNER JOIN employees AS m ON e.manager_id = m.employee_id WHERE e.salary < m.salary ORDER BY e.employee_id;",
+          "expectedOutput": "Rahul Das | 65000 | Priya Sen | 90000; Sara Ali | 72000 | Priya Sen | 90000; Omar Khan | 52000 | Rahul Das | 65000; Tara Roy | 58000 | Rahul Das | 65000",
+          "explanation": "A second alias lets the query compare two roles from the same underlying table.",
+          "runnable": true
+        },
+        {
+          "id": "sql8.6-ex5",
+          "language": "en",
+          "title": "Count direct reports for every employee",
+          "code": "CREATE TABLE employees (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, manager_id INTEGER, department TEXT NOT NULL, city TEXT NOT NULL, salary INTEGER NOT NULL);\nINSERT INTO employees VALUES (1,'Priya Sen',NULL,'Sales','Hyderabad',90000),(2,'Rahul Das',1,'Sales','Hyderabad',65000),(3,'Sara Ali',1,'Engineering','Vijayawada',72000),(4,'Omar Khan',2,'Sales','Hyderabad',52000),(5,'Tara Roy',2,'Engineering','Vijayawada',58000);\nSELECT m.employee_name AS manager, COUNT(e.employee_id) AS direct_reports FROM employees AS m LEFT JOIN employees AS e ON e.manager_id = m.employee_id GROUP BY m.employee_id, m.employee_name ORDER BY m.employee_id;",
+          "expectedOutput": "Priya Sen | 2; Rahul Das | 2; Sara Ali | 0; Omar Khan | 0; Tara Roy | 0",
+          "explanation": "A self LEFT JOIN retains employees who have no direct reports; COUNT on the employee key returns zero.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the employee setup. First join each employee to their manager, then change INNER JOIN to LEFT JOIN and observe the top-level employee. Predict the output before running each query.",
+      "independentTask": "Create a categories table with category_id, category_name and parent_category_id. Insert at least six rows including two top-level categories. Write five self-join queries to display parent-child pairs, find top-level rows, compare categories, and count direct children.",
+      "hints": [
+        "Use two different aliases for the same table.",
+        "Match the child foreign-key column to the parent primary key.",
+        "Use LEFT JOIN when rows without a parent must remain visible.",
+        "Use a primary-key inequality to avoid self-pairs or mirrored pairs.",
+        "Check NULL explicitly with IS NULL rather than = NULL."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE employees (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, manager_id INTEGER, department TEXT NOT NULL, city TEXT NOT NULL, salary INTEGER NOT NULL);\nINSERT INTO employees VALUES (1,'Priya Sen',NULL,'Sales','Hyderabad',90000),(2,'Rahul Das',1,'Sales','Hyderabad',65000),(3,'Sara Ali',1,'Engineering','Vijayawada',72000),(4,'Omar Khan',2,'Sales','Hyderabad',52000),(5,'Tara Roy',2,'Engineering','Vijayawada',58000);\n\n-- Show employees with their managers\nSELECT e.employee_name AS employee, m.employee_name AS manager\nFROM employees AS e\nLEFT JOIN employees AS m ON e.manager_id = m.employee_id\nORDER BY e.employee_id;",
+    "resetCode": "CREATE TABLE employees (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, manager_id INTEGER, department TEXT NOT NULL, city TEXT NOT NULL, salary INTEGER NOT NULL);\nINSERT INTO employees VALUES (1,'Priya Sen',NULL,'Sales','Hyderabad',90000),(2,'Rahul Das',1,'Sales','Hyderabad',65000),(3,'Sara Ali',1,'Engineering','Vijayawada',72000),(4,'Omar Khan',2,'Sales','Hyderabad',52000),(5,'Tara Roy',2,'Engineering','Vijayawada',58000);"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql8.6-q1",
+        "prompt": "What is a self join?",
+        "options": [
+          "A table joined to itself using separate references",
+          "A table copied permanently before joining",
+          "A join that removes duplicate rows",
+          "A join that requires a foreign database"
+        ],
+        "answer": "A table joined to itself using separate references",
+        "explanation": "The same table is used as both logical inputs, usually with different aliases."
+      },
+      {
+        "id": "sql8.6-q2",
+        "prompt": "Why are aliases useful in a self join?",
+        "options": [
+          "They distinguish the two roles of the same table",
+          "They create new physical tables",
+          "They disable NULL values",
+          "They automatically enforce foreign keys"
+        ],
+        "answer": "They distinguish the two roles of the same table",
+        "explanation": "Aliases let a query refer clearly to employee and manager roles."
+      },
+      {
+        "id": "sql8.6-q3",
+        "prompt": "Which condition links an employee to their manager?",
+        "options": [
+          "e.manager_id = m.employee_id",
+          "e.employee_id = m.employee_id",
+          "e.department = m.salary",
+          "e.manager_id IS NULL"
+        ],
+        "answer": "e.manager_id = m.employee_id",
+        "explanation": "The employee row's manager_id references the manager row's employee_id."
+      },
+      {
+        "id": "sql8.6-q4",
+        "prompt": "Which join keeps employees who have no manager match?",
+        "options": [
+          "LEFT JOIN",
+          "INNER JOIN",
+          "CROSS JOIN",
+          "A join without an ON clause"
+        ],
+        "answer": "LEFT JOIN",
+        "explanation": "LEFT JOIN preserves all rows from the employee-side input."
+      },
+      {
+        "id": "sql8.6-q5",
+        "prompt": "How can a self-join pair comparison avoid mirrored duplicates?",
+        "options": [
+          "Use a strict key ordering such as a.id < b.id",
+          "Remove the ON clause",
+          "Use SELECT DISTINCT on every column",
+          "Sort only by a text name"
+        ],
+        "answer": "Use a strict key ordering such as a.id < b.id",
+        "explanation": "A strict ordering includes each unordered pair once and excludes a row paired with itself."
+      }
+    ]
+  },
+  "status": "draft"
+}
