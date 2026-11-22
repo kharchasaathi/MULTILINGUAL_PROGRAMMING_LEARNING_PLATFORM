@@ -117,6 +117,14 @@ const pyRunner = [
   "        continue",
   "    expected_text = item['expectedOutput'].strip()",
   "    expected = norm(expected_text)",
+  "    expected_pattern = item.get('expectedPattern')",
+  "    if expected_pattern:",
+  "        observed = repr(result_sets)",
+  "        if re.search(expected_pattern, observed, re.I):",
+  "            dynamic += 1",
+  "            continue",
+  "        mismatches.append({'id': item['id'], 'expectedPattern': expected_pattern, 'observed': observed})",
+  "        continue",
   "    actual = set()",
   "    combined_rows = []",
   "    for columns, rows in result_sets:",
@@ -192,6 +200,7 @@ for (const topic of topics) {
     expectedOutput: example.expectedOutput,
     expectsError: /^Error:/i.test(example.expectedOutput.trim()),
     parameters: example.parameters ?? null
+    expectedPattern: example.expectedPattern ?? null,
   }));
   const run = spawnSync("python3", ["-c", pyRunner, JSON.stringify(payload)], { encoding: "utf8", timeout: 15000 });
   assert.equal(run.status, 0, topic.topicId + ": SQLite execution/output check failed: " + (run.stderr || run.stdout));
