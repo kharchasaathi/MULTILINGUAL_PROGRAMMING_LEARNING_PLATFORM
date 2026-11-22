@@ -14,6 +14,7 @@ const questionIds = new Set();
 let examplesChecked = 0;
 let outputsCompared = 0;
 let statusOnlyExamples = 0;
+let dynamicOutputs = 0;
 const pyRunner = [
   "import json, re, sqlite3, sys",
   "examples = json.loads(sys.argv[1])",
@@ -54,6 +55,7 @@ const pyRunner = [
   "    return {norm(v) for v in variants}",
   "compared = 0",
   "skipped = 0",
+  "dynamic = 0",
   "mismatches = []",
   "for item in examples:",
   "    last_columns = None",
@@ -73,14 +75,21 @@ const pyRunner = [
   "    if last_columns is None:",
   "        skipped += 1",
   "        continue",
-  "    expected = norm(item['expectedOutput'])",
+  "    expected_text = item['expectedOutput'].strip()",
+  "    expected = norm(expected_text)",
   "    actual = output_variants(last_columns, last_rows or [])",
+  "    if 'version depends on runtime' in expected_text.lower():",
+  "        observed = str((last_rows or [[None]])[0][0]) if last_rows else ''",
+  "        if len(last_columns) == 1 and re.fullmatch(r'\\d+\\.\\d+(?:\\.\\d+)?', observed): dynamic += 1; continue",
+  "    if expected_text.splitlines()[-1:] == ['Current UTC date']:",
+  "        observed = str((last_rows or [[None]])[0][0]) if last_rows else ''",
+  "        if len(last_columns) == 1 and re.fullmatch(r'\\d{4}-\\d{2}-\\d{2}', observed): dynamic += 1; continue",
   "    if expected not in actual:",
   "        mismatches.append({'id': item['id'], 'expected': item['expectedOutput'], 'columns': last_columns, 'rows': [[cell(v) for v in row] for row in (last_rows or [])], 'accepted': sorted(actual)[:4]})",
   "    else:",
   "        compared += 1",
   "db.close()",
-  "print(json.dumps({'compared': compared, 'skipped': skipped, 'mismatches': mismatches}))"
+  "print(json.dumps({'compared': compared, 'skipped': skipped, 'dynamic': dynamic, 'mismatches': mismatches}))"
 ].join("\n");
 
 for (const topic of topics) {
@@ -139,6 +148,7 @@ for (const topic of topics) {
   const result = JSON.parse(run.stdout);
   outputsCompared += result.compared;
   statusOnlyExamples += result.skipped;
+  dynamicOutputs += result.dynamic;
   assert.equal(result.mismatches.length, 0, topic.topicId + ": expectedOutput mismatch: " + JSON.stringify(result.mismatches));
 }
 console.log("SQL course validation passed: " + topics.length + " lessons, " + examplesChecked + " SQLite-executed examples, " + outputsCompared + " expected outputs compared with actual result sets, " + statusOnlyExamples + " status-only examples, " + questionIds.size + " MCQs.");
