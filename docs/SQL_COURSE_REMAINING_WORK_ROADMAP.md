@@ -10,14 +10,14 @@ Current audited branch HEAD before this roadmap commit: 60e3e2c0189da3f51474f481
 
 ## Verified current baseline
 
-- 116 English SQL lesson JSON files are present across SQL1–SQL18 (81 original lessons plus 5 lessons each for SQL12 transactions, SQL13 subqueries/CTEs, SQL14 window functions, SQL15 indexing/performance, SQL16 dialect portability, SQL17 triggers and SQL18 migrations).
-- 116 SQL curriculum-index topics and 121 source-inventory records are present.
+- 121 English SQL lesson JSON files are present across SQL1–SQL19 (81 original lessons plus 5 lessons each for SQL12 transactions, SQL13 subqueries/CTEs, SQL14 window functions, SQL15 indexing/performance, SQL16 dialect portability, SQL17 triggers, SQL18 migrations and SQL19 inventory/sales capstone).
+- 121 SQL curriculum-index topics and 126 source-inventory records are present.
 - The new `docs/SQL_W3SCHOOLS_COVERAGE_MATRIX.csv` maps 72 W3Schools navigation/reference topics to existing CodeSaathi lesson IDs:
   - 45 SQL Tutorial topics
   - 21 SQL Database topics
   - 6 SQL Reference topics (Data Types, Keywords, Quick Reference, MySQL Functions, SQL Server Functions and MS Access Functions)
 - Mapping is a coverage index, not editorial sign-off. Every mapped lesson remains draft pending technical/editorial review.
-- SQL examples on commit `b916118`: 430 executed; 310 expected result sets compared; 115 status-only examples executed; 790 database-state assertions; 2 runtime-dependent outputs pattern-checked; 3 expected-error examples; 430 MCQs. SQL13–SQL18 add 150 more examples and 150 MCQs; latest validation is pending.
+- SQL examples on commit `b916118`: 430 executed; 310 expected result sets compared; 115 status-only examples executed; 790 database-state assertions; 2 runtime-dependent outputs pattern-checked; 3 expected-error examples; 430 MCQs. SQL13–SQL19 add 175 more examples and 175 MCQs; latest validation is pending.
 - SQL Playground is implemented with browser-side SQLite. Final feature/security/browser audit remains pending.
 - Telugu SQL lesson translations are not complete.
 - No production deployment has been performed.
@@ -61,9 +61,10 @@ These are supplementary curriculum additions, not W3Schools core navigation topi
 - [x] SQL16.1–SQL16.5: SQL dialects, data types, identity columns, date/time, NULL functions, concatenation and pagination differences. Five English draft lessons, 25 examples and 25 MCQs added; SQL validation PASS on commit `a00f32f`.
 - [x] SQL17.1–SQL17.5: Trigger fundamentals, AFTER INSERT/UPDATE/DELETE, BEFORE validation with RAISE, recursion and safe maintenance. Five English draft lessons, 25 examples and 25 MCQs added; latest-head SQL validation pending.
 - [x] SQL18.1–SQL18.5: Schema migration versioning, additive changes, backfills, transactional migrations, rollback planning, idempotency and validation. Five English draft lessons, 25 examples and 25 MCQs added; latest-head SQL validation pending.
+- [x] SQL19.1–SQL19.5: Inventory/product modelling, customers/orders/order items, safe sale transactions, sales reporting and capstone validation. Five English draft capstone lessons, 25 examples and 25 MCQs added; latest-head SQL validation pending.
 - [ ] SQL14: Window functions, ranking, LAG/LEAD and running aggregates.
 - [ ] Recursive CTEs and hierarchical data.
-- [ ] Real-world database projects and SQL capstone.
+- [x] English inventory-and-sales capstone lesson sequence drafted in SQL19.\n- [ ] Integrate SQL19 with the platform's project/capstone activity, rubric and learner-progress features.
 - [ ] Real-world database projects and SQL capstone.
 - [ ] Advanced query plans, index design and performance tuning.
 - [ ] Advanced dialect comparison (SQLite, MySQL, PostgreSQL, SQL Server and Oracle).
