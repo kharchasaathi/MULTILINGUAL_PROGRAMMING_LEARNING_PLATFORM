@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql16.1.en",
+  "courseId": "sql",
+  "moduleId": "SQL16",
+  "topicId": "SQL16.1",
+  "title": "SQL Dialects and Portability Principles",
+  "language": "en",
+  "learningObjectives": [
+    "Explain why SQL syntax and behaviour vary among database products.",
+    "Identify common portability differences in types, functions, pagination and identity columns.",
+    "Choose a target DBMS and version before relying on product-specific syntax.",
+    "Use portable SQL constructs when they meet the requirement.",
+    "Explain why SQLite validation alone does not prove compatibility with server DBMS products."
+  ],
+  "prerequisites": [
+    "SQL2.7",
+    "SQL3.9",
+    "SQL11.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "SQL is standardized, but database products implement different dialects, data types, functions, transaction features and administrative commands. Portable SQL uses common syntax where practical and isolates product-specific behaviour behind tested, documented boundaries.",
+      "whyItMatters": "A query that works in SQLite may not run unchanged in MySQL, PostgreSQL, SQL Server or Access. Knowing the dialect prevents incorrect assumptions during development and migration.",
+      "analogy": "SQL portability is like translating a precise instruction into several product dialects: the intent stays the same, but the exact words and rules can differ.",
+      "analogyLimit": "The analogy does not model type systems, function return types, time-zone rules, optimizer behaviour or transaction semantics."
+    },
+    "explain": {
+      "narrative": "## SQL standard and product dialects\nSQL standards define common language features, but database products add extensions and differ in implementation details. SQLite is an embedded database library; MySQL, PostgreSQL and SQL Server commonly run as database servers; Access has its own SQL and application model.\n\n## Common portability differences\nDifferences include identity columns, data types, date arithmetic, string concatenation, NULL functions, pagination, transaction behaviour, DDL support and parameter-binding APIs. Identifier quoting and reserved words can also vary.\n\n## A practical portability strategy\nChoose a target DBMS, document the dialect for each runnable example, use portable constructs such as COALESCE when appropriate, and isolate product-specific code. Test queries against the actual engine and version used in production; SQLite success does not prove server-database compatibility.",
+      "examples": [
+        {
+          "id": "sql16.1-ex1",
+          "language": "en",
+          "title": "Create a portable sample table",
+          "code": "CREATE TABLE dialect16_people (person_id INTEGER PRIMARY KEY, person_name TEXT NOT NULL, active INTEGER NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "This example demonstrates create a portable sample table using SQLite. Compare its syntax with the target DBMS before migration.",
+          "runnable": true
+        },
+        {
+          "id": "sql16.1-ex2",
+          "language": "en",
+          "title": "Insert portable sample values",
+          "code": "INSERT INTO dialect16_people VALUES (1, 'Asha', 1), (2, 'Bilal', 0);",
+          "expectedOutput": "2 rows inserted",
+          "explanation": "This example demonstrates insert portable sample values using SQLite. Compare its syntax with the target DBMS before migration.",
+          "runnable": true
+        },
+        {
+          "id": "sql16.1-ex3",
+          "language": "en",
+          "title": "Use a common SELECT pattern",
+          "code": "SELECT person_name FROM dialect16_people WHERE active = 1 ORDER BY person_name;",
+          "expectedOutput": "Asha",
+          "explanation": "This example demonstrates use a common select pattern using SQLite. Compare its syntax with the target DBMS before migration.",
+          "runnable": true
+        },
+        {
+          "id": "sql16.1-ex4",
+          "language": "en",
+          "title": "Use COALESCE as a broadly supported NULL expression",
+          "code": "SELECT COALESCE(NULL, 'fallback') AS display_value;",
+          "expectedOutput": "fallback",
+          "explanation": "This example demonstrates use coalesce as a broadly supported null expression using SQLite. Compare its syntax with the target DBMS before migration.",
+          "runnable": true
+        },
+        {
+          "id": "sql16.1-ex5",
+          "language": "en",
+          "title": "Check the SQLite engine version explicitly",
+          "code": "SELECT sqlite_version();",
+          "expectedOutput": "version depends on runtime",
+          "explanation": "This example demonstrates check the sqlite engine version explicitly using SQLite. Compare its syntax with the target DBMS before migration.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and identify which ones use broadly common SQL and which one returns a runtime-dependent version string.",
+      "independentTask": "Choose one query from an existing lesson. Identify any SQLite-specific syntax and rewrite or document the equivalent approach for MySQL, PostgreSQL and SQL Server.",
+      "hints": [
+        "A SQL standard does not mean every product implements every feature identically.",
+        "Check data types, identity columns, date functions, NULL functions and pagination.",
+        "Use a documented target DBMS and version.",
+        "Prefer portable syntax where it is clear and efficient.",
+        "Run integration tests against the actual production database engine."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE dialect16_people (person_id INTEGER PRIMARY KEY, person_name TEXT NOT NULL, active INTEGER NOT NULL);\nINSERT INTO dialect16_people VALUES (1, 'Asha', 1), (2, 'Bilal', 0);\nSELECT person_name FROM dialect16_people WHERE active = 1 ORDER BY person_name;",
+    "resetCode": "CREATE TABLE dialect16_people (person_id INTEGER PRIMARY KEY, person_name TEXT NOT NULL, active INTEGER NOT NULL);\nINSERT INTO dialect16_people VALUES (1, 'Asha', 1), (2, 'Bilal', 0);\nSELECT person_name FROM dialect16_people WHERE active = 1 ORDER BY person_name;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql16.1-q1",
+        "prompt": "What is a SQL dialect?",
+        "options": [
+          "A database product's implementation and extensions of SQL",
+          "A database backup format",
+          "A table relationship",
+          "A type of index"
+        ],
+        "answer": "A database product's implementation and extensions of SQL",
+        "explanation": "A dialect describes product-specific SQL syntax and behaviour."
+      },
+      {
+        "id": "sql16.1-q2",
+        "prompt": "Does a query passing in SQLite prove it works in PostgreSQL?",
+        "options": [
+          "No, dialect and behaviour differences must be tested",
+          "Yes, all products are identical",
+          "Only if the query uses uppercase keywords",
+          "Only if the table has a primary key"
+        ],
+        "answer": "No, dialect and behaviour differences must be tested",
+        "explanation": "SQLite validation is not proof of compatibility with other database engines."
+      },
+      {
+        "id": "sql16.1-q3",
+        "prompt": "Which feature commonly differs among database products?",
+        "options": [
+          "Identity syntax and date/time functions",
+          "The existence of SELECT",
+          "The meaning of a table name",
+          "The use of rows"
+        ],
+        "answer": "Identity syntax and date/time functions",
+        "explanation": "Identity, date/time, NULL and pagination syntax often differ."
+      },
+      {
+        "id": "sql16.1-q4",
+        "prompt": "What is a good portability strategy?",
+        "options": [
+          "Choose a target engine, document dialect-specific code and test against it",
+          "Assume SQLite is the same as every server DBMS",
+          "Avoid all constraints",
+          "Copy product-specific code without tests"
+        ],
+        "answer": "Choose a target engine, document dialect-specific code and test against it",
+        "explanation": "Portability requires explicit target selection and verification."
+      },
+      {
+        "id": "sql16.1-q5",
+        "prompt": "Which function is commonly used for portable NULL fallback?",
+        "options": [
+          "COALESCE",
+          "AUTOINCREMENT",
+          "ROW_NUMBER only",
+          "VACUUM"
+        ],
+        "answer": "COALESCE",
+        "explanation": "COALESCE is widely supported for returning the first non-NULL expression."
+      }
+    ]
+  },
+  "status": "draft"
+}
