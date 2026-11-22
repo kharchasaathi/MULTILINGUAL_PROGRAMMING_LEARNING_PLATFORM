@@ -25,7 +25,7 @@
       "analogyLimit": "The analogy does not model SQL's exact cardinality rules, NULL logic, query optimizer or recursive evaluation."
     },
     "explain": {
-      "narrative": "## Scalar subqueries\nA scalar subquery returns one value and can appear in a SELECT expression or a comparison. If the query returns no rows, its scalar result is NULL. If it returns more than one row, SQLite reports a scalar subquery error.\n\n## Correlated subqueries\nA correlated subquery references an outer-query column. For each outer row, the nested condition is associated with that row's values. A common pattern compares an employee's salary with the average salary in that employee's department.\n\n## NULL and performance\nBe careful when a scalar subquery can return NULL. Correlated subqueries can be readable, but large workloads should be checked with EXPLAIN QUERY PLAN and appropriate indexes. An equivalent join or window query may be clearer or faster.",
+      "narrative": "## Scalar subqueries\nA scalar subquery returns one value and can appear in a SELECT expression or a comparison. If the query returns no rows, its scalar result is NULL. If it returns more than one row, SQLite reports a scalar subquery error.\n\n## Correlated subqueries\nA correlated subquery references an outer-query column. For each outer row, the nested condition is associated with that row's values. A common pattern compares an employee's salary with the average salary in that employee's department.\n\n## NULL and performance\nBe careful when a scalar subquery can return NULL. Correlated subqueries can be readable, but large workloads should be checked with EXPLAIN QUERY PLAN and appropriate indexes. An equivalent join or window query may be clearer or faster.\n\n### Correlation and NULL handling\nA correlated subquery refers to a column from the outer query. If a scalar subquery returns no row, its value is NULL; comparisons with NULL evaluate to unknown and do not pass a WHERE filter. Use COALESCE only when a fallback value is semantically correct.\n\n### Performance and alternatives\nAn optimizer may transform a correlated subquery, but repeated lookup patterns can benefit from an index on the correlated key. Compare the correlated form with a grouped join or window function using EXPLAIN QUERY PLAN and representative data.",
       "examples": [
         {
           "id": "sql13.2-ex1",
@@ -33,7 +33,7 @@
           "title": "Create employee data",
           "code": "CREATE TABLE sub13_employees (employee_id INTEGER PRIMARY KEY, employee_name TEXT NOT NULL, department_id INTEGER NOT NULL, salary INTEGER NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create employee data using SQLite. Follow the inner query and outer result carefully.",
+          "explanation": "Creates employee rows with a primary key, department identifier and integer salary. The sample omits a separate departments table so the query can focus on the correlated comparison.",
           "runnable": true
         },
         {
@@ -42,7 +42,7 @@
           "title": "Insert employees across two departments",
           "code": "INSERT INTO sub13_employees VALUES (1, 'Asha', 1, 100), (2, 'Ravi', 1, 80), (3, 'Mira', 2, 90), (4, 'Noor', 2, 70);",
           "expectedOutput": "4 rows inserted",
-          "explanation": "This example demonstrates insert employees across two departments using SQLite. Follow the inner query and outer result carefully.",
+          "explanation": "Inserts four employees split evenly across two departments. Department 1 has an average salary of 90; department 2 has an average of 80.",
           "runnable": true
         },
         {
@@ -51,7 +51,7 @@
           "title": "Find employees above their own department average",
           "code": "SELECT e.employee_name FROM sub13_employees AS e WHERE e.salary > (SELECT AVG(x.salary) FROM sub13_employees AS x WHERE x.department_id = e.department_id) ORDER BY e.employee_name;",
           "expectedOutput": "Asha; Mira",
-          "explanation": "This example demonstrates find employees above their own department average using SQLite. Follow the inner query and outer result carefully.",
+          "explanation": "The inner query references the outer row's department_id, so its average is calculated for the current employee's department. Asha's 100 exceeds 90 and Mira's 90 exceeds 80; the other employees do not exceed their department average.",
           "runnable": true
         },
         {
@@ -60,7 +60,7 @@
           "title": "Show the company average beside each employee",
           "code": "SELECT employee_name, salary, (SELECT AVG(salary) FROM sub13_employees) AS company_average FROM sub13_employees ORDER BY employee_name;",
           "expectedOutput": "Asha | 100 | 85; Mira | 90 | 85; Noor | 70 | 85; Ravi | 80 | 85",
-          "explanation": "This example demonstrates show the company average beside each employee using SQLite. Follow the inner query and outer result carefully.",
+          "explanation": "The scalar subquery calculates the company-wide average once as a logical expression and displays it beside each employee. The average of 100, 80, 90 and 70 is 85; the outer query orders employees by name.",
           "runnable": true
         },
         {
@@ -69,7 +69,7 @@
           "title": "Find each employee's department size",
           "code": "SELECT e.employee_name, (SELECT COUNT(*) FROM sub13_employees AS x WHERE x.department_id = e.department_id) AS department_size FROM sub13_employees AS e ORDER BY e.employee_name;",
           "expectedOutput": "Asha | 2; Mira | 2; Noor | 2; Ravi | 2",
-          "explanation": "This example demonstrates find each employee's department size using SQLite. Follow the inner query and outer result carefully.",
+          "explanation": "The correlated COUNT subquery counts employees in the current employee's department. Each row therefore displays a department size of two. The outer alias e is referenced inside the nested query through its department_id.",
           "runnable": true
         }
       ]
