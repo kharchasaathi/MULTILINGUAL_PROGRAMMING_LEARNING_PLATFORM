@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql10.2.en",
+  "courseId": "sql",
+  "moduleId": "SQL10",
+  "topicId": "SQL10.2",
+  "title": "SQL INSERT INTO SELECT",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of SQL INSERT INTO SELECT.",
+    "Write SQLite-compatible SQL for the topic or a clearly labelled equivalent.",
+    "Predict result rows using the lesson's sample data.",
+    "Identify dialect limitations, NULL behaviour and common errors.",
+    "Apply the topic to a practical data task."
+  ],
+  "prerequisites": [
+    "SQL5.1",
+    "SQL5.4",
+    "SQL9.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "INSERT INTO ... SELECT copies rows returned by a SELECT query into an existing destination table. The destination table must already exist, and the selected values must match the target columns in count and compatible order.",
+      "whyItMatters": "It moves filtered or transformed data between tables without manually writing each VALUES row, supporting imports, archives and summary pipelines.",
+      "analogy": "Think of a SQL query as a carefully specified instruction for selecting or shaping rows in a database.",
+      "analogyLimit": "The analogy does not model SQL evaluation order, transaction guarantees, NULL logic or DBMS-specific implementation details."
+    },
+    "explain": {
+      "narrative": "## Syntax\n```sql\nINSERT INTO destination_table (column_a, column_b)\nSELECT source_a, source_b\nFROM source_table\nWHERE condition;\n```\n\nUnlike SELECT INTO, INSERT INTO ... SELECT does not create the destination table. Define its schema first. Always name destination columns explicitly, align SELECT expressions to that order, and check constraints and duplicate handling. SQLite supports this syntax directly.\n\n## Common mistakes\n- Assuming syntax is identical across all database engines.\n- Omitting explicit column lists when moving data.\n- Ignoring NULL, constraints or result ordering.\n- Treating a documented dialect example as executable SQLite syntax.\n\n## Best practices\nUse explicit columns, test against the target DBMS/version, keep setup scripts repeatable, and verify results with SELECT queries.",
+      "examples": [
+        {
+          "id": "sql10.2-ex1",
+          "language": "en",
+          "title": "Copy all rows into an archive",
+          "code": "DROP TABLE IF EXISTS orders;\nDROP TABLE IF EXISTS order_archive;\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer TEXT, amount INTEGER);\nCREATE TABLE order_archive (order_id INTEGER, customer TEXT, amount INTEGER);\nINSERT INTO orders VALUES (1,'Asha',500),(2,'Bilal',750);\nINSERT INTO order_archive (order_id,customer,amount) SELECT order_id,customer,amount FROM orders;\nSELECT order_id,customer,amount FROM order_archive ORDER BY order_id;",
+          "expectedOutput": "1 | Asha | 500; 2 | Bilal | 750",
+          "explanation": "The destination exists first; SELECT supplies the rows to insert.",
+          "runnable": true
+        },
+        {
+          "id": "sql10.2-ex2",
+          "language": "en",
+          "title": "Insert only rows matching a condition",
+          "code": "DROP TABLE IF EXISTS orders;\nDROP TABLE IF EXISTS large_orders;\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer TEXT, amount INTEGER);\nCREATE TABLE large_orders (order_id INTEGER, customer TEXT, amount INTEGER);\nINSERT INTO orders VALUES (1,'Asha',500),(2,'Bilal',750),(3,'Chitra',1200);\nINSERT INTO large_orders SELECT order_id,customer,amount FROM orders WHERE amount>=700;\nSELECT order_id,customer,amount FROM large_orders ORDER BY order_id;",
+          "expectedOutput": "2 | Bilal | 750; 3 | Chitra | 1200",
+          "explanation": "The WHERE clause filters source rows before insertion.",
+          "runnable": true
+        },
+        {
+          "id": "sql10.2-ex3",
+          "language": "en",
+          "title": "Insert transformed values",
+          "code": "DROP TABLE IF EXISTS products;\nDROP TABLE IF EXISTS price_list;\nCREATE TABLE products (product_id INTEGER PRIMARY KEY, product_name TEXT, price REAL);\nCREATE TABLE price_list (product_name TEXT, price_with_tax REAL);\nINSERT INTO products VALUES (1,'Keyboard',1000),(2,'Mouse',500);\nINSERT INTO price_list (product_name,price_with_tax) SELECT product_name, ROUND(price*1.18,2) FROM products;\nSELECT product_name,price_with_tax FROM price_list ORDER BY product_name;",
+          "expectedOutput": "Keyboard | 1180.0; Mouse | 590.0",
+          "explanation": "Expressions in the SELECT list transform data as it is inserted.",
+          "runnable": true
+        },
+        {
+          "id": "sql10.2-ex4",
+          "language": "en",
+          "title": "Insert grouped totals into a summary table",
+          "code": "DROP TABLE IF EXISTS sales;\nDROP TABLE IF EXISTS sales_summary;\nCREATE TABLE sales (sale_id INTEGER PRIMARY KEY, region TEXT, amount INTEGER);\nCREATE TABLE sales_summary (region TEXT, total_amount INTEGER);\nINSERT INTO sales VALUES (1,'East',300),(2,'West',400),(3,'East',200);\nINSERT INTO sales_summary SELECT region,SUM(amount) FROM sales GROUP BY region;\nSELECT region,total_amount FROM sales_summary ORDER BY region;",
+          "expectedOutput": "East | 500; West | 400",
+          "explanation": "Aggregate results can be inserted into a pre-created summary table.",
+          "runnable": true
+        },
+        {
+          "id": "sql10.2-ex5",
+          "language": "en",
+          "title": "Avoid inserting rows already present",
+          "code": "DROP TABLE IF EXISTS source_codes;\nDROP TABLE IF EXISTS target_codes;\nCREATE TABLE source_codes (code TEXT);\nCREATE TABLE target_codes (code TEXT UNIQUE);\nINSERT INTO source_codes VALUES ('A1'),('B2'),('A1');\nINSERT INTO target_codes VALUES ('A1');\nINSERT INTO target_codes (code) SELECT DISTINCT s.code FROM source_codes AS s WHERE NOT EXISTS (SELECT 1 FROM target_codes AS t WHERE t.code=s.code);\nSELECT code FROM target_codes ORDER BY code;",
+          "expectedOutput": "A1; B2",
+          "explanation": "NOT EXISTS plus DISTINCT prevents already-present values and repeated source values from being inserted.",
+          "runnable": true
+        }
+      ]
+    }
+  },
+  "practise": {
+    "guidedTask": "Run the five examples in order. Before each run, predict the result and explain how SQL INSERT INTO SELECT affects it.",
+    "independentTask": "Create your own small dataset and write three new queries using SQL INSERT INTO SELECT. Include one boundary case and document the expected output.",
+    "hints": [
+      "Read the target DBMS syntax notes before running an example.",
+      "Use explicit column names and aliases where they improve clarity.",
+      "Check NULL values separately from zero and empty strings.",
+      "Use ORDER BY when the display order matters.",
+      "Compare the returned rows with your prediction after execution."
+    ]
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "DROP TABLE IF EXISTS orders;\nDROP TABLE IF EXISTS order_archive;\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer TEXT, amount INTEGER);\nCREATE TABLE order_archive (order_id INTEGER, customer TEXT, amount INTEGER);\nINSERT INTO orders VALUES (1,'Asha',500),(2,'Bilal',750);\nINSERT INTO order_archive (order_id,customer,amount) SELECT order_id,customer,amount FROM orders;\nSELECT order_id,customer,amount FROM order_archive ORDER BY order_id;",
+    "resetCode": "DROP TABLE IF EXISTS orders;\nDROP TABLE IF EXISTS order_archive;\nCREATE TABLE orders (order_id INTEGER PRIMARY KEY, customer TEXT, amount INTEGER);\nCREATE TABLE order_archive (order_id INTEGER, customer TEXT, amount INTEGER);\nINSERT INTO orders VALUES (1,'Asha',500),(2,'Bilal',750);\nINSERT INTO order_archive (order_id,customer,amount) SELECT order_id,customer,amount FROM orders;\nSELECT order_id,customer,amount FROM order_archive ORDER BY order_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql10.2-q1",
+        "prompt": "Which statement best describes INSERT INTO ... SELECT?",
+        "options": [
+          "It inserts rows returned by a SELECT into an existing table",
+          "It creates a destination table automatically in every DBMS",
+          "It updates source rows",
+          "It deletes destination rows"
+        ],
+        "answer": "It inserts rows returned by a SELECT into an existing table",
+        "explanation": "The SELECT result rows are inserted into a destination table that already exists."
+      },
+      {
+        "id": "sql10.2-q2",
+        "prompt": "Which practice is safest for this topic?",
+        "options": [
+          "Name columns explicitly and verify dialect support",
+          "Assume all SQL dialects use identical syntax",
+          "Ignore NULL and constraint behaviour",
+          "Rely on implicit row order"
+        ],
+        "answer": "Name columns explicitly and verify dialect support",
+        "explanation": "Explicit columns, dialect checks and clear assumptions make SQL predictable."
+      },
+      {
+        "id": "sql10.2-q3",
+        "prompt": "What should a learner check before relying on this feature?",
+        "options": [
+          "The target DBMS and its supported syntax",
+          "Only the browser screen size",
+          "The name of the SQL file",
+          "Whether the query has uppercase keywords"
+        ],
+        "answer": "The target DBMS and its supported syntax",
+        "explanation": "SQL syntax and behaviour can vary between database engines and versions."
+      },
+      {
+        "id": "sql10.2-q4",
+        "prompt": "Which statement about query results is correct?",
+        "options": [
+          "A result should be ordered explicitly when order matters",
+          "Rows are always returned in insertion order",
+          "Aliases change the stored source table",
+          "Comments alter the result set"
+        ],
+        "answer": "A result should be ordered explicitly when order matters",
+        "explanation": "Without ORDER BY, SQL does not guarantee a particular result order."
+      },
+      {
+        "id": "sql10.2-q5",
+        "prompt": "How should this topic be practised in the CodeSaathi SQLite Playground?",
+        "options": [
+          "Run the provided SQLite-compatible examples and distinguish documented dialect syntax",
+          "Paste unsupported DBMS syntax and assume it will run",
+          "Skip the setup statements",
+          "Treat expected output as a database command"
+        ],
+        "answer": "Run the provided SQLite-compatible examples and distinguish documented dialect syntax",
+        "explanation": "The Playground runs SQLite, so dialect-specific syntax must be labelled and translated to a supported equivalent."
+      }
+    ]
+  },
+  "status": "draft"
+}
