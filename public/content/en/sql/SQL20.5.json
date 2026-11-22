@@ -1,0 +1,161 @@
+{
+  "id": "sql.sql20.5.en",
+  "courseId": "sql",
+  "moduleId": "SQL20",
+  "topicId": "SQL20.5",
+  "title": "Secure Backups, Retention and Access Reviews",
+  "language": "en",
+  "learningObjectives": [
+    "Explain why database backups are sensitive copies of production data.",
+    "Record backup metadata and verification status.",
+    "Query backup recency and integrity-review results.",
+    "Describe encryption, key management and restricted backup access.",
+    "Plan retention and recovery tests rather than relying on backup existence alone."
+  ],
+  "prerequisites": [
+    "SQL1.1",
+    "SQL4.1",
+    "SQL11.4",
+    "SQL11.5",
+    "SQL11.6"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A backup is a recoverable copy of database state. Because it may contain the same sensitive information as the live database, backup storage, transfer, access, retention and restoration must be protected.",
+      "whyItMatters": "A backup that is stolen, corrupted or impossible to restore does not provide reliable recovery and may create a separate privacy incident.",
+      "analogy": "A spare key is useful only if it is protected, labelled and tested before an emergency.",
+      "analogyLimit": "A SQL table can track backup metadata but does not itself create, encrypt, verify or restore a physical database backup."
+    },
+    "explain": {
+      "narrative": "## Backup security\nProtect backup files with encryption in transit and at rest, restrict access to the smallest operational group, manage encryption keys separately and log backup/restore activity. Do not assume a local database snapshot is encrypted because it is stored in IndexedDB or exported as a file.\n\n## Recovery evidence\nTrack backup type, time, location reference, completion state and integrity verification. Periodically restore to an isolated environment and test application-level data consistency; a successful backup job alone is not proof of recoverability.\n\n## Retention and access review\nKeep backups only as long as policy and legal obligations require. Expire obsolete copies securely, review who can read or restore backups, and record approval and review dates.\n\n## SQLite boundary\nSQLite provides file/database backup mechanisms through its library and tooling, but SQL statements in this lesson only model the backup inventory. Actual backup creation, encryption and restore are host/application or operations tasks.",
+      "examples": [
+        {
+          "id": "sql205-ex1",
+          "language": "en",
+          "title": "Create a backup inventory",
+          "code": "CREATE TABLE sec20_backups (backup_id INTEGER PRIMARY KEY, backup_type TEXT NOT NULL CHECK (backup_type IN ('full','incremental')), created_at TEXT NOT NULL, location_ref TEXT NOT NULL, backup_state TEXT NOT NULL CHECK (backup_state IN ('complete','failed')), integrity_verified INTEGER NOT NULL CHECK (integrity_verified IN (0,1)));",
+          "expectedOutput": "Table created",
+          "explanation": "Stores metadata about backup operations. location_ref is a non-secret storage reference, not a credential or public URL.",
+          "runnable": true
+        },
+        {
+          "id": "sql205-ex2",
+          "language": "en",
+          "title": "Record successful and failed backup attempts",
+          "code": "INSERT INTO sec20_backups VALUES (1, 'full', '2026-11-01T02:00:00Z', 'vault-A/object-1', 'complete', 1), (2, 'full', '2026-11-10T02:00:00Z', 'vault-A/object-2', 'complete', 0), (3, 'incremental', '2026-11-21T02:00:00Z', 'vault-B/object-3', 'complete', 1), (4, 'incremental', '2026-11-22T02:00:00Z', 'vault-B/object-4', 'failed', 0);",
+          "expectedOutput": "4 rows inserted",
+          "explanation": "Adds two verified/unverified successful records and one failed attempt. The metadata makes it possible to distinguish job completion from verified recoverability.",
+          "runnable": true
+        },
+        {
+          "id": "sql205-ex3",
+          "language": "en",
+          "title": "Find the newest completed backup",
+          "code": "SELECT created_at, backup_type FROM sec20_backups WHERE backup_state = 'complete' ORDER BY created_at DESC LIMIT 1;",
+          "expectedOutput": "2026-11-21T02:00:00Z | incremental",
+          "explanation": "Returns the most recent completed backup. A production recovery plan must also verify that the required full backup and all dependent incrementals are available.",
+          "runnable": true
+        },
+        {
+          "id": "sql205-ex4",
+          "language": "en",
+          "title": "Count completed backups that still need integrity verification",
+          "code": "SELECT COUNT(*) AS unverified_backups FROM sec20_backups WHERE backup_state = 'complete' AND integrity_verified = 0;",
+          "expectedOutput": "unverified_backups = 1",
+          "explanation": "Counts completed backup jobs whose integrity verification flag is still false. The flag should be set only after an actual verification process, not merely because a job finished.",
+          "runnable": true
+        },
+        {
+          "id": "sql205-ex5",
+          "language": "en",
+          "title": "List failed backup attempts for operational review",
+          "code": "SELECT backup_id, created_at, location_ref FROM sec20_backups WHERE backup_state = 'failed' ORDER BY created_at DESC;",
+          "expectedOutput": "4 | 2026-11-22T02:00:00Z | vault-B/object-4",
+          "explanation": "Lists failed attempts for follow-up. Operational monitoring should alert on failures and retain enough non-secret metadata to diagnose the issue without exposing storage credentials.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and explain why the latest completed backup is not necessarily sufficient for recovery if the full/incremental chain or restore test is missing.",
+      "independentTask": "Design a backup-review report that identifies stale full backups, failed jobs and completed backups not yet restore-tested. Add a policy for access review and retention expiry.",
+      "hints": [
+        "A backup contains sensitive data and needs protection.",
+        "Separate job completion from integrity verification and restore testing.",
+        "Store references, not storage credentials, in metadata tables.",
+        "Review access to backup and encryption keys.",
+        "Test restoration regularly and document retention."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE sec20_backups (backup_id INTEGER PRIMARY KEY, backup_type TEXT NOT NULL, created_at TEXT NOT NULL, location_ref TEXT NOT NULL, backup_state TEXT NOT NULL, integrity_verified INTEGER NOT NULL);\nINSERT INTO sec20_backups VALUES (1, 'full', '2026-11-01T02:00:00Z', 'vault-A/object-1', 'complete', 1), (2, 'incremental', '2026-11-21T02:00:00Z', 'vault-B/object-3', 'complete', 1);\nSELECT created_at, backup_type FROM sec20_backups WHERE backup_state = 'complete' ORDER BY created_at DESC LIMIT 1;",
+    "resetCode": "CREATE TABLE sec20_backups (backup_id INTEGER PRIMARY KEY, backup_type TEXT NOT NULL, created_at TEXT NOT NULL, location_ref TEXT NOT NULL, backup_state TEXT NOT NULL, integrity_verified INTEGER NOT NULL);\nINSERT INTO sec20_backups VALUES (1, 'full', '2026-11-01T02:00:00Z', 'vault-A/object-1', 'complete', 1), (2, 'incremental', '2026-11-21T02:00:00Z', 'vault-B/object-3', 'complete', 1);\nSELECT created_at, backup_type FROM sec20_backups WHERE backup_state = 'complete' ORDER BY created_at DESC LIMIT 1;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql205-q1",
+        "prompt": "Why are database backups sensitive?",
+        "options": [
+          "They can contain the same private data as the live database",
+          "They contain only SQL keywords",
+          "They cannot be copied",
+          "They are always encrypted"
+        ],
+        "answer": "They can contain the same private data as the live database",
+        "explanation": "Backups must be protected as sensitive data stores."
+      },
+      {
+        "id": "sql205-q2",
+        "prompt": "What proves a backup is recoverable?",
+        "options": [
+          "A tested restore with integrity and application checks",
+          "A filename ending in .db",
+          "A successful job status alone",
+          "An entry in a metadata table"
+        ],
+        "answer": "A tested restore with integrity and application checks",
+        "explanation": "Restore testing verifies more than backup-job completion."
+      },
+      {
+        "id": "sql205-q3",
+        "prompt": "Where should backup encryption keys be stored?",
+        "options": [
+          "In a separately protected key-management boundary",
+          "Inside the same unprotected backup file",
+          "In a public SQL table",
+          "In a query comment"
+        ],
+        "answer": "In a separately protected key-management boundary",
+        "explanation": "Separating keys from backups reduces the impact of storage compromise."
+      },
+      {
+        "id": "sql205-q4",
+        "prompt": "What does integrity_verified = 0 indicate in this lesson?",
+        "options": [
+          "The completed backup has not yet passed the recorded verification step",
+          "The backup is guaranteed corrupt",
+          "The backup has been restored successfully",
+          "The backup is automatically expired"
+        ],
+        "answer": "The completed backup has not yet passed the recorded verification step",
+        "explanation": "Completion and verification are separate operational states."
+      },
+      {
+        "id": "sql205-q5",
+        "prompt": "What should an access review examine?",
+        "options": [
+          "Who can read, export or restore backup copies and keys",
+          "Only the number of SQL tables",
+          "Only the backup filename",
+          "The ORDER BY clause"
+        ],
+        "answer": "Who can read, export or restore backup copies and keys",
+        "explanation": "Backup privileges and key access should be limited and periodically reviewed."
+      }
+    ]
+  },
+  "status": "draft"
+}
