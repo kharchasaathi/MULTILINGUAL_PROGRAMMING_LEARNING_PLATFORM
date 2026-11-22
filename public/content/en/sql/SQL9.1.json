@@ -1,0 +1,160 @@
+{
+  "id": "sql.sql9.1.en",
+  "courseId": "sql",
+  "moduleId": "SQL9",
+  "topicId": "SQL9.1",
+  "title": "SQL UNION Operator",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of SQL UNION Operator.",
+    "Write valid SQLite queries that demonstrate the topic or a documented equivalent.",
+    "Predict result rows using the supplied sample data.",
+    "Identify common mistakes and important NULL or duplicate behaviour.",
+    "Choose an appropriate query pattern for a practical reporting task."
+  ],
+  "prerequisites": [
+    "SQL5.1",
+    "SQL5.4",
+    "SQL6.1",
+    "SQL8.2"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "UNION combines the result rows of two or more SELECT statements and removes duplicate rows from the combined result. Each SELECT must return the same number of columns in compatible positions. Column names in the combined result are taken from the first SELECT.",
+      "whyItMatters": "UNION is useful when the same kind of record is stored in separate tables or query branches, such as current and archived customers or sales from different periods.",
+      "analogy": "Think of a database report as carefully combining or grouping rows from well-labelled registers to answer a specific question.",
+      "analogyLimit": "The analogy does not model SQL's exact evaluation rules, duplicate semantics, three-valued NULL logic or dialect-specific features."
+    },
+    "explain": {
+      "narrative": "## Core concept\nUNION combines the result rows of two or more SELECT statements and removes duplicate rows from the combined result. Each SELECT must return the same number of columns in compatible positions. Column names in the combined result are taken from the first SELECT.\n\n## Syntax\n```sql\nSELECT column_list FROM source_a\nUNION\nSELECT column_list FROM source_b;\n```\n\n## SQLite sample database\nThe following examples use a small fictional dataset. Each worked example starts with a repeatable setup script so it can be run independently in the SQL Playground.\n\n## Worked examples\n### 1. Combine customer names without duplicates\n```sql\nDROP TABLE IF EXISTS sales_2025;\nDROP TABLE IF EXISTS sales_2026;\nCREATE TABLE sales_2025 (sale_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE sales_2026 (sale_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nINSERT INTO sales_2025 VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada');\nINSERT INTO sales_2026 VALUES (4,'Asha','Rajahmundry'),(5,'Dev','Mumbai'),(6,'Esha','Hyderabad');\nSELECT customer_name FROM sales_2025 UNION SELECT customer_name FROM sales_2026 ORDER BY customer_name;\n```\nExpected result: Asha; Bilal; Chitra; Dev; Esha\n\nUNION removes duplicate result rows, so Asha appears once.\n\n### 2. Combine city lists without duplicates\n```sql\nDROP TABLE IF EXISTS sales_2025;\nDROP TABLE IF EXISTS sales_2026;\nCREATE TABLE sales_2025 (sale_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE sales_2026 (sale_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nINSERT INTO sales_2025 VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada');\nINSERT INTO sales_2026 VALUES (4,'Asha','Rajahmundry'),(5,'Dev','Mumbai'),(6,'Esha','Hyderabad');\nSELECT city FROM sales_2025 UNION SELECT city FROM sales_2026 ORDER BY city;\n```\nExpected result: Hyderabad; Mumbai; Rajahmundry; Vijayawada\n\nThe result is a distinct set of cities from both periods.\n\n### 3. Combine aligned customer and city columns\n```sql\nDROP TABLE IF EXISTS sales_2025;\nDROP TABLE IF EXISTS sales_2026;\nCREATE TABLE sales_2025 (sale_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE sales_2026 (sale_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nINSERT INTO sales_2025 VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada');\nINSERT INTO sales_2026 VALUES (4,'Asha','Rajahmundry'),(5,'Dev','Mumbai'),(6,'Esha','Hyderabad');\nSELECT customer_name, city FROM sales_2025 UNION SELECT customer_name, city FROM sales_2026 ORDER BY customer_name;\n```\nExpected result: Asha | Rajahmundry; Bilal | Hyderabad; Chitra | Vijayawada; Dev | Mumbai; Esha | Hyderabad\n\nBoth SELECT statements return two compatible columns in the same order. The repeated Asha-city pair is removed.\n\n### 4. Combine filtered rows from both sources\n```sql\nDROP TABLE IF EXISTS sales_2025;\nDROP TABLE IF EXISTS sales_2026;\nCREATE TABLE sales_2025 (sale_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE sales_2026 (sale_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nINSERT INTO sales_2025 VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada');\nINSERT INTO sales_2026 VALUES (4,'Asha','Rajahmundry'),(5,'Dev','Mumbai'),(6,'Esha','Hyderabad');\nSELECT customer_name, city FROM sales_2025 WHERE city = 'Hyderabad' UNION SELECT customer_name, city FROM sales_2026 WHERE city = 'Hyderabad' ORDER BY customer_name;\n```\nExpected result: Bilal | Hyderabad; Esha | Hyderabad\n\nEach SELECT can apply its own WHERE condition before the result sets are combined.\n\n### 5. Use UNION to create a combined reporting set\n```sql\nDROP TABLE IF EXISTS sales_2025;\nDROP TABLE IF EXISTS sales_2026;\nCREATE TABLE sales_2025 (sale_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE sales_2026 (sale_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nINSERT INTO sales_2025 VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada');\nINSERT INTO sales_2026 VALUES (4,'Asha','Rajahmundry'),(5,'Dev','Mumbai'),(6,'Esha','Hyderabad');\nSELECT '2025' AS sales_year, customer_name FROM sales_2025 UNION SELECT '2026' AS sales_year, customer_name FROM sales_2026 ORDER BY sales_year, customer_name;\n```\nExpected result: 2025 | Asha; 2025 | Bilal; 2025 | Chitra; 2026 | Asha; 2026 | Dev; 2026 | Esha\n\nThe year literal makes rows from different sources distinguishable, so the two Asha records are not duplicates.\n\n## Query behaviour and dialect notes\nThe examples target SQLite and use portable core SQL syntax. Column positions and compatible data types must align across set-operation branches. Result order is not guaranteed without an outer ORDER BY.\n\n## Common mistakes\n- Returning different numbers of columns from the SELECT branches.\n- Putting columns in different semantic positions.\n- Assuming UNION and UNION ALL treat duplicates the same way.\n- Expecting output order without ORDER BY.\n- Using incompatible types across corresponding columns.\n\n## Best practices\nChoose UNION when duplicate elimination is required and UNION ALL when every source row must be preserved. Align selected columns deliberately, add a source label when provenance matters, and sort only in the final combined query.",
+      "examples": [
+        {
+          "id": "sql9.1-ex1",
+          "language": "en",
+          "title": "Combine customer names without duplicates",
+          "code": "DROP TABLE IF EXISTS sales_2025;\nDROP TABLE IF EXISTS sales_2026;\nCREATE TABLE sales_2025 (sale_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE sales_2026 (sale_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nINSERT INTO sales_2025 VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada');\nINSERT INTO sales_2026 VALUES (4,'Asha','Rajahmundry'),(5,'Dev','Mumbai'),(6,'Esha','Hyderabad');\nSELECT customer_name FROM sales_2025 UNION SELECT customer_name FROM sales_2026 ORDER BY customer_name;",
+          "expectedOutput": "Asha; Bilal; Chitra; Dev; Esha",
+          "explanation": "UNION removes duplicate result rows, so Asha appears once.",
+          "runnable": true
+        },
+        {
+          "id": "sql9.1-ex2",
+          "language": "en",
+          "title": "Combine city lists without duplicates",
+          "code": "DROP TABLE IF EXISTS sales_2025;\nDROP TABLE IF EXISTS sales_2026;\nCREATE TABLE sales_2025 (sale_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE sales_2026 (sale_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nINSERT INTO sales_2025 VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada');\nINSERT INTO sales_2026 VALUES (4,'Asha','Rajahmundry'),(5,'Dev','Mumbai'),(6,'Esha','Hyderabad');\nSELECT city FROM sales_2025 UNION SELECT city FROM sales_2026 ORDER BY city;",
+          "expectedOutput": "Hyderabad; Mumbai; Rajahmundry; Vijayawada",
+          "explanation": "The result is a distinct set of cities from both periods.",
+          "runnable": true
+        },
+        {
+          "id": "sql9.1-ex3",
+          "language": "en",
+          "title": "Combine aligned customer and city columns",
+          "code": "DROP TABLE IF EXISTS sales_2025;\nDROP TABLE IF EXISTS sales_2026;\nCREATE TABLE sales_2025 (sale_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE sales_2026 (sale_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nINSERT INTO sales_2025 VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada');\nINSERT INTO sales_2026 VALUES (4,'Asha','Rajahmundry'),(5,'Dev','Mumbai'),(6,'Esha','Hyderabad');\nSELECT customer_name, city FROM sales_2025 UNION SELECT customer_name, city FROM sales_2026 ORDER BY customer_name;",
+          "expectedOutput": "Asha | Rajahmundry; Bilal | Hyderabad; Chitra | Vijayawada; Dev | Mumbai; Esha | Hyderabad",
+          "explanation": "Both SELECT statements return two compatible columns in the same order. The repeated Asha-city pair is removed.",
+          "runnable": true
+        },
+        {
+          "id": "sql9.1-ex4",
+          "language": "en",
+          "title": "Combine filtered rows from both sources",
+          "code": "DROP TABLE IF EXISTS sales_2025;\nDROP TABLE IF EXISTS sales_2026;\nCREATE TABLE sales_2025 (sale_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE sales_2026 (sale_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nINSERT INTO sales_2025 VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada');\nINSERT INTO sales_2026 VALUES (4,'Asha','Rajahmundry'),(5,'Dev','Mumbai'),(6,'Esha','Hyderabad');\nSELECT customer_name, city FROM sales_2025 WHERE city = 'Hyderabad' UNION SELECT customer_name, city FROM sales_2026 WHERE city = 'Hyderabad' ORDER BY customer_name;",
+          "expectedOutput": "Bilal | Hyderabad; Esha | Hyderabad",
+          "explanation": "Each SELECT can apply its own WHERE condition before the result sets are combined.",
+          "runnable": true
+        },
+        {
+          "id": "sql9.1-ex5",
+          "language": "en",
+          "title": "Use UNION to create a combined reporting set",
+          "code": "DROP TABLE IF EXISTS sales_2025;\nDROP TABLE IF EXISTS sales_2026;\nCREATE TABLE sales_2025 (sale_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE sales_2026 (sale_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nINSERT INTO sales_2025 VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada');\nINSERT INTO sales_2026 VALUES (4,'Asha','Rajahmundry'),(5,'Dev','Mumbai'),(6,'Esha','Hyderabad');\nSELECT '2025' AS sales_year, customer_name FROM sales_2025 UNION SELECT '2026' AS sales_year, customer_name FROM sales_2026 ORDER BY sales_year, customer_name;",
+          "expectedOutput": "2025 | Asha; 2025 | Bilal; 2025 | Chitra; 2026 | Asha; 2026 | Dev; 2026 | Esha",
+          "explanation": "The year literal makes rows from different sources distinguishable, so the two Asha records are not duplicates.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the setup, execute each SELECT separately, then combine them with UNION. Predict which complete rows are duplicates before running the combined query.",
+      "independentTask": "Create current_members and former_members tables with member_id, full_name and city. Write five UNION queries that combine names, cities and aligned two-column reports. Include one filtered branch and explain why duplicate removal happens on the entire selected row.",
+      "hints": [
+        "Both SELECT branches must return the same number of columns.",
+        "Align columns by meaning and position, not just by name.",
+        "The combined output column names come from the first SELECT.",
+        "UNION removes duplicate complete rows, not just duplicates in one chosen column.",
+        "Use ORDER BY after the final SELECT to sort the combined result."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "DROP TABLE IF EXISTS sales_2025;\nDROP TABLE IF EXISTS sales_2026;\nCREATE TABLE sales_2025 (sale_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE sales_2026 (sale_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nINSERT INTO sales_2025 VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada');\nINSERT INTO sales_2026 VALUES (4,'Asha','Rajahmundry'),(5,'Dev','Mumbai'),(6,'Esha','Hyderabad');\n\n-- Try the lesson's first query\nSELECT customer_name FROM sales_2025 UNION SELECT customer_name FROM sales_2026 ORDER BY customer_name;",
+    "resetCode": "DROP TABLE IF EXISTS sales_2025;\nDROP TABLE IF EXISTS sales_2026;\nCREATE TABLE sales_2025 (sale_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE sales_2026 (sale_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, city TEXT NOT NULL);\nINSERT INTO sales_2025 VALUES (1,'Asha','Rajahmundry'),(2,'Bilal','Hyderabad'),(3,'Chitra','Vijayawada');\nINSERT INTO sales_2026 VALUES (4,'Asha','Rajahmundry'),(5,'Dev','Mumbai'),(6,'Esha','Hyderabad');"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql9.1-q1",
+        "prompt": "What is the main purpose of SQL UNION Operator?",
+        "options": [
+          "UNION combines the result rows of two or more SELECT statements and removes duplicate rows from the combined result",
+          "To permanently change the database schema",
+          "To disable query filtering",
+          "To create a new database connection"
+        ],
+        "answer": "UNION combines the result rows of two or more SELECT statements and removes duplicate rows from the combined result",
+        "explanation": "This describes the central operation taught in this lesson."
+      },
+      {
+        "id": "sql9.1-q2",
+        "prompt": "Which statement about the sample queries is correct?",
+        "options": [
+          "The query result depends on the input rows and the SQL condition",
+          "SQL always returns rows in insertion order",
+          "Aliases permanently rename source columns",
+          "A SELECT query always changes stored data"
+        ],
+        "answer": "The query result depends on the input rows and the SQL condition",
+        "explanation": "SQL result sets are determined by the selected source rows and query expressions."
+      },
+      {
+        "id": "sql9.1-q3",
+        "prompt": "Why should an SQL learner inspect expected output?",
+        "options": [
+          "To verify the query's meaning against actual sample data",
+          "To make every query return the same rows",
+          "To avoid using a WHERE clause",
+          "To force a database-specific syntax"
+        ],
+        "answer": "To verify the query's meaning against actual sample data",
+        "explanation": "Expected output helps detect misunderstandings about filtering, grouping, duplicates or comparisons."
+      },
+      {
+        "id": "sql9.1-q4",
+        "prompt": "Which practice improves query reliability?",
+        "options": [
+          "Use explicit conditions and test edge cases",
+          "Omit conditions to shorten every query",
+          "Assume NULL behaves like zero",
+          "Rely on unspecified row order"
+        ],
+        "answer": "Use explicit conditions and test edge cases",
+        "explanation": "Explicit query logic and edge-case testing make results easier to reason about."
+      },
+      {
+        "id": "sql9.1-q5",
+        "prompt": "What should be done when a feature differs between database engines?",
+        "options": [
+          "Label the dialect and verify the target engine's support",
+          "Assume all SQL engines behave identically",
+          "Remove the compatibility note",
+          "Silently replace the syntax without explanation"
+        ],
+        "answer": "Label the dialect and verify the target engine's support",
+        "explanation": "Dialect-aware teaching avoids promising features that the learner's runtime cannot execute."
+      }
+    ]
+  },
+  "status": "draft"
+}
