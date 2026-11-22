@@ -25,7 +25,7 @@
       "analogyLimit": "The analogy does not model B-tree pages, query planner estimates, index maintenance or the full range of SQL access paths."
     },
     "explain": {
-      "narrative": "## Composite indexes\nA composite index stores a key made from multiple columns. For an index on (region, status), region is the leftmost column and status follows it. Queries that constrain region, or region and status together, can often use the index.\n\n## Column order\nPut columns in an order that matches real query patterns. Equality filters, range filters and ORDER BY requirements affect the best design. Do not assume an index on (a,b) is equivalent to an index on (b,a).\n\n## Verify with query plans\nUse EXPLAIN QUERY PLAN to inspect whether the composite index is used. The exact plan text can vary, so verify the plan and the result rows.",
+      "narrative": "## Composite indexes\nA composite index stores a key made from multiple columns. For an index on (region, status), region is the leftmost column and status follows it. Queries that constrain region, or region and status together, can often use the index.\n\n## Column order\nPut columns in an order that matches real query patterns. Equality filters, range filters and ORDER BY requirements affect the best design. Do not assume an index on (a,b) is equivalent to an index on (b,a).\n\n## Verify with query plans\nUse EXPLAIN QUERY PLAN to inspect whether the composite index is used. The exact plan text can vary, so verify the plan and the result rows.\n\n### Leftmost-prefix reasoning\nAn index on `(region, status)` can generally support lookups beginning with region, including region alone or region plus status. It is not equivalent to an index on `(status, region)` for all query patterns. A query filtering only on status may not efficiently use the first index key.\n\n### Equality and range columns\nA common starting design places frequently constrained equality columns before range columns, but workload, sort requirements and selectivity matter. Confirm the actual access plan and avoid adding indexes for hypothetical queries.",
       "examples": [
         {
           "id": "sql15.2-ex1",
@@ -33,7 +33,7 @@
           "title": "Create regional order data",
           "code": "CREATE TABLE perf15_region_orders (order_id INTEGER PRIMARY KEY, region TEXT NOT NULL, status TEXT NOT NULL, amount INTEGER NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create regional order data in SQLite. Verify both the access strategy and the returned data.",
+          "explanation": "Creates a regional orders table with region, status and amount attributes. The query patterns in this lesson filter by both region and status.",
           "runnable": true
         },
         {
@@ -42,7 +42,7 @@
           "title": "Insert sample regional orders",
           "code": "INSERT INTO perf15_region_orders VALUES (1, 'East', 'paid', 100), (2, 'East', 'open', 50), (3, 'West', 'paid', 80), (4, 'West', 'open', 20), (5, 'East', 'paid', 70), (6, 'North', 'paid', 60);",
           "expectedOutput": "6 rows inserted",
-          "explanation": "This example demonstrates insert sample regional orders in SQLite. Verify both the access strategy and the returned data.",
+          "explanation": "Inserts six rows across East, West and North. Two East orders are paid, with amounts 100 and 70, giving a known total of 170.",
           "runnable": true
         },
         {
@@ -51,7 +51,7 @@
           "title": "Create a composite index",
           "code": "CREATE INDEX idx_perf15_region_status ON perf15_region_orders(region, status);",
           "expectedOutput": "Index created",
-          "explanation": "This example demonstrates create a composite index in SQLite. Verify both the access strategy and the returned data.",
+          "explanation": "Creates a composite index whose leftmost key is region and whose second key is status. The order of these columns is part of the index design, not just a cosmetic choice.",
           "runnable": true
         },
         {
@@ -61,7 +61,7 @@
           "code": "EXPLAIN QUERY PLAN SELECT order_id, amount FROM perf15_region_orders WHERE region = 'East' AND status = 'paid';",
           "expectedOutput": "Query plan uses idx_perf15_region_status",
           "expectedPattern": "SEARCH.*USING INDEX idx_perf15_region_status",
-          "explanation": "This example demonstrates inspect a query that constrains both indexed columns in SQLite. Verify both the access strategy and the returned data.",
+          "explanation": "Displays the access plan for a query that constrains both indexed columns with equality predicates. SQLite can use the composite index to narrow the search; exact plan wording can vary with engine version and statistics.",
           "runnable": true
         },
         {
@@ -70,7 +70,7 @@
           "title": "Return matching rows and total",
           "code": "SELECT COUNT(*) AS matching_orders, SUM(amount) AS total_amount FROM perf15_region_orders WHERE region = 'East' AND status = 'paid';",
           "expectedOutput": "2 | 170",
-          "explanation": "This example demonstrates return matching rows and total in SQLite. Verify both the access strategy and the returned data.",
+          "explanation": "Counts the two matching paid East orders and sums their amount to 170. The result confirms the filter logic independently of whether the planner chooses the index.",
           "runnable": true
         }
       ]
