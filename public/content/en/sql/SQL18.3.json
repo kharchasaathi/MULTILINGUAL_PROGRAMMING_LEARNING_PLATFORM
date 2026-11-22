@@ -27,7 +27,7 @@
       "analogyLimit": "The analogy does not model transactional DDL, locking, data backfills, version checks or application compatibility."
     },
     "explain": {
-      "narrative": "## Backfill workflow\nAdd the new field in a compatible way, deploy code that can handle both old and new values, populate existing rows, verify completeness, and only then tighten constraints if the target DBMS supports the required alteration.\n\n## Large datasets\nFor large tables, backfill in bounded batches using a stable key range. Track progress, monitor locks and write load, and make the process restartable.\n\n## Constraint rollout\nBefore adding UNIQUE, CHECK or foreign-key constraints, query for duplicates, invalid values and orphan rows. Clean the data first, then add or validate the constraint using the target DBMS's supported migration approach.",
+      "narrative": "## Backfill workflow\nAdd the new field in a compatible way, deploy code that can handle both old and new values, populate existing rows, verify completeness, and only then tighten constraints if the target DBMS supports the required alteration.\n\n## Large datasets\nFor large tables, backfill in bounded batches using a stable key range. Track progress, monitor locks and write load, and make the process restartable.\n\n## Constraint rollout\nBefore adding UNIQUE, CHECK or foreign-key constraints, query for duplicates, invalid values and orphan rows. Clean the data first, then add or validate the constraint using the target DBMS's supported migration approach.\n\n### Backfill strategy\nA backfill populates newly introduced or previously missing values for existing records. Use a predicate that targets only rows still needing work, and consider stable key ranges or bounded batches to limit locks, transaction duration and replication lag. Make the operation restartable and record progress when the data set is large.\n\n### Constraint rollout gate\nBefore changing a nullable column to NOT NULL or adding a CHECK constraint, count and inspect violating rows, decide how to repair them, and validate the full data set. A zero-NULL count is necessary for a NOT NULL rule but may not establish business correctness.",
       "examples": [
         {
           "id": "sql18.3-ex1",
@@ -35,7 +35,7 @@
           "title": "Create a customer table with a nullable segment",
           "code": "CREATE TABLE mig18_customers (customer_id INTEGER PRIMARY KEY, customer_name TEXT NOT NULL, segment TEXT);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create a customer table with a nullable segment in SQLite. Verify the migration state before and after the operation.",
+          "explanation": "Creates a customer table with a nullable segment. The nullable column represents a staged rollout in which old records may not yet have the new attribute.",
           "runnable": true
         },
         {
@@ -44,7 +44,7 @@
           "title": "Insert legacy rows without a segment",
           "code": "INSERT INTO mig18_customers(customer_id, customer_name) VALUES (1, 'Asha'), (2, 'Bilal'), (3, 'Mira');",
           "expectedOutput": "3 rows inserted",
-          "explanation": "This example demonstrates insert legacy rows without a segment in SQLite. Verify the migration state before and after the operation.",
+          "explanation": "Inserts three legacy-style records without segment values. Because segment is omitted and has no default, each inserted row begins with NULL in that column.",
           "runnable": true
         },
         {
@@ -53,7 +53,7 @@
           "title": "Backfill existing rows in a bounded key range",
           "code": "UPDATE mig18_customers SET segment = 'standard' WHERE segment IS NULL AND customer_id BETWEEN 1 AND 2;",
           "expectedOutput": "2 rows updated",
-          "explanation": "This example demonstrates backfill existing rows in a bounded key range in SQLite. Verify the migration state before and after the operation.",
+          "explanation": "Backfills only customer IDs 1 and 2. The IS NULL predicate avoids overwriting values already supplied by an application, while the bounded key range allows a large migration to be divided into controlled batches.",
           "runnable": true
         },
         {
@@ -62,7 +62,7 @@
           "title": "Complete the remaining backfill",
           "code": "UPDATE mig18_customers SET segment = 'standard' WHERE segment IS NULL;",
           "expectedOutput": "1 row updated",
-          "explanation": "This example demonstrates complete the remaining backfill in SQLite. Verify the migration state before and after the operation.",
+          "explanation": "Backfills any remaining NULL segment values. In a large production table, repeatable batches, progress checkpoints and workload monitoring may be safer than one unbounded update.",
           "runnable": true
         },
         {
@@ -71,7 +71,7 @@
           "title": "Verify no customer remains without a segment",
           "code": "SELECT COUNT(*) AS missing_segments FROM mig18_customers WHERE segment IS NULL;",
           "expectedOutput": "missing_segments = 0",
-          "explanation": "This example demonstrates verify no customer remains without a segment in SQLite. Verify the migration state before and after the operation.",
+          "explanation": "Counts rows that still have NULL segments. A zero result is a validation gate before enforcing NOT NULL; it does not by itself prove every value is semantically correct.",
           "runnable": true
         }
       ]
