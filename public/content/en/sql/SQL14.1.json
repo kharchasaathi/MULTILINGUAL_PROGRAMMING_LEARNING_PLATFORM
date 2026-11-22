@@ -25,7 +25,7 @@
       "analogyLimit": "The analogy does not represent SQL partition rules, frame boundaries, tie handling or optimizer behaviour."
     },
     "explain": {
-      "narrative": "## Window functions\nA window function performs a calculation across a window of rows related to the current row. The OVER clause defines that window. The result is added to each row instead of collapsing the rows into a grouped result.\n\n## Aggregate versus window aggregate\nSUM(amount) with GROUP BY returns one row per group. SUM(amount) OVER () returns every input row and adds the overall total to each one.\n\n## Window definition\nOVER () uses the full result set as the window. Later lessons add PARTITION BY, ORDER BY and frame clauses to control which rows contribute.",
+      "narrative": "## Window functions\nA window function performs a calculation across a window of rows related to the current row. The OVER clause defines that window. The result is added to each row instead of collapsing the rows into a grouped result.\n\n## Aggregate versus window aggregate\nSUM(amount) with GROUP BY returns one row per group. SUM(amount) OVER () returns every input row and adds the overall total to each one.\n\n## Window definition\nOVER () uses the full result set as the window. Later lessons add PARTITION BY, ORDER BY and frame clauses to control which rows contribute.\n\n### Logical query processing\nWindow functions are evaluated after the row set has been formed by FROM, WHERE, GROUP BY and HAVING, and before the final ORDER BY. This is why a window result generally cannot be filtered directly in the same query's WHERE clause; use a CTE or derived table to filter it.\n\n### Window versus grouping\nGROUP BY changes the result grain by producing one row per group. A window function preserves the input row grain and adds a calculation across related rows.",
       "examples": [
         {
           "id": "sql14.1-ex1",
@@ -33,7 +33,7 @@
           "title": "Create a sales table",
           "code": "CREATE TABLE win14_sales (sale_id INTEGER PRIMARY KEY, salesperson TEXT NOT NULL, amount INTEGER NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create a sales table with SQLite window functions. Check the window definition and row order.",
+          "explanation": "Creates a sales table with a primary key, required salesperson and integer amount. Each row is one sale, which remains visible in the later window queries.",
           "runnable": true
         },
         {
@@ -42,7 +42,7 @@
           "title": "Insert sales rows",
           "code": "INSERT INTO win14_sales VALUES (1, 'Asha', 50), (2, 'Bilal', 70), (3, 'Mira', 40), (4, 'Noor', 80);",
           "expectedOutput": "4 rows inserted",
-          "explanation": "This example demonstrates insert sales rows with SQLite window functions. Check the window definition and row order.",
+          "explanation": "Inserts four sales rows with amounts totaling 240. Their average is 60 and the maximum is 80, providing independent checks for the window aggregates.",
           "runnable": true
         },
         {
@@ -51,7 +51,7 @@
           "title": "Add the overall total without grouping rows",
           "code": "SELECT salesperson, amount, SUM(amount) OVER () AS overall_total FROM win14_sales ORDER BY salesperson;",
           "expectedOutput": "Asha | 50 | 240; Bilal | 70 | 240; Mira | 40 | 240; Noor | 80 | 240",
-          "explanation": "This example demonstrates add the overall total without grouping rows with SQLite window functions. Check the window definition and row order.",
+          "explanation": "SUM(amount) OVER () calculates one total across the full window and repeats that value on every source row. Unlike GROUP BY, the window function does not collapse the four sales into one row; the outer ORDER BY controls display order.",
           "runnable": true
         },
         {
@@ -60,7 +60,7 @@
           "title": "Add an overall average",
           "code": "SELECT salesperson, amount, AVG(amount) OVER () AS overall_average FROM win14_sales ORDER BY salesperson;",
           "expectedOutput": "Asha | 50 | 60.0; Bilal | 70 | 60.0; Mira | 40 | 60.0; Noor | 80 | 60.0",
-          "explanation": "This example demonstrates add an overall average with SQLite window functions. Check the window definition and row order.",
+          "explanation": "AVG(amount) OVER () computes the average across all rows and attaches 60.0 to each sale. The decimal display is SQLite's result representation for this aggregate over the sample values.",
           "runnable": true
         },
         {
@@ -69,7 +69,7 @@
           "title": "Compare each row with the overall maximum",
           "code": "SELECT salesperson, amount, MAX(amount) OVER () AS highest_sale FROM win14_sales ORDER BY salesperson;",
           "expectedOutput": "Asha | 50 | 80; Bilal | 70 | 80; Mira | 40 | 80; Noor | 80 | 80",
-          "explanation": "This example demonstrates compare each row with the overall maximum with SQLite window functions. Check the window definition and row order.",
+          "explanation": "MAX(amount) OVER () returns the highest sale amount, 80, for every row. This is useful when each detail row needs a comparison with a global benchmark.",
           "runnable": true
         }
       ]
