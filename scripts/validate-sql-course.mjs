@@ -58,6 +58,7 @@ const pyRunner = [
   "    variants = {'; '.join(row_pipe), '\\n'.join(row_pipe)}",
   "    if len(columns) == 1:",
   "        variants.add('; '.join(row[0] for row in values))",
+  "        variants.add(str(columns[0]) + ' | ' + '; '.join(row[0] for row in values))",
   "        variants.add(str(columns[0]) + ': ' + '; '.join(row[0] for row in values))",
   "        variants.add('\\n'.join(row[0] for row in values))",
   "    if len(values) == 1:",
