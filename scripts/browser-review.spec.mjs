@@ -294,6 +294,26 @@ test("SQL Playground runs SQLite in a worker, persists locally, reports errors a
   await expect(page.locator("#sqlResults")).toContainText("88");
   await expect(page.locator("#sqlStatus")).toHaveAttribute("data-state", "ready");
 
+  // Verify positional and named prepared-statement parameters are bound as values.
+  await page.locator("#sqlCode").fill("SELECT learner_name, score FROM learners WHERE learner_name = ?;");
+  await page.locator("#sqlParams").fill('["Asha"]');
+  await page.locator("#runSql").click();
+  await expect(page.locator("#sqlResults")).toContainText("Asha", { timeout: 15000 });
+  await expect(page.locator("#sqlResults")).toContainText("88");
+  await expect(page.locator("#sqlResults")).not.toContainText("Ravi");
+
+  await page.locator("#sqlCode").fill("SELECT learner_name, score FROM learners WHERE learner_name = :name;");
+  await page.locator("#sqlParams").fill('{"\\u003aname":"Ravi"}');
+  await page.locator("#runSql").click();
+  await expect(page.locator("#sqlResults")).toContainText("Ravi", { timeout: 15000 });
+  await expect(page.locator("#sqlResults")).toContainText("76");
+
+  await page.locator("#sqlCode").fill("SELECT learner_name FROM learners WHERE learner_name = ?; SELECT score FROM learners;");
+  await page.locator("#sqlParams").fill('["Asha"]');
+  await page.locator("#runSql").click();
+  await expect(page.locator("#sqlResults")).toContainText("exactly one SQL statement", { timeout: 15000 });
+  await page.locator("#sqlParams").fill("");
+
   await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.locator("#sqlStatus")).toHaveAttribute("data-state", "ready", { timeout: 120000 });
   await page.locator("#sqlCode").fill("SELECT learner_name, score FROM learners ORDER BY learner_id;");
@@ -311,12 +331,26 @@ test("SQL Playground runs SQLite in a worker, persists locally, reports errors a
   await expect(page.locator("#sqlResults")).toContainText("2", { timeout: 15000 });
   await expect(page.locator("#sqlStatus")).toHaveAttribute("data-state", "ready");
 
+  const exportPromise = page.waitForEvent("download");
+  await page.locator("#exportSqlDatabase").click();
+  const databaseDownload = await exportPromise;
+  const exportedDatabasePath = await databaseDownload.path();
+  expect(exportedDatabasePath).toBeTruthy();
+
   page.once("dialog", dialog => dialog.accept());
   await page.locator("#resetSqlDatabase").click();
   await expect(page.locator("#sqlStatus")).toHaveAttribute("data-state", "ready", { timeout: 15000 });
   await page.locator("#sqlCode").fill("SELECT COUNT(*) AS table_count FROM sqlite_master WHERE type = 'table' AND name = 'learners';");
   await page.locator("#runSql").click();
   await expect(page.locator("#sqlResults")).toContainText("0", { timeout: 15000 });
+
+  page.once("dialog", dialog => dialog.accept());
+  await page.locator("#sqlDatabaseFile").setInputFiles(exportedDatabasePath);
+  await expect(page.locator("#sqlStatus")).toHaveAttribute("data-state", "ready", { timeout: 20000 });
+  await page.locator("#sqlCode").fill("SELECT learner_name, score FROM learners ORDER BY learner_id;");
+  await page.locator("#runSql").click();
+  await expect(page.locator("#sqlResults")).toContainText("Asha", { timeout: 15000 });
+  await expect(page.locator("#sqlResults")).toContainText("Ravi");
 
   await page.locator("#sqlExample").selectOption("join");
   await expect(page.locator("#sqlCode")).toHaveValue(/JOIN/);
