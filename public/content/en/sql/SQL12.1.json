@@ -25,7 +25,7 @@
       "analogyLimit": "The analogy does not model SQL locking, isolation levels, storage durability or engine-specific transaction implementation."
     },
     "explain": {
-      "narrative": "## Transaction basics\nA transaction groups related statements into one unit of work. The application decides when to begin and finish the unit. COMMIT makes the changes permanent; ROLLBACK cancels uncommitted changes.\n\n## ACID properties\n- **Atomicity:** all intended changes happen, or none do.\n- **Consistency:** a committed transaction preserves declared rules and application invariants.\n- **Isolation:** concurrent transactions are controlled so they do not observe unsafe intermediate states.\n- **Durability:** committed changes survive failures according to the engine's durability settings and storage guarantees.\n\n## Example: transfer between accounts\nA transfer normally debits one account and credits another in the same transaction. If the credit fails, roll back the debit. A CHECK constraint can protect individual rows, while transaction logic protects the multi-row operation.\n\n## SQLite context\nSQLite supports transactions. Its locking and isolation model differs from client/server engines. The Playground uses a single browser-side SQLite database, so it can teach transaction statements but cannot simulate real multi-client contention.",
+      "narrative": "## Transaction basics\nA transaction groups related statements into one unit of work. The application decides when to begin and finish the unit. COMMIT makes the changes permanent; ROLLBACK cancels uncommitted changes.\n\n## ACID properties\n- **Atomicity:** all intended changes happen, or none do.\n- **Consistency:** a committed transaction preserves declared rules and application invariants.\n- **Isolation:** concurrent transactions are controlled so they do not observe unsafe intermediate states.\n- **Durability:** committed changes survive failures according to the engine's durability settings and storage guarantees.\n\n## Example: transfer between accounts\nA transfer normally debits one account and credits another in the same transaction. If the credit fails, roll back the debit. A CHECK constraint can protect individual rows, while transaction logic protects the multi-row operation.\n\n## SQLite context\nSQLite supports transactions. Its locking and isolation model differs from client/server engines. The Playground uses a single browser-side SQLite database, so it can teach transaction statements but cannot simulate real multi-client contention.\n\n### ACID in practice\nAtomicity is provided by the transaction boundary, while CHECK and other constraints help preserve consistency. Isolation and durability depend on the database engine, configuration and storage environment. A browser-local single-connection Playground demonstrates transaction syntax but cannot simulate competing bank transfers or production durability guarantees.\n\n### Safe transfer logic\nCheck the debit's affected-row count before crediting and committing. If the debit did not update exactly one account, roll back. For concurrent transfers, use a transaction and an engine-appropriate isolation/locking strategy; do not rely on a prior SELECT alone to reserve funds.",
       "examples": [
         {
           "id": "sql12.1-ex1",
@@ -33,7 +33,7 @@
           "title": "Create accounts table",
           "code": "CREATE TABLE tx12_accounts (account_id INTEGER PRIMARY KEY, balance INTEGER NOT NULL CHECK (balance >= 0));",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create accounts table in SQLite. Observe the transaction boundary and verify the stated result.",
+          "explanation": "Creates an account table with a primary key and a CHECK constraint that rejects negative balances. The constraint protects each stored row, but it does not by itself enforce transfer rules across two accounts.",
           "runnable": true
         },
         {
@@ -42,7 +42,7 @@
           "title": "Insert two accounts",
           "code": "INSERT INTO tx12_accounts VALUES (1, 100), (2, 100);",
           "expectedOutput": "2 rows inserted",
-          "explanation": "This example demonstrates insert two accounts in SQLite. Observe the transaction boundary and verify the stated result.",
+          "explanation": "Inserts two accounts with a combined starting balance of 200. These known values make it possible to verify that the transfer changes the distribution without changing the total.",
           "runnable": true
         },
         {
@@ -51,7 +51,7 @@
           "title": "Transfer funds atomically",
           "code": "BEGIN; UPDATE tx12_accounts SET balance = balance - 25 WHERE account_id = 1; UPDATE tx12_accounts SET balance = balance + 25 WHERE account_id = 2; COMMIT; SELECT account_id, balance FROM tx12_accounts ORDER BY account_id;",
           "expectedOutput": "1 | 75; 2 | 125",
-          "explanation": "This example demonstrates transfer funds atomically in SQLite. Observe the transaction boundary and verify the stated result.",
+          "explanation": "Executes the debit and credit as one explicit transaction, then reads both balances before the batch ends. With the sample rows, account 1 moves from 100 to 75 and account 2 moves from 100 to 125. A production application must check that the debit affected exactly one row and roll back if the source account is missing or has insufficient funds.",
           "runnable": true
         },
         {
@@ -60,7 +60,7 @@
           "title": "Verify total balance is preserved",
           "code": "SELECT SUM(balance) AS total_balance FROM tx12_accounts;",
           "expectedOutput": "total_balance = 200",
-          "explanation": "This example demonstrates verify total balance is preserved in SQLite. Observe the transaction boundary and verify the stated result.",
+          "explanation": "Adds the two account balances. The result remains 200, demonstrating conservation of the total for this successful sample transfer. This is a business invariant that should be tested after transactional operations.",
           "runnable": true
         },
         {
@@ -69,7 +69,7 @@
           "title": "Verify account count and non-negative balances",
           "code": "SELECT COUNT(*) AS account_count, MIN(balance) AS lowest_balance FROM tx12_accounts;",
           "expectedOutput": "2 | 75",
-          "explanation": "This example demonstrates verify account count and non-negative balances in SQLite. Observe the transaction boundary and verify the stated result.",
+          "explanation": "Returns the number of accounts and the minimum balance. The result confirms that both rows remain and the smallest balance is 75; it does not alone prove every transfer rule is correct.",
           "runnable": true
         }
       ]
