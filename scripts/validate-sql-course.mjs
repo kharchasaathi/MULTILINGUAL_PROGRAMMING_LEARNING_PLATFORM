@@ -31,7 +31,6 @@ const pyRunner = [
   "def cell(value):",
   "    if value is None: return 'NULL'",
   "    if isinstance(value, bytes): return '0x' + value.hex()",
-  "    if isinstance(value, float): return format(value, '.15g')",
   "    return str(value)",
   "def norm(value):",
   "    value = value.replace(chr(92) + 'n', chr(10)).replace(chr(92) + 'r', chr(13))",
