@@ -1,0 +1,161 @@
+{
+  "id": "sql.sql24.4.en",
+  "courseId": "sql",
+  "moduleId": "SQL24",
+  "topicId": "SQL24.4",
+  "title": "Data Integrity Checks and Validation Queries",
+  "language": "en",
+  "learningObjectives": [
+    "Distinguish preventive constraints from diagnostic validation queries.",
+    "Find missing parent references and duplicate business keys.",
+    "Check required values, ranges and controlled states.",
+    "Reconcile stored totals with derived totals.",
+    "Design repeatable data-quality checks for operational use."
+  ],
+  "prerequisites": [
+    "SQL3.2",
+    "SQL4.1",
+    "SQL8.1",
+    "SQL9.3",
+    "SQL12.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Data integrity means stored values and relationships obey the rules of the application. Constraints prevent many invalid writes, while validation queries detect existing defects and import problems.",
+      "whyItMatters": "A database can contain structurally valid rows that still violate business rules, especially after imports, migrations or legacy application writes.",
+      "analogy": "A quality inspection checks both whether a product was built to specification and whether the finished batch contains defects.",
+      "analogyLimit": "A validation query detects a problem only when it is run; it does not prevent a later invalid write unless a constraint or enforcement mechanism exists."
+    },
+    "explain": {
+      "narrative": "## Preventive controls\nUse NOT NULL, UNIQUE, CHECK, PRIMARY KEY and FOREIGN KEY constraints for rules that can be enforced in the schema. Enable SQLite foreign keys on every relevant connection.\n\n## Diagnostic checks\nUse LEFT JOIN to find missing parent rows, GROUP BY/HAVING to detect duplicates, and aggregate comparisons to reconcile stored totals. Validation queries are especially useful for staging imports and migrations.\n\n## Business-rule checks\nSome rules depend on context beyond one row, such as a total matching line items or an account not becoming overdrawn. Enforce them with carefully designed transactions, triggers or trusted application logic and test both success and failure paths.",
+      "examples": [
+        {
+          "id": "sql244-ex1",
+          "language": "en",
+          "title": "Create department and employee tables",
+          "code": "CREATE TABLE prj24_departments (department_id INTEGER PRIMARY KEY, department_name TEXT NOT NULL UNIQUE); CREATE TABLE prj24_employees (employee_id INTEGER PRIMARY KEY, employee_code TEXT NOT NULL UNIQUE, employee_name TEXT NOT NULL, department_id INTEGER REFERENCES prj24_departments(department_id), salary INTEGER NOT NULL CHECK (salary >= 0));",
+          "expectedOutput": "Tables created",
+          "explanation": "Adds primary keys, unique business identifiers, a foreign-key relationship and a non-negative salary rule.",
+          "runnable": true
+        },
+        {
+          "id": "sql244-ex2",
+          "language": "en",
+          "title": "Insert valid department and employee records",
+          "code": "INSERT INTO prj24_departments VALUES (1, 'Sales'), (2, 'Support'); INSERT INTO prj24_employees VALUES (1, 'E-101', 'Asha', 1, 60000), (2, 'E-102', 'Bilal', 2, 52000), (3, 'E-103', 'Chitra', 1, 58000);",
+          "expectedOutput": "5 rows inserted",
+          "explanation": "Seeds two departments and three employees. These rows provide a known valid baseline for data-quality checks.",
+          "runnable": true
+        },
+        {
+          "id": "sql244-ex3",
+          "language": "en",
+          "title": "Find employees without a matching department",
+          "code": "SELECT e.employee_code FROM prj24_employees AS e LEFT JOIN prj24_departments AS d ON d.department_id = e.department_id WHERE d.department_id IS NULL;",
+          "expectedOutput": "(no rows)",
+          "explanation": "Uses a LEFT JOIN to identify employees whose department reference is missing. The empty result indicates no orphan was found in this sample.",
+          "runnable": true
+        },
+        {
+          "id": "sql244-ex4",
+          "language": "en",
+          "title": "Check for duplicate employee codes",
+          "code": "SELECT employee_code, COUNT(*) AS occurrences FROM prj24_employees GROUP BY employee_code HAVING COUNT(*) > 1;",
+          "expectedOutput": "(no rows)",
+          "explanation": "Groups by the business identifier and reports duplicates. The UNIQUE constraint should prevent new duplicates, while this query can audit imported legacy data.",
+          "runnable": true
+        },
+        {
+          "id": "sql244-ex5",
+          "language": "en",
+          "title": "Reconcile employee counts and total salary by department",
+          "code": "SELECT d.department_name, COUNT(e.employee_id) AS employee_count, COALESCE(SUM(e.salary), 0) AS salary_total FROM prj24_departments AS d LEFT JOIN prj24_employees AS e ON e.department_id = d.department_id GROUP BY d.department_id, d.department_name ORDER BY d.department_id;",
+          "expectedOutput": "Sales | 2 | 118000; Support | 1 | 52000",
+          "explanation": "Includes departments even when no employee matches, counts child keys rather than COUNT(*), and uses COALESCE to show zero rather than NULL for an empty group.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the validation queries and explain the difference between a constraint that prevents a defect and a query that detects existing bad data.",
+      "independentTask": "Design a validation pack for an imported invoice table: missing customers, duplicate invoice numbers, negative totals, line/header mismatches and missing dates.",
+      "hints": [
+        "Constraints prevent invalid writes at the database boundary.",
+        "LEFT JOIN can reveal missing parent matches.",
+        "GROUP BY/HAVING can find duplicate business keys.",
+        "COUNT(child_key) differs from COUNT(*) in an outer join.",
+        "Reconcile derived totals against source records."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE prj24_departments (department_id INTEGER PRIMARY KEY, department_name TEXT NOT NULL UNIQUE);\nCREATE TABLE prj24_employees (employee_id INTEGER PRIMARY KEY, employee_code TEXT NOT NULL UNIQUE, department_id INTEGER REFERENCES prj24_departments(department_id));\nINSERT INTO prj24_departments VALUES (1, 'Sales');\nINSERT INTO prj24_employees VALUES (1, 'E-101', 1), (2, 'E-102', 1);\nSELECT d.department_name, COUNT(e.employee_id) AS employee_count FROM prj24_departments d LEFT JOIN prj24_employees e ON e.department_id=d.department_id GROUP BY d.department_id;",
+    "resetCode": "CREATE TABLE prj24_departments (department_id INTEGER PRIMARY KEY, department_name TEXT NOT NULL UNIQUE);\nCREATE TABLE prj24_employees (employee_id INTEGER PRIMARY KEY, employee_code TEXT NOT NULL UNIQUE, department_id INTEGER REFERENCES prj24_departments(department_id));\nINSERT INTO prj24_departments VALUES (1, 'Sales');\nINSERT INTO prj24_employees VALUES (1, 'E-101', 1), (2, 'E-102', 1);\nSELECT d.department_name, COUNT(e.employee_id) AS employee_count FROM prj24_departments d LEFT JOIN prj24_employees e ON e.department_id=d.department_id GROUP BY d.department_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql244-q1",
+        "prompt": "What is a preventive integrity control?",
+        "options": [
+          "A constraint that rejects invalid writes",
+          "A report run once a year",
+          "A chart of query timings",
+          "A comment in a SQL file"
+        ],
+        "answer": "A constraint that rejects invalid writes",
+        "explanation": "Constraints enforce rules at the data boundary."
+      },
+      {
+        "id": "sql244-q2",
+        "prompt": "How can a LEFT JOIN help find orphan rows?",
+        "options": [
+          "Filter for a NULL key from the parent table",
+          "Use ORDER BY only",
+          "Count every row without a join",
+          "Use CROSS JOIN"
+        ],
+        "answer": "Filter for a NULL key from the parent table",
+        "explanation": "Unmatched child rows have NULL parent columns in a LEFT JOIN."
+      },
+      {
+        "id": "sql244-q3",
+        "prompt": "Which query pattern detects duplicate business identifiers?",
+        "options": [
+          "GROUP BY key HAVING COUNT(*) > 1",
+          "ORDER BY key LIMIT 1",
+          "SELECT DISTINCT key only",
+          "CREATE VIEW key"
+        ],
+        "answer": "GROUP BY key HAVING COUNT(*) > 1",
+        "explanation": "Grouping and filtering counts identifies repeated values."
+      },
+      {
+        "id": "sql244-q4",
+        "prompt": "Why use COUNT(child_key) with a LEFT JOIN?",
+        "options": [
+          "It counts only matching child rows, not the preserved parent row",
+          "It counts every parent twice",
+          "It converts NULL to zero automatically",
+          "It removes duplicates"
+        ],
+        "answer": "It counts only matching child rows, not the preserved parent row",
+        "explanation": "COUNT(expression) ignores NULL values from unmatched child rows."
+      },
+      {
+        "id": "sql244-q5",
+        "prompt": "Do validation queries prevent future invalid writes?",
+        "options": [
+          "No; constraints or trusted enforcement are also needed",
+          "Yes, automatically forever",
+          "Only if they use GROUP BY",
+          "Only after an index is created"
+        ],
+        "answer": "No; constraints or trusted enforcement are also needed",
+        "explanation": "A diagnostic query reports current defects but does not enforce future writes."
+      }
+    ]
+  },
+  "status": "draft"
+}
