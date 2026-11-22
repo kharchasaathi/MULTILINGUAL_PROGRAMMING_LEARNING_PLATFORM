@@ -1,0 +1,160 @@
+{
+  "id": "sql.sql15.2.en",
+  "courseId": "sql",
+  "moduleId": "SQL15",
+  "topicId": "SQL15.2",
+  "title": "Composite Indexes and Column Order",
+  "language": "en",
+  "learningObjectives": [
+    "Define a composite index and explain why column order matters.",
+    "Describe the leftmost-prefix principle for a composite index.",
+    "Create a multi-column index for a common query pattern.",
+    "Use EXPLAIN QUERY PLAN to inspect a composite-index lookup.",
+    "Choose index column order based on actual filters and sorting needs."
+  ],
+  "prerequisites": [
+    "SQL3.10",
+    "SQL5.4",
+    "SQL5.6"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A composite index contains more than one column. In SQLite, the leftmost columns of the index are especially important: a query that constrains the leading column or a leading prefix can often use the index, while a query that filters only a later column may not benefit in the same way.",
+      "whyItMatters": "Choosing the right column order helps indexes support common multi-column filters and sort patterns without creating unnecessary indexes.",
+      "analogy": "An index is like a sorted lookup guide that points toward the relevant records instead of requiring every page to be read.",
+      "analogyLimit": "The analogy does not model B-tree pages, query planner estimates, index maintenance or the full range of SQL access paths."
+    },
+    "explain": {
+      "narrative": "## Composite indexes\nA composite index stores a key made from multiple columns. For an index on (region, status), region is the leftmost column and status follows it. Queries that constrain region, or region and status together, can often use the index.\n\n## Column order\nPut columns in an order that matches real query patterns. Equality filters, range filters and ORDER BY requirements affect the best design. Do not assume an index on (a,b) is equivalent to an index on (b,a).\n\n## Verify with query plans\nUse EXPLAIN QUERY PLAN to inspect whether the composite index is used. The exact plan text can vary, so verify the plan and the result rows.",
+      "examples": [
+        {
+          "id": "sql15.2-ex1",
+          "language": "en",
+          "title": "Create regional order data",
+          "code": "CREATE TABLE perf15_region_orders (order_id INTEGER PRIMARY KEY, region TEXT NOT NULL, status TEXT NOT NULL, amount INTEGER NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "This example demonstrates create regional order data in SQLite. Verify both the access strategy and the returned data.",
+          "runnable": true
+        },
+        {
+          "id": "sql15.2-ex2",
+          "language": "en",
+          "title": "Insert sample regional orders",
+          "code": "INSERT INTO perf15_region_orders VALUES (1, 'East', 'paid', 100), (2, 'East', 'open', 50), (3, 'West', 'paid', 80), (4, 'West', 'open', 20), (5, 'East', 'paid', 70), (6, 'North', 'paid', 60);",
+          "expectedOutput": "6 rows inserted",
+          "explanation": "This example demonstrates insert sample regional orders in SQLite. Verify both the access strategy and the returned data.",
+          "runnable": true
+        },
+        {
+          "id": "sql15.2-ex3",
+          "language": "en",
+          "title": "Create a composite index",
+          "code": "CREATE INDEX idx_perf15_region_status ON perf15_region_orders(region, status);",
+          "expectedOutput": "Index created",
+          "explanation": "This example demonstrates create a composite index in SQLite. Verify both the access strategy and the returned data.",
+          "runnable": true
+        },
+        {
+          "id": "sql15.2-ex4",
+          "language": "en",
+          "title": "Inspect a query that constrains both indexed columns",
+          "code": "EXPLAIN QUERY PLAN SELECT order_id, amount FROM perf15_region_orders WHERE region = 'East' AND status = 'paid';",
+          "expectedOutput": "Query plan uses idx_perf15_region_status",
+          "expectedPattern": "SEARCH.*USING INDEX idx_perf15_region_status",
+          "explanation": "This example demonstrates inspect a query that constrains both indexed columns in SQLite. Verify both the access strategy and the returned data.",
+          "runnable": true
+        },
+        {
+          "id": "sql15.2-ex5",
+          "language": "en",
+          "title": "Return matching rows and total",
+          "code": "SELECT COUNT(*) AS matching_orders, SUM(amount) AS total_amount FROM perf15_region_orders WHERE region = 'East' AND status = 'paid';",
+          "expectedOutput": "2 | 170",
+          "explanation": "This example demonstrates return matching rows and total in SQLite. Verify both the access strategy and the returned data.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and inspect the composite index plan. Identify the leading column and explain why both filters match the index key.",
+      "independentTask": "Create an orders table with customer, status and order_date. Design a composite index for a realistic filter and justify the column order using the queries your application runs.",
+      "hints": [
+        "A composite index contains multiple key columns.",
+        "The leftmost column begins the index key.",
+        "An index on (region,status) is not identical to one on (status,region).",
+        "Use query plans to inspect whether a query uses the index.",
+        "Design indexes from observed query patterns, not guesses."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE perf15_region_orders (order_id INTEGER PRIMARY KEY, region TEXT NOT NULL, status TEXT NOT NULL, amount INTEGER NOT NULL);\nINSERT INTO perf15_region_orders VALUES (1, 'East', 'paid', 100), (2, 'East', 'open', 50), (3, 'West', 'paid', 80), (4, 'West', 'open', 20), (5, 'East', 'paid', 70), (6, 'North', 'paid', 60);\nCREATE INDEX idx_perf15_region_status ON perf15_region_orders(region, status);\nSELECT order_id, amount FROM perf15_region_orders WHERE region = 'East' AND status = 'paid';",
+    "resetCode": "CREATE TABLE perf15_region_orders (order_id INTEGER PRIMARY KEY, region TEXT NOT NULL, status TEXT NOT NULL, amount INTEGER NOT NULL);\nINSERT INTO perf15_region_orders VALUES (1, 'East', 'paid', 100), (2, 'East', 'open', 50), (3, 'West', 'paid', 80), (4, 'West', 'open', 20), (5, 'East', 'paid', 70), (6, 'North', 'paid', 60);\nCREATE INDEX idx_perf15_region_status ON perf15_region_orders(region, status);\nSELECT order_id, amount FROM perf15_region_orders WHERE region = 'East' AND status = 'paid';"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql15.2-q1",
+        "prompt": "What is a composite index?",
+        "options": [
+          "An index containing more than one column",
+          "An index stored in two databases",
+          "A table with multiple primary keys",
+          "A transaction with multiple savepoints"
+        ],
+        "answer": "An index containing more than one column",
+        "explanation": "A composite index uses multiple columns as its key."
+      },
+      {
+        "id": "sql15.2-q2",
+        "prompt": "What is the leftmost-prefix principle?",
+        "options": [
+          "Queries can often use the leading column or a leading prefix of a composite index",
+          "Only the last index column can be searched",
+          "Every column must be filtered with LIKE",
+          "Index order never matters"
+        ],
+        "answer": "Queries can often use the leading column or a leading prefix of a composite index",
+        "explanation": "The leading columns are important to how a composite index can be used."
+      },
+      {
+        "id": "sql15.2-q3",
+        "prompt": "Are indexes on (region,status) and (status,region) interchangeable?",
+        "options": [
+          "No, their leading key columns differ",
+          "Yes, always",
+          "Only when both columns are integers",
+          "Only when the table has no primary key"
+        ],
+        "answer": "No, their leading key columns differ",
+        "explanation": "Column order changes which query predicates can use the index efficiently."
+      },
+      {
+        "id": "sql15.2-q4",
+        "prompt": "How should composite index order be chosen?",
+        "options": [
+          "From real filter, join and sort patterns",
+          "Alphabetically by column name",
+          "By the longest column name",
+          "Randomly"
+        ],
+        "answer": "From real filter, join and sort patterns",
+        "explanation": "Index order should match the workload's access patterns."
+      },
+      {
+        "id": "sql15.2-q5",
+        "prompt": "Which tool helps verify index usage in SQLite?",
+        "options": [
+          "EXPLAIN QUERY PLAN",
+          "COMMIT",
+          "VACUUM INTO only",
+          "CREATE VIEW"
+        ],
+        "answer": "EXPLAIN QUERY PLAN",
+        "explanation": "EXPLAIN QUERY PLAN reveals whether the index is used."
+      }
+    ]
+  },
+  "status": "draft"
+}
