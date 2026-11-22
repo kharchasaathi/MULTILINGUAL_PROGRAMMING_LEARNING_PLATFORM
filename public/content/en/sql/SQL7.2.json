@@ -1,0 +1,160 @@
+{
+  "id": "sql.sql7.2.en",
+  "courseId": "sql",
+  "moduleId": "SQL7",
+  "topicId": "SQL7.2",
+  "title": "SQL Wildcard Characters",
+  "language": "en",
+  "learningObjectives": [
+    "Explain the purpose and behaviour of SQL Wildcard Characters.",
+    "Write valid SQLite queries that use the topic in a WHERE condition.",
+    "Interpret matching and non-matching rows from a sample table.",
+    "Combine the topic with other filtering conditions safely.",
+    "Recognize NULL and SQL dialect considerations relevant to the topic."
+  ],
+  "prerequisites": [
+    "SQL5.4",
+    "SQL5.5",
+    "SQL5.7",
+    "SQL6.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Wildcards are special pattern characters used with LIKE. The portable core patterns are % for zero or more characters and _ for exactly one character. Other pattern syntaxes, such as bracket character lists, differ by database product and are not portable SQL.",
+      "whyItMatters": "Understanding each wildcard prevents accidental broad matches and helps learners express precise text-search requirements.",
+      "analogy": "Think of a librarian applying a clear rule to decide which records belong in a result list.",
+      "analogyLimit": "The analogy does not represent SQL's NULL logic, collation rules, optimizer decisions or product-specific pattern behaviour."
+    },
+    "explain": {
+      "narrative": "## Core concept\nWildcards are special pattern characters used with LIKE. The portable core patterns are % for zero or more characters and _ for exactly one character. Other pattern syntaxes, such as bracket character lists, differ by database product and are not portable SQL.\n\n## SQLite syntax\n```sql\nSELECT column_name FROM table_name WHERE column_name LIKE 'pattern';\n```\n\n## Worked examples\n### 1. Create sample city data\n```sql\nCREATE TABLE wildcard_cities (city_id INTEGER PRIMARY KEY, city_name TEXT);\nINSERT INTO wildcard_cities VALUES (1,'London'),(2,'Londonderry'),(3,'Berlin'),(4,'Boston'),(5,'Oslo'),(6,'Lyon');\n```\nExpected result: Six city rows are inserted.\n\nThe table gives examples with varied lengths and shared character sequences.\n\n### 2. Use % to match any suffix\n```sql\nSELECT city_name FROM wildcard_cities WHERE city_name LIKE 'Lon%' ORDER BY city_name;\n```\nExpected result: London; Londonderry\n\nThe percent wildcard can match zero or more characters after Lon.\n\n### 3. Use % to find a sequence anywhere\n```sql\nSELECT city_name FROM wildcard_cities WHERE city_name LIKE '%on%' ORDER BY city_name;\n```\nExpected result: Boston; London; Londonderry; Lyon\n\nThe pattern searches for on at any position.\n\n### 4. Use _ for one character\n```sql\nSELECT city_name FROM wildcard_cities WHERE city_name LIKE 'L_ndon' ORDER BY city_name;\n```\nExpected result: London\n\nThe underscore occupies exactly one character position between L and ndon.\n\n### 5. Combine _ and %\n```sql\nSELECT city_name FROM wildcard_cities WHERE city_name LIKE 'L___on%' ORDER BY city_name;\n```\nExpected result: London; Londonderry\n\nThree underscores require three characters after L before on; percent allows a remaining suffix.\n\n## Query behaviour and limitations\nThese examples target SQLite. SQL pattern syntax, LIKE case behaviour, collation, date/time representation and support for product-specific wildcard forms can vary across DBMS products. SQLite LIKE uses % and _; do not assume SQL Server-style bracket lists are portable. Comparisons involving NULL evaluate to UNKNOWN, so NULL rows are not selected by ordinary positive or negative predicates.\n\n## Common mistakes\n- Omitting quotes around text patterns or text list values.\n- Assuming % and _ mean the same thing.\n- Treating BETWEEN as exclusive.\n- Using NOT IN without checking whether a subquery can return NULL.\n- Assuming wildcard and collation behaviour is identical across products.\n\n## Best practices\nUse explicit predicates, predictable ORDER BY clauses, representative test data and documented dialect assumptions. Inspect boundary and NULL cases before relying on a filter in a report.",
+      "examples": [
+        {
+          "id": "sql7.2-ex1",
+          "language": "en",
+          "title": "Create sample city data",
+          "code": "CREATE TABLE wildcard_cities (city_id INTEGER PRIMARY KEY, city_name TEXT);\nINSERT INTO wildcard_cities VALUES (1,'London'),(2,'Londonderry'),(3,'Berlin'),(4,'Boston'),(5,'Oslo'),(6,'Lyon');",
+          "expectedOutput": "Six city rows are inserted.",
+          "explanation": "The table gives examples with varied lengths and shared character sequences.",
+          "runnable": true
+        },
+        {
+          "id": "sql7.2-ex2",
+          "language": "en",
+          "title": "Use % to match any suffix",
+          "code": "SELECT city_name FROM wildcard_cities WHERE city_name LIKE 'Lon%' ORDER BY city_name;",
+          "expectedOutput": "London; Londonderry",
+          "explanation": "The percent wildcard can match zero or more characters after Lon.",
+          "runnable": true
+        },
+        {
+          "id": "sql7.2-ex3",
+          "language": "en",
+          "title": "Use % to find a sequence anywhere",
+          "code": "SELECT city_name FROM wildcard_cities WHERE city_name LIKE '%on%' ORDER BY city_name;",
+          "expectedOutput": "Boston; London; Londonderry; Lyon",
+          "explanation": "The pattern searches for on at any position.",
+          "runnable": true
+        },
+        {
+          "id": "sql7.2-ex4",
+          "language": "en",
+          "title": "Use _ for one character",
+          "code": "SELECT city_name FROM wildcard_cities WHERE city_name LIKE 'L_ndon' ORDER BY city_name;",
+          "expectedOutput": "London",
+          "explanation": "The underscore occupies exactly one character position between L and ndon.",
+          "runnable": true
+        },
+        {
+          "id": "sql7.2-ex5",
+          "language": "en",
+          "title": "Combine _ and %",
+          "code": "SELECT city_name FROM wildcard_cities WHERE city_name LIKE 'L___on%' ORDER BY city_name;",
+          "expectedOutput": "London; Londonderry",
+          "explanation": "Three underscores require three characters after L before on; percent allows a remaining suffix.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Try replacing each underscore with another underscore and observe how the required name length changes. Then move the percent sign to the beginning or end and compare results.",
+      "independentTask": "Build a table of at least eight usernames. Write patterns using %, _, and combinations of both. For each query, explain exactly how many characters are fixed and how many may vary.",
+      "hints": [
+        "% can match an empty sequence as well as longer text.",
+        "Each _ consumes exactly one character position.",
+        "A pattern without wildcards behaves like an exact pattern match.",
+        "Bracket patterns such as [abc] are not portable across SQL engines.",
+        "Do not assume wildcard behaviour is case-sensitive or case-insensitive without checking the DBMS."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE wildcard_cities (city_id INTEGER PRIMARY KEY, city_name TEXT);\nINSERT INTO wildcard_cities VALUES (1,'London'),(2,'Londonderry'),(3,'Berlin'),(4,'Boston'),(5,'Oslo'),(6,'Lyon');\n\n-- Try the lesson query here\nSELECT * FROM wildcard_cities;",
+    "resetCode": "CREATE TABLE wildcard_cities (city_id INTEGER PRIMARY KEY, city_name TEXT);\nINSERT INTO wildcard_cities VALUES (1,'London'),(2,'Londonderry'),(3,'Berlin'),(4,'Boston'),(5,'Oslo'),(6,'Lyon');"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql7.2-q1",
+        "prompt": "Which wildcard represents zero or more characters in LIKE?",
+        "options": [
+          "%",
+          "_",
+          "?",
+          "#"
+        ],
+        "answer": "%",
+        "explanation": "Percent can match an empty sequence or a longer sequence."
+      },
+      {
+        "id": "sql7.2-q2",
+        "prompt": "Which wildcard represents exactly one character?",
+        "options": [
+          "_",
+          "%",
+          "*",
+          "..."
+        ],
+        "answer": "_",
+        "explanation": "Underscore matches one character position."
+      },
+      {
+        "id": "sql7.2-q3",
+        "prompt": "What does 'L_ndon' match?",
+        "options": [
+          "A value with L, one character, then ndon",
+          "Any value starting with L",
+          "Any value ending with don",
+          "Only the literal text L_ndon"
+        ],
+        "answer": "A value with L, one character, then ndon",
+        "explanation": "The underscore stands for exactly one character."
+      },
+      {
+        "id": "sql7.2-q4",
+        "prompt": "Are bracket wildcards such as [abc] portable across DBMS products?",
+        "options": [
+          "No; support and syntax vary",
+          "Yes, every SQL engine uses them identically",
+          "They are required by standard SQL",
+          "They work only in SQLite LIKE"
+        ],
+        "answer": "No; support and syntax vary",
+        "explanation": "Bracket-list pattern support is product-specific."
+      },
+      {
+        "id": "sql7.2-q5",
+        "prompt": "What does LIKE 'Oslo' do when no wildcard is present?",
+        "options": [
+          "Matches the exact pattern value",
+          "Matches every value containing o",
+          "Matches values beginning with O",
+          "Matches values ending with lo plus any text"
+        ],
+        "answer": "Matches the exact pattern value",
+        "explanation": "Without wildcard characters, the pattern must match the complete value."
+      }
+    ]
+  },
+  "status": "draft"
+}
