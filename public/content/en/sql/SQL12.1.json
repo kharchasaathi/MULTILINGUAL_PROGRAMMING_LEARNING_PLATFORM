@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql12.1.en",
+  "courseId": "sql",
+  "moduleId": "SQL12",
+  "topicId": "SQL12.1",
+  "title": "Transactions and ACID Properties",
+  "language": "en",
+  "learningObjectives": [
+    "Define a database transaction and explain why related statements belong in one unit.",
+    "Describe Atomicity, Consistency, Isolation and Durability (ACID).",
+    "Demonstrate a multi-row change that must succeed or fail as one unit.",
+    "Explain how constraints and transactions protect different integrity rules.",
+    "Recognize the limits of a single-connection SQLite Playground when discussing concurrency."
+  ],
+  "prerequisites": [
+    "SQL3.3",
+    "SQL3.5",
+    "SQL4.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A transaction is a logical unit of database work. It groups one or more statements so that the database can commit the complete change or roll it back. ACID describes Atomicity, Consistency, Isolation and Durability. The exact guarantees and configuration depend on the database engine.",
+      "whyItMatters": "Transactions protect multi-step changes such as transferring money or reserving stock. Without a transaction, a failure between statements can leave related data inconsistent.",
+      "analogy": "A transaction is like a sealed work packet: its related steps are accepted together or returned for correction.",
+      "analogyLimit": "The analogy does not model SQL locking, isolation levels, storage durability or engine-specific transaction implementation."
+    },
+    "explain": {
+      "narrative": "## Transaction basics\nA transaction groups related statements into one unit of work. The application decides when to begin and finish the unit. COMMIT makes the changes permanent; ROLLBACK cancels uncommitted changes.\n\n## ACID properties\n- **Atomicity:** all intended changes happen, or none do.\n- **Consistency:** a committed transaction preserves declared rules and application invariants.\n- **Isolation:** concurrent transactions are controlled so they do not observe unsafe intermediate states.\n- **Durability:** committed changes survive failures according to the engine's durability settings and storage guarantees.\n\n## Example: transfer between accounts\nA transfer normally debits one account and credits another in the same transaction. If the credit fails, roll back the debit. A CHECK constraint can protect individual rows, while transaction logic protects the multi-row operation.\n\n## SQLite context\nSQLite supports transactions. Its locking and isolation model differs from client/server engines. The Playground uses a single browser-side SQLite database, so it can teach transaction statements but cannot simulate real multi-client contention.",
+      "examples": [
+        {
+          "id": "sql12.1-ex1",
+          "language": "en",
+          "title": "Create accounts table",
+          "code": "CREATE TABLE tx12_accounts (account_id INTEGER PRIMARY KEY, balance INTEGER NOT NULL CHECK (balance >= 0));",
+          "expectedOutput": "Table created",
+          "explanation": "This example demonstrates create accounts table in SQLite. Observe the transaction boundary and verify the stated result.",
+          "runnable": true
+        },
+        {
+          "id": "sql12.1-ex2",
+          "language": "en",
+          "title": "Insert two accounts",
+          "code": "INSERT INTO tx12_accounts VALUES (1, 100), (2, 100);",
+          "expectedOutput": "2 rows inserted",
+          "explanation": "This example demonstrates insert two accounts in SQLite. Observe the transaction boundary and verify the stated result.",
+          "runnable": true
+        },
+        {
+          "id": "sql12.1-ex3",
+          "language": "en",
+          "title": "Transfer funds atomically",
+          "code": "BEGIN; UPDATE tx12_accounts SET balance = balance - 25 WHERE account_id = 1; UPDATE tx12_accounts SET balance = balance + 25 WHERE account_id = 2; COMMIT; SELECT account_id, balance FROM tx12_accounts ORDER BY account_id;",
+          "expectedOutput": "1 | 75; 2 | 125",
+          "explanation": "This example demonstrates transfer funds atomically in SQLite. Observe the transaction boundary and verify the stated result.",
+          "runnable": true
+        },
+        {
+          "id": "sql12.1-ex4",
+          "language": "en",
+          "title": "Verify total balance is preserved",
+          "code": "SELECT SUM(balance) AS total_balance FROM tx12_accounts;",
+          "expectedOutput": "total_balance = 200",
+          "explanation": "This example demonstrates verify total balance is preserved in SQLite. Observe the transaction boundary and verify the stated result.",
+          "runnable": true
+        },
+        {
+          "id": "sql12.1-ex5",
+          "language": "en",
+          "title": "Verify account count and non-negative balances",
+          "code": "SELECT COUNT(*) AS account_count, MIN(balance) AS lowest_balance FROM tx12_accounts;",
+          "expectedOutput": "2 | 75",
+          "explanation": "This example demonstrates verify account count and non-negative balances in SQLite. Observe the transaction boundary and verify the stated result.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Use the account table to model a transfer. Predict balances before running it, execute the transaction, and verify that the total balance remains unchanged.",
+      "independentTask": "Create a two-account transfer with a different amount. Add a verification query for the total balance and describe what should happen if the second update fails.",
+      "hints": [
+        "Start a transaction before the first related change.",
+        "Keep both sides of a transfer inside the same transaction.",
+        "Use COMMIT only after all required statements succeed.",
+        "Use ROLLBACK after a failure before commit.",
+        "Check both row-level constraints and the overall business invariant."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE tx12_accounts (account_id INTEGER PRIMARY KEY, balance INTEGER NOT NULL CHECK (balance >= 0));\nINSERT INTO tx12_accounts VALUES (1, 100), (2, 100);\nBEGIN;\nUPDATE tx12_accounts SET balance = balance - 25 WHERE account_id = 1;\nUPDATE tx12_accounts SET balance = balance + 25 WHERE account_id = 2;\nCOMMIT;\nSELECT account_id, balance FROM tx12_accounts ORDER BY account_id;",
+    "resetCode": "CREATE TABLE tx12_accounts (account_id INTEGER PRIMARY KEY, balance INTEGER NOT NULL CHECK (balance >= 0));\nINSERT INTO tx12_accounts VALUES (1, 100), (2, 100);\nBEGIN;\nUPDATE tx12_accounts SET balance = balance - 25 WHERE account_id = 1;\nUPDATE tx12_accounts SET balance = balance + 25 WHERE account_id = 2;\nCOMMIT;\nSELECT account_id, balance FROM tx12_accounts ORDER BY account_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql12.1-q1",
+        "prompt": "What does Atomicity mean?",
+        "options": [
+          "All statements in the transaction succeed together or the transaction is rolled back",
+          "Every query runs in alphabetical order",
+          "A transaction can contain only one statement",
+          "Every committed row is automatically encrypted"
+        ],
+        "answer": "All statements in the transaction succeed together or the transaction is rolled back",
+        "explanation": "Atomicity treats a transaction as one indivisible unit of work."
+      },
+      {
+        "id": "sql12.1-q2",
+        "prompt": "Which ACID property concerns committed data surviving a failure?",
+        "options": [
+          "Durability",
+          "Isolation",
+          "Atomicity",
+          "Consistency"
+        ],
+        "answer": "Durability",
+        "explanation": "Durability concerns persistence of committed changes."
+      },
+      {
+        "id": "sql12.1-q3",
+        "prompt": "Why should a transfer debit and credit be in one transaction?",
+        "options": [
+          "To prevent only one side from being committed",
+          "To make SELECT queries faster",
+          "To remove primary keys",
+          "To disable constraints"
+        ],
+        "answer": "To prevent only one side from being committed",
+        "explanation": "A transaction prevents a partial transfer from being committed."
+      },
+      {
+        "id": "sql12.1-q4",
+        "prompt": "What does COMMIT do?",
+        "options": [
+          "Makes the transaction's changes permanent",
+          "Deletes the database file",
+          "Starts a savepoint",
+          "Disables foreign keys"
+        ],
+        "answer": "Makes the transaction's changes permanent",
+        "explanation": "COMMIT completes the transaction and persists its changes."
+      },
+      {
+        "id": "sql12.1-q5",
+        "prompt": "What can the single-connection Playground not fully demonstrate?",
+        "options": [
+          "Real multi-client lock contention and concurrent isolation anomalies",
+          "Basic INSERT statements",
+          "A transaction rollback",
+          "A CHECK constraint"
+        ],
+        "answer": "Real multi-client lock contention and concurrent isolation anomalies",
+        "explanation": "The Playground executes against one isolated browser-side SQLite connection."
+      }
+    ]
+  },
+  "status": "draft"
+}
