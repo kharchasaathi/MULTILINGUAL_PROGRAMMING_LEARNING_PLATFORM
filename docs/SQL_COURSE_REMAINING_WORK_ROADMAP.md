@@ -17,7 +17,7 @@ Current audited branch HEAD before this roadmap commit: 60e3e2c0189da3f51474f481
   - 21 SQL Database topics
   - 6 SQL Reference topics (Data Types, Keywords, Quick Reference, MySQL Functions, SQL Server Functions and MS Access Functions)
 - Mapping is a coverage index, not editorial sign-off. Every mapped lesson remains draft pending technical/editorial review.
-- SQL examples on commit `b916118`: 430 executed; 310 expected result sets compared; 115 status-only examples executed; 790 database-state assertions; 2 runtime-dependent outputs pattern-checked; 3 expected-error examples; 430 MCQs. SQL13–SQL19 add 175 more examples and 175 MCQs; latest validation is pending.
+- Latest SQL validation PASS on commit `013c72e251ea0cf9cb4959e4ea11cc5e74b4bc21` (run #45008098331): 121 lessons; 605 SQLite-executed examples; 382 expected outputs compared; 212 status-only examples; 902 database-state assertions; 7 runtime-dependent outputs checked by pattern; 4 expected-error examples; 605 MCQs.
 - SQL Playground is implemented with browser-side SQLite. Final feature/security/browser audit remains pending.
 - Telugu SQL lesson translations are not complete.
 - No production deployment has been performed.
