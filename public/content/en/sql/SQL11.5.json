@@ -27,51 +27,60 @@
       "analogyLimit": "The analogy does not model SQL grammar, database transaction isolation, driver APIs, security boundaries or DBMS-specific implementation details."
     },
     "explain": {
-      "narrative": "## Parameter placeholders\nDatabase APIs commonly support positional placeholders such as ? and named placeholders such as :customer_id or @customer_id. The application prepares a statement and supplies values through a binding API. Placeholder syntax, parameter numbering and type handling depend on the driver and DBMS.\n\n## Values versus identifiers\nA bound parameter can represent a value in a predicate or INSERT. It generally cannot replace a table name, column name, keyword or sort direction. For dynamic identifiers, choose from a fixed allow-list and quote identifiers using the database driver's supported mechanism.\n\n## Playground limitation\nThe CodeSaathi SQL Playground accepts SQL scripts through SQLite executescript-style execution; it does not currently provide an application binding panel. The examples run fixed-value equivalents in SQLite and show parameter templates in comments. In real application code, use the driver's prepare/bind/execute API and never concatenate user input.\n\n## Worked examples\nThe five original SQLite examples below are executable in the CodeSaathi SQL Playground. Any host-language API or other DBMS command is explicitly labelled as explanatory rather than runnable.",
+      "narrative": "## Parameter placeholders\nDatabase APIs commonly support positional placeholders such as ? and named placeholders such as :customer_id or @customer_id. The application prepares a statement and supplies values through a binding API. Placeholder syntax, parameter numbering and type handling depend on the driver and DBMS.\n\n## Values versus identifiers\nA bound parameter can represent a value in a predicate or INSERT. It generally cannot replace a table name, column name, keyword or sort direction. For dynamic identifiers, choose from a fixed allow-list and quote identifiers using the database driver's supported mechanism.\n\n## CodeSaathi Playground parameter panel\nThe SQL Playground now has a **Bound parameters (JSON)** field. Leave it empty for a normal multi-statement script. For a parameterized query, enter one SQL statement with ? placeholders and a JSON array such as [\"Hyderabad\"]. You can also use a named placeholder such as :city with a JSON object whose key includes the placeholder name, for example {\":city\":\"Hyderabad\"}. Parameter mode intentionally accepts exactly one SQL statement.\n\n## Security\nThe database engine binds values separately from SQL syntax. Do not build SQL by concatenating untrusted input. Bound values do not safely substitute table names or other identifiers; use a fixed allow-list for dynamic identifiers.\n\n## Worked examples\nThe examples use bound values where marked. For those examples, copy the SQL into the editor and the listed JSON array into the Bound parameters field. Setup statements remain ordinary SQL.",
       "examples": [
         {
           "id": "sql11.5-ex1",
           "language": "en",
-          "title": "Show a positional parameter template",
-          "code": "-- Application template: SELECT name FROM parameter_people WHERE city = ?;\nDROP TABLE IF EXISTS parameter_people; CREATE TABLE parameter_people(id INTEGER PRIMARY KEY,name TEXT,city TEXT); INSERT INTO parameter_people VALUES(1,'Asha','Hyderabad'),(2,'Bilal','Vijayawada'); SELECT name FROM parameter_people WHERE city='Hyderabad';",
-          "expectedOutput": "Asha",
-          "explanation": "The comment shows the positional placeholder template; the runnable SELECT uses a fixed value because this script runner cannot bind parameters.",
+          "title": "Create a parameter table",
+          "code": "CREATE TABLE parameter_people (id INTEGER PRIMARY KEY, name TEXT NOT NULL, city TEXT NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "Create the table before using bound values.",
           "runnable": true
         },
         {
           "id": "sql11.5-ex2",
           "language": "en",
-          "title": "Show a named parameter template",
-          "code": "-- Application template: SELECT name FROM parameter_people WHERE city = :city;\nDROP TABLE IF EXISTS parameter_people; CREATE TABLE parameter_people(id INTEGER PRIMARY KEY,name TEXT,city TEXT); INSERT INTO parameter_people VALUES(1,'Asha','Hyderabad'),(2,'Bilal','Vijayawada'); SELECT name FROM parameter_people WHERE city='Vijayawada';",
-          "expectedOutput": "Bilal",
-          "explanation": "Named placeholders are bound by the host-language database API, not by string replacement.",
+          "title": "Insert sample people",
+          "code": "INSERT INTO parameter_people VALUES (1, 'Asha', 'Hyderabad'), (2, 'Bilal', 'Vijayawada'), (3, 'Ananya', 'Hyderabad');",
+          "expectedOutput": "3 rows inserted",
+          "explanation": "The insert is a regular statement; no user input is concatenated into SQL.",
           "runnable": true
         },
         {
           "id": "sql11.5-ex3",
           "language": "en",
-          "title": "Use a value in an INSERT pattern",
-          "code": "-- Application template: INSERT INTO parameter_people(id,name,city) VALUES(?,?,?);\nDROP TABLE IF EXISTS parameter_people; CREATE TABLE parameter_people(id INTEGER PRIMARY KEY,name TEXT,city TEXT); INSERT INTO parameter_people VALUES(3,'Mira','Chennai'); SELECT name,city FROM parameter_people WHERE id=3;",
-          "expectedOutput": "Mira | Chennai",
-          "explanation": "The INSERT template uses three value parameters; the runnable statement supplies literal demo data.",
+          "title": "Bind a city value with a positional placeholder",
+          "code": "SELECT name FROM parameter_people WHERE city = ? ORDER BY name;",
+          "expectedOutput": "Ananya; Asha",
+          "parameters": [
+            "Hyderabad"
+          ],
+          "explanation": "Enter [\"Hyderabad\"] in the Bound parameters JSON field. SQLite receives the city as a bound value.",
           "runnable": true
         },
         {
           "id": "sql11.5-ex4",
           "language": "en",
-          "title": "Filter with a range value",
-          "code": "-- Application template: SELECT id FROM parameter_people WHERE id >= :minimum_id;\nDROP TABLE IF EXISTS parameter_people; CREATE TABLE parameter_people(id INTEGER PRIMARY KEY,name TEXT); INSERT INTO parameter_people VALUES(1,'Asha'),(2,'Bilal'),(3,'Mira'); SELECT id FROM parameter_people WHERE id >= 2 ORDER BY id;",
-          "expectedOutput": "2; 3",
-          "explanation": "A parameter can supply a comparison value without changing the query structure.",
+          "title": "Bind a different city value",
+          "code": "SELECT name FROM parameter_people WHERE city = ?;",
+          "expectedOutput": "Bilal",
+          "parameters": [
+            "Vijayawada"
+          ],
+          "explanation": "Reuse the same query shape with a different bound value.",
           "runnable": true
         },
         {
           "id": "sql11.5-ex5",
           "language": "en",
-          "title": "Bind a search pattern as a value",
-          "code": "-- Application template: SELECT name FROM parameter_people WHERE name LIKE ?;\nDROP TABLE IF EXISTS parameter_people; CREATE TABLE parameter_people(name TEXT); INSERT INTO parameter_people VALUES('Asha'),('Ananya'),('Bilal'); SELECT name FROM parameter_people WHERE name LIKE 'A%' ORDER BY name;",
+          "title": "Bind a LIKE pattern",
+          "code": "SELECT name FROM parameter_people WHERE name LIKE ? ORDER BY name;",
           "expectedOutput": "Ananya; Asha",
-          "explanation": "A complete LIKE pattern can be bound as a value; do not concatenate it into SQL syntax.",
+          "parameters": [
+            "A%"
+          ],
+          "explanation": "The entire pattern is bound as a value; it is not concatenated into the SQL statement.",
           "runnable": true
         }
       ]
