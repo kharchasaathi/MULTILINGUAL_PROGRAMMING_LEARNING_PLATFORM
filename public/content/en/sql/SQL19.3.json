@@ -29,7 +29,7 @@
       "analogyLimit": "The analogy does not model database isolation, concurrent workloads, deployment security or recovery guarantees."
     },
     "explain": {
-      "narrative": "## Sale workflow\nA sale typically creates an order header, adds one or more order items, and reduces product stock. Each operation depends on the others.\n\n## Transaction boundary\nStart a transaction before the related writes. Validate stock availability, insert the order and items, update stock, and commit only if all required operations succeed. Otherwise roll back.\n\n## Concurrency note\nA production application must handle concurrent sales that compete for the same stock. Use guarded updates such as UPDATE ... WHERE stock_qty >= requested_quantity and check affected-row counts. The single-connection Playground does not simulate multiple concurrent clients.",
+      "narrative": "## Sale workflow\nA sale typically creates an order header, adds one or more order items, and reduces product stock. Each operation depends on the others.\n\n## Transaction boundary\nStart a transaction before the related writes. Validate stock availability, insert the order and items, update stock, and commit only if all required operations succeed. Otherwise roll back.\n\n## Concurrency note\nA production application must handle concurrent sales that compete for the same stock. Use guarded updates such as UPDATE ... WHERE stock_qty >= requested_quantity and check affected-row counts. The single-connection Playground does not simulate multiple concurrent clients.\n\n### Correct transaction control\nThe guarded UPDATE is a useful concurrency-aware pattern because the availability condition is evaluated as part of the write. The application must check that exactly one row was updated before committing. If zero rows were updated, the application should roll back the earlier sale insert and report insufficient stock. If more than one row is possible, the key design is wrong and should be corrected.\n\n### Concurrency boundary\nA single-browser SQLite Playground session does not reproduce simultaneous sales from multiple application servers. Production systems need transaction isolation appropriate to the engine, proper constraints, retry handling for lock/serialization errors, and an affected-row check before COMMIT.",
       "examples": [
         {
           "id": "sql19.3-ex1",
@@ -37,7 +37,7 @@
           "title": "Create stock and sales tables",
           "code": "CREATE TABLE cap19_stock (product_id INTEGER PRIMARY KEY, stock_qty INTEGER NOT NULL CHECK (stock_qty >= 0)); CREATE TABLE cap19_sales (sale_id INTEGER PRIMARY KEY, product_id INTEGER NOT NULL, quantity INTEGER NOT NULL CHECK (quantity > 0));",
           "expectedOutput": "Tables created",
-          "explanation": "This example demonstrates create stock and sales tables in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "explanation": "Creates a compact stock table and a sales table. The CHECK constraints reject negative stock values and non-positive sale quantities. This teaching schema omits a foreign key from sales.product_id to stock.product_id; a production schema should normally declare that relationship.",
           "runnable": true
         },
         {
@@ -46,7 +46,7 @@
           "title": "Insert starting stock",
           "code": "INSERT INTO cap19_stock VALUES (1, 10), (2, 5);",
           "expectedOutput": "2 rows inserted",
-          "explanation": "This example demonstrates insert starting stock in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "explanation": "Inserts two starting stock balances. Product 1 has ten units and product 2 has five, establishing a known state for the transaction.",
           "runnable": true
         },
         {
@@ -55,7 +55,7 @@
           "title": "Start a sale transaction and record a sale",
           "code": "BEGIN; INSERT INTO cap19_sales VALUES (1, 1, 3); UPDATE cap19_stock SET stock_qty = stock_qty - 3 WHERE product_id = 1 AND stock_qty >= 3; COMMIT;",
           "expectedOutput": "Sale committed",
-          "explanation": "This example demonstrates start a sale transaction and record a sale in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "explanation": "Starts one transaction, records a sale for three units of product 1, then performs a guarded stock update that only matches when at least three units are available. With the supplied sample row, stock changes from 10 to 7. Critical limitation: plain SQL in this example does not automatically roll back the inserted sale when the guarded UPDATE affects zero rows. Application code must inspect the affected-row count and issue ROLLBACK instead of COMMIT if the update did not affect exactly one row.",
           "runnable": true
         },
         {
@@ -64,7 +64,7 @@
           "title": "Verify the sale and remaining stock",
           "code": "SELECT s.sale_id, s.quantity, st.stock_qty FROM cap19_sales AS s JOIN cap19_stock AS st ON st.product_id = s.product_id;",
           "expectedOutput": "1 | 3 | 7",
-          "explanation": "This example demonstrates verify the sale and remaining stock in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "explanation": "Joins the sale to its current stock row using product_id. The result shows sale quantity 3 and remaining stock 7. In a full order model, join through a declared foreign key and include order/customer details as required.",
           "runnable": true
         },
         {
@@ -73,7 +73,7 @@
           "title": "Check that stock is never negative",
           "code": "SELECT COUNT(*) AS invalid_stock_rows FROM cap19_stock WHERE stock_qty < 0;",
           "expectedOutput": "invalid_stock_rows = 0",
-          "explanation": "This example demonstrates check that stock is never negative in the CodeSaathi inventory-and-sales capstone. Verify the data and business rule.",
+          "explanation": "Counts stock rows below zero. A zero result confirms that no negative quantity exists in this sample at query time; the CHECK constraint is the preventive control, while this SELECT is a diagnostic check.",
           "runnable": true
         }
       ]
