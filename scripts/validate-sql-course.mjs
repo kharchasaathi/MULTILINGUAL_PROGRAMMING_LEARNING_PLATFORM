@@ -79,11 +79,14 @@ const pyRunner = [
   "mismatches = []",
   "for item in examples:",
   "    result_sets = []",
+  "    statement_list = list(statements(item['code']))",
+  "    if item.get('parameters') is not None:",
+  "        assert len(statement_list) == 1, item['id'] + \" bound-parameter examples must contain exactly one statement\"",
   "    try:",
-  "        for statement in statements(item['code']):",
+  "        for statement in statement_list:",
   "            before_changes = db.total_changes",
   "            before_schema = schema_snapshot()",
-  "            cursor = db.execute(statement)",
+  "            cursor = db.execute(statement, item['parameters']) if item.get('parameters') is not None else db.execute(statement)",
   "            if cursor.description is not None:",
   "                result_sets.append(([column[0] for column in cursor.description], cursor.fetchall()))",
   "            has_result = cursor.description is not None",
@@ -187,7 +190,8 @@ for (const topic of topics) {
     id: example.id,
     code: example.code,
     expectedOutput: example.expectedOutput,
-    expectsError: /^Error:/i.test(example.expectedOutput.trim())
+    expectsError: /^Error:/i.test(example.expectedOutput.trim()),
+    parameters: example.parameters ?? null
   }));
   const run = spawnSync("python3", ["-c", pyRunner, JSON.stringify(payload)], { encoding: "utf8", timeout: 15000 });
   assert.equal(run.status, 0, topic.topicId + ": SQLite execution/output check failed: " + (run.stderr || run.stdout));
