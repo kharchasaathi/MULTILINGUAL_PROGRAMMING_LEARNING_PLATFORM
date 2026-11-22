@@ -1,0 +1,162 @@
+{
+  "id": "sql.sql25.4.en",
+  "courseId": "sql",
+  "moduleId": "SQL25",
+  "topicId": "SQL25.4",
+  "title": "Project: Hospital Appointment and Billing Database",
+  "language": "en",
+  "learningObjectives": [
+    "Model patients, clinicians, appointments and invoices.",
+    "Use keys and constraints to protect appointment and billing records.",
+    "Query schedules and patient appointment history.",
+    "Aggregate billed amounts by clinician.",
+    "Define privacy, access and operational testing requirements."
+  ],
+  "prerequisites": [
+    "SQL1.1",
+    "SQL3.2",
+    "SQL4.1",
+    "SQL8.1",
+    "SQL12.1",
+    "SQL20.4"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A hospital appointment and billing database records patient identities, clinicians, appointments and charges. Each appointment is an event linked to a patient and clinician.",
+      "whyItMatters": "Healthcare scheduling and billing depend on accurate relationships, clear appointment states and restricted access to sensitive information.",
+      "analogy": "A clinic schedule links a patient visit to a clinician and a billing record, while patient identity remains in a separate register.",
+      "analogyLimit": "This simplified project is not a clinical record system. Real healthcare data requires strict privacy, regulatory, audit, retention and clinical-safety controls."
+    },
+    "explain": {
+      "narrative": "## Project brief\nBuild a compact hospital scheduling and billing database. It must store patients, clinicians, appointments and invoices, support daily schedules, show patient visit history and summarize billed amounts.\n\n## ER design\nPatients and clinicians are parent entities. Appointments reference both and record appointment time and status. Invoices reference appointments and store an amount in integer minor units for this sample.\n\n## Data and safety rules\nUse controlled appointment states, positive or non-negative amount constraints and unique keys. Avoid placing clinical notes or sensitive diagnoses in general reporting tables.\n\n## Project assessment\nTest schedule boundaries, cancelled appointments, missing invoices and multiple visits. Restrict patient information, audit changes to appointments and billing, and document that the sample is not a production clinical system.",
+      "examples": [
+        {
+          "id": "sql254-ex1",
+          "language": "en",
+          "title": "Create patient, clinician, appointment and invoice tables",
+          "code": "CREATE TABLE proj25_patients (patient_id INTEGER PRIMARY KEY, patient_name TEXT NOT NULL, contact_ref TEXT NOT NULL); CREATE TABLE proj25_clinicians (clinician_id INTEGER PRIMARY KEY, clinician_name TEXT NOT NULL, specialty TEXT NOT NULL); CREATE TABLE proj25_appointments (appointment_id INTEGER PRIMARY KEY, patient_id INTEGER NOT NULL REFERENCES proj25_patients(patient_id), clinician_id INTEGER NOT NULL REFERENCES proj25_clinicians(clinician_id), appointment_time TEXT NOT NULL, appointment_status TEXT NOT NULL CHECK (appointment_status IN ('scheduled','completed','cancelled'))); CREATE TABLE proj25_invoices (invoice_id INTEGER PRIMARY KEY, appointment_id INTEGER NOT NULL UNIQUE REFERENCES proj25_appointments(appointment_id), amount_cents INTEGER NOT NULL CHECK (amount_cents >= 0), invoice_state TEXT NOT NULL);",
+          "expectedOutput": "Tables created",
+          "explanation": "Creates four related entities. Each appointment references one patient and clinician; an invoice is linked to at most one appointment in this simplified model.",
+          "runnable": true
+        },
+        {
+          "id": "sql254-ex2",
+          "language": "en",
+          "title": "Seed patients, clinicians, appointments and invoices",
+          "code": "INSERT INTO proj25_patients VALUES (1, 'Asha', 'contact-A'), (2, 'Bilal', 'contact-B'); INSERT INTO proj25_clinicians VALUES (10, 'Dr Rao', 'Cardiology'), (20, 'Dr Sen', 'General'); INSERT INTO proj25_appointments VALUES (101, 1, 10, '2026-11-22T09:00:00', 'completed'), (102, 2, 20, '2026-11-22T10:00:00', 'scheduled'), (103, 1, 20, '2026-11-23T11:00:00', 'cancelled'); INSERT INTO proj25_invoices VALUES (501, 101, 25000, 'issued'), (502, 102, 15000, 'draft');",
+          "expectedOutput": "9 rows inserted",
+          "explanation": "Adds synthetic patient, clinician, appointment and invoice records. contact_ref is a placeholder and must not be treated as a real patient identifier.",
+          "runnable": true
+        },
+        {
+          "id": "sql254-ex3",
+          "language": "en",
+          "title": "List the daily appointment schedule",
+          "code": "SELECT a.appointment_time, p.patient_name, c.clinician_name, a.appointment_status FROM proj25_appointments AS a JOIN proj25_patients AS p ON p.patient_id = a.patient_id JOIN proj25_clinicians AS c ON c.clinician_id = a.clinician_id WHERE a.appointment_time >= '2026-11-22' AND a.appointment_time < '2026-11-23' ORDER BY a.appointment_time;",
+          "expectedOutput": "2026-11-22T09:00:00 | Asha | Dr Rao | completed; 2026-11-22T10:00:00 | Bilal | Dr Sen | scheduled",
+          "explanation": "Returns appointments for the stated day using a half-open timestamp range. The query excludes the cancelled appointment on the next day.",
+          "runnable": true
+        },
+        {
+          "id": "sql254-ex4",
+          "language": "en",
+          "title": "Summarize issued invoice amounts by clinician",
+          "code": "SELECT c.clinician_name, SUM(i.amount_cents) AS billed_cents FROM proj25_invoices AS i JOIN proj25_appointments AS a ON a.appointment_id = i.appointment_id JOIN proj25_clinicians AS c ON c.clinician_id = a.clinician_id WHERE i.invoice_state = 'issued' GROUP BY c.clinician_id, c.clinician_name ORDER BY c.clinician_name;",
+          "expectedOutput": "Dr Rao | 25000",
+          "explanation": "Groups issued invoices by clinician. The draft invoice for Dr Sen is excluded by the WHERE predicate.",
+          "runnable": true
+        },
+        {
+          "id": "sql254-ex5",
+          "language": "en",
+          "title": "Cancel an appointment and verify the state",
+          "code": "UPDATE proj25_appointments SET appointment_status = 'cancelled' WHERE appointment_id = 102 AND appointment_status = 'scheduled'; SELECT appointment_id, appointment_status FROM proj25_appointments WHERE appointment_id = 102;",
+          "expectedOutput": "102 | cancelled",
+          "explanation": "Updates only the scheduled appointment and verifies the state. A real hospital workflow must also apply cancellation policy, audit the actor and handle billing adjustments.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the schedule and billing reports. Explain why the draft invoice is excluded and why patient contact references are not exposed in the schedule output.",
+      "independentTask": "Extend the model with appointment rooms and clinician availability. Add tests for overlapping appointments, cancelled visits, missing invoices and access to patient contact information.",
+      "hints": [
+        "Separate patient identity from appointment events.",
+        "Use controlled appointment states.",
+        "Store billing amounts with a defined currency unit.",
+        "Use explicit columns to minimize sensitive data exposure.",
+        "Audit schedule and billing changes."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE proj25_patients (patient_id INTEGER PRIMARY KEY, patient_name TEXT NOT NULL);\nCREATE TABLE proj25_clinicians (clinician_id INTEGER PRIMARY KEY, clinician_name TEXT NOT NULL);\nCREATE TABLE proj25_appointments (appointment_id INTEGER PRIMARY KEY, patient_id INTEGER NOT NULL, clinician_id INTEGER NOT NULL, appointment_time TEXT NOT NULL, appointment_status TEXT NOT NULL);\nINSERT INTO proj25_patients VALUES (1, 'Asha');\nINSERT INTO proj25_clinicians VALUES (10, 'Dr Rao');\nINSERT INTO proj25_appointments VALUES (101, 1, 10, '2026-11-22T09:00:00', 'scheduled');\nSELECT p.patient_name, c.clinician_name, a.appointment_time FROM proj25_appointments a JOIN proj25_patients p ON p.patient_id=a.patient_id JOIN proj25_clinicians c ON c.clinician_id=a.clinician_id;",
+    "resetCode": "CREATE TABLE proj25_patients (patient_id INTEGER PRIMARY KEY, patient_name TEXT NOT NULL);\nCREATE TABLE proj25_clinicians (clinician_id INTEGER PRIMARY KEY, clinician_name TEXT NOT NULL);\nCREATE TABLE proj25_appointments (appointment_id INTEGER PRIMARY KEY, patient_id INTEGER NOT NULL, clinician_id INTEGER NOT NULL, appointment_time TEXT NOT NULL, appointment_status TEXT NOT NULL);\nINSERT INTO proj25_patients VALUES (1, 'Asha');\nINSERT INTO proj25_clinicians VALUES (10, 'Dr Rao');\nINSERT INTO proj25_appointments VALUES (101, 1, 10, '2026-11-22T09:00:00', 'scheduled');\nSELECT p.patient_name, c.clinician_name, a.appointment_time FROM proj25_appointments a JOIN proj25_patients p ON p.patient_id=a.patient_id JOIN proj25_clinicians c ON c.clinician_id=a.clinician_id;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql254-q1",
+        "prompt": "What does an appointment row represent?",
+        "options": [
+          "A visit event linked to a patient and clinician",
+          "The permanent patient identity only",
+          "A clinician's password",
+          "A database backup"
+        ],
+        "answer": "A visit event linked to a patient and clinician",
+        "explanation": "Appointments are events and should be modeled separately from patients and clinicians."
+      },
+      {
+        "id": "sql254-q2",
+        "prompt": "Why use a controlled appointment_status CHECK?",
+        "options": [
+          "To restrict values to approved workflow states",
+          "To sort the schedule",
+          "To create an invoice",
+          "To encrypt patient data"
+        ],
+        "answer": "To restrict values to approved workflow states",
+        "explanation": "CHECK enforces the allowed state values."
+      },
+      {
+        "id": "sql254-q3",
+        "prompt": "Why is the schedule query's date range half-open?",
+        "options": [
+          "It includes the start and excludes the next day boundary",
+          "It removes all completed appointments",
+          "It changes the time zone automatically",
+          "It includes only NULL values"
+        ],
+        "answer": "It includes the start and excludes the next day boundary",
+        "explanation": "Half-open ranges avoid overlap between adjacent days."
+      },
+      {
+        "id": "sql254-q4",
+        "prompt": "Why exclude draft invoices from billed totals?",
+        "options": [
+          "They have not reached the issued state in this report definition",
+          "They are always zero",
+          "They belong to another patient table",
+          "They have no primary key"
+        ],
+        "answer": "They have not reached the issued state in this report definition",
+        "explanation": "The report explicitly filters to issued invoices."
+      },
+      {
+        "id": "sql254-q5",
+        "prompt": "What is essential for real healthcare systems beyond this schema?",
+        "options": [
+          "Privacy, audit, retention and regulatory controls",
+          "Only more indexes",
+          "Only SELECT *",
+          "No authentication"
+        ],
+        "answer": "Privacy, audit, retention and regulatory controls",
+        "explanation": "Healthcare data requires strict operational and legal safeguards."
+      }
+    ]
+  },
+  "status": "draft"
+}
