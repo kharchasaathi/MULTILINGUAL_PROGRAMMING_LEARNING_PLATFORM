@@ -156,7 +156,7 @@ self.addEventListener("message", async event => {
       send("export-done", { bytes }, [bytes]);
     }
   } catch (error) {
-    const payload = { runId: message.runId, message: error?.message || String(error) };
+    const payload = { runId: message.runId, operation: message.type, message: error?.message || String(error) };
     if (message.type === "run" && db) {
       try {
         const bytes = exportBytes();
