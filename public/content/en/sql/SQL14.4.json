@@ -25,7 +25,7 @@
       "analogyLimit": "The analogy does not represent SQL partition rules, frame boundaries, tie handling or optimizer behaviour."
     },
     "explain": {
-      "narrative": "## LAG and LEAD\nLAG(expression, offset, default) reads a value from a preceding row in the window. LEAD uses a following row. The default offset is one row, and the default result when no row exists is NULL unless a default value is supplied.\n\n## Ordering is essential\nSpecify ORDER BY inside OVER so the previous and next rows have a meaningful sequence. Add a stable tie-breaker when the ordering column is not unique.\n\n## Comparing periods\nA common pattern calculates the previous period value with LAG, then subtracts it from the current value. The first row has no previous value and normally returns NULL.",
+      "narrative": "## LAG and LEAD\nLAG(expression, offset, default) reads a value from a preceding row in the window. LEAD uses a following row. The default offset is one row, and the default result when no row exists is NULL unless a default value is supplied.\n\n## Ordering is essential\nSpecify ORDER BY inside OVER so the previous and next rows have a meaningful sequence. Add a stable tie-breaker when the ordering column is not unique.\n\n## Comparing periods\nA common pattern calculates the previous period value with LAG, then subtracts it from the current value. The first row has no previous value and normally returns NULL.\n\n### Offset, default and missing periods\nLAG and LEAD use a row offset within the ordered window, not a calendar interval. If month numbers are missing, LAG still returns the previous available row. A report that needs the previous calendar month must first create or join to a complete calendar series.\n\n### NULL versus zero\nThe optional default handles the absence of a preceding or following row. It does not automatically replace a NULL expression in an existing row. Use COALESCE separately only when treating a missing measure as zero is correct for the business definition.",
       "examples": [
         {
           "id": "sql14.4-ex1",
@@ -33,7 +33,7 @@
           "title": "Create monthly revenue data",
           "code": "CREATE TABLE win14_months (month_no INTEGER PRIMARY KEY, revenue INTEGER NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create monthly revenue data with SQLite window functions. Check the window definition and row order.",
+          "explanation": "Creates a monthly revenue table with month_no as a unique chronological sequence. A stable order key is essential because LAG and LEAD depend on row order.",
           "runnable": true
         },
         {
@@ -42,7 +42,7 @@
           "title": "Insert four months",
           "code": "INSERT INTO win14_months VALUES (1, 100), (2, 130), (3, 120), (4, 160);",
           "expectedOutput": "4 rows inserted",
-          "explanation": "This example demonstrates insert four months with SQLite window functions. Check the window definition and row order.",
+          "explanation": "Inserts four monthly values: 100, 130, 120 and 160. The next examples compare each month with its immediate neighbour.",
           "runnable": true
         },
         {
@@ -51,7 +51,7 @@
           "title": "Show previous and next month revenue",
           "code": "SELECT month_no, revenue, LAG(revenue) OVER (ORDER BY month_no) AS previous_revenue, LEAD(revenue) OVER (ORDER BY month_no) AS next_revenue FROM win14_months ORDER BY month_no;",
           "expectedOutput": "1 | 100 | NULL | 130; 2 | 130 | 100 | 120; 3 | 120 | 130 | 160; 4 | 160 | 120 | NULL",
-          "explanation": "This example demonstrates show previous and next month revenue with SQLite window functions. Check the window definition and row order.",
+          "explanation": "LAG reads the prior row's revenue and LEAD reads the following row's revenue in month_no order. The first previous value and final next value are NULL because those neighbouring rows do not exist.",
           "runnable": true
         },
         {
@@ -60,7 +60,7 @@
           "title": "Calculate change from the previous month",
           "code": "SELECT month_no, revenue, revenue - LAG(revenue) OVER (ORDER BY month_no) AS change_from_previous FROM win14_months ORDER BY month_no;",
           "expectedOutput": "1 | 100 | NULL; 2 | 130 | 30; 3 | 120 | -10; 4 | 160 | 40",
-          "explanation": "This example demonstrates calculate change from the previous month with SQLite window functions. Check the window definition and row order.",
+          "explanation": "Subtracts the previous month's revenue from the current month's revenue. The first row is NULL because there is no previous month; later rows show increases of 30, a decrease of 10 and an increase of 40.",
           "runnable": true
         },
         {
@@ -69,7 +69,7 @@
           "title": "Supply a default for the first row",
           "code": "SELECT month_no, revenue, LAG(revenue, 1, 0) OVER (ORDER BY month_no) AS previous_or_zero FROM win14_months ORDER BY month_no;",
           "expectedOutput": "1 | 100 | 0; 2 | 130 | 100; 3 | 120 | 130; 4 | 160 | 120",
-          "explanation": "This example demonstrates supply a default for the first row with SQLite window functions. Check the window definition and row order.",
+          "explanation": "Supplies zero as the default value when LAG has no preceding row. This changes only the missing-neighbour result; it does not replace NULL values stored in an existing row.",
           "runnable": true
         }
       ]
