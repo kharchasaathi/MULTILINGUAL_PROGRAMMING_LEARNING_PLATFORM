@@ -1,0 +1,160 @@
+{
+  "id": "sql.sql17.3.en",
+  "courseId": "sql",
+  "moduleId": "SQL17",
+  "topicId": "SQL17.3",
+  "title": "BEFORE Triggers and RAISE Validation",
+  "language": "en",
+  "learningObjectives": [
+    "Describe when a BEFORE trigger runs.",
+    "Use NEW values and a WHEN clause to validate an incoming row.",
+    "Use RAISE(ABORT, message) to reject invalid data in SQLite.",
+    "Distinguish trigger validation from declarative CHECK constraints.",
+    "Recognize SQLite's caution about modifying the target row in BEFORE triggers."
+  ],
+  "prerequisites": [
+    "SQL3.2",
+    "SQL3.3",
+    "SQL3.5",
+    "SQL4.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A BEFORE trigger runs before the row operation. SQLite supports RAISE() inside trigger programs to abort, ignore or otherwise control an operation. BEFORE triggers should be used carefully; SQLite documents caveats when a BEFORE trigger modifies or deletes the row that the outer statement is changing.",
+      "whyItMatters": "Database-side validation can reject invalid writes even when data arrives through different application paths.",
+      "analogy": "A trigger is like an automatic rule attached to a data event: it runs when the specified change occurs, even if the application did not call it directly.",
+      "analogyLimit": "The analogy does not model OLD/NEW row values, transaction timing, recursive execution or DBMS-specific trigger semantics."
+    },
+    "explain": {
+      "narrative": "## BEFORE triggers\nA BEFORE trigger runs before the associated row change. It can inspect NEW values and reject an invalid operation. In SQLite, RAISE(ABORT, message) aborts the current statement with an error.\n\n## Validation with WHEN\nA WHEN clause can make a trigger run only when a condition is true. For example, reject an inserted stock quantity below zero.\n\n## SQLite caution\nAvoid using a BEFORE UPDATE or BEFORE DELETE trigger to modify or delete the same row that the outer statement is changing; SQLite documents undefined or surprising behaviour for such patterns. Prefer AFTER triggers for side effects and constraints for simple declarative rules.",
+      "examples": [
+        {
+          "id": "sql17.3-ex1",
+          "language": "en",
+          "title": "Create a stock table",
+          "code": "CREATE TABLE trg17_stock (item_id INTEGER PRIMARY KEY, item_name TEXT NOT NULL, quantity INTEGER NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "This example demonstrates create a stock table using SQLite triggers. Verify the event, timing and affected rows.",
+          "runnable": true
+        },
+        {
+          "id": "sql17.3-ex2",
+          "language": "en",
+          "title": "Create a validation trigger",
+          "code": "CREATE TRIGGER trg17_stock_nonnegative BEFORE INSERT ON trg17_stock WHEN NEW.quantity < 0 BEGIN SELECT RAISE(ABORT, 'quantity must be non-negative'); END;",
+          "expectedOutput": "Trigger created",
+          "explanation": "This example demonstrates create a validation trigger using SQLite triggers. Verify the event, timing and affected rows.",
+          "runnable": true
+        },
+        {
+          "id": "sql17.3-ex3",
+          "language": "en",
+          "title": "Insert a valid stock row",
+          "code": "INSERT INTO trg17_stock VALUES (1, 'Cable', 5);",
+          "expectedOutput": "1 row inserted",
+          "explanation": "This example demonstrates insert a valid stock row using SQLite triggers. Verify the event, timing and affected rows.",
+          "runnable": true
+        },
+        {
+          "id": "sql17.3-ex4",
+          "language": "en",
+          "title": "Verify the valid row",
+          "code": "SELECT item_name, quantity FROM trg17_stock;",
+          "expectedOutput": "Cable | 5",
+          "explanation": "This example demonstrates verify the valid row using SQLite triggers. Verify the event, timing and affected rows.",
+          "runnable": true
+        },
+        {
+          "id": "sql17.3-ex5",
+          "language": "en",
+          "title": "Reject a negative quantity",
+          "code": "INSERT INTO trg17_stock VALUES (2, 'Adapter', -3);",
+          "expectedOutput": "Error: quantity must be non-negative",
+          "explanation": "This example demonstrates reject a negative quantity using SQLite triggers. Verify the event, timing and affected rows.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the valid insert, then run the final negative-quantity example separately and observe the trigger error.",
+      "independentTask": "Create a booking table and a BEFORE INSERT trigger that rejects a booking with an end date earlier than its start date. Explain whether a CHECK constraint could express the same rule more simply.",
+      "hints": [
+        "BEFORE INSERT runs before the row is added.",
+        "NEW refers to the row values being inserted.",
+        "Use WHEN to test the invalid condition.",
+        "RAISE(ABORT, message) aborts the statement in SQLite.",
+        "Prefer CHECK constraints for simple row-level rules when they can express the requirement."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE trg17_stock (item_id INTEGER PRIMARY KEY, item_name TEXT NOT NULL, quantity INTEGER NOT NULL);\nCREATE TRIGGER trg17_stock_nonnegative BEFORE INSERT ON trg17_stock WHEN NEW.quantity < 0 BEGIN SELECT RAISE(ABORT, 'quantity must be non-negative'); END;\nINSERT INTO trg17_stock VALUES (1, 'Cable', 5);\nSELECT item_name, quantity FROM trg17_stock;",
+    "resetCode": "CREATE TABLE trg17_stock (item_id INTEGER PRIMARY KEY, item_name TEXT NOT NULL, quantity INTEGER NOT NULL);\nCREATE TRIGGER trg17_stock_nonnegative BEFORE INSERT ON trg17_stock WHEN NEW.quantity < 0 BEGIN SELECT RAISE(ABORT, 'quantity must be non-negative'); END;\nINSERT INTO trg17_stock VALUES (1, 'Cable', 5);\nSELECT item_name, quantity FROM trg17_stock;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql17.3-q1",
+        "prompt": "When does a BEFORE INSERT trigger run?",
+        "options": [
+          "Before the row is inserted",
+          "After every SELECT",
+          "After the database is exported",
+          "Only when a table is dropped"
+        ],
+        "answer": "Before the row is inserted",
+        "explanation": "BEFORE INSERT runs before the row operation."
+      },
+      {
+        "id": "sql17.3-q2",
+        "prompt": "What does RAISE(ABORT, message) do in SQLite?",
+        "options": [
+          "Aborts the current statement with an error",
+          "Commits the transaction",
+          "Creates an audit table",
+          "Returns a row number"
+        ],
+        "answer": "Aborts the current statement with an error",
+        "explanation": "RAISE(ABORT) rejects the statement and reports the supplied message."
+      },
+      {
+        "id": "sql17.3-q3",
+        "prompt": "What does NEW.quantity refer to?",
+        "options": [
+          "The quantity value proposed for the inserted row",
+          "The previous row's quantity",
+          "The table's average quantity",
+          "The database version"
+        ],
+        "answer": "The quantity value proposed for the inserted row",
+        "explanation": "NEW exposes the incoming row values."
+      },
+      {
+        "id": "sql17.3-q4",
+        "prompt": "When is a CHECK constraint preferable?",
+        "options": [
+          "When a simple row-level rule can be expressed declaratively",
+          "When a rule requires an external network call",
+          "When a trigger must send an email",
+          "When no table exists"
+        ],
+        "answer": "When a simple row-level rule can be expressed declaratively",
+        "explanation": "Declarative constraints are usually clearer for simple row-level validation."
+      },
+      {
+        "id": "sql17.3-q5",
+        "prompt": "Which BEFORE-trigger pattern should be avoided in SQLite?",
+        "options": [
+          "Modifying or deleting the same row that the outer statement is changing",
+          "Checking NEW values",
+          "Using a WHEN clause",
+          "Raising an abort error"
+        ],
+        "answer": "Modifying or deleting the same row that the outer statement is changing",
+        "explanation": "SQLite documents caveats for BEFORE triggers that modify or delete the target row."
+      }
+    ]
+  },
+  "status": "draft"
+}
