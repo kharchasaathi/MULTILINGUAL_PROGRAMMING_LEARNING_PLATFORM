@@ -6,11 +6,11 @@
   "title": "Keys and Primary Keys",
   "language": "en",
   "learningObjectives": [
-    "Explain the core concepts of Keys and Primary Keys.",
-    "Identify the SQL structures and terminology used in this topic.",
-    "Read and interpret an original SQL example related to Keys and Primary Keys.",
-    "Predict the expected behaviour or result of a query in the stated engine context.",
-    "Apply safe and maintainable practices when using this concept."
+    "Explain the purpose of candidate keys and primary keys.",
+    "State the uniqueness and non-NULL rules for a primary key.",
+    "Distinguish natural keys from surrogate keys.",
+    "Explain when a composite primary key is appropriate.",
+    "Describe SQLite's INTEGER PRIMARY KEY rowid behaviour and its dialect-specific scope."
   ],
   "prerequisites": [],
   "stages": {
@@ -21,7 +21,7 @@
       "analogyLimit": "A key is not necessarily meaningful to a person, secret or proof of identity. A database key only identifies records within the rules and scope of the database design."
     },
     "explain": {
-      "narrative": "## Why keys are needed\nNames and other descriptive values may repeat or change. A stable key provides an unambiguous way to identify a row. A candidate key is a minimal set of columns that can uniquely identify rows. One candidate key is selected as the primary key; other candidate keys may be enforced with UNIQUE constraints.\n\n## Primary-key rules\nA primary key must be unique and non-NULL. It may consist of one column or several columns (a composite primary key). A table has one primary-key constraint, although that constraint can cover multiple columns.\n\n## SQLite integer primary keys\nIn SQLite, a column declared exactly INTEGER PRIMARY KEY is an alias for the rowid in ordinary rowid tables. This is a SQLite-specific behaviour. AUTOINCREMENT is optional and has additional semantics; it should not be added automatically to every table.\n\n## Natural and surrogate keys\nA natural key comes from meaningful domain data, such as a carefully chosen externally assigned code. A surrogate key is an identifier created for database use, such as an integer ID. Both approaches have trade-offs. Natural values can change; surrogate keys need not carry business meaning.\n\n## Composite keys\nA composite primary key uses more than one column, for example (student_id, course_id) in an Enrollment table. Each component alone may repeat, while the combination must be unique.",
+      "narrative": "## Why keys are needed\nNames and other descriptive values may repeat or change. A stable key provides an unambiguous way to identify a row. A candidate key is a minimal set of columns that can uniquely identify rows. One candidate key is selected as the primary key; other candidate keys may be enforced with UNIQUE constraints.\n\n## Primary-key rules\nA primary key must be unique and non-NULL. It may consist of one column or several columns (a composite primary key). A table has one primary-key constraint, although that constraint can cover multiple columns.\n\n## SQLite integer primary keys\nIn SQLite, a column declared exactly INTEGER PRIMARY KEY is an alias for the rowid in ordinary rowid tables. This is a SQLite-specific behaviour. AUTOINCREMENT is optional and has additional semantics; it should not be added automatically to every table.\n\n## Natural and surrogate keys\nA natural key comes from meaningful domain data, such as a carefully chosen externally assigned code. A surrogate key is an identifier created for database use, such as an integer ID. Both approaches have trade-offs. Natural values can change; surrogate keys need not carry business meaning.\n\n## Composite keys\nA composite primary key uses more than one column, for example (student_id, course_id) in an Enrollment table. Each component alone may repeat, while the combination must be unique.\n\n### Editorial review notes\nThis lesson has been expanded to use topic-specific objectives and practice. Each example is intended to be run in sequence in the dedicated SQLite Playground; engine-specific behaviour is identified where relevant.",
       "examples": [
         {
           "id": "sql1.4-ex1",
@@ -30,7 +30,7 @@
           "code": "CREATE TABLE Student (student_id INTEGER PRIMARY KEY, full_name TEXT NOT NULL);",
           "expectedOutput": "Table created",
           "explanation": "The primary-key constraint makes student_id unique and non-NULL. NOT NULL on full_name is a separate rule.",
-          "runnable": false
+          "runnable": true
         },
         {
           "id": "sql1.4-ex2",
@@ -39,40 +39,41 @@
           "code": "INSERT INTO Student (student_id, full_name) VALUES (101, 'Asha'), (102, 'Ravi');",
           "expectedOutput": "2 rows inserted",
           "explanation": "Each inserted row has a different primary-key value.",
-          "runnable": false
+          "runnable": true
         },
         {
           "id": "sql1.4-ex3",
           "language": "en",
           "title": "Find a row by its key",
           "code": "SELECT student_id, full_name FROM Student WHERE student_id = 102;",
-          "expectedOutput": "student_id | full_name\n102        | Ravi",
+          "expectedOutput": "student_id | full_name\n102 | Ravi",
           "explanation": "A primary key is a natural target for a single-row lookup.",
-          "runnable": false
+          "runnable": true
         },
         {
           "id": "sql1.4-ex4",
           "language": "en",
-          "title": "Demonstrate uniqueness enforcement",
+          "title": "Test uniqueness enforcement",
           "code": "INSERT INTO Student (student_id, full_name) VALUES (101, 'Duplicate ID');",
-          "expectedOutput": "Error: UNIQUE constraint failed: Student.student_id",
-          "explanation": "The duplicate key is rejected. Exact error wording varies by engine and version.",
-          "runnable": false
+          "expectedOutput": "Unique constraint error",
+          "explanation": "The duplicate primary-key value is rejected. Exact error wording varies by engine and version.",
+          "runnable": true,
+          "expectsError": true
         },
         {
           "id": "sql1.4-ex5",
           "language": "en",
-          "title": "Use a composite primary key",
+          "title": "Create a composite primary key",
           "code": "CREATE TABLE Enrollment (student_id INTEGER, course_id INTEGER, PRIMARY KEY (student_id, course_id));",
           "expectedOutput": "Table created",
           "explanation": "The pair identifies an enrollment. The same student may enroll in different courses, but the same pair cannot be inserted twice.",
-          "runnable": false
+          "runnable": true
         }
       ]
     },
     "practise": {
-      "guidedTask": "Study the five examples for Keys and Primary Keys. For each example, identify the SQL statement, predict its effect or result, then verify it in a compatible SQL engine when available.",
-      "independentTask": "Create a small relational database scenario that demonstrates Keys and Primary Keys. Write at least three queries or statements, explain the expected result, and identify any assumptions about the database dialect.",
+      "guidedTask": "Design a Student table with a stable primary key and an Enrollment table with a composite key.",
+      "independentTask": "Insert valid rows, find one row by key and deliberately test a duplicate key to observe the constraint error.",
       "hints": [
         "Read the statement from its first keyword and identify the target object.",
         "Check table and column names against the schema before running a query.",
