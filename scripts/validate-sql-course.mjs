@@ -33,6 +33,7 @@ const pyRunner = [
   "    if isinstance(value, bytes): return '0x' + value.hex()",
   "    return str(value)",
   "def norm(value):",
+  "    value = value.replace(chr(92) + 'n', chr(10)).replace(chr(92) + 'r', chr(13))",
   "    value = value.replace('\\r\\n', '\\n').replace('\\r', '\\n')",
   "    value = re.sub(r'\\s*\\|\\s*', '|', value)",
   "    value = re.sub(r'\\s*=\\s*', '=', value)",
