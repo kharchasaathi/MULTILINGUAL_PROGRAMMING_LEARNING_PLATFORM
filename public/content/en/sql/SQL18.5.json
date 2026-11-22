@@ -27,7 +27,7 @@
       "analogyLimit": "The analogy does not model transactional DDL, locking, data backfills, version checks or application compatibility."
     },
     "explain": {
-      "narrative": "## Idempotency\nA migration runner should check the migration history before applying a version. Do not blindly rerun ALTER TABLE statements that would add the same column twice. Use migration version records and explicit preconditions.\n\n## Validation checks\nVerify required tables, columns, indexes, constraints, row counts and data invariants. Use PRAGMA table_info and sqlite_schema in SQLite. Run foreign_key_check when foreign keys are involved.\n\n## Deployment checklist\nTest from a representative starting schema, apply the migration, verify the target schema and data, test application compatibility, and record the exact migration version and deployment evidence.",
+      "narrative": "## Idempotency\nA migration runner should check the migration history before applying a version. Do not blindly rerun ALTER TABLE statements that would add the same column twice. Use migration version records and explicit preconditions.\n\n## Validation checks\nVerify required tables, columns, indexes, constraints, row counts and data invariants. Use PRAGMA table_info and sqlite_schema in SQLite. Run foreign_key_check when foreign keys are involved.\n\n## Deployment checklist\nTest from a representative starting schema, apply the migration, verify the target schema and data, test application compatibility, and record the exact migration version and deployment evidence.\n\n### Idempotency\nA migration is idempotent only when repeating it produces the same intended state without duplicate or destructive side effects. IF NOT EXISTS and ON CONFLICT DO NOTHING help with selected SQLite statements, but they do not make a multi-step migration automatically idempotent. Check the migration version before applying a step and validate the schema afterwards.\n\n### Deployment checklist\nValidate migration ordering, backups, permissions, schema state, data invariants, foreign keys, application compatibility and rollback or forward-fix plans. Run checks against a staging copy before production deployment.",
       "examples": [
         {
           "id": "sql18.5-ex1",
@@ -35,7 +35,7 @@
           "title": "Create a table and migration history",
           "code": "CREATE TABLE mig18_inventory (item_id INTEGER PRIMARY KEY, item_name TEXT NOT NULL); CREATE TABLE mig18_history (version INTEGER PRIMARY KEY, description TEXT NOT NULL);",
           "expectedOutput": "Tables created",
-          "explanation": "This example demonstrates create a table and migration history in SQLite. Verify the migration state before and after the operation.",
+          "explanation": "Creates the inventory table and migration ledger. IF NOT EXISTS allows safe re-execution of this particular creation step, but a migration runner should still verify the resulting column definitions and constraints.",
           "runnable": true
         },
         {
@@ -44,7 +44,7 @@
           "title": "Record a baseline version idempotently",
           "code": "INSERT INTO mig18_history VALUES (1, 'Create inventory') ON CONFLICT(version) DO NOTHING;",
           "expectedOutput": "Baseline recorded",
-          "explanation": "This example demonstrates record a baseline version idempotently in SQLite. Verify the migration state before and after the operation.",
+          "explanation": "Records baseline version 1 with ON CONFLICT(version) DO NOTHING. This SQLite-specific UPSERT form makes repeated execution idempotent for the version key; it does not make every possible migration statement safe to repeat.",
           "runnable": true
         },
         {
@@ -53,7 +53,7 @@
           "title": "Inspect the required table columns",
           "code": "SELECT name, type FROM pragma_table_info('mig18_inventory') ORDER BY cid;",
           "expectedOutput": "item_id | INTEGER; item_name | TEXT",
-          "explanation": "This example demonstrates inspect the required table columns in SQLite. Verify the migration state before and after the operation.",
+          "explanation": "Uses SQLite's table-valued pragma_table_info function to inspect column names and declared types. This is an engine-specific inspection interface; other DBMS products expose their own catalog views or metadata commands.",
           "runnable": true
         },
         {
@@ -62,7 +62,7 @@
           "title": "Verify the migration version",
           "code": "SELECT version, description FROM mig18_history ORDER BY version;",
           "expectedOutput": "1 | Create inventory",
-          "explanation": "This example demonstrates verify the migration version in SQLite. Verify the migration state before and after the operation.",
+          "explanation": "Reads the migration ledger to verify that version 1 is recorded. A deployment check should also compare the ledger with the actual schema and expected migration sequence.",
           "runnable": true
         },
         {
@@ -71,7 +71,7 @@
           "title": "Check that no foreign-key violations exist",
           "code": "SELECT COUNT(*) AS foreign_key_violations FROM pragma_foreign_key_check;",
           "expectedOutput": "foreign_key_violations = 0",
-          "explanation": "This example demonstrates check that no foreign-key violations exist in SQLite. Verify the migration state before and after the operation.",
+          "explanation": "Runs SQLite's foreign_key_check pragma and counts violations. A zero count indicates no detected foreign-key violations in the checked database; it does not replace checks for other constraints, business rules or data quality.",
           "runnable": true
         }
       ]
