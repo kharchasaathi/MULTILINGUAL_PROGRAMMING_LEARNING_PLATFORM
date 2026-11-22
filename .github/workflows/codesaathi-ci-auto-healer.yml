@@ -1,0 +1,140 @@
+name: CodeSaathi CI Auto-Healer
+
+on:
+  workflow_run:
+    workflows:
+      - SQL Course Validation
+      - Browser Review
+      - Python Course Validation
+      - C Course Validation
+      - C++ Course Validation
+      - Curriculum Validation
+      - Deploy CodeSaathi to Firebase Hosting
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "Optional failed workflow run ID to inspect"
+        required: false
+        type: string
+
+permissions:
+  actions: write
+  contents: read
+  issues: write
+
+concurrency:
+  group: codesaathi-ci-auto-healer-${{ github.event.workflow_run.id || inputs.run_id || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  inspect-failure:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'failure'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Inspect failed run and apply safe recovery policy
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const eventRun = context.payload.workflow_run;
+            const runId = Number(eventRun?.id || core.getInput('run_id'));
+            if (!Number.isSafeInteger(runId) || runId <= 0) {
+              core.setFailed('A valid failed workflow run ID is required.');
+              return;
+            }
+
+            const { data: run } = await github.rest.actions.getWorkflowRun({ owner, repo, run_id: runId });
+            if (run.conclusion !== 'failure') {
+              core.info(`Run ${runId} is ${run.conclusion || run.status}; no recovery action taken.`);
+              return;
+            }
+
+            const { data: jobData } = await github.rest.actions.listJobsForWorkflowRun({
+              owner, repo, run_id: runId, per_page: 100
+            });
+            const failedJobs = jobData.jobs.filter(job => job.conclusion === 'failure');
+            const failedSteps = failedJobs.flatMap(job =>
+              (job.steps || []).filter(step => step.conclusion === 'failure')
+                .map(step => ({ job: job.name, step: step.name }))
+            );
+            const failedStepNames = failedSteps.map(item => item.step).join(' | ');
+            const infraPattern = /(checkout|setup .*node|setup .*python|install dependencies|download|upload artifact|cache|npm ci|pip install|chromium install)/i;
+            const likelyTransient = failedSteps.length > 0 && failedSteps.every(item => infraPattern.test(item.step));
+            const attempt = Number(run.run_attempt || 1);
+
+            core.info(`Workflow: ${run.name}; run: ${runId}; attempt: ${attempt}`);
+            core.info(`Failed jobs: ${failedJobs.map(job => job.name).join(', ') || 'none reported'}`);
+            core.info(`Failed steps: ${failedStepNames || 'not identified'}`);
+
+            // Only one retry, and only when every failed step is a known setup/network-like step.
+            // Never retry test, assertion, lint, compilation, security, or content-validation failures.
+            if (likelyTransient && attempt === 1) {
+              await github.rest.actions.reRunFailedJobs({ owner, repo, run_id: runId });
+              await core.summary
+                .addHeading('CodeSaathi CI Auto-Healer')
+                .addRaw('A single controlled retry was requested because all failed steps matched the allow-listed setup/download/cache categories.')
+                .addLink('Original failed run', run.html_url)
+                .write();
+              core.info('Requested one retry of failed jobs. No source files were changed.');
+              return;
+            }
+
+            const classification = likelyTransient ? 'Transient/setup-like failure; retry limit reached or already retried' :
+              'Deterministic or unclassified failure; human diagnosis required';
+            const title = `[CI Auto-Healer] ${run.name} failed — run ${runId}`;
+            const body = [
+              '## Automated CI failure report',
+              '',
+              `- **Workflow:** ${run.name}`,
+              `- **Run:** [${runId}](${run.html_url})`,
+              `- **Attempt:** ${attempt}`,
+              `- **Branch:** ${run.head_branch || 'unknown'}`,
+              `- **Commit:** ${run.head_sha || 'unknown'}`,
+              `- **Classification:** ${classification}`,
+              '',
+              '## Failed jobs',
+              ...(failedJobs.length ? failedJobs.map(job => `- **${job.name}** (job ID: ${job.id})`) : ['- GitHub reported failure but no failed job was returned.']),
+              '',
+              '## Failed steps',
+              ...(failedSteps.length ? failedSteps.map(item => `- ${item.job} → **${item.step}**`) : ['- No failed step details available.']),
+              '',
+              '## Recovery decision',
+              likelyTransient && attempt > 1
+                ? '- One retry was already attempted. Further automatic retries are intentionally blocked.'
+                : '- No automatic source-code edits or merge actions were performed.',
+              '- Review the run logs, fix the root cause on a branch, and validate with the affected workflow.',
+              '',
+              '## Safety',
+              '- This workflow does not check out or execute code from the failed run.',
+              '- Workflow logs and artifacts are treated as untrusted input.',
+              '- No pull request is merged automatically.',
+              '',
+              '_Created by CodeSaathi CI Auto-Healer._'
+            ].join('\n');
+
+            const existing = await github.rest.search.issuesAndPullRequests({
+              q: `repo:${owner}/${repo} is:issue in:title "${runId}" "[CI Auto-Healer]"`
+            });
+            if (existing.data.items.length) {
+              core.info(`An issue already exists for run ${runId}: ${existing.data.items[0].html_url}`);
+              return;
+            }
+
+            const issue = await github.rest.issues.create({
+              owner, repo, title, body,
+              labels: ['ci-failure']
+            }).catch(async error => {
+              if (error.status === 422) {
+                return github.rest.issues.create({ owner, repo, title, body });
+              }
+              throw error;
+            });
+            await core.summary
+              .addHeading('CodeSaathi CI Auto-Healer')
+              .addRaw(`Failure classified: ${classification}`)
+              .addLink('Open diagnostic issue', issue.data.html_url)
+              .write();
+            core.info(`Created diagnostic issue: ${issue.data.html_url}`);
