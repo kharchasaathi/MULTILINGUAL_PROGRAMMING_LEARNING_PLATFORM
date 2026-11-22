@@ -12,7 +12,7 @@ Current audited branch HEAD before this roadmap commit: 60e3e2c0189da3f51474f481
 
 - 81 English SQL lesson JSON files are present across SQL1–SQL11.
 - 81 SQL curriculum-index topics and 81 source-inventory records are present.
-- The new `docs/SQL_W3SCHOOLS_COVERAGE_MATRIX.csv` maps 68 W3Schools navigation/reference topics to existing CodeSaathi lesson IDs:
+- The new `docs/SQL_W3SCHOOLS_COVERAGE_MATRIX.csv` maps 72 W3Schools navigation/reference topics to existing CodeSaathi lesson IDs:
   - 45 SQL Tutorial topics
   - 21 SQL Database topics
   - 2 SQL Reference topics (Data Types and Keywords)
@@ -38,9 +38,12 @@ The roadmap-document commit itself must receive a fresh Actions run before its C
 ### A. Complete the W3Schools topic audit
 - [x] Build a 68-row topic-to-lesson mapping matrix for the current W3Schools SQL Tutorial, SQL Database and SQL Reference navigation.
 - [ ] Verify every mapped lesson's detailed content against its individual W3Schools source page.
+- [x] Add the standalone SQL Aggregate Functions overview to SQL6.1 and map all five aggregate lessons.
+- [x] Add SQL Quick Reference and MySQL, SQL Server and MS Access function-reference records; explicitly mark these reference catalogs as partial rather than claiming exhaustive function coverage.
 - [x] Correct SQL4.2–SQL4.7 inventory and coverage mappings against actual lesson titles; map DEFAULT to SQL4.2, UNIQUE to SQL4.3, PRIMARY KEY to SQL4.4, FOREIGN KEY to SQL4.5, CHECK to SQL4.6 and column/table-level constraints to SQL4.7.
 - [ ] Check all 81 lesson files for title accuracy, learning objectives, three learning stages, examples, practice, MCQ explanations and dialect notes.
-- [ ] Resolve source-inventory `missing_coverage` notes; distinguish required tutorial concepts from optional advanced depth and dialect-specific extensions.
+- [ ] Resolve remaining source-inventory `missing_coverage` notes; distinguish required tutorial concepts from optional advanced depth and dialect-specific extensions.
+- [ ] Complete curated dialect function reference coverage; current MySQL, SQL Server and MS Access function mappings are explicitly partial.
 - [ ] Verify that no W3Schools topic is missing and no CodeSaathi lesson duplicates another topic unnecessarily.
 
 ### B. Complete English lesson quality
