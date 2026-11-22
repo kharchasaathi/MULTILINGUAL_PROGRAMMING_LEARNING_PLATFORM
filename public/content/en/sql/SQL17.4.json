@@ -1,0 +1,160 @@
+{
+  "id": "sql.sql17.4.en",
+  "courseId": "sql",
+  "moduleId": "SQL17",
+  "topicId": "SQL17.4",
+  "title": "AFTER DELETE Triggers and Audit Records",
+  "language": "en",
+  "learningObjectives": [
+    "Explain when an AFTER DELETE trigger runs.",
+    "Use OLD values to capture a deleted row's information.",
+    "Create an audit table and populate it from a DELETE trigger.",
+    "Describe why delete audits need retention and access controls.",
+    "Recognize that cascade-trigger behaviour must be checked for the target DBMS."
+  ],
+  "prerequisites": [
+    "SQL3.2",
+    "SQL3.3",
+    "SQL3.5",
+    "SQL4.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A DELETE trigger can record information about a row that is being removed. In an AFTER DELETE trigger, OLD contains the deleted row's values and can be copied to an audit table.",
+      "whyItMatters": "Deletion audits help trace data removal, support compliance and explain why records are no longer present in an operational table.",
+      "analogy": "A trigger is like an automatic rule attached to a data event: it runs when the specified change occurs, even if the application did not call it directly.",
+      "analogyLimit": "The analogy does not model OLD/NEW row values, transaction timing, recursive execution or DBMS-specific trigger semantics."
+    },
+    "explain": {
+      "narrative": "## AFTER DELETE\nAn AFTER DELETE trigger runs after a row has been deleted. OLD exposes the deleted row's values; there is no NEW row for a DELETE event.\n\n## Audit design\nA delete audit can preserve the deleted key, a few relevant fields and an action label. Avoid copying sensitive fields unless the retention and access policy explicitly requires them.\n\n## Cascades and triggers\nForeign-key cascades can cause additional row changes. Understand whether the target DBMS fires triggers for cascaded actions and test the exact engine/version. Do not assume identical behaviour across products.",
+      "examples": [
+        {
+          "id": "sql17.4-ex1",
+          "language": "en",
+          "title": "Create a member table",
+          "code": "CREATE TABLE trg17_members (member_id INTEGER PRIMARY KEY, member_name TEXT NOT NULL, status TEXT NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "This example demonstrates create a member table using SQLite triggers. Verify the event, timing and affected rows.",
+          "runnable": true
+        },
+        {
+          "id": "sql17.4-ex2",
+          "language": "en",
+          "title": "Create a deletion audit table",
+          "code": "CREATE TABLE trg17_member_deletes (audit_id INTEGER PRIMARY KEY, member_id INTEGER NOT NULL, member_name TEXT NOT NULL, old_status TEXT NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "This example demonstrates create a deletion audit table using SQLite triggers. Verify the event, timing and affected rows.",
+          "runnable": true
+        },
+        {
+          "id": "sql17.4-ex3",
+          "language": "en",
+          "title": "Insert a member",
+          "code": "INSERT INTO trg17_members VALUES (1, 'Mira', 'active');",
+          "expectedOutput": "1 row inserted",
+          "explanation": "This example demonstrates insert a member using SQLite triggers. Verify the event, timing and affected rows.",
+          "runnable": true
+        },
+        {
+          "id": "sql17.4-ex4",
+          "language": "en",
+          "title": "Create an AFTER DELETE trigger",
+          "code": "CREATE TRIGGER trg17_member_delete AFTER DELETE ON trg17_members BEGIN INSERT INTO trg17_member_deletes(member_id, member_name, old_status) VALUES (OLD.member_id, OLD.member_name, OLD.status); END;",
+          "expectedOutput": "Trigger created",
+          "explanation": "This example demonstrates create an after delete trigger using SQLite triggers. Verify the event, timing and affected rows.",
+          "runnable": true
+        },
+        {
+          "id": "sql17.4-ex5",
+          "language": "en",
+          "title": "Delete the member and inspect the audit",
+          "code": "DELETE FROM trg17_members WHERE member_id = 1; SELECT member_id, member_name, old_status FROM trg17_member_deletes;",
+          "expectedOutput": "1 | Mira | active",
+          "explanation": "This example demonstrates delete the member and inspect the audit using SQLite triggers. Verify the event, timing and affected rows.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and verify that the operational member row is removed while the minimal audit record remains.",
+      "independentTask": "Create an inventory table and a delete-audit table. Add an AFTER DELETE trigger that records the item ID and a non-sensitive description.",
+      "hints": [
+        "A DELETE trigger has OLD values but no NEW row.",
+        "AFTER DELETE runs after the row is removed.",
+        "Copy only the fields needed for traceability.",
+        "Consider audit retention, privacy and access controls.",
+        "Test foreign-key cascade behaviour on the target database engine."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE trg17_members (member_id INTEGER PRIMARY KEY, member_name TEXT NOT NULL, status TEXT NOT NULL);\nCREATE TABLE trg17_member_deletes (audit_id INTEGER PRIMARY KEY, member_id INTEGER NOT NULL, member_name TEXT NOT NULL, old_status TEXT NOT NULL);\nINSERT INTO trg17_members VALUES (1, 'Mira', 'active');\nCREATE TRIGGER trg17_member_delete AFTER DELETE ON trg17_members BEGIN INSERT INTO trg17_member_deletes(member_id, member_name, old_status) VALUES (OLD.member_id, OLD.member_name, OLD.status); END;\nDELETE FROM trg17_members WHERE member_id = 1;\nSELECT member_id, member_name, old_status FROM trg17_member_deletes;",
+    "resetCode": "CREATE TABLE trg17_members (member_id INTEGER PRIMARY KEY, member_name TEXT NOT NULL, status TEXT NOT NULL);\nCREATE TABLE trg17_member_deletes (audit_id INTEGER PRIMARY KEY, member_id INTEGER NOT NULL, member_name TEXT NOT NULL, old_status TEXT NOT NULL);\nINSERT INTO trg17_members VALUES (1, 'Mira', 'active');\nCREATE TRIGGER trg17_member_delete AFTER DELETE ON trg17_members BEGIN INSERT INTO trg17_member_deletes(member_id, member_name, old_status) VALUES (OLD.member_id, OLD.member_name, OLD.status); END;\nDELETE FROM trg17_members WHERE member_id = 1;\nSELECT member_id, member_name, old_status FROM trg17_member_deletes;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql17.4-q1",
+        "prompt": "What does OLD represent in a DELETE trigger?",
+        "options": [
+          "The row being deleted",
+          "A new row being inserted",
+          "The next row in sort order",
+          "The trigger definition"
+        ],
+        "answer": "The row being deleted",
+        "explanation": "OLD exposes the values of the deleted row."
+      },
+      {
+        "id": "sql17.4-q2",
+        "prompt": "Is there a NEW row in a DELETE trigger?",
+        "options": [
+          "No",
+          "Yes, always",
+          "Only when a primary key exists",
+          "Only when the table has an index"
+        ],
+        "answer": "No",
+        "explanation": "DELETE removes a row, so it has OLD values but no NEW row."
+      },
+      {
+        "id": "sql17.4-q3",
+        "prompt": "What is a common purpose of an AFTER DELETE trigger?",
+        "options": [
+          "Record a minimal audit entry for the deleted row",
+          "Create a new database",
+          "Disable all foreign keys",
+          "Run a SELECT on every table"
+        ],
+        "answer": "Record a minimal audit entry for the deleted row",
+        "explanation": "An AFTER DELETE trigger can preserve an audit record."
+      },
+      {
+        "id": "sql17.4-q4",
+        "prompt": "Why should audit data be minimized?",
+        "options": [
+          "To reduce unnecessary sensitive-data retention",
+          "To make triggers run before insert",
+          "To remove indexes",
+          "To increase table size"
+        ],
+        "answer": "To reduce unnecessary sensitive-data retention",
+        "explanation": "Audit records should contain only the information required by policy."
+      },
+      {
+        "id": "sql17.4-q5",
+        "prompt": "What should be verified for cascaded deletes?",
+        "options": [
+          "The target DBMS's trigger behaviour for foreign-key cascades",
+          "Only the SQL keyword case",
+          "The browser font",
+          "The database filename extension"
+        ],
+        "answer": "The target DBMS's trigger behaviour for foreign-key cascades",
+        "explanation": "Cascade and trigger interaction can vary across products and must be tested."
+      }
+    ]
+  },
+  "status": "draft"
+}
