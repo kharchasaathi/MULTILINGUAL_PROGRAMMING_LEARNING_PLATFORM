@@ -1,0 +1,161 @@
+{
+  "id": "sql.sql18.4.en",
+  "courseId": "sql",
+  "moduleId": "SQL18",
+  "topicId": "SQL18.4",
+  "title": "Transactional Migrations and Rollback Planning",
+  "language": "en",
+  "learningObjectives": [
+    "Explain how a transaction can make a migration atomic.",
+    "Group related schema and data changes inside a transaction where supported.",
+    "Demonstrate rollback of an uncommitted SQLite schema change.",
+    "Recognize DBMS-specific DDL transaction and implicit-commit behaviour.",
+    "Plan backups and recovery for changes that cannot be safely reversed."
+  ],
+  "prerequisites": [
+    "SQL3.2",
+    "SQL3.7",
+    "SQL12.1",
+    "SQL12.2",
+    "SQL12.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A migration may include multiple dependent schema and data changes. Where supported, a transaction can make the migration atomic: all included changes commit together or are rolled back together. Some DBMS products implicitly commit certain DDL statements, so behaviour must be checked per engine.",
+      "whyItMatters": "Rollback planning protects data and application availability when a deployment encounters a failed migration step.",
+      "analogy": "A migration is like a numbered building renovation plan: each change has a recorded step, a verification and a recovery plan.",
+      "analogyLimit": "The analogy does not model transactional DDL, locking, data backfills, version checks or application compatibility."
+    },
+    "explain": {
+      "narrative": "## Transactional migration\nA migration can begin a transaction, apply schema changes, backfill data, update the migration history and commit only after all checks pass. If a required step fails, roll back the uncommitted work.\n\n## DDL portability\nSQLite supports transactional schema changes in many cases. Other products have different DDL transaction rules; some statements implicitly commit or cannot be rolled back. Never assume a migration transaction behaves identically across DBMS products.\n\n## Recovery planning\nA rollback script is not always the reverse of a forward migration. Dropping a newly added column can lose data written after deployment. Prefer forward-compatible changes, backups and tested recovery procedures.",
+      "examples": [
+        {
+          "id": "sql18.4-ex1",
+          "language": "en",
+          "title": "Create an account table",
+          "code": "CREATE TABLE mig18_accounts (account_id INTEGER PRIMARY KEY, balance INTEGER NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "This example demonstrates create an account table in SQLite. Verify the migration state before and after the operation.",
+          "runnable": true
+        },
+        {
+          "id": "sql18.4-ex2",
+          "language": "en",
+          "title": "Insert a starting balance",
+          "code": "INSERT INTO mig18_accounts VALUES (1, 100);",
+          "expectedOutput": "1 row inserted",
+          "explanation": "This example demonstrates insert a starting balance in SQLite. Verify the migration state before and after the operation.",
+          "runnable": true
+        },
+        {
+          "id": "sql18.4-ex3",
+          "language": "en",
+          "title": "Begin a migration and add a temporary column",
+          "code": "BEGIN; ALTER TABLE mig18_accounts ADD COLUMN note TEXT; UPDATE mig18_accounts SET note = 'migration candidate';",
+          "expectedOutput": "Migration changes staged",
+          "explanation": "This example demonstrates begin a migration and add a temporary column in SQLite. Verify the migration state before and after the operation.",
+          "runnable": true
+        },
+        {
+          "id": "sql18.4-ex4",
+          "language": "en",
+          "title": "Roll back the uncommitted migration",
+          "code": "ROLLBACK;",
+          "expectedOutput": "Migration rolled back",
+          "explanation": "This example demonstrates roll back the uncommitted migration in SQLite. Verify the migration state before and after the operation.",
+          "runnable": true
+        },
+        {
+          "id": "sql18.4-ex5",
+          "language": "en",
+          "title": "Verify the column and original row remain unchanged",
+          "code": "SELECT COUNT(*) FROM pragma_table_info('mig18_accounts') WHERE name = 'note'; SELECT balance FROM mig18_accounts WHERE account_id = 1;",
+          "expectedOutput": "0; 100",
+          "explanation": "This example demonstrates verify the column and original row remain unchanged in SQLite. Verify the migration state before and after the operation.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Run the examples and verify that rollback removes the uncommitted column and preserves the original balance.",
+      "independentTask": "Design a migration with two schema changes and a data backfill. Identify which steps can be rolled back in your target DBMS and what recovery plan is needed if a later step fails.",
+      "hints": [
+        "Start the transaction before the related schema and data changes.",
+        "Commit only after all required checks pass.",
+        "SQLite supports transactional DDL for many schema operations.",
+        "Check implicit commit rules in MySQL, SQL Server, PostgreSQL and other targets.",
+        "A rollback script may not recover data written after deployment; plan backups and forward fixes."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE mig18_accounts (account_id INTEGER PRIMARY KEY, balance INTEGER NOT NULL);\nINSERT INTO mig18_accounts VALUES (1, 100);\nBEGIN;\nALTER TABLE mig18_accounts ADD COLUMN note TEXT;\nUPDATE mig18_accounts SET note = 'migration candidate';\nROLLBACK;\nSELECT COUNT(*) FROM pragma_table_info('mig18_accounts') WHERE name = 'note';",
+    "resetCode": "CREATE TABLE mig18_accounts (account_id INTEGER PRIMARY KEY, balance INTEGER NOT NULL);\nINSERT INTO mig18_accounts VALUES (1, 100);\nBEGIN;\nALTER TABLE mig18_accounts ADD COLUMN note TEXT;\nUPDATE mig18_accounts SET note = 'migration candidate';\nROLLBACK;\nSELECT COUNT(*) FROM pragma_table_info('mig18_accounts') WHERE name = 'note';"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql18.4-q1",
+        "prompt": "What is the purpose of a transactional migration?",
+        "options": [
+          "To commit related schema and data changes together or roll them back",
+          "To run SQL without a database",
+          "To create a user account",
+          "To skip all validation"
+        ],
+        "answer": "To commit related schema and data changes together or roll them back",
+        "explanation": "A transaction can make a group of migration steps atomic when the engine supports it."
+      },
+      {
+        "id": "sql18.4-q2",
+        "prompt": "Can all DBMS products roll back every DDL statement?",
+        "options": [
+          "No, DDL transaction rules differ by product and statement",
+          "Yes, every product behaves identically",
+          "Only SQLite supports DDL",
+          "DDL never changes schema"
+        ],
+        "answer": "No, DDL transaction rules differ by product and statement",
+        "explanation": "Some products implicitly commit certain DDL operations or have other limitations."
+      },
+      {
+        "id": "sql18.4-q3",
+        "prompt": "When should a migration commit?",
+        "options": [
+          "After all required changes and checks succeed",
+          "Before applying the first statement",
+          "After the database is deleted",
+          "Only when a SELECT returns NULL"
+        ],
+        "answer": "After all required changes and checks succeed",
+        "explanation": "Commit only when the migration is complete and verified."
+      },
+      {
+        "id": "sql18.4-q4",
+        "prompt": "Why is a rollback script not always a simple reverse operation?",
+        "options": [
+          "New data may have been written after deployment and could be lost",
+          "SQL statements cannot be reversed alphabetically",
+          "A rollback always creates duplicates",
+          "Indexes cannot be dropped"
+        ],
+        "answer": "New data may have been written after deployment and could be lost",
+        "explanation": "Reversing a deployed change may destroy new data or require a compensating forward migration."
+      },
+      {
+        "id": "sql18.4-q5",
+        "prompt": "What should accompany a risky production migration?",
+        "options": [
+          "A tested backup and recovery plan",
+          "Only a new SQL editor theme",
+          "No documentation",
+          "A disabled progress tracker"
+        ],
+        "answer": "A tested backup and recovery plan",
+        "explanation": "Backups and recovery planning reduce risk if the migration fails."
+      }
+    ]
+  },
+  "status": "draft"
+}
