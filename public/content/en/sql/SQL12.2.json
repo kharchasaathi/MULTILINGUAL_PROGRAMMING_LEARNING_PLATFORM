@@ -1,0 +1,159 @@
+{
+  "id": "sql.sql12.2.en",
+  "courseId": "sql",
+  "moduleId": "SQL12",
+  "topicId": "SQL12.2",
+  "title": "BEGIN, COMMIT and Transaction Boundaries",
+  "language": "en",
+  "learningObjectives": [
+    "Start an explicit SQLite transaction with BEGIN.",
+    "Finish a transaction with COMMIT.",
+    "Explain the difference between explicit transactions and SQLite autocommit mode.",
+    "Choose a safe boundary for a multi-statement business operation.",
+    "Recognize why transactions should be short and always completed."
+  ],
+  "prerequisites": [
+    "SQL3.3",
+    "SQL3.5",
+    "SQL4.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "BEGIN starts an explicit transaction in SQLite. COMMIT ends it and makes its changes permanent. Keeping the transaction boundary around the smallest complete business operation reduces the risk of leaving a transaction open.",
+      "whyItMatters": "Explicit boundaries let an application decide which statements must succeed together and exactly when changes become visible as committed work.",
+      "analogy": "A transaction is like a sealed work packet: its related steps are accepted together or returned for correction.",
+      "analogyLimit": "The analogy does not model SQL locking, isolation levels, storage durability or engine-specific transaction implementation."
+    },
+    "explain": {
+      "narrative": "## Basic transaction flow\nUse BEGIN to start a transaction, execute related statements, and use COMMIT after all required work succeeds. If a statement fails, handle the error and roll back rather than committing a partial operation.\n\n## SQLite syntax\nSQLite supports BEGIN [DEFERRED | IMMEDIATE | EXCLUSIVE], COMMIT and END. A transaction started with BEGIN remains active until COMMIT or ROLLBACK.\n\n## Transaction boundaries\nKeep transactions short. Do not wait for user input or make network requests while holding a write transaction. Use application error handling to guarantee that every successful BEGIN is paired with COMMIT or ROLLBACK.\n\n## Autocommit\nSQLite normally runs in autocommit mode when no explicit transaction is active. A standalone statement is committed automatically when it finishes successfully.",
+      "examples": [
+        {
+          "id": "sql12.2-ex1",
+          "language": "en",
+          "title": "Create an order table",
+          "code": "CREATE TABLE tx12_orders (order_id INTEGER PRIMARY KEY, customer TEXT NOT NULL, order_status TEXT NOT NULL);",
+          "expectedOutput": "Table created",
+          "explanation": "This example demonstrates create an order table in SQLite. Observe the transaction boundary and verify the stated result.",
+          "runnable": true
+        },
+        {
+          "id": "sql12.2-ex2",
+          "language": "en",
+          "title": "Start and insert an order",
+          "code": "BEGIN; INSERT INTO tx12_orders VALUES (1, 'Nila', 'created');",
+          "expectedOutput": "1 row inserted",
+          "explanation": "This example demonstrates start and insert an order in SQLite. Observe the transaction boundary and verify the stated result.",
+          "runnable": true
+        },
+        {
+          "id": "sql12.2-ex3",
+          "language": "en",
+          "title": "Commit the order",
+          "code": "COMMIT;",
+          "expectedOutput": "Transaction committed",
+          "explanation": "This example demonstrates commit the order in SQLite. Observe the transaction boundary and verify the stated result.",
+          "runnable": true
+        },
+        {
+          "id": "sql12.2-ex4",
+          "language": "en",
+          "title": "Read the committed order",
+          "code": "SELECT order_id, customer, order_status FROM tx12_orders;",
+          "expectedOutput": "1 | Nila | created",
+          "explanation": "This example demonstrates read the committed order in SQLite. Observe the transaction boundary and verify the stated result.",
+          "runnable": true
+        },
+        {
+          "id": "sql12.2-ex5",
+          "language": "en",
+          "title": "Update and commit order status",
+          "code": "BEGIN; UPDATE tx12_orders SET order_status = 'paid' WHERE order_id = 1; COMMIT; SELECT order_status FROM tx12_orders WHERE order_id = 1;",
+          "expectedOutput": "paid",
+          "explanation": "This example demonstrates update and commit order status in SQLite. Observe the transaction boundary and verify the stated result.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create an order, commit it, and retrieve the committed row. Then update its status in a second transaction.",
+      "independentTask": "Design a three-step inventory receiving operation. Put the related statements inside one transaction and explain when the application should commit.",
+      "hints": [
+        "BEGIN starts the explicit transaction.",
+        "Statements after BEGIN belong to that transaction until it ends.",
+        "COMMIT completes the transaction.",
+        "A standalone statement outside an explicit transaction is normally committed automatically.",
+        "Keep the transaction short and avoid waiting on external services inside it."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "sql",
+    "starterCode": "CREATE TABLE tx12_orders (order_id INTEGER PRIMARY KEY, customer TEXT NOT NULL, order_status TEXT NOT NULL);\nBEGIN;\nINSERT INTO tx12_orders VALUES (1, 'Nila', 'created');\nCOMMIT;\nSELECT order_id, customer, order_status FROM tx12_orders;",
+    "resetCode": "CREATE TABLE tx12_orders (order_id INTEGER PRIMARY KEY, customer TEXT NOT NULL, order_status TEXT NOT NULL);\nBEGIN;\nINSERT INTO tx12_orders VALUES (1, 'Nila', 'created');\nCOMMIT;\nSELECT order_id, customer, order_status FROM tx12_orders;"
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "sql12.2-q1",
+        "prompt": "Which statement begins an explicit SQLite transaction?",
+        "options": [
+          "BEGIN",
+          "COMMIT",
+          "SAVEPOINT",
+          "ATTACH"
+        ],
+        "answer": "BEGIN",
+        "explanation": "BEGIN starts the explicit transaction."
+      },
+      {
+        "id": "sql12.2-q2",
+        "prompt": "What ends a successful transaction and commits its changes?",
+        "options": [
+          "COMMIT",
+          "ROLLBACK",
+          "DROP",
+          "PRAGMA"
+        ],
+        "answer": "COMMIT",
+        "explanation": "COMMIT makes the transaction's changes permanent."
+      },
+      {
+        "id": "sql12.2-q3",
+        "prompt": "What is SQLite autocommit mode?",
+        "options": [
+          "The normal mode where each standalone statement is committed when it completes",
+          "A mode that commits only once per year",
+          "A feature that disables transactions",
+          "A command to export a database"
+        ],
+        "answer": "The normal mode where each standalone statement is committed when it completes",
+        "explanation": "When no explicit transaction is active, SQLite normally commits each statement automatically."
+      },
+      {
+        "id": "sql12.2-q4",
+        "prompt": "Why should transactions be kept short?",
+        "options": [
+          "To reduce the time locks or transactional resources are held",
+          "To make SQL keywords case-sensitive",
+          "To prevent SELECT statements",
+          "To remove all constraints"
+        ],
+        "answer": "To reduce the time locks or transactional resources are held",
+        "explanation": "Short transactions reduce contention and resource holding time."
+      },
+      {
+        "id": "sql12.2-q5",
+        "prompt": "What should application code do if a required statement fails before COMMIT?",
+        "options": [
+          "Roll back the transaction and handle the error",
+          "Commit the partial work anyway",
+          "Start another BEGIN immediately",
+          "Close the database file without handling the transaction"
+        ],
+        "answer": "Roll back the transaction and handle the error",
+        "explanation": "Rollback prevents incomplete work from being committed."
+      }
+    ]
+  },
+  "status": "draft"
+}
