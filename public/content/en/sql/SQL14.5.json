@@ -25,7 +25,7 @@
       "analogyLimit": "The analogy does not represent SQL partition rules, frame boundaries, tie handling or optimizer behaviour."
     },
     "explain": {
-      "narrative": "## Window frames\nA frame is the subset of rows used by a window function for the current row. A frame can be based on ROWS, RANGE or GROUPS, depending on the SQL engine and requirements.\n\n## Running total\nROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW includes every earlier row in the ordered partition plus the current row. SUM over this frame produces a running total.\n\n## Moving calculations\nA frame such as ROWS BETWEEN 1 PRECEDING AND CURRENT ROW includes the previous physical row and current row. It can be used for a two-row moving average. Always define an order and choose a frame that matches the business definition.",
+      "narrative": "## Window frames\nA frame is the subset of rows used by a window function for the current row. A frame can be based on ROWS, RANGE or GROUPS, depending on the SQL engine and requirements.\n\n## Running total\nROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW includes every earlier row in the ordered partition plus the current row. SUM over this frame produces a running total.\n\n## Moving calculations\nA frame such as ROWS BETWEEN 1 PRECEDING AND CURRENT ROW includes the previous physical row and current row. It can be used for a two-row moving average. Always define an order and choose a frame that matches the business definition.\n\n### ROWS versus RANGE\nROWS counts physical rows relative to the current row. RANGE uses ordering-value ranges and can include peer rows with equal ordering values; exact support and behaviour vary by engine. Some products also support GROUPS frames. Choose the frame unit to match the intended business meaning.\n\n### Frame defaults and deterministic results\nWhen ORDER BY is present and no explicit frame is supplied, default frame semantics can include peers and may differ from a simple row-by-row running total expectation. Write the frame explicitly for financial running totals and moving averages, and use a unique ordering key when the sequence must be deterministic.",
       "examples": [
         {
           "id": "sql14.5-ex1",
@@ -33,7 +33,7 @@
           "title": "Create daily transaction amounts",
           "code": "CREATE TABLE win14_transactions (sequence_no INTEGER PRIMARY KEY, amount INTEGER NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create daily transaction amounts with SQLite window functions. Check the window definition and row order.",
+          "explanation": "Creates a transaction table with an explicit sequence number and integer amount. The sequence number supplies a deterministic order for the running calculations.",
           "runnable": true
         },
         {
@@ -42,7 +42,7 @@
           "title": "Insert four transactions",
           "code": "INSERT INTO win14_transactions VALUES (1, 10), (2, 20), (3, 15), (4, 5);",
           "expectedOutput": "4 rows inserted",
-          "explanation": "This example demonstrates insert four transactions with SQLite window functions. Check the window definition and row order.",
+          "explanation": "Inserts four amounts totaling 50. The ordered values are 10, 20, 15 and 5.",
           "runnable": true
         },
         {
@@ -51,7 +51,7 @@
           "title": "Calculate a running total",
           "code": "SELECT sequence_no, amount, SUM(amount) OVER (ORDER BY sequence_no ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_total FROM win14_transactions ORDER BY sequence_no;",
           "expectedOutput": "1 | 10 | 10; 2 | 20 | 30; 3 | 15 | 45; 4 | 5 | 50",
-          "explanation": "This example demonstrates calculate a running total with SQLite window functions. Check the window definition and row order.",
+          "explanation": "Defines a ROWS frame from the first row in the partition through the current row. SUM therefore accumulates 10, then 30, then 45 and finally 50.",
           "runnable": true
         },
         {
@@ -60,7 +60,7 @@
           "title": "Calculate a two-row moving average",
           "code": "SELECT sequence_no, amount, AVG(amount) OVER (ORDER BY sequence_no ROWS BETWEEN 1 PRECEDING AND CURRENT ROW) AS moving_average FROM win14_transactions ORDER BY sequence_no;",
           "expectedOutput": "1 | 10 | 10.0; 2 | 20 | 15.0; 3 | 15 | 17.5; 4 | 5 | 10.0",
-          "explanation": "This example demonstrates calculate a two-row moving average with SQLite window functions. Check the window definition and row order.",
+          "explanation": "Defines a two-row frame containing the immediately preceding physical row, when present, and the current row. AVG returns 10.0 for the first row, then averages each adjacent pair.",
           "runnable": true
         },
         {
@@ -69,7 +69,7 @@
           "title": "Calculate a cumulative transaction count",
           "code": "SELECT sequence_no, COUNT(*) OVER (ORDER BY sequence_no ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS transactions_so_far FROM win14_transactions ORDER BY sequence_no;",
           "expectedOutput": "1 | 1; 2 | 2; 3 | 3; 4 | 4",
-          "explanation": "This example demonstrates calculate a cumulative transaction count with SQLite window functions. Check the window definition and row order.",
+          "explanation": "Counts rows from the beginning of the ordered partition through the current row. The result is a cumulative transaction count, increasing by one for each row.",
           "runnable": true
         }
       ]
