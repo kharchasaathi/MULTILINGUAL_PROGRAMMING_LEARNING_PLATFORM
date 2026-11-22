@@ -10,14 +10,14 @@ Current audited branch HEAD before this roadmap commit: 60e3e2c0189da3f51474f481
 
 ## Verified current baseline
 
-- 96 English SQL lesson JSON files are present across SQL1–SQL14 (81 original lessons plus 5 SQL12 transaction, 5 SQL13 subquery/CTE and 5 SQL14 window-function lessons).
-- 96 SQL curriculum-index topics and 101 source-inventory records are present.
+- 101 English SQL lesson JSON files are present across SQL1–SQL15 (81 original lessons plus 5 lessons each for SQL12 transactions, SQL13 subqueries/CTEs, SQL14 window functions and SQL15 indexing/performance).
+- 101 SQL curriculum-index topics and 106 source-inventory records are present.
 - The new `docs/SQL_W3SCHOOLS_COVERAGE_MATRIX.csv` maps 72 W3Schools navigation/reference topics to existing CodeSaathi lesson IDs:
   - 45 SQL Tutorial topics
   - 21 SQL Database topics
   - 6 SQL Reference topics (Data Types, Keywords, Quick Reference, MySQL Functions, SQL Server Functions and MS Access Functions)
 - Mapping is a coverage index, not editorial sign-off. Every mapped lesson remains draft pending technical/editorial review.
-- SQL examples on commit `b916118`: 430 executed; 310 expected result sets compared; 115 status-only examples executed; 790 database-state assertions; 2 runtime-dependent outputs pattern-checked; 3 expected-error examples; 430 MCQs. SQL13 and SQL14 add 50 more examples and 50 MCQs; latest validation is pending.
+- SQL examples on commit `b916118`: 430 executed; 310 expected result sets compared; 115 status-only examples executed; 790 database-state assertions; 2 runtime-dependent outputs pattern-checked; 3 expected-error examples; 430 MCQs. SQL13–SQL15 add 75 more examples and 75 MCQs; latest validation is pending.
 - SQL Playground is implemented with browser-side SQLite. Final feature/security/browser audit remains pending.
 - Telugu SQL lesson translations are not complete.
 - No production deployment has been performed.
@@ -57,9 +57,10 @@ These are supplementary curriculum additions, not W3Schools core navigation topi
 - [x] SQL12.1–SQL12.5: Transactions, ACID, BEGIN/COMMIT, ROLLBACK, SAVEPOINT, SQLite transaction modes and concurrency boundaries. Five English draft lessons, 25 examples and 25 MCQs added; SQL validation PASS on commit `4b6f3e1`.
 - [x] SQL13.1–SQL13.5: Subquery fundamentals, scalar/correlated subqueries, derived tables, CTEs and recursive CTEs. Five English draft lessons, 25 examples and 25 MCQs added; latest-head SQL validation pending.
 - [x] SQL14.1–SQL14.5: Window functions, PARTITION BY, ranking functions, LAG/LEAD and window frames. Five English draft lessons, 25 examples and 25 MCQs added; latest-head SQL validation pending.
+- [x] SQL15.1–SQL15.5: Index fundamentals, query plans, composite/partial/covering indexes, ANALYZE and PRAGMA optimize. Five English draft lessons, 25 examples and 25 MCQs added; latest-head SQL validation pending.
 - [ ] SQL14: Window functions, ranking, LAG/LEAD and running aggregates.
 - [ ] Recursive CTEs and hierarchical data.
-- [ ] Query plans, index design and performance optimization.
+- [ ] Cross-database dialect differences, triggers and migration workflows.
 - [ ] Advanced query plans, index design and performance tuning.
 - [ ] Advanced dialect comparison (SQLite, MySQL, PostgreSQL, SQL Server and Oracle).
 - [ ] Triggers, migration workflows and operational database maintenance.
