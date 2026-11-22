@@ -59,21 +59,24 @@ jobs:
                 .map(step => ({ job: job.name, step: step.name }))
             );
             const failedStepNames = failedSteps.map(item => item.step).join(' | ');
-            const infraPattern = /(checkout|setup .*node|setup .*python|install dependencies|download|upload artifact|cache|npm ci|pip install|chromium install)/i;
-            const likelyTransient = failedSteps.length > 0 && failedSteps.every(item => infraPattern.test(item.step));
+            // Only runner provisioning is retried automatically. Checkout, dependency
+            // installation, browser setup and project commands can fail deterministically.
+            const runnerProvisioningOnly = failedSteps.length > 0 &&
+              failedSteps.every(item => /^Set up job$/i.test(item.step));
+            const likelyTransient = runnerProvisioningOnly;
             const attempt = Number(run.run_attempt || 1);
 
             core.info(`Workflow: ${run.name}; run: ${runId}; attempt: ${attempt}`);
             core.info(`Failed jobs: ${failedJobs.map(job => job.name).join(', ') || 'none reported'}`);
             core.info(`Failed steps: ${failedStepNames || 'not identified'}`);
 
-            // Only one retry, and only when every failed step is a known setup/network-like step.
-            // Never retry test, assertion, lint, compilation, security, or content-validation failures.
+            // Only one retry, and only for GitHub runner provisioning.
+            // Never retry checkout, dependency installation, browser setup, tests, or project commands.
             if (likelyTransient && attempt === 1) {
               await github.rest.actions.reRunFailedJobs({ owner, repo, run_id: runId });
               await core.summary
                 .addHeading('CodeSaathi CI Auto-Healer')
-                .addRaw('A single controlled retry was requested because all failed steps matched the allow-listed setup/download/cache categories.')
+                .addRaw('A single controlled retry was requested because all failed steps were GitHub runner provisioning.')
                 .addLink('Original failed run', run.html_url)
                 .write();
               core.info('Requested one retry of failed jobs. No source files were changed.');
