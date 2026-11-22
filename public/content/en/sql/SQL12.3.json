@@ -25,7 +25,7 @@
       "analogyLimit": "The analogy does not model SQL locking, isolation levels, storage durability or engine-specific transaction implementation."
     },
     "explain": {
-      "narrative": "## ROLLBACK\nROLLBACK ends the active transaction and discards its uncommitted changes. It is commonly used when validation, a constraint, or a later statement fails.\n\n## Example workflow\nBegin a transaction, update related rows, verify required conditions, and commit only if the operation is valid. If any required step fails, roll back the whole unit.\n\n## Important distinction\nROLLBACK cannot undo changes that have already been committed. If an application needs to compensate for a committed business operation, it must run a new compensating transaction.\n\n## Safe error handling\nApplications should use try/catch or equivalent error handling around transaction work and guarantee rollback on failure. Avoid silently ignoring errors and continuing to COMMIT.",
+      "narrative": "## ROLLBACK\nROLLBACK ends the active transaction and discards its uncommitted changes. It is commonly used when validation, a constraint, or a later statement fails.\n\n## Example workflow\nBegin a transaction, update related rows, verify required conditions, and commit only if the operation is valid. If any required step fails, roll back the whole unit.\n\n## Important distinction\nROLLBACK cannot undo changes that have already been committed. If an application needs to compensate for a committed business operation, it must run a new compensating transaction.\n\n## Safe error handling\nApplications should use try/catch or equivalent error handling around transaction work and guarantee rollback on failure. Avoid silently ignoring errors and continuing to COMMIT.\n\n### What rollback can and cannot do\nROLLBACK reverses changes made since the current transaction began or since the relevant savepoint. It cannot undo an earlier COMMIT. A compensating business action after commit is a new transaction, not a rollback of history.\n\n### Error handling pattern\nIf any required statement or validation fails, stop the workflow and roll back before reporting failure. Do not catch an error and then blindly issue COMMIT. Some database engines have different transaction-abort rules after an error, so consult the target engine documentation.",
       "examples": [
         {
           "id": "sql12.3-ex1",
@@ -33,7 +33,7 @@
           "title": "Create stock table",
           "code": "CREATE TABLE tx12_stock (item_id INTEGER PRIMARY KEY, item_name TEXT NOT NULL, quantity INTEGER NOT NULL CHECK (quantity >= 0));",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create stock table in SQLite. Observe the transaction boundary and verify the stated result.",
+          "explanation": "Creates a stock table whose CHECK constraint prevents a stored quantity below zero. This is a declarative safeguard that remains active regardless of which application issues the write.",
           "runnable": true
         },
         {
@@ -42,7 +42,7 @@
           "title": "Insert starting stock",
           "code": "INSERT INTO tx12_stock VALUES (1, 'Keyboard', 8);",
           "expectedOutput": "1 row inserted",
-          "explanation": "This example demonstrates insert starting stock in SQLite. Observe the transaction boundary and verify the stated result.",
+          "explanation": "Inserts the initial quantity of eight keyboards. This known starting value is the baseline used to demonstrate the difference between committed and uncommitted data.",
           "runnable": true
         },
         {
@@ -51,7 +51,7 @@
           "title": "Begin a stock reduction",
           "code": "BEGIN; UPDATE tx12_stock SET quantity = quantity - 3 WHERE item_id = 1; SELECT quantity FROM tx12_stock WHERE item_id = 1;",
           "expectedOutput": "5",
-          "explanation": "This example demonstrates begin a stock reduction in SQLite. Observe the transaction boundary and verify the stated result.",
+          "explanation": "Begins a transaction, reduces the quantity by three, and reads it before committing. The same connection sees its own uncommitted change, so the result is five while the transaction is still open.",
           "runnable": true
         },
         {
@@ -60,7 +60,7 @@
           "title": "Roll back the uncommitted reduction",
           "code": "ROLLBACK; SELECT quantity FROM tx12_stock WHERE item_id = 1;",
           "expectedOutput": "8",
-          "explanation": "This example demonstrates roll back the uncommitted reduction in SQLite. Observe the transaction boundary and verify the stated result.",
+          "explanation": "ROLLBACK discards the pending reduction. The following SELECT reads eight, showing that the uncommitted update was not retained.",
           "runnable": true
         },
         {
@@ -69,7 +69,7 @@
           "title": "Confirm no negative quantity was committed",
           "code": "SELECT COUNT(*) AS invalid_rows FROM tx12_stock WHERE quantity < 0;",
           "expectedOutput": "invalid_rows = 0",
-          "explanation": "This example demonstrates confirm no negative quantity was committed in SQLite. Observe the transaction boundary and verify the stated result.",
+          "explanation": "Counts rows with negative quantities. The zero result is a data-quality check; the CHECK constraint is the preventive rule, while this query can audit data imported from a source that did not enforce the same rule.",
           "runnable": true
         }
       ]
