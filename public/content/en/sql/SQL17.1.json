@@ -26,7 +26,7 @@
       "analogyLimit": "The analogy does not model OLD/NEW row values, transaction timing, recursive execution or DBMS-specific trigger semantics."
     },
     "explain": {
-      "narrative": "## What is a trigger?\nA trigger is stored SQL that executes automatically when its defined event occurs. SQLite supports BEFORE and AFTER triggers for INSERT, UPDATE and DELETE on tables, and INSTEAD OF triggers on views.\n\n## AFTER INSERT\nAn AFTER INSERT trigger runs after a row has been inserted successfully. A common use is writing an audit record that captures the new row's key and event time.\n\n## Use triggers deliberately\nTriggers can centralize data-side effects, but they are less visible than application code. Document trigger behaviour, test it with the application workflow and avoid duplicating business logic in multiple layers.",
+      "narrative": "## What is a trigger?\nA trigger is stored SQL that executes automatically when its defined event occurs. SQLite supports BEFORE and AFTER triggers for INSERT, UPDATE and DELETE on tables, and INSTEAD OF triggers on views.\n\n## AFTER INSERT\nAn AFTER INSERT trigger runs after a row has been inserted successfully. A common use is writing an audit record that captures the new row's key and event time.\n\n## Use triggers deliberately\nTriggers can centralize data-side effects, but they are less visible than application code. Document trigger behaviour, test it with the application workflow and avoid duplicating business logic in multiple layers.\n\n### Event and row context\nAn AFTER INSERT trigger runs after each qualifying row has been inserted. SQLite exposes the inserted row through NEW; OLD is not available for INSERT events. A trigger has no independent COMMIT boundary: its work is part of the statement's transaction, so a trigger error can cause the statement to fail.\n\n### Design checks\nUse a narrow WHEN condition where possible, keep audit writes small, and test multi-row INSERT statements because row triggers can run once per affected row. Do not assume identical trigger syntax or timing across database products.",
       "examples": [
         {
           "id": "sql17.1-ex1",
@@ -34,7 +34,7 @@
           "title": "Create an orders table",
           "code": "CREATE TABLE trg17_orders (order_id INTEGER PRIMARY KEY, customer TEXT NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create an orders table using SQLite triggers. Verify the event, timing and affected rows.",
+          "explanation": "Defines the orders table used by the trigger example. The INTEGER PRIMARY KEY identifies each order; customer is required, so an insert that omits it or supplies NULL is rejected.",
           "runnable": true
         },
         {
@@ -43,7 +43,7 @@
           "title": "Create an audit table",
           "code": "CREATE TABLE trg17_order_audit (audit_id INTEGER PRIMARY KEY, order_id INTEGER NOT NULL, action_name TEXT NOT NULL);",
           "expectedOutput": "Table created",
-          "explanation": "This example demonstrates create an audit table using SQLite triggers. Verify the event, timing and affected rows.",
+          "explanation": "Stores a durable audit record independently of the live orders table. The audit row deliberately stores the order identifier and event name rather than referencing the order with a foreign key, so the audit can remain after a later order deletion.",
           "runnable": true
         },
         {
@@ -52,7 +52,7 @@
           "title": "Create an AFTER INSERT trigger",
           "code": "CREATE TRIGGER trg17_order_insert AFTER INSERT ON trg17_orders BEGIN INSERT INTO trg17_order_audit(order_id, action_name) VALUES (NEW.order_id, 'INSERT'); END;",
           "expectedOutput": "Trigger created",
-          "explanation": "This example demonstrates create an after insert trigger using SQLite triggers. Verify the event, timing and affected rows.",
+          "explanation": "Attaches an AFTER INSERT trigger to trg17_orders. Once an order row has been inserted successfully, NEW.order_id supplies its generated or explicit key and the trigger writes one audit row. The trigger body is part of the same statement transaction.",
           "runnable": true
         },
         {
@@ -61,7 +61,7 @@
           "title": "Insert an order",
           "code": "INSERT INTO trg17_orders VALUES (1, 'Asha');",
           "expectedOutput": "1 row inserted",
-          "explanation": "This example demonstrates insert an order using SQLite triggers. Verify the event, timing and affected rows.",
+          "explanation": "Inserts one order. Because the AFTER INSERT trigger fires for this row, the database also inserts an audit record with order_id 1 and action_name INSERT before the statement completes.",
           "runnable": true
         },
         {
@@ -70,7 +70,7 @@
           "title": "Read the automatically created audit row",
           "code": "SELECT order_id, action_name FROM trg17_order_audit;",
           "expectedOutput": "1 | INSERT",
-          "explanation": "This example demonstrates read the automatically created audit row using SQLite triggers. Verify the event, timing and affected rows.",
+          "explanation": "Reads the audit table to verify the side effect. The expected row proves that the trigger copied the inserted order key and recorded the event; it does not mean the audit table is a separate transaction.",
           "runnable": true
         }
       ]
