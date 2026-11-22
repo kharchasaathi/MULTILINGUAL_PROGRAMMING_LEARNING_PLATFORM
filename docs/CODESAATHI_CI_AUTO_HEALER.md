@@ -2,7 +2,7 @@
 
 ## What it does
 
-The workflow `.github/workflows/codesaathi-ci-auto-healer.yml` listens for completed runs of the selected CodeSaathi validation and deployment workflows.
+The workflow `.github/workflows/codesaathi-ci-auto-healer.yml` listens for completed runs of the verified workflows: `SQL course validation`, `Added lessons browser, technical and accessibility review`, `Python Course Validation`, `F1.7 curriculum validation`, and `CodeSaathi Project Health Management`.
 
 1. Reads the failed workflow run and its failed job/step metadata through the GitHub Actions API.
 2. Retries failed jobs once only when the failed step is GitHub runner provisioning (`Set up job`).
@@ -30,4 +30,4 @@ Use the workflow's **Run workflow** action and supply a failed run ID. The run m
 
 ## Extension path
 
-This is the safe monitoring and bounded-retry foundation. A future repair-PR generator should be a separate, explicitly gated workflow with a strict allow-list of repair classes, dedicated validation, and human review. It must not run untrusted PR code in a privileged `workflow_run` context.
+This is the safe monitoring and bounded-retry foundation. Autonomous AI code repair is intentionally not enabled in this phase: it needs an explicitly configured model credential, a narrow repair policy, dedicated validation, and human review. Add repair-PR generation only after recurring failure classes have been observed and safe deterministic fixes can be allow-listed. It must not run untrusted PR code in a privileged `workflow_run` context.
