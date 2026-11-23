@@ -1,8 +1,8 @@
 # SQL W3Schools Completion Audit
 
-**Audit date:** 2026-11-22  
+**Audit date:** 2026-11-23  
 **Repository branch audited:** `release/v1-frontend`  
-**Audited commit:** `b4b8c163746491abf033e9541a0c178c1a62190b`  
+**Release baseline:** `b4b8c163746491abf033e9541a0c178c1a62190b`  \n**Learner-practice implementation under review:** PR #217, head `4c99019c70cae072a8037ba111199ac80ff3e8e9`  
 **Reference scope:** W3Schools SQL tutorial, syllabus, exercises, quiz, challenges, editor, certification and SQL reference pages.  
 **Content policy:** W3Schools is a coverage reference only. CodeSaathi lessons, examples and assessments remain original.
 
@@ -22,7 +22,7 @@
 | Tracker status | 81 VALIDATED / 70 DRAFT (151 total) | Do not treat DRAFT as production-approved |
 | Telugu translations | Deferred by project instruction | Not included in this English-first completion gate |
 
-The SQL validator run was on `909ba9e2`, before the later SQL/Python playground-status fixes. The current branch head is `b4b8c163746491abf033e9541a0c178c1a62190b`. The later current-head Browser Review and Firebase deploy both passed on `b4b8c163746491abf033e9541a0c178c1a62190b` (runs 45017406016 and 45017405965).
+The earlier SQL validator run #45016457817 passed on `909ba9e2`. The new learner-practice branch has also passed SQL course, challenge and practice-bank validation on PR #217 (run #45166566268). The browser review for the latest learner-practice changes is still being checked; do not infer a pass until its run completes. PR #217 is not merged and no new Firebase deployment has been performed for it.
 
 ## W3Schools course syllabus baseline
 
@@ -111,13 +111,13 @@ The existing `docs/SQL_W3SCHOOLS_COVERAGE_MATRIX.csv` maps tutorial topics to ex
 
 ### Gaps that block a complete claim
 
-1. **Lesson publication gate:** the tracker still records 70 of 151 SQL lessons as DRAFT. Re-audit these lessons, then promote only after editorial and technical checks.
+1. **Lesson publication gate:** PR #216 records 151/151 tracker rows as VALIDATED after automated contract checks and targeted technical review. The lesson JSON files intentionally retain `status: draft`; a complete line-by-line English editorial approval and release sign-off remain outstanding.
 2. **Syllabus outcome audit:** explicitly verify all W3Schools learning outcomes, especially user permissions/data security and the outcome of building an application using SQL.
-3. **Exercises:** add an original fill-in-the-blank exercise type and connect exercise completion/progress to each topic. Existing MCQs and practice prompts do not replace this.
-4. **Cumulative quiz:** add a course-level quiz flow with topic selection, scoring, answer review and persistent progress.
-5. **Code challenges:** 32 reference solutions pass SQLite CI, but the challenge learner experience still needs starter data, hidden tests, hints, automatic grading and progress tracking.
+3. **Exercises:** PR #217 adds 60 original fill-in-the-blank exercises with hints, explanations, answer feedback and in-browser progress. A topic-by-topic mapping against all W3Schools exercise categories is still required; 60 items do not prove every W3Schools category is covered.
+4. **Cumulative quiz:** PR #217 adds a 20-question random sample from the 755 English lesson MCQs and stores the latest score locally. Topic-specific quiz filters, full attempt history and account-synced progress remain future work.
+5. **Code challenges:** PR #217 exposes all 32 existing challenges, hints, automatic expected-row grading and local solved-progress. The answer bank and expected rows are client-accessible; hidden tests, stronger anti-cheat and broader challenge coverage remain pending.
 6. **SQL editor:** complete the final security/accessibility audit and make the SQLite-only execution boundary explicit in the UI and documentation.
-7. **Certification / final exam:** create an end-of-course exam blueprint and question bank, timed and untimed modes, scoring, review and completion record.
+7. **Certification / final exam:** PR #217 adds a 60-question, 60-minute self-assessment using the lesson MCQ bank, with a CodeSaathi-recommended 80% practice pass mark and a local completion record. This is not an official W3Schools certification, is not proctored, and is not externally verifiable. A balanced exam blueprint, question weighting, full review mode and secure learner identity/progress remain pending.
 8. **Dialect references:** expand and clearly label Access, MySQL, SQL Server, PostgreSQL and Oracle differences. The in-browser runtime is SQLite; do not present SQLite results as proof that vendor-specific syntax runs on those engines.
 9. **Reference catalogues:** complete a deliberate audit of SQL data types, keywords, quick reference, MySQL functions and SQL Server functions. Broad mappings are not exhaustive reference coverage.
 10. **English editorial approval:** technical CI is necessary but does not replace editorial review for clarity, correctness, scope and beginner progression.
