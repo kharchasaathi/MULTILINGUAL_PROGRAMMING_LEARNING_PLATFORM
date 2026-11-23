@@ -435,3 +435,13 @@ test("SQL Practice Hub runs fill-in-the-blank, cumulative quiz and isolated code
   await page.locator("#checkChallenge").click();
   await expect(page.locator("#challengeFeedback")).toContainText("Correct", { timeout: 30000 });
 });
+
+
+test("C compiler embed exposes the browser-local compiler and direct fallback", async ({ page }) => {
+  await page.goto(baseURL + "/c-compiler.html", { waitUntil: "domcontentloaded" });
+  const frame = page.locator("#cCompilerFrame");
+  await expect(frame).toHaveAttribute("src", /^https:\/\/nothing12-glitch\.github\.io\/cpp-forge\//, { timeout: 10000 });
+  await expect(page.getByRole("link", { name: /open the C compiler directly/i })).toHaveAttribute("href", "https://nothing12-glitch.github.io/cpp-forge/");
+  await expect(page.locator(".c-compiler-notice").first()).toContainText("23 MB");
+  expect(await page.locator("body").innerText()).not.toContain("\\n");
+});
