@@ -9,7 +9,7 @@ const practice = JSON.parse(await readFile(resolve(root, "public/content/en/sql/
 const challengeBank = JSON.parse(await readFile(resolve(root, "public/content/en/sql/sql-code-challenges.json"), "utf8"));
 assert.equal(practice.courseId, "sql");
 assert.equal(practice.language, "en");
-assert.ok(Array.isArray(practice.exercises) && practice.exercises.length >= 60, "At least 60 fill-in-the-blank exercises are required");
+assert.ok(Array.isArray(practice.exercises) && practice.exercises.length >= 80, "At least 80 fill-in-the-blank exercises are required");
 const exerciseIds = new Set();
 for (const item of practice.exercises) {
   assert.ok(item.id && !exerciseIds.has(item.id), "Exercise IDs must be unique");
@@ -21,7 +21,16 @@ for (const item of practice.exercises) {
   assert.ok(item.hint?.length > 8 && item.explanation?.length > 12, item.id + ": hint and explanation are required");
 }
 assert.ok(lessonTopics.length >= 150, "SQL English lesson inventory is unexpectedly small");
+const matrixLines = (await readFile(resolve(root, "docs/SQL_W3SCHOOLS_COVERAGE_MATRIX.csv"), "utf8")).split(/\r?\n/).slice(1).filter(Boolean);
+const officialModuleTopics = new Set(matrixLines.map(line => line.match(/^"(?:Tutorial|Database)","([^"]+)"/)?.[1]).filter(Boolean));
+assert.equal(officialModuleTopics.size, 66, "The current W3Schools Tutorial and SQL Database inventory should contain 66 modules");
+const mappedExerciseTopics = new Set(practice.exercises.map(item => item.w3schoolsTopic).filter(Boolean));
+for (const topic of officialModuleTopics) assert.ok(mappedExerciseTopics.has(topic), "Missing fill-in-the-blank coverage for " + topic);
+for (const item of practice.exercises.filter(item => item.w3schoolsTopic)) assert.ok(lessonTopics.some(topic => topic.topicId === item.topicId), item.id + ": topicId must map to an English SQL lesson");
 assert.ok(challengeBank.challenges.length >= 30, "SQL learner challenges are required");
+const mappedExerciseTopics = new Set(practice.exercises.map(item => item.w3schoolsTopic).filter(Boolean));
+assert.ok(mappedExerciseTopics.size >= 66, "All 66 W3Schools tutorial and database modules need exercise coverage");
+for (const item of practice.exercises.filter(item => item.w3schoolsTopic)) assert.ok(lessonTopics.some(topic => topic.topicId === item.topicId), item.id + ": topicId must map to an English SQL lesson");
 const topicIds = new Set(lessonTopics.map(topic => topic.topicId));
 for (const challenge of challengeBank.challenges) {
   assert.ok(topicIds.has(challenge.topicId), challenge.id + ": challenge must map to a SQL lesson");
