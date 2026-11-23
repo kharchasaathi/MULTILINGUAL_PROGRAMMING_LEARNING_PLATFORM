@@ -14,7 +14,7 @@
 - Preserve the repository lesson JSON contract and Understand, Explain, Practise stages.
 - English first. Telugu translation is deferred until the English course is complete.
 - W3Schools is the topic coverage and sequence reference only. Write original explanations, examples and assessments.
-- Each lesson: five measurable objectives, two complete Java examples, guided and independent tasks, three hints and five topic-specific MCQs with explanations.
+- Each lesson: five measurable objectives, five complete Java examples, guided and independent tasks, three hints and five topic-specific MCQs with explanations.
 - Keep lesson JSON `status: "draft"` until editorial review and release approval.
 - The existing browser playground does not execute Java. Java examples are validated with a JDK in CI; do not label them browser-playground runnable.
 - Initial reproducible CI baseline: JDK 21.
@@ -99,9 +99,9 @@
 
 | Topic IDs | Lessons | Status |
 |---|---:|---|
-| JV1.1–JV1.6 | 6 | English draft authored; JDK 21 CI validation PASS on PR head a75d17f |
-| JV2.1–JV2.7 | 7 | English draft authored in this batch; JDK 21 CI validation pending |
-| JV2.8–JV8.5 | 45 | Planned; not yet authored |
+| JV1.1–JV1.6 | 6 | English draft expanded to five examples each; current-head JDK validation pending |
+| JV2.1–JV2.7 | 7 | English draft expanded to five examples each; JDK 21 validation PASS on run #13 (47 examples across 13 lessons) |
+| JV3.1–JV3.5 | 5 | English draft authored with five examples each; current-head JDK validation pending |\n| JV3.6–JV8.5 | 40 | Planned; not yet authored |
 
 ## Runtime and release plan
 
@@ -142,3 +142,13 @@ Each lesson contains five learning objectives, at least two original JDK-compati
 - Existing learning objectives, Understand/Explain/Practise content, MCQs, topic IDs, file paths, `status: draft`, and `playgroundMode: none` preserved.
 - The validator now accepts lesson-specific example counts of at least two while legacy JV1 lessons are brought up to the five-example standard. This is a temporary compatibility gate; raise the global minimum to five after JV1 expansion.
 - JDK 21 execution of the added examples is pending the next Java Course Validation workflow run.
+
+
+## JV1 quality expansion and JV3 authoring — 24 November 2026
+
+- JV1.1–JV1.6 each expanded from two to five original examples (18 additional examples). Their JDK 21 execution on the updated head is pending.
+- JV3.1–JV3.5 authored in English: If...Else, Switch, While Loop, For Loop, Break and Continue.
+- Each JV3 lesson contains five objectives, five JDK-compatible examples with expected output, three-stage lesson content, guided and independent practice, hints, challenge and five topic-specific MCQs.
+- JV3.2 covers both traditional switch statements and modern arrow-style switch expressions supported by JDK 21.
+- Curriculum index and progress tracker now include JV3.1–JV3.5. Lessons remain `draft`; Telugu translation is deferred; Java examples remain `playgroundMode: none`.
+- Current-head JDK 21 and browser review validation are pending.
