@@ -1,7 +1,7 @@
 (() => {
   "use strict";
   const $ = id => document.getElementById(id);
-  const state = { bank:null, blankIndex:0, blankCorrect:0, blankAnswered:new Set(), quiz:[], quizIndex:0, quizCorrect:0, quizAnswered:false, challenges:[], challenge:null, solved:new Set(), worker:null, workerReady:false, runId:0, pending:null };
+  const state = { bank:null, blankIndex:0, blankCorrect:0, blankAnswered:new Set(), quiz:[], quizIndex:0, quizCorrect:0, quizAnswered:false, questionBank:null, exam:[], examIndex:0, examCorrect:0, examAnswered:false, challenges:[], challenge:null, solved:new Set(), worker:null, workerReady:false, runId:0, pending:null };
   const safeText = value => String(value ?? "");
   function setTab(name) {
     for (const tab of document.querySelectorAll("[data-tab]")) tab.setAttribute("aria-pressed", String(tab.dataset.tab === name));
@@ -164,6 +164,50 @@
     try{localStorage.setItem("codesaathi-sql-last-quiz",JSON.stringify({score:state.quizCorrect,total:state.quiz.length,completedAt:new Date().toISOString()}));}catch{}
   });
   $("retryQuiz").addEventListener("click",()=>{ $("quizResult").hidden=true;$("quizIntro").hidden=false;$("startQuiz").textContent="Start another 20-question quiz"; });
+  async function startExam() {
+    $("startExam").disabled = true; $("startExam").textContent = "Loading the full lesson question bank…";
+    try {
+      const all = await loadQuizBank();
+      state.exam = shuffle(all).slice(0,50); state.examIndex=0; state.examCorrect=0;
+      $("examIntro").hidden=true; $("examResult").hidden=true; $("examStage").hidden=false;
+      renderExamQuestion();
+    } catch(error) { $("examIntro").hidden=false; $("startExam").textContent=error.message; }
+    $("startExam").disabled=false;
+  }
+  function renderExamQuestion() {
+    const q=state.exam[state.examIndex]; state.examAnswered=false;
+    $("examCounter").textContent="Question "+(state.examIndex+1)+" of "+state.exam.length+" · "+q.topicId;
+    $("examProgressText").textContent=state.examCorrect+" correct";
+    $("examProgress").style.width=(state.examIndex/state.exam.length*100)+"%";
+    $("examPrompt").textContent=q.prompt; $("examOptions").replaceChildren();
+    $("examFeedback").textContent=""; $("examFeedback").className="practice-feedback"; $("examNext").disabled=true;
+    q.options.forEach(option=>{
+      const label=document.createElement("label"); const input=document.createElement("input");
+      input.type="radio"; input.name="final-assessment-question"; input.value=option;
+      input.addEventListener("change",()=>{
+        if(state.examAnswered)return; state.examAnswered=true;
+        for(const control of $("examOptions").querySelectorAll("input"))control.disabled=true;
+        if(option===q.answer){state.examCorrect+=1;$("examFeedback").className="practice-feedback good";$("examFeedback").textContent="Correct. "+(q.explanation||"");}
+        else{$("examFeedback").className="practice-feedback bad";$("examFeedback").textContent="Correct answer: "+q.answer+". "+(q.explanation||"");}
+        $("examProgressText").textContent=state.examCorrect+" correct"; $("examNext").disabled=false;
+        $("examNext").textContent=state.examIndex===state.exam.length-1?"Finish assessment":"Next question";
+      });
+      label.append(input,document.createTextNode(" "+option));$("examOptions").append(label);
+    });
+  }
+  $("startExam").addEventListener("click",startExam);
+  $("examNext").addEventListener("click",()=>{
+    if(state.examIndex<state.exam.length-1){state.examIndex+=1;renderExamQuestion();return;}
+    const percent=Math.round(state.examCorrect/state.exam.length*100);
+    const passed=percent>=80;
+    $("examStage").hidden=true;$("examResult").hidden=false;
+    $("examScore").textContent=state.examCorrect+" / "+state.exam.length+" ("+percent+"%)";
+    $("examOutcome").className="practice-feedback "+(passed?"good":"bad");
+    $("examOutcome").textContent=passed?"PASS — You met the 80% suggested pass mark.":"NOT YET — Review the lessons and try again.";
+    $("examSummary").textContent="This result is saved locally only. It is not an accredited or externally verifiable certificate.";
+    try{localStorage.setItem("codesaathi-sql-final-assessment",JSON.stringify({score:state.examCorrect,total:state.exam.length,percent,passed,completedAt:new Date().toISOString()}));}catch{}
+  });
+  $("retryExam").addEventListener("click",()=>{$("examResult").hidden=true;$("examIntro").hidden=false;$("startExam").textContent="Start another final assessment";});
   function renderChallengeList() {
     $("challengeList").replaceChildren();
     state.challenges.forEach((challenge,index)=>{
