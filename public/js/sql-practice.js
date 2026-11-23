@@ -7,6 +7,7 @@
     for (const tab of document.querySelectorAll("[data-tab]")) tab.setAttribute("aria-pressed", String(tab.dataset.tab === name));
     $("blanksPanel").hidden = name !== "blanks";
     $("quizPanel").hidden = name !== "quiz";
+    $("examPanel").hidden = name !== "exam";
     $("challengesPanel").hidden = name !== "challenges";
   }
   document.querySelectorAll("[data-tab]").forEach(button => button.addEventListener("click", () => setTab(button.dataset.tab)));
