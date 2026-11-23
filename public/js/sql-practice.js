@@ -81,10 +81,15 @@
     $("blankFeedback").className = "practice-feedback";
     $("blankHintText").hidden = true;
     $("blankHintText").textContent = item.hint;
-    $("blankNext").disabled = true;
+    const alreadyAnswered = state.blankAnswered.has(item.id);
+    $("blankNext").disabled = !alreadyAnswered;
+    if (alreadyAnswered) {
+      $("blankFeedback").textContent = "Already completed. Correct answer: " + item.answer + ". " + item.explanation;
+      $("blankNext").textContent = state.blankIndex === items.length - 1 ? "Restart exercises" : "Next exercise";
+    }
     item.options.forEach(option => {
       const button = document.createElement("button");
-      button.type = "button"; button.textContent = option; button.setAttribute("aria-pressed","false");
+      button.type = "button"; button.textContent = option; button.disabled = alreadyAnswered; button.setAttribute("aria-pressed","false");
       button.addEventListener("click", () => {
         if (state.blankAnswered.has(item.id)) return;
         for (const other of $("blankOptions").querySelectorAll("button")) { other.disabled = true; other.setAttribute("aria-pressed", String(other === button)); }
