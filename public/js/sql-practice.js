@@ -1,7 +1,7 @@
 (() => {
   "use strict";
   const $ = id => document.getElementById(id);
-  const state = { bank:null, blankIndex:0, blankCorrect:0, blankAnswered:new Set(), quiz:[], quizIndex:0, quizCorrect:0, quizAnswered:false, questionBank:null, exam:[], examIndex:0, examCorrect:0, examAnswered:false, challenges:[], challenge:null, solved:new Set(), worker:null, workerReady:false, runId:0, pending:null };
+  const state = { bank:null, blankIndex:0, blankCorrect:0, blankAnswered:new Set(), quiz:[], quizIndex:0, quizCorrect:0, quizAnswered:false, questionBank:null, exam:[], examIndex:0, examCorrect:0, examAnswered:false, examSecondsRemaining:3600, examTimer:null, challenges:[], challenge:null, solved:new Set(), worker:null, workerReady:false, runId:0, pending:null };
   const safeText = value => String(value ?? "");
   function setTab(name) {
     for (const tab of document.querySelectorAll("[data-tab]")) tab.setAttribute("aria-pressed", String(tab.dataset.tab === name));
@@ -169,13 +169,13 @@
     $("startExam").disabled = true; $("startExam").textContent = "Loading the full lesson question bank…";
     try {
       const all = await loadQuizBank();
-      state.exam = shuffle(all).slice(0,50); state.examIndex=0; state.examCorrect=0;
+      state.exam = shuffle(all).slice(0,60); state.examIndex=0; state.examCorrect=0; state.examSecondsRemaining=3600;\n      startExamTimer();
       $("examIntro").hidden=true; $("examResult").hidden=true; $("examStage").hidden=false;
       renderExamQuestion();
     } catch(error) { $("examIntro").hidden=false; $("startExam").textContent=error.message; }
     $("startExam").disabled=false;
   }
-  function renderExamQuestion() {
+  function startExamTimer() {\n    clearInterval(state.examTimer);\n    const tick = () => {\n      const minutes = Math.floor(state.examSecondsRemaining / 60);\n      const seconds = state.examSecondsRemaining % 60;\n      $("examTimer").textContent = String(minutes).padStart(2,"0") + ":" + String(seconds).padStart(2,"0") + " remaining";\n      if (state.examSecondsRemaining <= 0) finishExam();\n      else state.examSecondsRemaining -= 1;\n    };\n    tick();\n    state.examTimer = setInterval(tick, 1000);\n  }\n  function finishExam() {\n    clearInterval(state.examTimer); state.examTimer = null;\n    const percent=Math.round(state.examCorrect/state.exam.length*100);\n    const passed=percent>=80;\n    $("examStage").hidden=true;$("examResult").hidden=false;\n    $("examScore").textContent=state.examCorrect+" / "+state.exam.length+" ("+percent+"%)";\n    $("examOutcome").className="practice-feedback "+(passed?"good":"bad");\n    $("examOutcome").textContent=passed?"PASS — You met the 80% suggested pass mark.":"NOT YET — Review the lessons and try again.";\n    $("examSummary").textContent="This result is saved locally only. It is not an accredited or externally verifiable certificate.";\n    try{localStorage.setItem("codesaathi-sql-final-assessment",JSON.stringify({score:state.examCorrect,total:state.exam.length,percent,passed,completedAt:new Date().toISOString()}));}catch{}\n  }\n  function renderExamQuestion() {
     const q=state.exam[state.examIndex]; state.examAnswered=false;
     $("examCounter").textContent="Question "+(state.examIndex+1)+" of "+state.exam.length+" · "+q.topicId;
     $("examProgressText").textContent=state.examCorrect+" correct";
