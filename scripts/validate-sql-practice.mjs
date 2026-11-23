@@ -21,7 +21,11 @@ for (const item of practice.exercises) {
   assert.ok(item.hint?.length > 8 && item.explanation?.length > 12, item.id + ": hint and explanation are required");
 }
 assert.ok(lessonTopics.length >= 150, "SQL English lesson inventory is unexpectedly small");
+const matrix = (await readFile(resolve(root, "docs/SQL_W3SCHOOLS_COVERAGE_MATRIX.csv"), "utf8")).split(/\\r?\\n/).slice(1).filter(Boolean);
 assert.ok(challengeBank.challenges.length >= 30, "SQL learner challenges are required");
+const mappedExerciseTopics = new Set(practice.exercises.map(item => item.w3schoolsTopic).filter(Boolean));
+assert.ok(mappedExerciseTopics.size >= 66, "All 66 W3Schools tutorial and database modules need exercise coverage");
+for (const item of practice.exercises.filter(item => item.w3schoolsTopic)) assert.ok(lessonTopics.some(topic => topic.topicId === item.topicId), item.id + ": topicId must map to an English SQL lesson");
 const topicIds = new Set(lessonTopics.map(topic => topic.topicId));
 for (const challenge of challengeBank.challenges) {
   assert.ok(topicIds.has(challenge.topicId), challenge.id + ": challenge must map to a SQL lesson");
