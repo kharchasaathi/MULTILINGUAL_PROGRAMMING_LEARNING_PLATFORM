@@ -37,7 +37,8 @@
     c: ["C Programming", "SYSTEMS PROGRAMMING", "Learn C syntax, memory, functions, files and data structures.", "C"],
     cpp: ["C++ Programming", "MODERN SYSTEMS & OBJECT-ORIENTED PROGRAMMING", "Learn modern C++ fundamentals, classes, templates, standard-library tools and safe resource management.", "C++"],
     python: ["Python Programming", "GENERAL-PURPOSE PROGRAMMING", "Learn Python fundamentals, automation, data handling, object-oriented programming and practical application development.", "PY"],
-    sql: ["SQL Programming", "RELATIONAL DATABASES", "Learn relational database concepts, write SQL queries and design reliable data structures.", "SQL"]
+    sql: ["SQL Programming", "RELATIONAL DATABASES", "Learn relational database concepts, write SQL queries and design reliable data structures.", "SQL"],
+    java: ["Java Programming", "JAVA FUNDAMENTALS & OBJECT-ORIENTED PROGRAMMING", "Learn Java syntax, object-oriented programming, collections, exceptions, threads and file handling.", "JAVA"]
   };
 
   function renderCourseCards() {
@@ -54,7 +55,7 @@
       top.append(text("span", "course-icon " + (courseId === "html" ? "icon-html" : courseId === "css" ? "icon-css" : courseId === "c" ? "icon-c" : ""), meta[3]));
       top.append(text("span", "course-number", String(items.length).padStart(2, "0") + " TOPICS"));
       card.append(top, text("h3", "", meta[0]), text("p", "", meta[2]));
-      const metaLine = text("div", "course-meta", courseId === "c" || courseId === "cpp" || courseId === "sql" ? items.length + " authored English lesson drafts · Telugu translation pending" : items.length + " authored lesson topics · English and Telugu drafts");
+      const metaLine = text("div", "course-meta", courseId === "c" || courseId === "cpp" || courseId === "sql" || courseId === "java" ? items.length + " authored English lesson drafts · Telugu translation pending" : items.length + " authored lesson topics · English and Telugu drafts");
       card.append(metaLine);
       const footer = text("div", "course-footer");
       footer.append(text("span", "course-price", "FREE PREVIEW"));
