@@ -99,8 +99,9 @@
 
 | Topic IDs | Lessons | Status |
 |---|---:|---|
-| JV1.1–JV1.6 | 6 | English draft authored; JDK CI validation pending |
-| JV1.7–JV8.5 | 52 | Planned; not yet authored |
+| JV1.1–JV1.6 | 6 | English draft authored; JDK 21 CI validation PASS on PR head a75d17f |
+| JV2.1–JV2.7 | 7 | English draft authored in this batch; JDK 21 CI validation pending |
+| JV2.8–JV8.5 | 45 | Planned; not yet authored |
 
 ## Runtime and release plan
 
@@ -118,3 +119,18 @@
 - W3Schools Java Tutorial: https://www.w3schools.com/java/
 
 The official syllabus currently groups the course into 8 chapters and 58 modules. This inventory preserves that order while using CodeSaathi topic IDs.
+
+
+## JV2 batch source mapping and implementation record
+
+| CodeSaathi topic | W3Schools reference | Lesson file | Current state |
+|---|---|---|---|
+| JV2.1 — Java Variables | https://www.w3schools.com/java/java_variables.asp | `public/content/en/java/JV2.1.json` | English draft authored; CI pending |
+| JV2.2 — Java Data Types | https://www.w3schools.com/java/java_data_types.asp | `public/content/en/java/JV2.2.json` | English draft authored; CI pending |
+| JV2.3 — Java Type Casting | https://www.w3schools.com/java/java_type_casting.asp | `public/content/en/java/JV2.3.json` | English draft authored; CI pending |
+| JV2.4 — Java Operators | https://www.w3schools.com/java/java_operators.asp | `public/content/en/java/JV2.4.json` | English draft authored; CI pending |
+| JV2.5 — Java Strings | https://www.w3schools.com/java/java_strings.asp | `public/content/en/java/JV2.5.json` | English draft authored; CI pending |
+| JV2.6 — Java Math | https://www.w3schools.com/java/java_math.asp | `public/content/en/java/JV2.6.json` | English draft authored; CI pending |
+| JV2.7 — Java Booleans | https://www.w3schools.com/java/java_booleans.asp | `public/content/en/java/JV2.7.json` | English draft authored; CI pending |
+
+Each lesson contains five learning objectives, two original JDK-compatible examples with expected output, the three-stage lesson structure, guided and independent practice, three hints and five original MCQs. Java examples remain `playgroundMode: none`; they are intended for the JDK validation workflow, not the web-language playground. Telugu translation remains deferred.
