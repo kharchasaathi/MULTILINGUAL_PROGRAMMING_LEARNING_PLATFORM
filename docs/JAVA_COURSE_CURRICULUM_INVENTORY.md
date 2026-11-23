@@ -145,6 +145,17 @@ Each lesson contains five learning objectives, at least two original JDK-compati
 - JDK 21 execution of the added examples is pending the next Java Course Validation workflow run.
 
 
+### JV3 W3Schools source mapping
+
+| CodeSaathi topic | W3Schools reference | Lesson file |
+|---|---|---|
+| JV3.1 — Java If...Else | https://www.w3schools.com/java/java_conditions.asp | `public/content/en/java/JV3.1.json` |
+| JV3.2 — Java Switch | https://www.w3schools.com/java/java_switch.asp | `public/content/en/java/JV3.2.json` |
+| JV3.3 — Java While Loop | https://www.w3schools.com/java/java_while_loop.asp | `public/content/en/java/JV3.3.json` |
+| JV3.4 — Java For Loop | https://www.w3schools.com/java/java_for_loop.asp | `public/content/en/java/JV3.4.json` |
+| JV3.5 — Java Break and Continue | https://www.w3schools.com/java/java_break.asp | `public/content/en/java/JV3.5.json` |
+
+
 ## JV1 quality expansion and JV3 authoring — 24 November 2026
 
 - JV1.1–JV1.6 each expanded from two to five original examples (18 additional examples). Their JDK 21 execution on the updated head is pending.
