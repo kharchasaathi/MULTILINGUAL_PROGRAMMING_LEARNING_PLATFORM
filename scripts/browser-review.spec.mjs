@@ -443,5 +443,9 @@ test("C compiler embed exposes the browser-local compiler and direct fallback", 
   await expect(frame).toHaveAttribute("src", /^https:\/\/nothing12-glitch\.github\.io\/cpp-forge\//, { timeout: 10000 });
   await expect(page.getByRole("link", { name: /open the C compiler directly/i })).toHaveAttribute("href", "https://nothing12-glitch.github.io/cpp-forge/");
   await expect(page.locator(".c-compiler-notice").first()).toContainText("23 MB");
+  const src = await frame.getAttribute("src");
+  const token = new URL(src).hash.slice("#code=".length);
+  const encodedState = JSON.parse(Buffer.from(token.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8"));
+  expect(encodedState.code).toContain('printf("Hello, CodeSaathi!\\n");');
   expect(await page.locator("body").innerText()).not.toContain("\\n");
 });
