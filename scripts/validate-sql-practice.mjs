@@ -9,7 +9,7 @@ const practice = JSON.parse(await readFile(resolve(root, "public/content/en/sql/
 const challengeBank = JSON.parse(await readFile(resolve(root, "public/content/en/sql/sql-code-challenges.json"), "utf8"));
 assert.equal(practice.courseId, "sql");
 assert.equal(practice.language, "en");
-assert.ok(Array.isArray(practice.exercises) && practice.exercises.length >= 20, "At least 20 fill-in-the-blank exercises are required");
+assert.ok(Array.isArray(practice.exercises) && practice.exercises.length >= 60, "At least 60 fill-in-the-blank exercises are required");
 const exerciseIds = new Set();
 for (const item of practice.exercises) {
   assert.ok(item.id && !exerciseIds.has(item.id), "Exercise IDs must be unique");
@@ -42,6 +42,6 @@ const page = await readFile(resolve(root, "public/sql-practice.html"), "utf8");
 const script = await readFile(resolve(root, "public/js/sql-practice.js"), "utf8");
 assert.ok(page.includes("/js/sql-practice.js"), "Practice page must load its client script");
 assert.ok(script.includes("challenge-check") && script.includes("codesaathi-sql-last-quiz"), "Practice interactions and local quiz history must be wired");
-assert.ok(script.includes("codesaathi-sql-final-assessment") && script.includes("slice(0,50)"), "The 50-question final assessment must be wired");
+assert.ok(script.includes("codesaathi-sql-final-assessment") && script.includes("slice(0,60)") && script.includes("3600"), "The 50-question final assessment must be wired");
 assert.ok(page.includes("id=\"examPanel\""), "The final assessment panel must be present");
 console.log(JSON.stringify({ lessonTopics: lessonTopics.length, fillBlankExercises: practice.exercises.length, cumulativeQuizQuestions: quizQuestions, codeChallenges: challengeBank.challenges.length }, null, 2));
