@@ -16,7 +16,7 @@
       state.bank = await loadJson("/content/en/sql/sql-practice-bank.json");
       renderBlank();
       const challengeBank = await loadJson("/content/en/sql/sql-code-challenges.json");
-      state.challenges = challengeBank.challenges || [];
+      state.challenges = challengeBank.challenges || [];\n      state.challengeBankSetup = challengeBank.dataset?.setupSql || "";
       $("challengeCount").textContent = state.challenges.length + " challenges";
       renderChallengeList();
       state.worker = new Worker("/js/sql-playground-worker.js", {name:"codesaathi-sql-practice"});
@@ -189,11 +189,7 @@
     if(!state.challenge||!state.workerReady||state.pending)return;
     state.runId+=1;state.pending={id:state.challenge.id};
     $("checkChallenge").disabled=true;$("challengeFeedback").className="practice-feedback";$("challengeFeedback").textContent="Checking query in an isolated SQLite database…";
-    state.worker.postMessage({type:"challenge-check",runId:state.runId,setupSql:"",code:$("challengeSql").value,expectedRows:state.challenge.expectedRows,challengeId:state.challenge.id});
-    // The trusted challenge dataset is loaded once from the challenge bank below.
-    state.worker.postMessage({type:"challenge-setup",runId:state.runId,setupSql:state.challengeBankSetup});
+    state.worker.postMessage({type:"challenge-check",runId:state.runId,setupSql:state.challengeBankSetup,code:$("challengeSql").value,expectedRows:state.challenge.expectedRows,challengeId:state.challenge.id});
   });
-  init().then(async()=>{
-    try{const bank=await loadJson("/content/en/sql/sql-code-challenges.json");state.challengeBankSetup=bank.dataset.setupSql;}catch{}
-  });
+  init();
 })();
