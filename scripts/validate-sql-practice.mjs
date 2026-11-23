@@ -42,6 +42,6 @@ const page = await readFile(resolve(root, "public/sql-practice.html"), "utf8");
 const script = await readFile(resolve(root, "public/js/sql-practice.js"), "utf8");
 assert.ok(page.includes("/js/sql-practice.js"), "Practice page must load its client script");
 assert.ok(script.includes("challenge-check") && script.includes("codesaathi-sql-last-quiz"), "Practice interactions and local quiz history must be wired");
-assert.ok(script.includes("codesaathi-sql-final-assessment") && script.includes("slice(0,60)") && script.includes("3600"), "The 50-question final assessment must be wired");
+assert.ok(script.includes("codesaathi-sql-final-assessment") && script.includes("slice(0,60)") && script.includes("3600"), "The 60-question, 60-minute final assessment must be wired");
 assert.ok(page.includes("id=\"examPanel\""), "The final assessment panel must be present");
 console.log(JSON.stringify({ lessonTopics: lessonTopics.length, fillBlankExercises: practice.exercises.length, cumulativeQuizQuestions: quizQuestions, codeChallenges: challengeBank.challenges.length }, null, 2));
