@@ -15,6 +15,7 @@
   async function init() {
     try {
       state.bank = await loadJson("/content/en/sql/sql-practice-bank.json");
+      try { const saved = JSON.parse(localStorage.getItem("codesaathi-sql-fill-blanks") || "{}"); if (Array.isArray(saved.answered)) state.blankAnswered = new Set(saved.answered); state.blankIndex = Math.min(Number(saved.index) || 0, state.bank.exercises.length - 1); state.blankCorrect = Number(saved.correct) || 0; } catch {}
       renderBlank();
       const challengeBank = await loadJson("/content/en/sql/sql-code-challenges.json");
       state.challenges = challengeBank.challenges || [];
@@ -64,11 +65,14 @@
       $("challengeCount").textContent = "Could not load challenges";
     }
   }
+  function saveBlankProgress() {
+    try { localStorage.setItem("codesaathi-sql-fill-blanks", JSON.stringify({index:state.blankIndex,correct:state.blankCorrect,answered:[...state.blankAnswered]})); } catch {}
+  }
   function renderBlank() {
     const items = state.bank?.exercises || [];
     const item = items[state.blankIndex];
     if (!item) return;
-    $("blankCounter").textContent = "Exercise " + (state.blankIndex + 1) + " of " + items.length;
+    $("blankCounter").textContent = "Exercise " + (state.blankIndex + 1) + " of " + items.length + " · " + (item.w3schoolsTopic || "Supplementary SQL");
     $("blankScore").textContent = state.blankCorrect + " correct";
     $("blankProgress").style.width = (state.blankAnswered.size / items.length * 100) + "%";
     $("blankPrompt").textContent = item.prompt;
@@ -95,6 +99,7 @@
         }
         $("blankScore").textContent = state.blankCorrect + " correct";
         $("blankProgress").style.width = (state.blankAnswered.size / items.length * 100) + "%";
+        saveBlankProgress();
         $("blankNext").disabled = false;
         $("blankNext").textContent = state.blankIndex === items.length - 1 ? "Restart exercises" : "Next exercise";
       });
@@ -105,6 +110,7 @@
   $("blankNext").addEventListener("click", () => {
     if (state.blankIndex >= state.bank.exercises.length - 1) { state.blankIndex = 0; state.blankCorrect = 0; state.blankAnswered.clear(); }
     else state.blankIndex += 1;
+    saveBlankProgress();
     renderBlank();
   });
   async function loadQuizBank() {
