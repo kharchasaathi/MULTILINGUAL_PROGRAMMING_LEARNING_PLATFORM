@@ -28,9 +28,6 @@ const mappedExerciseTopics = new Set(practice.exercises.map(item => item.w3schoo
 for (const topic of officialModuleTopics) assert.ok(mappedExerciseTopics.has(topic), "Missing fill-in-the-blank coverage for " + topic);
 for (const item of practice.exercises.filter(item => item.w3schoolsTopic)) assert.ok(lessonTopics.some(topic => topic.topicId === item.topicId), item.id + ": topicId must map to an English SQL lesson");
 assert.ok(challengeBank.challenges.length >= 30, "SQL learner challenges are required");
-const mappedExerciseTopics = new Set(practice.exercises.map(item => item.w3schoolsTopic).filter(Boolean));
-assert.ok(mappedExerciseTopics.size >= 66, "All 66 W3Schools tutorial and database modules need exercise coverage");
-for (const item of practice.exercises.filter(item => item.w3schoolsTopic)) assert.ok(lessonTopics.some(topic => topic.topicId === item.topicId), item.id + ": topicId must map to an English SQL lesson");
 const topicIds = new Set(lessonTopics.map(topic => topic.topicId));
 for (const challenge of challengeBank.challenges) {
   assert.ok(topicIds.has(challenge.topicId), challenge.id + ": challenge must map to a SQL lesson");
