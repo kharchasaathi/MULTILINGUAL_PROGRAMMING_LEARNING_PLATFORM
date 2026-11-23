@@ -103,7 +103,8 @@
 | JV2.1–JV2.7 | 7 | English draft expanded to five examples each; JDK 21 validation PASS on run #13 (47 examples across 13 lessons) |
 | JV3.1–JV3.5 | 5 | English draft authored with five examples each; JDK 21 validation PASS on run #22 |
 | JV4.1–JV4.6 | 6 | English draft authored; JDK 21 validation pending |
-| JV4.7–JV8.5 | 34 | Planned; not yet authored |
+| JV5.1–JV5.14 | 14 | English draft authored; JDK 21 validation pending |
+| JV6.1–JV8.5 | 20 | Planned; not yet authored |
 
 ## Runtime and release plan
 
@@ -182,3 +183,28 @@ Each lesson contains five learning objectives, at least two original JDK-compati
 - Each lesson contains five learning objectives, five complete standalone Java examples with expected output, the Understand/Explain/Practise structure, guided and independent tasks, three hints, a challenge and five topic-specific MCQs with explanations.
 - All lessons remain `status: "draft"`; `practice.playgroundMode: "none"`; Telugu translation remains deferred.
 - Curriculum index and progress tracker updated for JV4.1–JV4.6. JDK 21 execution and browser review are required before marking the batch validated.
+
+
+## JV5 — Object-oriented Java — 24 November 2026
+
+| CodeSaathi topic | W3Schools reference | Lesson file | Current state |
+|---|---|---|---|
+| JV5.1 — Java OOP | https://www.w3schools.com/java/java_oop.asp | `public/content/en/java/JV5.1.json` | English draft authored; JDK 21 validation pending |
+| JV5.2 — Java Classes/Objects | https://www.w3schools.com/java/java_classes.asp | `public/content/en/java/JV5.2.json` | English draft authored; JDK 21 validation pending |
+| JV5.3 — Java Class Attributes | https://www.w3schools.com/java/java_class_attributes.asp | `public/content/en/java/JV5.3.json` | English draft authored; JDK 21 validation pending |
+| JV5.4 — Java Class Methods | https://www.w3schools.com/java/java_class_methods.asp | `public/content/en/java/JV5.4.json` | English draft authored; JDK 21 validation pending |
+| JV5.5 — Java Constructors | https://www.w3schools.com/java/java_constructors.asp | `public/content/en/java/JV5.5.json` | English draft authored; JDK 21 validation pending |
+| JV5.6 — Java Modifiers | https://www.w3schools.com/java/java_modifiers.asp | `public/content/en/java/JV5.6.json` | English draft authored; JDK 21 validation pending |
+| JV5.7 — Java Encapsulation | https://www.w3schools.com/java/java_encapsulation.asp | `public/content/en/java/JV5.7.json` | English draft authored; JDK 21 validation pending |
+| JV5.8 — Java Packages | https://www.w3schools.com/java/java_packages.asp | `public/content/en/java/JV5.8.json` | English draft authored; JDK 21 validation pending |
+| JV5.9 — Java Inheritance | https://www.w3schools.com/java/java_inheritance.asp | `public/content/en/java/JV5.9.json` | English draft authored; JDK 21 validation pending |
+| JV5.10 — Java Polymorphism | https://www.w3schools.com/java/java_polymorphism.asp | `public/content/en/java/JV5.10.json` | English draft authored; JDK 21 validation pending |
+| JV5.11 — Java Inner Classes | https://www.w3schools.com/java/java_inner_classes.asp | `public/content/en/java/JV5.11.json` | English draft authored; JDK 21 validation pending |
+| JV5.12 — Java Abstraction | https://www.w3schools.com/java/java_abstract.asp | `public/content/en/java/JV5.12.json` | English draft authored; JDK 21 validation pending |
+| JV5.13 — Java Interface | https://www.w3schools.com/java/java_interface.asp | `public/content/en/java/JV5.13.json` | English draft authored; JDK 21 validation pending |
+| JV5.14 — Java Enums | https://www.w3schools.com/java/java_enums.asp | `public/content/en/java/JV5.14.json` | English draft authored; JDK 21 validation pending |
+
+- Authored fourteen original English lessons covering OOP foundations, classes/objects, fields, class methods, constructors, modifiers, encapsulation, packages, inheritance, polymorphism, inner classes, abstraction, interfaces and enums.
+- Each lesson includes five measurable objectives, five standalone Java examples with expected output, Understand/Explain/Practise stages, guided and independent practice, three hints, a challenge and five topic-specific MCQs with explanations.
+- All lessons remain `status: "draft"`; `practice.playgroundMode: "none"`; Telugu translation remains deferred.
+- Curriculum index and progress tracker updated for JV5.1–JV5.14. JDK 21 validation and browser review are pending.
