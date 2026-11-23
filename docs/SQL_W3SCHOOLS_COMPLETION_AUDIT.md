@@ -2,8 +2,8 @@
 
 **Audit date:** 2026-11-23  
 **Repository branch audited:** `release/v1-frontend`  
-**Release baseline:** `bdb79f9618d9f7e803b58639fba952c2107a7de5`  
-**Learner-practice implementation:** PR #217 and PR #229 merged; release commit `bdb79f9618d9f7e803b58639fba952c2107a7de5`  
+**Release baseline:** `d3db35d44a8c4a29b1b4cc3baddc42ff0e9f9dfe`  
+**Learner-practice implementation:** PR #217 and PR #229 merged; PR #235 and PR #244 merged; release commit `d3db35d44a8c4a29b1b4cc3baddc42ff0e9f9dfe`  
 **Reference scope:** W3Schools SQL tutorial, syllabus, exercises, quiz, challenges, editor, certification and SQL reference pages.  
 **Content policy:** W3Schools is a coverage reference only. CodeSaathi lessons, examples and assessments remain original.
 
@@ -18,7 +18,7 @@
 | W3Schools SQL Database modules | 21 | All have lesson destinations in the coverage matrix |
 | Official syllabus learning outcomes | 10 mapped | All mapped lesson IDs exist; manual outcome-by-outcome content review remains |
 | SQL Playground security configuration | PASS in PR #235 run 45169839513 | Worker isolation, network blocking, watchdog, input/result limits and challenge read-only mode checked |
-| SQL Reference & Dialect Guide | Included in PR #235 | Curated cross-dialect guide; full vendor reference catalogues remain partial |
+| SQL Reference & Dialect Guide | Merged in PR #235 and expanded in PR #244 | Six curated reference collections now have page sections; not exhaustive vendor catalogues |
 | Total W3Schools modules | 66 | 45 Tutorial + 21 Database |
 | Reference collections | 6 | Three partial reference and three partial dialect-reference rows remain |
 | SQL course validation | PASS on release commit `bdb79f96` (run 45167888120) | All 151 lessons were loaded by validator |
@@ -33,7 +33,7 @@
 | Tracker status | 151 VALIDATED / 0 DRAFT in merged PR #216 | Lesson JSON metadata intentionally remains `draft` until release approval |
 | Telugu translations | Deferred by project instruction | Not included in this English-first completion gate |
 
-The original SQL validator run #45016457817 passed on commit `909ba9e2`. The release commit `000fdd5a` also passed SQL Course Validation (run #45166821479), Browser Review (run #45166821705), and Firebase Hosting deployment (run #45166821694). PR #229 was merged after SQL Course Validation and Browser Review passed; its release deployment succeeded. PR #235 adds a curated reference guide, a 10-outcome matrix and SQL Playground security checks. Its SQL validation (run #45169839513) passed; its final Browser Review is still pending.
+The original SQL validator run #45016457817 passed on commit `909ba9e2`. The release commit `000fdd5a` also passed SQL Course Validation (run #45166821479), Browser Review (run #45166821705), and Firebase Hosting deployment (run #45166821694). PR #229 was merged after SQL Course Validation and Browser Review passed; its release deployment succeeded. PR #235 merged after SQL Course Validation and Browser Review passed on its head. Its release commit passed SQL Course Validation (run #45188090323), Browser Review (run #45188090097) and Firebase deployment (run #45188090328). PR #244 expanded the six reference collections; its Browser Review passed (run #45188258180). The resulting release commit `d3db35d4` is undergoing a new Browser Review and Firebase deployment (runs #45188530104 and #45188530061).
 
 ## W3Schools course syllabus baseline
 
@@ -135,11 +135,11 @@ The existing `docs/SQL_W3SCHOOLS_COVERAGE_MATRIX.csv` maps all 66 tutorial/datab
 2. **Learning outcomes:** explicitly verify every official syllabus outcome, especially managing user permissions/data security, relational design with foreign keys, subqueries and indexes, and application-level use of SQL.
 3. **Exercises:** the live release has 60 original fill-in-the-blank exercises. PR #229 now provides 85 original exercises mapped to all 66 official modules and CodeSaathi topic IDs; the PR SQL and browser checks passed. W3Schools exercise categories also include multiple-choice activities, not only blanks.
 4. **Cumulative quiz:** the live course-level quiz samples 20 questions from the 755 lesson MCQs and saves the latest score locally. Topic-specific quiz filters, full attempt history and account-synced progress remain pending.
-5. **Code challenges:** all 32 challenges have a learner UI, hints, expected-row grading and isolated SQLite execution with query-only mode. The challenge bank/expected answers are client-accessible; hidden tests, anti-cheat and broader challenge coverage remain pending.
-6. **SQL editor:** the SQL Playground passes current browser tests and uses a worker, an 8-second execution watchdog, local IndexedDB snapshots and import/export controls. A security review document and CI invariants are included in PR #235; static checks pass. Formal penetration testing, strict memory quotas, browser-specific resource stress tests and full CSP/SRI review remain outstanding.
+5. **Code challenges:** all 32 challenges have a learner UI, hints, expected-row grading and isolated SQLite execution with query-only mode. The challenge bank/expected answers are client-accessible; server-side hidden tests and anti-cheat require a trusted backend and are not provided by this static client-side course.
+6. **SQL editor:** the SQL Playground passes browser tests and uses a worker, an 8-second execution watchdog, local IndexedDB snapshots and import/export controls. Security configuration checks and a security review document are merged. Formal penetration testing, strict memory quotas, browser-specific resource stress tests and full CSP/SRI review remain outstanding.
 7. **Final exam:** the live self-assessment has 60 questions and a 60-minute timer, with an 80% CodeSaathi practice pass mark and local completion record. It is not proctored, identity-verified, externally verifiable or an official W3Schools certification.
 8. **Dialect references:** expand and clearly label Access, MySQL, SQL Server, PostgreSQL and Oracle differences. The in-browser runtime is SQLite; do not present SQLite results as proof that vendor-specific syntax runs on other engines.
-9. **Reference catalogues:** SQL Data Types, SQL Keywords, SQL Quick Reference, MySQL Functions, SQL Server Functions and MS Access Functions remain partial; create and audit dedicated, original reference pages.
+9. **Reference catalogues:** SQL Data Types, SQL Keywords, SQL Quick Reference, MySQL Functions, SQL Server Functions and MS Access Functions now have curated original sections in `public/sql-reference.html` after PR #244. These are educational summaries, not exhaustive vendor references.
 10. **English editorial approval:** technical CI is necessary but does not replace editorial review for clarity, correctness, scope and beginner progression.
 
 ## Current quality gates
@@ -155,13 +155,13 @@ The existing `docs/SQL_W3SCHOOLS_COVERAGE_MATRIX.csv` maps all 66 tutorial/datab
 | Cumulative quiz | LIVE | 20 questions sampled from 755 lesson MCQs; latest score saved locally |
 | Challenge learner UI | LIVE | 32 challenges; read-only isolated database; hidden tests remain |
 | Final assessment | LIVE | 60 questions / 60 minutes; local self-assessment only |
-| Curated SQL Reference & Dialect Guide | PROPOSED in PR #235 | Cross-dialect types, syntax, functions, quick patterns and safe queries; not exhaustive |
-| Full dialect/reference catalogues | PARTIAL | Complete all six reference collections and vendor-specific guidance |
+| Curated SQL Reference & Dialect Guide | LIVE after PR #235 | Cross-dialect types, syntax, functions, quick patterns and safe queries; curated scope |
+| Six curated reference collections | LIVE after PR #244 | Browser Review passed; exhaustive vendor/version coverage remains out of scope |
 | Telugu translation | DEFERRED | Start only after English completion, per instruction |
 
 ## Recommended execution order
 
-1. Complete PR #235 Browser Review, merge the reference guide/outcome/security work, and verify the release deployment.
+1. PR #235 and PR #244 are merged; verify the latest release-head Browser Review and Firebase deployment.
 2. Complete a line-by-line English editorial review and release approval for all 151 lesson files; keep IDs and schemas unchanged.
 3. Finish explicit outcome checks for user permissions/data security, foreign-key relationships, subqueries, indexes and application-level SQL use.
 4. Build the six reference collections: SQL Data Types, SQL Keywords, SQL Quick Reference, MySQL Functions, SQL Server Functions and MS Access Functions.
@@ -183,3 +183,23 @@ The existing `docs/SQL_W3SCHOOLS_COVERAGE_MATRIX.csv` maps all 66 tutorial/datab
 - W3Schools SQL certification: https://www.w3schools.com/sql/sql_certification.asp
 
 This audit is a completion checklist, not a declaration that the remaining work is already implemented.
+
+
+## Release-head update — 2026-11-23
+
+- PR #235 merged as `f998b83c0d1d7bf89f526b962967369c4323f4d6`; SQL Course Validation, Browser Review and Firebase deployment all passed on that release commit.
+- PR #244 merged as `d3db35d44a8c4a29b1b4cc3baddc42ff0e9f9dfe`; it adds grouped SQL keywords and curated MySQL, SQL Server and MS Access function collections to the SQL Reference Guide. Its Browser Review passed on PR head `a31c4ddfd508ee504b73b614bab87c93e4f5d295`.
+- The post-merge release-head Browser Review and Firebase deployment were triggered for `d3db35d4`; confirm their final conclusions before calling the deployed site current.
+- The 151 English lesson files and tracker remain 151/151 VALIDATED, but JSON status remains `draft` pending independent editorial sign-off. Do not equate automated structural validation with full manual editorial approval.
+- The final assessment is a 60-question, 60-minute local self-assessment with an 80% suggested threshold. It is not a certificate or independently verifiable credential.
+- Telugu translation remains intentionally deferred by the user's instruction.
+
+## Remaining non-automatable / release limitations
+
+1. Independent line-by-line editorial sign-off for all 151 lessons has not been completed or evidenced by CI.
+2. Formal penetration testing and strict browser/WASM memory-quota testing require a dedicated security test plan and specialist review.
+3. Client-visible challenge solutions cannot be made secure hidden tests without a trusted server-side grading service; do not market the current challenge runner as an anti-cheat exam.
+4. The six reference collections are curated quick references. Exhaustive reserved-word/function catalogues and execution against each supported vendor/version are not covered by SQLite CI.
+5. Telugu translation is intentionally not started.
+
+These are explicit remaining gates, not completed work. The English SQL lesson and practice implementation is substantial and technically validated, but the overall course must not be labelled 100% complete until the editorial/security decisions are addressed.
