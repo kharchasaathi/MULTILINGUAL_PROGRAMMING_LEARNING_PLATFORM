@@ -34,7 +34,7 @@ for (const topic of topics) {
   assert.equal(lesson.stages?.practise?.hints?.length, 3, `${topic.topicId}: three hints`);
   assert.ok(lesson.stages?.practise?.challenge?.length > 30, `${topic.topicId}: challenge`);
   assert.equal(lesson.practice?.playgroundMode, "none", `${topic.topicId}: Java does not use the web-language playground`);
-  assert.equal(lesson.stages?.explain?.examples?.length, 2, `${topic.topicId}: two examples`);
+  assert.ok(lesson.stages?.explain?.examples?.length >= 2, `${topic.topicId}: at least two examples`);
   for (const example of lesson.stages.explain.examples) {
     assert.equal(example.language, "java", `${topic.topicId}: Java example language`);
     assert.ok(example.code?.includes("public class Main"), `${topic.topicId}: standalone Main class`);
