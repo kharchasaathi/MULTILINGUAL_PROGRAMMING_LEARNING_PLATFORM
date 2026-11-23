@@ -169,13 +169,37 @@
     $("startExam").disabled = true; $("startExam").textContent = "Loading the full lesson question bank…";
     try {
       const all = await loadQuizBank();
-      state.exam = shuffle(all).slice(0,60); state.examIndex=0; state.examCorrect=0; state.examSecondsRemaining=3600;\n      startExamTimer();
+      state.exam = shuffle(all).slice(0,60); state.examIndex=0; state.examCorrect=0; state.examSecondsRemaining=3600;
       $("examIntro").hidden=true; $("examResult").hidden=true; $("examStage").hidden=false;
+      startExamTimer();
       renderExamQuestion();
     } catch(error) { $("examIntro").hidden=false; $("startExam").textContent=error.message; }
     $("startExam").disabled=false;
   }
-  function startExamTimer() {\n    clearInterval(state.examTimer);\n    const tick = () => {\n      const minutes = Math.floor(state.examSecondsRemaining / 60);\n      const seconds = state.examSecondsRemaining % 60;\n      $("examTimer").textContent = String(minutes).padStart(2,"0") + ":" + String(seconds).padStart(2,"0") + " remaining";\n      if (state.examSecondsRemaining <= 0) finishExam();\n      else state.examSecondsRemaining -= 1;\n    };\n    tick();\n    state.examTimer = setInterval(tick, 1000);\n  }\n  function finishExam() {\n    clearInterval(state.examTimer); state.examTimer = null;\n    const percent=Math.round(state.examCorrect/state.exam.length*100);\n    const passed=percent>=80;\n    $("examStage").hidden=true;$("examResult").hidden=false;\n    $("examScore").textContent=state.examCorrect+" / "+state.exam.length+" ("+percent+"%)";\n    $("examOutcome").className="practice-feedback "+(passed?"good":"bad");\n    $("examOutcome").textContent=passed?"PASS — You met the 80% suggested pass mark.":"NOT YET — Review the lessons and try again.";\n    $("examSummary").textContent="This result is saved locally only. It is not an accredited or externally verifiable certificate.";\n    try{localStorage.setItem("codesaathi-sql-final-assessment",JSON.stringify({score:state.examCorrect,total:state.exam.length,percent,passed,completedAt:new Date().toISOString()}));}catch{}\n  }\n  function renderExamQuestion() {
+  function startExamTimer() {
+    clearInterval(state.examTimer);
+    const tick = () => {
+      const minutes = Math.floor(state.examSecondsRemaining / 60);
+      const seconds = state.examSecondsRemaining % 60;
+      $("examTimer").textContent = String(minutes).padStart(2,"0") + ":" + String(seconds).padStart(2,"0") + " remaining";
+      if (state.examSecondsRemaining <= 0) finishExam();
+      else state.examSecondsRemaining -= 1;
+    };
+    tick();
+    state.examTimer = setInterval(tick, 1000);
+  }
+  function finishExam() {
+    clearInterval(state.examTimer); state.examTimer = null;
+    const percent = Math.round(state.examCorrect / state.exam.length * 100);
+    const passed = percent >= 80;
+    $("examStage").hidden = true; $("examResult").hidden = false;
+    $("examScore").textContent = state.examCorrect + " / " + state.exam.length + " (" + percent + "%)";
+    $("examOutcome").className = "practice-feedback " + (passed ? "good" : "bad");
+    $("examOutcome").textContent = passed ? "PASS — You met the 80% suggested pass mark." : "NOT YET — Review the lessons and try again.";
+    $("examSummary").textContent = "This result is saved locally only. It is not an accredited or externally verifiable certificate.";
+    try { localStorage.setItem("codesaathi-sql-final-assessment", JSON.stringify({score:state.examCorrect,total:state.exam.length,percent,passed,completedAt:new Date().toISOString()})); } catch {}
+  }
+  function renderExamQuestion() {
     const q=state.exam[state.examIndex]; state.examAnswered=false;
     $("examCounter").textContent="Question "+(state.examIndex+1)+" of "+state.exam.length+" · "+q.topicId;
     $("examProgressText").textContent=state.examCorrect+" correct";
