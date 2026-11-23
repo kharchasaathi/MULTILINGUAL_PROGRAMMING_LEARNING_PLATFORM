@@ -461,3 +461,15 @@ test("SQL reference guide is accessible and responsive", async ({ page }) => {
   const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
   expect(results.violations.filter(item => ["critical", "serious"].includes(item.impact))).toEqual([]);
 });
+
+
+test("SQL Playground and Practice Hub pass serious accessibility checks", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const path of ["/sql-playground.html", "/sql-practice.html"]) {
+    await page.goto(baseURL + path, { waitUntil: "domcontentloaded" });
+    const result = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
+    expect(result.violations.filter(item => ["critical", "serious"].includes(item.impact))).toEqual([]);
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+    expect(overflow).toBeFalsy();
+  }
+});
