@@ -417,6 +417,11 @@ test("SQL Practice Hub runs fill-in-the-blank, cumulative quiz and isolated code
   await expect(page.locator("#quizOptions input").first()).toBeVisible();
   await page.locator("#quizOptions input").first().check();
   await expect(page.locator("#quizNext")).toBeEnabled();
+  await page.getByRole("button", { name: "Final assessment" }).click();
+  await page.getByRole("button", { name: /Start final assessment/ }).click();
+  await expect(page.locator("#examCounter")).toContainText("Question 1 of 50", { timeout: 30000 });
+  await page.locator("#examOptions input").first().check();
+  await expect(page.locator("#examNext")).toBeEnabled();
   await page.getByRole("button", { name: "SQL challenges" }).click();
   await expect(page.locator("#challengeCount")).toContainText("32 challenges");
   await page.getByRole("button", { name: /CH01/ }).click();
