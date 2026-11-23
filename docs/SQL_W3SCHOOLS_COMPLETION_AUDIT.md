@@ -3,7 +3,7 @@
 **Audit date:** 2026-11-23  
 **Repository branch audited:** `release/v1-frontend`  
 **Release baseline:** `bdb79f9618d9f7e803b58639fba952c2107a7de5`  
-**Learner-practice implementation under review:** PR #217, head `4c99019c70cae072a8037ba111199ac80ff3e8e9`  
+**Learner-practice implementation:** PR #217 and PR #229 merged; release commit `bdb79f9618d9f7e803b58639fba952c2107a7de5`  
 **Reference scope:** W3Schools SQL tutorial, syllabus, exercises, quiz, challenges, editor, certification and SQL reference pages.  
 **Content policy:** W3Schools is a coverage reference only. CodeSaathi lessons, examples and assessments remain original.
 
@@ -18,13 +18,13 @@
 | W3Schools SQL Database modules | 21 | All have lesson destinations in the coverage matrix |
 | Total W3Schools modules | 66 | 45 Tutorial + 21 Database |
 | Reference collections | 6 | Three partial reference and three partial dialect-reference rows remain |
-| SQL course validation | PASS on release commit `000fdd5a` (run 45166821479) | All 151 lessons were loaded by validator |
+| SQL course validation | PASS on release commit `bdb79f96` (run 45167888120) | All 151 lessons were loaded by validator |
 | Runnable SQL examples | 756 executed in SQLite | Runtime coverage is strong for the SQLite target |
 | Expected outputs | 459 compared against actual result sets | Verified output comparisons |
 | Status-only statements | 282, with 1,039 DB-state assertions | Verified through state assertions |
 | MCQs | 755 | Lesson-level MCQs exist |
 | Original code challenges | 32/32 passed isolated SQLite execution | Learner UI, isolated read-only execution and local solved-progress are live |
-| Fill-in-the-blank exercises | 60 live; 85 live after PR #229 | PR #229 maps original exercises to all 66 modules; SQL and browser checks passed |
+| Fill-in-the-blank exercises | 85 live, mapped across all 66 modules | PR #229 maps original exercises to all 66 modules; SQL and browser checks passed |
 | Cumulative quiz | 20 questions sampled from 755 lesson MCQs | Dynamic selection and local latest-score record |
 | Final assessment | 60 questions / 60 minutes | Local self-assessment with an 80% suggested pass mark; not an official credential |
 | Tracker status | 151 VALIDATED / 0 DRAFT in merged PR #216 | Lesson JSON metadata intentionally remains `draft` until release approval |
@@ -157,7 +157,7 @@ The existing `docs/SQL_W3SCHOOLS_COVERAGE_MATRIX.csv` maps all 66 tutorial/datab
 
 ## Recommended execution order
 
-1. Verify the latest release-branch SQL validation, Browser Review and Firebase Hosting deployment after PR #229 merged.
+1. Verify the release-branch Browser Review run #45167888114 completes successfully after PR #229 merged.
 2. Complete a line-by-line English editorial review and release approval for all 151 lesson files; keep IDs and schemas unchanged.
 3. Finish explicit outcome checks for user permissions/data security, foreign-key relationships, subqueries, indexes and application-level SQL use.
 4. Build the six reference collections: SQL Data Types, SQL Keywords, SQL Quick Reference, MySQL Functions, SQL Server Functions and MS Access Functions.
