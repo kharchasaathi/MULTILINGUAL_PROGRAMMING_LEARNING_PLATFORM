@@ -133,4 +133,12 @@ The official syllabus currently groups the course into 8 chapters and 58 modules
 | JV2.6 — Java Math | https://www.w3schools.com/java/java_math.asp | `public/content/en/java/JV2.6.json` | English draft authored; CI pending |
 | JV2.7 — Java Booleans | https://www.w3schools.com/java/java_booleans.asp | `public/content/en/java/JV2.7.json` | English draft authored; CI pending |
 
-Each lesson contains five learning objectives, two original JDK-compatible examples with expected output, the three-stage lesson structure, guided and independent practice, three hints and five original MCQs. Java examples remain `playgroundMode: none`; they are intended for the JDK validation workflow, not the web-language playground. Telugu translation remains deferred.
+Each lesson contains five learning objectives, at least two original JDK-compatible examples with expected output, the three-stage lesson structure, guided and independent practice, three hints and five original MCQs. JV2.1–JV2.7 have now been expanded to five examples each; JV1.1–JV1.6 still need the same expansion before the validator can enforce a five-example minimum globally. Java examples remain `playgroundMode: none`; they are intended for the JDK validation workflow, not the web-language playground. Telugu translation remains deferred.
+
+
+## JV2 example expansion — 24 November 2026
+
+- JV2.1–JV2.7 expanded from two to five original examples each (21 additional examples).
+- Existing learning objectives, Understand/Explain/Practise content, MCQs, topic IDs, file paths, `status: draft`, and `playgroundMode: none` preserved.
+- The validator now accepts lesson-specific example counts of at least two while legacy JV1 lessons are brought up to the five-example standard. This is a temporary compatibility gate; raise the global minimum to five after JV1 expansion.
+- JDK 21 execution of the added examples is pending the next Java Course Validation workflow run.
