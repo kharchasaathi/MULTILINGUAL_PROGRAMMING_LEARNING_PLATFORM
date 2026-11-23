@@ -124,7 +124,7 @@ self.addEventListener("message", async event => {
       if (!code.trim() || code.length > 20000) throw new Error("Enter a SQL query under 20,000 characters.");
       if (hasMultipleStatements(code)) throw new Error("Submit one SQL statement per challenge attempt.");
       const executable = code.replace(/^\s*(?:(?:--[^\n]*(?:\n|$))|(?:\/\*[\s\S]*?\*\/\s*))*/, "").trim();
-      if (!/^(SELECT|WITH|EXPLAIN)\\b/i.test(executable)) throw new Error("Challenges accept read-only SELECT, WITH or EXPLAIN statements only.");
+      if (!/^(SELECT|WITH|EXPLAIN)\b/i.test(executable)) throw new Error("Challenges accept read-only SELECT, WITH or EXPLAIN statements only.");
       const sandbox = new SQL.Database();
       let statement = null;
       try {
