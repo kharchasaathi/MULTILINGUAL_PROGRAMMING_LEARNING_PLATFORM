@@ -130,6 +130,7 @@ self.addEventListener("message", async event => {
       try {
         sandbox.exec("PRAGMA foreign_keys = ON;");
         sandbox.exec(setupSql);
+        sandbox.exec("PRAGMA query_only = ON;");
         statement = sandbox.prepare(code);
         const columns = statement.getColumnNames();
         if (!columns.length) throw new Error("Your query must return a result set.");
@@ -140,7 +141,7 @@ self.addEventListener("message", async event => {
         }
         const expectedRows = Array.isArray(message.expectedRows) ? message.expectedRows : [];
         const matches = JSON.stringify(rows) === JSON.stringify(expectedRows);
-        send("challenge-result", { runId: message.runId, challengeId: String(message.challengeId || ""), columns, rows, matches, error: matches ? "" : "Expected rows: " + JSON.stringify(expectedRows) });
+        send("challenge-result", { runId: message.runId, challengeId: String(message.challengeId || ""), columns, rows, expectedRows, matches, error: matches ? "" : "Result rows do not match the expected answer." });
       } finally {
         if (statement) statement.free();
         sandbox.close();
