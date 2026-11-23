@@ -38,7 +38,7 @@
           } else {
             $("challengeFeedback").className = "practice-feedback bad";
             $("challengeFeedback").textContent = "Not quite. Compare your result with the requested columns, rows and order.";
-            $("challengeOutput").textContent = message.error || ("Your query returned:\n" + JSON.stringify(message.rows, null, 2));
+            $("challengeOutput").textContent = "Expected rows:\n" + JSON.stringify(message.expectedRows, null, 2) + "\n\nYour rows:\n" + JSON.stringify(message.rows, null, 2);
           }
           $("challengeCompleted").textContent = state.solved.size + " solved";
           renderChallengeList();
