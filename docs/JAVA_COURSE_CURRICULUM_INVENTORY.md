@@ -101,7 +101,8 @@
 |---|---:|---|
 | JV1.1–JV1.6 | 6 | English draft expanded to five examples each; current-head JDK validation pending |
 | JV2.1–JV2.7 | 7 | English draft expanded to five examples each; JDK 21 validation PASS on run #13 (47 examples across 13 lessons) |
-| JV3.1–JV3.5 | 5 | English draft authored with five examples each; current-head JDK validation pending |\n| JV3.6–JV8.5 | 40 | Planned; not yet authored |
+| JV3.1–JV3.5 | 5 | English draft authored with five examples each; current-head JDK validation pending |
+| JV3.6–JV8.5 | 40 | Planned; not yet authored |
 
 ## Runtime and release plan
 
