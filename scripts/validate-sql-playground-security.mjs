@@ -1,0 +1,23 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
+
+const root = process.cwd();
+const worker = await readFile(resolve(root, "public/js/sql-playground-worker.js"), "utf8");
+const ui = await readFile(resolve(root, "public/js/sql-playground.js"), "utf8");
+assert.match(worker, /sql\.js@1\.16\.0/, "SQL.js runtime must remain version-pinned");
+assert.match(worker, /self\.fetch\s*=\s*blocked/, "SQL worker must block fetch after runtime initialization");
+assert.match(worker, /self\.XMLHttpRequest\s*=\s*class/, "SQL worker must block XHR");
+assert.match(worker, /self\.WebSocket\s*=\s*class/, "SQL worker must block WebSocket");
+assert.match(worker, /self\.EventSource\s*=\s*class/, "SQL worker must block EventSource");
+assert.match(worker, /code\.length\s*>\s*50000/, "General SQL input size limit is required");
+assert.match(worker, /code\.length\s*>\s*20000/, "Challenge SQL input size limit is required");
+assert.match(worker, /rows\.length\s*>\s*1000/, "Challenge result row limit is required");
+assert.match(worker, /values\.slice\(0,\s*200\)/, "Rendered result rows must be capped");
+assert.match(worker, /byteLength\s*>\s*20\s*\*\s*1024\s*\*\s*1024/, "Database import size limit is required");
+assert.match(worker, /PRAGMA query_only = ON/, "Challenge database must be read-only during learner execution");
+assert.match(worker, /hasMultipleStatements\(code\)/, "Challenge must reject multiple statements");
+assert.match(ui, /TIMEOUT_MS\s*=\s*8000/, "The SQL Playground must retain its execution watchdog");
+assert.doesNotMatch(worker, /\beval\s*\(|new Function\s*\(/, "SQL worker must not evaluate learner text as JavaScript");
+assert.doesNotMatch(ui, /\beval\s*\(|new Function\s*\(/, "SQL UI must not evaluate learner text as JavaScript");
+console.log("SQL Playground security configuration checks passed.");

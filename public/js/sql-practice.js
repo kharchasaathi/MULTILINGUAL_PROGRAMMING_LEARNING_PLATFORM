@@ -75,6 +75,7 @@
     $("blankCounter").textContent = "Exercise " + (state.blankIndex + 1) + " of " + items.length + " · " + (item.w3schoolsTopic || "Supplementary SQL");
     $("blankScore").textContent = state.blankCorrect + " correct";
     $("blankProgress").style.width = (state.blankAnswered.size / items.length * 100) + "%";
+    $("blankProgress").parentElement.setAttribute("aria-valuenow", String(Math.round(state.blankAnswered.size / items.length * 100)));
     $("blankPrompt").textContent = item.prompt;
     $("blankOptions").replaceChildren();
     $("blankFeedback").textContent = "";
@@ -215,6 +216,7 @@
     $("examCounter").textContent="Question "+(state.examIndex+1)+" of "+state.exam.length+" · "+q.topicId;
     $("examProgressText").textContent=state.examCorrect+" correct";
     $("examProgress").style.width=(state.examIndex/state.exam.length*100)+"%";
+    $("examProgress").parentElement.setAttribute("aria-valuenow", String(Math.round(state.examIndex / state.exam.length * 100)));
     $("examPrompt").textContent=q.prompt; $("examOptions").replaceChildren();
     $("examFeedback").textContent=""; $("examFeedback").className="practice-feedback"; $("examNext").disabled=true;
     q.options.forEach(option=>{

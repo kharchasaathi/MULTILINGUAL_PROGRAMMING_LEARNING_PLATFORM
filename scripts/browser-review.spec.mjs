@@ -434,6 +434,9 @@ test("SQL Practice Hub runs fill-in-the-blank, cumulative quiz and isolated code
   await page.locator("#challengeSql").fill("SELECT customer_name, city, active FROM customers ORDER BY customer_id;");
   await page.locator("#checkChallenge").click();
   await expect(page.locator("#challengeFeedback")).toContainText("Correct", { timeout: 30000 });
+  await page.locator("#challengeSql").fill("WITH attempted_write AS (SELECT 1) DELETE FROM customers RETURNING customer_id;");
+  await page.locator("#checkChallenge").click();
+  await expect(page.locator("#challengeOutput")).toContainText(/readonly|read-only/i, { timeout: 30000 });
 });
 
 
@@ -448,4 +451,28 @@ test("C compiler embed exposes the browser-local compiler and direct fallback", 
   const encodedState = JSON.parse(Buffer.from(token.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8"));
   expect(encodedState.code).toContain('printf("Hello, CodeSaathi!\\n");');
   expect(await page.locator("body").innerText()).not.toContain("\\n");
+});
+
+
+test("SQL reference guide is accessible and responsive", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(baseURL + "/sql-reference.html", { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("heading", { name: "SQL Reference & Dialect Guide" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Data type families across databases" })).toBeVisible();
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+  expect(overflow).toBeFalsy();
+  const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
+  expect(results.violations.filter(item => ["critical", "serious"].includes(item.impact))).toEqual([]);
+});
+
+
+test("SQL Playground and Practice Hub pass serious accessibility checks", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const path of ["/sql-playground.html", "/sql-practice.html"]) {
+    await page.goto(baseURL + path, { waitUntil: "domcontentloaded" });
+    const result = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
+    expect(result.violations.filter(item => ["critical", "serious"].includes(item.impact))).toEqual([]);
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+    expect(overflow).toBeFalsy();
+  }
 });
