@@ -403,3 +403,24 @@ test("SQL lesson practice links open the dedicated SQL Playground with lesson st
   await expect(playground.locator("#sqlStatus")).toHaveAttribute("data-state", "ready", { timeout: 120000 });
   await playground.close();
 });
+
+\ntest("SQL Practice Hub runs fill-in-the-blank, cumulative quiz and isolated code challenges", async ({ page }) => {
+  test.setTimeout(180000);
+  await page.goto(baseURL + "/sql-practice.html", { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("heading", { name: "SQL Practice Hub" })).toBeVisible();
+  await page.getByRole("button", { name: "WHERE", exact: true }).click();
+  await expect(page.locator("#blankFeedback")).toContainText("Correct");
+  await page.getByRole("button", { name: "Cumulative quiz" }).click();
+  await page.getByRole("button", { name: /Start 20-question quiz/ }).click();
+  await expect(page.locator("#quizCounter")).toContainText("Question 1 of 20", { timeout: 120000 });
+  await expect(page.locator("#quizOptions input").first()).toBeVisible();
+  await page.locator("#quizOptions input").first().check();
+  await expect(page.locator("#quizNext")).toBeEnabled();
+  await page.getByRole("button", { name: "SQL challenges" }).click();
+  await expect(page.locator("#challengeCount")).toContainText("32 challenges");
+  await page.getByRole("button", { name: /CH01/ }).click();
+  await expect(page.locator("#checkChallenge")).toBeEnabled({ timeout: 30000 });
+  await page.locator("#challengeSql").fill("SELECT customer_name, city, active FROM customers ORDER BY customer_id;");
+  await page.locator("#checkChallenge").click();
+  await expect(page.locator("#challengeFeedback")).toContainText("Correct", { timeout: 30000 });
+});
