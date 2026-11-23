@@ -16,7 +16,8 @@
       state.bank = await loadJson("/content/en/sql/sql-practice-bank.json");
       renderBlank();
       const challengeBank = await loadJson("/content/en/sql/sql-code-challenges.json");
-      state.challenges = challengeBank.challenges || [];\n      state.challengeBankSetup = challengeBank.dataset?.setupSql || "";
+      state.challenges = challengeBank.challenges || [];
+      state.challengeBankSetup = challengeBank.dataset?.setupSql || "";
       $("challengeCount").textContent = state.challenges.length + " challenges";
       renderChallengeList();
       state.worker = new Worker("/js/sql-playground-worker.js", {name:"codesaathi-sql-practice"});
