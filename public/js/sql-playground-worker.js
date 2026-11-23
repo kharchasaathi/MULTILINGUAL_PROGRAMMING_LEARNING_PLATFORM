@@ -117,6 +117,37 @@ self.addEventListener("message", async event => {
       send("ready", { version: SQL.version?.libVersion || "SQLite", restored: Boolean(message.bytes) });
       return;
     }
+    if (message.type === "challenge-check") {
+      const setupSql = String(message.setupSql || "");
+      const code = String(message.code || "");
+      if (!setupSql || setupSql.length > 100000) throw new Error("The challenge dataset is missing or too large.");
+      if (!code.trim() || code.length > 20000) throw new Error("Enter a SQL query under 20,000 characters.");
+      if (hasMultipleStatements(code)) throw new Error("Submit one SQL statement per challenge attempt.");
+      const executable = code.replace(/^\s*(?:(?:--[^\n]*(?:\n|$))|(?:\/\*[\s\S]*?\*\/\s*))*/, "").trim();
+      if (!/^(SELECT|WITH|EXPLAIN)\b/i.test(executable)) throw new Error("Challenges accept read-only SELECT, WITH or EXPLAIN statements only.");
+      const sandbox = new SQL.Database();
+      let statement = null;
+      try {
+        sandbox.exec("PRAGMA foreign_keys = ON;");
+        sandbox.exec(setupSql);
+        sandbox.exec("PRAGMA query_only = ON;");
+        statement = sandbox.prepare(code);
+        const columns = statement.getColumnNames();
+        if (!columns.length) throw new Error("Your query must return a result set.");
+        const rows = [];
+        while (statement.step()) {
+          rows.push(statement.get().map(serializeValue));
+          if (rows.length > 1000) throw new Error("Challenge results are limited to 1,000 rows.");
+        }
+        const expectedRows = Array.isArray(message.expectedRows) ? message.expectedRows : [];
+        const matches = JSON.stringify(rows) === JSON.stringify(expectedRows);
+        send("challenge-result", { runId: message.runId, challengeId: String(message.challengeId || ""), columns, rows, expectedRows, matches, error: matches ? "" : "Result rows do not match the expected answer." });
+      } finally {
+        if (statement) statement.free();
+        sandbox.close();
+      }
+      return;
+    }
     if (!db) throw new Error("The SQL database is not initialized.");
     if (message.type === "run") {
       const code = String(message.code || "");

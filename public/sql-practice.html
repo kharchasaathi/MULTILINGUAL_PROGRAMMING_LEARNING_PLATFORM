@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101828">
+  <meta name="description" content="Practise SQL with fill-in-the-blank exercises, a cumulative quiz and browser-run coding challenges.">
+  <title>SQL Practice Hub — CodeSaathi</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .practice-page{width:min(1120px,calc(100% - 32px));margin:28px auto 60px}
+    .practice-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+    .practice-head h1{font:700 clamp(28px,4vw,42px)/1.15 "Space Grotesk",sans-serif;margin:8px 0}
+    .practice-head p{max-width:760px;color:#667085;line-height:1.7}
+    .practice-links{display:flex;gap:10px;flex-wrap:wrap}
+    .practice-links a{font-weight:700;color:#4437b5;text-decoration:none}
+    .practice-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
+    .practice-tabs button,.practice-button{border:1px solid #d0d5dd;border-radius:9px;padding:10px 14px;background:#fff;color:#344054;font-weight:700;cursor:pointer}
+    .practice-tabs button[aria-pressed="true"],.practice-button.primary{background:#4338a8;color:#fff;border-color:#4338a8}
+    .practice-panel{border:1px solid #e4e7ec;border-radius:16px;padding:20px;background:#fff;margin:14px 0}
+    .practice-panel h2{font:700 22px "Space Grotesk",sans-serif;margin:0 0 8px}
+    .practice-muted{color:#667085;line-height:1.6}
+    .practice-progress{height:8px;background:#eaecf0;border-radius:99px;overflow:hidden;margin:14px 0}
+    .practice-progress span{display:block;height:100%;width:0;background:#635bca;transition:width .2s}
+    .practice-meta{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#667085;font-size:13px}
+    .practice-question{font-size:18px;font-weight:700;line-height:1.6;margin:18px 0}
+    .blank-options{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0}
+    .blank-options button{border:1px solid #d0d5dd;border-radius:9px;padding:10px 14px;background:#f9fafb;color:#344054;cursor:pointer}
+    .blank-options button[aria-pressed="true"]{border-color:#635bca;background:#efedff;color:#352b8f}
+    .practice-feedback{min-height:28px;margin:12px 0;font-weight:600}
+    .practice-feedback.good{color:#067647}.practice-feedback.bad{color:#b42318}
+    .quiz-options{display:grid;gap:10px;margin:16px 0}
+    .quiz-options label{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid #d0d5dd;border-radius:10px;cursor:pointer}
+    .quiz-options label:has(input:checked){border-color:#635bca;background:#f4f3ff}
+    .challenge-layout{display:grid;grid-template-columns:minmax(220px,.7fr) minmax(0,1.3fr);gap:16px}
+    .challenge-list{display:grid;gap:8px;max-height:420px;overflow:auto}
+    .challenge-list button{text-align:left;border:1px solid #e4e7ec;border-radius:9px;padding:10px;background:#fff;color:#344054;cursor:pointer}
+    .challenge-list button[aria-pressed="true"]{border-color:#635bca;background:#f4f3ff}
+    .challenge-editor{width:100%;min-height:190px;resize:vertical;border:1px solid #344054;border-radius:10px;padding:14px;background:#111827;color:#e6edf7;font:13px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace}
+    .challenge-output{white-space:pre-wrap;overflow-wrap:anywhere;background:#f8f9fc;border:1px solid #e4e7ec;border-radius:10px;padding:12px;min-height:48px;color:#344054;font:13px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace}
+    .practice-note{padding:12px 14px;border-radius:10px;background:#f8f9fc;color:#475467;font-size:13px;line-height:1.6}
+    .practice-score{font:700 30px "Space Grotesk",sans-serif}
+    [hidden]{display:none!important}
+    @media(max-width:760px){.challenge-layout{grid-template-columns:1fr}.practice-page{width:calc(100% - 20px)}.practice-panel{padding:15px}}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="CodeSaathi home"><span class="brand-mark">C</span><span>Code<span class="brand-accent">Saathi</span></span></a>
+    <nav class="desktop-nav" aria-label="Practice navigation"><a href="/#courses">Courses</a><a href="/master-curriculum.html">Curriculum</a><a href="/sql-playground.html">SQL Playground</a></nav>
+  </header>
+  <main class="practice-page">
+    <div class="practice-head">
+      <div><a class="practice-links" href="/#courses">← Back to courses</a><div class="eyebrow">SQL PROGRAMMING · LEARN BY DOING</div><h1>SQL Practice Hub</h1><p>Strengthen your SQL skills with short syntax exercises, a cumulative knowledge check and hands-on challenges using an isolated copy of the CodeSaathi retail dataset.</p></div>
+      <div class="practice-links"><a href="/sql-playground.html">Open full SQL Playground ↗</a></div>
+    </div>
+    <div class="practice-tabs" role="group" aria-label="Choose a practice activity">
+      <button type="button" data-tab="blanks" aria-pressed="true">Fill in the blanks</button>
+      <button type="button" data-tab="quiz" aria-pressed="false">Cumulative quiz</button>
+      <button type="button" data-tab="exam" aria-pressed="false">Final assessment</button>
+      <button type="button" data-tab="challenges" aria-pressed="false">SQL challenges</button>
+    </div>
+    <section class="practice-panel" id="blanksPanel" aria-labelledby="blanksTitle">
+      <div class="practice-meta"><span id="blankCounter">Exercise 1</span><span id="blankScore">0 correct</span></div>
+      <div class="practice-progress" aria-label="Fill in the blanks progress"><span id="blankProgress"></span></div>
+      <h2 id="blanksTitle">Fill in the blanks</h2>
+      <p class="practice-muted">Choose the SQL keyword or expression that completes the statement.</p>
+      <p class="practice-question" id="blankPrompt">Loading exercises…</p>
+      <div class="blank-options" id="blankOptions"></div>
+      <p class="practice-feedback" id="blankFeedback" role="status" aria-live="polite"></p>
+      <div class="practice-links"><button class="practice-button" id="blankHint" type="button">Show hint</button><button class="practice-button primary" id="blankNext" type="button" disabled>Next exercise</button></div>
+      <p class="practice-muted" id="blankHintText" hidden></p>
+    </section>
+    <section class="practice-panel" id="quizPanel" hidden aria-labelledby="quizTitle">
+      <h2 id="quizTitle">Cumulative SQL quiz</h2>
+      <p class="practice-muted">A 20-question sample drawn from the English lesson assessments across the SQL curriculum. Your score is saved locally in this browser.</p>
+      <div id="quizIntro"><button class="practice-button primary" id="startQuiz" type="button">Start 20-question quiz</button></div>
+      <div id="quizStage" hidden>
+        <div class="practice-meta"><span id="quizCounter">Question 1 of 20</span><span id="quizProgressText">0 answered</span></div>
+        <div class="practice-progress"><span id="quizProgress"></span></div>
+        <p class="practice-question" id="quizPrompt"></p>
+        <div class="quiz-options" id="quizOptions"></div>
+        <p class="practice-feedback" id="quizFeedback" role="status" aria-live="polite"></p>
+        <button class="practice-button primary" id="quizNext" type="button" disabled>Next question</button>
+      </div>
+      <div id="quizResult" hidden><p class="practice-score" id="quizScore"></p><p id="quizSummary" class="practice-muted"></p><button class="practice-button primary" id="retryQuiz" type="button">Try another quiz</button></div>
+      <p class="practice-note">Assessment questions are based on the current English lesson bank. This is practice feedback, not a proctored or identity-verified certification exam.</p>
+    </section>
+    <section class="practice-panel" id="examPanel" hidden aria-labelledby="examTitle">
+      <h2 id="examTitle">SQL course final assessment</h2>
+      <p class="practice-muted">A 60-question, 60-minute assessment sampled across the English SQL curriculum. CodeSaathi recommends 80% as a practice pass mark. Your result is stored locally in this browser.</p>
+      <div id="examIntro"><button class="practice-button primary" id="startExam" type="button">Start final assessment</button></div>
+      <div id="examStage" hidden>
+        <div class="practice-meta"><span id="examCounter">Question 1 of 60</span><span id="examTimer" aria-live="off">60:00 remaining</span><span id="examProgressText">0 correct</span></div>
+        <div class="practice-progress"><span id="examProgress"></span></div>
+        <p class="practice-question" id="examPrompt"></p>
+        <div class="quiz-options" id="examOptions"></div>
+        <p class="practice-feedback" id="examFeedback" role="status" aria-live="polite"></p>
+        <button class="practice-button primary" id="examNext" type="button" disabled>Next question</button>
+      </div>
+      <div id="examResult" hidden><p class="practice-score" id="examScore"></p><p id="examOutcome" class="practice-feedback" role="status"></p><p id="examSummary" class="practice-muted"></p><button class="practice-button primary" id="retryExam" type="button">Retake assessment</button></div>
+      <p class="practice-note">This is an educational self-assessment, not a proctored, accredited or identity-verified certification. Passing is recorded only in this browser and does not issue an externally verifiable credential.</p>
+    </section>
+    <section class="practice-panel" id="challengesPanel" hidden aria-labelledby="challengesTitle">
+      <h2 id="challengesTitle">SQL code challenges</h2>
+      <p class="practice-muted">Write a query for the selected task. Each attempt runs against a fresh, isolated copy of the sample database. Only read-only SELECT-style queries are accepted.</p>
+      <div class="challenge-layout">
+        <div><div class="practice-meta"><span id="challengeCount">Loading challenges…</span><span id="challengeCompleted">0 solved</span></div><div class="challenge-list" id="challengeList"></div></div>
+        <div>
+          <h3 id="challengeTitle">Choose a challenge</h3>
+          <p id="challengePrompt" class="practice-muted"></p>
+          <p class="practice-note" id="challengeDialect"></p>
+          <label for="challengeSql"><strong>Your SQL query</strong></label>
+          <textarea id="challengeSql" class="challenge-editor" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="Your SQL challenge answer"></textarea>
+          <div class="practice-links" style="margin:10px 0"><button class="practice-button primary" id="checkChallenge" type="button" disabled>Check query</button><button class="practice-button" id="showHint" type="button" disabled>Show hint</button></div>
+          <p class="practice-feedback" id="challengeFeedback" role="status" aria-live="polite"></p>
+          <pre class="challenge-output" id="challengeOutput" aria-live="polite">Choose a challenge to begin.</pre>
+        </div>
+      </div>
+      <details class="practice-note" style="margin:14px 0"><summary><strong>Sample database schema</strong> — tables and columns available in challenges</summary><p><code>customers</code>: customer_id, customer_name, city, active</p><p><code>products</code>: product_id, product_name, category, price, stock_qty, discontinued</p><p><code>orders</code>: order_id, customer_id, order_date, status, total_amount</p><p><code>order_items</code>: order_item_id, order_id, product_id, quantity, unit_price</p><p><code>employees</code>: employee_id, employee_name, manager_id</p><p><code>suppliers</code>: supplier_id, supplier_name, city</p><p><code>archived_orders</code>: archive_id, customer_id, order_date, status, total_amount</p><p><code>order_import</code>: import_id, customer_id</p><p><code>regional_targets</code>: region, target · <code>regional_sales</code>: region, sales</p></details>
+      <p class="practice-note">Challenge SQL is evaluated in a temporary SQLite database in your browser. Do not paste passwords, personal records or other secrets.</p>
+    </section>
+  </main>
+  <script src="/js/sql-practice.js" defer></script>
+</body>
+</html>
