@@ -15,7 +15,8 @@
 |---|---:|---|
 | English SQL lesson files | 151 | Present |
 | W3Schools SQL Tutorial modules | 45 | All have lesson destinations in the coverage matrix |
-| W3Schools SQL Database modules | 21 | All have lesson destinations in the coverage matrix |\n| Official syllabus learning outcomes | 10 mapped | All mapped lesson IDs exist; manual outcome-by-outcome content review remains |
+| W3Schools SQL Database modules | 21 | All have lesson destinations in the coverage matrix |
+| Official syllabus learning outcomes | 10 mapped | All mapped lesson IDs exist; manual outcome-by-outcome content review remains |
 | Total W3Schools modules | 66 | 45 Tutorial + 21 Database |
 | Reference collections | 6 | Three partial reference and three partial dialect-reference rows remain |
 | SQL course validation | PASS on release commit `bdb79f96` (run 45167888120) | All 151 lessons were loaded by validator |
