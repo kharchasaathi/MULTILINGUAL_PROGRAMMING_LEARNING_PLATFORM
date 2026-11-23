@@ -102,7 +102,8 @@
 | JV1.1–JV1.6 | 6 | English draft expanded to five examples each; JDK 21 validation PASS on run #22 |
 | JV2.1–JV2.7 | 7 | English draft expanded to five examples each; JDK 21 validation PASS on run #13 (47 examples across 13 lessons) |
 | JV3.1–JV3.5 | 5 | English draft authored with five examples each; JDK 21 validation PASS on run #22 |
-| JV3.6–JV8.5 | 40 | Planned; not yet authored |
+| JV4.1–JV4.6 | 6 | English draft authored; JDK 21 validation pending |
+| JV4.7–JV8.5 | 34 | Planned; not yet authored |
 
 ## Runtime and release plan
 
@@ -164,3 +165,20 @@ Each lesson contains five learning objectives, at least two original JDK-compati
 - JV3.2 covers both traditional switch statements and modern arrow-style switch expressions supported by JDK 21.
 - Curriculum index and progress tracker now include JV3.1–JV3.5. Lessons remain `draft`; Telugu translation is deferred; Java examples remain `playgroundMode: none`.
 - Java Course Validation run #22 PASS: 18 indexed English lessons, 90 examples compiled and executed with expected outputs, and 90 MCQs validated. Browser Review run #1454 PASS. The lessons remain DRAFT pending editorial and release approval.
+
+
+## JV4 — Arrays and methods — 24 November 2026
+
+| CodeSaathi topic | W3Schools reference | Lesson file | Current state |
+|---|---|---|---|
+| JV4.1 — Java Arrays | https://www.w3schools.com/java/java_arrays.asp | `public/content/en/java/JV4.1.json` | English draft authored; JDK 21 validation pending |
+| JV4.2 — Java Methods | https://www.w3schools.com/java/java_methods.asp | `public/content/en/java/JV4.2.json` | English draft authored; JDK 21 validation pending |
+| JV4.3 — Java Method Parameters | https://www.w3schools.com/java/java_method_parameters.asp | `public/content/en/java/JV4.3.json` | English draft authored; JDK 21 validation pending |
+| JV4.4 — Java Method Overloading | https://www.w3schools.com/java/java_methods_overloading.asp | `public/content/en/java/JV4.4.json` | English draft authored; JDK 21 validation pending |
+| JV4.5 — Java Scope | https://www.w3schools.com/java/java_scope.asp | `public/content/en/java/JV4.5.json` | English draft authored; JDK 21 validation pending |
+| JV4.6 — Java Recursion | https://www.w3schools.com/java/java_recursion.asp | `public/content/en/java/JV4.6.json` | English draft authored; JDK 21 validation pending |
+
+- Authored six original English lessons covering arrays, method declarations and calls, parameters/arguments, overloading, scope, and recursion.
+- Each lesson contains five learning objectives, five complete standalone Java examples with expected output, the Understand/Explain/Practise structure, guided and independent tasks, three hints, a challenge and five topic-specific MCQs with explanations.
+- All lessons remain `status: "draft"`; `practice.playgroundMode: "none"`; Telugu translation remains deferred.
+- Curriculum index and progress tracker updated for JV4.1–JV4.6. JDK 21 execution and browser review are required before marking the batch validated.
