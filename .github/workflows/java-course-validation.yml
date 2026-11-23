@@ -1,0 +1,31 @@
+name: Java Course Validation
+
+on:
+  pull_request:
+    branches: [release/v1-frontend]
+    paths:
+      - "public/content/en/java/**"
+      - "public/content/curriculum-index.json"
+      - "scripts/validate-java-course.mjs"
+      - ".github/workflows/java-course-validation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-java:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Set up Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Validate Java lessons and execute examples
+        run: node scripts/validate-java-course.mjs
