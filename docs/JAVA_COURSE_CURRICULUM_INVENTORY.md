@@ -99,9 +99,9 @@
 
 | Topic IDs | Lessons | Status |
 |---|---:|---|
-| JV1.1–JV1.6 | 6 | English draft expanded to five examples each; current-head JDK validation pending |
+| JV1.1–JV1.6 | 6 | English draft expanded to five examples each; JDK 21 validation PASS on run #22 |
 | JV2.1–JV2.7 | 7 | English draft expanded to five examples each; JDK 21 validation PASS on run #13 (47 examples across 13 lessons) |
-| JV3.1–JV3.5 | 5 | English draft authored with five examples each; current-head JDK validation pending |
+| JV3.1–JV3.5 | 5 | English draft authored with five examples each; JDK 21 validation PASS on run #22 |
 | JV3.6–JV8.5 | 40 | Planned; not yet authored |
 
 ## Runtime and release plan
@@ -163,4 +163,4 @@ Each lesson contains five learning objectives, at least two original JDK-compati
 - Each JV3 lesson contains five objectives, five JDK-compatible examples with expected output, three-stage lesson content, guided and independent practice, hints, challenge and five topic-specific MCQs.
 - JV3.2 covers both traditional switch statements and modern arrow-style switch expressions supported by JDK 21.
 - Curriculum index and progress tracker now include JV3.1–JV3.5. Lessons remain `draft`; Telugu translation is deferred; Java examples remain `playgroundMode: none`.
-- Current-head JDK 21 and browser review validation are pending.
+- Java Course Validation run #22 PASS: 18 indexed English lessons, 90 examples compiled and executed with expected outputs, and 90 MCQs validated. Browser Review run #1454 PASS. The lessons remain DRAFT pending editorial and release approval.
