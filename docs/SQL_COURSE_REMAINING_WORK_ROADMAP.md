@@ -1,11 +1,12 @@
 # CodeSaathi SQL Course — Remaining Work Roadmap
 
-Last audited: 2026-11-22
+Last audited: 2026-11-23
 
 **User decision:** Telugu translation is explicitly deferred until the very end. Do not create or edit Telugu SQL lesson files until the user asks to begin that final phase.
 Repository: kharchasaathi/MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM
-Working branch: content/sql-course-foundation
-Pull request: #13 (open; do not merge until release gates pass)
+Release branch: release/v1-frontend
+Latest release commit: d3db35d44a8c4a29b1b4cc3baddc42ff0e9f9dfe
+PR #235 and PR #244 merged; latest post-merge Browser Review and Firebase deployment must be checked.
 Current audited branch HEAD before this roadmap commit: 60e3e2c0189da3f51474f48123209b8ac9a8c809
 
 ## Verified current baseline
@@ -20,9 +21,9 @@ Current audited branch HEAD before this roadmap commit: 60e3e2c0189da3f51474f481
   - 6 SQL Reference topics (Data Types, Keywords, Quick Reference, MySQL Functions, SQL Server Functions and MS Access Functions)
 - Mapping is a coverage index, not editorial sign-off. Every mapped lesson remains draft pending technical/editorial review.
 - Latest SQL validation PASS on PR head `40eb7efe2d8da64931a4da30a3377f4a0ad57745` (run #45011134985, SQL workflow #784): 151 lessons; 755 SQLite-executed examples; 459 expected outputs compared; 282 status-only examples; 1,037 database-state assertions; 10 runtime-dependent outputs checked by pattern; 4 expected-error examples; 755 MCQs. The same run also validates all 32 original SQL code challenges in isolated SQLite databases.
-- SQL Playground is implemented with browser-side SQLite. Final feature/security/browser audit remains pending.
+- SQL Playground is implemented with browser-side SQLite. Security configuration checks and browser review are merged; formal penetration testing and strict memory/resource stress testing remain external gates.
 - Telugu SQL lesson translations are not complete.
-- No production deployment has been performed.
+- PR #235 release commit deployed successfully; PR #244 post-merge deployment is being verified.
 
 ## English editorial review progress (2026-11-22)
 
@@ -125,3 +126,18 @@ These are supplementary curriculum additions, not W3Schools core navigation topi
 - `VALIDATED` means the relevant automated checks passed on the exact commit under review; it does not mean translated or production-ready.
 - A historical Actions PASS must never be reused as evidence for a newer commit.
 - Keep PR #13 open and do not merge or deploy while any release gate remains unchecked.
+
+
+## Release status update — 2026-11-23
+
+- PR #235 merged. SQL Course Validation PASS, Browser Review PASS and Firebase Hosting deployment SUCCESS on release commit `f998b83c0d1d7bf89f526b962967369c4323f4d6`.
+- PR #244 merged. The SQL Reference Guide now includes curated sections for SQL Quick Reference, Data Types, SQL Keywords, MySQL Functions, SQL Server Functions and MS Access Functions. Browser Review passed on PR head `a31c4ddfd508ee504b73b614bab87c93e4f5d295`.
+- New release commit: `d3db35d44a8c4a29b1b4cc3baddc42ff0e9f9dfe`. Post-merge Browser Review and Firebase deployment must be confirmed on this exact commit.
+- The tracker is 151/151 VALIDATED / 0 DRAFT tracker rows. Lesson JSON `status` remains `draft` pending final editorial/release approval.
+- The final assessment is a local self-assessment only (60 questions, 60 minutes, suggested 80% pass). It is not an accredited or externally verifiable certificate.
+- All 32 challenges run in isolated SQLite databases with query-only mode, but reference solutions are client-accessible. Server-side hidden tests and anti-cheat need a trusted backend and are not part of this client-only release.
+- Six SQL reference collections now have curated sections; exhaustive vendor/version-specific reference catalogues and running every dialect example against real DBMS installations remain future extension work.
+- Formal penetration testing, strict WASM memory limits, browser resource-exhaustion stress tests, and independent line-by-line editorial approval for all 151 lessons remain open release-quality gates.
+- Telugu translation remains deliberately deferred until the user starts the final translation phase.
+
+Do not mark the whole SQL course 100% complete while these independent editorial/security gates remain open.
