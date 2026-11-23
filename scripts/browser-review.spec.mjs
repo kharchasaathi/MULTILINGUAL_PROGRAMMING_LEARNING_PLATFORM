@@ -404,7 +404,8 @@ test("SQL lesson practice links open the dedicated SQL Playground with lesson st
   await playground.close();
 });
 
-\ntest("SQL Practice Hub runs fill-in-the-blank, cumulative quiz and isolated code challenges", async ({ page }) => {
+
+test("SQL Practice Hub runs fill-in-the-blank, cumulative quiz and isolated code challenges", async ({ page }) => {
   test.setTimeout(180000);
   await page.goto(baseURL + "/sql-practice.html", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: "SQL Practice Hub" })).toBeVisible();
