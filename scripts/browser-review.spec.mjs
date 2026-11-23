@@ -411,6 +411,10 @@ test("SQL Practice Hub runs fill-in-the-blank, cumulative quiz and isolated code
   await expect(page.getByRole("heading", { name: "SQL Practice Hub" })).toBeVisible();
   await page.getByRole("button", { name: "WHERE", exact: true }).click();
   await expect(page.locator("#blankFeedback")).toContainText("Correct");
+  await page.reload();
+  await expect(page.locator("#blankScore")).toContainText("1 correct");
+  await expect(page.locator("#blankNext")).toBeEnabled();
+  await page.locator("#blankNext").click();
   await page.getByRole("button", { name: "Cumulative quiz" }).click();
   await page.getByRole("button", { name: /Start 20-question quiz/ }).click();
   await expect(page.locator("#quizCounter")).toContainText("Question 1 of 20", { timeout: 120000 });
