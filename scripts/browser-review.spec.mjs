@@ -434,6 +434,9 @@ test("SQL Practice Hub runs fill-in-the-blank, cumulative quiz and isolated code
   await page.locator("#challengeSql").fill("SELECT customer_name, city, active FROM customers ORDER BY customer_id;");
   await page.locator("#checkChallenge").click();
   await expect(page.locator("#challengeFeedback")).toContainText("Correct", { timeout: 30000 });
+  await page.locator("#challengeSql").fill("WITH attempted_write AS (SELECT 1) DELETE FROM customers;");
+  await page.locator("#checkChallenge").click();
+  await expect(page.locator("#challengeFeedback")).toContainText(/readonly|read-only/i, { timeout: 30000 });
 });
 
 
