@@ -16,7 +16,9 @@
 | English SQL lesson files | 151 | Present |
 | W3Schools SQL Tutorial modules | 45 | All have lesson destinations in the coverage matrix |
 | W3Schools SQL Database modules | 21 | All have lesson destinations in the coverage matrix |
-| Official syllabus learning outcomes | 10 mapped | All mapped lesson IDs exist; manual outcome-by-outcome content review remains |\n| SQL Playground security configuration | PASS in PR #235 run 45169839513 | Worker isolation, network blocking, watchdog, input/result limits and challenge read-only mode checked |\n| SQL Reference & Dialect Guide | Included in PR #235 | Curated cross-dialect guide; full vendor reference catalogues remain partial |
+| Official syllabus learning outcomes | 10 mapped | All mapped lesson IDs exist; manual outcome-by-outcome content review remains |
+| SQL Playground security configuration | PASS in PR #235 run 45169839513 | Worker isolation, network blocking, watchdog, input/result limits and challenge read-only mode checked |
+| SQL Reference & Dialect Guide | Included in PR #235 | Curated cross-dialect guide; full vendor reference catalogues remain partial |
 | Total W3Schools modules | 66 | 45 Tutorial + 21 Database |
 | Reference collections | 6 | Three partial reference and three partial dialect-reference rows remain |
 | SQL course validation | PASS on release commit `bdb79f96` (run 45167888120) | All 151 lessons were loaded by validator |
@@ -153,7 +155,8 @@ The existing `docs/SQL_W3SCHOOLS_COVERAGE_MATRIX.csv` maps all 66 tutorial/datab
 | Cumulative quiz | LIVE | 20 questions sampled from 755 lesson MCQs; latest score saved locally |
 | Challenge learner UI | LIVE | 32 challenges; read-only isolated database; hidden tests remain |
 | Final assessment | LIVE | 60 questions / 60 minutes; local self-assessment only |
-| Curated SQL Reference & Dialect Guide | PROPOSED in PR #235 | Cross-dialect types, syntax, functions, quick patterns and safe queries; not exhaustive |\n| Full dialect/reference catalogues | PARTIAL | Complete all six reference collections and vendor-specific guidance |
+| Curated SQL Reference & Dialect Guide | PROPOSED in PR #235 | Cross-dialect types, syntax, functions, quick patterns and safe queries; not exhaustive |
+| Full dialect/reference catalogues | PARTIAL | Complete all six reference collections and vendor-specific guidance |
 | Telugu translation | DEFERRED | Start only after English completion, per instruction |
 
 ## Recommended execution order
