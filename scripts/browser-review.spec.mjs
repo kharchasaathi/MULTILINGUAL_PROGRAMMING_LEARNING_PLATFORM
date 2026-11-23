@@ -449,3 +449,15 @@ test("C compiler embed exposes the browser-local compiler and direct fallback", 
   expect(encodedState.code).toContain('printf("Hello, CodeSaathi!\\n");');
   expect(await page.locator("body").innerText()).not.toContain("\\n");
 });
+
+
+test("SQL reference guide is accessible and responsive", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(baseURL + "/sql-reference.html", { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("heading", { name: "SQL Reference & Dialect Guide" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Data type families across databases" })).toBeVisible();
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+  expect(overflow).toBeFalsy();
+  const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
+  expect(results.violations.filter(item => ["critical", "serious"].includes(item.impact))).toEqual([]);
+});
