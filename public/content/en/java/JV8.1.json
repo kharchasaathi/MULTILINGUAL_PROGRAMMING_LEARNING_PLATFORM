@@ -24,12 +24,12 @@
   "stages": {
     "understand": {
       "concept": "Java file handling lets a program work with data stored outside its running process. The java.io.File class represents a path and provides metadata and directory operations; it does not itself read or write file contents. A File object may represent an existing or not-yet-created path. Always check existence and permissions, and remember that results depend on the operating system and the process working directory.",
-      "whyItMatters": "File handling allows a Java application to persist, retrieve and manage information beyond the lifetime of a single run.",
+      "whyItMatters": "File-system code must distinguish a path from the file's contents. Correct path inspection helps applications locate resources, validate expected files and report missing or inaccessible locations before attempting I/O. Understanding File and Path also prevents the common mistake of assuming that constructing a path creates a file.",
       "analogy": "Think of a path as a labeled address to a storage location; the address and the data stored there are different things.",
       "analogyLimit": "A path is not a guarantee that the target exists or that the program has permission to access it."
     },
     "explain": {
-      "narrative": "Import java.io.File and create a File object from a path string. Use exists to test whether the path currently exists, isFile and isDirectory to inspect its kind, getName to read the final path component, getParent to inspect its parent, and getAbsolutePath to see the resolved path. File metadata can change between a check and a later operation, so production code should handle failures from the actual operation too.",
+      "narrative": "## A path is not the file contents\n\nJava represents file-system locations with path objects. The older `java.io.File` class represents an abstract pathname and provides operations such as `exists()`, `isFile()`, `isDirectory()`, `getName()` and `getAbsolutePath()`. Creating a File object does not create a file, open it, or read its bytes.\n\n## File and Path\n\nModern Java code commonly uses `java.nio.file.Path` to represent a path and the static methods in `java.nio.file.Files` to inspect or manipulate it. Create a path with `Path.of(\"reports\", \"annual.txt\")`. Use `Files.exists(path)`, `Files.isRegularFile(path)` and `Files.isDirectory(path)` for basic checks. These checks can be affected by permissions and file-system changes; they are not a substitute for handling errors from the operation you actually perform.\n\n## Relative and absolute paths\n\nA relative path is resolved against the process working directory, which may differ between an IDE, terminal and hosted application. `toAbsolutePath()` shows the resolved location. Do not assume the working directory is the source-code folder.\n\n## Directories and safe inspection\n\nUse `Files.createDirectory` for one new directory and `Files.createDirectories` when missing parent directories should also be created. Handle `IOException` and avoid creating, reading or deleting paths outside a controlled application directory. Do not trust user-supplied path strings without validation.\n\n## Common mistakes\n\n- Assuming `new File(\"notes.txt\")` creates the file.\n- Confusing a directory path with a regular file.\n- Assuming a relative path is resolved from the Java source file.\n- Treating an existence check as a guarantee that the next operation will succeed.\n- Using a path from untrusted input without checking where it resolves.\n\nUse `File` when learning legacy APIs or when an API requires it; prefer `Path` and `Files` for new file-system code. File creation, reading, writing and deletion are covered in the following lessons.",
       "examples": [
         {
           "id": "jv8.1-ex1",
@@ -79,14 +79,15 @@
       ]
     },
     "practise": {
-      "guidedTask": "Create a small Java program that demonstrates java file handling. Predict each result, then compile and run it with JDK 21.",
-      "independentTask": "Build a practical Java file-handling utility related to java file handling. Include at least two test cases, expected outputs, and an explanation of failure handling and path safety.",
+      "guidedTask": "Write a program that creates a Path for `workspace/notes.txt`. Print whether it exists, whether it is a regular file, its file name and its absolute path. Then create only the `workspace` directory with Files.createDirectories and repeat the checks. Explain why the Path object itself does not create either location.",
+      "independentTask": "Build a path-inspection utility for a small report folder. It must accept a fixed, application-controlled relative path, display its absolute path, distinguish a regular file from a directory, and report a missing target without crashing. Include tests for a missing path, an existing directory and an existing regular file.",
       "hints": [
-        "Start with a Path or File that points to a controlled test location.",
-        "Use try-with-resources for streams and writers, and handle IOException where the API declares it.",
-        "Test both the normal case and an edge case such as a missing path or existing target."
+        "Use Path.of to represent a location; it does not perform file-system I/O by itself.",
+        "Use Files.exists, Files.isRegularFile and Files.isDirectory for the relevant checks.",
+        "Use Files.createDirectories only for a test folder that your program owns, and catch IOException around actual I/O.",
+        "Remember that relative paths use the process working directory."
       ],
-      "challenge": "Extend one java file handling example to handle a realistic file-system edge case safely and explain the API behaviour."
+      "challenge": "Compare java.io.File with java.nio.file.Path and Files. Write a short program that inspects the same location using both APIs, then explain why a check-then-use sequence can still fail if the file system changes between the check and the operation."
     }
   },
   "practice": {

@@ -24,12 +24,12 @@
   "stages": {
     "understand": {
       "concept": "Java's FileWriter writes character data to a file. Opening it in the default mode replaces existing content; the constructor with append=true adds content to the end. Writers should be closed so buffered characters are flushed. Try-with-resources closes the writer automatically, including when an exception occurs. For explicit character encodings in modern applications, prefer Files.newBufferedWriter with a StandardCharsets value.",
-      "whyItMatters": "File handling allows a Java application to persist, retrieve and manage information beyond the lifetime of a single run.",
+      "whyItMatters": "Writing files allows applications to save reports, settings and generated text. Correct resource management prevents lost buffered data and open handles, while explicit character encoding keeps text predictable across different machines.",
       "analogy": "Think of a path as a labeled address to a storage location; the address and the data stored there are different things.",
       "analogyLimit": "A path is not a guarantee that the target exists or that the program has permission to access it."
     },
     "explain": {
-      "narrative": "Import java.io.FileWriter and java.io.IOException. Create a writer in try-with-resources, call write, and let the resource close at the end of the block. Use new FileWriter(path, true) when appending. FileWriter uses the platform default charset, so use java.nio.file.Files.newBufferedWriter and StandardCharsets.UTF_8 when a predictable encoding is required.",
+      "narrative": "## Character writers and file contents\n\nA `Writer` writes character data. `FileWriter` is a character-output stream connected to a file. Its one-argument constructor opens the file for writing and replaces existing contents; the constructor with `append=true` adds characters at the end. Calling `write` does not mean every character has already reached storage because writers may buffer data.\n\n## Close resources reliably\n\nUse try-with-resources so the writer is closed automatically when the block exits, including when an exception occurs. Closing flushes buffered characters and releases the resource. Do not rely on the program ending to close an open writer.\n\n## Choose a character set\n\nThe traditional FileWriter constructors use the platform default charset. If a file format requires a known encoding, prefer `Files.newBufferedWriter(path, StandardCharsets.UTF_8)` or another explicit charset. Use the same encoding when the file is read later.\n\n## Replace versus append\n\nChoose replace mode when generating a complete new version of a file. Choose append mode for logs or records that should be added without removing earlier text. Be explicit: accidental replace mode can destroy existing content.\n\n## Error handling and safe output\n\nWriting may fail because a directory is missing, permission is denied, storage is unavailable or the path is invalid. Handle `IOException` and report failure to the caller. Write only to an application-controlled destination; never build a destination path by blindly concatenating untrusted input.",
       "examples": [
         {
           "id": "jv8.3-ex1",
@@ -79,14 +79,15 @@
       ]
     },
     "practise": {
-      "guidedTask": "Create a small Java program that demonstrates java write to files. Predict each result, then compile and run it with JDK 21.",
-      "independentTask": "Build a practical Java file-handling utility related to java write to files. Include at least two test cases, expected outputs, and an explanation of failure handling and path safety.",
+      "guidedTask": "Write `First line` and `Second line` to a file using Files.newBufferedWriter with UTF-8 and try-with-resources. Read the file back with Files.readString using UTF-8 and print it. Then append `Third line` in a separate writer and verify the complete contents.",
+      "independentTask": "Create a simple text-based activity log. It must write a header in replace mode only when starting a new log, append later events, use UTF-8 explicitly, close every writer with try-with-resources and report IOException. Test first-run creation, a second append and a line containing non-ASCII text.",
       "hints": [
-        "Start with a Path or File that points to a controlled test location.",
-        "Use try-with-resources for streams and writers, and handle IOException where the API declares it.",
-        "Test both the normal case and an edge case such as a missing path or existing target."
+        "Use Files.newBufferedWriter with StandardCharsets.UTF_8 when the encoding must be predictable.",
+        "Use StandardOpenOption.APPEND together with CREATE when appending to an existing log, or use the FileWriter append constructor.",
+        "Use try-with-resources; closing the writer flushes buffered text.",
+        "Read the output back using the same charset to verify the bytes decode as intended."
       ],
-      "challenge": "Extend one java write to files example to handle a realistic file-system edge case safely and explain the API behaviour."
+      "challenge": "Design a safe log-writing method that does not accidentally truncate an existing log. Explain how you handle a missing parent directory, an I/O failure and concurrent writers. State whether your design guarantees atomic writes; do not claim atomicity unless you implement and verify it."
     }
   },
   "practice": {

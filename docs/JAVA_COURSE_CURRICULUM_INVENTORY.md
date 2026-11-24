@@ -308,3 +308,12 @@ This section supersedes earlier historical batch-status rows above where they sa
 - These checks establish technical CI/browser compatibility, not independent editorial sign-off. Keep lesson status `draft`; do not treat draft content as release-approved.
 - W3Schools broader tutorial/exercise gaps remain under audit; the 58-module syllabus mapping is not proof that every exercise and extended navigation item is fully covered.
 - Telugu translation remains deferred. No merge or production deployment has been performed.
+
+
+## JV8 File Handling instructional-quality batch — 24 November 2026
+
+- Updated JV8.1–JV8.5 in place; preserved topic IDs, JSON schema, five objectives, five runnable examples, five assessment items, draft status and `practice.playgroundMode: "none"`.
+- Rewrote the Explain narratives to distinguish pathname representation from file contents; cover NIO Path/Files, creation semantics, UTF-8 output, whole-file versus streaming input, and safe deletion.
+- Replaced generic practice prompts with lesson-specific guided tasks, independent tasks, hints and challenges, including missing/existing paths, append versus replace, end-of-file handling, and deletion safety.
+- The prior Java Actions #167 and Browser Review #1588 passed on the parent content commit. This new batch requires fresh current-HEAD JDK and browser runs before its changes can be marked validated.
+- No merge or deployment; English lessons remain drafts and Telugu remains deferred.

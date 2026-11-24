@@ -187,3 +187,16 @@ The 27 proposed JV9–JV14 lessons have now been authored as English draft JSON 
 The W3Schools 58-module syllabus mapping and the broader tutorial navigation/exercise catalogue must be audited separately. Outstanding candidates already identified include do-while, enhanced for/for-each, multidimensional-array subtopics, errors and testing exercises, problem-solving exercises, I/O streams, data structures and project work. Map each to an existing lesson or a distinct supplemental topic ID; do not silently count a broad module mapping as complete subtopic coverage.
 
 All lessons remain English drafts pending editorial review and release approval. Telugu remains deferred. CI PASS is technical evidence only, not release approval.
+
+
+## JV8 File Handling follow-up audit — 24 November 2026
+
+The JV8.1–JV8.5 lesson files were reviewed as one learning sequence. The five examples and five MCQs per lesson were already present, but the practice instructions repeated generic file-handling prompts. Updated the lesson-specific explanations and practice tasks in place:
+
+- JV8.1: distinguish `File` and `Path`, relative/absolute paths, metadata checks and TOCTOU limitations.
+- JV8.2: `createNewFile`, `Files.createFile`, `mkdir`, `mkdirs`, `Files.createDirectories`, existing-target and parent-path outcomes.
+- JV8.3: replace versus append, try-with-resources, explicit UTF-8 and I/O failure handling.
+- JV8.4: `readString`, `readAllLines`, streaming `BufferedReader`, charset selection and EOF semantics.
+- JV8.5: `delete`, `deleteIfExists`, empty directories, path normalization and destructive-operation safety.
+
+The changes preserve lesson IDs and JSON structure. Fresh JDK 21 and browser CI on the new commit are required before validation evidence is updated. The broader W3Schools tutorial/exercise gap audit remains open; this batch closes only the JV8 instructional-quality items.
