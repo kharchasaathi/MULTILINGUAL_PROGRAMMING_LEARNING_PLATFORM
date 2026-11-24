@@ -7,6 +7,7 @@
 - Lesson integration: Java lesson practice links pass the first authored Java example through a base64url hash payload.
 - Compiler discovery: Wandbox `GET https://wandbox.org/api/list.json`; Java compilers are discovered at runtime and sorted by stable version.
 - Execution: Wandbox `POST https://wandbox.org/api/compile.json`, including source and optional standard input.
+- The provider writes the primary source as `prog.java`; the client normalizes a top-level `public class Main` declaration to package-private `class Main` for the hosted run. This keeps lesson examples portable while avoiding Java public-class/file-name mismatch.
 - Public permalink saving is disabled (`save: false`).
 - Source and stdin are sent to Wandbox, not to a CodeSaathi-owned server. Learners are warned not to submit secrets or personal/confidential data.
 - The page has source/stdin size limits, a 60-second request timeout, AbortController cancellation, text-only output rendering, and no eval/Function execution in the page.
