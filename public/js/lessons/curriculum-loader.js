@@ -215,7 +215,7 @@ const link = $(".lesson-practice-link", container);
       }
       link.target = "_blank";
       link.rel = "noopener noreferrer";
-    } else if (link && (lesson.courseId === "cpp" || lesson.courseId === "c"))
+    } else if (link && (lesson.courseId === "cpp" || lesson.courseId === "c")) {
       const language = lesson.courseId;
       const starter = code || (language === "cpp"
         ? '#include <iostream>\n\nint main() {\n    std::cout << "Hello, CodeSaathi!\\\n";\n    return 0;\n}\n'
