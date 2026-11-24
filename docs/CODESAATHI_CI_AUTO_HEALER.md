@@ -63,3 +63,29 @@ The workflow verifies the issue/run relationship and that the run failed on the 
 - If logs do not identify an eligible source file, the model refuses a safe proposal, the API key is missing, or validation fails, the workflow stops without a PR.
 
 This workflow creates a guarded AI-assisted draft PR proposal, not autonomous production repair. The first live run still requires the owner to configure `OPENAI_API_KEY` and manually dispatch it against a suitable diagnostic issue.
+
+## Operating decision: GitHub-assisted CI recovery (current default)
+
+For normal CodeSaathi development, a separate paid OpenAI API-powered autonomous Auto-Healer is **not required**. The maintainer/ChatGPT can use the connected GitHub repository and Actions tools during an active development session to inspect failures, diagnose logs, make scoped fixes, and verify the new runs. This is the default operating procedure unless the repository owner explicitly approves a separate autonomous service later.
+
+### Mandatory CI-first procedure for every continuation
+
+1. Before starting new work, identify the active branch, latest branch HEAD SHA, open PR(s), and relevant workflows for the task.
+2. Inspect the latest relevant workflow runs and classify each as success, failure, in progress, cancelled, or skipped. Match each run's head_sha to the current branch/PR HEAD; a pass on an older SHA is not evidence that the current code passed.
+3. For every relevant failure, inspect the failed job, failed step, and actual logs. Record the root cause and affected files; do not infer a cause from the red icon alone.
+4. Fix the root cause with the smallest architecture-preserving change. Fetch the current file/blob SHA before updating a file. Do not modify unrelated courses or files.
+5. Run local/repository-level validation where available, commit the fix, verify the resulting commit SHA, and inspect the newly triggered Actions runs on that exact SHA.
+6. Do not report a fix as validated until the corresponding current-head checks finish successfully. If a check is queued or running, report it as pending. If it cannot be resolved, record it as a blocker with the evidence.
+7. Once critical blockers are fixed or explicitly isolated, continue independent work where safe. Do not proceed with work that depends on a failed prerequisite or mark incomplete work complete.
+8. Before merge, re-fetch PR metadata and verify current head SHA, base branch, mergeability/conflicts, and all required current-head checks. Merge only with the repository owner's explicit authorization. Deploy only with explicit authorization and after release checks pass; verify the deployment and live site afterward.
+9. Report actual workflow statuses, relevant run links, exact commit SHA, completed fixes, unresolved blockers, PR state, merge state, and deployment state.
+
+### Important limits and cost controls
+
+- This process runs when ChatGPT/maintainer is actively continuing the task; it is **not** a continuously running background monitor and does not promise to notice failures between sessions.
+- GitHub Actions workflow_run events may create a short workflow-run entry even when the downstream job is skipped because the completed source workflow succeeded. A run entry alone does not mean the Auto-Healer attempted a repair. Check the job conclusion and logs.
+- The current Auto-Healer workflow remains a bounded diagnostic/retry mechanism. It is not a fully autonomous code repair agent.
+- Do not require or configure OPENAI_API_KEY, paid model API calls, Google Cloud, or Firebase Cloud Storage for the default manual CI-recovery process.
+- The optional AI Repair PR workflow may remain available as a separately opt-in experiment, but it must not be assumed to be active or necessary. Do not run it or incur API charges unless the owner explicitly asks for it.
+- Never allow automatic merge or production deployment from an AI repair proposal. Human review and all normal project/release checks remain mandatory.
+
