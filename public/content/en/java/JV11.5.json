@@ -25,7 +25,7 @@
       "analogyLimit": "The analogy does not define software boundaries. Choose classes and interfaces based on responsibilities, dependencies and testability rather than creating a class for every noun."
     },
     "explain": {
-      "narrative": "## Capstone: Command-Line Task Manager\n\nSeparate task data, application logic, persistence and console interaction. Build one feature at a time and test empty storage, duplicate IDs, invalid commands and file errors.\n\n## Suggested architecture\n\n- `Task`: immutable or carefully encapsulated task identity, title and completion state.\n- `TaskService`: validates commands and enforces rules such as unique IDs.\n- `TaskRepository`: loads and saves task records using a documented UTF-8 format.\n- `Main`: parses console input and displays results; it should not contain persistence logic.\n\n## Define command behaviour\n\nSpecify commands such as `add`, `list`, `done`, `remove`, `help` and `exit`. Decide what happens for missing IDs, duplicate IDs, blank titles and malformed saved records. Save through a temporary file and replace the target only after a complete successful write when data-loss risk matters.\n\n## Acceptance checks\n\nRun the application with empty storage, add two tasks, complete one, restart and confirm the state persists. Also test invalid commands and file access failures.",
+      "narrative": "## Capstone goal and separation of responsibilities\n\nBuild a command-line task manager that supports adding, listing, completing and removing tasks, plus help and exit commands. Separate task data, business rules, persistence and console interaction. This separation makes the project easier to test and prevents file handling from becoming mixed with menu logic.\n\n## Suggested design\n\n- `Task`: task ID, nonblank title and completion state.\n- `TaskService`: validates commands and enforces unique IDs and valid state transitions.\n- `TaskRepository`: loads and saves records using a documented UTF-8 format.\n- `Main`: reads console input, dispatches commands and displays results.\n\nChoose whether task IDs are generated or supplied. Define how duplicate IDs, blank titles, unknown commands, missing tasks and malformed saved records are handled. Avoid parsing a delimiter-based format without an escaping rule; titles may contain the delimiter or newline.\n\n## Persistence and failure safety\n\nLoad existing tasks at startup and save successful changes. For safer replacement, write a complete new snapshot to a temporary file and move it over the previous file only after writing succeeds. Handle unsupported atomic moves where necessary. Do not print “saved” until the write has completed.\n\n## Acceptance tests\n\nStart with empty storage, add two tasks, complete one, list them, remove one, exit and restart. Confirm the remaining state is correct. Also test duplicate IDs, blank titles, malformed records, unknown commands, a missing task ID and a file access failure. The project is complete when the behavior is predictable after restart, not merely when a single in-memory list prints.",
       "examples": [
         {
           "id": "jv11.5-ex1",
@@ -78,9 +78,9 @@
       "guidedTask": "Model a Task with an ID, title and completion state. Implement add, list and complete commands using a Map and reject duplicate IDs.",
       "independentTask": "Build the command-line task manager with separate Task, TaskService, TaskRepository and Main classes. Persist tasks in a documented UTF-8 text format.",
       "hints": [
-        "Choose the API that matches the data representation and operation.",
-        "Use try-with-resources for AutoCloseable resources.",
-        "Test empty, normal and failure cases; verify exact output or file contents."
+        "Keep task rules in TaskService and file operations in TaskRepository; keep Main focused on input and display.",
+        "Define an escaping or structured serialization format so titles containing delimiters cannot corrupt saved records.",
+        "Test the full add/complete/remove/restart journey and verify that failed saves do not report success."
       ],
       "challenge": "Test empty storage, malformed records, duplicate IDs, unknown commands, completing a missing task and restarting after saved changes."
     }
