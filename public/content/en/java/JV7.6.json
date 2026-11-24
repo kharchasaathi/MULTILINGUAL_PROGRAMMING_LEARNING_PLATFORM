@@ -1,0 +1,163 @@
+{
+  "id": "java.jv7.6.en",
+  "courseId": "java",
+  "moduleId": "JV7",
+  "topicId": "JV7.6",
+  "title": "Java Advanced Sorting",
+  "language": "en",
+  "learningObjectives": [
+    "Sort custom objects using Comparator.comparing.",
+    "Build multi-level orderings with thenComparing.",
+    "Reverse a comparator without subtraction arithmetic.",
+    "Use stable sorting to preserve equal-key relative order.",
+    "Choose sorting rules that are deterministic and readable."
+  ],
+  "prerequisites": [
+    "JV1.1",
+    "JV1.2",
+    "JV2.1",
+    "JV2.2",
+    "JV3.1",
+    "JV4.2",
+    "JV5.1",
+    "JV5.5"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Advanced sorting combines Comparator factories and chained comparisons to order custom objects. Comparator.comparing selects a key, comparingInt and comparingDouble avoid unnecessary boxing, and thenComparing adds tie-breakers. reversed reverses the complete comparator built so far. Java's list sorting is stable, so elements that compare equal retain their prior relative order.",
+      "whyItMatters": "This topic equips Java learners to write robust programs using java advanced sorting in real applications.",
+      "analogy": "Think of each language feature as a clearly labelled tool: choose it for the specific problem it is designed to solve.",
+      "analogyLimit": "The analogy does not replace the Java language and library contracts; compile and test the actual behaviour."
+    },
+    "explain": {
+      "narrative": "Model the desired ordering explicitly: first compare by a primary property, then by secondary properties. Use nullsFirst or nullsLast when nullable keys are part of the data model. Do not compare integers by subtracting one from another because overflow can break comparator contracts; use Integer.compare. Sorting a list is in place, so copy first if the original order must be retained.",
+      "examples": [
+        {
+          "id": "jv7.6-ex1",
+          "language": "java",
+          "title": "Sort objects by age",
+          "code": "import java.util.ArrayList;\nimport java.util.Comparator;\nclass Person { String name; int age; Person(String n,int a){name=n;age=a;} public String toString(){return name+\":\"+age;} }\npublic class Main { public static void main(String[] args) { ArrayList<Person> p = new ArrayList<>(); p.add(new Person(\"Ravi\",30)); p.add(new Person(\"Asha\",24)); p.sort(Comparator.comparingInt(x -> x.age)); System.out.println(p); } }",
+          "expectedOutput": "[Asha:24, Ravi:30]",
+          "explanation": "comparingInt builds a comparator from an integer key.",
+          "runnable": false
+        },
+        {
+          "id": "jv7.6-ex2",
+          "language": "java",
+          "title": "Add a name tie-breaker",
+          "code": "import java.util.ArrayList;\nimport java.util.Comparator;\nclass Item { String name; int price; Item(String n,int p){name=n;price=p;} public String toString(){return name;} }\npublic class Main { public static void main(String[] args) { ArrayList<Item> a = new ArrayList<>(); a.add(new Item(\"Zed\",10)); a.add(new Item(\"Ari\",10)); a.add(new Item(\"Bee\",8)); a.sort(Comparator.comparingInt((Item x)->x.price).thenComparing(x->x.name)); System.out.println(a); } }",
+          "expectedOutput": "[Bee, Ari, Zed]",
+          "explanation": "The comparator sorts by price and then alphabetically by name.",
+          "runnable": false
+        },
+        {
+          "id": "jv7.6-ex3",
+          "language": "java",
+          "title": "Reverse a comparator",
+          "code": "import java.util.ArrayList;\nimport java.util.Comparator;\npublic class Main { public static void main(String[] args) { ArrayList<Integer> a = new ArrayList<>(); a.add(2); a.add(9); a.add(4); a.sort(Comparator.<Integer>naturalOrder().reversed()); System.out.println(a); } }",
+          "expectedOutput": "[9, 4, 2]",
+          "explanation": "reversed creates descending natural order.",
+          "runnable": false
+        },
+        {
+          "id": "jv7.6-ex4",
+          "language": "java",
+          "title": "Nulls last",
+          "code": "import java.util.ArrayList;\nimport java.util.Comparator;\npublic class Main { public static void main(String[] args) { ArrayList<String> a = new ArrayList<>(); a.add(\"pear\"); a.add(null); a.add(\"apple\"); a.sort(Comparator.nullsLast(Comparator.naturalOrder())); System.out.println(a); } }",
+          "expectedOutput": "[apple, pear, null]",
+          "explanation": "nullsLast defines how null values participate in ordering.",
+          "runnable": false
+        },
+        {
+          "id": "jv7.6-ex5",
+          "language": "java",
+          "title": "Compare integers safely",
+          "code": "import java.util.ArrayList;\nimport java.util.Comparator;\npublic class Main { public static void main(String[] args) { ArrayList<Integer> a = new ArrayList<>(); a.add(Integer.MAX_VALUE); a.add(-1); a.add(0); a.sort(Integer::compare); System.out.println(a); } }",
+          "expectedOutput": "[-1, 0, 2147483647]",
+          "explanation": "Integer.compare avoids overflow risks from subtraction-based comparisons.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Build a small Java program that demonstrates java advanced sorting. Predict the output before compiling with JDK 21.",
+      "independentTask": "Create a practical application using java advanced sorting. Include at least two test cases, expected output, and an explanation of one important edge case.",
+      "hints": [
+        "Start with the smallest standard Java API or language construct that expresses the requirement.",
+        "Trace the execution path and verify the documented behaviour of each method or keyword.",
+        "Compile with JDK 21 and test normal as well as boundary or failure cases."
+      ],
+      "challenge": "Extend one example into a small reusable component and document its error handling, ordering or concurrency guarantees as relevant."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "jv7.6-q1",
+        "prompt": "Which method adds a secondary comparison?",
+        "answer": "thenComparing()",
+        "options": [
+          "reversed()",
+          "thenComparing()",
+          "equals()",
+          "parallel()"
+        ],
+        "explanation": "thenComparing applies a tie-breaker when the first comparator returns zero."
+      },
+      {
+        "id": "jv7.6-q2",
+        "prompt": "What does Comparator.comparingInt extract?",
+        "answer": "An int sort key",
+        "options": [
+          "A String key",
+          "An int sort key",
+          "A thread ID",
+          "A date pattern"
+        ],
+        "explanation": "comparingInt builds a comparator using an int-valued key extractor."
+      },
+      {
+        "id": "jv7.6-q3",
+        "prompt": "What does reversed() do?",
+        "answer": "Reverses the comparator's ordering",
+        "options": [
+          "Randomizes the list",
+          "Reverses the comparator's ordering",
+          "Removes null values",
+          "Copies the collection"
+        ],
+        "explanation": "reversed returns a comparator with the opposite ordering."
+      },
+      {
+        "id": "jv7.6-q4",
+        "prompt": "What does nullsLast specify?",
+        "answer": "Null values sort after non-null values",
+        "options": [
+          "Null values are rejected",
+          "Null values sort after non-null values",
+          "Null values sort first",
+          "Null values are removed"
+        ],
+        "explanation": "nullsLast wraps a comparator with a policy for null references."
+      },
+      {
+        "id": "jv7.6-q5",
+        "prompt": "Why avoid comparing integers by subtraction?",
+        "answer": "Subtraction can overflow",
+        "options": [
+          "It is always slower",
+          "Subtraction can overflow",
+          "It changes the list size",
+          "It prevents stable sorting"
+        ],
+        "explanation": "Integer.compare is safe across the full int range."
+      }
+    ]
+  },
+  "status": "draft"
+}
