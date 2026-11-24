@@ -25,7 +25,7 @@
       "analogyLimit": "This analogy is only a learning aid; actual behavior is defined by Java language rules and API contracts."
     },
     "explain": {
-      "narrative": "## try-with-resources and Exception Suppression\n\ntry-with-resources closes AutoCloseable resources automatically, including when the body throws. Resources close in reverse declaration order. If both the body and close operation fail, the body exception remains primary and close failures are suppressed.\n\n## Applying the concept\n\nIdentify the input and desired result. Select the Java construct or API that directly supports the requirement. Keep code readable, handle documented failure cases and state assumptions clearly.\n\n## Verification checklist\n\n- Compile with JDK 21.\n- Predict the output before running.\n- Test normal, boundary and invalid inputs where relevant.\n- Check resource cleanup and error handling.\n- Prefer explicit types and focused methods.",
+      "narrative": "## Resource lifetime and AutoCloseable\n\nFiles, streams, readers, writers and other objects hold resources that should be released promptly. Java's `AutoCloseable` interface defines a `close()` method. A try-with-resources statement declares resources in its parentheses and closes them automatically when control leaves the block, whether the block finishes normally or throws.\n\n## Resource declaration and closing order\n\nA resource declared in try-with-resources must implement `AutoCloseable` (or `Closeable`). Multiple resources can be declared in one statement, separated by semicolons. Java closes them in reverse declaration order: the last resource declared is closed first. This is useful when one resource depends on another, such as a reader wrapping an input stream.\n\n## Primary and suppressed exceptions\n\nIf the try body throws and a resource's `close()` also throws, Java preserves the body exception as primary. The close failure is attached as a suppressed exception and can be inspected with `getSuppressed()`. If the body succeeds but closing fails, the close exception itself is thrown.\n\n## Prefer structured cleanup\n\nUse try-with-resources instead of hand-written `finally` blocks for ordinary AutoCloseable resources. Keep resource creation inside the try statement when possible, handle or propagate checked exceptions, and avoid manually closing the same resource. Test normal completion, a body failure and a close failure.",
       "examples": [
         {
           "id": "jv9.4-ex1",
@@ -78,9 +78,9 @@
       "guidedTask": "Create two AutoCloseable resources that print from close(). Confirm reverse close order when both are declared in one try-with-resources statement.",
       "independentTask": "Create a resource whose close() throws while the try body also throws. Print the primary exception and each suppressed exception.",
       "hints": [
-        "State the input, output and assumptions before coding.",
-        "Use the smallest example that demonstrates the behavior.",
-        "Predict the result, compile with JDK 21, then test a boundary or failure case."
+        "Declare AutoCloseable resources in the try header so Java closes them on every exit path.",
+        "When multiple resources are declared, remember that they close in reverse declaration order.",
+        "If both the body and close fail, inspect getSuppressed() on the primary exception."
       ],
       "challenge": "Refactor a manually closed reader into try-with-resources. Test normal completion and an exception thrown while reading."
     }

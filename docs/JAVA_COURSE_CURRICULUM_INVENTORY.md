@@ -325,3 +325,8 @@ This section supersedes earlier historical batch-status rows above where they sa
 - Minimal repair: reduce each JV8.1–JV8.5 lesson to exactly three topic-specific hints, retaining all five objectives, five examples, five MCQs, lesson IDs, existing JSON structure and `playgroundMode: "none"`.
 - The failure was structural validation before example execution; it was not a Java compiler/runtime defect.
 - Re-run JDK 21 and browser CI on the repair commit before changing JV8 validation status back to VALIDATED.
+
+
+## Supplemental lesson quality batch 2 — 24 November 2026
+
+Updated JV9.2–JV9.4, JV10.1–JV10.2 and JV11.1–JV11.3 in place. Replaced generic explanation/checklist paragraphs with topic-specific instruction covering debugger workflow and safe diagnostics; catch ordering, multi-catch and exception causes; AutoCloseable reverse closing and suppressed exceptions; requirements, constraints and acceptance examples; pseudocode, decomposition and invariants; unit conversion formula/input separation; grade boundaries and empty score handling; and inventory stock invariants and Map lookup. Replaced generic practice hints with three lesson-specific hints per lesson. JV11.3 practical stock-sale example now validates requested quantity and available stock before updating. Preserved lesson IDs, objectives, five examples, five MCQs, schema and draft status. New JDK 21 and browser validation are required on this commit. No merge/deploy; Telugu remains deferred.
