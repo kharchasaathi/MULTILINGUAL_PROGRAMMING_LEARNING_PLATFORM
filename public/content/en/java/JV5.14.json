@@ -10,7 +10,8 @@
     "Declare an enum and use its constants.",
     "Use enum values in switch statements.",
     "Call values and valueOf on an enum type.",
-    "Explain how enums can include fields, constructors and methods."
+    "Explain how enums can include fields, constructors and methods.",
+    "Explain enum constructor syntax and how each constant supplies constructor arguments."
   ],
   "prerequisites": [
     "JV1.1",
@@ -46,7 +47,7 @@
       "analogyLimit": "This analogy is only a design aid; Java access, inheritance and dispatch follow the language's exact rules."
     },
     "explain": {
-      "narrative": "## Declare enum constants\n\nUse the `enum` keyword and list constants separated by commas. Refer to a constant using the enum type name, such as `Day.MONDAY`.\n\n## Enum operations\n\nThe compiler provides `values()` to return the constants and `valueOf(String)` to look up a constant by its exact name. Enums work naturally with switch statements.\n\n## Enum members\n\nAn enum can declare fields, a constructor and methods. Enum constructors cannot be called directly with new; constants are created by the enum declaration.\n\n## Common mistakes\n\n- Comparing an enum to an unrelated string.\n- Passing an incorrectly cased name to valueOf.\n- Trying to instantiate an enum with new.",
+      "narrative": "## Declare enum constants\n\nUse the `enum` keyword and list constants separated by commas. Refer to a constant using the enum type name, such as `Day.MONDAY`.\n\n## Enum operations\n\nThe compiler provides `values()` to return the constants and `valueOf(String)` to look up a constant by its exact name. Enums work naturally with switch statements.\n\n## Enum members\n\nAn enum can declare fields, a constructor and methods. Enum constructors cannot be called directly with new; constants are created by the enum declaration.\n\n## Common mistakes\n\n- Comparing an enum to an unrelated string.\n- Passing an incorrectly cased name to valueOf.\n- Trying to instantiate an enum with new.\n\n## Enum constructors\n\nAn enum may define a constructor to initialize data associated with each constant. The constructor cannot be public or protected; enum constructors are implicitly private. Each constant supplies its arguments in the enum declaration:\n\n```java\nenum Priority {\n    LOW(1), HIGH(3);\n    private final int level;\n    Priority(int level) { this.level = level; }\n    int level() { return level; }\n}\n```\n\nThe constants are created by the enum declaration. Programs cannot call the enum constructor with `new`.",
       "examples": [
         {
           "id": "jv5.14-ex1",
@@ -92,11 +93,20 @@
           "expectedOutput": "4",
           "explanation": "An enum can store per-constant data through its constructor and methods.",
           "runnable": false
+        },
+        {
+          "id": "jv5.14-ex6",
+          "language": "java",
+          "title": "Pass values to an enum constructor",
+          "code": "enum Priority { LOW(1), HIGH(3); private final int level; Priority(int level) { this.level = level; } int level() { return level; } }\npublic class Main { public static void main(String[] args) { System.out.println(Priority.LOW.level()); System.out.println(Priority.HIGH.level()); } }",
+          "expectedOutput": "1\n3",
+          "explanation": "Each enum constant passes an argument to the enum constructor. The constructor stores the value in a final field, and the accessor returns it.",
+          "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Create a small Java program about java enums. Predict its output, then compile and run it with JDK 21.",
+      "guidedTask": "Create a small Java program about java enums. Predict its output, then compile and run it with JDK 21. Define an enum whose constants each carry a numeric priority. Print the priority for two constants and explain why the constructor is not called with new.",
       "independentTask": "Build an original program demonstrating java enums in a practical scenario. Include at least two test cases, expected outputs and a short explanation of your design choices.",
       "hints": [
         "Identify the class, object or type that owns each piece of state or behaviour.",
@@ -172,6 +182,18 @@
           "Only package declarations"
         ],
         "explanation": "Enums are specialized classes and can define members."
+      },
+      {
+        "id": "jv5.14-q6",
+        "prompt": "How are enum constructor arguments supplied?",
+        "options": [
+          "By each enum constant declaration",
+          "By calling new on the enum",
+          "By a public setter after construction",
+          "By the package statement"
+        ],
+        "answer": "By each enum constant declaration",
+        "explanation": "Enum constants are declared with constructor arguments in the enum body."
       }
     ]
   },
