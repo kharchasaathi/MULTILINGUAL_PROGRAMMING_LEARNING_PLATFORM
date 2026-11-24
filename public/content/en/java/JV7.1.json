@@ -10,8 +10,7 @@
     "Use try and catch to handle expected failures.",
     "Use finally for cleanup that must run.",
     "Distinguish checked and unchecked exceptions.",
-    "Catch specific exceptions before broader exception types.",
-    "Describe a systematic debugging workflow and use multi-catch and try-with-resources appropriately."
+    "Distinguish compiler, runtime and logic errors; debug systematically and handle multiple exceptions and resource cleanup."
   ],
   "prerequisites": [
     "JV1.1",
@@ -31,7 +30,7 @@
       "analogyLimit": "The analogy does not replace the Java language and library contracts; compile and test the actual behaviour."
     },
     "explain": {
-      "narrative": "Place risky operations in a try block and add catch clauses for the exceptions you can recover from. A catch clause receives the exception object and may inspect its message. Multiple catch clauses are checked from top to bottom, so a subclass catch must appear before a superclass catch. Use try-with-resources for AutoCloseable resources; it is usually clearer and safer than manual close calls in finally.\n\n## Compiler errors, runtime errors and debugging\n\nA compiler error prevents source code from compiling, for example a missing semicolon or incompatible type. A runtime exception occurs while a compiled program executes, such as an invalid array index. A logic error allows the program to run but produces an incorrect result.\n\nDebug systematically: reproduce the problem, read the first useful diagnostic and its line number, inspect relevant values and control flow, reduce the failing case, make one change, then rerun the test. Use breakpoints and step controls when available. Do not hide failures with a broad empty catch block.\n\n## Multi-catch\n\nA single catch can handle unrelated exception types with the multi-catch operator, for example `catch (IOException | NumberFormatException e)`. The alternatives cannot be in a subclass/superclass relationship.\n\n## try-with-resources and suppressed exceptions\n\nTry-with-resources automatically closes resources that implement `AutoCloseable`. If the try body throws and close also throws, the body exception remains primary and the close exception is recorded as suppressed. Use `getSuppressed()` when diagnosing cleanup failures.",
+      "narrative": "Place risky operations in a try block and add catch clauses for the exceptions you can recover from. A catch clause receives the exception object and may inspect its message. Multiple catch clauses are checked from top to bottom, so a subclass catch must appear before a superclass catch. Use try-with-resources for AutoCloseable resources; it is usually clearer and safer than manual close calls in finally.\n\n## Compiler errors, runtime errors and debugging\n\nA compiler error prevents source code from compiling, for example a missing semicolon or incompatible type. A runtime exception occurs while a compiled program executes, such as an invalid array index. A logic error allows the program to run but produces an incorrect result.\n\nDebug systematically: reproduce the problem, read the first useful diagnostic and its line number, inspect relevant values and control flow, reduce the failing case, make one change, then rerun the test. Use breakpoints and step controls when available. Do not hide failures with a broad empty catch block.\n\n## Multi-catch\n\nA single catch can handle unrelated exception types with the multi-catch operator, for example `catch (IOException | NumberFormatException e)`. The alternatives cannot be in a subclass/superclass relationship.\n\n## try-with-resources and suppressed exceptions\n\nTry-with-resources automatically closes resources that implement `AutoCloseable`. If the try body throws and close also throws, the body exception remains primary and the close exception is recorded as suppressed. Use `getSuppressed()` when diagnosing cleanup failures.\n\n## Compiler errors, runtime errors and debugging\n\nA compiler error prevents source code from compiling, for example a missing semicolon or incompatible type. A runtime exception occurs while a compiled program executes, such as an invalid array index. A logic error allows the program to run but produces an incorrect result.\n\nDebug systematically: reproduce the problem, read the first useful diagnostic and its line number, inspect relevant values and control flow, reduce the failing case, make one change, then rerun the test. Use breakpoints and step controls when available. Do not hide failures with a broad empty catch block.\n\n## Multi-catch\n\nA single catch can handle unrelated exception types with the multi-catch operator, for example `catch (IOException | NumberFormatException e)`. The alternatives cannot be in a subclass/superclass relationship.\n\n## try-with-resources and suppressed exceptions\n\nTry-with-resources automatically closes resources that implement `AutoCloseable`. If the try body throws and close also throws, the body exception remains primary and the close exception is recorded as suppressed. Use `getSuppressed()` when diagnosing cleanup failures.",
       "examples": [
         {
           "id": "jv7.1-ex1",
@@ -72,25 +71,16 @@
         {
           "id": "jv7.1-ex5",
           "language": "java",
-          "title": "Catch a parent type",
-          "code": "public class Main { public static void main(String[] args) { try { int[] a = {4}; System.out.println(a[3]); } catch (RuntimeException e) { System.out.println(e.getClass().getSimpleName()); } } }",
-          "expectedOutput": "ArrayIndexOutOfBoundsException",
-          "explanation": "A superclass catch can handle a subclass exception, though narrower catches are preferable.",
-          "runnable": false
-        },
-        {
-          "id": "jv7.1-ex6",
-          "language": "java",
-          "title": "Handle two exception types with multi-catch",
-          "code": "public class Main { public static void main(String[] args) { String value = \"x\"; try { int number = Integer.parseInt(value); System.out.println(10 / number); } catch (NumberFormatException | ArithmeticException e) { System.out.println(\"Input or arithmetic problem\"); } } }",
-          "expectedOutput": "Input or arithmetic problem",
-          "explanation": "The multi-catch clause handles either unrelated exception type with one handler. The alternatives cannot be in a subclass/superclass relationship.",
+          "title": "Catch a parent type and use multi-catch",
+          "code": "public class Main { public static void main(String[] args) { try { String value = \"x\"; int number = Integer.parseInt(value); System.out.println(10 / number); } catch (NumberFormatException | ArithmeticException e) { System.out.println(\"Input or arithmetic problem\"); } try { int[] a = {4}; System.out.println(a[3]); } catch (RuntimeException e) { System.out.println(e.getClass().getSimpleName()); } } }",
+          "expectedOutput": "Input or arithmetic problem\nArrayIndexOutOfBoundsException",
+          "explanation": "The multi-catch handles either unrelated exception type with one handler. The second catch demonstrates that a RuntimeException superclass can handle an ArrayIndexOutOfBoundsException.",
           "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Build a small Java program that demonstrates java exceptions. Predict the output before compiling with JDK 21. Create a debugging checklist for a deliberately incorrect calculation. Then write a multi-catch example and a try-with-resources example; explain how suppressed exceptions are reported when both the body and close operation fail.",
+      "guidedTask": "Build a small Java program that demonstrates java exceptions. Predict the output before compiling with JDK 21. Create a debugging checklist for a deliberately incorrect calculation. Then write a multi-catch example and a try-with-resources example; explain how suppressed exceptions are reported when both the body and close operation fail. Create a debugging checklist for a deliberately incorrect calculation. Then write a multi-catch example and a try-with-resources example; explain how suppressed exceptions are reported when both the body and close operation fail.",
       "independentTask": "Create a practical application using java exceptions. Include at least two test cases, expected output, and an explanation of one important edge case.",
       "hints": [
         "Start with the smallest standard Java API or language construct that expresses the requirement.",
@@ -157,26 +147,14 @@
       },
       {
         "id": "jv7.1-q5",
-        "prompt": "Which category must be caught or declared?",
-        "answer": "Checked exceptions",
-        "options": [
-          "All RuntimeExceptions",
-          "Checked exceptions",
-          "Errors only",
-          "No exceptions"
-        ],
-        "explanation": "The compiler enforces handling or declaration of checked exceptions."
-      },
-      {
-        "id": "jv7.1-q6",
         "prompt": "When both a try-with-resources body and close operation throw, where is the close failure recorded?",
+        "answer": "As a suppressed exception on the primary exception",
         "options": [
           "As a suppressed exception on the primary exception",
           "It replaces the primary exception",
           "It is silently discarded in all cases",
           "As a compiler warning only"
         ],
-        "answer": "As a suppressed exception on the primary exception",
         "explanation": "The exception from the body remains primary, and close failures are available through getSuppressed()."
       }
     ]
