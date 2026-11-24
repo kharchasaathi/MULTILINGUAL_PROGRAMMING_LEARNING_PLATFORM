@@ -25,7 +25,7 @@
       "analogyLimit": "Actual behavior is defined by Java language rules and API contracts."
     },
     "explain": {
-      "narrative": "## Generics Fundamentals and Type Parameters\n\nGenerics let classes and methods work with types while preserving compile-time checks. Parameterized collections avoid unsafe casts.\n\nIdentify the input and desired result. Select the Java construct or API that supports the requirement. Keep code readable, handle documented failures and state assumptions clearly.\n\nCompile with JDK 21, predict output before running, and test normal, boundary and invalid inputs.",
+      "narrative": "## Why Java has generics\n\nGenerics let a class, interface or method work with a type selected by its caller while retaining compile-time type checking. A declaration such as List<String> communicates that the list is intended to contain String values. Reading an element returns String without a manual cast, and adding an incompatible type is rejected by the compiler.\n\n## Type parameters and arguments\n\nA type parameter is a placeholder declared by a generic type, commonly named T, E, K or V. A type argument is the concrete type supplied when the generic type is used. For example, Box<T> declares a type parameter, while Box<String> supplies String as its type argument.\n\n## Build a generic class\n\nA generic class declares its type parameters after the class name. Its fields and methods can use those parameters. The same class can then hold different reference types without duplicating the implementation. The compiler checks that values read and written through the generic API agree with the selected type.\n\n## Parameterized collections and raw types\n\nPrefer List<String> over raw List. Raw types bypass much of the compiler's generic checking and can introduce heap pollution or ClassCastException later. Avoid unchecked casts when a parameterized declaration expresses the required type directly.\n\n## Primitive types and wrappers\n\nJava type arguments must be reference types, not primitive types. Use wrapper classes such as Integer, Double and Boolean with generic collections. Autoboxing converts between a primitive value and its wrapper where the language permits it; unboxing a null wrapper causes NullPointerException.\n\n## Type erasure\n\nJava implements generics using type erasure for most runtime representation. Generic type information is primarily enforced by the compiler, and ordinary code cannot test an object with expressions such as value instanceof T. Arrays of a non-reifiable parameterized type cannot be created directly. Understand these limits when designing generic APIs.",
       "examples": [
         {
           "id": "jv14.1-ex1",
@@ -33,7 +33,7 @@
           "title": "Core API",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.List<String> names = new java.util.ArrayList<>(); names.add(\"Asha\"); System.out.println(names.get(0)); } }",
           "expectedOutput": "Asha",
-          "explanation": "A parameterized List stores String values safely.",
+          "explanation": "The parameterized List<String> declaration constrains inserted values to String and allows retrieval without an explicit cast.",
           "runnable": false
         },
         {
@@ -42,7 +42,7 @@
           "title": "Practical use",
           "code": "public class Main { public static void main(String[] args) throws Exception { class Box<T> { private final T value; Box(T value) { this.value=value; } T get() { return value; } } Box<Integer> box = new Box<>(7); System.out.println(box.get()); } }",
           "expectedOutput": "7",
-          "explanation": "A generic class uses a type parameter for its stored value.",
+          "explanation": "Box<T> declares a reusable type parameter; constructing Box<String> fixes T as String for this object.",
           "runnable": false
         },
         {
@@ -51,7 +51,7 @@
           "title": "Boundary behavior",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.List<Integer> values = java.util.List.of(1,2,3); System.out.println(values.get(2) + 1); } }",
           "expectedOutput": "4",
-          "explanation": "A typed collection returns Integer values without manual casts.",
+          "explanation": "List<Integer> returns Integer values, so the program can assign a retrieved element to an Integer without a cast.",
           "runnable": false
         },
         {
@@ -60,7 +60,7 @@
           "title": "Alternative pattern",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.Map<String,Integer> scores = java.util.Map.of(\"Asha\",90); System.out.println(scores.get(\"Asha\")); } }",
           "expectedOutput": "90",
-          "explanation": "A Map has separate key and value type parameters.",
+          "explanation": "Map<String, Integer> declares separate type parameters for keys and values; the compiler checks both positions.",
           "runnable": false
         },
         {
@@ -69,7 +69,7 @@
           "title": "Verify the result",
           "code": "public class Main { public static void main(String[] args) throws Exception { System.out.println(\"Parameterized types are checked at compile time\"); } }",
           "expectedOutput": "Parameterized types are checked at compile time",
-          "explanation": "Summarizes the main safety benefit of generics.",
+          "explanation": "The diamond operator lets the compiler infer the constructor's type arguments from the declared variable type.",
           "runnable": false
         }
       ]
@@ -78,9 +78,9 @@
       "guidedTask": "Create a generic Box<T> class and use it with String and Integer. Show how the compiler rejects assigning the wrong type.",
       "independentTask": "Refactor a raw List into List<String>, remove unnecessary casts and demonstrate a compile-time type mismatch.",
       "hints": [
-        "Start with a small, deterministic dataset and predict the result.",
-        "Check the relevant Java interface and method contract.",
-        "Compile with JDK 21 and test duplicate, empty and boundary cases."
+        "Read the generic declaration to identify its type parameters, then read the use site to identify the supplied type arguments.",
+        "Use wrapper classes such as Integer rather than int in generic type arguments.",
+        "Prefer parameterized types over raw collections so invalid values are rejected at compile time."
       ],
       "challenge": "Create a generic Pair<K,V> class and use it for a product code and price; explain why primitive types need wrapper classes."
     }
