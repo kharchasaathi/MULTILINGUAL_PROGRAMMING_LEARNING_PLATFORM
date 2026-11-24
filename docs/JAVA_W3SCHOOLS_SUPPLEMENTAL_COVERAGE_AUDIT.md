@@ -200,3 +200,11 @@ The JV8.1–JV8.5 lesson files were reviewed as one learning sequence. The five 
 - JV8.5: `delete`, `deleteIfExists`, empty directories, path normalization and destructive-operation safety.
 
 The changes preserve lesson IDs and JSON structure. Fresh JDK 21 and browser CI on the new commit are required before validation evidence is updated. The broader W3Schools tutorial/exercise gap audit remains open; this batch closes only the JV8 instructional-quality items.
+
+
+## JV8 validation repair — 24 November 2026
+
+- Java Course Validation #168 exposed a validator contract mismatch: `scripts/validate-java-course.mjs` requires exactly three practice hints per lesson; JV8.1 had four (the same four-hint batch pattern was applied to JV8.2–JV8.5).
+- Minimal repair: reduce each JV8.1–JV8.5 lesson to exactly three topic-specific hints, retaining all five objectives, five examples, five MCQs, lesson IDs, existing JSON structure and `playgroundMode: "none"`.
+- The failure was structural validation before example execution; it was not a Java compiler/runtime defect.
+- Re-run JDK 21 and browser CI on the repair commit before changing JV8 validation status back to VALIDATED.

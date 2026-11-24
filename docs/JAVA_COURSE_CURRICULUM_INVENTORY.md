@@ -317,3 +317,11 @@ This section supersedes earlier historical batch-status rows above where they sa
 - Replaced generic practice prompts with lesson-specific guided tasks, independent tasks, hints and challenges, including missing/existing paths, append versus replace, end-of-file handling, and deletion safety.
 - The prior Java Actions #167 and Browser Review #1588 passed on the parent content commit. This new batch requires fresh current-HEAD JDK and browser runs before its changes can be marked validated.
 - No merge or deployment; English lessons remain drafts and Telugu remains deferred.
+
+
+## JV8 validation repair — 24 November 2026
+
+- Java Course Validation #168 exposed a validator contract mismatch: `scripts/validate-java-course.mjs` requires exactly three practice hints per lesson; JV8.1 had four (the same four-hint batch pattern was applied to JV8.2–JV8.5).
+- Minimal repair: reduce each JV8.1–JV8.5 lesson to exactly three topic-specific hints, retaining all five objectives, five examples, five MCQs, lesson IDs, existing JSON structure and `playgroundMode: "none"`.
+- The failure was structural validation before example execution; it was not a Java compiler/runtime defect.
+- Re-run JDK 21 and browser CI on the repair commit before changing JV8 validation status back to VALIDATED.
