@@ -1,6 +1,8 @@
 (() => {
   "use strict";
   const API = "https://wandbox.org/api";
+  const COMPILER_LIST_URL = API + "/list.json";
+  const EXECUTE_URL = API + "/compile.json";
   const DEFAULT_CODE = `public class Main {
     public static void main(String[] args) {
         System.out.println("Hello, CodeSaathi!");
@@ -56,7 +58,7 @@
   async function loadCompilers() {
     setStatus("loading", "Contacting Wandbox for available Java compilers…");
     try {
-      const response = await fetch(API + "/list.json", { headers: { Accept: "application/json" }, cache: "no-store" });
+      const response = await fetch(COMPILER_LIST_URL, { headers: { Accept: "application/json" }, cache: "no-store" });
       if (!response.ok) throw new Error("Compiler list request returned HTTP " + response.status);
       const all = await response.json();
       compilers = all.filter(item => String(item.language || "").toLowerCase() === "java" && item.name && item.version)
@@ -117,7 +119,7 @@
     setOutput("Compiling Java source…", "info");
     const timeout = setTimeout(() => activeRequest?.abort(), 60000);
     try {
-      const response = await fetch(API + "/compile.json", {
+      const response = await fetch(EXECUTE_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
