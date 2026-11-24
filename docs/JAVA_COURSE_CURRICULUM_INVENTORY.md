@@ -274,3 +274,14 @@ This section supersedes earlier historical batch-status rows above where they sa
 - The broader W3Schools Java Tutorial contains supplemental areas beyond the 58-module syllabus. The audit identifies missing/partial areas and proposes JV9–JV14 (27 lessons) without changing JV1–JV8 IDs.
 - Supplemental lessons have not yet been authored or registered. Existing lesson expansions are also pending for the subtopics explicitly marked partial/gap in the audit.
 - The latest audit commit must pass all relevant current-head Actions before it can be called validated.
+
+
+## Supplemental curriculum update — 24 November 2026
+
+- Added and indexed 27 English draft lessons across JV9–JV14.
+- Java curriculum index now contains 85 topics (58 original syllabus lessons + 27 supplemental entries).
+- The progress tracker contains the 27 supplemental topics with English draft and Telugu-deferred status.
+- All new lessons use the existing schema, three-stage structure, five objectives, five example records, five MCQs and `playgroundMode: "none"`.
+- New examples are currently introductory demonstration prompts; they require substantive code-level editorial enhancement before release. Their JDK 21 compilation/execution is pending current-head CI.
+- The supplemental lessons are drafts, not published lessons. No Telugu translations have been created.
+- Do not claim the expanded Java curriculum is editorially complete until the code examples, exercises and MCQs have passed independent review.
