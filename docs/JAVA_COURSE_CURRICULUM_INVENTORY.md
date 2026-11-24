@@ -208,3 +208,22 @@ Each lesson contains five learning objectives, at least two original JDK-compati
 - Each lesson includes five measurable objectives, five standalone Java examples with expected output, Understand/Explain/Practise stages, guided and independent practice, three hints, a challenge and five topic-specific MCQs with explanations.
 - All lessons remain `status: "draft"`; `practice.playgroundMode: "none"`; Telugu translation remains deferred.
 - Curriculum index and progress tracker updated for JV5.1–JV5.14. JDK 21 validation and browser review are pending.
+
+## JV6 — Input, dates and collections — 24 November 2026
+
+| CodeSaathi topic | W3Schools reference | Lesson file | Current state |
+|---|---|---|---|
+| JV6.1 — Java User Input | https://www.w3schools.com/java/java_user_input.asp | `public/content/en/java/JV6.1.json` | English draft authored; current-head JDK 21 validation pending |
+| JV6.2 — Java Date | https://www.w3schools.com/java/java_date.asp | `public/content/en/java/JV6.2.json` | English draft authored; current-head JDK 21 validation pending |
+| JV6.3 — Java ArrayList | https://www.w3schools.com/java/java_arraylist.asp | `public/content/en/java/JV6.3.json` | English draft authored; current-head JDK 21 validation pending |
+| JV6.4 — Java LinkedList | https://www.w3schools.com/java/java_linkedlist.asp | `public/content/en/java/JV6.4.json` | English draft authored; current-head JDK 21 validation pending |
+| JV6.5 — Java List Sorting | https://www.w3schools.com/java/java_list_sort.asp | `public/content/en/java/JV6.5.json` | English draft authored; current-head JDK 21 validation pending |
+| JV6.6 — Java HashMap | https://www.w3schools.com/java/java_hashmap.asp | `public/content/en/java/JV6.6.json` | English draft authored; current-head JDK 21 validation pending |
+| JV6.7 — Java HashSet | https://www.w3schools.com/java/java_hashset.asp | `public/content/en/java/JV6.7.json` | English draft authored; current-head JDK 21 validation pending |
+| JV6.8 — Java Iterator | https://www.w3schools.com/java/java_iterator.asp | `public/content/en/java/JV6.8.json` | English draft authored; current-head JDK 21 validation pending |
+| JV6.9 — Java Wrapper Classes | https://www.w3schools.com/java/java_wrapper_classes.asp | `public/content/en/java/JV6.9.json` | English draft authored; current-head JDK 21 validation pending |
+
+- Authored nine original English lessons for console input, modern date APIs, ArrayList, LinkedList, list sorting, HashMap, HashSet, Iterator and wrapper classes.
+- Each lesson contains five measurable objectives, five standalone Java examples with expected output, Understand/Explain/Practise stages, guided and independent practice, three hints, a challenge and five topic-specific MCQs with explanations.
+- All lessons remain `status: "draft"`; `practice.playgroundMode: "none"`; Telugu translation remains deferred.
+- Curriculum index and progress tracker include JV6.1–JV6.9. JDK 21 execution and browser review must pass on the final indexed commit before marking the batch validated.
