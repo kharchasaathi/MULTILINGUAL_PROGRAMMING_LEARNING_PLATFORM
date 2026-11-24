@@ -1,85 +1,162 @@
 # Java Course — W3Schools Supplemental Coverage Audit
 
-**Date:** 24 November 2026  
+**Audit date:** 24 November 2026  
 **Branch:** `feature/java-course-foundation`  
 **PR:** #246  
-**Current validated head:** `6e2fd2393c7fa23dd1ec9f0c1e3e4902c9dcbf91`
+**Audited baseline:** 58 English lessons, JV1.1–JV8.5  
+**Source pages:** W3Schools Java Tutorial and Java Syllabus (checked 24 November 2026)
 
-## Verified baseline
+## 1. Executive result
 
-- 58 English lesson JSON files exist under `public/content/en/java/`.
-- The current 8-chapter / 58-module structure matches the W3Schools Java Syllabus module list.
-- Current-head Java Course Validation #77, Java Playground Validation #13, and Browser Review #1509 passed.
-- The 58-module syllabus match must not be represented as full coverage of every current Java Tutorial navigation section and nested subtopic.
+The existing JV1–JV8 sequence contains all 58 modules in the W3Schools Java Syllabus. This is a valid syllabus-alignment result, but it is **not complete coverage of the broader W3Schools Java Tutorial navigation**.
 
-## Scope distinction
+All 58 lesson JSON files were inspected at the content level (learning objectives and Explain narrative). The audit distinguishes:
+- **Covered:** explicitly taught in the inspected lesson content.
+- **Partial:** mentioned or demonstrated but needs a dedicated explanation, worked example or practice.
+- **Gap:** no adequate teaching coverage found in the inspected lessons.
 
-W3Schools publishes both a compact 8-chapter / 58-module syllabus and a broader Java Tutorial navigation tree. Keep the 58 syllabus topics unchanged. Add missing material as supplemental lessons or explicit subtopics, with separate CodeSaathi IDs, rather than renaming or reordering existing JV1–JV8 IDs.
+Do not duplicate the existing JV1–JV8 topics. Preserve their IDs and sequence. Supplemental lessons should be registered as new topics after JV8.
 
-## Supplemental coverage to audit against existing lesson bodies
+## 2. Existing lesson baseline and quality checks
 
-### A. Expand within existing lessons where pedagogically appropriate
+- 58 English JSON files exist: JV1.1–JV8.5.
+- Existing schema: `id`, `courseId`, `moduleId`, `topicId`, `title`, `language`, `learningObjectives`, `prerequisites`, `stages`, `practice`, `assessment`, `status`.
+- Lesson stages are `understand`, `explain`, and `practise` (practice tasks live within the established lesson structure).
+- Existing lesson examples are JDK-compiled and executed by the Java Course Validation workflow; keep `practice.playgroundMode: "none"`.
+- Existing lessons remain draft pending editorial review and release approval.
+- Current-head Java Course Validation #78, Java Playground Validation #14 and Browser Review #1510 passed. Python #1256, SQL #913 and F1.7 #1395 also passed on the same head before this audit update.
+- Existing Java baseline is 8 chapters / 58 lessons. The Java Playground is separate from the HTML/CSS/JavaScript playground.
 
-- Syntax/output: statements, print text, print numbers.
-- Variables/data types: identifiers, constants (`final`), numeric/boolean/character types, non-primitive types, `var`.
-- Operators: arithmetic, assignment, comparison, logical operators, precedence.
-- Strings: concatenation, numbers and strings, special characters, StringBuilder.
-- Conditions and loops: else-if, shorthand if, nested conditions, logical conditions, do/while, nested loops, for-each.
-- Arrays: traversal, multidimensional arrays.
-- Methods: return values.
-- Classes/OOP: `this`, `super`, access/non-access modifiers, anonymous classes, enum constructors, API/package usage.
-- Exceptions: multiple exceptions, try-with-resources, debugging and error diagnosis.
-- Collections: List/Set/Map abstractions, collection algorithms and sorting.
-- File handling: file APIs and safe resource closure.
+## 3. Topic-by-topic coverage findings
 
-These are coverage checks, not claims that the existing lesson bodies definitely omit every item. Each existing lesson must be inspected before assigning a gap.
+| W3Schools area / subtopic | Existing CodeSaathi coverage | Finding |
+|---|---|---|
+| Java HOME, Intro, Get Started | JV1.1–JV1.3 | Covered: language scope, source/bytecode/JVM, JDK setup, javac/java commands |
+| Syntax, statements, blocks | JV1.4 | Covered: class/main structure, braces, statements, semicolons, identifiers |
+| Output text/numbers | JV1.5 | Covered: print, println, variables/expressions, printf, format specifiers |
+| Comments | JV1.6 | Covered: line, block and Javadoc comments |
+| Variables, identifiers, constants (final) | JV2.1 | Covered |
+| Primitive and reference data types | JV2.2 | Covered: eight primitive types, String/reference types, literal suffixes |
+| `var` local-variable type inference | JV2.2 | **Gap:** not explicitly taught; add a focused section and examples |
+| Type casting | JV2.3 | Covered: widening, narrowing, parsing, overflow/precision caveats |
+| Operators and precedence | JV2.4 | Covered: arithmetic, assignment, comparison, logical, short-circuit and parentheses |
+| Strings, concatenation, numbers and strings | JV2.5 | Covered at core level; special-character escapes and StringBuilder need explicit confirmation/expansion |
+| Math and booleans | JV2.6–JV2.7 | Covered |
+| if/else and else-if | JV3.1 | Covered |
+| Short-hand if/else (ternary) | JV3.1 | **Gap:** no focused explanation/practice found |
+| Nested if and logical conditions | JV3.1 | Partial: logical conditions covered; nested-if patterns need explicit example/practice |
+| switch | JV3.2 | Covered: traditional switch, fall-through, default, modern switch expressions |
+| while loop | JV3.3 | Covered |
+| do/while loop | JV3.3 | **Gap:** not explicitly taught |
+| for loop and nested loops | JV3.4 | Covered at core level; expand worked nested-loop pattern if absent from examples |
+| for-each / enhanced for | JV3.4 and JV4.1 | Partial: used in traversal guidance; needs explicit dedicated teaching and practice |
+| break and continue | JV3.5 | Covered |
+| arrays and array traversal | JV4.1 | Covered |
+| multidimensional arrays | JV4.1 | **Gap:** not explicitly taught |
+| methods, parameters, return values, overloading, scope, recursion | JV4.2–JV4.6 | Covered at core level; ensure return-value practice is prominent in JV4.2/JV4.3 |
+| OOP, classes, attributes, class methods, constructors | JV5.1–JV5.5 | Covered |
+| this keyword | JV5.4 | Covered |
+| access and non-access modifiers | JV5.6 | Covered |
+| encapsulation, packages/API, inheritance, polymorphism | JV5.7–JV5.10 | Covered |
+| super keyword | JV5.9 | Covered |
+| inner, local and anonymous classes | JV5.11 | Partial: anonymous/local classes are mentioned; add a complete anonymous-class example and use case |
+| abstraction and interfaces | JV5.12–JV5.13 | Covered |
+| enums and enum constructors | JV5.14 | Covered in objectives and narrative; ensure constructor syntax is demonstrated |
+| Scanner / user input | JV6.1 | Covered |
+| Date / LocalDate | JV6.2 | Covered |
+| ArrayList and LinkedList | JV6.3–JV6.4 | Covered |
+| List interface | JV6.4 | Partial: LinkedList is shown through List/Deque; dedicated List contract and implementation choice need clearer coverage |
+| List sorting / Comparator | JV6.5 | Covered |
+| HashMap | JV6.6 | Covered |
+| Map interface | JV6.6 | Partial: HashMap is taught; Map abstraction and implementation substitution need a focused explanation |
+| HashSet | JV6.7 | Covered |
+| Set interface | JV6.7 | Partial: uniqueness is taught; Set abstraction and implementation choice need clearer coverage |
+| Iterator | JV6.8 | Covered |
+| TreeSet and LinkedHashSet | JV6.7 | **Gap:** not explicitly taught |
+| TreeMap and LinkedHashMap | JV6.6 | **Gap:** not explicitly taught |
+| Collections algorithms | JV6.5/JV7.6 | Partial: sorting is covered; binary search, reverse, shuffle, frequency, min/max and other common algorithms are absent |
+| Errors and debugging | JV7.1 | **Gap:** exception handling exists, but compiler/runtime errors and a systematic debugging workflow are not taught as a topic |
+| Exceptions, multiple exceptions, try-with-resources | JV7.1–JV7.2 and JV8.3 | Partial: try-with-resources is mentioned; multiple catch clauses and resource suppression/cleanup need dedicated examples |
+| Problem solving, build the logic, test cases | — | **Gap:** no dedicated systematic problem-solving/testing lessons found |
+| Java Projects | — | **Gap:** no guided project sequence/capstone lessons found |
+| File API basics, create/write/read/delete | JV8.1–JV8.5 | Covered for basic file operations |
+| I/O Streams overview and byte vs character streams | — | **Gap:** not explicitly taught |
+| FileInputStream and FileOutputStream | — | **Gap** |
+| FileReader and FileWriter | JV8.3–JV8.4 | Partial: FileWriter is taught; FileReader not explicitly taught |
+| BufferedReader and BufferedWriter | JV8.4 | Partial: BufferedReader is mentioned/used for line reading; BufferedWriter is not explicitly taught |
+| Data structures / Collections overview | JV6.3–JV6.8 | Partial: common classes are taught; broader structure choice, complexity and interface taxonomy need a dedicated lesson |
+| Generics | JV6.3–JV6.7 | **Gap:** parameterized collection use appears, but generic types, methods, bounds and wildcards are not taught |
+| Annotations | JV5.10/JV7.5 | Partial: `@Override` is mentioned; annotation purpose, built-in annotations and declaration/retention basics are not taught |
+| Optional | — | **Gap** |
+| Regex, threads, lambda, advanced sorting | JV7.3–JV7.6 | Covered |
 
-### B. Supplemental standalone topics visible in the current W3Schools Java Tutorial
+## 4. Supplemental lesson plan — unique gaps only
 
-1. Java Errors and Debugging
-2. Multiple Exceptions and try-with-resources (if not sufficiently taught in JV7/JV8)
-3. Java Problem Solving
-4. Building the Logic
-5. Test Cases
-6. Java Projects / guided projects
-7. Java I/O Streams
-8. FileInputStream and FileOutputStream
-9. BufferedReader and BufferedWriter
-10. Java Data Structures overview
-11. Java Collections overview
-12. List, Set and Map interfaces
-13. TreeSet and LinkedHashSet
-14. TreeMap and LinkedHashMap
-15. Java Algorithms
-16. Java Generics
-17. Java Annotations
-18. Java Optional
+Keep JV1–JV8 unchanged. Add the following supplemental sequence after JV8. The proposed IDs are reserved in this plan only; register them only when the lesson files are authored and validated.
 
-## Recommended supplemental module plan
+### JV9 — Java Errors, Debugging and Robust Exceptions
+- JV9.1 — Java Errors and Compiler Diagnostics
+- JV9.2 — Debugging Java Programs
+- JV9.3 — Multiple Exceptions and Multi-Catch
+- JV9.4 — try-with-resources and Exception Suppression
 
-Keep JV1–JV8 intact and add a new supplemental sequence after JV8:
+### JV10 — Java Problem Solving and Testing
+- JV10.1 — Understand a Programming Problem
+- JV10.2 — Build the Logic with Pseudocode and Decomposition
+- JV10.3 — Design Test Cases and Boundary Tests
 
-- JV9 — Errors, Debugging and Robust Exception Handling
-- JV10 — Problem Solving, Logic Building and Test Cases
-- JV11 — Java Projects
-- JV12 — Java I/O Streams
-- JV13 — Advanced Collections and Data Structures
-- JV14 — Generics, Annotations and Optional
+### JV11 — Java Projects
+- JV11.1 — Console Project: Unit Converter
+- JV11.2 — Data Project: Student Grade Manager
+- JV11.3 — Collections Project: Inventory Tracker
+- JV11.4 — File Project: Persistent Notes Manager
+- JV11.5 — Capstone: Command-Line Task Manager
 
-The above is a proposed coverage expansion, not yet authored or registered. Before authoring, compare each item with the 58 lesson JSON bodies and current W3Schools pages to avoid duplicate lessons. Add topic IDs only after the gap-by-gap mapping is approved internally and validated against repository naming conventions.
+### JV12 — Java I/O Streams
+- JV12.1 — Input and Output Streams Overview
+- JV12.2 — Byte Streams: FileInputStream and FileOutputStream
+- JV12.3 — Character Streams: FileReader and FileWriter
+- JV12.4 — BufferedReader and BufferedWriter
+- JV12.5 — Encoding, Buffering and Safe Resource Management
 
-## Release and runtime controls
+### JV13 — Java Data Structures and Collections
+- JV13.1 — Collections Framework and Data Structure Selection
+- JV13.2 — List, Set and Map Interfaces
+- JV13.3 — TreeSet and LinkedHashSet
+- JV13.4 — TreeMap and LinkedHashMap
+- JV13.5 — Common Collections Algorithms
+- JV13.6 — Complexity, Ordering and Equality Contracts
 
-- Keep all new lessons in English first; Telugu translation remains deferred.
-- Preserve the existing lesson JSON schema and three-stage Understand / Explain / Practise structure.
-- Keep lesson status as `draft` until editorial review and release approval.
-- Compile and execute runnable examples with the pinned JDK 21 CI toolchain.
-- Java examples must not be sent to the HTML/CSS/JavaScript playground.
-- Java Playground is a separate external compiler integration; its provider request and privacy limitations must remain visible.
+### JV14 — Java Advanced Language Features
+- JV14.1 — Generics Fundamentals and Type Parameters
+- JV14.2 — Generic Methods, Bounds and Wildcards
+- JV14.3 — Java Annotations
+- JV14.4 — Java Optional
+
+### Existing lesson expansions (do not create duplicate topic IDs)
+Add targeted sections/examples/practice to JV2.2, JV2.5, JV3.1, JV3.3, JV3.4, JV4.1, JV5.11, JV5.14, JV6.3–JV6.7 and JV7.1 only where the gap table marks partial or missing.
+
+**Proposed supplemental count:** 27 new lessons across JV9–JV14. This is a gap-driven extension beyond the 58-module W3Schools syllabus, not a replacement for the official syllabus sequence.
+
+## 5. Authoring and validation requirements
+
+- English first; Telugu translation remains deferred.
+- Preserve existing lesson JSON schema and Understand / Explain / Practise structure.
+- Each supplemental lesson: five measurable objectives, at least five original JDK 21 examples with expected output, guided and independent practice, hints, challenge and five topic-specific MCQs with explanations.
+- Use only original explanations and examples; W3Schools is a coverage reference, not text to copy.
+- Compile and execute every runnable example with the repository's JDK 21 validator.
+- Keep Java examples out of the HTML/CSS/JavaScript playground; `playgroundMode: "none"`.
+- Update curriculum index, progress tracker, inventory and validation scripts together when each batch is authored.
+- Keep lesson status `draft` pending independent editorial review and release approval.
+- The Java Playground uses an external execution provider; clearly disclose that submitted source and standard input are sent to that provider. Do not send secrets or personal data.
 - Do not merge PR #246 or deploy without explicit release authorization.
 
-## Sources
+## 6. Official reference pages checked
 
+- W3Schools Java Tutorial: https://www.w3schools.com/java/
 - W3Schools Java Syllabus: https://www.w3schools.com/java/java_syllabus.asp
-- W3Schools Java Tutorial navigation: https://www.w3schools.com/java/
-- W3Schools Java Course catalogue: https://campus.w3schools.com/collections/course-catalog/products/java-course
+- W3Schools Java Problem Solving: https://www.w3schools.com/java/java_problem_solving.asp
+- W3Schools Java I/O Streams: https://www.w3schools.com/java/java_io_streams.asp
+- W3Schools Java Exercises: https://www.w3schools.com/java/java_exercises.asp
+
+The W3Schools Tutorial navigation contains broader areas beyond the 58-module syllabus, including Errors, Problem Solving, Projects, I/O Streams, Data Structures and Java Advanced. Its exercise catalogue also exposes subtopics such as do/while, for-each, multidimensional arrays, errors, multiple exceptions, problem solving and testing.
