@@ -20,12 +20,12 @@
   "stages": {
     "understand": {
       "concept": "FileInputStream reads bytes and FileOutputStream writes bytes. The read method returns -1 at end of stream. For larger files, use a byte buffer.",
-      "whyItMatters": "Byte Streams: FileInputStream and FileOutputStream helps learners create Java applications that are easier to reason about, test and maintain.",
-      "analogy": "Treat the concept as a clearly labeled tool for one programming responsibility.",
-      "analogyLimit": "Actual behavior is defined by Java language rules and API contracts."
+      "whyItMatters": "Byte streams preserve raw bytes and are appropriate for binary data such as images, archives and arbitrary file copies. Correct buffering and end-of-stream handling prevent truncated output and unnecessary one-byte I/O operations.",
+      "analogy": "A byte stream is like moving sealed numbered packets: the program copies each byte without interpreting it as a letter or character.",
+      "analogyLimit": "Bytes do not inherently represent text. Decoding arbitrary bytes as characters without knowing the encoding can corrupt or misinterpret data."
     },
     "explain": {
-      "narrative": "## Byte Streams: FileInputStream and FileOutputStream\n\nFileInputStream reads bytes and FileOutputStream writes bytes. The read method returns -1 at end of stream. For larger files, use a byte buffer.\n\nIdentify the input and desired result. Select the Java construct or API that supports the requirement. Keep code readable, handle documented failures and state assumptions clearly.\n\nCompile with JDK 21, predict output before running, and test normal, boundary and invalid inputs.",
+      "narrative": "## Byte Streams: FileInputStream and FileOutputStream\n\nFileInputStream reads bytes and FileOutputStream writes bytes. The read method returns -1 at end of stream. For larger files, use a byte buffer.\n\n## Read loop and buffer length\n\n`InputStream.read(byte[])` returns the number of bytes actually read, or -1 at end of stream. Always write only that returned count; the last buffer may be partly filled. A zero-length read request is a special case, so use a non-empty buffer for the normal copy loop.\n\n```java\nbyte[] buffer = new byte[8192];\nint count;\nwhile ((count = input.read(buffer)) != -1) {\n    output.write(buffer, 0, count);\n}\n```\n\n## Resource and failure handling\n\nOpen both streams with try-with-resources. Test an empty file, a file shorter than the buffer and one spanning multiple buffers. For a reliable copy, compare file sizes and bytes rather than printing binary content as text.",
       "examples": [
         {
           "id": "jv12.2-ex1",
