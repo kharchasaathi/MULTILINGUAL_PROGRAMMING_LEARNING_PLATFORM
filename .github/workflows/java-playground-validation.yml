@@ -1,0 +1,30 @@
+name: Java Playground Validation
+
+on:
+  pull_request:
+    branches: [release/v1-frontend]
+    paths:
+      - "public/java-playground.html"
+      - "public/js/java-playground.js"
+      - "public/js/lessons/curriculum-loader.js"
+      - "scripts/validate-java-playground.mjs"
+      - ".github/workflows/java-playground-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-java-playground:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check Java Playground JavaScript syntax
+        run: node --check public/js/java-playground.js
+      - name: Validate Java Playground integration and safety contract
+        run: node scripts/validate-java-playground.mjs
