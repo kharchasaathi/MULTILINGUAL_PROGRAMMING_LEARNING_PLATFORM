@@ -206,7 +206,7 @@ const link = $(".lesson-practice-link", container);
         const stateBytes = new TextEncoder().encode(JSON.stringify(javaState));
         let stateBinary = "";
         stateBytes.forEach(byte => { stateBinary += String.fromCharCode(byte); });
-        const stateToken = btoa(stateBinary).replace(/\\+/g, "-").replace(/\\//g, "_").replace(/=+$/, "");
+        const stateToken = btoa(stateBinary).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
         link.href = "/java-playground.html#code=" + stateToken;
         link.textContent = "Open this lesson's example in Java Playground ↗";
       } else {
@@ -223,7 +223,7 @@ const link = $(".lesson-practice-link", container);
       const stateBytes = new TextEncoder().encode(JSON.stringify({ language, code: starter, stdin: "" }));
       let stateBinary = "";
       stateBytes.forEach(byte => { stateBinary += String.fromCharCode(byte); });
-      const stateToken = btoa(stateBinary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+        const stateToken = btoa(stateBinary).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
       link.href = (language === "cpp" ? "/cpp-compiler.html" : "/c-compiler.html") + "#code=" + stateToken;
       link.target = "_blank";
       link.rel = "noopener noreferrer";
@@ -235,7 +235,7 @@ const link = $(".lesson-practice-link", container);
         const stateBytes = new TextEncoder().encode(JSON.stringify(pythonState));
         let stateBinary = "";
         stateBytes.forEach(byte => { stateBinary += String.fromCharCode(byte); });
-        const stateToken = btoa(stateBinary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+        const stateToken = btoa(stateBinary).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
         link.href = "/python-playground.html#code=" + stateToken;
         link.textContent = "Open this lesson's example in Python Playground ↗";
       } else {
@@ -251,7 +251,7 @@ const link = $(".lesson-practice-link", container);
         const stateBytes = new TextEncoder().encode(JSON.stringify(sqlState));
         let stateBinary = "";
         stateBytes.forEach(byte => { stateBinary += String.fromCharCode(byte); });
-        const stateToken = btoa(stateBinary).split("+").join("-").split("/").join("_").replace(/=+$/, "");
+        const stateToken = btoa(stateBinary).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
         link.href = "/sql-playground.html#code=" + stateToken;
         link.textContent = "Open this lesson's example in SQL Playground ↗";
       } else {
