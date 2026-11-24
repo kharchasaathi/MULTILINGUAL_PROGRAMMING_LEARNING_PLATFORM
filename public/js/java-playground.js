@@ -3,7 +3,7 @@
   const API = "https://wandbox.org/api";
   const COMPILER_LIST_URL = API + "/list.json";
   const EXECUTE_URL = API + "/compile.json";
-  const DEFAULT_CODE = `public class Main {
+  const DEFAULT_CODE = `class Main {
     public static void main(String[] args) {
         System.out.println("Hello, CodeSaathi!");
     }
@@ -117,6 +117,7 @@
     runState.textContent = "Compiling and running…";
     setStatus("loading", "Sending source to Wandbox. Please wait…");
     setOutput("Compiling Java source…", "info");
+    const runnableCode = code.replace(/(^|\\n)(\\s*)public\\s+class\\s+Main\\b/m, "$1$2class Main");
     const timeout = setTimeout(() => activeRequest?.abort(), 60000);
     try {
       const response = await fetch(EXECUTE_URL, {
@@ -124,7 +125,7 @@
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
           compiler: compiler.name,
-          code,
+          code: runnableCode,
           codes: [],
           stdin: input.value,
           options: "",
