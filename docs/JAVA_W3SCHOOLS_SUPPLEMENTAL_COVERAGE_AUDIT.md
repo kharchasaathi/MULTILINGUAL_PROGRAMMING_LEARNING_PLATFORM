@@ -160,3 +160,8 @@ Add targeted sections/examples/practice to JV2.2, JV2.5, JV3.1, JV3.3, JV3.4, JV
 - W3Schools Java Exercises: https://www.w3schools.com/java/java_exercises.asp
 
 The W3Schools Tutorial navigation contains broader areas beyond the 58-module syllabus, including Errors, Problem Solving, Projects, I/O Streams, Data Structures and Java Advanced. Its exercise catalogue also exposes subtopics such as do/while, for-each, multidimensional arrays, errors, multiple exceptions, problem solving and testing.
+
+
+## Supplemental authoring status correction — 24 November 2026
+
+The 27 proposed JV9–JV14 lessons have now been authored as English draft JSON files and registered in the curriculum index. Their assessment banks have been updated with topic-specific MCQs rather than generic prompts. Existing partial-topic expansions in JV2.2, JV2.5, JV3.1, JV3.3, JV3.4, JV4.1, JV5.11, JV5.14, JV6.3–JV6.7 and JV7.1 remain separate pending work. The new lesson examples must pass current-head JDK 21 compile-and-execute CI before validation status is granted. Telugu remains deferred.
