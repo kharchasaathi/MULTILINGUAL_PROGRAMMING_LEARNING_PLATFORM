@@ -282,7 +282,9 @@ This section supersedes earlier historical batch-status rows above where they sa
 - Java curriculum index now contains 85 topics (58 original syllabus lessons + 27 supplemental entries).
 - The progress tracker contains the 27 supplemental topics with English draft and Telugu-deferred status.
 - All new lessons use the existing schema, three-stage structure, five objectives, five example records, five MCQs and `playgroundMode: "none"`.
-- New examples are currently introductory demonstration prompts; they require substantive code-level editorial enhancement before release. Their JDK 21 compilation/execution is pending current-head CI.
+- The 27 supplemental lessons now contain topic-specific JDK 21 examples, five focused MCQs with answer explanations, and applied guided/independent/challenge tasks.
+- JV13.6 complexity/equality examples were strengthened; JV14.3 custom annotation examples were corrected to use legal member annotation declarations and explicit retention behavior.
+- JDK 21 compilation/execution across all 85 indexed English lessons is still pending current-head CI; do not mark lessons validated until the Java workflow passes.
 - The supplemental lessons are drafts, not published lessons. No Telugu translations have been created.
 - Do not claim the expanded Java curriculum is editorially complete until the code examples, exercises and MCQs have passed independent review.
 
