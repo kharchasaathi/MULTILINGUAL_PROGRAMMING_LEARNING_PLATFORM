@@ -25,7 +25,7 @@
       "analogyLimit": "Java char represents a UTF-16 code unit, not always one complete Unicode code point or one user-perceived symbol. A charset also defines byte encoding, not visual rendering."
     },
     "explain": {
-      "narrative": "## Character Streams: FileReader and FileWriter\n\nFileReader and FileWriter are character-oriented APIs. Their default charset depends on runtime configuration; portable applications should choose an explicit Charset such as UTF-8.\n\n## Choose an explicit charset\n\n`FileReader` and `FileWriter` are convenient character-oriented APIs, but their default charset can depend on the runtime configuration. For predictable files, use APIs that accept a charset, such as `Files.newBufferedReader(path, StandardCharsets.UTF_8)` and `Files.newBufferedWriter(path, StandardCharsets.UTF_8)`.\n\n## Avoid mixed encodings\n\nThe writer and reader must agree on the encoding. A file written as UTF-8 and decoded using a different charset may display replacement characters or mojibake. Use try-with-resources and test text containing accented characters and scripts beyond ASCII.\n\nFor very large text files, add buffering or use the buffered NIO helpers so reads and writes do not require a separate operation for every character.",
+      "narrative": "## Character streams represent text\n\n`Reader` and `Writer` are character-oriented abstractions. They let a program process text as characters rather than manually managing raw bytes. `FileReader` reads characters from a file and `FileWriter` writes characters to a file, but their convenience constructors use the runtime's default charset.\n\n## Make encoding explicit\n\nA text file is still stored as bytes. A charset defines how those bytes map to characters. If an application must exchange files predictably across machines, choose the charset explicitly, commonly UTF-8. Use `Files.newBufferedReader(path, StandardCharsets.UTF_8)` and `Files.newBufferedWriter(path, StandardCharsets.UTF_8)`, or an `InputStreamReader`/`OutputStreamWriter` with an explicit charset.\n\n## Avoid mismatched decoding\n\nA file written as UTF-8 must be decoded as UTF-8. Reading those bytes with a different charset can produce mojibake or replacement characters. ASCII-only examples may hide this bug because many encodings represent basic Latin characters identically.\n\n## Buffering, ownership and tests\n\nFor larger files, use buffered readers and writers to reduce repeated low-level operations. Use try-with-resources for streams your code owns; closing a reader or writer releases its underlying resource. Test accented characters and non-Latin scripts, an empty file, a final line without a newline and an I/O failure. Verify the decoded text exactly rather than checking only that the file exists.",
       "examples": [
         {
           "id": "jv12.3-ex1",
@@ -78,9 +78,9 @@
       "guidedTask": "Write text using a character writer and read it back using UTF-8-aware APIs. Explain why the charset must be agreed by both sides.",
       "independentTask": "Compare FileReader/FileWriter defaults with Files.newBufferedReader/newBufferedWriter using StandardCharsets.UTF_8.",
       "hints": [
-        "Choose the API that matches the data representation and operation.",
-        "Use try-with-resources for AutoCloseable resources.",
-        "Test empty, normal and failure cases; verify exact output or file contents."
+        "FileReader/FileWriter convenience constructors use a default charset; choose an explicit charset when file interchange must be predictable.",
+        "Use the same charset for writing and reading; ASCII-only tests may conceal an encoding mismatch.",
+        "Test accented and non-Latin text, empty input and I/O failures; use buffering for larger files."
       ],
       "challenge": "Test non-ASCII text such as café and Telugu characters, then verify the decoded text exactly matches the original."
     }

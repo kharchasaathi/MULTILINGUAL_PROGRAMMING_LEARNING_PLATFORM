@@ -25,7 +25,7 @@
       "analogyLimit": "Bytes do not inherently represent text. Decoding arbitrary bytes as characters without knowing the encoding can corrupt or misinterpret data."
     },
     "explain": {
-      "narrative": "## Byte Streams: FileInputStream and FileOutputStream\n\nFileInputStream reads bytes and FileOutputStream writes bytes. The read method returns -1 at end of stream. For larger files, use a byte buffer.\n\n## Read loop and buffer length\n\n`InputStream.read(byte[])` returns the number of bytes actually read, or -1 at end of stream. Always write only that returned count; the last buffer may be partly filled. A zero-length read request is a special case, so use a non-empty buffer for the normal copy loop.\n\n```java\nbyte[] buffer = new byte[8192];\nint count;\nwhile ((count = input.read(buffer)) != -1) {\n    output.write(buffer, 0, count);\n}\n```\n\n## Resource and failure handling\n\nOpen both streams with try-with-resources. Test an empty file, a file shorter than the buffer and one spanning multiple buffers. For a reliable copy, compare file sizes and bytes rather than printing binary content as text.",
+      "narrative": "## Byte-oriented file input and output\n\n`FileInputStream` reads the raw bytes stored in a file, while `FileOutputStream` writes raw bytes to a destination. Use this pair for binary formats such as images, archives and audio. A byte stream does not interpret character encoding; it transfers byte values exactly.\n\n## Read one byte or read a block\n\nThe single-byte `read()` method returns an int from 0 through 255, or -1 when the stream reaches end-of-file. Do not store the result in a byte before checking for -1, because -1 is the end marker rather than a data byte.\n\nFor efficient copying, pass a non-empty byte array to `read(buffer)`. The returned count is the number of bytes filled in this read. The final read may fill only part of the buffer, so write exactly `count` bytes with `write(buffer, 0, count)`; writing the entire buffer can append stale bytes from a previous iteration.\n\n## Copy files safely\n\nOpen source and destination streams with try-with-resources. Decide whether an existing destination should be replaced or appended; the default FileOutputStream constructor truncates an existing file. If preserving the old destination matters, write to a temporary file and replace only after a successful copy.\n\n## Verify binary integrity\n\nDo not compare binary files by printing them as text. Compare byte arrays or use a checksum, and test empty input, a file smaller than the buffer, a file larger than the buffer and data containing zero-valued bytes. Handle IOException and ensure both streams close when a read or write fails.",
       "examples": [
         {
           "id": "jv12.2-ex1",
@@ -78,9 +78,9 @@
       "guidedTask": "Copy a temporary binary file with FileInputStream and FileOutputStream using a fixed-size byte buffer. Compare source and destination bytes.",
       "independentTask": "Implement a byte-copy method that loops until read returns -1, writes only the bytes actually read and closes both streams safely.",
       "hints": [
-        "Choose the API that matches the data representation and operation.",
-        "Use try-with-resources for AutoCloseable resources.",
-        "Test empty, normal and failure cases; verify exact output or file contents."
+        "Check for -1 before treating a single-byte read result as data; read() returns int for this reason.",
+        "For read(byte[]), write only the returned count, not the full buffer capacity.",
+        "Test empty, short, multi-buffer and zero-byte binary files; compare bytes or checksums rather than decoded text."
       ],
       "challenge": "Test an empty file, a file smaller than the buffer, a file larger than the buffer and binary bytes containing zero values."
     }

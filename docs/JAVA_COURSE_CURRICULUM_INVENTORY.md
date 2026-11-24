@@ -335,3 +335,8 @@ Updated JV9.2–JV9.4, JV10.1–JV10.2 and JV11.1–JV11.3 in place. Replaced ge
 ## Supplemental lesson quality batch 3 — 25 November 2026
 
 Updated JV11.4, JV11.5, JV12.1, JV12.4 and JV12.5 in place. Replaced generic explanations and hints with topic-specific instruction on safe application-owned note storage, UTF-8 and path validation; task-manager separation of concerns, robust persistence and acceptance testing; byte versus character streams; BufferedReader EOF/blank-line behavior, BufferedWriter newLine/flush; and charset encoding, UTF-16 code units versus UTF-8 bytes, incremental processing and malformed input. Preserved lesson IDs, JSON schema, five worked examples, five MCQs, practice fields and draft status. JV11.4/11.5 and JV12.1/12.4/12.5 require fresh JDK 21 execution and browser review on the new commit. No merge or deployment; Telugu deferred.
+
+
+## Supplemental lesson quality batch 4 — 25 November 2026
+
+Updated JV12.2 and JV12.3 in place. Expanded byte-stream read semantics (EOF sentinel, partial buffer counts, exact write length, destination truncation, binary integrity tests) and character-stream charset behavior (default charset caveat, explicit UTF-8, mismatched decoding, buffering and non-ASCII tests). Replaced generic practice hints with topic-specific checks. Preserved IDs, JSON schema, five examples, five MCQs, practice structure and draft status. Fresh current-head JDK 21 validation and browser review are required. No merge or deployment; Telugu deferred.
