@@ -165,3 +165,25 @@ The W3Schools Tutorial navigation contains broader areas beyond the 58-module sy
 ## Supplemental authoring status correction — 24 November 2026
 
 The 27 proposed JV9–JV14 lessons have now been authored as English draft JSON files and registered in the curriculum index. Their assessment banks have been updated with topic-specific MCQs rather than generic prompts. Existing partial-topic expansions in JV2.2, JV2.5, JV3.1, JV3.3, JV3.4, JV4.1, JV5.11, JV5.14, JV6.3–JV6.7 and JV7.1 remain separate pending work. The new lesson examples must pass current-head JDK 21 compile-and-execute CI before validation status is granted. Telugu remains deferred.
+
+
+## Follow-up verification — 24 November 2026
+
+### Current-head technical checks
+
+- Commit `36b7f29725492f64a7c1f3d25374552c5cc44d5e` passed Java Course Validation #166 on Eclipse Temurin JDK 21.0.13+9: 85 indexed English lessons, 425 Java examples compiled and executed, and 425 MCQs validated.
+- Browser Review #1587 passed all 16 Playwright tests. It now opens a representative Java lesson in the shared renderer, asserts Java lessons remain `playgroundMode: "none"`, and separately tests Java Playground compiler discovery, execution, stdin and lesson handoff.
+
+### Supplemental explanations strengthened
+
+- JV13.3: HashSet versus LinkedHashSet versus TreeSet; comparator equality and ordering guarantees.
+- JV13.4: HashMap versus LinkedHashMap versus TreeMap; duplicate-key replacement and ordering contracts.
+- JV14.1–JV14.2: generic type parameters, type erasure, bounds, wildcards, invariance and PECS.
+- JV14.3: annotation declaration, targets, retention and runtime reflection.
+- JV14.4: Optional creation, map/filter/flatMap and eager versus lazy fallback evaluation.
+
+### Coverage gaps still requiring explicit disposition
+
+The W3Schools 58-module syllabus mapping and the broader tutorial navigation/exercise catalogue must be audited separately. Outstanding candidates already identified include do-while, enhanced for/for-each, multidimensional-array subtopics, errors and testing exercises, problem-solving exercises, I/O streams, data structures and project work. Map each to an existing lesson or a distinct supplemental topic ID; do not silently count a broad module mapping as complete subtopic coverage.
+
+All lessons remain English drafts pending editorial review and release approval. Telugu remains deferred. CI PASS is technical evidence only, not release approval.

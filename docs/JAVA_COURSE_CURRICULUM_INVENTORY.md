@@ -296,3 +296,15 @@ This section supersedes earlier historical batch-status rows above where they sa
 - Each supplemental lesson retains five example records, the Understand / Explain / Practise stages, five learning objectives, and `practice.playgroundMode: "none"`.
 - Example code and expected outputs still require current-head JDK 21 compile-and-execute validation. Automated Actions are pending; do not mark these lessons validated until they pass.
 - The supplemental lessons remain English drafts. Telugu translation remains deferred, and release approval is still pending.
+
+
+## Current-head technical validation and quality follow-up — 24 November 2026
+
+- Working branch: `content/java-supplemental-content-quality-batch1`.
+- Validated commit: `36b7f29725492f64a7c1f3d25374552c5cc44d5e`.
+- Java Course Validation #166: PASS with Eclipse Temurin JDK 21.0.13+9; 85 indexed English lessons, 425 examples compiled and executed, and 425 MCQs validated.
+- Browser Review #1587: PASS, 16/16 Playwright tests. The suite now includes a representative Java lesson-renderer check and asserts `practice.playgroundMode: "none"`; it also exercises Java Playground compiler discovery, execution, stdin and lesson-to-playground handoff.
+- Supplemental explanations for JV13.3 (HashSet/LinkedHashSet/TreeSet contracts), JV13.4 (HashMap/LinkedHashMap/TreeMap contracts), JV14.1 (generic types and erasure), JV14.2 (bounds and wildcards), JV14.3 (annotation targets and retention), and JV14.4 (Optional creation and transformations) were strengthened. The updated examples were included in the 425-example JDK run.
+- These checks establish technical CI/browser compatibility, not independent editorial sign-off. Keep lesson status `draft`; do not treat draft content as release-approved.
+- W3Schools broader tutorial/exercise gaps remain under audit; the 58-module syllabus mapping is not proof that every exercise and extended navigation item is fully covered.
+- Telugu translation remains deferred. No merge or production deployment has been performed.
