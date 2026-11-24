@@ -285,3 +285,12 @@ This section supersedes earlier historical batch-status rows above where they sa
 - New examples are currently introductory demonstration prompts; they require substantive code-level editorial enhancement before release. Their JDK 21 compilation/execution is pending current-head CI.
 - The supplemental lessons are drafts, not published lessons. No Telugu translations have been created.
 - Do not claim the expanded Java curriculum is editorially complete until the code examples, exercises and MCQs have passed independent review.
+
+
+## Follow-up content-quality correction — 24 November 2026
+
+- The 27 supplemental English draft lesson files JV9.1–JV14.4 are present and registered in `public/content/curriculum-index.json` (85 Java topics total).
+- All 27 supplemental lessons now have topic-specific five-question MCQ banks; generic placeholder assessment questions were replaced.
+- Each supplemental lesson retains five example records, the Understand / Explain / Practise stages, five learning objectives, and `practice.playgroundMode: "none"`.
+- Example code and expected outputs still require current-head JDK 21 compile-and-execute validation. Automated Actions are pending; do not mark these lessons validated until they pass.
+- The supplemental lessons remain English drafts. Telugu translation remains deferred, and release approval is still pending.
