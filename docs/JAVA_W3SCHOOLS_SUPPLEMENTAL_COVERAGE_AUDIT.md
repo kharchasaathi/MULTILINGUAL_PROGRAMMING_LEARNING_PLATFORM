@@ -136,7 +136,7 @@ Keep JV1–JV8 unchanged. Add the following supplemental sequence after JV8. The
 ### Existing lesson expansions (do not create duplicate topic IDs)
 Add targeted sections/examples/practice to JV2.2, JV2.5, JV3.1, JV3.3, JV3.4, JV4.1, JV5.11, JV5.14, JV6.3–JV6.7 and JV7.1 only where the gap table marks partial or missing.
 
-**Proposed supplemental count:** 27 new lessons across JV9–JV14. This is a gap-driven extension beyond the 58-module W3Schools syllabus, not a replacement for the official syllabus sequence.
+**Supplemental count authored:** 27 draft lessons across JV9–JV14. These are additional to the original 58 syllabus lessons. This is a gap-driven extension beyond the 58-module W3Schools syllabus, not a replacement for the official syllabus sequence.
 
 ## 5. Authoring and validation requirements
 
@@ -149,7 +149,7 @@ Add targeted sections/examples/practice to JV2.2, JV2.5, JV3.1, JV3.3, JV3.4, JV
 - Update curriculum index, progress tracker, inventory and validation scripts together when each batch is authored.
 - Keep lesson status `draft` pending independent editorial review and release approval.
 - The Java Playground uses an external execution provider; clearly disclose that submitted source and standard input are sent to that provider. Do not send secrets or personal data.
-- Do not merge PR #246 or deploy without explicit release authorization.
+- The user has explicitly requested merge and deployment in the current conversation. Proceed only after all content, CI, browser and release checks pass; do not publish draft material as editorially complete.
 
 ## 6. Official reference pages checked
 
