@@ -10,7 +10,8 @@
     "Insert and retrieve mappings with put and get.",
     "Check keys and provide default values safely.",
     "Update or remove mappings.",
-    "Understand unique keys and unspecified iteration order."
+    "Understand unique keys and unspecified iteration order.",
+    "Distinguish the Map interface from HashMap, LinkedHashMap and TreeMap implementations."
   ],
   "prerequisites": [
     "JV1.1",
@@ -60,7 +61,7 @@
       "analogyLimit": "The analogy is only a guide; Java API contracts, equality rules and exception behaviour determine the actual result."
     },
     "explain": {
-      "narrative": "Declare both generic types, for example HashMap<String, Integer>. put adds or replaces a mapping; get retrieves by key; remove deletes a mapping. keySet, values and entrySet expose views for iteration. Do not rely on display order. For custom key classes, implement equals and hashCode consistently and avoid mutating fields that participate in hashing while the key is in the map.",
+      "narrative": "Declare both generic types, for example HashMap<String, Integer>. put adds or replaces a mapping; get retrieves by key; remove deletes a mapping. keySet, values and entrySet expose views for iteration. Do not rely on display order. For custom key classes, implement equals and hashCode consistently and avoid mutating fields that participate in hashing while the key is in the map.\n\n## The Map interface and implementations\n\n`Map<K,V>` defines key-to-value mappings. `HashMap` provides hash-based lookup without a guaranteed iteration order. `LinkedHashMap` maintains a predictable encounter order, normally insertion order. `TreeMap` orders entries by key using natural ordering or a supplied Comparator. Declare a variable as `Map<K,V>` when the code needs only the Map contract, then choose the implementation according to ordering and performance requirements.",
       "examples": [
         {
           "id": "jv6.6-ex1",
@@ -106,11 +107,20 @@
           "expectedOutput": "5",
           "explanation": "entrySet exposes key-value entries; this example does not assume an order.",
           "runnable": false
+        },
+        {
+          "id": "jv6.6-ex6",
+          "language": "java",
+          "title": "Use Map with LinkedHashMap",
+          "code": "import java.util.LinkedHashMap; import java.util.Map;\npublic class Main { public static void main(String[] args) { Map<String, Integer> stock = new LinkedHashMap<>(); stock.put(\"Pen\", 4); stock.put(\"Book\", 7); stock.put(\"Bag\", 2); for (String key : stock.keySet()) System.out.println(key); } }",
+          "expectedOutput": "Pen\nBook\nBag",
+          "explanation": "Map expresses the key-value contract while LinkedHashMap preserves insertion order during iteration. TreeMap would be appropriate when entries must be ordered by key.",
+          "runnable": false
         }
       ]
     },
     "practise": {
-      "guidedTask": "Create a small Java program demonstrating java hashmap. Predict each result, then compile and run it with JDK 21.",
+      "guidedTask": "Create a small Java program demonstrating java hashmap. Predict each result, then compile and run it with JDK 21. Declare a Map reference backed by LinkedHashMap and show that iteration follows insertion order. Explain when TreeMap would be a better choice.",
       "independentTask": "Build an original practical program using java hashmap. Include at least two test cases, expected outputs, and a short explanation of your API choices and edge cases.",
       "hints": [
         "Start with the smallest standard-library type or interface that expresses the data you need.",
@@ -186,6 +196,18 @@
           "To make values immutable"
         ],
         "explanation": "The hash-based lookup relies on compatible equals and hashCode implementations."
+      },
+      {
+        "id": "jv6.6-q6",
+        "prompt": "Which Map implementation orders entries by key?",
+        "options": [
+          "TreeMap",
+          "HashMap",
+          "ArrayList",
+          "HashSet"
+        ],
+        "answer": "TreeMap",
+        "explanation": "TreeMap orders keys by natural ordering or a supplied Comparator."
       }
     ]
   },
