@@ -20,12 +20,12 @@
   "stages": {
     "understand": {
       "concept": "FileReader and FileWriter are character-oriented APIs. Their default charset depends on runtime configuration; portable applications should choose an explicit Charset such as UTF-8.",
-      "whyItMatters": "Character Streams: FileReader and FileWriter helps learners create Java applications that are easier to reason about, test and maintain.",
-      "analogy": "Treat the concept as a clearly labeled tool for one programming responsibility.",
-      "analogyLimit": "Actual behavior is defined by Java language rules and API contracts."
+      "whyItMatters": "Character streams convert between bytes and characters using a charset. Making the encoding explicit avoids platform-dependent text corruption when files move between operating systems or contain characters outside basic ASCII.",
+      "analogy": "A character stream is like two people agreeing on the same alphabet and codebook before exchanging a written message.",
+      "analogyLimit": "Java char represents a UTF-16 code unit, not always one complete Unicode code point or one user-perceived symbol. A charset also defines byte encoding, not visual rendering."
     },
     "explain": {
-      "narrative": "## Character Streams: FileReader and FileWriter\n\nFileReader and FileWriter are character-oriented APIs. Their default charset depends on runtime configuration; portable applications should choose an explicit Charset such as UTF-8.\n\nIdentify the input and desired result. Select the Java construct or API that supports the requirement. Keep code readable, handle documented failures and state assumptions clearly.\n\nCompile with JDK 21, predict output before running, and test normal, boundary and invalid inputs.",
+      "narrative": "## Character Streams: FileReader and FileWriter\n\nFileReader and FileWriter are character-oriented APIs. Their default charset depends on runtime configuration; portable applications should choose an explicit Charset such as UTF-8.\n\n## Choose an explicit charset\n\n`FileReader` and `FileWriter` are convenient character-oriented APIs, but their default charset can depend on the runtime configuration. For predictable files, use APIs that accept a charset, such as `Files.newBufferedReader(path, StandardCharsets.UTF_8)` and `Files.newBufferedWriter(path, StandardCharsets.UTF_8)`.\n\n## Avoid mixed encodings\n\nThe writer and reader must agree on the encoding. A file written as UTF-8 and decoded using a different charset may display replacement characters or mojibake. Use try-with-resources and test text containing accented characters and scripts beyond ASCII.\n\nFor very large text files, add buffering or use the buffered NIO helpers so reads and writes do not require a separate operation for every character.",
       "examples": [
         {
           "id": "jv12.3-ex1",
