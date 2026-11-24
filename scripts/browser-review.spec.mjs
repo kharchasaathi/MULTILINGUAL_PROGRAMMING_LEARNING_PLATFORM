@@ -495,7 +495,7 @@ test("Java Playground discovers a compiler, runs with stdin, and receives lesson
       expect(body.save).toBe(false);
       expect(body.code).toContain("Scanner");
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
-        status: "0", compiler: "wandbox-java", compiler_message: "", program_output: "Hello, Ada!\\n", program_message: "", program_error: ""
+        status: "0", compiler: "wandbox-java", compiler_message: "", program_output: "Hello, Ada!", program_message: "", program_error: ""
       }) });
       return;
     }
@@ -505,7 +505,8 @@ test("Java Playground discovers a compiler, runs with stdin, and receives lesson
   await page.goto(baseURL + "/java-playground.html", { waitUntil: "domcontentloaded" });
   await expect(page.locator("#javaStatus")).toHaveAttribute("data-state", "ready");
   await expect(page.locator("#javaCompiler")).toHaveValue("wandbox-java");
-  await page.locator("#javaCode").fill('import java.util.Scanner;\\npublic class Main { public static void main(String[] args) { Scanner in = new Scanner(System.in); System.out.println("Hello, " + in.nextLine() + "!"); } }');
+  const source = ["import java.util.Scanner;", 'public class Main { public static void main(String[] args) { Scanner in = new Scanner(System.in); System.out.println("Hello, " + in.nextLine() + "!"); } }'].join(String.fromCharCode(10));
+  await page.locator("#javaCode").fill(source);
   await page.locator("#javaInput").fill("Ada");
   await page.locator("#runJava").click();
   await expect(page.locator("#javaOutput")).toContainText("Hello, Ada!");
@@ -528,7 +529,7 @@ test("Java lesson practice link opens Java Playground with its first example", a
   const lesson = await (await page.request.get(baseURL + "/content/en/java/JV1.2.json")).json();
   const expected = lesson.stages.explain.examples.find(example => example.code)?.code;
   const link = dialog.locator(".lesson-practice-link");
-  await expect(link).toHaveAttribute("href", /java-playground\\.html#code=/);
+  expect(await link.getAttribute("href")).toContain("/java-playground.html#code=");
   await expect(link).toContainText("Java Playground");
   const [playground] = await Promise.all([page.waitForEvent("popup"), link.click()]);
   await expect(playground.locator("#javaCode")).toHaveValue(expected);
