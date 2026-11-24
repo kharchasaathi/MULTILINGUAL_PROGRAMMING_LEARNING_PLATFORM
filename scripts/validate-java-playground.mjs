@@ -14,7 +14,7 @@ assert.ok(html.includes("wandbox.org") && html.includes("source and stdin are se
 assert.ok(js.includes('API + "/list.json"'), "Java compiler list endpoint is configured");
 assert.ok(js.includes('API + "/compile.json"'), "Java execution endpoint is configured");
 assert.ok(js.includes("save: false"), "Student submissions are not saved as public permalinks");
-assert.ok(js.includes("public\\\\s+class\\\\s+Main") && js.includes("class Main"), "Public Main is normalized for the provider fixed source filename");
+assert.ok(js.includes('code.replace("public class Main", "class Main")'), "Public Main is normalized for the provider fixed source filename");
 assert.ok(js.includes("AbortController") && js.includes("60000"), "Execution requests can be cancelled and time limited");
 assert.ok(js.includes("textContent"), "Compiler output is rendered as text");
 assert.ok(!/\beval\s*\(|new Function\s*\(/.test(js), "No eval or Function constructor is used");
