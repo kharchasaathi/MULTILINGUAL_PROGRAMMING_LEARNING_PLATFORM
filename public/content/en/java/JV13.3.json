@@ -25,7 +25,7 @@
       "analogyLimit": "Actual behavior is defined by Java language rules and API contracts."
     },
     "explain": {
-      "narrative": "## TreeSet and LinkedHashSet\n\nTreeSet stores unique elements in sorted order. LinkedHashSet preserves insertion order. A comparator that returns zero treats values as duplicates in a TreeSet.\n\nIdentify the input and desired result. Select the Java construct or API that supports the requirement. Keep code readable, handle documented failures and state assumptions clearly.\n\nCompile with JDK 21, predict output before running, and test normal, boundary and invalid inputs.",
+      "narrative": "## Set contracts and ordering choices\n\nA Set stores no duplicate elements according to its equality rule. The Set interface describes uniqueness but does not promise a particular iteration order. Choose an implementation based on the ordering contract the application needs.\n\n## HashSet, LinkedHashSet and TreeSet\n\n- HashSet uses hashing and makes no iteration-order guarantee. Its typical membership operations are efficient when hash codes are well distributed.\n- LinkedHashSet maintains insertion encounter order while enforcing uniqueness. It is useful when output should follow the order in which distinct values were first added.\n- TreeSet keeps elements sorted by natural ordering or a supplied Comparator. Its basic add, remove and contains operations are logarithmic-time in the documented balanced-tree implementation.\n\n## Comparator equality controls uniqueness\n\nTreeSet uses its ordering comparison to decide whether two elements occupy the same set position. If compare(a, b) returns zero, the set treats the values as equivalent for set membership, even if a.equals(b) is false. Design comparators carefully and make their ordering consistent with equals when practical.\n\n## Nulls and type requirements\n\nHashSet and LinkedHashSet permit a null element. TreeSet generally cannot compare null with its natural-order elements; a custom comparator must explicitly define null handling if null is to be supported. Elements in a TreeSet must be mutually comparable under the selected ordering.\n\n## Practical selection\n\nUse HashSet for uniqueness without order requirements, LinkedHashSet for uniqueness plus insertion order, and TreeSet for uniqueness plus sorted traversal. Declare variables using Set<E> when callers need only the interface contract. Do not write tests that expect HashSet iteration order.",
       "examples": [
         {
           "id": "jv13.3-ex1",
@@ -33,7 +33,7 @@
           "title": "Core API",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.Set<Integer> values = new java.util.TreeSet<>(java.util.List.of(3,1,2)); System.out.println(values); } }",
           "expectedOutput": "[1, 2, 3]",
-          "explanation": "TreeSet keeps unique values in sorted order.",
+          "explanation": "TreeSet orders the inserted values by their natural ordering and removes duplicate values according to its comparison result.",
           "runnable": false
         },
         {
@@ -42,7 +42,7 @@
           "title": "Practical use",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.Set<String> values = new java.util.LinkedHashSet<>(); values.add(\"B\"); values.add(\"A\"); values.add(\"B\"); System.out.println(values); } }",
           "expectedOutput": "[B, A]",
-          "explanation": "LinkedHashSet preserves insertion order and rejects duplicates.",
+          "explanation": "LinkedHashSet rejects the repeated value but iterates the remaining elements in their insertion order.",
           "runnable": false
         },
         {
@@ -51,7 +51,7 @@
           "title": "Boundary behavior",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.Set<Integer> values = new java.util.TreeSet<>(); values.add(5); values.add(5); System.out.println(values.size()); } }",
           "expectedOutput": "1",
-          "explanation": "TreeSet uniqueness follows its ordering comparison.",
+          "explanation": "The contains call checks membership using the set's equality and hashing contract; the boolean result is printed explicitly.",
           "runnable": false
         },
         {
@@ -60,7 +60,7 @@
           "title": "Alternative pattern",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.Set<String> values = new java.util.TreeSet<>(java.util.Comparator.reverseOrder()); values.add(\"A\"); values.add(\"C\"); values.add(\"B\"); System.out.println(values); } }",
           "expectedOutput": "[C, B, A]",
-          "explanation": "A reverse Comparator changes sorted order.",
+          "explanation": "Comparator.reverseOrder supplies descending natural order, so TreeSet iterates from the greatest value to the least.",
           "runnable": false
         },
         {
@@ -69,7 +69,7 @@
           "title": "Verify the result",
           "code": "public class Main { public static void main(String[] args) throws Exception { System.out.println(new java.util.TreeSet<>(java.util.List.of(\"pear\",\"apple\",\"orange\"))); } }",
           "expectedOutput": "[apple, orange, pear]",
-          "explanation": "String values are compared using their natural lexicographic ordering when no custom Comparator is supplied.",
+          "explanation": "The default String ordering is lexicographic and case-sensitive; values whose comparison is zero are considered duplicates by TreeSet.",
           "runnable": false
         }
       ]
@@ -78,9 +78,9 @@
       "guidedTask": "Insert duplicate and unsorted values into a TreeSet and LinkedHashSet. Print both and explain their different iteration orders.",
       "independentTask": "Use a Comparator to sort strings in reverse order with TreeSet. Explain how compare returning zero affects uniqueness.",
       "hints": [
-        "Select the interface from the behavior the problem requires.",
-        "Use generics to make the element or key/value types explicit.",
-        "Check ordering and duplicate behavior with a small test dataset."
+        "Use HashSet when no iteration order is required, LinkedHashSet for insertion order, and TreeSet for sorted order.",
+        "For TreeSet, inspect Comparator.compare: a zero result means the set regards the elements as equivalent.",
+        "Do not assume HashSet iteration order; test membership and size instead."
       ],
       "challenge": "Create a case-insensitive TreeSet of names and test values that differ only by letter case; explain why one may be treated as equivalent."
     }
