@@ -37,7 +37,8 @@
     c: ["C Programming", "SYSTEMS PROGRAMMING", "Learn C syntax, memory, functions, files and data structures.", "C"],
     cpp: ["C++ Programming", "MODERN SYSTEMS & OBJECT-ORIENTED PROGRAMMING", "Learn modern C++ fundamentals, classes, templates, standard-library tools and safe resource management.", "C++"],
     python: ["Python Programming", "GENERAL-PURPOSE PROGRAMMING", "Learn Python fundamentals, automation, data handling, object-oriented programming and practical application development.", "PY"],
-    sql: ["SQL Programming", "RELATIONAL DATABASES", "Learn relational database concepts, write SQL queries and design reliable data structures.", "SQL"]
+    sql: ["SQL Programming", "RELATIONAL DATABASES", "Learn relational database concepts, write SQL queries and design reliable data structures.", "SQL"],
+    java: ["Java Programming", "JAVA FUNDAMENTALS & OBJECT-ORIENTED PROGRAMMING", "Learn Java syntax, object-oriented programming, collections, exceptions, threads and file handling.", "JAVA"]
   };
 
   function renderCourseCards() {
@@ -54,7 +55,7 @@
       top.append(text("span", "course-icon " + (courseId === "html" ? "icon-html" : courseId === "css" ? "icon-css" : courseId === "c" ? "icon-c" : ""), meta[3]));
       top.append(text("span", "course-number", String(items.length).padStart(2, "0") + " TOPICS"));
       card.append(top, text("h3", "", meta[0]), text("p", "", meta[2]));
-      const metaLine = text("div", "course-meta", courseId === "c" || courseId === "cpp" || courseId === "sql" ? items.length + " authored English lesson drafts · Telugu translation pending" : items.length + " authored lesson topics · English and Telugu drafts");
+      const metaLine = text("div", "course-meta", courseId === "c" || courseId === "cpp" || courseId === "sql" || courseId === "java" ? items.length + " authored English lesson drafts · Telugu translation pending" : items.length + " authored lesson topics · English and Telugu drafts");
       card.append(metaLine);
       const footer = text("div", "course-footer");
       footer.append(text("span", "course-price", "FREE PREVIEW"));
@@ -198,7 +199,23 @@
       }
     }
 const link = $(".lesson-practice-link", container);
-    if (link && (lesson.courseId === "cpp" || lesson.courseId === "c")) {
+    if (link && lesson.courseId === "java") {
+      const javaExample = examples.find(example => typeof example.code === "string" && example.code.trim());
+      if (javaExample) {
+        const javaState = { language: "java", code: javaExample.code, stdin: "" };
+        const stateBytes = new TextEncoder().encode(JSON.stringify(javaState));
+        let stateBinary = "";
+        stateBytes.forEach(byte => { stateBinary += String.fromCharCode(byte); });
+        const stateToken = btoa(stateBinary).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
+        link.href = "/java-playground.html#code=" + stateToken;
+        link.textContent = "Open this lesson's example in Java Playground ↗";
+      } else {
+        link.href = "/java-playground.html";
+        link.textContent = "Open Java Playground ↗";
+      }
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+    } else if (link && (lesson.courseId === "cpp" || lesson.courseId === "c")) {
       const language = lesson.courseId;
       const starter = code || (language === "cpp"
         ? '#include <iostream>\n\nint main() {\n    std::cout << "Hello, CodeSaathi!\\\n";\n    return 0;\n}\n'
@@ -206,7 +223,7 @@ const link = $(".lesson-practice-link", container);
       const stateBytes = new TextEncoder().encode(JSON.stringify({ language, code: starter, stdin: "" }));
       let stateBinary = "";
       stateBytes.forEach(byte => { stateBinary += String.fromCharCode(byte); });
-      const stateToken = btoa(stateBinary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+        const stateToken = btoa(stateBinary).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
       link.href = (language === "cpp" ? "/cpp-compiler.html" : "/c-compiler.html") + "#code=" + stateToken;
       link.target = "_blank";
       link.rel = "noopener noreferrer";
@@ -218,7 +235,7 @@ const link = $(".lesson-practice-link", container);
         const stateBytes = new TextEncoder().encode(JSON.stringify(pythonState));
         let stateBinary = "";
         stateBytes.forEach(byte => { stateBinary += String.fromCharCode(byte); });
-        const stateToken = btoa(stateBinary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+        const stateToken = btoa(stateBinary).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
         link.href = "/python-playground.html#code=" + stateToken;
         link.textContent = "Open this lesson's example in Python Playground ↗";
       } else {
@@ -234,7 +251,7 @@ const link = $(".lesson-practice-link", container);
         const stateBytes = new TextEncoder().encode(JSON.stringify(sqlState));
         let stateBinary = "";
         stateBytes.forEach(byte => { stateBinary += String.fromCharCode(byte); });
-        const stateToken = btoa(stateBinary).split("+").join("-").split("/").join("_").replace(/=+$/, "");
+        const stateToken = btoa(stateBinary).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
         link.href = "/sql-playground.html#code=" + stateToken;
         link.textContent = "Open this lesson's example in SQL Playground ↗";
       } else {

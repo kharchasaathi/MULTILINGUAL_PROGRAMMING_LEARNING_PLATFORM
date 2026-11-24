@@ -479,3 +479,61 @@ test("SQL Playground and Practice Hub pass serious accessibility checks", async 
     expect(overflow).toBeFalsy();
   }
 });
+
+
+test("Java Playground discovers a compiler, runs with stdin, and receives lesson code", async ({ page }) => {
+  const compilerList = [{ name: "wandbox-java", language: "Java", version: "21.0.1", "display-name": "OpenJDK 21" }];
+  await page.context().route("https://wandbox.org/api/**", async route => {
+    if (route.request().url().endsWith("/list.json")) {
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(compilerList) });
+      return;
+    }
+    if (route.request().url().endsWith("/compile.json")) {
+      const body = route.request().postDataJSON();
+      expect(body.compiler).toBe("wandbox-java");
+      expect(body.stdin).toBe("Ada");
+      expect(body.save).toBe(false);
+      expect(body.code).toContain("Scanner");
+      expect(body.code).toContain("class Main");
+      expect(body.code).not.toContain("public class Main");
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
+        status: "0", compiler: "wandbox-java", compiler_message: "", program_output: "Hello, Ada!", program_message: "", program_error: ""
+      }) });
+      return;
+    }
+    await route.continue();
+  });
+
+  await page.goto(baseURL + "/java-playground.html", { waitUntil: "domcontentloaded" });
+  await expect(page.locator("#javaStatus")).toHaveAttribute("data-state", "ready");
+  await expect(page.locator("#javaCompiler")).toHaveValue("wandbox-java");
+  const source = ["import java.util.Scanner;", 'public class Main { public static void main(String[] args) { Scanner in = new Scanner(System.in); System.out.println("Hello, " + in.nextLine() + "!"); } }'].join(String.fromCharCode(10));
+  await page.locator("#javaCode").fill(source);
+  await page.locator("#javaInput").fill("Ada");
+  await page.locator("#runJava").click();
+  await expect(page.locator("#javaOutput")).toContainText("Hello, Ada!");
+  await expect(page.locator("#javaStatus")).toHaveAttribute("data-state", "ready");
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+  expect(overflow, "Java Playground should not overflow on mobile").toBe(false);
+  const accessibility = await new AxeBuilder({ page }).withTags(["wcag2a","wcag2aa","wcag21a","wcag21aa"]).analyze();
+  expect(accessibility.violations.filter(item => ["serious","critical"].includes(item.impact))).toEqual([]);
+});
+
+test("Java lesson practice link opens Java Playground with its first example", async ({ page }) => {
+  await page.goto(baseURL, { waitUntil: "domcontentloaded" });
+  await waitForCurriculum(page);
+  await page.locator('[data-course-nav="java"]').click();
+  const dialog = page.locator("#lessonDialog");
+  await expect(dialog).toBeVisible();
+  await dialog.locator('[data-topic-id="JV1.2"]').click();
+  const lesson = await (await page.request.get(baseURL + "/content/en/java/JV1.2.json")).json();
+  const expected = lesson.stages.explain.examples.find(example => example.code)?.code;
+  const link = dialog.locator(".lesson-practice-link");
+  expect(await link.getAttribute("href")).toContain("/java-playground.html#code=");
+  await expect(link).toContainText("Java Playground");
+  const [playground] = await Promise.all([page.waitForEvent("popup"), link.click()]);
+  await expect(playground.locator("#javaCode")).toHaveValue(expected);
+  await playground.close();
+});

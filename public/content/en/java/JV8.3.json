@@ -1,0 +1,162 @@
+{
+  "id": "java.jv8.3.en",
+  "courseId": "java",
+  "moduleId": "JV8",
+  "topicId": "JV8.3",
+  "title": "Java Write to Files",
+  "language": "en",
+  "learningObjectives": [
+    "Write text to a file with FileWriter.",
+    "Use try-with-resources to close a writer reliably.",
+    "Append content without replacing existing content.",
+    "Understand character encoding and IOException concerns.",
+    "Verify written text by reading it back."
+  ],
+  "prerequisites": [
+    "JV1.1",
+    "JV1.2",
+    "JV1.3",
+    "JV2.1",
+    "JV3.1",
+    "JV4.1",
+    "JV5.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Java's FileWriter writes character data to a file. Opening it in the default mode replaces existing content; the constructor with append=true adds content to the end. Writers should be closed so buffered characters are flushed. Try-with-resources closes the writer automatically, including when an exception occurs. For explicit character encodings in modern applications, prefer Files.newBufferedWriter with a StandardCharsets value.",
+      "whyItMatters": "File handling allows a Java application to persist, retrieve and manage information beyond the lifetime of a single run.",
+      "analogy": "Think of a path as a labeled address to a storage location; the address and the data stored there are different things.",
+      "analogyLimit": "A path is not a guarantee that the target exists or that the program has permission to access it."
+    },
+    "explain": {
+      "narrative": "Import java.io.FileWriter and java.io.IOException. Create a writer in try-with-resources, call write, and let the resource close at the end of the block. Use new FileWriter(path, true) when appending. FileWriter uses the platform default charset, so use java.nio.file.Files.newBufferedWriter and StandardCharsets.UTF_8 when a predictable encoding is required.",
+      "examples": [
+        {
+          "id": "jv8.3-ex1",
+          "language": "java",
+          "title": "Write text",
+          "code": "import java.io.FileWriter;\nimport java.io.IOException;\nimport java.nio.file.Files;\nimport java.nio.file.Path;\npublic class Main { public static void main(String[] args) throws IOException { try (FileWriter writer = new FileWriter(\"message.txt\")) { writer.write(\"Hello Java\"); } System.out.println(Files.readString(Path.of(\"message.txt\"))); } }",
+          "expectedOutput": "Hello Java",
+          "explanation": "write sends characters to the writer, and closing it flushes them before reading the file.",
+          "runnable": false
+        },
+        {
+          "id": "jv8.3-ex2",
+          "language": "java",
+          "title": "Append text",
+          "code": "import java.io.FileWriter;\nimport java.io.IOException;\nimport java.nio.file.Files;\nimport java.nio.file.Path;\npublic class Main { public static void main(String[] args) throws IOException { try (FileWriter writer = new FileWriter(\"log.txt\")) { writer.write(\"Start\"); } try (FileWriter writer = new FileWriter(\"log.txt\", true)) { writer.write(\"-End\"); } System.out.println(Files.readString(Path.of(\"log.txt\"))); } }",
+          "expectedOutput": "Start-End",
+          "explanation": "The append constructor preserves existing content and writes new characters at the end.",
+          "runnable": false
+        },
+        {
+          "id": "jv8.3-ex3",
+          "language": "java",
+          "title": "Write multiple lines",
+          "code": "import java.io.FileWriter;\nimport java.io.IOException;\nimport java.nio.file.Files;\nimport java.nio.file.Path;\npublic class Main { public static void main(String[] args) throws IOException { try (FileWriter writer = new FileWriter(\"lines.txt\")) { writer.write(\"First\\nSecond\"); } System.out.println(Files.readString(Path.of(\"lines.txt\")).lines().count()); } }",
+          "expectedOutput": "2",
+          "explanation": "A newline character separates the two written lines in the file.",
+          "runnable": false
+        },
+        {
+          "id": "jv8.3-ex4",
+          "language": "java",
+          "title": "Write UTF-8 explicitly",
+          "code": "import java.io.IOException;\nimport java.nio.charset.StandardCharsets;\nimport java.nio.file.Files;\nimport java.nio.file.Path;\npublic class Main { public static void main(String[] args) throws IOException { Path path = Path.of(\"utf8.txt\"); try (var writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) { writer.write(\"CodeSaathi\"); } System.out.println(Files.readString(path, StandardCharsets.UTF_8)); } }",
+          "expectedOutput": "CodeSaathi",
+          "explanation": "Files.newBufferedWriter accepts an explicit charset for predictable text encoding.",
+          "runnable": false
+        },
+        {
+          "id": "jv8.3-ex5",
+          "language": "java",
+          "title": "Replace existing content",
+          "code": "import java.io.FileWriter;\nimport java.io.IOException;\nimport java.nio.file.Files;\nimport java.nio.file.Path;\npublic class Main { public static void main(String[] args) throws IOException { try (FileWriter writer = new FileWriter(\"replace.txt\")) { writer.write(\"Old\"); } try (FileWriter writer = new FileWriter(\"replace.txt\")) { writer.write(\"New\"); } System.out.println(Files.readString(Path.of(\"replace.txt\"))); } }",
+          "expectedOutput": "New",
+          "explanation": "The one-argument FileWriter constructor truncates an existing file before writing.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a small Java program that demonstrates java write to files. Predict each result, then compile and run it with JDK 21.",
+      "independentTask": "Build a practical Java file-handling utility related to java write to files. Include at least two test cases, expected outputs, and an explanation of failure handling and path safety.",
+      "hints": [
+        "Start with a Path or File that points to a controlled test location.",
+        "Use try-with-resources for streams and writers, and handle IOException where the API declares it.",
+        "Test both the normal case and an edge case such as a missing path or existing target."
+      ],
+      "challenge": "Extend one java write to files example to handle a realistic file-system edge case safely and explain the API behaviour."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "jv8.3-q1",
+        "prompt": "Which class writes character data to a file?",
+        "answer": "FileWriter",
+        "options": [
+          "FileReader",
+          "FileWriter",
+          "File",
+          "Scanner"
+        ],
+        "explanation": "FileWriter is a character stream writer for text files."
+      },
+      {
+        "id": "jv8.3-q2",
+        "prompt": "How do you append with FileWriter?",
+        "answer": "Use the constructor with true",
+        "options": [
+          "Call appendMode()",
+          "Use the constructor with true",
+          "Set append=true after writing",
+          "Use mkdirs()"
+        ],
+        "explanation": "The append flag preserves existing content and writes new text at the end."
+      },
+      {
+        "id": "jv8.3-q3",
+        "prompt": "Why use try-with-resources for a writer?",
+        "answer": "It closes the writer automatically",
+        "options": [
+          "It encrypts the file",
+          "It closes the writer automatically",
+          "It prevents all IOExceptions",
+          "It creates parent folders"
+        ],
+        "explanation": "try-with-resources closes an AutoCloseable resource at the end of the block."
+      },
+      {
+        "id": "jv8.3-q4",
+        "prompt": "What does the one-argument FileWriter constructor do to existing content?",
+        "answer": "Replaces it",
+        "options": [
+          "Always appends",
+          "Replaces it",
+          "Deletes the directory",
+          "Keeps only the first line"
+        ],
+        "explanation": "The default FileWriter mode truncates existing file content."
+      },
+      {
+        "id": "jv8.3-q5",
+        "prompt": "How can an application select UTF-8 explicitly?",
+        "answer": "Use Files.newBufferedWriter with StandardCharsets.UTF_8",
+        "options": [
+          "Use File.exists()",
+          "Use Files.newBufferedWriter with StandardCharsets.UTF_8",
+          "Use mkdir()",
+          "Use File.length()"
+        ],
+        "explanation": "This API makes the chosen text encoding explicit and avoids platform-default charset differences."
+      }
+    ]
+  },
+  "status": "draft"
+}

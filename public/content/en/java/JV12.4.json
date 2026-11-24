@@ -1,0 +1,158 @@
+{
+  "id": "java.jv12.4.en",
+  "courseId": "java",
+  "moduleId": "JV12",
+  "topicId": "JV12.4",
+  "title": "BufferedReader and BufferedWriter",
+  "language": "en",
+  "learningObjectives": [
+    "Read text line by line with BufferedReader and readLine",
+    "Write text efficiently with BufferedWriter and newLine",
+    "Recognize null as the end-of-input result from readLine",
+    "Flush buffered output when an intermediate write must be visible",
+    "Close buffered wrappers and their underlying streams safely"
+  ],
+  "prerequisites": [
+    "JV1.1",
+    "JV1.2",
+    "JV1.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "BufferedReader.readLine returns null at end of input. BufferedWriter accumulates characters and offers newLine for a platform line separator. Closing a wrapper closes its underlying stream.",
+      "whyItMatters": "BufferedReader and BufferedWriter helps learners create Java applications that are easier to reason about, test and maintain.",
+      "analogy": "Treat the concept as a clearly labeled tool for one programming responsibility.",
+      "analogyLimit": "Actual behavior is defined by Java language rules and API contracts."
+    },
+    "explain": {
+      "narrative": "## BufferedReader and BufferedWriter\n\nBufferedReader.readLine returns null at end of input. BufferedWriter accumulates characters and offers newLine for a platform line separator. Closing a wrapper closes its underlying stream.\n\nIdentify the input and desired result. Select the Java construct or API that supports the requirement. Keep code readable, handle documented failures and state assumptions clearly.\n\nCompile with JDK 21, predict output before running, and test normal, boundary and invalid inputs.",
+      "examples": [
+        {
+          "id": "jv12.4-ex1",
+          "language": "java",
+          "title": "Core API",
+          "code": "public class Main { public static void main(String[] args) throws Exception { try (var reader = new java.io.BufferedReader(new java.io.StringReader(\"first\\nsecond\"))) { System.out.println(reader.readLine()); } } }",
+          "expectedOutput": "first",
+          "explanation": "Reads one complete line with BufferedReader.",
+          "runnable": false
+        },
+        {
+          "id": "jv12.4-ex2",
+          "language": "java",
+          "title": "Practical use",
+          "code": "public class Main { public static void main(String[] args) throws Exception { try (var writer = new java.io.StringWriter(); var buffered = new java.io.BufferedWriter(writer)) { buffered.write(\"buffered text\"); buffered.flush(); System.out.println(writer); } } }",
+          "expectedOutput": "buffered text",
+          "explanation": "Writes buffered characters and flushes them to the underlying writer.",
+          "runnable": false
+        },
+        {
+          "id": "jv12.4-ex3",
+          "language": "java",
+          "title": "Boundary behavior",
+          "code": "public class Main { public static void main(String[] args) throws Exception { try (var reader = new java.io.BufferedReader(new java.io.StringReader(\"a\\nb\"))) { System.out.println(reader.readLine()); System.out.println(reader.readLine()); System.out.println(reader.readLine()); } } }",
+          "expectedOutput": "a\nb\nnull",
+          "explanation": "readLine returns null when no more lines remain.",
+          "runnable": false
+        },
+        {
+          "id": "jv12.4-ex4",
+          "language": "java",
+          "title": "Alternative pattern",
+          "code": "public class Main { public static void main(String[] args) throws Exception { try (var writer = new java.io.StringWriter(); var buffered = new java.io.BufferedWriter(writer)) { buffered.write(\"A\"); buffered.newLine(); buffered.write(\"B\"); buffered.flush(); System.out.println(writer.toString().replace(System.lineSeparator(), \"|\")); } } }",
+          "expectedOutput": "A|B",
+          "explanation": "Uses newLine to insert the platform-specific line separator.",
+          "runnable": false
+        },
+        {
+          "id": "jv12.4-ex5",
+          "language": "java",
+          "title": "Verify the result",
+          "code": "public class Main { public static void main(String[] args) throws Exception { try (var reader = new java.io.BufferedReader(new java.io.StringReader(\"one\"))) { System.out.println(reader.readLine() != null); } } }",
+          "expectedOutput": "true",
+          "explanation": "Uses a null check to detect whether a line was read.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Read a multi-line StringReader using BufferedReader.readLine until it returns null. Write a transformed copy with BufferedWriter and newLine.",
+      "independentTask": "Build a buffered text-file copier that preserves every line and uses try-with-resources for reader and writer.",
+      "hints": [
+        "Select the interface from the behavior the problem requires.",
+        "Use generics to make the element or key/value types explicit.",
+        "Check ordering and duplicate behavior with a small test dataset."
+      ],
+      "challenge": "Test empty input, one line without a final newline, several lines and explicit flush/close behavior."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "jv12.4-q1",
+        "prompt": "What does BufferedReader.readLine() return at end of input?",
+        "options": [
+          "null",
+          "An empty String every time",
+          "-1",
+          "A new BufferedReader"
+        ],
+        "answer": "null",
+        "explanation": "What does BufferedReader.readLine() return at end of input? This is the correct choice for BufferedReader and BufferedWriter because it follows the Java API contract and the lesson's stated learning goal."
+      },
+      {
+        "id": "jv12.4-q2",
+        "prompt": "Which method writes a platform-specific line separator?",
+        "options": [
+          "BufferedWriter.newLine()",
+          "BufferedWriter.readLine()",
+          "Files.delete()",
+          "String.splitLine()"
+        ],
+        "answer": "BufferedWriter.newLine()",
+        "explanation": "Which method writes a platform-specific line separator? This is the correct choice for BufferedReader and BufferedWriter because it follows the Java API contract and the lesson's stated learning goal."
+      },
+      {
+        "id": "jv12.4-q3",
+        "prompt": "What does flush() do on a writer?",
+        "options": [
+          "Pushes buffered characters toward the underlying destination",
+          "Closes the writer permanently",
+          "Deletes the output file",
+          "Converts characters to uppercase"
+        ],
+        "answer": "Pushes buffered characters toward the underlying destination",
+        "explanation": "What does flush() do on a writer? This is the correct choice for BufferedReader and BufferedWriter because it follows the Java API contract and the lesson's stated learning goal."
+      },
+      {
+        "id": "jv12.4-q4",
+        "prompt": "When a buffered wrapper is closed, what happens to its wrapped stream?",
+        "options": [
+          "The wrapped stream is closed too",
+          "It is detached and left open by default",
+          "It is deleted",
+          "It is converted into a byte array"
+        ],
+        "answer": "The wrapped stream is closed too",
+        "explanation": "When a buffered wrapper is closed, what happens to its wrapped stream? This is the correct choice for BufferedReader and BufferedWriter because it follows the Java API contract and the lesson's stated learning goal."
+      },
+      {
+        "id": "jv12.4-q5",
+        "prompt": "Why buffer text I/O?",
+        "options": [
+          "To reduce frequent interactions with the underlying I/O system",
+          "To reorder lines alphabetically",
+          "To validate all user input",
+          "To guarantee a particular charset"
+        ],
+        "answer": "To reduce frequent interactions with the underlying I/O system",
+        "explanation": "Why buffer text I/O? This is the correct choice for BufferedReader and BufferedWriter because it follows the Java API contract and the lesson's stated learning goal."
+      }
+    ]
+  },
+  "status": "draft"
+}

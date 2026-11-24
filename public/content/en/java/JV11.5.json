@@ -1,0 +1,158 @@
+{
+  "id": "java.jv11.5.en",
+  "courseId": "java",
+  "moduleId": "JV11",
+  "topicId": "JV11.5",
+  "title": "Capstone: Command-Line Task Manager",
+  "language": "en",
+  "learningObjectives": [
+    "Model tasks with unique identifiers and completion state",
+    "Combine classes and collections to implement task operations",
+    "Implement add, list and complete commands with input validation",
+    "Persist task data and restore it safely when the program restarts",
+    "Test duplicate identifiers, malformed storage and unknown commands"
+  ],
+  "prerequisites": [
+    "JV1.1",
+    "JV1.2",
+    "JV1.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Separate task data, application logic, persistence and console interaction. Build one feature at a time and test empty storage, duplicate IDs, invalid commands and file errors.",
+      "whyItMatters": "Capstone: Command-Line Task Manager helps learners create Java applications that are easier to reason about, test and maintain.",
+      "analogy": "Treat the concept as a clearly labeled tool for one programming responsibility.",
+      "analogyLimit": "Actual behavior is defined by Java language rules and API contracts."
+    },
+    "explain": {
+      "narrative": "## Capstone: Command-Line Task Manager\n\nSeparate task data, application logic, persistence and console interaction. Build one feature at a time and test empty storage, duplicate IDs, invalid commands and file errors.\n\nIdentify the input and desired result. Select the Java construct or API that supports the requirement. Keep code readable, handle documented failures and state assumptions clearly.\n\nCompile with JDK 21, predict output before running, and test normal, boundary and invalid inputs.",
+      "examples": [
+        {
+          "id": "jv11.5-ex1",
+          "language": "java",
+          "title": "Core API",
+          "code": "public class Main { public static void main(String[] args) throws Exception { record Task(int id, String title, boolean done) {} Task t = new Task(1, \"Write tests\", false); System.out.println(t.title()); } }",
+          "expectedOutput": "Write tests",
+          "explanation": "Models a task as an immutable record.",
+          "runnable": false
+        },
+        {
+          "id": "jv11.5-ex2",
+          "language": "java",
+          "title": "Practical use",
+          "code": "public class Main { public static void main(String[] args) throws Exception { java.util.List<String> tasks = new java.util.ArrayList<>(); tasks.add(\"Plan\"); tasks.add(\"Build\"); System.out.println(tasks); } }",
+          "expectedOutput": "[Plan, Build]",
+          "explanation": "Stores tasks in an ordered list.",
+          "runnable": false
+        },
+        {
+          "id": "jv11.5-ex3",
+          "language": "java",
+          "title": "Boundary behavior",
+          "code": "public class Main { public static void main(String[] args) throws Exception { java.util.Map<Integer,String> tasks = new java.util.LinkedHashMap<>(); tasks.put(1, \"Review\"); System.out.println(tasks.containsKey(1)); } }",
+          "expectedOutput": "true",
+          "explanation": "Uses a stable ID to look up a task.",
+          "runnable": false
+        },
+        {
+          "id": "jv11.5-ex4",
+          "language": "java",
+          "title": "Alternative pattern",
+          "code": "public class Main { public static void main(String[] args) throws Exception { String command = \"complete\"; System.out.println(switch(command) { case \"add\", \"list\", \"complete\" -> \"known command\"; default -> \"unknown command\"; }); } }",
+          "expectedOutput": "known command",
+          "explanation": "Validates a command before dispatching an action.",
+          "runnable": false
+        },
+        {
+          "id": "jv11.5-ex5",
+          "language": "java",
+          "title": "Verify the result",
+          "code": "public class Main { public static void main(String[] args) throws Exception { java.nio.file.Path p = java.nio.file.Files.createTempFile(\"tasks\", \".txt\"); try { java.nio.file.Files.writeString(p, \"1|Plan|false\"); System.out.println(java.nio.file.Files.readString(p)); } finally { java.nio.file.Files.deleteIfExists(p); } } }",
+          "expectedOutput": "1|Plan|false",
+          "explanation": "Demonstrates a simple persistence record; a production project should validate fields and handle escaping.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Model a Task with an ID, title and completion state. Implement add, list and complete commands using a Map and reject duplicate IDs.",
+      "independentTask": "Build the command-line task manager with separate Task, TaskService, TaskRepository and Main classes. Persist tasks in a documented UTF-8 text format.",
+      "hints": [
+        "Choose the API that matches the data representation and operation.",
+        "Use try-with-resources for AutoCloseable resources.",
+        "Test empty, normal and failure cases; verify exact output or file contents."
+      ],
+      "challenge": "Test empty storage, malformed records, duplicate IDs, unknown commands, completing a missing task and restarting after saved changes."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "jv11.5-q1",
+        "prompt": "Which separation makes a task manager easier to maintain?",
+        "options": [
+          "Task model, application logic, persistence and console interface",
+          "All code inside main with global variables",
+          "File operations inside every print statement",
+          "Mixing input parsing with ID generation"
+        ],
+        "answer": "Task model, application logic, persistence and console interface",
+        "explanation": "Which separation makes a task manager easier to maintain? This is the correct choice for Capstone: Command-Line Task Manager because it follows the Java API contract and the lesson's stated learning goal."
+      },
+      {
+        "id": "jv11.5-q2",
+        "prompt": "What should happen when a task ID does not exist?",
+        "options": [
+          "Report that the task was not found without changing other tasks",
+          "Complete the first task anyway",
+          "Create a random task",
+          "Clear the entire task list"
+        ],
+        "answer": "Report that the task was not found without changing other tasks",
+        "explanation": "What should happen when a task ID does not exist? This is the correct choice for Capstone: Command-Line Task Manager because it follows the Java API contract and the lesson's stated learning goal."
+      },
+      {
+        "id": "jv11.5-q3",
+        "prompt": "Why persist task data?",
+        "options": [
+          "Tasks remain available after the application exits",
+          "The application can avoid compiling",
+          "The task list becomes immutable",
+          "It removes the need for validation"
+        ],
+        "answer": "Tasks remain available after the application exits",
+        "explanation": "Why persist task data? This is the correct choice for Capstone: Command-Line Task Manager because it follows the Java API contract and the lesson's stated learning goal."
+      },
+      {
+        "id": "jv11.5-q4",
+        "prompt": "Which collection is suitable for looking up tasks by unique ID?",
+        "options": [
+          "Map",
+          "StackTraceElement",
+          "StringBuilder",
+          "Scanner"
+        ],
+        "answer": "Map",
+        "explanation": "Which collection is suitable for looking up tasks by unique ID? This is the correct choice for Capstone: Command-Line Task Manager because it follows the Java API contract and the lesson's stated learning goal."
+      },
+      {
+        "id": "jv11.5-q5",
+        "prompt": "Which scenario belongs in capstone testing?",
+        "options": [
+          "Loading an empty file and handling malformed or missing data",
+          "Only launching the program once",
+          "Changing the console font",
+          "Deleting source code after each run"
+        ],
+        "answer": "Loading an empty file and handling malformed or missing data",
+        "explanation": "Which scenario belongs in capstone testing? This is the correct choice for Capstone: Command-Line Task Manager because it follows the Java API contract and the lesson's stated learning goal."
+      }
+    ]
+  },
+  "status": "draft"
+}

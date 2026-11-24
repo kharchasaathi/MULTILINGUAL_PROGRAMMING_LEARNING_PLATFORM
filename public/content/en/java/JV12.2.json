@@ -1,0 +1,158 @@
+{
+  "id": "java.jv12.2.en",
+  "courseId": "java",
+  "moduleId": "JV12",
+  "topicId": "JV12.2",
+  "title": "Byte Streams: FileInputStream and FileOutputStream",
+  "language": "en",
+  "learningObjectives": [
+    "Read raw file data using FileInputStream and byte arrays",
+    "Write binary data using FileOutputStream and byte buffers",
+    "Detect end-of-stream using the documented negative-one result",
+    "Copy files while writing only the number of bytes actually read",
+    "Close input and output streams safely after every operation"
+  ],
+  "prerequisites": [
+    "JV1.1",
+    "JV1.2",
+    "JV1.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "FileInputStream reads bytes and FileOutputStream writes bytes. The read method returns -1 at end of stream. For larger files, use a byte buffer.",
+      "whyItMatters": "Byte Streams: FileInputStream and FileOutputStream helps learners create Java applications that are easier to reason about, test and maintain.",
+      "analogy": "Treat the concept as a clearly labeled tool for one programming responsibility.",
+      "analogyLimit": "Actual behavior is defined by Java language rules and API contracts."
+    },
+    "explain": {
+      "narrative": "## Byte Streams: FileInputStream and FileOutputStream\n\nFileInputStream reads bytes and FileOutputStream writes bytes. The read method returns -1 at end of stream. For larger files, use a byte buffer.\n\nIdentify the input and desired result. Select the Java construct or API that supports the requirement. Keep code readable, handle documented failures and state assumptions clearly.\n\nCompile with JDK 21, predict output before running, and test normal, boundary and invalid inputs.",
+      "examples": [
+        {
+          "id": "jv12.2-ex1",
+          "language": "java",
+          "title": "Core API",
+          "code": "public class Main { public static void main(String[] args) throws Exception { try (var in = new java.io.ByteArrayInputStream(new byte[]{65,66,67})) { System.out.println((char)in.read()); } } }",
+          "expectedOutput": "A",
+          "explanation": "Reads the first byte and interprets its ASCII value as a character for demonstration.",
+          "runnable": false
+        },
+        {
+          "id": "jv12.2-ex2",
+          "language": "java",
+          "title": "Practical use",
+          "code": "public class Main { public static void main(String[] args) throws Exception { try (var out = new java.io.ByteArrayOutputStream()) { out.write(new byte[]{65,66}); System.out.println(out.size()); } } }",
+          "expectedOutput": "2",
+          "explanation": "Writes two bytes to an output stream.",
+          "runnable": false
+        },
+        {
+          "id": "jv12.2-ex3",
+          "language": "java",
+          "title": "Boundary behavior",
+          "code": "public class Main { public static void main(String[] args) throws Exception { try (var in = new java.io.ByteArrayInputStream(new byte[]{65,66,67})) { int b; while((b=in.read())!=-1) System.out.print((char)b); } } }",
+          "expectedOutput": "ABC",
+          "explanation": "Reads until the -1 end-of-stream sentinel.",
+          "runnable": false
+        },
+        {
+          "id": "jv12.2-ex4",
+          "language": "java",
+          "title": "Alternative pattern",
+          "code": "public class Main { public static void main(String[] args) throws Exception { try (var in = new java.io.ByteArrayInputStream(new byte[]{1,2,3,4})) { byte[] buffer = new byte[2]; int count=in.read(buffer); System.out.println(count + \":\" + buffer[1]); } } }",
+          "expectedOutput": "2:2",
+          "explanation": "Reads a block of bytes into a buffer.",
+          "runnable": false
+        },
+        {
+          "id": "jv12.2-ex5",
+          "language": "java",
+          "title": "Verify the result",
+          "code": "public class Main { public static void main(String[] args) throws Exception { System.out.println(new java.io.ByteArrayInputStream(new byte[0]).read()); } }",
+          "expectedOutput": "-1",
+          "explanation": "Confirms that an empty stream immediately reports end-of-stream.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Copy a temporary binary file with FileInputStream and FileOutputStream using a fixed-size byte buffer. Compare source and destination bytes.",
+      "independentTask": "Implement a byte-copy method that loops until read returns -1, writes only the bytes actually read and closes both streams safely.",
+      "hints": [
+        "Choose the API that matches the data representation and operation.",
+        "Use try-with-resources for AutoCloseable resources.",
+        "Test empty, normal and failure cases; verify exact output or file contents."
+      ],
+      "challenge": "Test an empty file, a file smaller than the buffer, a file larger than the buffer and binary bytes containing zero values."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "jv12.2-q1",
+        "prompt": "What does FileInputStream.read() return at end of stream?",
+        "options": [
+          "-1",
+          "0",
+          "null",
+          "The file length"
+        ],
+        "answer": "-1",
+        "explanation": "What does FileInputStream.read() return at end of stream? This is the correct choice for Byte Streams: FileInputStream and FileOutputStream because it follows the Java API contract and the lesson's stated learning goal."
+      },
+      {
+        "id": "jv12.2-q2",
+        "prompt": "Which API writes raw bytes to a file?",
+        "options": [
+          "FileOutputStream",
+          "FileReader",
+          "BufferedReader",
+          "Scanner"
+        ],
+        "answer": "FileOutputStream",
+        "explanation": "Which API writes raw bytes to a file? This is the correct choice for Byte Streams: FileInputStream and FileOutputStream because it follows the Java API contract and the lesson's stated learning goal."
+      },
+      {
+        "id": "jv12.2-q3",
+        "prompt": "Why use a byte buffer when copying a large file?",
+        "options": [
+          "It transfers multiple bytes per read/write operation",
+          "It converts all binary data into text",
+          "It prevents the destination from existing",
+          "It sorts the file contents"
+        ],
+        "answer": "It transfers multiple bytes per read/write operation",
+        "explanation": "Why use a byte buffer when copying a large file? This is the correct choice for Byte Streams: FileInputStream and FileOutputStream because it follows the Java API contract and the lesson's stated learning goal."
+      },
+      {
+        "id": "jv12.2-q4",
+        "prompt": "Which resource declaration ensures a stream is closed?",
+        "options": [
+          "try (FileInputStream in = ...)",
+          "if (FileInputStream in = ...)",
+          "while (FileInputStream in = ...)",
+          "switch (FileInputStream in)"
+        ],
+        "answer": "try (FileInputStream in = ...)",
+        "explanation": "Which resource declaration ensures a stream is closed? This is the correct choice for Byte Streams: FileInputStream and FileOutputStream because it follows the Java API contract and the lesson's stated learning goal."
+      },
+      {
+        "id": "jv12.2-q5",
+        "prompt": "Why should arbitrary binary data not be decoded as text without a format?",
+        "options": [
+          "The bytes may not represent valid text in the assumed charset",
+          "Every binary file is UTF-8",
+          "Java cannot read bytes",
+          "Text readers automatically repair all binary formats"
+        ],
+        "answer": "The bytes may not represent valid text in the assumed charset",
+        "explanation": "Why should arbitrary binary data not be decoded as text without a format? This is the correct choice for Byte Streams: FileInputStream and FileOutputStream because it follows the Java API contract and the lesson's stated learning goal."
+      }
+    ]
+  },
+  "status": "draft"
+}

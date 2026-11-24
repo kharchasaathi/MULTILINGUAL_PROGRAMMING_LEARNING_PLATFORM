@@ -1,0 +1,162 @@
+{
+  "id": "java.jv8.5.en",
+  "courseId": "java",
+  "moduleId": "JV8",
+  "topicId": "JV8.5",
+  "title": "Java Delete Files",
+  "language": "en",
+  "learningObjectives": [
+    "Delete a file with File.delete and inspect its boolean result.",
+    "Use Files.delete for explicit failure reporting.",
+    "Use Files.deleteIfExists when absence is acceptable.",
+    "Distinguish deleting files from deleting non-empty directories.",
+    "Apply safe path checks and avoid deleting unintended data."
+  ],
+  "prerequisites": [
+    "JV1.1",
+    "JV1.2",
+    "JV1.3",
+    "JV2.1",
+    "JV3.1",
+    "JV4.1",
+    "JV5.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Java supports deletion through File.delete and the NIO Files API. File.delete returns a boolean, which can make failure reasons difficult to diagnose. Files.delete throws IOException when deletion fails and NoSuchFileException when the path is absent. Files.deleteIfExists returns false if nothing existed to delete. A directory can normally be deleted only when it is empty; always validate the target path before destructive operations.",
+      "whyItMatters": "File handling allows a Java application to persist, retrieve and manage information beyond the lifetime of a single run.",
+      "analogy": "Think of a path as a labeled address to a storage location; the address and the data stored there are different things.",
+      "analogyLimit": "A path is not a guarantee that the target exists or that the program has permission to access it."
+    },
+    "explain": {
+      "narrative": "Represent the target with Path.of. Use Files.delete when absence should be treated as an error, or Files.deleteIfExists when deleting an already-absent path is acceptable. Both methods can throw IOException. File.delete offers a boolean result instead. Do not recursively delete paths unless the application has carefully validated the target and its contents.",
+      "examples": [
+        {
+          "id": "jv8.5-ex1",
+          "language": "java",
+          "title": "Delete an existing file",
+          "code": "import java.io.IOException;\nimport java.nio.file.Files;\nimport java.nio.file.Path;\npublic class Main { public static void main(String[] args) throws IOException { Path path = Path.of(\"remove.txt\"); Files.writeString(path, \"temporary\"); Files.delete(path); System.out.println(Files.exists(path)); } }",
+          "expectedOutput": "false",
+          "explanation": "Files.delete removes the path, and exists confirms that it is no longer present.",
+          "runnable": false
+        },
+        {
+          "id": "jv8.5-ex2",
+          "language": "java",
+          "title": "Delete only if present",
+          "code": "import java.io.IOException;\nimport java.nio.file.Files;\nimport java.nio.file.Path;\npublic class Main { public static void main(String[] args) throws IOException { Path path = Path.of(\"optional.txt\"); System.out.println(Files.deleteIfExists(path)); } }",
+          "expectedOutput": "false",
+          "explanation": "deleteIfExists returns false when the target path was absent.",
+          "runnable": false
+        },
+        {
+          "id": "jv8.5-ex3",
+          "language": "java",
+          "title": "Delete an empty directory",
+          "code": "import java.io.IOException;\nimport java.nio.file.Files;\nimport java.nio.file.Path;\npublic class Main { public static void main(String[] args) throws IOException { Path folder = Path.of(\"empty-folder\"); Files.createDirectory(folder); Files.delete(folder); System.out.println(Files.exists(folder)); } }",
+          "expectedOutput": "false",
+          "explanation": "An empty directory can be deleted after it is created.",
+          "runnable": false
+        },
+        {
+          "id": "jv8.5-ex4",
+          "language": "java",
+          "title": "Use File.delete result",
+          "code": "import java.io.File;\npublic class Main { public static void main(String[] args) throws Exception { File file = new File(\"legacy.txt\"); file.createNewFile(); System.out.println(file.delete()); } }",
+          "expectedOutput": "true",
+          "explanation": "File.delete returns true when the path was successfully deleted.",
+          "runnable": false
+        },
+        {
+          "id": "jv8.5-ex5",
+          "language": "java",
+          "title": "Delete a file then confirm",
+          "code": "import java.io.IOException;\nimport java.nio.file.Files;\nimport java.nio.file.Path;\npublic class Main { public static void main(String[] args) throws IOException { Path path = Path.of(\"confirm.txt\"); Files.writeString(path, \"data\"); boolean removed = Files.deleteIfExists(path); System.out.println(removed); System.out.println(Files.exists(path)); } }",
+          "expectedOutput": "true\nfalse",
+          "explanation": "deleteIfExists reports that it removed the file, and the follow-up check confirms absence.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a small Java program that demonstrates java delete files. Predict each result, then compile and run it with JDK 21.",
+      "independentTask": "Build a practical Java file-handling utility related to java delete files. Include at least two test cases, expected outputs, and an explanation of failure handling and path safety.",
+      "hints": [
+        "Start with a Path or File that points to a controlled test location.",
+        "Use try-with-resources for streams and writers, and handle IOException where the API declares it.",
+        "Test both the normal case and an edge case such as a missing path or existing target."
+      ],
+      "challenge": "Extend one java delete files example to handle a realistic file-system edge case safely and explain the API behaviour."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "jv8.5-q1",
+        "prompt": "Which method deletes a path and throws if deletion fails?",
+        "answer": "Files.delete()",
+        "options": [
+          "Files.exists()",
+          "Files.delete()",
+          "Files.readString()",
+          "Files.createFile()"
+        ],
+        "explanation": "delete() removes the target path and reports failure when it cannot delete it."
+      },
+      {
+        "id": "jv8.5-q2",
+        "prompt": "What does deleteIfExists return for a missing path?",
+        "answer": "false",
+        "options": [
+          "true",
+          "false",
+          "null",
+          "0"
+        ],
+        "explanation": "The method returns false when the target already exists or creation did not occur."
+      },
+      {
+        "id": "jv8.5-q3",
+        "prompt": "What does File.delete return?",
+        "answer": "A boolean",
+        "options": [
+          "A Path",
+          "A boolean",
+          "The file contents",
+          "An IOException"
+        ],
+        "explanation": "The method's return value indicates whether deletion succeeded."
+      },
+      {
+        "id": "jv8.5-q4",
+        "prompt": "Can a non-empty directory normally be deleted directly with Files.delete?",
+        "answer": "No",
+        "options": [
+          "Yes, it always removes all children",
+          "No",
+          "Only when it is hidden",
+          "Only on Windows"
+        ],
+        "explanation": "Deletion should not be assumed to succeed when the target is missing or cannot be removed."
+      },
+      {
+        "id": "jv8.5-q5",
+        "prompt": "What should be done before a destructive delete operation?",
+        "answer": "Validate the target path and intended scope",
+        "options": [
+          "Delete the parent folder first",
+          "Ignore the path",
+          "Validate the target path and intended scope",
+          "Assume every delete succeeds"
+        ],
+        "explanation": "Validate the exact target before deletion to avoid removing unintended files."
+      }
+    ]
+  },
+  "status": "draft"
+}

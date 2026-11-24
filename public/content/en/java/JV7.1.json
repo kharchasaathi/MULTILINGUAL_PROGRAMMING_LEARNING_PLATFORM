@@ -1,0 +1,163 @@
+{
+  "id": "java.jv7.1.en",
+  "courseId": "java",
+  "moduleId": "JV7",
+  "topicId": "JV7.1",
+  "title": "Java Exceptions",
+  "language": "en",
+  "learningObjectives": [
+    "Explain why exceptions interrupt normal control flow.",
+    "Use try and catch to handle expected failures.",
+    "Use finally for cleanup that must run.",
+    "Distinguish checked and unchecked exceptions.",
+    "Catch specific exceptions before broader exception types."
+  ],
+  "prerequisites": [
+    "JV1.1",
+    "JV1.2",
+    "JV2.1",
+    "JV2.2",
+    "JV3.1",
+    "JV4.2",
+    "JV5.1",
+    "JV5.5"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "An exception is an object that represents an unusual condition during program execution. Java uses try and catch to handle failures at a suitable boundary. A finally block runs after try/catch completes in ordinary control flow and is commonly used for cleanup. Checked exceptions must be caught or declared; unchecked exceptions are RuntimeException subclasses. Catch the most specific exception that your code can meaningfully handle.",
+      "whyItMatters": "This topic equips Java learners to write robust programs using java exceptions in real applications.",
+      "analogy": "Think of each language feature as a clearly labelled tool: choose it for the specific problem it is designed to solve.",
+      "analogyLimit": "The analogy does not replace the Java language and library contracts; compile and test the actual behaviour."
+    },
+    "explain": {
+      "narrative": "Place risky operations in a try block and add catch clauses for the exceptions you can recover from. A catch clause receives the exception object and may inspect its message. Multiple catch clauses are checked from top to bottom, so a subclass catch must appear before a superclass catch. Use try-with-resources for AutoCloseable resources; it is usually clearer and safer than manual close calls in finally.",
+      "examples": [
+        {
+          "id": "jv7.1-ex1",
+          "language": "java",
+          "title": "Catch arithmetic failure",
+          "code": "public class Main { public static void main(String[] args) { try { int n = 10 / 0; System.out.println(n); } catch (ArithmeticException e) { System.out.println(\"Cannot divide by zero\"); } } }",
+          "expectedOutput": "Cannot divide by zero",
+          "explanation": "ArithmeticException is caught so the program can continue.",
+          "runnable": false
+        },
+        {
+          "id": "jv7.1-ex2",
+          "language": "java",
+          "title": "Catch invalid number text",
+          "code": "public class Main { public static void main(String[] args) { try { int n = Integer.parseInt(\"abc\"); System.out.println(n); } catch (NumberFormatException e) { System.out.println(\"Invalid number\"); } } }",
+          "expectedOutput": "Invalid number",
+          "explanation": "NumberFormatException is an unchecked exception raised by invalid numeric text.",
+          "runnable": false
+        },
+        {
+          "id": "jv7.1-ex3",
+          "language": "java",
+          "title": "Multiple catch branches",
+          "code": "public class Main { public static void main(String[] args) { String value = \"0\"; try { int n = Integer.parseInt(value); System.out.println(12 / n); } catch (NumberFormatException e) { System.out.println(\"Bad input\"); } catch (ArithmeticException e) { System.out.println(\"Zero divisor\"); } } }",
+          "expectedOutput": "Zero divisor",
+          "explanation": "Specific catch blocks handle different failure types.",
+          "runnable": false
+        },
+        {
+          "id": "jv7.1-ex4",
+          "language": "java",
+          "title": "Finally executes",
+          "code": "public class Main { public static void main(String[] args) { try { System.out.println(\"Work\"); } finally { System.out.println(\"Cleanup\"); } } }",
+          "expectedOutput": "Work\nCleanup",
+          "explanation": "finally runs after the try block in this normal completion path.",
+          "runnable": false
+        },
+        {
+          "id": "jv7.1-ex5",
+          "language": "java",
+          "title": "Catch a parent type",
+          "code": "public class Main { public static void main(String[] args) { try { int[] a = {4}; System.out.println(a[3]); } catch (RuntimeException e) { System.out.println(e.getClass().getSimpleName()); } } }",
+          "expectedOutput": "ArrayIndexOutOfBoundsException",
+          "explanation": "A superclass catch can handle a subclass exception, though narrower catches are preferable.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Build a small Java program that demonstrates java exceptions. Predict the output before compiling with JDK 21.",
+      "independentTask": "Create a practical application using java exceptions. Include at least two test cases, expected output, and an explanation of one important edge case.",
+      "hints": [
+        "Start with the smallest standard Java API or language construct that expresses the requirement.",
+        "Trace the execution path and verify the documented behaviour of each method or keyword.",
+        "Compile with JDK 21 and test normal as well as boundary or failure cases."
+      ],
+      "challenge": "Extend one example into a small reusable component and document its error handling, ordering or concurrency guarantees as relevant."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "jv7.1-q1",
+        "prompt": "Which block contains code that may throw an exception?",
+        "answer": "try",
+        "options": [
+          "try",
+          "catch",
+          "finally",
+          "throws"
+        ],
+        "explanation": "The try block encloses code whose exceptions may be handled."
+      },
+      {
+        "id": "jv7.1-q2",
+        "prompt": "Which exception is thrown by parsing non-numeric text as an integer?",
+        "answer": "NumberFormatException",
+        "options": [
+          "IOException",
+          "NumberFormatException",
+          "SQLException",
+          "InterruptedException"
+        ],
+        "explanation": "Integer parsing reports invalid numeric text with NumberFormatException."
+      },
+      {
+        "id": "jv7.1-q3",
+        "prompt": "Where should a subclass exception catch appear relative to its superclass catch?",
+        "answer": "Before the superclass catch",
+        "options": [
+          "After the superclass catch",
+          "Before the superclass catch",
+          "Only inside finally",
+          "Outside the method"
+        ],
+        "explanation": "Otherwise the superclass catch makes the subclass catch unreachable."
+      },
+      {
+        "id": "jv7.1-q4",
+        "prompt": "Which block is commonly used for cleanup?",
+        "answer": "finally",
+        "options": [
+          "try",
+          "catch",
+          "finally",
+          "throw"
+        ],
+        "explanation": "finally is intended for cleanup that should run after try/catch."
+      },
+      {
+        "id": "jv7.1-q5",
+        "prompt": "Which category must be caught or declared?",
+        "answer": "Checked exceptions",
+        "options": [
+          "All RuntimeExceptions",
+          "Checked exceptions",
+          "Errors only",
+          "No exceptions"
+        ],
+        "explanation": "The compiler enforces handling or declaration of checked exceptions."
+      }
+    ]
+  },
+  "status": "draft"
+}

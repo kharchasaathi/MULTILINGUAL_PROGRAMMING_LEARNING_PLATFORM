@@ -1,0 +1,158 @@
+{
+  "id": "java.jv9.4.en",
+  "courseId": "java",
+  "moduleId": "JV9",
+  "topicId": "JV9.4",
+  "title": "try-with-resources and Exception Suppression",
+  "language": "en",
+  "learningObjectives": [
+    "Use AutoCloseable resources in try-with-resources statements",
+    "Declare and safely close multiple resources in one statement",
+    "Explain why resources close in reverse declaration order",
+    "Inspect suppressed exceptions when resource cleanup also fails",
+    "Replace manual cleanup logic with structured resource management"
+  ],
+  "prerequisites": [
+    "JV1.1",
+    "JV1.2",
+    "JV1.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "try-with-resources closes AutoCloseable resources automatically, including when the body throws. Resources close in reverse declaration order. If both the body and close operation fail, the body exception remains primary and close failures are suppressed.",
+      "whyItMatters": "try-with-resources and Exception Suppression helps learners create Java applications that are easier to reason about, test and maintain. It connects core language knowledge with realistic programming tasks.",
+      "analogy": "Treat this concept as a clearly labeled tool: select it for a specific responsibility and check the result.",
+      "analogyLimit": "This analogy is only a learning aid; actual behavior is defined by Java language rules and API contracts."
+    },
+    "explain": {
+      "narrative": "## try-with-resources and Exception Suppression\n\ntry-with-resources closes AutoCloseable resources automatically, including when the body throws. Resources close in reverse declaration order. If both the body and close operation fail, the body exception remains primary and close failures are suppressed.\n\n## Applying the concept\n\nIdentify the input and desired result. Select the Java construct or API that directly supports the requirement. Keep code readable, handle documented failure cases and state assumptions clearly.\n\n## Verification checklist\n\n- Compile with JDK 21.\n- Predict the output before running.\n- Test normal, boundary and invalid inputs where relevant.\n- Check resource cleanup and error handling.\n- Prefer explicit types and focused methods.",
+      "examples": [
+        {
+          "id": "jv9.4-ex1",
+          "language": "java",
+          "title": "Core concept",
+          "code": "public class Main { public static void main(String[] args) throws Exception { try (var in = new java.io.ByteArrayInputStream(new byte[]{65, 66})) { System.out.println((char) in.read()); } } }",
+          "expectedOutput": "A",
+          "explanation": "Uses try-with-resources with an AutoCloseable byte stream.",
+          "runnable": false
+        },
+        {
+          "id": "jv9.4-ex2",
+          "language": "java",
+          "title": "Practical use",
+          "code": "public class Main { public static void main(String[] args) throws Exception { try (var writer = new java.io.StringWriter()) { writer.write(\"CodeSaathi\"); System.out.println(writer.toString()); } } }",
+          "expectedOutput": "CodeSaathi",
+          "explanation": "Shows automatic resource closure for a writer.",
+          "runnable": false
+        },
+        {
+          "id": "jv9.4-ex3",
+          "language": "java",
+          "title": "Edge case",
+          "code": "public class Main { public static void main(String[] args) throws Exception { class R implements AutoCloseable { public void close() { System.out.println(\"closed\"); } } try (R r = new R()) { System.out.println(\"body\"); } } }",
+          "expectedOutput": "body\nclosed",
+          "explanation": "Shows that close runs after the try body.",
+          "runnable": false
+        },
+        {
+          "id": "jv9.4-ex4",
+          "language": "java",
+          "title": "API behavior",
+          "code": "public class Main { public static void main(String[] args) throws Exception { class R implements AutoCloseable { public void close() throws Exception { throw new Exception(\"close\"); } } try (R r = new R()) { throw new Exception(\"body\"); } catch (Exception ex) { System.out.println(ex.getMessage()); System.out.println(ex.getSuppressed()[0].getMessage()); } } }",
+          "expectedOutput": "body\nclose",
+          "explanation": "Shows that a body exception remains primary and a close failure is suppressed.",
+          "runnable": false
+        },
+        {
+          "id": "jv9.4-ex5",
+          "language": "java",
+          "title": "Test and verify",
+          "code": "public class Main { public static void main(String[] args) throws Exception { try (var one = new java.io.StringReader(\"one\"); var two = new java.io.StringReader(\"two\")) { System.out.println(\"\" + (char) one.read() + (char) two.read()); } } }",
+          "expectedOutput": "ot",
+          "explanation": "Declares multiple resources; they close automatically in reverse order.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create two AutoCloseable resources that print from close(). Confirm reverse close order when both are declared in one try-with-resources statement.",
+      "independentTask": "Create a resource whose close() throws while the try body also throws. Print the primary exception and each suppressed exception.",
+      "hints": [
+        "State the input, output and assumptions before coding.",
+        "Use the smallest example that demonstrates the behavior.",
+        "Predict the result, compile with JDK 21, then test a boundary or failure case."
+      ],
+      "challenge": "Refactor a manually closed reader into try-with-resources. Test normal completion and an exception thrown while reading."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "jv9.4-q1",
+        "prompt": "Which interface is commonly used by resources in try-with-resources?",
+        "options": [
+          "AutoCloseable",
+          "Serializable",
+          "Comparable",
+          "Runnable"
+        ],
+        "answer": "AutoCloseable",
+        "explanation": "Which interface is commonly used by resources in try-with-resources? The correct choice follows the Java concept taught in try-with-resources and Exception Suppression; the alternatives conflict with its language rules or intended use."
+      },
+      {
+        "id": "jv9.4-q2",
+        "prompt": "In what order are multiple try-with-resources variables closed?",
+        "options": [
+          "Reverse declaration order",
+          "Declaration order",
+          "Alphabetical order",
+          "Random order"
+        ],
+        "answer": "Reverse declaration order",
+        "explanation": "In what order are multiple try-with-resources variables closed? The correct choice follows the Java concept taught in try-with-resources and Exception Suppression; the alternatives conflict with its language rules or intended use."
+      },
+      {
+        "id": "jv9.4-q3",
+        "prompt": "If the try body throws and close also throws, which exception remains primary?",
+        "options": [
+          "The exception from the try body",
+          "The close exception always",
+          "Both are discarded",
+          "No exception is reported"
+        ],
+        "answer": "The exception from the try body",
+        "explanation": "If the try body throws and close also throws, which exception remains primary? The correct choice follows the Java concept taught in try-with-resources and Exception Suppression; the alternatives conflict with its language rules or intended use."
+      },
+      {
+        "id": "jv9.4-q4",
+        "prompt": "How can close-time failures be inspected when another exception is primary?",
+        "options": [
+          "getSuppressed()",
+          "getCauseOnly()",
+          "getStackTraceText()",
+          "getMessageCount()"
+        ],
+        "answer": "getSuppressed()",
+        "explanation": "How can close-time failures be inspected when another exception is primary? The correct choice follows the Java concept taught in try-with-resources and Exception Suppression; the alternatives conflict with its language rules or intended use."
+      },
+      {
+        "id": "jv9.4-q5",
+        "prompt": "Which is a key benefit of try-with-resources?",
+        "options": [
+          "Resources are closed automatically on normal and exceptional exits",
+          "It prevents every IOException",
+          "It makes resources global",
+          "It skips initialization"
+        ],
+        "answer": "Resources are closed automatically on normal and exceptional exits",
+        "explanation": "Which is a key benefit of try-with-resources? The correct choice follows the Java concept taught in try-with-resources and Exception Suppression; the alternatives conflict with its language rules or intended use."
+      }
+    ]
+  },
+  "status": "draft"
+}

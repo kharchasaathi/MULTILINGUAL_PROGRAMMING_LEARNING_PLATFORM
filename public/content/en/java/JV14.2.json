@@ -1,0 +1,158 @@
+{
+  "id": "java.jv14.2.en",
+  "courseId": "java",
+  "moduleId": "JV14",
+  "topicId": "JV14.2",
+  "title": "Generic Methods, Bounds and Wildcards",
+  "language": "en",
+  "learningObjectives": [
+    "Declare generic methods with type parameters before return types",
+    "Restrict generic types with bounded type parameter declarations",
+    "Read producer values safely using extends wildcards",
+    "Add consumer values safely using super wildcards",
+    "Explain PECS and the purpose of generic type erasure"
+  ],
+  "prerequisites": [
+    "JV1.1",
+    "JV1.2",
+    "JV1.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Generic methods declare type parameters before the return type. Bounds restrict acceptable types. extends is useful for producers and super for consumers.",
+      "whyItMatters": "Generic Methods, Bounds and Wildcards helps learners create Java applications that are easier to reason about, test and maintain.",
+      "analogy": "Treat the concept as a clearly labeled tool for one programming responsibility.",
+      "analogyLimit": "Actual behavior is defined by Java language rules and API contracts."
+    },
+    "explain": {
+      "narrative": "## Generic Methods, Bounds and Wildcards\n\nGeneric methods declare type parameters before the return type. Bounds restrict acceptable types. extends is useful for producers and super for consumers.\n\nIdentify the input and desired result. Select the Java construct or API that supports the requirement. Keep code readable, handle documented failures and state assumptions clearly.\n\nCompile with JDK 21, predict output before running, and test normal, boundary and invalid inputs.",
+      "examples": [
+        {
+          "id": "jv14.2-ex1",
+          "language": "java",
+          "title": "Core concept",
+          "code": "public class Main { public static void main(String[] args) throws Exception { class NumberTools { <T extends Number> double sum(java.util.List<T> values) { double total=0; for(T value:values) total+=value.doubleValue(); return total; } } NumberTools tools = new NumberTools(); System.out.println(tools.sum(java.util.List.of(2,3,4))); } }",
+          "expectedOutput": "9.0",
+          "explanation": "A bounded type parameter allows the method to call Number.doubleValue.",
+          "runnable": false
+        },
+        {
+          "id": "jv14.2-ex2",
+          "language": "java",
+          "title": "Practical use",
+          "code": "public class Main { public static void main(String[] args) throws Exception { class First { <T> T get(java.util.List<T> values) { return values.get(0); } } System.out.println(new First().get(java.util.List.of(\"red\",\"blue\"))); } }",
+          "expectedOutput": "red",
+          "explanation": "A generic method returns the element type supplied by its caller.",
+          "runnable": false
+        },
+        {
+          "id": "jv14.2-ex3",
+          "language": "java",
+          "title": "Boundary behavior",
+          "code": "public class Main { public static void main(String[] args) throws Exception { class Total { double sum(java.util.List<? extends Number> values) { double total=0; for(Number n:values) total+=n.doubleValue(); return total; } } System.out.println(new Total().sum(java.util.List.of(1,2,3))); } }",
+          "expectedOutput": "6.0",
+          "explanation": "An extends wildcard allows reading Number values from a producer.",
+          "runnable": false
+        },
+        {
+          "id": "jv14.2-ex4",
+          "language": "java",
+          "title": "Alternative pattern",
+          "code": "public class Main { public static void main(String[] args) throws Exception { class Add { void addOne(java.util.List<? super Integer> values) { values.add(1); } } java.util.List<Number> values = new java.util.ArrayList<>(); new Add().addOne(values); System.out.println(values); } }",
+          "expectedOutput": "[1]",
+          "explanation": "A super wildcard accepts a consumer list that can store Integer values.",
+          "runnable": false
+        },
+        {
+          "id": "jv14.2-ex5",
+          "language": "java",
+          "title": "Verify the result",
+          "code": "public class Main { public static void main(String[] args) throws Exception { class Show { <T> void show(T value) { System.out.println(value.getClass().getSimpleName()); } } new Show().show(\"Java\"); } }",
+          "expectedOutput": "String",
+          "explanation": "A generic method infers its type argument from the call.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Write a generic method that returns the first element of List<T>, then write a bounded method that sums List<? extends Number>.",
+      "independentTask": "Implement a method that copies Integer values into a destination List<? super Integer>. Explain why the wildcard supports adding integers.",
+      "hints": [
+        "Start with a small, deterministic dataset and predict the result.",
+        "Check the relevant Java interface and method contract.",
+        "Compile with JDK 21 and test duplicate, empty and boundary cases."
+      ],
+      "challenge": "Create compile-time examples demonstrating extends for reading and super for writing. Explain type erasure at a high level."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "jv14.2-q1",
+        "prompt": "Where is a generic method's type parameter declared?",
+        "options": [
+          "Before its return type",
+          "After the method body",
+          "Inside the package declaration",
+          "After the class closing brace"
+        ],
+        "answer": "Before its return type",
+        "explanation": "Where is a generic method's type parameter declared? This is the correct answer based on the Java contract and behavior described in Generic Methods, Bounds and Wildcards."
+      },
+      {
+        "id": "jv14.2-q2",
+        "prompt": "What does <T extends Number> require?",
+        "options": [
+          "T must be Number or a subtype of Number",
+          "T must be a String",
+          "T must be primitive",
+          "T must implement Runnable only"
+        ],
+        "answer": "T must be Number or a subtype of Number",
+        "explanation": "What does <T extends Number> require? This is the correct answer based on the Java contract and behavior described in Generic Methods, Bounds and Wildcards."
+      },
+      {
+        "id": "jv14.2-q3",
+        "prompt": "What does List<? extends Number> primarily allow?",
+        "options": [
+          "Reading elements as Number safely",
+          "Adding arbitrary Number values",
+          "Adding any Object",
+          "Changing the list's type parameter"
+        ],
+        "answer": "Reading elements as Number safely",
+        "explanation": "What does List<? extends Number> primarily allow? This is the correct answer based on the Java contract and behavior described in Generic Methods, Bounds and Wildcards."
+      },
+      {
+        "id": "jv14.2-q4",
+        "prompt": "What does List<? super Integer> allow conveniently?",
+        "options": [
+          "Adding Integer values to the list",
+          "Reading every element as Integer safely",
+          "Adding only Double values",
+          "Sorting without a comparator"
+        ],
+        "answer": "Adding Integer values to the list",
+        "explanation": "What does List<? super Integer> allow conveniently? This is the correct answer based on the Java contract and behavior described in Generic Methods, Bounds and Wildcards."
+      },
+      {
+        "id": "jv14.2-q5",
+        "prompt": "What does PECS stand for?",
+        "options": [
+          "Producer Extends, Consumer Super",
+          "Private Encapsulation, Class Scope",
+          "Primitive Elements, Character Strings",
+          "Public Enum, Constant Switch"
+        ],
+        "answer": "Producer Extends, Consumer Super",
+        "explanation": "What does PECS stand for? This is the correct answer based on the Java contract and behavior described in Generic Methods, Bounds and Wildcards."
+      }
+    ]
+  },
+  "status": "draft"
+}

@@ -1,0 +1,158 @@
+{
+  "id": "java.jv14.3.en",
+  "courseId": "java",
+  "moduleId": "JV14",
+  "topicId": "JV14.3",
+  "title": "Java Annotations",
+  "language": "en",
+  "learningObjectives": [
+    "Explain how annotations provide metadata to compilers and tools",
+    "Use Override and Deprecated annotations appropriately in Java code",
+    "Declare custom annotation types using the @interface syntax",
+    "Select annotation targets and retention policies for a use case",
+    "Inspect runtime-retained annotations using Java reflection"
+  ],
+  "prerequisites": [
+    "JV1.1",
+    "JV1.2",
+    "JV1.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Annotations provide metadata for compilers, tools and runtime frameworks. Custom annotations use @interface; retention and target control where they apply.",
+      "whyItMatters": "Java Annotations helps learners create Java applications that are easier to reason about, test and maintain.",
+      "analogy": "Treat the concept as a clearly labeled tool for one programming responsibility.",
+      "analogyLimit": "Actual behavior is defined by Java language rules and API contracts."
+    },
+    "explain": {
+      "narrative": "## Java Annotations\n\nAnnotations provide metadata for compilers, tools and runtime frameworks. Custom annotations use @interface; retention and target control where they apply.\n\nIdentify the input and desired result. Select the Java construct or API that supports the requirement. Keep code readable, handle documented failures and state assumptions clearly.\n\nCompile with JDK 21, predict output before running, and test normal, boundary and invalid inputs.",
+      "examples": [
+        {
+          "id": "jv14.3-ex1",
+          "language": "java",
+          "title": "Core concept",
+          "code": "public class Main { public static void main(String[] args) throws Exception { System.out.println(Deprecated.class.isAnnotation()); } }",
+          "expectedOutput": "true",
+          "explanation": "Shows that Deprecated is an annotation type.",
+          "runnable": false
+        },
+        {
+          "id": "jv14.3-ex2",
+          "language": "java",
+          "title": "Practical use",
+          "code": "public class Main { public static void main(String[] args) throws Exception { class Example { @Override public String toString() { return \"Example\"; } } System.out.println(new Example()); } }",
+          "expectedOutput": "Example",
+          "explanation": "Uses Override so the compiler checks the method override.",
+          "runnable": false
+        },
+        {
+          "id": "jv14.3-ex3",
+          "language": "java",
+          "title": "Boundary behavior",
+          "code": "public class Main { public static void main(String[] args) throws Exception { @SuppressWarnings(\"deprecation\") String oldName = \"legacy\"; System.out.println(oldName); } }",
+          "expectedOutput": "legacy",
+          "explanation": "Shows a narrowly scoped suppression example.",
+          "runnable": false
+        },
+        {
+          "id": "jv14.3-ex4",
+          "language": "java",
+          "title": "Runtime annotation inspection",
+          "code": "public class Main { @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME) @java.lang.annotation.Target(java.lang.annotation.ElementType.TYPE) @interface Marker {} @Marker static class Marked {} public static void main(String[] args) { System.out.println(Marked.class.isAnnotationPresent(Marker.class)); } }",
+          "expectedOutput": "true",
+          "explanation": "A member annotation type is declared on Main, targeted at types and retained at runtime, so reflection can find it.",
+          "runnable": false
+        },
+        {
+          "id": "jv14.3-ex5",
+          "language": "java",
+          "title": "Class-retained annotation",
+          "code": "public class Main { @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS) @java.lang.annotation.Target(java.lang.annotation.ElementType.TYPE) @interface CourseTag {} @CourseTag static class Course {} public static void main(String[] args) { System.out.println(Course.class.isAnnotationPresent(CourseTag.class)); } }",
+          "expectedOutput": "false",
+          "explanation": "CLASS retention stores the annotation in class-file metadata but does not make it available through runtime reflection.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Use @Override and @Deprecated in a small example. Declare a custom runtime annotation with @Target(TYPE), apply it to a class and inspect it with reflection.",
+      "independentTask": "Create a custom annotation with documented retention and target. Demonstrate how a runtime-retained annotation can be read with reflection.",
+      "hints": [
+        "Use the API's documented contract rather than relying on assumptions.",
+        "Keep examples minimal and demonstrate one behavior at a time.",
+        "Compile with JDK 21 and verify both present and absent or failure cases."
+      ],
+      "challenge": "Compare SOURCE, CLASS and RUNTIME retention. Explain why SuppressWarnings should be narrow and why annotations are metadata rather than automatic behavior."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "jv14.3-q1",
+        "prompt": "What is the main purpose of an annotation?",
+        "options": [
+          "Attach metadata for compilers, tools or frameworks",
+          "Execute a method automatically in every case",
+          "Replace Java access modifiers",
+          "Store a database record"
+        ],
+        "answer": "Attach metadata for compilers, tools or frameworks",
+        "explanation": "What is the main purpose of an annotation? This is the correct answer based on the Java contract and behavior described in Java Annotations."
+      },
+      {
+        "id": "jv14.3-q2",
+        "prompt": "What does @Override ask the compiler to check?",
+        "options": [
+          "That the method overrides a superclass or interface method",
+          "That the method is static",
+          "That the class is final",
+          "That the method is private"
+        ],
+        "answer": "That the method overrides a superclass or interface method",
+        "explanation": "What does @Override ask the compiler to check? This is the correct answer based on the Java contract and behavior described in Java Annotations."
+      },
+      {
+        "id": "jv14.3-q3",
+        "prompt": "What does @Deprecated communicate?",
+        "options": [
+          "The API is discouraged for new use and may be removed in a future release",
+          "The API is always broken",
+          "The class cannot compile",
+          "The method is private"
+        ],
+        "answer": "The API is discouraged for new use and may be removed in a future release",
+        "explanation": "What does @Deprecated communicate? This is the correct answer based on the Java contract and behavior described in Java Annotations."
+      },
+      {
+        "id": "jv14.3-q4",
+        "prompt": "Which syntax declares a custom annotation type?",
+        "options": [
+          "@interface Marker {}",
+          "interface @Marker {}",
+          "annotation Marker {}",
+          "class @interface Marker {}"
+        ],
+        "answer": "@interface Marker {}",
+        "explanation": "Which syntax declares a custom annotation type? This is the correct answer based on the Java contract and behavior described in Java Annotations."
+      },
+      {
+        "id": "jv14.3-q5",
+        "prompt": "Which meta-annotation controls where an annotation may be applied?",
+        "options": [
+          "@Target",
+          "@Override",
+          "@Deprecated",
+          "@FunctionalInterface"
+        ],
+        "answer": "@Target",
+        "explanation": "Which meta-annotation controls where an annotation may be applied? This is the correct answer based on the Java contract and behavior described in Java Annotations."
+      }
+    ]
+  },
+  "status": "draft"
+}

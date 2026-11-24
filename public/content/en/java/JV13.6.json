@@ -1,0 +1,158 @@
+{
+  "id": "java.jv13.6.en",
+  "courseId": "java",
+  "moduleId": "JV13",
+  "topicId": "JV13.6",
+  "title": "Complexity, Ordering and Equality Contracts",
+  "language": "en",
+  "learningObjectives": [
+    "Compare expected operation costs for common collection implementations",
+    "Explain average lookup behavior for hash-based collections",
+    "Describe logarithmic lookup behavior for tree-based collections",
+    "Maintain the equals and hashCode contract for value-based objects",
+    "Use comparator tie-breakers when distinct values need distinct ordering"
+  ],
+  "prerequisites": [
+    "JV1.1",
+    "JV1.2",
+    "JV1.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Hash-based collections rely on consistent equals and hashCode; sorted collections rely on comparison. Big-O describes growth, not exact elapsed time.",
+      "whyItMatters": "Complexity, Ordering and Equality Contracts helps learners create Java applications that are easier to reason about, test and maintain.",
+      "analogy": "Treat the concept as a clearly labeled tool for one programming responsibility.",
+      "analogyLimit": "Actual behavior is defined by Java language rules and API contracts."
+    },
+    "explain": {
+      "narrative": "## Complexity, Ordering and Equality Contracts\n\nHash-based collections rely on consistent equals and hashCode; sorted collections rely on comparison. Big-O describes growth, not exact elapsed time.\n\nIdentify the input and desired result. Select the Java construct or API that supports the requirement. Keep code readable, handle documented failures and state assumptions clearly.\n\nCompile with JDK 21, predict output before running, and test normal, boundary and invalid inputs.",
+      "examples": [
+        {
+          "id": "jv13.6-ex1",
+          "language": "java",
+          "title": "Hash-based lookup and equality",
+          "code": "public class Main { public static void main(String[] args) { record User(int id, String name) {} java.util.Map<Integer,User> users = new java.util.HashMap<>(); users.put(7, new User(7, \"Asha\")); System.out.println(users.get(7).name()); } }",
+          "expectedOutput": "Asha",
+          "explanation": "HashMap uses hash-based lookup; this example demonstrates a key lookup. Average-time complexity is commonly O(1), but worst-case behavior and hash quality matter.",
+          "runnable": false
+        },
+        {
+          "id": "jv13.6-ex2",
+          "language": "java",
+          "title": "Sorted-map lookup",
+          "code": "public class Main { public static void main(String[] args) { java.util.Map<Integer,String> users = new java.util.TreeMap<>(); users.put(3, \"C\"); users.put(1, \"A\"); users.put(2, \"B\"); System.out.println(users.keySet()); } }",
+          "expectedOutput": "[1, 2, 3]",
+          "explanation": "TreeMap maintains keys in sorted order and common lookup operations take O(log n).",
+          "runnable": false
+        },
+        {
+          "id": "jv13.6-ex3",
+          "language": "java",
+          "title": "equals and hashCode consistency",
+          "code": "public class Main { public static void main(String[] args) { record Product(String code) {} java.util.Set<Product> products = new java.util.HashSet<>(); products.add(new Product(\"PEN\")); products.add(new Product(\"PEN\")); System.out.println(products.size()); } }",
+          "expectedOutput": "1",
+          "explanation": "Records generate equals and hashCode from their components, so logically equal records behave as one set element.",
+          "runnable": false
+        },
+        {
+          "id": "jv13.6-ex4",
+          "language": "java",
+          "title": "Comparator tie-breaker",
+          "code": "public class Main { public static void main(String[] args) { record Person(String name, int age) {} java.util.Comparator<Person> order = java.util.Comparator.comparingInt(Person::age).thenComparing(Person::name); java.util.Set<Person> people = new java.util.TreeSet<>(order); people.add(new Person(\"Mira\", 20)); people.add(new Person(\"Asha\", 20)); System.out.println(people.size()); } }",
+          "expectedOutput": "2",
+          "explanation": "A tie-breaker keeps distinct names distinct when ages are equal; a comparator returning zero would collapse them in a TreeSet.",
+          "runnable": false
+        },
+        {
+          "id": "jv13.6-ex5",
+          "language": "java",
+          "title": "Indexed access trade-off",
+          "code": "public class Main { public static void main(String[] args) { java.util.List<Integer> values = new java.util.ArrayList<>(java.util.List.of(10,20,30)); System.out.println(values.get(2)); } }",
+          "expectedOutput": "30",
+          "explanation": "ArrayList supports constant-time indexed access in typical complexity analysis; LinkedList indexed access requires traversal.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Implement a value class that correctly overrides equals and hashCode. Add two equal instances to a HashSet and confirm only one logical value remains.",
+      "independentTask": "Compare lookup in HashMap and TreeMap using a representative dataset. Explain average versus logarithmic complexity without claiming fixed elapsed times.",
+      "hints": [
+        "Start with a small, deterministic dataset and predict the result.",
+        "Check the relevant Java interface and method contract.",
+        "Compile with JDK 21 and test duplicate, empty and boundary cases."
+      ],
+      "challenge": "Create a comparator that compares only a person's age and show how equal ages affect TreeSet uniqueness; revise it with a tie-breaker."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "jv13.6-q1",
+        "prompt": "What is the expected average lookup complexity often associated with HashMap?",
+        "options": [
+          "O(1)",
+          "O(n)",
+          "O(n log n)",
+          "O(2^n)"
+        ],
+        "answer": "O(1)",
+        "explanation": "What is the expected average lookup complexity often associated with HashMap? This is the correct answer based on the Java contract and behavior described in Complexity, Ordering and Equality Contracts."
+      },
+      {
+        "id": "jv13.6-q2",
+        "prompt": "What is the typical lookup complexity of TreeMap?",
+        "options": [
+          "O(log n)",
+          "O(1) always",
+          "O(n^2)",
+          "O(2^n)"
+        ],
+        "answer": "O(log n)",
+        "explanation": "What is the typical lookup complexity of TreeMap? This is the correct answer based on the Java contract and behavior described in Complexity, Ordering and Equality Contracts."
+      },
+      {
+        "id": "jv13.6-q3",
+        "prompt": "What contract must hashCode follow with equals?",
+        "options": [
+          "Equal objects must have equal hash codes",
+          "Unequal objects must always have different hash codes",
+          "hashCode must return a positive number",
+          "equals must compare object identity only"
+        ],
+        "answer": "Equal objects must have equal hash codes",
+        "explanation": "What contract must hashCode follow with equals? This is the correct answer based on the Java contract and behavior described in Complexity, Ordering and Equality Contracts."
+      },
+      {
+        "id": "jv13.6-q4",
+        "prompt": "What does Big-O describe?",
+        "options": [
+          "How resource usage grows with input size",
+          "Exact execution time on every computer",
+          "The number of source lines",
+          "The number of Java packages"
+        ],
+        "answer": "How resource usage grows with input size",
+        "explanation": "What does Big-O describe? This is the correct answer based on the Java contract and behavior described in Complexity, Ordering and Equality Contracts."
+      },
+      {
+        "id": "jv13.6-q5",
+        "prompt": "What does a Comparator returning zero indicate in a sorted set?",
+        "options": [
+          "The compared values are equivalent for ordering and uniqueness",
+          "The values are always unequal",
+          "The sort must stop",
+          "The comparator is ignored"
+        ],
+        "answer": "The compared values are equivalent for ordering and uniqueness",
+        "explanation": "What does a Comparator returning zero indicate in a sorted set? This is the correct answer based on the Java contract and behavior described in Complexity, Ordering and Equality Contracts."
+      }
+    ]
+  },
+  "status": "draft"
+}

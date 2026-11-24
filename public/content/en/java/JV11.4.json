@@ -1,0 +1,158 @@
+{
+  "id": "java.jv11.4.en",
+  "courseId": "java",
+  "moduleId": "JV11",
+  "topicId": "JV11.4",
+  "title": "Project: Persistent Notes Manager",
+  "language": "en",
+  "learningObjectives": [
+    "Create and append notes using Java file APIs and explicit UTF-8",
+    "Read saved text safely and list notes in the application directory",
+    "Handle missing files and invalid paths with clear error messages",
+    "Close file resources reliably when operations succeed or fail",
+    "Verify persisted notes using Unicode and repeated application runs"
+  ],
+  "prerequisites": [
+    "JV1.1",
+    "JV1.2",
+    "JV1.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Persist text between runs using an application-owned directory, UTF-8 encoding and try-with-resources. Treat file paths as data to validate.",
+      "whyItMatters": "Project: Persistent Notes Manager helps learners create Java applications that are easier to reason about, test and maintain.",
+      "analogy": "Treat the concept as a clearly labeled tool for one programming responsibility.",
+      "analogyLimit": "Actual behavior is defined by Java language rules and API contracts."
+    },
+    "explain": {
+      "narrative": "## Project: Persistent Notes Manager\n\nPersist text between runs using an application-owned directory, UTF-8 encoding and try-with-resources. Treat file paths as data to validate.\n\nIdentify the input and desired result. Select the Java construct or API that supports the requirement. Keep code readable, handle documented failures and state assumptions clearly.\n\nCompile with JDK 21, predict output before running, and test normal, boundary and invalid inputs.",
+      "examples": [
+        {
+          "id": "jv11.4-ex1",
+          "language": "java",
+          "title": "Core API",
+          "code": "public class Main { public static void main(String[] args) throws Exception { java.nio.file.Path p = java.nio.file.Files.createTempFile(\"note\", \".txt\"); try { java.nio.file.Files.writeString(p, \"Hello\", java.nio.charset.StandardCharsets.UTF_8); System.out.println(java.nio.file.Files.readString(p)); } finally { java.nio.file.Files.deleteIfExists(p); } } }",
+          "expectedOutput": "Hello",
+          "explanation": "Writes and reads a UTF-8 note using a temporary file.",
+          "runnable": false
+        },
+        {
+          "id": "jv11.4-ex2",
+          "language": "java",
+          "title": "Practical use",
+          "code": "public class Main { public static void main(String[] args) throws Exception { java.nio.file.Path p = java.nio.file.Files.createTempFile(\"note\", \".txt\"); try { java.nio.file.Files.writeString(p, \"First\"); java.nio.file.Files.writeString(p, \"\\nSecond\", java.nio.file.StandardOpenOption.APPEND); System.out.println(java.nio.file.Files.readString(p)); } finally { java.nio.file.Files.deleteIfExists(p); } } }",
+          "expectedOutput": "First\nSecond",
+          "explanation": "Appends text without replacing the existing note.",
+          "runnable": false
+        },
+        {
+          "id": "jv11.4-ex3",
+          "language": "java",
+          "title": "Boundary behavior",
+          "code": "public class Main { public static void main(String[] args) throws Exception { java.nio.file.Path p = java.nio.file.Files.createTempFile(\"note\", \".txt\"); try { java.nio.file.Files.writeString(p, \"A\\nB\\nC\"); System.out.println(java.nio.file.Files.readAllLines(p).size()); } finally { java.nio.file.Files.deleteIfExists(p); } } }",
+          "expectedOutput": "3",
+          "explanation": "Counts note lines by reading them as a list.",
+          "runnable": false
+        },
+        {
+          "id": "jv11.4-ex4",
+          "language": "java",
+          "title": "Alternative pattern",
+          "code": "public class Main { public static void main(String[] args) throws Exception { System.out.println(java.nio.charset.StandardCharsets.UTF_8.name()); } }",
+          "expectedOutput": "UTF-8",
+          "explanation": "Names the explicit character encoding used for portable notes.",
+          "runnable": false
+        },
+        {
+          "id": "jv11.4-ex5",
+          "language": "java",
+          "title": "Verify the result",
+          "code": "public class Main { public static void main(String[] args) throws Exception { java.nio.file.Path p = java.nio.file.Files.createTempFile(\"note\", \".txt\"); try { System.out.println(java.nio.file.Files.exists(p)); } finally { java.nio.file.Files.deleteIfExists(p); } } }",
+          "expectedOutput": "true",
+          "explanation": "Checks whether a saved note path exists and cleans up the temporary test file.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a notes file under a temporary application directory. Write a note in UTF-8, append a second line, read it back and delete the temporary file in a finally block or try-with-resources design.",
+      "independentTask": "Implement a PersistentNotes class with create, append, list and delete operations. Keep path handling inside the class and report missing files clearly.",
+      "hints": [
+        "Choose the API that matches the data representation and operation.",
+        "Use try-with-resources for AutoCloseable resources.",
+        "Test empty, normal and failure cases; verify exact output or file contents."
+      ],
+      "challenge": "Test Unicode text, an empty note, a missing file, append to an existing file and cleanup after an IOException."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "jv11.4-q1",
+        "prompt": "Which charset is a good explicit choice for portable text files?",
+        "options": [
+          "UTF-8",
+          "UTF-16LE only",
+          "A platform-dependent default without documenting it",
+          "ASCII for all languages"
+        ],
+        "answer": "UTF-8",
+        "explanation": "Which charset is a good explicit choice for portable text files? This is the correct choice for Project: Persistent Notes Manager because it follows the Java API contract and the lesson's stated learning goal."
+      },
+      {
+        "id": "jv11.4-q2",
+        "prompt": "Why use try-with-resources for file readers and writers?",
+        "options": [
+          "It closes resources automatically even when an operation fails",
+          "It prevents disk-full errors",
+          "It makes file paths secure automatically",
+          "It converts bytes into images"
+        ],
+        "answer": "It closes resources automatically even when an operation fails",
+        "explanation": "Why use try-with-resources for file readers and writers? This is the correct choice for Project: Persistent Notes Manager because it follows the Java API contract and the lesson's stated learning goal."
+      },
+      {
+        "id": "jv11.4-q3",
+        "prompt": "What should a notes manager do if a requested note file is missing?",
+        "options": [
+          "Handle the missing-file case clearly",
+          "Assume the file contains an empty string",
+          "Delete the parent directory",
+          "Ignore every IOException"
+        ],
+        "answer": "Handle the missing-file case clearly",
+        "explanation": "What should a notes manager do if a requested note file is missing? This is the correct choice for Project: Persistent Notes Manager because it follows the Java API contract and the lesson's stated learning goal."
+      },
+      {
+        "id": "jv11.4-q4",
+        "prompt": "Which API reads all text from a Path as a String?",
+        "options": [
+          "Files.readString",
+          "Files.delete",
+          "Files.createDirectory",
+          "Files.isDirectory"
+        ],
+        "answer": "Files.readString",
+        "explanation": "Which API reads all text from a Path as a String? This is the correct choice for Project: Persistent Notes Manager because it follows the Java API contract and the lesson's stated learning goal."
+      },
+      {
+        "id": "jv11.4-q5",
+        "prompt": "Why validate a user-supplied path?",
+        "options": [
+          "To restrict operations to the intended application storage area",
+          "To increase file size",
+          "To disable UTF-8",
+          "To make every path writable"
+        ],
+        "answer": "To restrict operations to the intended application storage area",
+        "explanation": "Why validate a user-supplied path? This is the correct choice for Project: Persistent Notes Manager because it follows the Java API contract and the lesson's stated learning goal."
+      }
+    ]
+  },
+  "status": "draft"
+}

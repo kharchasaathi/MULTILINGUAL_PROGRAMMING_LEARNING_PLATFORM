@@ -1,0 +1,162 @@
+{
+  "id": "java.jv8.1.en",
+  "courseId": "java",
+  "moduleId": "JV8",
+  "topicId": "JV8.1",
+  "title": "Java File Handling",
+  "language": "en",
+  "learningObjectives": [
+    "Explain how Java represents file and directory paths.",
+    "Import and use the java.io.File class for file-system metadata.",
+    "Check whether a path exists and whether it is a file or directory.",
+    "Inspect a path's name, parent and absolute location.",
+    "Handle file-system checks without assuming a path exists."
+  ],
+  "prerequisites": [
+    "JV1.1",
+    "JV1.2",
+    "JV1.3",
+    "JV2.1",
+    "JV3.1",
+    "JV4.1",
+    "JV5.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Java file handling lets a program work with data stored outside its running process. The java.io.File class represents a path and provides metadata and directory operations; it does not itself read or write file contents. A File object may represent an existing or not-yet-created path. Always check existence and permissions, and remember that results depend on the operating system and the process working directory.",
+      "whyItMatters": "File handling allows a Java application to persist, retrieve and manage information beyond the lifetime of a single run.",
+      "analogy": "Think of a path as a labeled address to a storage location; the address and the data stored there are different things.",
+      "analogyLimit": "A path is not a guarantee that the target exists or that the program has permission to access it."
+    },
+    "explain": {
+      "narrative": "Import java.io.File and create a File object from a path string. Use exists to test whether the path currently exists, isFile and isDirectory to inspect its kind, getName to read the final path component, getParent to inspect its parent, and getAbsolutePath to see the resolved path. File metadata can change between a check and a later operation, so production code should handle failures from the actual operation too.",
+      "examples": [
+        {
+          "id": "jv8.1-ex1",
+          "language": "java",
+          "title": "Represent a path",
+          "code": "import java.io.File;\npublic class Main { public static void main(String[] args) { File path = new File(\"notes.txt\"); System.out.println(path.getName()); System.out.println(path.isAbsolute()); } }",
+          "expectedOutput": "notes.txt\nfalse",
+          "explanation": "A File object represents a path; it does not create the file or read its contents.",
+          "runnable": false
+        },
+        {
+          "id": "jv8.1-ex2",
+          "language": "java",
+          "title": "Check existence",
+          "code": "import java.io.File;\npublic class Main { public static void main(String[] args) { File path = new File(\"missing-demo.txt\"); System.out.println(path.exists()); } }",
+          "expectedOutput": "false",
+          "explanation": "exists reports whether the named path is present at the time of the check.",
+          "runnable": false
+        },
+        {
+          "id": "jv8.1-ex3",
+          "language": "java",
+          "title": "Inspect a path name",
+          "code": "import java.io.File;\npublic class Main { public static void main(String[] args) { File path = new File(\"reports\", \"annual.txt\"); System.out.println(path.getName()); System.out.println(path.isFile()); } }",
+          "expectedOutput": "annual.txt\nfalse",
+          "explanation": "getName returns the final path component; isFile is false when no regular file exists there.",
+          "runnable": false
+        },
+        {
+          "id": "jv8.1-ex4",
+          "language": "java",
+          "title": "Create a directory and inspect it",
+          "code": "import java.io.File;\npublic class Main { public static void main(String[] args) { File folder = new File(\"demo-folder\"); System.out.println(folder.mkdir()); System.out.println(folder.isDirectory()); } }",
+          "expectedOutput": "true\ntrue",
+          "explanation": "mkdir creates one directory level, and isDirectory checks the resulting path.",
+          "runnable": false
+        },
+        {
+          "id": "jv8.1-ex5",
+          "language": "java",
+          "title": "Read absolute path",
+          "code": "import java.io.File;\npublic class Main { public static void main(String[] args) { File path = new File(\"data.txt\"); System.out.println(path.getAbsolutePath().endsWith(\"data.txt\")); } }",
+          "expectedOutput": "true",
+          "explanation": "getAbsolutePath resolves a relative path against the current working directory.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a small Java program that demonstrates java file handling. Predict each result, then compile and run it with JDK 21.",
+      "independentTask": "Build a practical Java file-handling utility related to java file handling. Include at least two test cases, expected outputs, and an explanation of failure handling and path safety.",
+      "hints": [
+        "Start with a Path or File that points to a controlled test location.",
+        "Use try-with-resources for streams and writers, and handle IOException where the API declares it.",
+        "Test both the normal case and an edge case such as a missing path or existing target."
+      ],
+      "challenge": "Extend one java file handling example to handle a realistic file-system edge case safely and explain the API behaviour."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "jv8.1-q1",
+        "prompt": "What does a File object represent?",
+        "answer": "A file-system path",
+        "options": [
+          "A file-system path",
+          "The file contents",
+          "A running thread",
+          "A database connection"
+        ],
+        "explanation": "A File instance stores a pathname reference; it does not contain the file's bytes."
+      },
+      {
+        "id": "jv8.1-q2",
+        "prompt": "Which method checks whether a path exists?",
+        "answer": "exists()",
+        "options": [
+          "createNewFile()",
+          "exists()",
+          "read()",
+          "write()"
+        ],
+        "explanation": "exists() checks whether the represented path currently exists."
+      },
+      {
+        "id": "jv8.1-q3",
+        "prompt": "Which class is commonly used for basic path metadata?",
+        "answer": "java.io.File",
+        "options": [
+          "java.util.List",
+          "java.io.File",
+          "java.net.URL",
+          "java.lang.Thread"
+        ],
+        "explanation": "File provides basic pathname and filesystem metadata operations."
+      },
+      {
+        "id": "jv8.1-q4",
+        "prompt": "Does constructing File(\"a.txt\") create a file?",
+        "answer": "No, it only represents the path",
+        "options": [
+          "Yes, it creates an empty file",
+          "No, it only represents the path",
+          "It reads the file",
+          "It deletes the file"
+        ],
+        "explanation": "Constructing a File object does not perform filesystem creation."
+      },
+      {
+        "id": "jv8.1-q5",
+        "prompt": "Which method tests whether a path is a directory?",
+        "answer": "isDirectory()",
+        "options": [
+          "isFile()",
+          "getName()",
+          "isDirectory()",
+          "exists()"
+        ],
+        "explanation": "isDirectory() returns true when the represented path is an existing directory."
+      }
+    ]
+  },
+  "status": "draft"
+}

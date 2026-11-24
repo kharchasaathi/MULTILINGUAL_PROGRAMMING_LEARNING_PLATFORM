@@ -1,0 +1,161 @@
+{
+  "id": "java.jv2.3.en",
+  "courseId": "java",
+  "moduleId": "JV2",
+  "topicId": "JV2.3",
+  "title": "Java Type Casting",
+  "language": "en",
+  "learningObjectives": [
+    "Explain type conversion as changing a value from one type to another.",
+    "Distinguish widening conversions from narrowing conversions.",
+    "Use an explicit cast when a narrowing numeric conversion is intended.",
+    "Predict truncation when a floating-point value is cast to an integer.",
+    "Distinguish numeric casts from parsing text with methods such as Integer.parseInt."
+  ],
+  "prerequisites": [
+    "JV1.1",
+    "JV1.2",
+    "JV1.3",
+    "JV1.4",
+    "JV1.5",
+    "JV1.6"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Type casting converts a value from one data type to another. Java permits many widening primitive conversions automatically, such as int to long or int to double. A narrowing conversion, such as double to int, generally requires an explicit cast and may lose information.",
+      "whyItMatters": "Programs often combine values of different numeric types or receive data in a type that differs from the one needed for a calculation. Understanding conversion rules helps prevent unexpected truncation and overflow.",
+      "analogy": "Casting is like converting a measurement between units: some conversions preserve the represented quantity well, while others discard detail or exceed the target's capacity.",
+      "analogyLimit": "Java casts are governed by language conversion rules, not by a general unit-conversion system. A cast does not validate business meaning and does not necessarily detect overflow."
+    },
+    "explain": {
+      "narrative": "## Widening conversion\n\nA widening primitive conversion moves to a type that can represent the source type's range or precision category according to Java's conversion rules. For example:\n\n```java\nint count = 42;\ndouble measurement = count;\n```\n\nThe assignment is automatic. Widening does not mean every possible conversion is mathematically exact; converting a very large long to float or double can lose integer precision.\n\n## Narrowing conversion\n\nA narrowing conversion may lose information and normally requires an explicit cast:\n\n```java\ndouble price = 19.95;\nint whole = (int) price;\n```\n\nThe result is 19. Casting a floating-point value to an integer type discards the fractional part toward zero; it does not round to the nearest integer.\n\n## Casting versus parsing\n\nCasting converts a value that already has a compatible Java type. Parsing converts text into a value:\n\n```java\nint quantity = Integer.parseInt(\"24\");\n```\n\nInvalid numeric text causes a NumberFormatException. A cast such as `(int) \"24\"` is not valid Java.\n\n## Overflow and validation\n\nNarrowing an integer to a smaller integer type can discard high-order bits. Validate input ranges before converting when correctness matters. Use a suitable numeric type from the beginning where possible.\n\n## Common mistakes\n\n- Assuming `(int) 8.9` rounds to 9; it produces 8.\n- Assuming a cast converts arbitrary text into a number.\n- Ignoring possible overflow or precision loss.\n- Using a cast to hide a type-design problem rather than choosing a suitable type.\n- Forgetting that parsing untrusted text can fail and should be handled.",
+      "examples": [
+        {
+          "id": "jv2.3-ex1",
+          "language": "java",
+          "title": "Widening an integer to double",
+          "code": "public class Main {\n    public static void main(String[] args) {\n        int items = 12;\n        double exactCountAsDecimal = items;\n        System.out.println(exactCountAsDecimal);\n    }\n}",
+          "expectedOutput": "12.0",
+          "explanation": "Java automatically widens int to double. The output is displayed as a decimal value.",
+          "runnable": false
+        },
+        {
+          "id": "jv2.3-ex2",
+          "language": "java",
+          "title": "Explicit narrowing cast",
+          "code": "public class Main {\n    public static void main(String[] args) {\n        double temperature = 27.8;\n        int wholeDegrees = (int) temperature;\n        System.out.println(wholeDegrees);\n    }\n}",
+          "expectedOutput": "27",
+          "explanation": "The explicit cast converts double to int and discards the fractional part toward zero; it does not round.",
+          "runnable": false
+        },
+        {
+          "id": "jv2.3-ex3",
+          "language": "java",
+          "title": "Widen an integer to a decimal type",
+          "code": "public class Main {\n    public static void main(String[] args) {\n        int items = 7;\n        double preciseItems = items;\n        System.out.println(preciseItems);\n    }\n}",
+          "expectedOutput": "7.0",
+          "explanation": "Widening from int to double is automatic because the destination type can represent the integer value.",
+          "runnable": false
+        },
+        {
+          "id": "jv2.3-ex4",
+          "language": "java",
+          "title": "Narrow with an explicit cast",
+          "code": "public class Main {\n    public static void main(String[] args) {\n        double price = 19.99;\n        int wholePart = (int) price;\n        System.out.println(wholePart);\n    }\n}",
+          "expectedOutput": "19",
+          "explanation": "An explicit cast from double to int discards the fractional part; it does not round.",
+          "runnable": false
+        },
+        {
+          "id": "jv2.3-ex5",
+          "language": "java",
+          "title": "Convert between a character and its numeric code",
+          "code": "public class Main {\n    public static void main(String[] args) {\n        char letter = 'A';\n        int code = letter;\n        char nextLetter = (char) (code + 1);\n        System.out.println(code);\n        System.out.println(nextLetter);\n    }\n}",
+          "expectedOutput": "65\nB",
+          "explanation": "A char can widen to int, and an explicit cast converts the resulting integer back to char.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Assign an int value to a double variable without a cast. Then convert a double to int with an explicit cast and print both results.",
+      "independentTask": "Read a numeric value stored as text in a String literal, convert it with Integer.parseInt, and explain what exception invalid text could cause. Do not use a cast for parsing.",
+      "hints": [
+        "Widening primitive conversions are often automatic.",
+        "Use parentheses such as (int) before a value for an explicit numeric cast.",
+        "Use parsing methods such as Integer.parseInt for text-to-number conversion."
+      ],
+      "challenge": "Compare casting 9.99 to int with Math.round(9.99). Explain why the results differ and which operation matches a requirement to round rather than truncate."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "jv2.3-q1",
+        "prompt": "Which conversion is usually automatic in an assignment?",
+        "options": [
+          "int to double",
+          "double to int",
+          "long to byte",
+          "double to short"
+        ],
+        "answer": "int to double",
+        "explanation": "int to double is a widening primitive conversion."
+      },
+      {
+        "id": "jv2.3-q2",
+        "prompt": "What is the result of (int) 6.9?",
+        "options": [
+          "6",
+          "7",
+          "6.9",
+          "A compile-time error"
+        ],
+        "answer": "6",
+        "explanation": "A floating-point value cast to an integer is truncated toward zero."
+      },
+      {
+        "id": "jv2.3-q3",
+        "prompt": "Which operation converts the text \"42\" into an int?",
+        "options": [
+          "Integer.parseInt(\"42\")",
+          "(int) \"42\"",
+          "String.toInt(\"42\")",
+          "int(\"42\")"
+        ],
+        "answer": "Integer.parseInt(\"42\")",
+        "explanation": "Integer.parseInt parses a String containing a valid integer representation."
+      },
+      {
+        "id": "jv2.3-q4",
+        "prompt": "Why can narrowing conversion be risky?",
+        "options": [
+          "It can lose information or overflow",
+          "It always creates a new object",
+          "It changes the source variable's declared type",
+          "It prevents compilation of all arithmetic"
+        ],
+        "answer": "It can lose information or overflow",
+        "explanation": "A narrower target type may not preserve the full source value."
+      },
+      {
+        "id": "jv2.3-q5",
+        "prompt": "What does casting 8.7 to int do?",
+        "options": [
+          "Discards the fractional part and produces 8",
+          "Rounds to 9",
+          "Produces 8.7 as an int",
+          "Produces 0"
+        ],
+        "answer": "Discards the fractional part and produces 8",
+        "explanation": "Floating-point-to-integer casting truncates toward zero rather than rounding."
+      }
+    ]
+  },
+  "status": "draft"
+}

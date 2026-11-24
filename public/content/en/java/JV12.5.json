@@ -1,0 +1,158 @@
+{
+  "id": "java.jv12.5.en",
+  "courseId": "java",
+  "moduleId": "JV12",
+  "topicId": "JV12.5",
+  "title": "Encoding, Buffering and Safe Resource Management",
+  "language": "en",
+  "learningObjectives": [
+    "Choose UTF-8 explicitly when encoding portable text files",
+    "Distinguish Java character counts from encoded byte lengths",
+    "Process large files incrementally instead of loading all content",
+    "Use buffering and structured cleanup for reliable file operations",
+    "Verify that text survives an encode and decode round trip"
+  ],
+  "prerequisites": [
+    "JV1.1",
+    "JV1.2",
+    "JV1.3"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Text is encoded as bytes using a charset. The same characters can produce different bytes under different encodings. Use UTF-8 explicitly, process large content incrementally and use try-with-resources.",
+      "whyItMatters": "Encoding, Buffering and Safe Resource Management helps learners create Java applications that are easier to reason about, test and maintain.",
+      "analogy": "Treat the concept as a clearly labeled tool for one programming responsibility.",
+      "analogyLimit": "Actual behavior is defined by Java language rules and API contracts."
+    },
+    "explain": {
+      "narrative": "## Encoding, Buffering and Safe Resource Management\n\nText is encoded as bytes using a charset. The same characters can produce different bytes under different encodings. Use UTF-8 explicitly, process large content incrementally and use try-with-resources.\n\nIdentify the input and desired result. Select the Java construct or API that supports the requirement. Keep code readable, handle documented failures and state assumptions clearly.\n\nCompile with JDK 21, predict output before running, and test normal, boundary and invalid inputs.",
+      "examples": [
+        {
+          "id": "jv12.5-ex1",
+          "language": "java",
+          "title": "Core API",
+          "code": "public class Main { public static void main(String[] args) throws Exception { byte[] bytes = \"café\".getBytes(java.nio.charset.StandardCharsets.UTF_8); System.out.println(bytes.length); } }",
+          "expectedOutput": "5",
+          "explanation": "UTF-8 encodes the string into five bytes.",
+          "runnable": false
+        },
+        {
+          "id": "jv12.5-ex2",
+          "language": "java",
+          "title": "Practical use",
+          "code": "public class Main { public static void main(String[] args) throws Exception { String restored = new String(\"Code\".getBytes(java.nio.charset.StandardCharsets.UTF_8), java.nio.charset.StandardCharsets.UTF_8); System.out.println(restored); } }",
+          "expectedOutput": "Code",
+          "explanation": "Decodes bytes using the same explicit charset.",
+          "runnable": false
+        },
+        {
+          "id": "jv12.5-ex3",
+          "language": "java",
+          "title": "Boundary behavior",
+          "code": "public class Main { public static void main(String[] args) throws Exception { System.out.println(\"A\".length() + \":\" + \"é\".getBytes(java.nio.charset.StandardCharsets.UTF_8).length); } }",
+          "expectedOutput": "1:2",
+          "explanation": "Shows that a Java String length and its UTF-8 byte count are different measures.",
+          "runnable": false
+        },
+        {
+          "id": "jv12.5-ex4",
+          "language": "java",
+          "title": "Alternative pattern",
+          "code": "public class Main { public static void main(String[] args) throws Exception { try (var writer = new java.io.StringWriter(); var buffered = new java.io.BufferedWriter(writer)) { buffered.write(\"safe\"); buffered.flush(); System.out.println(writer); } } }",
+          "expectedOutput": "safe",
+          "explanation": "Demonstrates resource wrapping and flushing.",
+          "runnable": false
+        },
+        {
+          "id": "jv12.5-ex5",
+          "language": "java",
+          "title": "Verify the result",
+          "code": "public class Main { public static void main(String[] args) throws Exception { System.out.println(\"Process chunks instead of loading a very large file at once\"); } }",
+          "expectedOutput": "Process chunks instead of loading a very large file at once",
+          "explanation": "States the memory-safety principle for large streams.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Encode a string containing ASCII and non-ASCII characters as UTF-8 bytes, decode it again and compare the original and restored strings.",
+      "independentTask": "Build a large-file processor that reads and writes buffered text incrementally using UTF-8 rather than loading the whole file into memory.",
+      "hints": [
+        "Select the interface from the behavior the problem requires.",
+        "Use generics to make the element or key/value types explicit.",
+        "Check ordering and duplicate behavior with a small test dataset."
+      ],
+      "challenge": "Measure and explain the difference between String.length() and UTF-8 byte length for ASCII, accented and Telugu text; verify cleanup on failure."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "jv12.5-q1",
+        "prompt": "What does UTF-8 define?",
+        "options": [
+          "A character encoding that maps Unicode text to bytes",
+          "A Java collection type",
+          "A file compression algorithm",
+          "A network protocol for Java compilation"
+        ],
+        "answer": "A character encoding that maps Unicode text to bytes",
+        "explanation": "What does UTF-8 define? This is the correct choice for Encoding, Buffering and Safe Resource Management because it follows the Java API contract and the lesson's stated learning goal."
+      },
+      {
+        "id": "jv12.5-q2",
+        "prompt": "Why can a character count differ from a byte count?",
+        "options": [
+          "Some characters require multiple bytes in UTF-8",
+          "Every character always uses exactly 8 bytes",
+          "Bytes include file names",
+          "Java strings store only ASCII"
+        ],
+        "answer": "Some characters require multiple bytes in UTF-8",
+        "explanation": "Why can a character count differ from a byte count? This is the correct choice for Encoding, Buffering and Safe Resource Management because it follows the Java API contract and the lesson's stated learning goal."
+      },
+      {
+        "id": "jv12.5-q3",
+        "prompt": "Which practice is best for very large text files?",
+        "options": [
+          "Process the content incrementally with buffered readers",
+          "Always read the entire file into one String",
+          "Convert the file to an int array",
+          "Skip resource closure"
+        ],
+        "answer": "Process the content incrementally with buffered readers",
+        "explanation": "Which practice is best for very large text files? This is the correct choice for Encoding, Buffering and Safe Resource Management because it follows the Java API contract and the lesson's stated learning goal."
+      },
+      {
+        "id": "jv12.5-q4",
+        "prompt": "What does try-with-resources guarantee for an AutoCloseable resource?",
+        "options": [
+          "A close attempt on scope exit, including exceptional exit",
+          "Successful disk writes in every circumstance",
+          "No IOException can occur",
+          "The file is automatically backed up"
+        ],
+        "answer": "A close attempt on scope exit, including exceptional exit",
+        "explanation": "What does try-with-resources guarantee for an AutoCloseable resource? This is the correct choice for Encoding, Buffering and Safe Resource Management because it follows the Java API contract and the lesson's stated learning goal."
+      },
+      {
+        "id": "jv12.5-q5",
+        "prompt": "Why specify UTF-8 explicitly?",
+        "options": [
+          "To make text interpretation consistent across environments",
+          "To make every character one byte",
+          "To avoid using streams",
+          "To force alphabetical sorting"
+        ],
+        "answer": "To make text interpretation consistent across environments",
+        "explanation": "Why specify UTF-8 explicitly? This is the correct choice for Encoding, Buffering and Safe Resource Management because it follows the Java API contract and the lesson's stated learning goal."
+      }
+    ]
+  },
+  "status": "draft"
+}

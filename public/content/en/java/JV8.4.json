@@ -1,0 +1,162 @@
+{
+  "id": "java.jv8.4.en",
+  "courseId": "java",
+  "moduleId": "JV8",
+  "topicId": "JV8.4",
+  "title": "Java Read Files",
+  "language": "en",
+  "learningObjectives": [
+    "Read text with Files.readString and a Path.",
+    "Read lines using Files.readAllLines.",
+    "Use BufferedReader to process a file line by line.",
+    "Specify UTF-8 when decoding text.",
+    "Handle missing files and other IOExceptions."
+  ],
+  "prerequisites": [
+    "JV1.1",
+    "JV1.2",
+    "JV1.3",
+    "JV2.1",
+    "JV3.1",
+    "JV4.1",
+    "JV5.1"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Java provides several ways to read text files. Files.readString is convenient for small files, Files.readAllLines returns all lines as a list, and BufferedReader supports line-by-line processing without loading the entire file at once. Text must be decoded using the correct character set; UTF-8 is a common explicit choice. Reading can fail, for example when a file is missing or access is denied, so handle IOException.",
+      "whyItMatters": "File handling allows a Java application to persist, retrieve and manage information beyond the lifetime of a single run.",
+      "analogy": "Think of a path as a labeled address to a storage location; the address and the data stored there are different things.",
+      "analogyLimit": "A path is not a guarantee that the target exists or that the program has permission to access it."
+    },
+    "explain": {
+      "narrative": "Use Path.of to describe the file. For small files, call Files.readString(path, StandardCharsets.UTF_8). For line collections, use Files.readAllLines. For larger files, open Files.newBufferedReader in try-with-resources and loop with readLine until it returns null. Choose the method based on file size and memory needs.",
+      "examples": [
+        {
+          "id": "jv8.4-ex1",
+          "language": "java",
+          "title": "Read an entire file",
+          "code": "import java.io.IOException;\nimport java.nio.file.Files;\nimport java.nio.file.Path;\npublic class Main { public static void main(String[] args) throws IOException { Path path = Path.of(\"read.txt\"); Files.writeString(path, \"Hello file\"); System.out.println(Files.readString(path)); } }",
+          "expectedOutput": "Hello file",
+          "explanation": "readString loads the text of a small file into one String.",
+          "runnable": false
+        },
+        {
+          "id": "jv8.4-ex2",
+          "language": "java",
+          "title": "Read all lines",
+          "code": "import java.io.IOException;\nimport java.nio.file.Files;\nimport java.nio.file.Path;\npublic class Main { public static void main(String[] args) throws IOException { Path path = Path.of(\"lines.txt\"); Files.writeString(path, \"One\\nTwo\\nThree\"); System.out.println(Files.readAllLines(path).size()); } }",
+          "expectedOutput": "3",
+          "explanation": "readAllLines returns a list containing each line from the file.",
+          "runnable": false
+        },
+        {
+          "id": "jv8.4-ex3",
+          "language": "java",
+          "title": "Read line by line",
+          "code": "import java.io.BufferedReader;\nimport java.io.IOException;\nimport java.nio.file.Files;\nimport java.nio.file.Path;\npublic class Main { public static void main(String[] args) throws IOException { Path path = Path.of(\"items.txt\"); Files.writeString(path, \"Pen\\nBook\"); try (BufferedReader reader = Files.newBufferedReader(path)) { String line; while ((line = reader.readLine()) != null) System.out.println(line); } } }",
+          "expectedOutput": "Pen\nBook",
+          "explanation": "BufferedReader reads one line at a time and returns null when the end is reached.",
+          "runnable": false
+        },
+        {
+          "id": "jv8.4-ex4",
+          "language": "java",
+          "title": "Read with UTF-8",
+          "code": "import java.io.IOException;\nimport java.nio.charset.StandardCharsets;\nimport java.nio.file.Files;\nimport java.nio.file.Path;\npublic class Main { public static void main(String[] args) throws IOException { Path path = Path.of(\"utf8.txt\"); Files.writeString(path, \"Learning\", StandardCharsets.UTF_8); System.out.println(Files.readString(path, StandardCharsets.UTF_8)); } }",
+          "expectedOutput": "Learning",
+          "explanation": "Using the same explicit charset for writing and reading avoids platform-default ambiguity.",
+          "runnable": false
+        },
+        {
+          "id": "jv8.4-ex5",
+          "language": "java",
+          "title": "Count characters",
+          "code": "import java.io.IOException;\nimport java.nio.file.Files;\nimport java.nio.file.Path;\npublic class Main { public static void main(String[] args) throws IOException { Path path = Path.of(\"count.txt\"); Files.writeString(path, \"Java\"); String text = Files.readString(path); System.out.println(text.length()); } }",
+          "expectedOutput": "4",
+          "explanation": "String.length reports the number of UTF-16 code units in the decoded text.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a small Java program that demonstrates java read files. Predict each result, then compile and run it with JDK 21.",
+      "independentTask": "Build a practical Java file-handling utility related to java read files. Include at least two test cases, expected outputs, and an explanation of failure handling and path safety.",
+      "hints": [
+        "Start with a Path or File that points to a controlled test location.",
+        "Use try-with-resources for streams and writers, and handle IOException where the API declares it.",
+        "Test both the normal case and an edge case such as a missing path or existing target."
+      ],
+      "challenge": "Extend one java read files example to handle a realistic file-system edge case safely and explain the API behaviour."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "jv8.4-q1",
+        "prompt": "Which method reads a small text file into one String?",
+        "answer": "Files.readString()",
+        "options": [
+          "Files.writeString()",
+          "Files.readString()",
+          "Files.delete()",
+          "Files.createDirectory()"
+        ],
+        "explanation": "readString() reads the file contents as a String (with an explicit charset overload)."
+      },
+      {
+        "id": "jv8.4-q2",
+        "prompt": "What does readLine return at end of file?",
+        "answer": "null",
+        "options": [
+          "An empty string always",
+          "null",
+          "-1",
+          "false"
+        ],
+        "explanation": "A missing or absent parent path is represented as null by the relevant File parent accessor."
+      },
+      {
+        "id": "jv8.4-q3",
+        "prompt": "Which method returns all file lines as a List?",
+        "answer": "Files.readAllLines()",
+        "options": [
+          "Files.readAllLines()",
+          "Files.write()",
+          "File.mkdir()",
+          "File.getName()"
+        ],
+        "explanation": "readAllLines() reads text into a list of lines."
+      },
+      {
+        "id": "jv8.4-q4",
+        "prompt": "Why specify StandardCharsets.UTF_8?",
+        "answer": "To make text decoding explicit and consistent",
+        "options": [
+          "To compress the file",
+          "To make text decoding explicit and consistent",
+          "To create a directory",
+          "To avoid closing resources"
+        ],
+        "explanation": "Specifying a charset makes decoding predictable across machines."
+      },
+      {
+        "id": "jv8.4-q5",
+        "prompt": "Which approach suits processing a large text file line by line?",
+        "answer": "BufferedReader",
+        "options": [
+          "Files.readString for every line",
+          "BufferedReader",
+          "File.getName()",
+          "File.mkdir()"
+        ],
+        "explanation": "BufferedReader provides efficient line-oriented character input."
+      }
+    ]
+  },
+  "status": "draft"
+}
