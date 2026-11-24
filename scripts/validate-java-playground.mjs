@@ -11,8 +11,8 @@ for (const id of ["javaCode","javaInput","javaCompiler","runJava","stopJava","ja
   assert.ok(html.includes('id="' + id + '"'), "Java Playground contains " + id);
 }
 assert.ok(html.includes("wandbox.org") && html.includes("source and stdin are sent"), "Third-party execution disclosure is visible");
-assert.ok(js.includes("https://wandbox.org/api/list.json"), "Java compiler list endpoint is configured");
-assert.ok(js.includes("https://wandbox.org/api/compile.json"), "Java execution endpoint is configured");
+assert.ok(js.includes('API + "/list.json"'), "Java compiler list endpoint is configured");
+assert.ok(js.includes('API + "/compile.json"'), "Java execution endpoint is configured");
 assert.ok(js.includes("save: false"), "Student submissions are not saved as public permalinks");
 assert.ok(js.includes("AbortController") && js.includes("60000"), "Execution requests can be cancelled and time limited");
 assert.ok(js.includes("textContent"), "Compiler output is rendered as text");
