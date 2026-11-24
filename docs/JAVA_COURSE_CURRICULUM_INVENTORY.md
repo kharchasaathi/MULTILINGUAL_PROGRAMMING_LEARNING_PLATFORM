@@ -260,3 +260,17 @@ Each lesson contains five learning objectives, at least two original JDK-compati
 - Each lesson contains five measurable objectives, five standalone Java examples with expected output, Understand/Explain/Practise stages, guided and independent practice, three hints, a challenge and five topic-specific MCQs with explanations.
 - All lessons remain `status: "draft"`; `practice.playgroundMode: "none"`; Telugu translation remains deferred.
 - Curriculum index and progress tracker now include JV8.1–JV8.5. JDK 21 execution and browser review are required on the latest PR head before marking the English curriculum validated.
+
+
+## Current reconciled status — 24 November 2026
+
+This section supersedes earlier historical batch-status rows above where they say JV8 was planned or not authored.
+
+- JV1.1–JV8.5: all 58 English lesson JSON files now exist.
+- The 58 topics align to the W3Schools Java Syllabus module list.
+- All 58 remain drafts pending editorial review and release approval.
+- Current Java Course Validation #78, Java Playground Validation #14 and Browser Review #1510 passed on the previous audit-document head.
+- A separate lesson-by-lesson supplemental coverage audit is maintained at `docs/JAVA_W3SCHOOLS_SUPPLEMENTAL_COVERAGE_AUDIT.md`.
+- The broader W3Schools Java Tutorial contains supplemental areas beyond the 58-module syllabus. The audit identifies missing/partial areas and proposes JV9–JV14 (27 lessons) without changing JV1–JV8 IDs.
+- Supplemental lessons have not yet been authored or registered. Existing lesson expansions are also pending for the subtopics explicitly marked partial/gap in the audit.
+- The latest audit commit must pass all relevant current-head Actions before it can be called validated.
