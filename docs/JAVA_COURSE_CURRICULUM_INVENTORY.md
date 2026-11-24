@@ -227,3 +227,19 @@ Each lesson contains five learning objectives, at least two original JDK-compati
 - Each lesson contains five measurable objectives, five standalone Java examples with expected output, Understand/Explain/Practise stages, guided and independent practice, three hints, a challenge and five topic-specific MCQs with explanations.
 - All lessons remain `status: "draft"`; `practice.playgroundMode: "none"`; Telugu translation remains deferred.
 - Curriculum index and progress tracker include JV6.1–JV6.9. The first JDK 21 run caught a JV6.1 MCQ answer-option mismatch; the option set was corrected in commit `c49e41a`. Re-run JDK 21 execution and browser review on the latest indexed commit before marking the batch validated.
+
+## JV7 — Exceptions, threads and lambdas — 24 November 2026
+
+| CodeSaathi topic | W3Schools reference | Lesson file | Current state |
+|---|---|---|---|
+| JV7.1 — Java Exceptions | https://www.w3schools.com/java/java_try_catch.asp | `public/content/en/java/JV7.1.json` | English draft authored; current-head JDK 21 validation pending |
+| JV7.2 — Java Throw | https://www.w3schools.com/java/java_throw.asp | `public/content/en/java/JV7.2.json` | English draft authored; current-head JDK 21 validation pending |
+| JV7.3 — Java Regular Expressions | https://www.w3schools.com/java/java_regex.asp | `public/content/en/java/JV7.3.json` | English draft authored; current-head JDK 21 validation pending |
+| JV7.4 — Java Threads | https://www.w3schools.com/java/java_threads.asp | `public/content/en/java/JV7.4.json` | English draft authored; current-head JDK 21 validation pending |
+| JV7.5 — Java Lambda | https://www.w3schools.com/java/java_lambda.asp | `public/content/en/java/JV7.5.json` | English draft authored; current-head JDK 21 validation pending |
+| JV7.6 — Java Advanced Sorting | https://www.w3schools.com/java/java_sort.asp | `public/content/en/java/JV7.6.json` | English draft authored; current-head JDK 21 validation pending |
+
+- Authored six original English lessons covering exception handling, explicit throwing and declarations, regular expressions, threads, lambda expressions and advanced comparator sorting.
+- Each lesson includes five measurable objectives, five standalone Java examples with expected output, Understand/Explain/Practise stages, guided and independent practice, three hints, a challenge and five topic-specific MCQs with explanations.
+- All JV7 lessons remain `status: "draft"`; `practice.playgroundMode: "none"`; Telugu translation remains deferred.
+- Curriculum index and progress tracker include JV7.1–JV7.6. Run JDK 21 and browser validation on the latest PR head before marking validated.
