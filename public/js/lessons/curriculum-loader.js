@@ -200,10 +200,22 @@
     }
 const link = $(".lesson-practice-link", container);
     if (link && lesson.courseId === "java") {
-      link.hidden = true;
-      link.setAttribute("aria-hidden", "true");
-      link.parentNode.insertBefore(text("p", "lesson-practice-note", "Java examples are shown here and compiled with the JDK in course validation. An interactive Java runner is a separate future feature; this web-language playground does not execute Java."), link);
-    } else if (link && (lesson.courseId === "cpp" || lesson.courseId === "c")) {
+      const javaExample = examples.find(example => typeof example.code === "string" && example.code.trim());
+      if (javaExample) {
+        const javaState = { language: "java", code: javaExample.code, stdin: "" };
+        const stateBytes = new TextEncoder().encode(JSON.stringify(javaState));
+        let stateBinary = "";
+        stateBytes.forEach(byte => { stateBinary += String.fromCharCode(byte); });
+        const stateToken = btoa(stateBinary).replace(/\\+/g, "-").replace(/\\//g, "_").replace(/=+$/, "");
+        link.href = "/java-playground.html#code=" + stateToken;
+        link.textContent = "Open this lesson's example in Java Playground ↗";
+      } else {
+        link.href = "/java-playground.html";
+        link.textContent = "Open Java Playground ↗";
+      }
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+    } else if (link && (lesson.courseId === "cpp" || lesson.courseId === "c"))
       const language = lesson.courseId;
       const starter = code || (language === "cpp"
         ? '#include <iostream>\n\nint main() {\n    std::cout << "Hello, CodeSaathi!\\\n";\n    return 0;\n}\n'
