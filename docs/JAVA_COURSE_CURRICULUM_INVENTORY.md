@@ -245,3 +245,18 @@ Each lesson contains five learning objectives, at least two original JDK-compati
 - Each lesson includes five measurable objectives, five standalone Java examples with expected output, Understand/Explain/Practise stages, guided and independent practice, three hints, a challenge and five topic-specific MCQs with explanations.
 - All JV7 lessons remain `status: "draft"`; `practice.playgroundMode: "none"`; Telugu translation remains deferred.
 - Curriculum index and progress tracker include JV7.1–JV7.6. A pre-validation contract audit found and corrected a trailing-space mismatch in JV7.3's plus-quantifier MCQ answer. Run JDK 21 and browser validation on the latest PR head before marking validated.
+
+## JV8 — File handling — 24 November 2026
+
+| CodeSaathi topic | W3Schools reference | Lesson file | Current state |
+|---|---|---|---|
+| JV8.1 — Java File Handling | https://www.w3schools.com/java/java_files.asp | `public/content/en/java/JV8.1.json` | English draft authored; current-head JDK 21 validation pending |
+| JV8.2 — Java Create Files | https://www.w3schools.com/java/java_files.asp | `public/content/en/java/JV8.2.json` | English draft authored; current-head JDK 21 validation pending |
+| JV8.3 — Java Write to Files | https://www.w3schools.com/java/java_files.asp | `public/content/en/java/JV8.3.json` | English draft authored; current-head JDK 21 validation pending |
+| JV8.4 — Java Read Files | https://www.w3schools.com/java/java_files.asp | `public/content/en/java/JV8.4.json` | English draft authored; current-head JDK 21 validation pending |
+| JV8.5 — Java Delete Files | https://www.w3schools.com/java/java_files.asp | `public/content/en/java/JV8.5.json` | English draft authored; current-head JDK 21 validation pending |
+
+- Authored five original English lessons covering file-path metadata, file and directory creation, writing and appending text, reading whole files and lines, and safe deletion.
+- Each lesson contains five measurable objectives, five standalone Java examples with expected output, Understand/Explain/Practise stages, guided and independent practice, three hints, a challenge and five topic-specific MCQs with explanations.
+- All lessons remain `status: "draft"`; `practice.playgroundMode: "none"`; Telugu translation remains deferred.
+- Curriculum index and progress tracker now include JV8.1–JV8.5. JDK 21 execution and browser review are required on the latest PR head before marking the English curriculum validated.
