@@ -104,7 +104,9 @@
 | JV3.1–JV3.5 | 5 | English draft authored with five examples each; JDK 21 validation PASS on run #22 |
 | JV4.1–JV4.6 | 6 | English draft authored; JDK 21 validation pending |
 | JV5.1–JV5.14 | 14 | English draft authored; JDK 21 validation pending |
-| JV6.1–JV8.5 | 20 | Planned; not yet authored |
+| JV6.1–JV6.9 | 9 | English drafts authored; MCQ mismatch in JV6.1 corrected; current-head JDK 21 revalidation pending |
+| JV7.1–JV7.6 | 6 | English drafts authored; one regex MCQ answer typo corrected; current-head JDK 21 revalidation pending |
+| JV8.1–JV8.5 | 5 | Planned; not yet authored |
 
 ## Runtime and release plan
 
@@ -242,4 +244,4 @@ Each lesson contains five learning objectives, at least two original JDK-compati
 - Authored six original English lessons covering exception handling, explicit throwing and declarations, regular expressions, threads, lambda expressions and advanced comparator sorting.
 - Each lesson includes five measurable objectives, five standalone Java examples with expected output, Understand/Explain/Practise stages, guided and independent practice, three hints, a challenge and five topic-specific MCQs with explanations.
 - All JV7 lessons remain `status: "draft"`; `practice.playgroundMode: "none"`; Telugu translation remains deferred.
-- Curriculum index and progress tracker include JV7.1–JV7.6. Run JDK 21 and browser validation on the latest PR head before marking validated.
+- Curriculum index and progress tracker include JV7.1–JV7.6. A pre-validation contract audit found and corrected a trailing-space mismatch in JV7.3's plus-quantifier MCQ answer. Run JDK 21 and browser validation on the latest PR head before marking validated.
