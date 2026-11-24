@@ -30,26 +30,26 @@
         {
           "id": "jv14.2-ex1",
           "language": "java",
-          "title": "Core API",
-          "code": "public class Main { public static void main(String[] args) throws Exception { static <T extends Number> double sum(java.util.List<T> values) { double total=0; for(T value:values) total+=value.doubleValue(); return total; } System.out.println(sum(java.util.List.of(2,3,4))); } }",
+          "title": "Core concept",
+          "code": "public class Main { public static void main(String[] args) throws Exception { class NumberTools { <T extends Number> double sum(java.util.List<T> values) { double total=0; for(T value:values) total+=value.doubleValue(); return total; } } NumberTools tools = new NumberTools(); System.out.println(tools.sum(java.util.List.of(2,3,4))); } }",
           "expectedOutput": "9.0",
-          "explanation": "A bounded type parameter allows Number methods.",
+          "explanation": "A bounded type parameter allows the method to call Number.doubleValue.",
           "runnable": false
         },
         {
           "id": "jv14.2-ex2",
           "language": "java",
           "title": "Practical use",
-          "code": "public class Main { public static void main(String[] args) throws Exception { static <T> T first(java.util.List<T> values) { return values.get(0); } System.out.println(first(java.util.List.of(\"red\",\"blue\"))); } }",
+          "code": "public class Main { public static void main(String[] args) throws Exception { class First { <T> T get(java.util.List<T> values) { return values.get(0); } } System.out.println(new First().get(java.util.List.of(\"red\",\"blue\"))); } }",
           "expectedOutput": "red",
-          "explanation": "A generic method returns the same type supplied by its list.",
+          "explanation": "A generic method returns the element type supplied by its caller.",
           "runnable": false
         },
         {
           "id": "jv14.2-ex3",
           "language": "java",
           "title": "Boundary behavior",
-          "code": "public class Main { public static void main(String[] args) throws Exception { static double total(java.util.List<? extends Number> values) { double sum=0; for(Number n:values) sum+=n.doubleValue(); return sum; } System.out.println(total(java.util.List.of(1,2,3))); } }",
+          "code": "public class Main { public static void main(String[] args) throws Exception { class Total { double sum(java.util.List<? extends Number> values) { double total=0; for(Number n:values) total+=n.doubleValue(); return total; } } System.out.println(new Total().sum(java.util.List.of(1,2,3))); } }",
           "expectedOutput": "6.0",
           "explanation": "An extends wildcard allows reading Number values from a producer.",
           "runnable": false
@@ -58,7 +58,7 @@
           "id": "jv14.2-ex4",
           "language": "java",
           "title": "Alternative pattern",
-          "code": "public class Main { public static void main(String[] args) throws Exception { static void addOne(java.util.List<? super Integer> values) { values.add(1); } java.util.List<Number> values = new java.util.ArrayList<>(); addOne(values); System.out.println(values); } }",
+          "code": "public class Main { public static void main(String[] args) throws Exception { class Add { void addOne(java.util.List<? super Integer> values) { values.add(1); } } java.util.List<Number> values = new java.util.ArrayList<>(); new Add().addOne(values); System.out.println(values); } }",
           "expectedOutput": "[1]",
           "explanation": "A super wildcard accepts a consumer list that can store Integer values.",
           "runnable": false
@@ -67,7 +67,7 @@
           "id": "jv14.2-ex5",
           "language": "java",
           "title": "Verify the result",
-          "code": "public class Main { public static void main(String[] args) throws Exception { static <T> void show(T value) { System.out.println(value.getClass().getSimpleName()); } show(\"Java\"); } }",
+          "code": "public class Main { public static void main(String[] args) throws Exception { class Show { <T> void show(T value) { System.out.println(value.getClass().getSimpleName()); } } new Show().show(\"Java\"); } }",
           "expectedOutput": "String",
           "explanation": "A generic method infers its type argument from the call.",
           "runnable": false
