@@ -1,0 +1,163 @@
+{
+  "id": "java.jv7.4.en",
+  "courseId": "java",
+  "moduleId": "JV7",
+  "topicId": "JV7.4",
+  "title": "Java Threads",
+  "language": "en",
+  "learningObjectives": [
+    "Explain a thread as an independent path of execution.",
+    "Create a task with Runnable and start a Thread.",
+    "Distinguish start from directly calling run.",
+    "Use join to wait for a thread to finish.",
+    "Recognize shared-state race conditions and synchronization needs."
+  ],
+  "prerequisites": [
+    "JV1.1",
+    "JV1.2",
+    "JV2.1",
+    "JV2.2",
+    "JV3.1",
+    "JV4.2",
+    "JV5.1",
+    "JV5.5"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A thread is a path of execution within a process. Java can run multiple threads concurrently. Define a task with Runnable and pass it to a Thread, then call start to schedule a new thread. Calling run directly is an ordinary method call on the current thread. Shared mutable data can create race conditions, so coordination and synchronization are needed when threads access the same state.",
+      "whyItMatters": "This topic equips Java learners to write robust programs using java threads in real applications.",
+      "analogy": "Think of each language feature as a clearly labelled tool: choose it for the specific problem it is designed to solve.",
+      "analogyLimit": "The analogy does not replace the Java language and library contracts; compile and test the actual behaviour."
+    },
+    "explain": {
+      "narrative": "Prefer Runnable to separate a task from the thread that runs it. Thread.start may return before the task completes; join waits for that thread to finish. Thread scheduling is controlled by the runtime and operating system, so output order between concurrent tasks is not guaranteed unless coordination establishes an order. Avoid tests that depend on a particular scheduling sequence.",
+      "examples": [
+        {
+          "id": "jv7.4-ex1",
+          "language": "java",
+          "title": "Start a Runnable task",
+          "code": "public class Main { public static void main(String[] args) throws InterruptedException { Thread t = new Thread(() -> System.out.println(\"Task running\")); t.start(); t.join(); System.out.println(\"Main finished\"); } }",
+          "expectedOutput": "Task running\nMain finished",
+          "explanation": "join ensures the task completes before main prints its final line.",
+          "runnable": false
+        },
+        {
+          "id": "jv7.4-ex2",
+          "language": "java",
+          "title": "Use a Runnable class",
+          "code": "class MessageTask implements Runnable { public void run() { System.out.println(\"Hello from task\"); } }\npublic class Main { public static void main(String[] args) throws InterruptedException { Thread t = new Thread(new MessageTask()); t.start(); t.join(); } }",
+          "expectedOutput": "Hello from task",
+          "explanation": "A class can implement Runnable and provide its run method.",
+          "runnable": false
+        },
+        {
+          "id": "jv7.4-ex3",
+          "language": "java",
+          "title": "Check thread state after join",
+          "code": "public class Main { public static void main(String[] args) throws InterruptedException { Thread t = new Thread(() -> {}); t.start(); t.join(); System.out.println(t.getState()); } }",
+          "expectedOutput": "TERMINATED",
+          "explanation": "After join returns for a completed thread, its state is TERMINATED.",
+          "runnable": false
+        },
+        {
+          "id": "jv7.4-ex4",
+          "language": "java",
+          "title": "Name a thread",
+          "code": "public class Main { public static void main(String[] args) throws InterruptedException { Thread t = new Thread(() -> System.out.println(Thread.currentThread().getName()), \"worker-A\"); t.start(); t.join(); } }",
+          "expectedOutput": "worker-A",
+          "explanation": "A thread can be given a name for diagnostics.",
+          "runnable": false
+        },
+        {
+          "id": "jv7.4-ex5",
+          "language": "java",
+          "title": "Run directly versus start",
+          "code": "public class Main { public static void main(String[] args) { Thread t = new Thread(() -> System.out.println(Thread.currentThread().getName())); t.run(); } }",
+          "expectedOutput": "main",
+          "explanation": "Calling run directly does not create a new thread; it executes on main.",
+          "runnable": false
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Build a small Java program that demonstrates java threads. Predict the output before compiling with JDK 21.",
+      "independentTask": "Create a practical application using java threads. Include at least two test cases, expected output, and an explanation of one important edge case.",
+      "hints": [
+        "Start with the smallest standard Java API or language construct that expresses the requirement.",
+        "Trace the execution path and verify the documented behaviour of each method or keyword.",
+        "Compile with JDK 21 and test normal as well as boundary or failure cases."
+      ],
+      "challenge": "Extend one example into a small reusable component and document its error handling, ordering or concurrency guarantees as relevant."
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "jv7.4-q1",
+        "prompt": "Which method starts a new thread of execution?",
+        "answer": "start()",
+        "options": [
+          "run()",
+          "start()",
+          "join()",
+          "sleep()"
+        ],
+        "explanation": "start asks the runtime to begin a new thread and invoke its run method."
+      },
+      {
+        "id": "jv7.4-q2",
+        "prompt": "What does join do?",
+        "answer": "Waits for a thread to finish",
+        "options": [
+          "Starts a second thread",
+          "Waits for a thread to finish",
+          "Renames a thread",
+          "Stops all threads"
+        ],
+        "explanation": "join blocks the calling thread until the target thread terminates."
+      },
+      {
+        "id": "jv7.4-q3",
+        "prompt": "What happens when run is called directly?",
+        "answer": "It runs as a normal call on the current thread",
+        "options": [
+          "It always starts a new thread",
+          "It runs as a normal call on the current thread",
+          "It waits for every thread",
+          "It terminates the JVM"
+        ],
+        "explanation": "Only start creates a separate thread of execution."
+      },
+      {
+        "id": "jv7.4-q4",
+        "prompt": "Which interface is commonly used to describe a task?",
+        "answer": "Runnable",
+        "options": [
+          "Comparable",
+          "Runnable",
+          "Serializable",
+          "AutoCloseable"
+        ],
+        "explanation": "Runnable represents a task with a run method."
+      },
+      {
+        "id": "jv7.4-q5",
+        "prompt": "What is a race condition?",
+        "answer": "A result depends on unpredictable timing of concurrent access",
+        "options": [
+          "A compiler warning",
+          "A result depends on unpredictable timing of concurrent access",
+          "A thread name collision only",
+          "A syntax error"
+        ],
+        "explanation": "Unsynchronized shared state can produce timing-dependent outcomes."
+      }
+    ]
+  },
+  "status": "draft"
+}
