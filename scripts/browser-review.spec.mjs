@@ -494,6 +494,8 @@ test("Java Playground discovers a compiler, runs with stdin, and receives lesson
       expect(body.stdin).toBe("Ada");
       expect(body.save).toBe(false);
       expect(body.code).toContain("Scanner");
+      expect(body.code).toContain("class Main");
+      expect(body.code).not.toContain("public class Main");
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
         status: "0", compiler: "wandbox-java", compiler_message: "", program_output: "Hello, Ada!", program_message: "", program_error: ""
       }) });
