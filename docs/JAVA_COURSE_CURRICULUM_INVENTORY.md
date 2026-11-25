@@ -340,3 +340,15 @@ Updated JV11.4, JV11.5, JV12.1, JV12.4 and JV12.5 in place. Replaced generic exp
 ## Supplemental lesson quality batch 4 — 25 November 2026
 
 Updated JV12.2 and JV12.3 in place. Expanded byte-stream read semantics (EOF sentinel, partial buffer counts, exact write length, destination truncation, binary integrity tests) and character-stream charset behavior (default charset caveat, explicit UTF-8, mismatched decoding, buffering and non-ASCII tests). Replaced generic practice hints with topic-specific checks. Preserved IDs, JSON schema, five examples, five MCQs, practice structure and draft status. Fresh current-head JDK 21 validation and browser review are required. No merge or deployment; Telugu deferred.
+
+
+## Supplemental lesson quality batch 5 — 25 November 2026
+
+Updated JV13.1, JV13.2, JV13.5 and JV13.6 in place. Replaced generic explanatory boilerplate with detailed instruction on Collections Framework interface contracts, implementation selection, ordering and mutability; strengthened example explanations and topic-specific practice hints; replaced templated MCQ explanations with answer-specific rationales. Preserved topic IDs, JSON schema, five objectives, five examples, five MCQs, practice structure, `playgroundMode: "none"` and draft status. Current-head JDK 21 execution and browser review are required before marking these revised lessons validated. No merge or deployment; Telugu deferred.
+
+### Current branch/validation evidence
+
+- Working branch: `content/java-supplemental-content-quality-batch1`.
+- Release base observed: `f5ec1202a8b63d81ede647bc923d8936fd725c99`.
+- Commit `3df70bfaa6af8cde9b8335de4fe742846cb3156d` passed Java Course Validation #172 and Browser Review #1593. Both workflows completed successfully on that exact SHA; the Java job ran JDK setup and the validate/compile/execute step, while browser review completed the Java Playground safety and browser review steps.
+- PR #265 remains open and unmerged. This batch is a subsequent commit; fresh checks must run on its new head.

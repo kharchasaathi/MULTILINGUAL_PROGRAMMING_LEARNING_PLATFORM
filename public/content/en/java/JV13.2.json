@@ -25,7 +25,7 @@
       "analogyLimit": "Actual behavior is defined by Java language rules and API contracts."
     },
     "explain": {
-      "narrative": "## List, Set and Map Interfaces\n\nUse List, Set or Map when callers need the interface contract. ArrayList, HashSet and HashMap differ in ordering, duplicate handling and lookup behavior.\n\nIdentify the input and desired result. Select the Java construct or API that supports the requirement. Keep code readable, handle documented failures and state assumptions clearly.\n\nCompile with JDK 21, predict output before running, and test normal, boundary and invalid inputs.",
+      "narrative": "## Program to collection interfaces\n\nCollection interfaces describe the operations callers may rely on without requiring one concrete storage strategy. Use `List<E>` for an ordered sequence with duplicates, `Set<E>` for unique elements, and `Map<K,V>` for key/value associations. Map is separate from the Collection interface hierarchy.\n\n## Declare the contract; construct the implementation\n\nA declaration such as `List<String> names = new ArrayList<>();` exposes List operations to the rest of the program while constructing an ArrayList. The variable can later refer to another List implementation if that implementation satisfies the same required contract. Declaring the variable as ArrayList unnecessarily couples the code to that class when only List behavior is needed.\n\n## Understand the boundaries\n\nList supports indexed access and duplicate values. Set prevents duplicates according to its implementation's equality or comparison rules. Map has unique keys; putting a value under an existing key replaces the previous mapping. Collection is a broader superinterface for many element collections, but it does not provide Map's key-based operations.\n\n## Interface choice does not promise performance\n\nThe interface tells you what operations mean, not that every implementation has the same time complexity or ordering. ArrayList and LinkedList both implement List but have different performance characteristics. HashSet and LinkedHashSet both implement Set but differ in encounter order. HashMap and TreeMap both implement Map but differ in ordering and operation costs.\n\n## Design flexible APIs\n\nAccept an interface when a method needs only that contract, and return the narrowest useful abstraction. Use generics to preserve type safety. Test only behavior guaranteed by the chosen interface; test implementation-specific ordering only when that implementation is deliberately part of the requirement.",
       "examples": [
         {
           "id": "jv13.2-ex1",
@@ -33,7 +33,7 @@
           "title": "Core API",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.List<String> names = new java.util.ArrayList<>(); names.add(\"A\"); names.add(\"B\"); System.out.println(names.size()); } }",
           "expectedOutput": "2",
-          "explanation": "Uses the List interface as the variable type.",
+          "explanation": "The variable is declared as List, so callers rely on the List contract while ArrayList supplies the concrete storage.",
           "runnable": false
         },
         {
@@ -42,7 +42,7 @@
           "title": "Practical use",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.Set<String> tags = new java.util.LinkedHashSet<>(); tags.add(\"java\"); tags.add(\"java\"); System.out.println(tags.size()); } }",
           "expectedOutput": "1",
-          "explanation": "Uses Set to prevent duplicates.",
+          "explanation": "LinkedHashSet implements Set: the repeated tag is rejected, so the resulting set contains one element.",
           "runnable": false
         },
         {
@@ -51,7 +51,7 @@
           "title": "Boundary behavior",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.Map<String,Integer> scores = new java.util.HashMap<>(); scores.put(\"Mira\", 90); System.out.println(scores.get(\"Mira\")); } }",
           "expectedOutput": "90",
-          "explanation": "Uses Map to associate a student name with a score.",
+          "explanation": "Map associates a student key with a score; get retrieves the value for the exact key.",
           "runnable": false
         },
         {
@@ -60,7 +60,7 @@
           "title": "Alternative pattern",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.Collection<Integer> values = java.util.List.of(2,4,6); int total=0; for(int v:values) total+=v; System.out.println(total); } }",
           "expectedOutput": "12",
-          "explanation": "Uses the Collection superinterface for iteration.",
+          "explanation": "Collection is a superinterface for element collections, allowing enhanced-for traversal without depending on List-specific indexing.",
           "runnable": false
         },
         {
@@ -69,7 +69,7 @@
           "title": "Verify the result",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.List<Integer> values = new java.util.ArrayList<>(java.util.List.of(3,1,2)); java.util.Collections.sort(values); System.out.println(values); } }",
           "expectedOutput": "[1, 2, 3]",
-          "explanation": "Shows that interface-based code can still use standard collection algorithms.",
+          "explanation": "Collections.sort accepts a List and orders its elements in place; the declared List interface is sufficient for this operation.",
           "runnable": false
         }
       ]
@@ -78,9 +78,9 @@
       "guidedTask": "Declare variables using List, Set and Map interfaces, then assign ArrayList, LinkedHashSet and HashMap implementations. Demonstrate each interface's contract.",
       "independentTask": "Refactor a method to accept List<String> instead of ArrayList<String>. Pass two different List implementations without changing the method.",
       "hints": [
-        "Select the interface from the behavior the problem requires.",
-        "Use generics to make the element or key/value types explicit.",
-        "Check ordering and duplicate behavior with a small test dataset."
+        "Declare variables and parameters with the narrowest interface that provides the operations your code needs.",
+        "Remember Map is not a Collection; its keySet, values and entrySet views expose different parts of its mappings.",
+        "Do not infer ordering or time complexity from an interface name; inspect the concrete implementation contract."
       ],
       "challenge": "Write a short API design note identifying which behaviors belong to interfaces and which depend on the concrete implementation."
     }
@@ -102,7 +102,7 @@
           "String names = new ArrayList<>()"
         ],
         "answer": "List<String> names = new ArrayList<>()",
-        "explanation": "Which declaration reduces coupling to a specific list implementation? This is the correct answer based on the Java contract and behavior described in List, Set and Map Interfaces."
+        "explanation": "Declaring the variable as List exposes the interface contract while allowing the implementation to be replaced by another List implementation."
       },
       {
         "id": "jv13.2-q2",
@@ -114,7 +114,7 @@
           "SortedMap"
         ],
         "answer": "List",
-        "explanation": "Which interface permits duplicate elements and positional access? This is the correct answer based on the Java contract and behavior described in List, Set and Map Interfaces."
+        "explanation": "List permits duplicates and provides positional operations such as get(index)."
       },
       {
         "id": "jv13.2-q3",
@@ -126,7 +126,7 @@
           "Deque"
         ],
         "answer": "Set",
-        "explanation": "Which interface represents unique elements? This is the correct answer based on the Java contract and behavior described in List, Set and Map Interfaces."
+        "explanation": "Set represents unique elements; it does not provide List-style positional access."
       },
       {
         "id": "jv13.2-q4",
@@ -138,7 +138,7 @@
           "Comparable"
         ],
         "answer": "Map",
-        "explanation": "Which interface stores key-value mappings? This is the correct answer based on the Java contract and behavior described in List, Set and Map Interfaces."
+        "explanation": "Map models key/value mappings and is not a subtype of Collection."
       },
       {
         "id": "jv13.2-q5",
@@ -150,7 +150,7 @@
           "It prevents all exceptions"
         ],
         "answer": "The implementation can change while callers rely on the same contract",
-        "explanation": "Why program to an interface? This is the correct answer based on the Java contract and behavior described in List, Set and Map Interfaces."
+        "explanation": "Programming to an interface reduces coupling, but does not guarantee constant-time operations or prevent exceptions."
       }
     ]
   },

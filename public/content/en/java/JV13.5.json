@@ -25,7 +25,7 @@
       "analogyLimit": "Actual behavior is defined by Java language rules and API contracts."
     },
     "explain": {
-      "narrative": "## Common Collections Algorithms\n\nCollections provides algorithms for lists. Sorting changes a list in place; binarySearch requires the list to be sorted using the same ordering.\n\nIdentify the input and desired result. Select the Java construct or API that supports the requirement. Keep code readable, handle documented failures and state assumptions clearly.\n\nCompile with JDK 21, predict output before running, and test normal, boundary and invalid inputs.",
+      "narrative": "## Algorithms supplied by Collections\n\nThe `Collections` utility class provides static algorithms that operate on collections, especially Lists. Common operations include sort, reverse, shuffle, frequency, min, max, swap and binarySearch. Most of these methods operate on the supplied list rather than creating a new list.\n\n## Sorting and searching\n\n`Collections.sort(list)` sorts according to natural ordering; the overload accepting a Comparator uses the supplied ordering. `Collections.binarySearch(list, key)` requires the list to be sorted using the same ordering used by the search. If the key is absent, the result is a negative insertion-point encoding, not simply -1. Do not interpret a search result as a valid index unless it is non-negative.\n\n## Reordering and counting\n\n`reverse` reverses the current order, `shuffle` applies a random permutation, and `swap` exchanges two positions. `frequency` counts elements equal to a target. `min` and `max` find the least or greatest element according to natural ordering or a supplied Comparator. These methods need a non-empty collection for min/max; empty input causes NoSuchElementException.\n\n## Mutability and algorithm requirements\n\nAn algorithm that modifies a list requires a list that supports the relevant mutation. Immutable lists such as those returned by `List.of` cannot be sorted or reversed in place and will throw UnsupportedOperationException. Make a mutable copy when mutation is required.\n\n## Test exact assumptions\n\nUse deterministic data for output examples. Test duplicates, empty lists, absent search keys, custom comparators and immutable inputs. For shuffle, verify membership and size rather than expecting a fixed order.",
       "examples": [
         {
           "id": "jv13.5-ex1",
@@ -33,7 +33,7 @@
           "title": "Core API",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.List<Integer> values = new java.util.ArrayList<>(java.util.List.of(3,1,2)); java.util.Collections.sort(values); System.out.println(values); } }",
           "expectedOutput": "[1, 2, 3]",
-          "explanation": "Collections.sort rearranges the supplied list in place according to natural ordering or the provided Comparator.",
+          "explanation": "Collections.sort mutates this ArrayList into natural ascending order.",
           "runnable": false
         },
         {
@@ -42,7 +42,7 @@
           "title": "Practical use",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.List<Integer> values = new java.util.ArrayList<>(java.util.List.of(1,2,3)); java.util.Collections.reverse(values); System.out.println(values); } }",
           "expectedOutput": "[3, 2, 1]",
-          "explanation": "Reverses the current list order.",
+          "explanation": "reverse changes the order of elements in the mutable list; it does not create a separately sorted list.",
           "runnable": false
         },
         {
@@ -51,7 +51,7 @@
           "title": "Boundary behavior",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.List<Integer> values = java.util.List.of(1,2,2,3); System.out.println(java.util.Collections.frequency(values,2)); } }",
           "expectedOutput": "2",
-          "explanation": "The frequency method counts how many elements in the collection are equal to the specified value.",
+          "explanation": "frequency counts elements equal to the requested target, so the value 2 occurs twice.",
           "runnable": false
         },
         {
@@ -60,7 +60,7 @@
           "title": "Alternative pattern",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.List<Integer> values = java.util.List.of(1,2,3,4); System.out.println(java.util.Collections.binarySearch(values,3)); } }",
           "expectedOutput": "2",
-          "explanation": "Binary search returns an index when the list is sorted.",
+          "explanation": "The list is already sorted in ascending order, and binarySearch returns the zero-based index where 3 is found.",
           "runnable": false
         },
         {
@@ -69,7 +69,7 @@
           "title": "Verify the result",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.List<Integer> values = java.util.List.of(4,2,8); System.out.println(java.util.Collections.max(values)); } }",
           "expectedOutput": "8",
-          "explanation": "The max method returns the greatest element according to natural ordering or the Comparator supplied for the collection.",
+          "explanation": "max selects the greatest element according to natural ordering for this non-empty integer list.",
           "runnable": false
         }
       ]
@@ -78,9 +78,9 @@
       "guidedTask": "Sort a mutable list, reverse it, count a repeated value with frequency and find a value with binarySearch. Predict every output first.",
       "independentTask": "Build a leaderboard that sorts scores, reports minimum and maximum, and counts how often a target score appears.",
       "hints": [
-        "Start with a small, deterministic dataset and predict the result.",
-        "Check the relevant Java interface and method contract.",
-        "Compile with JDK 21 and test duplicate, empty and boundary cases."
+        "Before binarySearch, sort with the same natural ordering or Comparator that the search will use.",
+        "Check whether the list supports mutation before calling sort, reverse, swap or shuffle; List.of returns an unmodifiable list.",
+        "For binarySearch, distinguish a non-negative found index from the negative insertion-point result; test empty and missing-key cases."
       ],
       "challenge": "Demonstrate why binarySearch can return an unexpected result on an unsorted list, then sort with the same Comparator and test again."
     }
@@ -102,7 +102,7 @@
           "The list must be empty"
         ],
         "answer": "The list must be sorted using the same ordering",
-        "explanation": "What must be true before using Collections.binarySearch on a list? This is the correct answer based on the Java contract and behavior described in Common Collections Algorithms."
+        "explanation": "binarySearch requires the list to be sorted using the same ordering as the search; otherwise the result is not reliable."
       },
       {
         "id": "jv13.5-q2",
@@ -114,7 +114,7 @@
           "Collections.copyOf"
         ],
         "answer": "Collections.reverse",
-        "explanation": "Which Collections method reverses list order? This is the correct answer based on the Java contract and behavior described in Common Collections Algorithms."
+        "explanation": "Collections.reverse reverses the current encounter order of a mutable list."
       },
       {
         "id": "jv13.5-q3",
@@ -126,7 +126,7 @@
           "Collections.swap"
         ],
         "answer": "Collections.frequency",
-        "explanation": "Which method counts occurrences of a value in a collection? This is the correct answer based on the Java contract and behavior described in Common Collections Algorithms."
+        "explanation": "Collections.frequency counts occurrences equal to the supplied target element."
       },
       {
         "id": "jv13.5-q4",
@@ -138,7 +138,7 @@
           "Converts the list to a Set"
         ],
         "answer": "Sorts the list in place",
-        "explanation": "What does Collections.sort do to a mutable list? This is the correct answer based on the Java contract and behavior described in Common Collections Algorithms."
+        "explanation": "Collections.sort sorts the supplied mutable list in place rather than returning a newly allocated sorted list."
       },
       {
         "id": "jv13.5-q5",
@@ -150,7 +150,7 @@
           "Collections.unmodifiableList"
         ],
         "answer": "Collections.shuffle",
-        "explanation": "Which method chooses a random permutation of a list? This is the correct answer based on the Java contract and behavior described in Common Collections Algorithms."
+        "explanation": "Collections.shuffle randomizes the order of the elements while retaining the same elements."
       }
     ]
   },
