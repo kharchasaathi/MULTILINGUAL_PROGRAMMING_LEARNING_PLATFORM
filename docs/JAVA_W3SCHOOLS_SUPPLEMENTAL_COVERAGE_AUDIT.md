@@ -235,3 +235,12 @@ Updated JV13.1, JV13.2, JV13.5 and JV13.6 in place. Replaced generic explanatory
 - Release base observed: `f5ec1202a8b63d81ede647bc923d8936fd725c99`.
 - Commit `3df70bfaa6af8cde9b8335de4fe742846cb3156d` passed Java Course Validation #172 and Browser Review #1593. Both workflows completed successfully on that exact SHA; the Java job ran JDK setup and the validate/compile/execute step, while browser review completed the Java Playground safety and browser review steps.
 - PR #265 remains open and unmerged. This batch is a subsequent commit; fresh checks must run on its new head.
+
+
+## Current-head validation — 25 November 2026
+
+- Working branch: `content/java-supplemental-content-quality-batch1`; tested content commit: `bda0bd51de1c22c7512ecef0c702c8ad378878c5`.
+- Java Course Validation #188 completed successfully on this commit. The validator iterates over every Java lesson registered in the curriculum index, checks the lesson contract and executes every example with JDK 21 while comparing expected output; it also validates all five MCQs per lesson.
+- Browser Review #1609 completed successfully on the same commit. The browser job passed application JavaScript syntax, Java Playground integration/safety contract, lesson contracts, Chromium setup, browser rendering, keyboard and accessibility review.
+- The current tracker marks all 85 indexed English Java lessons as technically validated against this head. Their lesson JSON status remains `draft` pending editorial/release approval; Telugu remains deferred.
+- PR #265 remains open and unmerged. No release deployment was performed.

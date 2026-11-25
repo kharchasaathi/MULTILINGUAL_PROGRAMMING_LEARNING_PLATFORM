@@ -5,7 +5,7 @@
 **Reference curriculum:** W3Schools Java Tutorial and Java Syllabus  
 **Reference baseline checked:** 23 November 2026  
 **Repository:** `kharchasaathi/MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM`  
-**Working branch:** `feature/java-course-foundation`  
+**Working branch:** `content/java-supplemental-content-quality-batch1`  
 **Release base:** `release/v1-frontend` at `c9c63982782ef910571775d59911dc9b092074e7`
 
 ## Scope and authoring rules
@@ -352,3 +352,12 @@ Updated JV13.1, JV13.2, JV13.5 and JV13.6 in place. Replaced generic explanatory
 - Release base observed: `f5ec1202a8b63d81ede647bc923d8936fd725c99`.
 - Commit `3df70bfaa6af8cde9b8335de4fe742846cb3156d` passed Java Course Validation #172 and Browser Review #1593. Both workflows completed successfully on that exact SHA; the Java job ran JDK setup and the validate/compile/execute step, while browser review completed the Java Playground safety and browser review steps.
 - PR #265 remains open and unmerged. This batch is a subsequent commit; fresh checks must run on its new head.
+
+
+## Current-head verification — 25 November 2026
+
+- Active working branch: `content/java-supplemental-content-quality-batch1` (PR #265 against `release/v1-frontend`).
+- Tested content commit: `bda0bd51de1c22c7512ecef0c702c8ad378878c5`.
+- Java Course Validation #188: PASS; all 85 indexed English lessons passed the JDK 21 lesson-contract and example compile/execute checks, with expected output comparisons and MCQ validation.
+- Browser Review #1609: PASS; Java lesson rendering, `playgroundMode: "none"`, Java Playground integration/safety, browser output, keyboard and accessibility checks passed.
+- Technical validation does not change editorial status: lessons remain `draft`; Telugu translation remains deferred. PR #265 is open and unmerged; no deployment performed.
