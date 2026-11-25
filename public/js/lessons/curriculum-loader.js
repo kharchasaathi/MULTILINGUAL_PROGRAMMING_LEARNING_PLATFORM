@@ -38,7 +38,8 @@
     cpp: ["C++ Programming", "MODERN SYSTEMS & OBJECT-ORIENTED PROGRAMMING", "Learn modern C++ fundamentals, classes, templates, standard-library tools and safe resource management.", "C++"],
     python: ["Python Programming", "GENERAL-PURPOSE PROGRAMMING", "Learn Python fundamentals, automation, data handling, object-oriented programming and practical application development.", "PY"],
     sql: ["SQL Programming", "RELATIONAL DATABASES", "Learn relational database concepts, write SQL queries and design reliable data structures.", "SQL"],
-    java: ["Java Programming", "JAVA FUNDAMENTALS & OBJECT-ORIENTED PROGRAMMING", "Learn Java syntax, object-oriented programming, collections, exceptions, threads and file handling.", "JAVA"]
+    java: ["Java Programming", "JAVA FUNDAMENTALS & OBJECT-ORIENTED PROGRAMMING", "Learn Java syntax, object-oriented programming, collections, exceptions, threads and file handling.", "JAVA"],
+    csharp: ["C# Programming", "MODERN .NET & OBJECT-ORIENTED PROGRAMMING", "Learn C# fundamentals, modern language features, object-oriented design, collections, LINQ and professional .NET development.", "C#"]
   };
 
   function renderCourseCards() {
