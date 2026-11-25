@@ -1,0 +1,38 @@
+name: C# course validation
+
+on:
+  push:
+    branches: [feature/csharp-course-foundation, release/v1-frontend]
+    paths:
+      - "public/content/en/csharp/**"
+      - "public/content/curriculum-index.json"
+      - "docs/CODESAATHI_CURRICULUM_PROGRESS_TRACKER.csv"
+      - "scripts/validate-csharp-course.mjs"
+      - ".github/workflows/csharp-course-validation.yml"
+  pull_request:
+    branches: [release/v1-frontend]
+    paths:
+      - "public/content/en/csharp/**"
+      - "public/content/curriculum-index.json"
+      - "docs/CODESAATHI_CURRICULUM_PROGRESS_TRACKER.csv"
+      - "scripts/validate-csharp-course.mjs"
+      - ".github/workflows/csharp-course-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-csharp:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up .NET 10 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - name: Report .NET SDK
+        run: dotnet --info
+      - name: Validate lesson structure and execute C# examples
+        run: node scripts/validate-csharp-course.mjs
