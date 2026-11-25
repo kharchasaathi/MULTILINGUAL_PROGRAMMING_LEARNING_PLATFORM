@@ -24,12 +24,12 @@
   "stages": {
     "understand": {
       "concept": "Java supports deletion through File.delete and the NIO Files API. File.delete returns a boolean, which can make failure reasons difficult to diagnose. Files.delete throws IOException when deletion fails and NoSuchFileException when the path is absent. Files.deleteIfExists returns false if nothing existed to delete. A directory can normally be deleted only when it is empty; always validate the target path before destructive operations.",
-      "whyItMatters": "File handling allows a Java application to persist, retrieve and manage information beyond the lifetime of a single run.",
+      "whyItMatters": "Deletion is a destructive file-system operation. Correct API selection and careful target validation help prevent accidental data loss, while explicit exception handling lets applications distinguish an absent file from a failed deletion.",
       "analogy": "Think of a path as a labeled address to a storage location; the address and the data stored there are different things.",
       "analogyLimit": "A path is not a guarantee that the target exists or that the program has permission to access it."
     },
     "explain": {
-      "narrative": "Represent the target with Path.of. Use Files.delete when absence should be treated as an error, or Files.deleteIfExists when deleting an already-absent path is acceptable. Both methods can throw IOException. File.delete offers a boolean result instead. Do not recursively delete paths unless the application has carefully validated the target and its contents.",
+      "narrative": "## Delete a file with the NIO API\n\nUse `Files.delete(path)` when the target is expected to exist. It throws an `IOException` if deletion fails and a `NoSuchFileException` if the path is absent. Use `Files.deleteIfExists(path)` when an already-absent target is an acceptable outcome; it returns `false` when there was nothing to delete and `true` when the path was removed.\n\nThe older `File.delete()` method returns a boolean. A false result indicates that deletion did not happen, but it provides less detail about the reason.\n\n## Directories and non-empty folders\n\nA directory can normally be deleted only when it is empty. Deleting a directory is not the same as recursively deleting its contents. Recursive deletion requires walking the tree and handling failures at each entry; it should never be added casually.\n\n## Validate the target before deletion\n\nConfirm that the path is inside the application-owned directory and matches the exact file the user intended to remove. Do not trust raw user-supplied path strings. Resolve and normalize paths, check that the resolved target remains under the approved base directory, and consider symbolic links and race conditions. An existence check alone does not guarantee that a later delete will succeed.\n\n## Handle failures explicitly\n\nDeletion can fail because the path is absent, access is denied, the target is a non-empty directory, or the file system reports another I/O error. Catch the appropriate exception or report it to the caller. Never print a success message unless the delete operation actually succeeded.",
       "examples": [
         {
           "id": "jv8.5-ex1",
@@ -79,14 +79,14 @@
       ]
     },
     "practise": {
-      "guidedTask": "Create a small Java program that demonstrates java delete files. Predict each result, then compile and run it with JDK 21.",
-      "independentTask": "Build a practical Java file-handling utility related to java delete files. Include at least two test cases, expected outputs, and an explanation of failure handling and path safety.",
+      "guidedTask": "Create a temporary file with Files.writeString, delete it with Files.deleteIfExists and print the returned boolean plus the final Files.exists result. Repeat the operation to demonstrate the false result for an already-absent path. Then create an empty directory and delete it.",
+      "independentTask": "Build a cleanup utility that deletes only a named temporary file inside a dedicated application test directory. Normalize the resolved path, verify that it remains under the approved base directory, use Files.deleteIfExists, and report success, absence and IOException separately. Test an existing file, a missing file and an empty directory.",
       "hints": [
-        "Start with a Path or File that points to a controlled test location.",
-        "Use try-with-resources for streams and writers, and handle IOException where the API declares it.",
-        "Test both the normal case and an edge case such as a missing path or existing target."
+        "delete removes a file or an empty directory; deleteIfExists avoids an exception when the target is already absent.",
+        "Validate and normalize the target path against the intended directory before performing a destructive operation.",
+        "Test missing targets, non-empty directories, permission failures and attempts to escape the allowed directory."
       ],
-      "challenge": "Extend one java delete files example to handle a realistic file-system edge case safely and explain the API behaviour."
+      "challenge": "Review a cleanup routine that accepts a user-provided path. Identify path traversal, symbolic-link and check-then-delete risks. Propose a safer design that restricts deletion to a dedicated directory and explain which race conditions still require care."
     }
   },
   "practice": {

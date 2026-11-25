@@ -25,7 +25,7 @@
       "analogyLimit": "Actual behavior is defined by Java language rules and API contracts."
     },
     "explain": {
-      "narrative": "## Generic Methods, Bounds and Wildcards\n\nGeneric methods declare type parameters before the return type. Bounds restrict acceptable types. extends is useful for producers and super for consumers.\n\nIdentify the input and desired result. Select the Java construct or API that supports the requirement. Keep code readable, handle documented failures and state assumptions clearly.\n\nCompile with JDK 21, predict output before running, and test normal, boundary and invalid inputs.",
+      "narrative": "## Generic methods\n\nA generic method declares its own type parameter list before the return type, for example <T> T first(List<T> values). The method's type parameter is inferred from the arguments when possible, or can be supplied explicitly. A method-level type parameter is independent of any type parameter declared by its enclosing class.\n\n## Bounds\n\nAn upper bound such as <T extends Number> restricts T to Number or one of its subclasses. This lets the method safely call Number methods such as doubleValue. A type parameter may have multiple bounds; when a class bound is present, it must appear first, followed by interface bounds.\n\n## Wildcard types\n\nList<?> means a list of an unknown element type. It is useful when code only needs operations that do not depend on the element type, such as reading its size. List<? extends Number> is an upper-bounded wildcard: values can be read as Number, but adding an arbitrary Number is not safe because the actual list could be List<Integer> or List<Double>.\n\nList<? super Integer> is a lower-bounded wildcard. It can safely accept Integer values (and subclasses), while values read from it are known only as Object. These rules are often summarized as PECS: Producer Extends, Consumer Super.\n\n## Invariance and API design\n\nEven though Integer extends Number, List<Integer> is not a subtype of List<Number>. Wildcards express the safe variance needed by an API without allowing writes that could violate the collection's actual element type.\n\n## Type erasure and limitations\n\nGeneric type arguments are erased from most runtime operations. Generic methods and classes therefore cannot generally create T with new T(), use T.class, or create arrays of T. Use a Class<T> token or a carefully designed factory when runtime construction is required.",
       "examples": [
         {
           "id": "jv14.2-ex1",
@@ -33,7 +33,7 @@
           "title": "Core concept",
           "code": "public class Main { public static void main(String[] args) throws Exception { class NumberTools { <T extends Number> double sum(java.util.List<T> values) { double total=0; for(T value:values) total+=value.doubleValue(); return total; } } NumberTools tools = new NumberTools(); System.out.println(tools.sum(java.util.List.of(2,3,4))); } }",
           "expectedOutput": "9.0",
-          "explanation": "A bounded type parameter allows the method to call Number.doubleValue.",
+          "explanation": "The method declares <T extends Number>, so its parameter may contain numeric wrapper values and each value can be converted with doubleValue.",
           "runnable": false
         },
         {
@@ -42,7 +42,7 @@
           "title": "Practical use",
           "code": "public class Main { public static void main(String[] args) throws Exception { class First { <T> T get(java.util.List<T> values) { return values.get(0); } } System.out.println(new First().get(java.util.List.of(\"red\",\"blue\"))); } }",
           "expectedOutput": "red",
-          "explanation": "A generic method returns the element type supplied by its caller.",
+          "explanation": "The type parameter T is inferred from the supplied list, and the method returns an element with that same compile-time type.",
           "runnable": false
         },
         {
@@ -51,7 +51,7 @@
           "title": "Boundary behavior",
           "code": "public class Main { public static void main(String[] args) throws Exception { class Total { double sum(java.util.List<? extends Number> values) { double total=0; for(Number n:values) total+=n.doubleValue(); return total; } } System.out.println(new Total().sum(java.util.List.of(1,2,3))); } }",
           "expectedOutput": "6.0",
-          "explanation": "An extends wildcard allows reading Number values from a producer.",
+          "explanation": "List<? extends Number> is a producer of Number values: the method can read them as Number but cannot safely add an Integer.",
           "runnable": false
         },
         {
@@ -60,7 +60,7 @@
           "title": "Alternative pattern",
           "code": "public class Main { public static void main(String[] args) throws Exception { class Add { void addOne(java.util.List<? super Integer> values) { values.add(1); } } java.util.List<Number> values = new java.util.ArrayList<>(); new Add().addOne(values); System.out.println(values); } }",
           "expectedOutput": "[1]",
-          "explanation": "A super wildcard accepts a consumer list that can store Integer values.",
+          "explanation": "List<? super Integer> is a consumer of Integer values: adding Integer is safe, while a retrieved element has only the known type Object.",
           "runnable": false
         },
         {
@@ -69,7 +69,7 @@
           "title": "Verify the result",
           "code": "public class Main { public static void main(String[] args) throws Exception { class Show { <T> void show(T value) { System.out.println(value.getClass().getSimpleName()); } } new Show().show(\"Java\"); } }",
           "expectedOutput": "String",
-          "explanation": "A generic method infers its type argument from the call.",
+          "explanation": "The compiler infers the generic method's type argument from the invocation, allowing the returned value to be assigned to the matching reference type.",
           "runnable": false
         }
       ]
@@ -78,9 +78,9 @@
       "guidedTask": "Write a generic method that returns the first element of List<T>, then write a bounded method that sums List<? extends Number>.",
       "independentTask": "Implement a method that copies Integer values into a destination List<? super Integer>. Explain why the wildcard supports adding integers.",
       "hints": [
-        "Start with a small, deterministic dataset and predict the result.",
-        "Check the relevant Java interface and method contract.",
-        "Compile with JDK 21 and test duplicate, empty and boundary cases."
+        "Declare method type parameters immediately before the return type, such as <T> T method(...).",
+        "Use extends when a structure produces values for reading and super when it consumes values for writing.",
+        "Remember that List<Integer> is not a subtype of List<Number>; use a wildcard to express a safe API."
       ],
       "challenge": "Create compile-time examples demonstrating extends for reading and super for writing. Explain type erasure at a high level."
     }
@@ -102,7 +102,7 @@
           "After the class closing brace"
         ],
         "answer": "Before its return type",
-        "explanation": "Where is a generic method's type parameter declared? This is the correct answer based on the Java contract and behavior described in Generic Methods, Bounds and Wildcards."
+        "explanation": "The bound T extends Number guarantees each list element has Number methods such as doubleValue, allowing a numeric sum."
       },
       {
         "id": "jv14.2-q2",
@@ -114,7 +114,7 @@
           "T must implement Runnable only"
         ],
         "answer": "T must be Number or a subtype of Number",
-        "explanation": "What does <T extends Number> require? This is the correct answer based on the Java contract and behavior described in Generic Methods, Bounds and Wildcards."
+        "explanation": "The generic method returns the same type T that appears in its input list; inference selects String for this invocation."
       },
       {
         "id": "jv14.2-q3",
@@ -126,7 +126,7 @@
           "Changing the list's type parameter"
         ],
         "answer": "Reading elements as Number safely",
-        "explanation": "What does List<? extends Number> primarily allow? This is the correct answer based on the Java contract and behavior described in Generic Methods, Bounds and Wildcards."
+        "explanation": "An upper-bounded wildcard allows reading elements as Number, and their doubleValue values sum to 6.0."
       },
       {
         "id": "jv14.2-q4",
@@ -138,7 +138,7 @@
           "Sorting without a comparator"
         ],
         "answer": "Adding Integer values to the list",
-        "explanation": "What does List<? super Integer> allow conveniently? This is the correct answer based on the Java contract and behavior described in Generic Methods, Bounds and Wildcards."
+        "explanation": "A lower-bounded wildcard List<? super Integer> can safely receive Integer values; reading from it is only guaranteed to produce Object."
       },
       {
         "id": "jv14.2-q5",
@@ -150,7 +150,7 @@
           "Public Enum, Constant Switch"
         ],
         "answer": "Producer Extends, Consumer Super",
-        "explanation": "What does PECS stand for? This is the correct answer based on the Java contract and behavior described in Generic Methods, Bounds and Wildcards."
+        "explanation": "The method type parameter is inferred as String from the argument, and getClass reports the runtime class simple name."
       }
     ]
   },

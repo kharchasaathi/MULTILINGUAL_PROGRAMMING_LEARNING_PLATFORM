@@ -25,7 +25,7 @@
       "analogyLimit": "Actual behavior is defined by Java language rules and API contracts."
     },
     "explain": {
-      "narrative": "## TreeMap and LinkedHashMap\n\nTreeMap orders entries by key. LinkedHashMap maintains predictable encounter order, normally insertion order. Both implement Map.\n\nIdentify the input and desired result. Select the Java construct or API that supports the requirement. Keep code readable, handle documented failures and state assumptions clearly.\n\nCompile with JDK 21, predict output before running, and test normal, boundary and invalid inputs.",
+      "narrative": "## Map implementations and their contracts\n\nMap<K,V> associates each key with at most one value. Adding a mapping for an existing key replaces its previous value. The Map interface defines operations such as put, get, containsKey, remove, keySet and entrySet; it does not itself promise a universal iteration order.\n\n## HashMap\n\nHashMap uses hashing for key lookup and makes no iteration-order guarantee. Its typical lookup and insertion performance is constant time when hash codes are distributed well. Never use a printed HashMap order as a stable expected result.\n\n## LinkedHashMap\n\nLinkedHashMap maintains a predictable encounter order, normally insertion order. Replacing the value for an existing key does not create a second key. It is useful for reports or user interfaces where entries should be traversed in the order they were first inserted. It can also be configured for access order, which is useful in cache designs.\n\n## TreeMap\n\nTreeMap stores entries in key-sorted order using the keys' natural ordering or a supplied Comparator. Basic get, put and remove operations take logarithmic time. Keys must be mutually comparable under the selected ordering. A comparator that returns zero treats keys as the same map key, so a later put replaces the existing mapping.\n\n## Choose and test deliberately\n\nDeclare a variable as Map<K,V> when code needs only map operations. Select HashMap, LinkedHashMap or TreeMap according to ordering requirements. Test duplicate-key replacement separately from iteration order, and ensure custom key classes implement equals and hashCode consistently when used with hash-based maps.",
       "examples": [
         {
           "id": "jv13.4-ex1",
@@ -33,7 +33,7 @@
           "title": "Core API",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.Map<Integer,String> values = new java.util.TreeMap<>(); values.put(2,\"B\"); values.put(1,\"A\"); System.out.println(values.keySet()); } }",
           "expectedOutput": "[1, 2]",
-          "explanation": "TreeMap stores map entries in key-sorted order, using natural key ordering or a supplied Comparator.",
+          "explanation": "put creates key-value mappings; get retrieves the value associated with the requested key.",
           "runnable": false
         },
         {
@@ -42,7 +42,7 @@
           "title": "Practical use",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.Map<Integer,String> values = new java.util.LinkedHashMap<>(); values.put(2,\"B\"); values.put(1,\"A\"); System.out.println(values.keySet()); } }",
           "expectedOutput": "[2, 1]",
-          "explanation": "LinkedHashMap preserves insertion order.",
+          "explanation": "Putting a second value under the same key replaces the first mapping rather than creating a duplicate key.",
           "runnable": false
         },
         {
@@ -51,7 +51,7 @@
           "title": "Boundary behavior",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.Map<String,Integer> values = new java.util.TreeMap<>(); values.put(\"pear\",2); values.put(\"apple\",1); System.out.println(values.keySet()); } }",
           "expectedOutput": "[apple, pear]",
-          "explanation": "TreeMap orders String keys alphabetically.",
+          "explanation": "getOrDefault returns the supplied fallback only when the key has no mapping; it does not replace the map contents.",
           "runnable": false
         },
         {
@@ -60,7 +60,7 @@
           "title": "Alternative pattern",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.Map<Integer,String> values = new java.util.TreeMap<>(java.util.Comparator.reverseOrder()); values.put(1,\"A\"); values.put(2,\"B\"); System.out.println(values.keySet()); } }",
           "expectedOutput": "[2, 1]",
-          "explanation": "A reverse Comparator changes key ordering.",
+          "explanation": "LinkedHashMap iterates in insertion order while TreeMap iterates by sorted key order; the output demonstrates the different contracts.",
           "runnable": false
         },
         {
@@ -69,7 +69,7 @@
           "title": "Verify the result",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.Map<String,Integer> values = new java.util.LinkedHashMap<>(); values.put(\"first\",1); values.put(\"second\",2); System.out.println(values.get(\"second\")); } }",
           "expectedOutput": "2",
-          "explanation": "Uses Map operations independently of concrete implementation.",
+          "explanation": "Map is the interface type used by the variable, while the TreeMap instance supplies sorted-key iteration.",
           "runnable": false
         }
       ]
@@ -78,9 +78,9 @@
       "guidedTask": "Insert keys out of order into TreeMap and LinkedHashMap. Print key sets and explain sorted-key order versus insertion order.",
       "independentTask": "Build a word-frequency report using a Map, then present the entries in sorted key order with TreeMap.",
       "hints": [
-        "Start with a small, deterministic dataset and predict the result.",
-        "Check the relevant Java interface and method contract.",
-        "Compile with JDK 21 and test duplicate, empty and boundary cases."
+        "A Map has unique keys; inserting an existing key replaces its value.",
+        "LinkedHashMap normally preserves insertion order; TreeMap sorts by key; HashMap promises neither order.",
+        "TreeMap uses its comparator to distinguish keys, so compare returning zero means the keys occupy the same mapping."
       ],
       "challenge": "Use a reverse-order Comparator with TreeMap and test duplicate key replacement; explain why a Map stores only one value per key."
     }
@@ -102,7 +102,7 @@
           "IdentityHashMap"
         ],
         "answer": "TreeMap",
-        "explanation": "Which Map implementation sorts entries by key? This is the correct answer based on the Java contract and behavior described in TreeMap and LinkedHashMap."
+        "explanation": "TreeMap orders its keys by natural numeric order, so keySet displays 1 before 2 even though 2 was inserted first."
       },
       {
         "id": "jv13.4-q2",
@@ -114,7 +114,7 @@
           "WeakHashMap"
         ],
         "answer": "LinkedHashMap",
-        "explanation": "Which Map implementation normally preserves insertion order? This is the correct answer based on the Java contract and behavior described in TreeMap and LinkedHashMap."
+        "explanation": "LinkedHashMap preserves insertion order, so the key set remains [2, 1] after the two puts."
       },
       {
         "id": "jv13.4-q3",
@@ -126,7 +126,7 @@
           "The value's toString output"
         ],
         "answer": "Natural ordering or a Comparator",
-        "explanation": "What determines key order in a TreeMap? This is the correct answer based on the Java contract and behavior described in TreeMap and LinkedHashMap."
+        "explanation": "TreeMap orders String keys lexicographically; the displayed key set therefore starts with apple."
       },
       {
         "id": "jv13.4-q4",
@@ -138,7 +138,7 @@
           "Queue"
         ],
         "answer": "Map",
-        "explanation": "What common interface do TreeMap and LinkedHashMap implement? This is the correct answer based on the Java contract and behavior described in TreeMap and LinkedHashMap."
+        "explanation": "The supplied reverse comparator orders integer keys from greatest to least, so keySet is [2, 1]."
       },
       {
         "id": "jv13.4-q5",
@@ -150,7 +150,7 @@
           "ArrayList"
         ],
         "answer": "TreeMap",
-        "explanation": "Which implementation is appropriate when entries should be traversed by sorted keys? This is the correct answer based on the Java contract and behavior described in TreeMap and LinkedHashMap."
+        "explanation": "Map.get looks up the value associated with the supplied key; it returns 2 for the second mapping."
       }
     ]
   },

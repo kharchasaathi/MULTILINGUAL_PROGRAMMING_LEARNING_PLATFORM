@@ -20,12 +20,12 @@
   "stages": {
     "understand": {
       "concept": "FileInputStream reads bytes and FileOutputStream writes bytes. The read method returns -1 at end of stream. For larger files, use a byte buffer.",
-      "whyItMatters": "Byte Streams: FileInputStream and FileOutputStream helps learners create Java applications that are easier to reason about, test and maintain.",
-      "analogy": "Treat the concept as a clearly labeled tool for one programming responsibility.",
-      "analogyLimit": "Actual behavior is defined by Java language rules and API contracts."
+      "whyItMatters": "Byte streams preserve raw bytes and are appropriate for binary data such as images, archives and arbitrary file copies. Correct buffering and end-of-stream handling prevent truncated output and unnecessary one-byte I/O operations.",
+      "analogy": "A byte stream is like moving sealed numbered packets: the program copies each byte without interpreting it as a letter or character.",
+      "analogyLimit": "Bytes do not inherently represent text. Decoding arbitrary bytes as characters without knowing the encoding can corrupt or misinterpret data."
     },
     "explain": {
-      "narrative": "## Byte Streams: FileInputStream and FileOutputStream\n\nFileInputStream reads bytes and FileOutputStream writes bytes. The read method returns -1 at end of stream. For larger files, use a byte buffer.\n\nIdentify the input and desired result. Select the Java construct or API that supports the requirement. Keep code readable, handle documented failures and state assumptions clearly.\n\nCompile with JDK 21, predict output before running, and test normal, boundary and invalid inputs.",
+      "narrative": "## Byte-oriented file input and output\n\n`FileInputStream` reads the raw bytes stored in a file, while `FileOutputStream` writes raw bytes to a destination. Use this pair for binary formats such as images, archives and audio. A byte stream does not interpret character encoding; it transfers byte values exactly.\n\n## Read one byte or read a block\n\nThe single-byte `read()` method returns an int from 0 through 255, or -1 when the stream reaches end-of-file. Do not store the result in a byte before checking for -1, because -1 is the end marker rather than a data byte.\n\nFor efficient copying, pass a non-empty byte array to `read(buffer)`. The returned count is the number of bytes filled in this read. The final read may fill only part of the buffer, so write exactly `count` bytes with `write(buffer, 0, count)`; writing the entire buffer can append stale bytes from a previous iteration.\n\n## Copy files safely\n\nOpen source and destination streams with try-with-resources. Decide whether an existing destination should be replaced or appended; the default FileOutputStream constructor truncates an existing file. If preserving the old destination matters, write to a temporary file and replace only after a successful copy.\n\n## Verify binary integrity\n\nDo not compare binary files by printing them as text. Compare byte arrays or use a checksum, and test empty input, a file smaller than the buffer, a file larger than the buffer and data containing zero-valued bytes. Handle IOException and ensure both streams close when a read or write fails.",
       "examples": [
         {
           "id": "jv12.2-ex1",
@@ -78,9 +78,9 @@
       "guidedTask": "Copy a temporary binary file with FileInputStream and FileOutputStream using a fixed-size byte buffer. Compare source and destination bytes.",
       "independentTask": "Implement a byte-copy method that loops until read returns -1, writes only the bytes actually read and closes both streams safely.",
       "hints": [
-        "Choose the API that matches the data representation and operation.",
-        "Use try-with-resources for AutoCloseable resources.",
-        "Test empty, normal and failure cases; verify exact output or file contents."
+        "Check for -1 before treating a single-byte read result as data; read() returns int for this reason.",
+        "For read(byte[]), write only the returned count, not the full buffer capacity.",
+        "Test empty, short, multi-buffer and zero-byte binary files; compare bytes or checksums rather than decoded text."
       ],
       "challenge": "Test an empty file, a file smaller than the buffer, a file larger than the buffer and binary bytes containing zero values."
     }
@@ -102,7 +102,7 @@
           "The file length"
         ],
         "answer": "-1",
-        "explanation": "What does FileInputStream.read() return at end of stream? This is the correct choice for Byte Streams: FileInputStream and FileOutputStream because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "FileInputStream.read() returns -1 when no more bytes are available; check this sentinel before treating the int as file data."
       },
       {
         "id": "jv12.2-q2",
@@ -114,7 +114,7 @@
           "Scanner"
         ],
         "answer": "FileOutputStream",
-        "explanation": "Which API writes raw bytes to a file? This is the correct choice for Byte Streams: FileInputStream and FileOutputStream because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "FileOutputStream writes raw byte values to a file and does not interpret them as characters."
       },
       {
         "id": "jv12.2-q3",
@@ -126,7 +126,7 @@
           "It sorts the file contents"
         ],
         "answer": "It transfers multiple bytes per read/write operation",
-        "explanation": "Why use a byte buffer when copying a large file? This is the correct choice for Byte Streams: FileInputStream and FileOutputStream because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "A byte buffer transfers multiple bytes per I/O call, reducing repeated low-level operations during a large copy."
       },
       {
         "id": "jv12.2-q4",
@@ -138,7 +138,7 @@
           "switch (FileInputStream in)"
         ],
         "answer": "try (FileInputStream in = ...)",
-        "explanation": "Which resource declaration ensures a stream is closed? This is the correct choice for Byte Streams: FileInputStream and FileOutputStream because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "Declaring the stream in a try-with-resources header causes Java to close it when the statement exits, including exceptional exits."
       },
       {
         "id": "jv12.2-q5",
@@ -150,7 +150,7 @@
           "Text readers automatically repair all binary formats"
         ],
         "answer": "The bytes may not represent valid text in the assumed charset",
-        "explanation": "Why should arbitrary binary data not be decoded as text without a format? This is the correct choice for Byte Streams: FileInputStream and FileOutputStream because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "Arbitrary binary bytes may not form valid text in an assumed charset, so verify binary copies as bytes or with a checksum."
       }
     ]
   },

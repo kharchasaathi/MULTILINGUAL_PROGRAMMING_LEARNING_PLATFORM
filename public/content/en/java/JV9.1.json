@@ -20,12 +20,12 @@
   "stages": {
     "understand": {
       "concept": "A syntax or type error prevents compilation; a runtime exception interrupts execution; a logic error produces an incorrect result. Read the first useful compiler diagnostic, inspect its source location and nearby code, make one correction, then compile again.",
-      "whyItMatters": "Java Errors and Compiler Diagnostics helps learners create Java applications that are easier to reason about, test and maintain. It connects core language knowledge with realistic programming tasks.",
-      "analogy": "Treat this concept as a clearly labeled tool: select it for a specific responsibility and check the result.",
-      "analogyLimit": "This analogy is only a learning aid; actual behavior is defined by Java language rules and API contracts."
+      "whyItMatters": "Compiler diagnostics identify source locations and rejected language constructs; runtime exceptions identify failures that occur after compilation; logic defects require tests and debugging. Distinguishing them helps choose the right repair instead of changing unrelated code.",
+      "analogy": "Think of a Java program passing through two gates: javac checks whether the source can become bytecode, while execution checks what happens for actual inputs. A program can pass the first gate and still fail or calculate the wrong result at the second.",
+      "analogyLimit": "The gates are a simplification: static analysis can detect some likely defects before execution, while runtime checks and tests still cannot prove every possible input is correct."
     },
     "explain": {
-      "narrative": "## Java Errors and Compiler Diagnostics\n\nA syntax or type error prevents compilation; a runtime exception interrupts execution; a logic error produces an incorrect result. Read the first useful compiler diagnostic, inspect its source location and nearby code, make one correction, then compile again.\n\n## Applying the concept\n\nIdentify the input and desired result. Select the Java construct or API that directly supports the requirement. Keep code readable, handle documented failure cases and state assumptions clearly.\n\n## Verification checklist\n\n- Compile with JDK 21.\n- Predict the output before running.\n- Test normal, boundary and invalid inputs where relevant.\n- Check resource cleanup and error handling.\n- Prefer explicit types and focused methods.",
+      "narrative": "## Java Errors and Compiler Diagnostics\n\nA syntax or type error prevents compilation; a runtime exception interrupts execution; a logic error produces an incorrect result. Read the first useful compiler diagnostic, inspect its source location and nearby code, make one correction, then compile again.\n\n## Read a compiler diagnostic\n\nStart with the first actionable error, not every message that follows it. Note the file, line and column, inspect the surrounding expression, and check the reported symbol or type. A single missing delimiter can cause several later parser messages, so fix the earliest root cause and compile again.\n\n## Classify before repairing\n\n- **Compile-time:** invalid syntax, inaccessible member or incompatible types; javac rejects the source.\n- **Runtime:** parsing invalid input or indexing beyond an array; the program starts but throws an exception.\n- **Logic:** a discount formula uses addition instead of multiplication; the program runs but violates the requirement.\n\nKeep a minimal reproduction and add a regression test after each repair.",
       "examples": [
         {
           "id": "jv9.1-ex1",
@@ -78,9 +78,9 @@
       "guidedTask": "Create three tiny Java files: one with a syntax error, one with a runtime parse failure, and one with an incorrect calculation. Compile/run each and record how the failure differs.",
       "independentTask": "Repair a supplied broken calculator. Keep a short defect log with the compiler/runtime message, source location, root cause, correction and regression test.",
       "hints": [
-        "State the input, output and assumptions before coding.",
-        "Use the smallest example that demonstrates the behavior.",
-        "Predict the result, compile with JDK 21, then test a boundary or failure case."
+        "Classify the failure first: javac rejection, a thrown runtime exception, or a wrong result despite successful execution.",
+        "Read the earliest actionable diagnostic and inspect its source location; later parser errors may be consequences of the first defect.",
+        "After correcting the cause, compile again and add a regression test for the original failure."
       ],
       "challenge": "Try an invalid numeric string and a zero divisor. Explain which failures javac catches and which require runtime validation."
     }
@@ -102,7 +102,7 @@
           "An incorrect business result"
         ],
         "answer": "A compile-time syntax error",
-        "explanation": "Which error normally prevents javac from producing a class file? The correct choice follows the Java concept taught in Java Errors and Compiler Diagnostics; the alternatives conflict with its language rules or intended use."
+        "explanation": "A syntax error is rejected by javac, so compilation does not produce the requested class file."
       },
       {
         "id": "jv9.1-q2",
@@ -114,7 +114,7 @@
           "Delete the whole class"
         ],
         "answer": "Inspect and fix the first meaningful diagnostic, then recompile",
-        "explanation": "What is a useful first response to several compiler diagnostics? The correct choice follows the Java concept taught in Java Errors and Compiler Diagnostics; the alternatives conflict with its language rules or intended use."
+        "explanation": "The first actionable diagnostic usually identifies the earliest source problem; later messages may be cascading errors caused by it."
       },
       {
         "id": "jv9.1-q3",
@@ -126,7 +126,7 @@
           "A missing source file"
         ],
         "answer": "A program compiles but calculates 2 + 2 as 5",
-        "explanation": "Which result is a logic error? The correct choice follows the Java concept taught in Java Errors and Compiler Diagnostics; the alternatives conflict with its language rules or intended use."
+        "explanation": "A logic error allows compilation and execution but violates the intended calculation, as in returning 5 for 2 + 2."
       },
       {
         "id": "jv9.1-q4",
@@ -138,7 +138,7 @@
           "A warning only"
         ],
         "answer": "A runtime conversion failure",
-        "explanation": "What does NumberFormatException indicate in Integer.parseInt? The correct choice follows the Java concept taught in Java Errors and Compiler Diagnostics; the alternatives conflict with its language rules or intended use."
+        "explanation": "Integer.parseInt throws NumberFormatException at runtime when the supplied text is not a valid integer representation."
       },
       {
         "id": "jv9.1-q5",
@@ -150,7 +150,7 @@
           "Ignore the input"
         ],
         "answer": "Validate the divisor before division",
-        "explanation": "Which practice helps prevent division by zero? The correct choice follows the Java concept taught in Java Errors and Compiler Diagnostics; the alternatives conflict with its language rules or intended use."
+        "explanation": "Check that the divisor is non-zero before division, and define how the program should handle a zero divisor."
       }
     ]
   },

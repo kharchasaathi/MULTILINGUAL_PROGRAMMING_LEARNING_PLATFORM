@@ -25,7 +25,7 @@
       "analogyLimit": "Actual behavior is defined by Java language rules and API contracts."
     },
     "explain": {
-      "narrative": "## BufferedReader and BufferedWriter\n\nBufferedReader.readLine returns null at end of input. BufferedWriter accumulates characters and offers newLine for a platform line separator. Closing a wrapper closes its underlying stream.\n\nIdentify the input and desired result. Select the Java construct or API that supports the requirement. Keep code readable, handle documented failures and state assumptions clearly.\n\nCompile with JDK 21, predict output before running, and test normal, boundary and invalid inputs.",
+      "narrative": "## Why buffering helps\n\nA `BufferedReader` reads characters into an internal buffer so the program can process data without making a low-level read for every character. `BufferedWriter` similarly collects characters before sending them to the underlying writer. Buffering is especially useful for sequential text processing and can reduce the number of expensive I/O operations.\n\n## Read lines safely\n\n`BufferedReader.readLine()` returns a line without its line terminator. It returns `null` when the end of the input is reached. A loop should therefore continue while the returned line is not null. An empty line is an empty string, not null; this distinction matters when preserving blank lines.\n\n## Write lines and flush output\n\nUse `BufferedWriter.write()` to write characters and `newLine()` to write the platform-specific line separator. Call `flush()` when data must be pushed to the underlying writer before it is closed; closing the writer also flushes it. Do not assume every platform uses the same newline characters.\n\n## Resource ownership and testing\n\nWrap readers and writers in try-with-resources. Closing the outer buffered wrapper closes the underlying resource too. Test empty input, one line, blank lines, a final line without a newline, and a write failure. When exact cross-platform bytes matter, specify the encoding and line-ending policy rather than relying on platform defaults.",
       "examples": [
         {
           "id": "jv12.4-ex1",
@@ -78,9 +78,9 @@
       "guidedTask": "Read a multi-line StringReader using BufferedReader.readLine until it returns null. Write a transformed copy with BufferedWriter and newLine.",
       "independentTask": "Build a buffered text-file copier that preserves every line and uses try-with-resources for reader and writer.",
       "hints": [
-        "Select the interface from the behavior the problem requires.",
-        "Use generics to make the element or key/value types explicit.",
-        "Check ordering and duplicate behavior with a small test dataset."
+        "Use readLine() != null for end-of-file; an empty string represents a blank line.",
+        "Use newLine() when platform line separators are intended, and flush when output must be visible before close.",
+        "Test empty input, blank lines, a final line without a terminator and cleanup after failure."
       ],
       "challenge": "Test empty input, one line without a final newline, several lines and explicit flush/close behavior."
     }
@@ -102,7 +102,7 @@
           "A new BufferedReader"
         ],
         "answer": "null",
-        "explanation": "What does BufferedReader.readLine() return at end of input? This is the correct choice for BufferedReader and BufferedWriter because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "readLine returns null only when the end of input is reached; an empty String represents a blank line within the input."
       },
       {
         "id": "jv12.4-q2",
@@ -114,7 +114,7 @@
           "String.splitLine()"
         ],
         "answer": "BufferedWriter.newLine()",
-        "explanation": "Which method writes a platform-specific line separator? This is the correct choice for BufferedReader and BufferedWriter because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "BufferedWriter.newLine writes the platform's line separator rather than assuming a fixed newline sequence."
       },
       {
         "id": "jv12.4-q3",
@@ -126,7 +126,7 @@
           "Converts characters to uppercase"
         ],
         "answer": "Pushes buffered characters toward the underlying destination",
-        "explanation": "What does flush() do on a writer? This is the correct choice for BufferedReader and BufferedWriter because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "flush pushes buffered characters toward the underlying destination before the writer is closed."
       },
       {
         "id": "jv12.4-q4",
@@ -138,7 +138,7 @@
           "It is converted into a byte array"
         ],
         "answer": "The wrapped stream is closed too",
-        "explanation": "When a buffered wrapper is closed, what happens to its wrapped stream? This is the correct choice for BufferedReader and BufferedWriter because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "Closing a buffered wrapper closes the wrapped resource as part of the wrapper's resource ownership."
       },
       {
         "id": "jv12.4-q5",
@@ -150,7 +150,7 @@
           "To guarantee a particular charset"
         ],
         "answer": "To reduce frequent interactions with the underlying I/O system",
-        "explanation": "Why buffer text I/O? This is the correct choice for BufferedReader and BufferedWriter because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "Buffering reduces frequent interactions with the underlying I/O system by grouping reads or writes."
       }
     ]
   },

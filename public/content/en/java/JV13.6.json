@@ -25,7 +25,7 @@
       "analogyLimit": "Actual behavior is defined by Java language rules and API contracts."
     },
     "explain": {
-      "narrative": "## Complexity, Ordering and Equality Contracts\n\nHash-based collections rely on consistent equals and hashCode; sorted collections rely on comparison. Big-O describes growth, not exact elapsed time.\n\nIdentify the input and desired result. Select the Java construct or API that supports the requirement. Keep code readable, handle documented failures and state assumptions clearly.\n\nCompile with JDK 21, predict output before running, and test normal, boundary and invalid inputs.",
+      "narrative": "## Complexity describes growth\n\nAlgorithmic complexity describes how resource use grows as input size grows. Big-O notation is an asymptotic description, not a stopwatch prediction for a particular machine. Constant factors, data distribution, memory locality, resizing, collisions and workload all affect observed performance.\n\n## Common collection trade-offs\n\nArrayList provides constant-time indexed access in typical analysis; inserting or removing near the beginning can require shifting later elements. LinkedList indexed access requires traversal, even though insertion or removal at a known node can be efficient. HashMap and HashSet commonly provide expected constant-time basic operations with well-distributed hashes, but this is not an unconditional worst-case guarantee. TreeMap and TreeSet provide sorted traversal and logarithmic-time basic operations.\n\n## Equality and hashing\n\nHash-based collections use hashCode to select candidate buckets and equals to distinguish keys or elements. The contract requires that equal objects have equal hash codes. Unequal objects may share a hash code. If a field used by equals/hashCode changes while an object is a key in a HashMap or member of a HashSet, lookup behavior can become surprising; prefer stable key state.\n\n## Ordering and comparison\n\nSorted collections use natural ordering or a Comparator. For TreeSet and TreeMap, compare returning zero means the values are equivalent for set membership or map-key identity, even if equals returns false. Make comparison consistent with equals where practical, or clearly document the intended difference. Add tie-breaker fields when distinct values must remain distinct in a sorted set.\n\n## Measure the real workload\n\nChoose based on required semantics first, then expected operation frequency and scale. Use benchmarks for performance questions rather than assuming Big-O alone predicts latency. Test duplicates, collisions, missing keys, equal-but-distinct objects and comparator ties.",
       "examples": [
         {
           "id": "jv13.6-ex1",
@@ -33,7 +33,7 @@
           "title": "Hash-based lookup and equality",
           "code": "public class Main { public static void main(String[] args) { record User(int id, String name) {} java.util.Map<Integer,User> users = new java.util.HashMap<>(); users.put(7, new User(7, \"Asha\")); System.out.println(users.get(7).name()); } }",
           "expectedOutput": "Asha",
-          "explanation": "HashMap uses hash-based lookup; this example demonstrates a key lookup. Average-time complexity is commonly O(1), but worst-case behavior and hash quality matter.",
+          "explanation": "HashMap offers expected constant-time lookup under suitable hash distribution; this example retrieves the User associated with key 7.",
           "runnable": false
         },
         {
@@ -42,7 +42,7 @@
           "title": "Sorted-map lookup",
           "code": "public class Main { public static void main(String[] args) { java.util.Map<Integer,String> users = new java.util.TreeMap<>(); users.put(3, \"C\"); users.put(1, \"A\"); users.put(2, \"B\"); System.out.println(users.keySet()); } }",
           "expectedOutput": "[1, 2, 3]",
-          "explanation": "TreeMap maintains keys in sorted order and common lookup operations take O(log n).",
+          "explanation": "TreeMap keeps keys sorted and its basic lookup operations have logarithmic-time complexity.",
           "runnable": false
         },
         {
@@ -51,7 +51,7 @@
           "title": "equals and hashCode consistency",
           "code": "public class Main { public static void main(String[] args) { record Product(String code) {} java.util.Set<Product> products = new java.util.HashSet<>(); products.add(new Product(\"PEN\")); products.add(new Product(\"PEN\")); System.out.println(products.size()); } }",
           "expectedOutput": "1",
-          "explanation": "Records generate equals and hashCode from their components, so logically equal records behave as one set element.",
+          "explanation": "Record-generated equals and hashCode use the record components, so two Product records with the same code compare equal and the set stores one distinct value.",
           "runnable": false
         },
         {
@@ -60,7 +60,7 @@
           "title": "Comparator tie-breaker",
           "code": "public class Main { public static void main(String[] args) { record Person(String name, int age) {} java.util.Comparator<Person> order = java.util.Comparator.comparingInt(Person::age).thenComparing(Person::name); java.util.Set<Person> people = new java.util.TreeSet<>(order); people.add(new Person(\"Mira\", 20)); people.add(new Person(\"Asha\", 20)); System.out.println(people.size()); } }",
           "expectedOutput": "2",
-          "explanation": "A tie-breaker keeps distinct names distinct when ages are equal; a comparator returning zero would collapse them in a TreeSet.",
+          "explanation": "The comparator uses age and then name. The second comparison breaks the age tie, so both people remain distinct in the TreeSet.",
           "runnable": false
         },
         {
@@ -69,7 +69,7 @@
           "title": "Indexed access trade-off",
           "code": "public class Main { public static void main(String[] args) { java.util.List<Integer> values = new java.util.ArrayList<>(java.util.List.of(10,20,30)); System.out.println(values.get(2)); } }",
           "expectedOutput": "30",
-          "explanation": "ArrayList supports constant-time indexed access in typical complexity analysis; LinkedList indexed access requires traversal.",
+          "explanation": "ArrayList supports constant-time indexed access in typical analysis, so get(2) retrieves the third element directly.",
           "runnable": false
         }
       ]
@@ -78,9 +78,9 @@
       "guidedTask": "Implement a value class that correctly overrides equals and hashCode. Add two equal instances to a HashSet and confirm only one logical value remains.",
       "independentTask": "Compare lookup in HashMap and TreeMap using a representative dataset. Explain average versus logarithmic complexity without claiming fixed elapsed times.",
       "hints": [
-        "Start with a small, deterministic dataset and predict the result.",
-        "Check the relevant Java interface and method contract.",
-        "Compile with JDK 21 and test duplicate, empty and boundary cases."
+        "Use Big-O to compare growth trends, not to claim an exact runtime on every machine.",
+        "For hash collections, equal objects must have equal hash codes; keep fields used by equals/hashCode stable while stored as keys or set members.",
+        "For TreeSet and TreeMap, compare returning zero defines ordering equivalence; add tie-breakers if distinct records must remain distinct."
       ],
       "challenge": "Create a comparator that compares only a person's age and show how equal ages affect TreeSet uniqueness; revise it with a tie-breaker."
     }
@@ -102,7 +102,7 @@
           "O(2^n)"
         ],
         "answer": "O(1)",
-        "explanation": "What is the expected average lookup complexity often associated with HashMap? This is the correct answer based on the Java contract and behavior described in Complexity, Ordering and Equality Contracts."
+        "explanation": "HashMap is commonly described as expected O(1) for basic lookup when hash codes are well distributed; collisions and implementation details affect worst cases."
       },
       {
         "id": "jv13.6-q2",
@@ -114,7 +114,7 @@
           "O(2^n)"
         ],
         "answer": "O(log n)",
-        "explanation": "What is the typical lookup complexity of TreeMap? This is the correct answer based on the Java contract and behavior described in Complexity, Ordering and Equality Contracts."
+        "explanation": "TreeMap is backed by a balanced search tree, giving logarithmic-time basic lookup, insertion and removal."
       },
       {
         "id": "jv13.6-q3",
@@ -126,7 +126,7 @@
           "equals must compare object identity only"
         ],
         "answer": "Equal objects must have equal hash codes",
-        "explanation": "What contract must hashCode follow with equals? This is the correct answer based on the Java contract and behavior described in Complexity, Ordering and Equality Contracts."
+        "explanation": "The equals/hashCode contract requires equal objects to produce the same hash code; unequal objects are allowed to collide."
       },
       {
         "id": "jv13.6-q4",
@@ -138,7 +138,7 @@
           "The number of Java packages"
         ],
         "answer": "How resource usage grows with input size",
-        "explanation": "What does Big-O describe? This is the correct answer based on the Java contract and behavior described in Complexity, Ordering and Equality Contracts."
+        "explanation": "Big-O describes asymptotic growth in resource use as input size increases, not exact wall-clock time on every computer."
       },
       {
         "id": "jv13.6-q5",
@@ -150,7 +150,7 @@
           "The comparator is ignored"
         ],
         "answer": "The compared values are equivalent for ordering and uniqueness",
-        "explanation": "What does a Comparator returning zero indicate in a sorted set? This is the correct answer based on the Java contract and behavior described in Complexity, Ordering and Equality Contracts."
+        "explanation": "In a sorted set, compare returning zero means the elements occupy the same ordering position and are treated as duplicates by the set."
       }
     ]
   },

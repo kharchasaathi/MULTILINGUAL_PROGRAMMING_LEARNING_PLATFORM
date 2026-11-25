@@ -20,12 +20,12 @@
   "stages": {
     "understand": {
       "concept": "Separate task data, application logic, persistence and console interaction. Build one feature at a time and test empty storage, duplicate IDs, invalid commands and file errors.",
-      "whyItMatters": "Capstone: Command-Line Task Manager helps learners create Java applications that are easier to reason about, test and maintain.",
-      "analogy": "Treat the concept as a clearly labeled tool for one programming responsibility.",
-      "analogyLimit": "Actual behavior is defined by Java language rules and API contracts."
+      "whyItMatters": "A capstone combines domain modelling, collections, command parsing, file persistence, validation and modular design. Splitting responsibilities makes the program easier to test and change than putting every feature into one large main method.",
+      "analogy": "A task manager resembles a small office: the console receives requests, the service applies rules, the repository stores records, and each Task represents one item of work.",
+      "analogyLimit": "The analogy does not define software boundaries. Choose classes and interfaces based on responsibilities, dependencies and testability rather than creating a class for every noun."
     },
     "explain": {
-      "narrative": "## Capstone: Command-Line Task Manager\n\nSeparate task data, application logic, persistence and console interaction. Build one feature at a time and test empty storage, duplicate IDs, invalid commands and file errors.\n\nIdentify the input and desired result. Select the Java construct or API that supports the requirement. Keep code readable, handle documented failures and state assumptions clearly.\n\nCompile with JDK 21, predict output before running, and test normal, boundary and invalid inputs.",
+      "narrative": "## Capstone goal and separation of responsibilities\n\nBuild a command-line task manager that supports adding, listing, completing and removing tasks, plus help and exit commands. Separate task data, business rules, persistence and console interaction. This separation makes the project easier to test and prevents file handling from becoming mixed with menu logic.\n\n## Suggested design\n\n- `Task`: task ID, nonblank title and completion state.\n- `TaskService`: validates commands and enforces unique IDs and valid state transitions.\n- `TaskRepository`: loads and saves records using a documented UTF-8 format.\n- `Main`: reads console input, dispatches commands and displays results.\n\nChoose whether task IDs are generated or supplied. Define how duplicate IDs, blank titles, unknown commands, missing tasks and malformed saved records are handled. Avoid parsing a delimiter-based format without an escaping rule; titles may contain the delimiter or newline.\n\n## Persistence and failure safety\n\nLoad existing tasks at startup and save successful changes. For safer replacement, write a complete new snapshot to a temporary file and move it over the previous file only after writing succeeds. Handle unsupported atomic moves where necessary. Do not print “saved” until the write has completed.\n\n## Acceptance tests\n\nStart with empty storage, add two tasks, complete one, list them, remove one, exit and restart. Confirm the remaining state is correct. Also test duplicate IDs, blank titles, malformed records, unknown commands, a missing task ID and a file access failure. The project is complete when the behavior is predictable after restart, not merely when a single in-memory list prints.",
       "examples": [
         {
           "id": "jv11.5-ex1",
@@ -78,9 +78,9 @@
       "guidedTask": "Model a Task with an ID, title and completion state. Implement add, list and complete commands using a Map and reject duplicate IDs.",
       "independentTask": "Build the command-line task manager with separate Task, TaskService, TaskRepository and Main classes. Persist tasks in a documented UTF-8 text format.",
       "hints": [
-        "Choose the API that matches the data representation and operation.",
-        "Use try-with-resources for AutoCloseable resources.",
-        "Test empty, normal and failure cases; verify exact output or file contents."
+        "Keep task rules in TaskService and file operations in TaskRepository; keep Main focused on input and display.",
+        "Define an escaping or structured serialization format so titles containing delimiters cannot corrupt saved records.",
+        "Test the full add/complete/remove/restart journey and verify that failed saves do not report success."
       ],
       "challenge": "Test empty storage, malformed records, duplicate IDs, unknown commands, completing a missing task and restarting after saved changes."
     }
@@ -102,7 +102,7 @@
           "Mixing input parsing with ID generation"
         ],
         "answer": "Task model, application logic, persistence and console interface",
-        "explanation": "Which separation makes a task manager easier to maintain? This is the correct choice for Capstone: Command-Line Task Manager because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "Separating task data, business rules, persistence and console interaction keeps each part focused and independently testable."
       },
       {
         "id": "jv11.5-q2",
@@ -114,7 +114,7 @@
           "Clear the entire task list"
         ],
         "answer": "Report that the task was not found without changing other tasks",
-        "explanation": "What should happen when a task ID does not exist? This is the correct choice for Capstone: Command-Line Task Manager because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "An unknown task ID should produce a not-found result and must not mutate unrelated tasks."
       },
       {
         "id": "jv11.5-q3",
@@ -126,7 +126,7 @@
           "It removes the need for validation"
         ],
         "answer": "Tasks remain available after the application exits",
-        "explanation": "Why persist task data? This is the correct choice for Capstone: Command-Line Task Manager because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "Persistence stores task state outside process memory so the data can be loaded again after the application restarts."
       },
       {
         "id": "jv11.5-q4",
@@ -138,7 +138,7 @@
           "Scanner"
         ],
         "answer": "Map",
-        "explanation": "Which collection is suitable for looking up tasks by unique ID? This is the correct choice for Capstone: Command-Line Task Manager because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "A Map is appropriate when each task is retrieved by a unique ID key."
       },
       {
         "id": "jv11.5-q5",
@@ -150,7 +150,7 @@
           "Deleting source code after each run"
         ],
         "answer": "Loading an empty file and handling malformed or missing data",
-        "explanation": "Which scenario belongs in capstone testing? This is the correct choice for Capstone: Command-Line Task Manager because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "A robust capstone test includes empty storage, malformed records and missing task data, not only a successful in-memory command."
       }
     ]
   },

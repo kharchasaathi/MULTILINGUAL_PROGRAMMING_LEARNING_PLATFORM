@@ -25,7 +25,7 @@
       "analogyLimit": "This analogy is only a learning aid; actual behavior is defined by Java language rules and API contracts."
     },
     "explain": {
-      "narrative": "## Multiple Exceptions and Multi-Catch\n\nCatch specific exceptions before broader ones. Java multi-catch uses a vertical bar for alternatives that share one recovery path. Do not catch Exception merely to silence errors; recover only when the program can take a useful action.\n\n## Applying the concept\n\nIdentify the input and desired result. Select the Java construct or API that directly supports the requirement. Keep code readable, handle documented failure cases and state assumptions clearly.\n\n## Verification checklist\n\n- Compile with JDK 21.\n- Predict the output before running.\n- Test normal, boundary and invalid inputs where relevant.\n- Check resource cleanup and error handling.\n- Prefer explicit types and focused methods.",
+      "narrative": "## Catch the exception your code can handle\n\nA `try` block contains operations that may fail. A `catch` block handles an exception only when the program has a meaningful recovery or reporting action. Catch specific types where possible: `NumberFormatException` can explain invalid integer text, while `IOException` can report a file-access problem. Do not catch and ignore an exception just to keep the program moving.\n\n## Order catch clauses from specific to general\n\nJava checks catch clauses in order. A subclass exception must be caught before its superclass; otherwise the broader handler makes the narrower handler unreachable and the code does not compile. A broad handler can be useful at an application boundary to report an unexpected failure, but it should preserve diagnostic details.\n\n## Multi-catch for a shared response\n\nUse `catch (NumberFormatException | NullPointerException ex)` only when unrelated exception types genuinely need the same handling. The alternatives cannot be related by inheritance. The multi-catch parameter is implicitly final and cannot be reassigned. If recovery actions differ, use separate catch clauses.\n\n## Preserve useful diagnostics\n\nUse the exception type and message to explain what failed without exposing sensitive data. When translating an exception into a domain-specific exception, retain the original as the cause. Prefer allowing an exception to propagate when the current method cannot recover safely. Test success, each expected failure and an unexpected failure path.",
       "examples": [
         {
           "id": "jv9.3-ex1",
@@ -78,9 +78,9 @@
       "guidedTask": "Write a parser that handles NumberFormatException and a file reader that handles IOException using separate, specific catch clauses.",
       "independentTask": "Refactor two unrelated exceptions that share one recovery action into a multi-catch. Demonstrate why subclass-related exceptions cannot share a multi-catch alternative.",
       "hints": [
-        "State the input, output and assumptions before coding.",
-        "Use the smallest example that demonstrates the behavior.",
-        "Predict the result, compile with JDK 21, then test a boundary or failure case."
+        "Catch a subclass before its superclass so no handler becomes unreachable.",
+        "Use multi-catch only for unrelated exception types that share the same recovery action.",
+        "Preserve useful messages and causes; do not catch an exception unless the current code can handle it meaningfully."
       ],
       "challenge": "Test valid input, malformed input and an array index error. Explain which catch block handles each case and why."
     }
@@ -102,7 +102,7 @@
           "RuntimeException"
         ],
         "answer": "FileNotFoundException",
-        "explanation": "Which catch clause should appear first when catching IOException and FileNotFoundException separately? The correct choice follows the Java concept taught in Multiple Exceptions and Multi-Catch; the alternatives conflict with its language rules or intended use."
+        "explanation": "FileNotFoundException is a subclass of IOException, so the narrower subclass handler must appear before the broader superclass handler."
       },
       {
         "id": "jv9.3-q2",
@@ -114,7 +114,7 @@
           "A semicolon"
         ],
         "answer": "A vertical bar (|)",
-        "explanation": "What is the syntax separator in a Java multi-catch? The correct choice follows the Java concept taught in Multiple Exceptions and Multi-Catch; the alternatives conflict with its language rules or intended use."
+        "explanation": "Java multi-catch separates alternative exception types with the vertical bar character inside one catch parameter."
       },
       {
         "id": "jv9.3-q3",
@@ -126,7 +126,7 @@
           "To ignore checked exceptions"
         ],
         "answer": "When unrelated exception types share the same recovery action",
-        "explanation": "When is multi-catch appropriate? The correct choice follows the Java concept taught in Multiple Exceptions and Multi-Catch; the alternatives conflict with its language rules or intended use."
+        "explanation": "Multi-catch is appropriate only when unrelated exception types can share the same handling action; related alternatives are not allowed."
       },
       {
         "id": "jv9.3-q4",
@@ -138,7 +138,7 @@
           "It disables stack traces"
         ],
         "answer": "It preserves meaningful recovery and avoids hiding unrelated failures",
-        "explanation": "Why should specific exceptions be caught instead of Exception broadly? The correct choice follows the Java concept taught in Multiple Exceptions and Multi-Catch; the alternatives conflict with its language rules or intended use."
+        "explanation": "Catching specific types lets the code handle known failures intentionally and avoids swallowing unrelated exceptions under one broad handler."
       },
       {
         "id": "jv9.3-q5",
@@ -150,7 +150,7 @@
           "The program silently retries"
         ],
         "answer": "The narrower catch becomes unreachable and compilation fails",
-        "explanation": "What happens if a broader catch is placed before a narrower catch? The correct choice follows the Java concept taught in Multiple Exceptions and Multi-Catch; the alternatives conflict with its language rules or intended use."
+        "explanation": "A superclass catch would already match the subclass, making the later narrower catch unreachable and causing a compile-time error."
       }
     ]
   },

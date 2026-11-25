@@ -25,7 +25,7 @@
       "analogyLimit": "Actual behavior is defined by Java language rules and API contracts."
     },
     "explain": {
-      "narrative": "## Collections Framework and Data Structure Selection\n\nList preserves positional sequence, Set models uniqueness, Queue models processing order, and Map associates keys with values. Choose by required behavior and workload.\n\nIdentify the input and desired result. Select the Java construct or API that supports the requirement. Keep code readable, handle documented failures and state assumptions clearly.\n\nCompile with JDK 21, predict output before running, and test normal, boundary and invalid inputs.",
+      "narrative": "## The Collections Framework as a set of contracts\n\nThe Java Collections Framework provides interfaces, implementations and algorithms for working with groups of objects. Choose an interface first: `List<E>` models an ordered sequence that permits duplicates and positional access; `Set<E>` models uniqueness; `Queue<E>` models elements waiting to be processed; and `Map<K,V>` associates unique keys with values. Map is part of the framework but is not a subtype of Collection.\n\n## Select by required operations\n\nAsk what the application must do most often. If it needs indexed reads and append operations, an ArrayList is a common List choice. If it needs membership checks without an order requirement, HashSet is a common Set choice. If it needs key-based lookup, HashMap is a common Map choice. If it must process the oldest waiting item first, Queue with ArrayDeque is often suitable. These are practical defaults, not universal performance guarantees.\n\n## Ordering and uniqueness are contracts\n\nList preserves positional order and allows repeated values. HashSet does not promise iteration order. LinkedHashSet preserves insertion encounter order. TreeSet traverses in sorted order. HashMap does not promise key iteration order; LinkedHashMap and TreeMap provide different ordering contracts. Never write a test that assumes an unspecified order.\n\n## Consider workload and edge cases\n\nCompare the cost of lookup, insertion, removal, traversal and indexed access for the chosen implementation. Check whether nulls are allowed, whether elements have stable equals/hashCode implementations, and whether sorted collections need a Comparator. Use generic type arguments to make the element or key/value types explicit.\n\n## Make the choice explainable\n\nDocument the requirement that led to the choice, then test duplicates, missing keys, empty collections and ordering. Keep variables typed to interfaces when callers need only the interface contract, so the implementation can change without rewriting dependent code.",
       "examples": [
         {
           "id": "jv13.1-ex1",
@@ -33,7 +33,7 @@
           "title": "Core API",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.List<Integer> list = new java.util.ArrayList<>(); list.add(3); list.add(1); System.out.println(list.get(0)); } }",
           "expectedOutput": "3",
-          "explanation": "A List keeps elements in a positional sequence, so the first inserted value in this example can be retrieved using index zero.",
+          "explanation": "List preserves positional order and permits duplicates, so index zero refers to the first inserted value in this example.",
           "runnable": false
         },
         {
@@ -42,7 +42,7 @@
           "title": "Practical use",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.Set<Integer> set = new java.util.HashSet<>(); set.add(3); set.add(3); System.out.println(set.size()); } }",
           "expectedOutput": "1",
-          "explanation": "A Set rejects duplicate elements according to its equality rules, so adding the same integer twice leaves only one distinct element.",
+          "explanation": "Set models uniqueness; adding the same Integer twice does not create a second distinct element.",
           "runnable": false
         },
         {
@@ -51,7 +51,7 @@
           "title": "Boundary behavior",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.Map<String,Integer> map = new java.util.HashMap<>(); map.put(\"apples\", 4); System.out.println(map.get(\"apples\")); } }",
           "expectedOutput": "4",
-          "explanation": "A Map stores an association between each key and its value, allowing the program to retrieve the value using the matching key.",
+          "explanation": "Map associates a key with a value. get(\"apples\") retrieves the value stored for that key.",
           "runnable": false
         },
         {
@@ -60,7 +60,7 @@
           "title": "Alternative pattern",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.Queue<String> queue = new java.util.ArrayDeque<>(); queue.offer(\"first\"); queue.offer(\"second\"); System.out.println(queue.poll()); } }",
           "expectedOutput": "first",
-          "explanation": "A Queue represents elements waiting to be processed; this ArrayDeque example retrieves the earliest inserted element first.",
+          "explanation": "Queue represents pending work. ArrayDeque's queue operations remove the head, so poll returns the first offered item.",
           "runnable": false
         },
         {
@@ -69,7 +69,7 @@
           "title": "Verify the result",
           "code": "public class Main { public static void main(String[] args) throws Exception { System.out.println(java.util.List.of(\"List\",\"Set\",\"Queue\",\"Map\")); } }",
           "expectedOutput": "[List, Set, Queue, Map]",
-          "explanation": "List, Set, Queue and Map are different abstractions, each suited to a distinct requirement for sequence, uniqueness, processing or key-based lookup.",
+          "explanation": "The four interface names summarize different contracts: sequence, uniqueness, key/value association and processing order.",
           "runnable": false
         }
       ]
@@ -78,9 +78,9 @@
       "guidedTask": "Choose a List, Set, Queue or Map for four requirements: ordered tasks, unique tags, first-in-first-out jobs and product-code lookup. Implement one example of each.",
       "independentTask": "Build a small contact directory that uses a Map for lookup and a List for ordered display. Explain why a Set or Queue would not replace either structure.",
       "hints": [
-        "Select the interface from the behavior the problem requires.",
-        "Use generics to make the element or key/value types explicit.",
-        "Check ordering and duplicate behavior with a small test dataset."
+        "Write down the required behavior first: positional sequence, uniqueness, key lookup or processing order.",
+        "Choose an implementation only after checking its ordering, null and equality contracts; do not assume HashMap or HashSet iteration order.",
+        "Compare the operations your workload performs most often, then test empty, duplicate and missing-value cases."
       ],
       "challenge": "Compare the selected structures for duplicate handling, ordering, lookup and insertion requirements; justify one alternative implementation."
     }
@@ -102,7 +102,7 @@
           "Queue"
         ],
         "answer": "List",
-        "explanation": "Which interface models a sequence with positional access? This is the correct answer based on the Java contract and behavior described in Collections Framework and Data Structure Selection."
+        "explanation": "List provides positional access through indexes and allows duplicate elements."
       },
       {
         "id": "jv13.1-q2",
@@ -114,7 +114,7 @@
           "Iterator"
         ],
         "answer": "Set",
-        "explanation": "Which interface models unique elements? This is the correct answer based on the Java contract and behavior described in Collections Framework and Data Structure Selection."
+        "explanation": "Set models uniqueness, so adding an equal element does not increase the number of distinct members."
       },
       {
         "id": "jv13.1-q3",
@@ -126,7 +126,7 @@
           "Collection"
         ],
         "answer": "Map",
-        "explanation": "Which interface associates keys with values? This is the correct answer based on the Java contract and behavior described in Collections Framework and Data Structure Selection."
+        "explanation": "Map stores associations from keys to values; it is not a positional sequence."
       },
       {
         "id": "jv13.1-q4",
@@ -138,7 +138,7 @@
           "Optional"
         ],
         "answer": "Queue",
-        "explanation": "Which type is designed for processing elements in a queue order? This is the correct answer based on the Java contract and behavior described in Collections Framework and Data Structure Selection."
+        "explanation": "Queue exposes operations such as offer and poll for elements waiting to be processed."
       },
       {
         "id": "jv13.1-q5",
@@ -150,7 +150,7 @@
           "The number of comments"
         ],
         "answer": "Required behavior, ordering and operation costs",
-        "explanation": "What should guide data-structure selection? This is the correct answer based on the Java contract and behavior described in Collections Framework and Data Structure Selection."
+        "explanation": "Data-structure selection should follow required behavior and workload, including ordering and operation costs."
       }
     ]
   },

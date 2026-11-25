@@ -25,7 +25,7 @@
       "analogyLimit": "Actual behavior is defined by Java language rules and API contracts."
     },
     "explain": {
-      "narrative": "## Project: Inventory Tracker\n\nUse a product code to find an item. Encapsulate quantity changes so stock cannot become negative. Test adding, receiving, selling and looking up products independently.\n\nIdentify the input and desired result. Select the Java construct or API that supports the requirement. Keep code readable, handle documented failures and state assumptions clearly.\n\nCompile with JDK 21, predict output before running, and test normal, boundary and invalid inputs.",
+      "narrative": "## Model products and identify them reliably\n\nAn inventory item needs a stable product code, a description, a unit price and a quantity on hand. A `Product` class or record can represent the product data. A `Map<String, Product>` is useful when the product code is the lookup key: it retrieves an item by code without scanning an entire list. Decide whether product codes are case-sensitive and normalize them consistently if not.\n\n## Keep stock changes inside validated operations\n\nReceiving stock increases quantity; selling stock decreases it. Validate that the requested quantity is positive and does not exceed available quantity before updating the map. Avoid scattering direct `put` and arithmetic operations throughout the application. Put the rules in methods such as `receiveStock(code, quantity)` and `sellStock(code, quantity)`, and report an unknown product code rather than treating a missing entry as zero without explanation.\n\n## Calculate and display inventory value\n\nThe value of one product line is unit price multiplied by quantity. Total inventory value is the sum of all line values. Use `BigDecimal` for monetary values when exact decimal arithmetic and rounding rules matter; a `double` example is acceptable for introductory demonstration but should not be used as a financial ledger. Use `LinkedHashMap` when insertion order is useful, or sort entries explicitly when the report needs alphabetical or quantity order.\n\n## Verify important business rules\n\nTest adding a product, receiving units, selling a valid quantity, selling more than available, a zero or negative request, an unknown code, duplicate product codes and a zero-priced item. Verify that failed operations leave stock unchanged. The central invariant is that stored stock never becomes negative.",
       "examples": [
         {
           "id": "jv11.3-ex1",
@@ -40,9 +40,9 @@
           "id": "jv11.3-ex2",
           "language": "java",
           "title": "Practical use",
-          "code": "public class Main { public static void main(String[] args) throws Exception { java.util.Map<String,Integer> stock = new java.util.HashMap<>(); stock.put(\"PEN\", 20); stock.put(\"PEN\", stock.get(\"PEN\") - 3); System.out.println(stock.get(\"PEN\")); } }",
+          "code": "public class Main { public static void main(String[] args) { java.util.Map<String,Integer> stock = new java.util.HashMap<>(); stock.put(\"PEN\", 20); int requested = 3; int available = stock.getOrDefault(\"PEN\", 0); if (requested > 0 && requested <= available) stock.put(\"PEN\", available - requested); System.out.println(stock.get(\"PEN\")); } }",
           "expectedOutput": "17",
-          "explanation": "Reads the current quantity, subtracts the sold units and stores the updated value under the same product code after validating the sale.",
+          "explanation": "Checks that the requested sale is positive and no greater than available stock before storing the reduced quantity.",
           "runnable": false
         },
         {
@@ -78,9 +78,9 @@
       "guidedTask": "Create a Product record and a Map keyed by product code. Implement add, receive-stock, sell-stock and lookup operations with quantity validation.",
       "independentTask": "Build an inventory summary that calculates total stock value, lists low-stock items and preserves a predictable display order.",
       "hints": [
-        "Break the work into small methods with clear inputs and outputs.",
-        "Validate data before calculating or changing stored state.",
-        "Compile with JDK 21 and compare actual results with your test table."
+        "Use the product code as a stable Map key and decide whether code matching is case-sensitive.",
+        "Validate positive quantities and available stock before updating; failed sales must leave stock unchanged.",
+        "Test unknown codes, duplicate products, zero or negative requests and total inventory value."
       ],
       "challenge": "Test unknown product codes, duplicate codes, zero quantity, selling more than available and a product whose price is zero."
     }
@@ -102,7 +102,7 @@
           "It replaces input validation"
         ],
         "answer": "It associates a product key with its record or quantity",
-        "explanation": "Why is a Map useful for an inventory tracker? This is the correct choice for Project: Inventory Tracker because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "A Map associates a product identifier with its product record or quantity, enabling lookup by key rather than scanning every item."
       },
       {
         "id": "jv11.3-q2",
@@ -114,7 +114,7 @@
           "A user viewing the inventory"
         ],
         "answer": "A quantity becoming negative when selling unavailable stock",
-        "explanation": "What should a stock update prevent? This is the correct choice for Project: Inventory Tracker because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "A sale must be rejected if it would reduce available stock below zero; failed operations should leave the stored quantity unchanged."
       },
       {
         "id": "jv11.3-q3",
@@ -126,7 +126,7 @@
           "Sort the console output only"
         ],
         "answer": "Increase the existing product quantity",
-        "explanation": "Which operation is appropriate when receiving more stock? This is the correct choice for Project: Inventory Tracker because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "Receiving stock adds the accepted quantity to the existing on-hand amount for that product."
       },
       {
         "id": "jv11.3-q4",
@@ -138,7 +138,7 @@
           "It avoids checking whether the product exists"
         ],
         "answer": "It provides a stable lookup identifier",
-        "explanation": "Why use a product code as a key? This is the correct choice for Project: Inventory Tracker because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "A stable product code identifies the same item across operations and provides a reliable lookup key."
       },
       {
         "id": "jv11.3-q5",
@@ -150,7 +150,7 @@
           "Test with no quantity change only"
         ],
         "answer": "Attempt to sell more units than are available",
-        "explanation": "Which test is important for a sale operation? This is the correct choice for Project: Inventory Tracker because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "Overselling is a critical boundary case because it must be rejected without corrupting the stock invariant."
       }
     ]
   },

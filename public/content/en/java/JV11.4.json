@@ -25,7 +25,7 @@
       "analogyLimit": "Actual behavior is defined by Java language rules and API contracts."
     },
     "explain": {
-      "narrative": "## Project: Persistent Notes Manager\n\nPersist text between runs using an application-owned directory, UTF-8 encoding and try-with-resources. Treat file paths as data to validate.\n\nIdentify the input and desired result. Select the Java construct or API that supports the requirement. Keep code readable, handle documented failures and state assumptions clearly.\n\nCompile with JDK 21, predict output before running, and test normal, boundary and invalid inputs.",
+      "narrative": "## Project purpose and storage design\n\nBuild a notes manager that creates, lists, appends to and deletes text notes across application runs. Choose an application-owned data directory rather than accepting arbitrary paths from untrusted input. Decide how a note is identified (for example, a validated ID mapped to a file name) and keep that mapping separate from the note's displayed title.\n\n## Use explicit text encoding and safe file APIs\n\nUse `Files.writeString`, `Files.readString` or a buffered reader/writer with `StandardCharsets.UTF_8`. Specify whether a save replaces existing content or appends to it; these are different operations and should be visible in method names. Use try-with-resources for streams and writers. Validate note IDs and resolve paths against the chosen storage directory so a user cannot escape it with path traversal such as `../`.\n\n## Handle missing files and partial failures\n\nA list operation should handle an empty notes directory. Reading a missing note should produce a clear “not found” result rather than an unexplained stack trace. Report I/O failures without claiming a save succeeded. For a robust update, write the new content to a temporary file and replace the target only after the write completes successfully.\n\n## Verify persistence and cleanup\n\nTest Unicode text, an empty note, append behavior, a missing ID, invalid IDs and an I/O failure. Restart the application and confirm saved content remains. Clean up temporary test files even when an operation fails, and avoid deleting files outside the application's own data directory.",
       "examples": [
         {
           "id": "jv11.4-ex1",
@@ -78,9 +78,9 @@
       "guidedTask": "Create a notes file under a temporary application directory. Write a note in UTF-8, append a second line, read it back and delete the temporary file in a finally block or try-with-resources design.",
       "independentTask": "Implement a PersistentNotes class with create, append, list and delete operations. Keep path handling inside the class and report missing files clearly.",
       "hints": [
-        "Choose the API that matches the data representation and operation.",
-        "Use try-with-resources for AutoCloseable resources.",
-        "Test empty, normal and failure cases; verify exact output or file contents."
+        "Use a dedicated application data directory and validate IDs before resolving a path.",
+        "Specify UTF-8 explicitly and distinguish replace from append operations.",
+        "Test Unicode, empty and missing notes, path traversal attempts and cleanup after an I/O failure."
       ],
       "challenge": "Test Unicode text, an empty note, a missing file, append to an existing file and cleanup after an IOException."
     }
@@ -102,7 +102,7 @@
           "ASCII for all languages"
         ],
         "answer": "UTF-8",
-        "explanation": "Which charset is a good explicit choice for portable text files? This is the correct choice for Project: Persistent Notes Manager because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "UTF-8 is an explicit, widely interoperable charset; specifying it avoids dependence on each machine's default charset."
       },
       {
         "id": "jv11.4-q2",
@@ -114,7 +114,7 @@
           "It converts bytes into images"
         ],
         "answer": "It closes resources automatically even when an operation fails",
-        "explanation": "Why use try-with-resources for file readers and writers? This is the correct choice for Project: Persistent Notes Manager because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "Try-with-resources closes readers and writers automatically even if reading or writing exits by throwing an exception."
       },
       {
         "id": "jv11.4-q3",
@@ -126,7 +126,7 @@
           "Ignore every IOException"
         ],
         "answer": "Handle the missing-file case clearly",
-        "explanation": "What should a notes manager do if a requested note file is missing? This is the correct choice for Project: Persistent Notes Manager because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "A missing note should be reported as a normal, understandable not-found case rather than treated as an unexplained crash."
       },
       {
         "id": "jv11.4-q4",
@@ -138,7 +138,7 @@
           "Files.isDirectory"
         ],
         "answer": "Files.readString",
-        "explanation": "Which API reads all text from a Path as a String? This is the correct choice for Project: Persistent Notes Manager because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "Files.readString reads the file content from a Path and returns it as a String."
       },
       {
         "id": "jv11.4-q5",
@@ -150,7 +150,7 @@
           "To make every path writable"
         ],
         "answer": "To restrict operations to the intended application storage area",
-        "explanation": "Why validate a user-supplied path? This is the correct choice for Project: Persistent Notes Manager because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "Validating and normalizing a supplied ID/path prevents traversal outside the application's intended data directory."
       }
     ]
   },

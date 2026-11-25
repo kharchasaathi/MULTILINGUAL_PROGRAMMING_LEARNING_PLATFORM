@@ -25,7 +25,7 @@
       "analogyLimit": "Actual behavior is defined by Java language rules and API contracts."
     },
     "explain": {
-      "narrative": "## Encoding, Buffering and Safe Resource Management\n\nText is encoded as bytes using a charset. The same characters can produce different bytes under different encodings. Use UTF-8 explicitly, process large content incrementally and use try-with-resources.\n\nIdentify the input and desired result. Select the Java construct or API that supports the requirement. Keep code readable, handle documented failures and state assumptions clearly.\n\nCompile with JDK 21, predict output before running, and test normal, boundary and invalid inputs.",
+      "narrative": "## Characters and bytes are not interchangeable\n\nA Java `String` represents text as UTF-16 code units; a file or network stream carries bytes. A charset defines how characters are encoded into bytes and decoded back. UTF-8 uses a variable number of bytes per Unicode code point, so the number of Java string code units is not generally the same as the number of UTF-8 bytes.\n\n## Choose and apply an explicit charset\n\nUse `StandardCharsets.UTF_8` with byte/string conversions and file APIs when UTF-8 is the agreed format. Encoding and decoding must use compatible charsets. Decoding arbitrary bytes with the wrong charset can produce replacement characters or incorrect text even when the original bytes were valid.\n\n## Buffer large content and manage resources\n\nFor large files, read and write in chunks or lines rather than loading the entire file into memory. Buffered wrappers reduce repeated low-level operations. Use try-with-resources for owned readers, writers and streams; closing a wrapper also closes the wrapped resource. Handle malformed input according to the application's policy rather than silently assuming every byte sequence is valid text.\n\n## Verify encoding behavior\n\nCompare ASCII, accented characters and non-Latin text. Check both the restored string and the encoded byte length. Test an empty file, a large file, a malformed byte sequence and an I/O failure. For interchange formats, document the charset and any byte-order mark or newline expectations so different systems interpret the data consistently.",
       "examples": [
         {
           "id": "jv12.5-ex1",
@@ -78,9 +78,9 @@
       "guidedTask": "Encode a string containing ASCII and non-ASCII characters as UTF-8 bytes, decode it again and compare the original and restored strings.",
       "independentTask": "Build a large-file processor that reads and writes buffered text incrementally using UTF-8 rather than loading the whole file into memory.",
       "hints": [
-        "Select the interface from the behavior the problem requires.",
-        "Use generics to make the element or key/value types explicit.",
-        "Check ordering and duplicate behavior with a small test dataset."
+        "Use the same explicitly selected charset when encoding and decoding; UTF-8 is common but should be part of the format contract.",
+        "String.length() counts UTF-16 code units, not UTF-8 bytes or necessarily Unicode code points.",
+        "Process large data incrementally and test non-ASCII text, malformed bytes and resource cleanup."
       ],
       "challenge": "Measure and explain the difference between String.length() and UTF-8 byte length for ASCII, accented and Telugu text; verify cleanup on failure."
     }
@@ -102,7 +102,7 @@
           "A network protocol for Java compilation"
         ],
         "answer": "A character encoding that maps Unicode text to bytes",
-        "explanation": "What does UTF-8 define? This is the correct choice for Encoding, Buffering and Safe Resource Management because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "UTF-8 defines how Unicode text is encoded into a sequence of bytes and decoded back into characters."
       },
       {
         "id": "jv12.5-q2",
@@ -114,7 +114,7 @@
           "Java strings store only ASCII"
         ],
         "answer": "Some characters require multiple bytes in UTF-8",
-        "explanation": "Why can a character count differ from a byte count? This is the correct choice for Encoding, Buffering and Safe Resource Management because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "UTF-8 is variable-width: some code points need multiple bytes, so character counts and encoded byte counts can differ."
       },
       {
         "id": "jv12.5-q3",
@@ -126,7 +126,7 @@
           "Skip resource closure"
         ],
         "answer": "Process the content incrementally with buffered readers",
-        "explanation": "Which practice is best for very large text files? This is the correct choice for Encoding, Buffering and Safe Resource Management because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "Incremental buffered processing avoids loading an entire large file into memory at once."
       },
       {
         "id": "jv12.5-q4",
@@ -138,7 +138,7 @@
           "The file is automatically backed up"
         ],
         "answer": "A close attempt on scope exit, including exceptional exit",
-        "explanation": "What does try-with-resources guarantee for an AutoCloseable resource? This is the correct choice for Encoding, Buffering and Safe Resource Management because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "Try-with-resources attempts to close an AutoCloseable resource when control exits the statement, including when the body throws."
       },
       {
         "id": "jv12.5-q5",
@@ -150,7 +150,7 @@
           "To force alphabetical sorting"
         ],
         "answer": "To make text interpretation consistent across environments",
-        "explanation": "Why specify UTF-8 explicitly? This is the correct choice for Encoding, Buffering and Safe Resource Management because it follows the Java API contract and the lesson's stated learning goal."
+        "explanation": "An explicit UTF-8 contract prevents machines with different default charsets from interpreting the same file differently."
       }
     ]
   },

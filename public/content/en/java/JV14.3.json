@@ -25,7 +25,7 @@
       "analogyLimit": "Actual behavior is defined by Java language rules and API contracts."
     },
     "explain": {
-      "narrative": "## Java Annotations\n\nAnnotations provide metadata for compilers, tools and runtime frameworks. Custom annotations use @interface; retention and target control where they apply.\n\nIdentify the input and desired result. Select the Java construct or API that supports the requirement. Keep code readable, handle documented failures and state assumptions clearly.\n\nCompile with JDK 21, predict output before running, and test normal, boundary and invalid inputs.",
+      "narrative": "## Annotation purpose\n\nAnnotations attach metadata to declarations such as classes, methods, fields, parameters and packages. The Java compiler, build tools, static analyzers, frameworks or runtime reflection can interpret that metadata. An annotation does not automatically change a method's behaviour merely because it is present.\n\n## Built-in annotations\n\n@Override asks the compiler to verify that a method overrides or implements a method from a supertype. @Deprecated marks an API as discouraged for new use and can include a removal warning. @SuppressWarnings requests suppression of selected compiler warnings; keep its scope as narrow as possible so useful diagnostics remain visible.\n\n## Declaring custom annotations\n\nUse @interface to declare an annotation type. Annotation elements resemble no-argument methods and may have permitted primitive, String, Class, enum, annotation or one-dimensional array types. Elements can declare default values. Apply meta-annotations such as @Target to restrict where the annotation may appear and @Retention to define how long it is retained.\n\n## Retention policies\n\nSOURCE annotations are discarded by the compiler. CLASS annotations are recorded in the class file but are not required to be available through runtime reflection. RUNTIME annotations remain available to reflection. The default retention is CLASS when @Retention is omitted.\n\n## Inspecting annotations\n\nFor a runtime-retained annotation, reflection methods such as Class.getAnnotation can retrieve its metadata. Check for null when an annotation may not be present. Reflection reads metadata; it does not itself execute the behavior described by that metadata.\n\n## Practical cautions\n\nChoose targets and retention based on the consumer. Avoid broad warning suppression, and do not mistake documentation or metadata annotations for access control or security enforcement.",
       "examples": [
         {
           "id": "jv14.3-ex1",
@@ -33,7 +33,7 @@
           "title": "Core concept",
           "code": "public class Main { public static void main(String[] args) throws Exception { System.out.println(Deprecated.class.isAnnotation()); } }",
           "expectedOutput": "true",
-          "explanation": "Shows that Deprecated is an annotation type.",
+          "explanation": "@Deprecated is itself a built-in annotation type; applying it marks an API as discouraged and can produce compiler warnings at use sites.",
           "runnable": false
         },
         {
@@ -42,7 +42,7 @@
           "title": "Practical use",
           "code": "public class Main { public static void main(String[] args) throws Exception { class Example { @Override public String toString() { return \"Example\"; } } System.out.println(new Example()); } }",
           "expectedOutput": "Example",
-          "explanation": "Uses Override so the compiler checks the method override.",
+          "explanation": "@Override causes the compiler to check that the method really overrides or implements an inherited method signature.",
           "runnable": false
         },
         {
@@ -51,7 +51,7 @@
           "title": "Boundary behavior",
           "code": "public class Main { public static void main(String[] args) throws Exception { @SuppressWarnings(\"deprecation\") String oldName = \"legacy\"; System.out.println(oldName); } }",
           "expectedOutput": "legacy",
-          "explanation": "Shows a narrowly scoped suppression example.",
+          "explanation": "SuppressWarnings is scoped to the annotated declaration; keep the suppression narrow so unrelated warnings remain visible.",
           "runnable": false
         },
         {
@@ -60,7 +60,7 @@
           "title": "Runtime annotation inspection",
           "code": "public class Main { @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME) @java.lang.annotation.Target(java.lang.annotation.ElementType.TYPE) @interface Marker {} @Marker static class Marked {} public static void main(String[] args) { System.out.println(Marked.class.isAnnotationPresent(Marker.class)); } }",
           "expectedOutput": "true",
-          "explanation": "A member annotation type is declared on Main, targeted at types and retained at runtime, so reflection can find it.",
+          "explanation": "The custom annotation is retained at runtime and targeted to types, so reflection on the annotated class can retrieve its value.",
           "runnable": false
         },
         {
@@ -69,7 +69,7 @@
           "title": "Class-retained annotation",
           "code": "public class Main { @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS) @java.lang.annotation.Target(java.lang.annotation.ElementType.TYPE) @interface CourseTag {} @CourseTag static class Course {} public static void main(String[] args) { System.out.println(Course.class.isAnnotationPresent(CourseTag.class)); } }",
           "expectedOutput": "false",
-          "explanation": "CLASS retention stores the annotation in class-file metadata but does not make it available through runtime reflection.",
+          "explanation": "CLASS retention records annotation metadata in the class file but does not make the annotation available through ordinary runtime reflection.",
           "runnable": false
         }
       ]
@@ -78,9 +78,9 @@
       "guidedTask": "Use @Override and @Deprecated in a small example. Declare a custom runtime annotation with @Target(TYPE), apply it to a class and inspect it with reflection.",
       "independentTask": "Create a custom annotation with documented retention and target. Demonstrate how a runtime-retained annotation can be read with reflection.",
       "hints": [
-        "Use the API's documented contract rather than relying on assumptions.",
-        "Keep examples minimal and demonstrate one behavior at a time.",
-        "Compile with JDK 21 and verify both present and absent or failure cases."
+        "An annotation supplies metadata; it does not automatically implement the behavior it describes.",
+        "Choose SOURCE, CLASS or RUNTIME retention according to whether the compiler, bytecode tools or runtime reflection needs the metadata.",
+        "Use @Target to limit valid declaration locations and keep @SuppressWarnings as narrow as possible."
       ],
       "challenge": "Compare SOURCE, CLASS and RUNTIME retention. Explain why SuppressWarnings should be narrow and why annotations are metadata rather than automatic behavior."
     }
@@ -102,7 +102,7 @@
           "Store a database record"
         ],
         "answer": "Attach metadata for compilers, tools or frameworks",
-        "explanation": "What is the main purpose of an annotation? This is the correct answer based on the Java contract and behavior described in Java Annotations."
+        "explanation": "Deprecated is a Java annotation type, so Class.isAnnotation reports true for the Deprecated annotation declaration."
       },
       {
         "id": "jv14.3-q2",
@@ -114,7 +114,7 @@
           "That the method is private"
         ],
         "answer": "That the method overrides a superclass or interface method",
-        "explanation": "What does @Override ask the compiler to check? This is the correct answer based on the Java contract and behavior described in Java Annotations."
+        "explanation": "@Override asks the compiler to verify the method overrides a supertype method; the method then supplies the object's text representation."
       },
       {
         "id": "jv14.3-q3",
@@ -126,7 +126,7 @@
           "The method is private"
         ],
         "answer": "The API is discouraged for new use and may be removed in a future release",
-        "explanation": "What does @Deprecated communicate? This is the correct answer based on the Java contract and behavior described in Java Annotations."
+        "explanation": "SuppressWarnings applies to the annotated declaration; this local suppression is limited to the intended deprecation warning."
       },
       {
         "id": "jv14.3-q4",
@@ -138,7 +138,7 @@
           "class @interface Marker {}"
         ],
         "answer": "@interface Marker {}",
-        "explanation": "Which syntax declares a custom annotation type? This is the correct answer based on the Java contract and behavior described in Java Annotations."
+        "explanation": "The annotation has RUNTIME retention and TYPE target, so reflection can find it on the annotated class."
       },
       {
         "id": "jv14.3-q5",
@@ -150,7 +150,7 @@
           "@FunctionalInterface"
         ],
         "answer": "@Target",
-        "explanation": "Which meta-annotation controls where an annotation may be applied? This is the correct answer based on the Java contract and behavior described in Java Annotations."
+        "explanation": "CLASS retention stores annotation metadata in the class file but does not require it to be available through runtime reflection."
       }
     ]
   },

@@ -20,12 +20,12 @@
   "stages": {
     "understand": {
       "concept": "A useful test suite covers typical inputs, boundaries, empty values and invalid cases. State expected results before running. Assertions check internal assumptions during development; explicit validation is still required for user input.",
-      "whyItMatters": "Design Test Cases and Boundary Tests helps learners create Java applications that are easier to reason about, test and maintain. It connects core language knowledge with realistic programming tasks.",
-      "analogy": "Treat this concept as a clearly labeled tool: select it for a specific responsibility and check the result.",
-      "analogyLimit": "This analogy is only a learning aid; actual behavior is defined by Java language rules and API contracts."
+      "whyItMatters": "Boundary tests reveal off-by-one errors, missing validation and assumptions that ordinary examples do not expose. A planned test table makes expected behaviour explicit before implementation and supports repeatable regression checks.",
+      "analogy": "Testing a range is like checking both ends of a measuring scale as well as values in the middle. The endpoints often expose mistakes that a typical middle value cannot reveal.",
+      "analogyLimit": "A finite test set cannot prove a program correct for every possible input. Combine representative cases, boundaries, equivalence classes and risk-based tests."
     },
     "explain": {
-      "narrative": "## Design Test Cases and Boundary Tests\n\nA useful test suite covers typical inputs, boundaries, empty values and invalid cases. State expected results before running. Assertions check internal assumptions during development; explicit validation is still required for user input.\n\n## Applying the concept\n\nIdentify the input and desired result. Select the Java construct or API that directly supports the requirement. Keep code readable, handle documented failure cases and state assumptions clearly.\n\n## Verification checklist\n\n- Compile with JDK 21.\n- Predict the output before running.\n- Test normal, boundary and invalid inputs where relevant.\n- Check resource cleanup and error handling.\n- Prefer explicit types and focused methods.",
+      "narrative": "## Design Test Cases and Boundary Tests\n\nA useful test suite covers typical inputs, boundaries, empty values and invalid cases. State expected results before running. Assertions check internal assumptions during development; explicit validation is still required for user input.\n\n## Build a boundary-value test set\n\nFor a valid percentage range of 0 through 100, test values immediately outside and on each boundary: -1, 0, 1, 99, 100 and 101. Add empty input, whitespace and non-numeric text when the value comes from a console or file.\n\n## Keep expected results independent\n\nWrite the expected result before running the implementation. A test that calculates its expected value using the same faulty formula can repeat the defect. Name each case, record input and expected outcome, then compare actual output.\n\n## Regression tests\n\nWhen a defect is fixed, preserve the failing case as a test. Assertions are useful for internal invariants during development; validate external input explicitly because assertions may be disabled.",
       "examples": [
         {
           "id": "jv10.3-ex1",
@@ -78,9 +78,9 @@
       "guidedTask": "Create a test table for a score validator with values -1, 0, 1, 99, 100 and 101. State expected results before coding.",
       "independentTask": "Implement a method that accepts a percentage from 0 through 100. Add tests for minimum, maximum, empty input and malformed numeric text.",
       "hints": [
-        "Break the work into small methods with clear inputs and outputs.",
-        "Validate data before calculating or changing stored state.",
-        "Compile with JDK 21 and compare actual results with your test table."
+        "For a range from minimum to maximum, test both limits and values immediately below and above them.",
+        "Record input and expected output before running the program; include empty, malformed and ordinary values where relevant.",
+        "Use assertions for development-time invariants, but validate external input explicitly because assertions may be disabled."
       ],
       "challenge": "Add a regression test for every defect discovered. Explain why assertions are useful during development but cannot replace validation of user input."
     }
@@ -102,7 +102,7 @@
           "A test that skips assertions"
         ],
         "answer": "A test at or near a limit such as minimum or maximum input",
-        "explanation": "What is a boundary test? The correct choice follows the Java concept taught in Design Test Cases and Boundary Tests; the alternatives conflict with its language rules or intended use."
+        "explanation": "Boundary tests exercise values at or near limits, where off-by-one and range-validation defects commonly appear."
       },
       {
         "id": "jv10.3-q2",
@@ -114,7 +114,7 @@
           "A deployment test"
         ],
         "answer": "An edge or boundary case",
-        "explanation": "Which test category checks an empty input? The correct choice follows the Java concept taught in Design Test Cases and Boundary Tests; the alternatives conflict with its language rules or intended use."
+        "explanation": "Empty input is an edge case because it has no ordinary elements to process and often needs a separate expected behavior."
       },
       {
         "id": "jv10.3-q3",
@@ -126,7 +126,7 @@
           "A random output"
         ],
         "answer": "The expected result",
-        "explanation": "What should be written before running a test? The correct choice follows the Java concept taught in Design Test Cases and Boundary Tests; the alternatives conflict with its language rules or intended use."
+        "explanation": "Writing the expected result first prevents the implementation from defining its own test oracle after the fact."
       },
       {
         "id": "jv10.3-q4",
@@ -138,7 +138,7 @@
           "Recompiles the class"
         ],
         "answer": "Throws AssertionError",
-        "explanation": "What does a Java assert statement do when assertions are enabled and its condition is false? The correct choice follows the Java concept taught in Design Test Cases and Boundary Tests; the alternatives conflict with its language rules or intended use."
+        "explanation": "When assertions are enabled and the condition is false, Java throws AssertionError."
       },
       {
         "id": "jv10.3-q5",
@@ -150,7 +150,7 @@
           "Assertions replace exception handling"
         ],
         "answer": "Assertions may be disabled and are not a substitute for validating external input",
-        "explanation": "Why is input validation still needed when assertions exist? The correct choice follows the Java concept taught in Design Test Cases and Boundary Tests; the alternatives conflict with its language rules or intended use."
+        "explanation": "Assertions can be disabled and are intended for internal assumptions; external data must be validated explicitly in normal program logic."
       }
     ]
   },

@@ -25,7 +25,7 @@
       "analogyLimit": "Actual behavior is defined by Java language rules and API contracts."
     },
     "explain": {
-      "narrative": "## Java Optional\n\nOptional represents a value that may be absent and is most useful as a method return type. Use map and filter, and orElseGet for lazy fallback calculation.\n\nIdentify the input and desired result. Select the Java construct or API that supports the requirement. Keep code readable, handle documented failures and state assumptions clearly.\n\nCompile with JDK 21, predict output before running, and test normal, boundary and invalid inputs.",
+      "narrative": "## Representing optional results\n\nOptional<T> is a container that either holds one non-null value or is empty. It is commonly used as a method return type when a result may legitimately be absent. It makes absence explicit in the API rather than relying on an undocumented null convention.\n\n## Creating Optional values\n\nOptional.of(value) requires a non-null value and throws NullPointerException for null. Optional.ofNullable(value) creates an empty Optional when its argument is null. Optional.empty() creates an empty instance. Do not use Optional as a replacement for every nullable field or as a parameter type by default; follow the API design conventions of the surrounding codebase.\n\n## Transforming and filtering\n\nmap applies a function when a value is present and wraps the mapped result. If the Optional is empty, map returns an empty Optional without calling the function. filter keeps the value only when the predicate is true. flatMap is useful when the mapping function already returns Optional and avoids nested Optional<Optional<T>> values.\n\n## Supplying fallback values\n\norElse(value) evaluates its argument before the call, even when the Optional is present. orElseGet(supplier) evaluates the supplier only when the Optional is empty, making it preferable when computing the fallback is expensive or has side effects. orElseThrow can provide an exception when a required value is absent.\n\n## Safe inspection\n\nUse isPresent/isEmpty when a branch is needed, ifPresent for an action on a present value, and map/filter/orElseGet for value-oriented pipelines. Avoid calling get without first establishing presence; it throws NoSuchElementException when empty.\n\n## API design\n\nOptional is primarily intended for return values. It does not make the underlying lookup successful or validate business rules. Decide what absence means and document the fallback or error policy.",
       "examples": [
         {
           "id": "jv14.4-ex1",
@@ -33,7 +33,7 @@
           "title": "Core API",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.Optional<String> value = java.util.Optional.of(\"Java\"); System.out.println(value.orElse(\"none\")); } }",
           "expectedOutput": "Java",
-          "explanation": "An Optional containing a value returns it.",
+          "explanation": "Optional.of stores a non-null value, and orElse returns that value because it is present.",
           "runnable": false
         },
         {
@@ -42,7 +42,7 @@
           "title": "Practical use",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.Optional<String> value = java.util.Optional.empty(); System.out.println(value.orElse(\"fallback\")); } }",
           "expectedOutput": "fallback",
-          "explanation": "An empty Optional uses the fallback value.",
+          "explanation": "Optional.empty represents absence; orElse supplies a fallback without changing the Optional itself.",
           "runnable": false
         },
         {
@@ -51,7 +51,7 @@
           "title": "Boundary behavior",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.Optional<String> value = java.util.Optional.of(\"java\"); System.out.println(value.map(String::toUpperCase).orElse(\"none\")); } }",
           "expectedOutput": "JAVA",
-          "explanation": "map transforms a present value.",
+          "explanation": "map applies the transformation only when the Optional contains a value and wraps the transformed result.",
           "runnable": false
         },
         {
@@ -60,7 +60,7 @@
           "title": "Alternative pattern",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.Optional<Integer> value = java.util.Optional.of(5); System.out.println(value.filter(n -> n > 3).isPresent()); } }",
           "expectedOutput": "true",
-          "explanation": "filter retains the value when its predicate matches.",
+          "explanation": "filter retains a present value only when the predicate is true; otherwise the result is empty.",
           "runnable": false
         },
         {
@@ -69,7 +69,7 @@
           "title": "Verify the result",
           "code": "public class Main { public static void main(String[] args) throws Exception { java.util.Optional<String> value = java.util.Optional.ofNullable(null); System.out.println(value.isEmpty()); } }",
           "expectedOutput": "true",
-          "explanation": "ofNullable safely represents a possibly null result.",
+          "explanation": "ofNullable converts a possibly null reference into a present or empty Optional without throwing for null.",
           "runnable": false
         }
       ]
@@ -78,9 +78,9 @@
       "guidedTask": "Write a method that returns Optional<String> for a lookup that may fail. Use map, filter and orElseGet without calling get().",
       "independentTask": "Build a configuration lookup that returns Optional values and supplies a lazy default only when a key is missing.",
       "hints": [
-        "Use the API's documented contract rather than relying on assumptions.",
-        "Keep examples minimal and demonstrate one behavior at a time.",
-        "Compile with JDK 21 and verify both present and absent or failure cases."
+        "Use of only when the value is known to be non-null; use ofNullable when null is a possible input.",
+        "map transforms a present value, filter tests it, and flatMap avoids nested Optional values.",
+        "Use orElseGet for a lazily computed fallback; avoid get unless presence is already guaranteed."
       ],
       "challenge": "Test Optional.of, ofNullable(null), empty, map on empty, filter rejection and orElseGet; explain why Optional is usually best as a return type."
     }
@@ -102,7 +102,7 @@
           "An IOException"
         ],
         "answer": "An Optional with no value",
-        "explanation": "What does Optional.empty() create? This is the correct answer based on the Java contract and behavior described in Java Optional."
+        "explanation": "Optional.of creates a present Optional for a non-null value, so orElse returns the stored Java string."
       },
       {
         "id": "jv14.4-q2",
@@ -114,7 +114,7 @@
           "sort"
         ],
         "answer": "map",
-        "explanation": "Which method transforms a present Optional value? This is the correct answer based on the Java contract and behavior described in Java Optional."
+        "explanation": "An empty Optional contains no value; orElse supplies the fallback string to the caller."
       },
       {
         "id": "jv14.4-q3",
@@ -126,7 +126,7 @@
           "A Comparator"
         ],
         "answer": "A Supplier that computes a fallback value if empty",
-        "explanation": "What does orElseGet accept? This is the correct answer based on the Java contract and behavior described in Java Optional."
+        "explanation": "map applies to a present value and wraps the uppercase result in another Optional."
       },
       {
         "id": "jv14.4-q4",
@@ -138,7 +138,7 @@
           "It changes the generic type"
         ],
         "answer": "It throws NoSuchElementException when the Optional is empty",
-        "explanation": "Why is calling Optional.get() without checking presence risky? This is the correct answer based on the Java contract and behavior described in Java Optional."
+        "explanation": "filter retains the value because 5 is greater than 3, so isPresent returns true."
       },
       {
         "id": "jv14.4-q5",
@@ -150,7 +150,7 @@
           "Manage file streams"
         ],
         "answer": "Represent a possibly absent return value",
-        "explanation": "What is a common intended use of Optional? This is the correct answer based on the Java contract and behavior described in Java Optional."
+        "explanation": "ofNullable(null) creates an empty Optional rather than throwing, and isEmpty reports that absence."
       }
     ]
   },

@@ -24,12 +24,12 @@
   "stages": {
     "understand": {
       "concept": "Java provides several ways to read text files. Files.readString is convenient for small files, Files.readAllLines returns all lines as a list, and BufferedReader supports line-by-line processing without loading the entire file at once. Text must be decoded using the correct character set; UTF-8 is a common explicit choice. Reading can fail, for example when a file is missing or access is denied, so handle IOException.",
-      "whyItMatters": "File handling allows a Java application to persist, retrieve and manage information beyond the lifetime of a single run.",
+      "whyItMatters": "Reading files turns stored information into data that a program can process. Choosing between whole-file and streaming APIs helps control memory use, while explicit decoding and clear exception handling make file input more reliable.",
       "analogy": "Think of a path as a labeled address to a storage location; the address and the data stored there are different things.",
       "analogyLimit": "A path is not a guarantee that the target exists or that the program has permission to access it."
     },
     "explain": {
-      "narrative": "Use Path.of to describe the file. For small files, call Files.readString(path, StandardCharsets.UTF_8). For line collections, use Files.readAllLines. For larger files, open Files.newBufferedReader in try-with-resources and loop with readLine until it returns null. Choose the method based on file size and memory needs.",
+      "narrative": "## Choose a reading strategy\n\nThe `java.nio.file.Files` class provides convenient text-reading methods. `Files.readString(path, charset)` is suitable for small files that comfortably fit in memory. `Files.readAllLines(path, charset)` returns all lines as a List and also loads the complete file. Neither is the best choice for an arbitrarily large file.\n\n## Process large files line by line\n\nUse `Files.newBufferedReader(path, charset)` with try-with-resources when a file should be processed incrementally. Call `readLine()` repeatedly until it returns `null`, which signals end-of-file. This avoids storing every line in a List, although the program still holds the current line and any data it chooses to accumulate.\n\n## Decode text with the correct charset\n\nText files contain bytes. A reader decodes those bytes into characters using a charset. If the file is UTF-8, specify `StandardCharsets.UTF_8` when reading. Using a different charset can produce incorrect characters even when the file itself is intact.\n\n## Handle input failures\n\nA read can fail because the path is missing, the target is a directory, permission is denied or an I/O error occurs. Handle `IOException` at a useful application boundary and show a meaningful message. Do not treat an empty file and a missing file as the same condition.\n\n## Common mistakes\n\n- Calling readAllLines for a file that may be too large for memory.\n- Forgetting to close a BufferedReader.\n- Assuming readLine returns an empty string at end-of-file; it returns `null`.\n- Using a different charset from the one used to encode the file.\n- Catching an exception and continuing with data that was never read.",
       "examples": [
         {
           "id": "jv8.4-ex1",
@@ -79,14 +79,14 @@
       ]
     },
     "practise": {
-      "guidedTask": "Create a small Java program that demonstrates java read files. Predict each result, then compile and run it with JDK 21.",
-      "independentTask": "Build a practical Java file-handling utility related to java read files. Include at least two test cases, expected outputs, and an explanation of failure handling and path safety.",
+      "guidedTask": "Create a UTF-8 text file containing three product names. Read it once with Files.readString and once with Files.newBufferedReader. Print each line and count the number of lines. Close the reader with try-with-resources and explain why readLine returning null ends the loop.",
+      "independentTask": "Build a small text-file summary tool. It must report a missing input file clearly, read a small file line by line, count non-empty lines and avoid loading the entire file into a List. Include an empty-file test, a three-line test and an I/O failure discussion.",
       "hints": [
-        "Start with a Path or File that points to a controlled test location.",
-        "Use try-with-resources for streams and writers, and handle IOException where the API declares it.",
-        "Test both the normal case and an edge case such as a missing path or existing target."
+        "readString loads the whole file, while BufferedReader can process a large file line by line.",
+        "readLine returns null at end-of-file; an empty string is a valid blank line and should not be mistaken for EOF.",
+        "Specify the charset and test empty files, blank lines, a final line without a newline and read failures."
       ],
-      "challenge": "Extend one java read files example to handle a realistic file-system edge case safely and explain the API behaviour."
+      "challenge": "Compare readString, readAllLines and BufferedReader for a very large log file. Explain memory behaviour, resource ownership, decoding and how you would report a missing or unreadable file without confusing it with an empty file."
     }
   },
   "practice": {

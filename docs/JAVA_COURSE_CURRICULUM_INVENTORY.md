@@ -5,7 +5,7 @@
 **Reference curriculum:** W3Schools Java Tutorial and Java Syllabus  
 **Reference baseline checked:** 23 November 2026  
 **Repository:** `kharchasaathi/MULTILINGUAL_PROGRAMMING_LEARNING_PLATFORM`  
-**Working branch:** `feature/java-course-foundation`  
+**Working branch:** `content/java-supplemental-content-quality-batch1`  
 **Release base:** `release/v1-frontend` at `c9c63982782ef910571775d59911dc9b092074e7`
 
 ## Scope and authoring rules
@@ -296,3 +296,68 @@ This section supersedes earlier historical batch-status rows above where they sa
 - Each supplemental lesson retains five example records, the Understand / Explain / Practise stages, five learning objectives, and `practice.playgroundMode: "none"`.
 - Example code and expected outputs still require current-head JDK 21 compile-and-execute validation. Automated Actions are pending; do not mark these lessons validated until they pass.
 - The supplemental lessons remain English drafts. Telugu translation remains deferred, and release approval is still pending.
+
+
+## Current-head technical validation and quality follow-up — 24 November 2026
+
+- Working branch: `content/java-supplemental-content-quality-batch1`.
+- Validated commit: `36b7f29725492f64a7c1f3d25374552c5cc44d5e`.
+- Java Course Validation #166: PASS with Eclipse Temurin JDK 21.0.13+9; 85 indexed English lessons, 425 examples compiled and executed, and 425 MCQs validated.
+- Browser Review #1587: PASS, 16/16 Playwright tests. The suite now includes a representative Java lesson-renderer check and asserts `practice.playgroundMode: "none"`; it also exercises Java Playground compiler discovery, execution, stdin and lesson-to-playground handoff.
+- Supplemental explanations for JV13.3 (HashSet/LinkedHashSet/TreeSet contracts), JV13.4 (HashMap/LinkedHashMap/TreeMap contracts), JV14.1 (generic types and erasure), JV14.2 (bounds and wildcards), JV14.3 (annotation targets and retention), and JV14.4 (Optional creation and transformations) were strengthened. The updated examples were included in the 425-example JDK run.
+- These checks establish technical CI/browser compatibility, not independent editorial sign-off. Keep lesson status `draft`; do not treat draft content as release-approved.
+- W3Schools broader tutorial/exercise gaps remain under audit; the 58-module syllabus mapping is not proof that every exercise and extended navigation item is fully covered.
+- Telugu translation remains deferred. No merge or production deployment has been performed.
+
+
+## JV8 File Handling instructional-quality batch — 24 November 2026
+
+- Updated JV8.1–JV8.5 in place; preserved topic IDs, JSON schema, five objectives, five runnable examples, five assessment items, draft status and `practice.playgroundMode: "none"`.
+- Rewrote the Explain narratives to distinguish pathname representation from file contents; cover NIO Path/Files, creation semantics, UTF-8 output, whole-file versus streaming input, and safe deletion.
+- Replaced generic practice prompts with lesson-specific guided tasks, independent tasks, hints and challenges, including missing/existing paths, append versus replace, end-of-file handling, and deletion safety.
+- The prior Java Actions #167 and Browser Review #1588 passed on the parent content commit. This new batch requires fresh current-HEAD JDK and browser runs before its changes can be marked validated.
+- No merge or deployment; English lessons remain drafts and Telugu remains deferred.
+
+
+## JV8 validation repair — 24 November 2026
+
+- Java Course Validation #168 exposed a validator contract mismatch: `scripts/validate-java-course.mjs` requires exactly three practice hints per lesson; JV8.1 had four (the same four-hint batch pattern was applied to JV8.2–JV8.5).
+- Minimal repair: reduce each JV8.1–JV8.5 lesson to exactly three topic-specific hints, retaining all five objectives, five examples, five MCQs, lesson IDs, existing JSON structure and `playgroundMode: "none"`.
+- The failure was structural validation before example execution; it was not a Java compiler/runtime defect.
+- Re-run JDK 21 and browser CI on the repair commit before changing JV8 validation status back to VALIDATED.
+
+
+## Supplemental lesson quality batch 2 — 24 November 2026
+
+Updated JV9.2–JV9.4, JV10.1–JV10.2 and JV11.1–JV11.3 in place. Replaced generic explanation/checklist paragraphs with topic-specific instruction covering debugger workflow and safe diagnostics; catch ordering, multi-catch and exception causes; AutoCloseable reverse closing and suppressed exceptions; requirements, constraints and acceptance examples; pseudocode, decomposition and invariants; unit conversion formula/input separation; grade boundaries and empty score handling; and inventory stock invariants and Map lookup. Replaced generic practice hints with three lesson-specific hints per lesson. JV11.3 practical stock-sale example now validates requested quantity and available stock before updating. Preserved lesson IDs, objectives, five examples, five MCQs, schema and draft status. New JDK 21 and browser validation are required on this commit. No merge/deploy; Telugu remains deferred.
+
+
+## Supplemental lesson quality batch 3 — 25 November 2026
+
+Updated JV11.4, JV11.5, JV12.1, JV12.4 and JV12.5 in place. Replaced generic explanations and hints with topic-specific instruction on safe application-owned note storage, UTF-8 and path validation; task-manager separation of concerns, robust persistence and acceptance testing; byte versus character streams; BufferedReader EOF/blank-line behavior, BufferedWriter newLine/flush; and charset encoding, UTF-16 code units versus UTF-8 bytes, incremental processing and malformed input. Preserved lesson IDs, JSON schema, five worked examples, five MCQs, practice fields and draft status. JV11.4/11.5 and JV12.1/12.4/12.5 require fresh JDK 21 execution and browser review on the new commit. No merge or deployment; Telugu deferred.
+
+
+## Supplemental lesson quality batch 4 — 25 November 2026
+
+Updated JV12.2 and JV12.3 in place. Expanded byte-stream read semantics (EOF sentinel, partial buffer counts, exact write length, destination truncation, binary integrity tests) and character-stream charset behavior (default charset caveat, explicit UTF-8, mismatched decoding, buffering and non-ASCII tests). Replaced generic practice hints with topic-specific checks. Preserved IDs, JSON schema, five examples, five MCQs, practice structure and draft status. Fresh current-head JDK 21 validation and browser review are required. No merge or deployment; Telugu deferred.
+
+
+## Supplemental lesson quality batch 5 — 25 November 2026
+
+Updated JV13.1, JV13.2, JV13.5 and JV13.6 in place. Replaced generic explanatory boilerplate with detailed instruction on Collections Framework interface contracts, implementation selection, ordering and mutability; strengthened example explanations and topic-specific practice hints; replaced templated MCQ explanations with answer-specific rationales. Preserved topic IDs, JSON schema, five objectives, five examples, five MCQs, practice structure, `playgroundMode: "none"` and draft status. Current-head JDK 21 execution and browser review are required before marking these revised lessons validated. No merge or deployment; Telugu deferred.
+
+### Current branch/validation evidence
+
+- Working branch: `content/java-supplemental-content-quality-batch1`.
+- Release base observed: `f5ec1202a8b63d81ede647bc923d8936fd725c99`.
+- Commit `3df70bfaa6af8cde9b8335de4fe742846cb3156d` passed Java Course Validation #172 and Browser Review #1593. Both workflows completed successfully on that exact SHA; the Java job ran JDK setup and the validate/compile/execute step, while browser review completed the Java Playground safety and browser review steps.
+- PR #265 remains open and unmerged. This batch is a subsequent commit; fresh checks must run on its new head.
+
+
+## Current-head verification — 25 November 2026
+
+- Active working branch: `content/java-supplemental-content-quality-batch1` (PR #265 against `release/v1-frontend`).
+- Tested content commit: `bda0bd51de1c22c7512ecef0c702c8ad378878c5`.
+- Java Course Validation #188: PASS; all 85 indexed English lessons passed the JDK 21 lesson-contract and example compile/execute checks, with expected output comparisons and MCQ validation.
+- Browser Review #1609: PASS; Java lesson rendering, `playgroundMode: "none"`, Java Playground integration/safety, browser output, keyboard and accessibility checks passed.
+- Technical validation does not change editorial status: lessons remain `draft`; Telugu translation remains deferred. PR #265 is open and unmerged; no deployment performed.

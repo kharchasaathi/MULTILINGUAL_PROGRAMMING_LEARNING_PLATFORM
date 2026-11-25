@@ -24,12 +24,12 @@
   "stages": {
     "understand": {
       "concept": "Java can create a new empty file with File.createNewFile. The method returns true when it creates the file and false when the path already exists; it can throw IOException when creation fails. For directories, mkdir creates one level while mkdirs can create missing parent levels. A program should check return values and handle exceptions rather than assuming the operation succeeded.",
-      "whyItMatters": "File handling allows a Java application to persist, retrieve and manage information beyond the lifetime of a single run.",
+      "whyItMatters": "Reliable file creation is the first step in persistent storage workflows. Programs must distinguish a newly created file from an already-existing path, create parent directories deliberately and handle file-system failures rather than silently assuming that storage is ready.",
       "analogy": "Think of a path as a labeled address to a storage location; the address and the data stored there are different things.",
       "analogyLimit": "A path is not a guarantee that the target exists or that the program has permission to access it."
     },
     "explain": {
-      "narrative": "Create a File for the desired path, then call createNewFile inside a try/catch because it declares IOException. A true result means this call created the file; false means the path already existed. Use mkdir for one directory and mkdirs for a nested path. Choose a safe, application-controlled location and avoid treating user-supplied paths as trusted.",
+      "narrative": "## Creating a new file\n\nThe `java.io.File` method `createNewFile()` attempts to create a new, empty file. It returns `true` when this call creates the file and `false` when a file already exists at that path. It declares `IOException`, so the caller must catch or declare that checked exception. The method does not create missing parent directories.\n\n## Creating directories\n\n`mkdir()` creates one directory level and normally fails if its parent does not exist. `mkdirs()` attempts to create the directory together with missing parent directories. Both methods return a boolean, so inspect the result rather than assuming success.\n\nFor new code, the NIO API offers `Files.createFile(path)`, `Files.createDirectory(path)` and `Files.createDirectories(path)`. These methods report failures with specific `IOException` subclasses. `Files.createFile` fails if the target already exists; it does not silently replace it.\n\n## Handle existing paths and failures\n\nDecide what an existing target means for the application. It may be an expected repeat operation, a conflict that should be reported, or a reason to choose another name. Do not delete or overwrite an existing file merely to make creation succeed. File-system permissions, invalid names, missing parents and concurrent processes can all affect the result.\n\n## Safe creation checklist\n\n- Choose an application-controlled directory.\n- Create required parent directories intentionally.\n- Use the API whose existing-file behaviour matches the requirement.\n- Check boolean results or catch the documented exception.\n- Avoid trusting an arbitrary path supplied by a user.",
       "examples": [
         {
           "id": "jv8.2-ex1",
@@ -79,14 +79,14 @@
       ]
     },
     "practise": {
-      "guidedTask": "Create a small Java program that demonstrates java create files. Predict each result, then compile and run it with JDK 21.",
-      "independentTask": "Build a practical Java file-handling utility related to java create files. Include at least two test cases, expected outputs, and an explanation of failure handling and path safety.",
+      "guidedTask": "Create a temporary test directory with Files.createDirectories, then attempt to create `profile.txt` with Files.createFile. Run the creation twice and handle the second attempt as an already-existing-file case. Print a clear message for each outcome and explain why the method does not overwrite the first file.",
+      "independentTask": "Implement a small report-file initializer. It must create missing parent directories, create a new empty report file only when absent, preserve an existing report, and report IOException without printing a false success message. Test a new target, a repeated run and a path whose parent is not a directory.",
       "hints": [
-        "Start with a Path or File that points to a controlled test location.",
-        "Use try-with-resources for streams and writers, and handle IOException where the API declares it.",
-        "Test both the normal case and an edge case such as a missing path or existing target."
+        "Files.createFile fails if the target already exists; Files.createDirectories creates missing parent directories as needed.",
+        "Use a known parent directory and validate path components before creating files from user input.",
+        "Test an existing target, missing parent directories, invalid paths and permission failures."
       ],
-      "challenge": "Extend one java create files example to handle a realistic file-system edge case safely and explain the API behaviour."
+      "challenge": "Compare File.createNewFile, Files.createFile and Files.createDirectories. Explain the difference between an existing target, a missing parent and an access failure, and choose the API that makes each condition easiest to report correctly."
     }
   },
   "practice": {
