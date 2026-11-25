@@ -4,6 +4,7 @@ on:
   push:
     branches: [feature/csharp-course-foundation, release/v1-frontend]
     paths:
+      - "global.json"
       - "public/content/en/csharp/**"
       - "public/content/curriculum-index.json"
       - "docs/CODESAATHI_CURRICULUM_PROGRESS_TRACKER.csv"
@@ -12,6 +13,7 @@ on:
   pull_request:
     branches: [release/v1-frontend]
     paths:
+      - "global.json"
       - "public/content/en/csharp/**"
       - "public/content/curriculum-index.json"
       - "docs/CODESAATHI_CURRICULUM_PROGRESS_TRACKER.csv"
@@ -28,11 +30,13 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-      - name: Set up .NET 10 SDK
+      - name: Set up .NET 10 SDK from global.json
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "10.0.x"
-      - name: Report .NET SDK
-        run: dotnet --info
+          global-json-file: global.json
+      - name: Report selected .NET SDK
+        run: |
+          dotnet --info
+          dotnet --version
       - name: Validate lesson structure and execute C# examples
         run: node scripts/validate-csharp-course.mjs
