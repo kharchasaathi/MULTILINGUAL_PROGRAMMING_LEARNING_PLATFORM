@@ -1,0 +1,165 @@
+{
+  "id": "csharp.csh2.2.en",
+  "courseId": "csharp",
+  "moduleId": "CSH2",
+  "topicId": "CSH2.2",
+  "title": "Constants and Readonly Values",
+  "language": "en",
+  "status": "draft",
+  "learningObjectives": [
+    "Declare a const local or member and explain why its value cannot be reassigned.",
+    "Declare a readonly field and initialize it at declaration or in a constructor.",
+    "Distinguish compile-time constants from runtime-initialized values.",
+    "Choose const or readonly according to when a value becomes known.",
+    "Explain why readonly does not necessarily make a referenced object immutable."
+  ],
+  "prerequisites": [
+    "CSH1.5",
+    "CSH1.6"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A constant represents a value that must not change. C# provides const for compile-time constants and readonly for fields that can be assigned only at declaration or in an appropriate constructor. They both prevent ordinary later reassignment but have different initialization and compilation rules.",
+      "whyItMatters": "Stable values such as unit conversions and object-specific settings should not be accidentally changed. Choosing the correct feature also avoids versioning surprises when libraries expose constants.",
+      "analogy": "const is like a rule printed permanently before a form is distributed. readonly is like a sealed label whose value is set when the object or type is initialized.",
+      "analogyLimit": "readonly restricts assignment to the field, not necessarily mutation of an object referenced by that field. A readonly field can refer to a mutable object."
+    },
+    "explain": {
+      "narrative": "## const\n\nA const field or local must be initialized with a compile-time constant expression. A class const member is implicitly static and cannot be assigned later. Numeric literals and expressions made from constants are common uses.\n\n## readonly\n\nA readonly field can be initialized where it is declared or assigned in the relevant constructor. A static readonly field is assigned at declaration or in a static constructor; an instance readonly field can also be assigned in an instance constructor. Its value may be determined at runtime.\n\n## Choosing between them\n\nUse const for values genuinely fixed at compile time. Use readonly when initialization depends on runtime information or when a library value may change between versions without consumers needing recompilation.\n\n## Important distinction\n\nreadonly protects the field assignment, not the full object graph behind a reference. The examples use immutable values to keep the behaviour clear.\n\n## Version baseline\n\nconst and readonly are long-standing C# features supported by .NET 10 and C# 14.",
+      "examples": [
+        {
+          "id": "csh2.2-ex1",
+          "language": "csharp",
+          "title": "A const local",
+          "code": "const int daysInWeek = 7;\nConsole.WriteLine(daysInWeek);",
+          "expectedOutput": "7",
+          "explanation": "The value is a compile-time constant and cannot be reassigned.",
+          "runnable": true
+        },
+        {
+          "id": "csh2.2-ex2",
+          "language": "csharp",
+          "title": "A constant expression",
+          "code": "const int hoursPerDay = 24;\nconst int minutesPerHour = 60;\nconst int minutesPerDay = hoursPerDay * minutesPerHour;\nConsole.WriteLine(minutesPerDay);",
+          "expectedOutput": "1440",
+          "explanation": "The compiler can evaluate the multiplication because both operands are constants.",
+          "runnable": true
+        },
+        {
+          "id": "csh2.2-ex3",
+          "language": "csharp",
+          "title": "A static readonly field",
+          "code": "using System;\nusing System.Globalization;\n\nclass Program\n{\n    private static readonly DateTime ReleaseDate = new DateTime(2026, 11, 26);\n    static void Main()\n    {\n        Console.WriteLine(ReleaseDate.ToString(\"yyyy-MM-dd\", CultureInfo.InvariantCulture));\n    }\n}",
+          "expectedOutput": "2026-11-26",
+          "explanation": "The DateTime value is created at runtime when the type initializes, so static readonly is appropriate.",
+          "runnable": true
+        },
+        {
+          "id": "csh2.2-ex4",
+          "language": "csharp",
+          "title": "An instance readonly field",
+          "code": "class Ticket\n{\n    private readonly int ticketNumber;\n    public Ticket(int number) { ticketNumber = number; }\n    public int Number => ticketNumber;\n}\n\nclass Program\n{\n    static void Main()\n    {\n        var ticket = new Ticket(42);\n        Console.WriteLine(ticket.Number);\n    }\n}",
+          "expectedOutput": "42",
+          "explanation": "The constructor assigns the readonly field. Code outside the constructor cannot later replace that field value.",
+          "runnable": true
+        },
+        {
+          "id": "csh2.2-ex5",
+          "language": "csharp",
+          "title": "Compare const and readonly",
+          "code": "class Program\n{\n    private const int MaximumRetries = 3;\n    private static readonly int StartupYear = System.DateTime.Now.Year;\n    static void Main()\n    {\n        Console.WriteLine(MaximumRetries);\n        Console.WriteLine(StartupYear >= 2026);\n    }\n}",
+          "expectedOutput": "3\nTrue",
+          "explanation": "MaximumRetries is known at compile time. StartupYear depends on the clock when the type initializes.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a .NET 10 console program demonstrating constants and readonly values. Explain each statement, then build and run the project.",
+      "independentTask": "Design an original console example based on a learner-progress or shop-inventory scenario. Demonstrate constants and readonly values, record the expected output, and explain one edge case.",
+      "hints": [
+        "Start with the smallest compiling program.",
+        "Use descriptive names and one concept at a time.",
+        "Check the first compiler diagnostic before changing code.",
+        "Run the program and compare its exact output with the expected result."
+      ],
+      "challenge": "Extend your example with a second realistic scenario involving constants and readonly values. Explain the design choice and one limitation.",
+      "validationCriteria": [
+        "Contains at least five original runnable examples.",
+        "Each example compiles using .NET SDK 10.0.404 and C# 14.",
+        "Actual output matches the documented deterministic expected output.",
+        "Includes guided and independent practice with useful hints.",
+        "Uses practice.playgroundMode none; C# must not be routed into the browser playground."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "csh2.2-q1",
+        "prompt": "What is the central focus of this lesson?",
+        "answer": "Constants and Readonly Values",
+        "options": [
+          "Constants and Readonly Values",
+          "Creating a web server",
+          "Managing CSS styles",
+          "Querying a database"
+        ],
+        "explanation": "The lesson is designed to teach constants and readonly values."
+      },
+      {
+        "id": "csh2.2-q2",
+        "prompt": "Which technical baseline do the C# course examples target?",
+        "answer": ".NET 10 with C# 14",
+        "options": [
+          ".NET 10 with C# 14",
+          ".NET 6 with C# 10",
+          "Java 21 with C# 14",
+          "An unpinned preview SDK"
+        ],
+        "explanation": "The course pins the initial examples to .NET 10 and C# 14."
+      },
+      {
+        "id": "csh2.2-q3",
+        "prompt": "How should runnable C# examples be verified?",
+        "answer": "Compile and execute them with the .NET SDK",
+        "options": [
+          "Compile and execute them with the .NET SDK",
+          "Only preview them as HTML",
+          "Run them in a CSS playground",
+          "Assume valid JSON means the code runs"
+        ],
+        "explanation": "C# examples require actual .NET compilation and runtime execution."
+      },
+      {
+        "id": "csh2.2-q4",
+        "prompt": "What is the safest response to a compiler diagnostic?",
+        "answer": "Read the diagnostic and fix the underlying code",
+        "options": [
+          "Read the diagnostic and fix the underlying code",
+          "Ignore all warnings and errors",
+          "Change unrelated files",
+          "Remove the expected output"
+        ],
+        "explanation": "Compiler diagnostics provide evidence about the code and should guide a minimal correction."
+      },
+      {
+        "id": "csh2.2-q5",
+        "prompt": "Which habit improves maintainability?",
+        "answer": "Use clear names and explain intent",
+        "options": [
+          "Use clear names and explain intent",
+          "Use cryptic names everywhere",
+          "Put all values in global state",
+          "Avoid checking actual output"
+        ],
+        "explanation": "Readable code and deliberate verification improve maintainability."
+      }
+    ]
+  }
+}
