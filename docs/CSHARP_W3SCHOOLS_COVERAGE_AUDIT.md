@@ -132,3 +132,21 @@ W3Schools is the coverage baseline, not the ceiling. Microsoft Learn's current C
 7. Browser review, CI, accessibility, responsive layout and production smoke tests.
 8. English editorial sign-off before Telugu translation.
 9. User approval required before merge and deployment.
+
+
+## CSH2 authoring update — 2026-11-26
+
+Six English draft lessons have now been authored and registered on the C# working branch:
+
+- CSH2.1 — Variables and Assignment
+- CSH2.2 — Constants and Readonly Values
+- CSH2.3 — Display Variables and String Interpolation
+- CSH2.4 — Multiple Variable Declarations and Assignments
+- CSH2.5 — Identifiers and C# Naming Rules
+- CSH2.6 — Scope and Lifetime of Local Variables (supplemental language-foundation coverage)
+
+The W3Schools C# Variables topic is mapped to CSH2.1–CSH2.5. The exercise categories Variables, Constant Variables, Display Variables, Multiple Variables and Identifiers map to the corresponding lessons. CSH2.6 extends the source with scope/lifetime concepts rather than being misreported as a separate W3Schools topic.
+
+Each new lesson has five original runnable examples, deterministic expected output, five learning objectives, guided and independent practice, and five unique MCQs with explanations. All six lesson files are registered in the working-branch curriculum index and progress tracker. Their status remains DRAFT / VALIDATION PENDING until the .NET 10 / C# 14 CI run confirms every example and MCQ.
+
+The W3Schools exercise mapping is a first mapping pass only; the final audit must still verify every exercise prompt and concept against original CodeSaathi practice content.
