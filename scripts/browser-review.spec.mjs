@@ -102,13 +102,13 @@ test("lesson practice links close the dialog and navigate to the playground", as
   await expect(page.frameLocator("#previewFrame").locator("p")).toHaveText("Named and hexadecimal colours");
 });
 
-test("all six CSH2 lessons load through the C# curriculum and render without a browser playground", async ({ page }) => {
+test("all CSH2 and CSH3 lessons load through the C# curriculum and render without a browser playground", async ({ page }) => {
   await page.goto(baseURL, { waitUntil: "domcontentloaded" });
   await waitForCurriculum(page);
   await page.locator('[data-course-nav="csharp"]').click();
   const dialog = page.locator("#lessonDialog");
   await expect(dialog).toBeVisible();
-  for (const topicId of ["CSH2.1", "CSH2.2", "CSH2.3", "CSH2.4", "CSH2.5", "CSH2.6"]) {
+  for (const topicId of ["CSH2.1", "CSH2.2", "CSH2.3", "CSH2.4", "CSH2.5", "CSH2.6", "CSH3.1", "CSH3.2", "CSH3.3", "CSH3.4", "CSH3.5", "CSH3.6", "CSH3.7", "CSH3.8"]) {
     await dialog.locator(`[data-topic-id="${topicId}"]`).click();
     await expect(dialog.locator(".lesson-template-title")).toContainText(topicId);
     const response = await page.request.get(`${baseURL}/content/en/csharp/${topicId}.json`);
