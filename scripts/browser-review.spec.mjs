@@ -25,9 +25,12 @@ const groups = {
 test("CodeSaathi brand links expose their visible text as the accessible name", async ({ page }) => {
   for (const path of ["/", "/sql-reference.html", "/sql-playground.html", "/java-playground.html"]) {
     await page.goto(baseURL + path, { waitUntil: "domcontentloaded" });
-    const brand = page.locator("a.brand");
-    await expect(brand).toBeVisible();
-    await expect(brand).toHaveAccessibleName(/CodeSaathi/);
+    const brands = page.locator("a.brand:visible");
+    const count = await brands.count();
+    expect(count, `visible brand links on ${path}`).toBeGreaterThan(0);
+    for (let i = 0; i < count; i++) {
+      await expect(brands.nth(i)).toHaveAccessibleName(/CodeSaathi/);
+    }
   }
 });
 
