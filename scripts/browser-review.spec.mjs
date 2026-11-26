@@ -128,6 +128,10 @@ test("all ten courses render representative lessons and starter programs execute
     const lessonData = await lessonResponse.json();
     const expectedExamples = lessonData.examples || lessonData.stages?.explain?.examples || [];
     if (course === "java" || course === "csharp") expect(lessonData.practice?.playgroundMode, `${course} lessons must not use the web-language playground`).toBe("none");
+    if (course === "csharp") {
+      await expect(dialog.locator(".lesson-practice-link")).toHaveCount(0);
+      await expect(dialog.locator(".lesson-practice-note")).toContainText("compiled and executed with the .NET 10 SDK");
+    }
     const expectedQuestions = lessonData.assessment?.questions || [];
     await expect(dialog.locator(".lesson-objectives-list li")).toHaveCount(lessonData.learningObjectives.length);
     await expect(dialog.locator(".lesson-example")).toHaveCount(expectedExamples.length);
