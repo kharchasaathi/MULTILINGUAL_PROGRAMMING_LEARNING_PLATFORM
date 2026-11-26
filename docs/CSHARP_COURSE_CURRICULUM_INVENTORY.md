@@ -4,7 +4,7 @@
 - Working branch: `feature/csharp-course-foundation`
 - Release base: `release/v1-frontend`
 - Authoring language: English first; Telugu deferred until English review and technical validation are complete.
-- Status: IN_PROGRESS — six English draft lesson files are registered in the working-branch curriculum index and progress tracker; automated validation currently covers the first five lessons only.
+- Status: IN_PROGRESS — six English draft lesson files are registered in the working-branch curriculum index and progress tracker; C# Validation #14 passed all six lessons: 30 examples executed and 30 MCQs checked; editorial review and release remain pending.
 - Planned scope: 20 chapters, 148 lesson topics.
 - W3Schools primary coverage baseline: 36 syllabus navigation entries (including HOME) and 53 exercise categories, checked 2026-11-25.
 - Technical reference: Microsoft Learn C# documentation and language specification.
@@ -229,6 +229,6 @@ Lesson status remains `draft` until all required gates are evidenced. Authored, 
 - Six English draft lesson files are registered: CSH1.1–CSH1.6.
 - Six C# rows are present in the progress tracker.
 - PR #266 remains Draft/Open; no merge or production deployment is authorized.
-- C# Validation #7 passed the original five lessons (25 executed examples and 25 MCQs). CSH1.6 remains unvalidated until a new run passes.
+- C# Validation #14 on commit `4624465` passed all six lessons (30 executed examples and 30 MCQs) using .NET SDK `10.0.404` and C# 14. Lesson metadata remains `draft`; editorial and release review remain pending.
 - Browser Review #1619 passed, but did not explicitly open a C# lesson; C# browser coverage is being added in the current batch.
 - Existing C, C++, Java, Python and SQL content remains outside the C# authoring scope.
