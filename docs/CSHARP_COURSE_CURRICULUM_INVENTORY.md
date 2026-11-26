@@ -4,7 +4,7 @@
 - Working branch: `feature/csharp-course-foundation`
 - Release base: `release/v1-frontend`
 - Authoring language: English first; Telugu deferred until English review and technical validation are complete.
-- Status: PLANNED — no C# lesson files or curriculum registration existed at the audit baseline.
+- Status: IN_PROGRESS — six English draft lesson files are registered in the working-branch curriculum index and progress tracker; automated validation currently covers the first five lessons only.
 - Planned scope: 20 chapters, 148 lesson topics.
 - W3Schools primary coverage baseline: 36 syllabus navigation entries (including HOME) and 53 exercise categories, checked 2026-11-25.
 - Technical reference: Microsoft Learn C# documentation and language specification.
@@ -223,11 +223,12 @@ Lesson status remains `draft` until all required gates are evidenced. Authored, 
 - Keep examples self-contained and avoid network, file-system, process, environment-secret or unbounded resource access unless the lesson is specifically about that API and its sandbox policy explicitly permits it.
 - No production deployment or merge without explicit user authorization.
 
-## Existing repository integration findings
+## Current working-branch integration findings (2026-11-26)
 
-At audit baseline:
-- `csharp` is not registered in `public/content/curriculum-index.json`.
-- No C# topics are registered in the curriculum index.
-- No C# rows exist in `docs/CODESAATHI_CURRICULUM_PROGRESS_TRACKER.csv`.
-- No C# working branch, dedicated C# PR, lesson directory, validator or C# course workflow was found.
-- Existing C, C++, Java, Python and SQL structures must remain untouched except for intentional shared index/tracker integration in reviewed batches.
+- `csharp` is registered in `public/content/curriculum-index.json`.
+- Six English draft lesson files are registered: CSH1.1–CSH1.6.
+- Six C# rows are present in the progress tracker.
+- PR #266 remains Draft/Open; no merge or production deployment is authorized.
+- C# Validation #7 passed the original five lessons (25 executed examples and 25 MCQs). CSH1.6 remains unvalidated until a new run passes.
+- Browser Review #1619 passed, but did not explicitly open a C# lesson; C# browser coverage is being added in the current batch.
+- Existing C, C++, Java, Python and SQL content remains outside the C# authoring scope.
