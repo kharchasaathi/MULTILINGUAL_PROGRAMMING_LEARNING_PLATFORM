@@ -55,7 +55,10 @@ for (const file of files) {
     try {
       await writeFile(join(dir, "Example.csproj"), `<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><LangVersion>14.0</LangVersion><ImplicitUsings>disable</ImplicitUsings><Nullable>enable</Nullable><TreatWarningsAsErrors>false</TreatWarningsAsErrors></PropertyGroup></Project>`);
       await writeFile(join(dir, "Program.cs"), example.code);
-      const actual = runDotnet(["run", "--project", join(dir, "Example.csproj"), "--configuration", "Release"], dir).replace(/\r\n/g, "\n").trimEnd();
+      const projectPath = join(dir, "Example.csproj");
+      runDotnet(["restore", projectPath], dir);
+      runDotnet(["build", projectPath, "--configuration", "Release", "--no-restore"], dir);
+      const actual = runDotnet(["run", "--project", projectPath, "--configuration", "Release", "--no-build", "--no-restore"], dir).replace(/\r\n/g, "\n").trimEnd();
       const expected = String(example.expectedOutput).replace(/\r\n/g, "\n").trimEnd();
       assert.equal(actual, expected, `${file}/${example.id}: expected output mismatch`);
       examplesExecuted++;
