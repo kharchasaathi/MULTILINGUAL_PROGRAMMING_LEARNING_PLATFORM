@@ -22,6 +22,15 @@ const groups = {
   python: ["PY1.1"]
 };
 
+test("CodeSaathi brand links expose their visible text as the accessible name", async ({ page }) => {
+  for (const path of ["/", "/sql-reference.html", "/sql-playground.html", "/java-playground.html"]) {
+    await page.goto(baseURL + path, { waitUntil: "domcontentloaded" });
+    const brand = page.locator("a.brand");
+    await expect(brand).toBeVisible();
+    await expect(brand).toHaveAccessibleName(/CodeSaathi/);
+  }
+});
+
 test("homepage and lesson dialog have no serious or critical WCAG axe violations", async ({ page }) => {
   await page.goto(baseURL, { waitUntil: "domcontentloaded" });
   await waitForCurriculum(page);
