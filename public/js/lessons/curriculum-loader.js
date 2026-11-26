@@ -200,7 +200,12 @@
       }
     }
 const link = $(".lesson-practice-link", container);
-    if (link && lesson.courseId === "java") {
+    if (link && lesson.courseId === "csharp") {
+      const note = document.createElement("p");
+      note.className = "lesson-practice-note";
+      note.textContent = "C# examples are compiled and executed with the .NET 10 SDK. Practise in a local .NET project; C# does not use the browser playground.";
+      link.replaceWith(note);
+    } else if (link && lesson.courseId === "java") {
       const javaExample = examples.find(example => typeof example.code === "string" && example.code.trim());
       if (javaExample) {
         const javaState = { language: "java", code: javaExample.code, stdin: "" };
