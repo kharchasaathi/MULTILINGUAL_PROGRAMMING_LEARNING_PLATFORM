@@ -254,3 +254,14 @@ Lesson status remains `draft` until all required gates are evidenced. Authored, 
 - W3Schools C# Data Types and Type Casting matrix entries now map to the new CSH3 lesson files. Exercise-level coverage remains subject to detailed audit.
 - Latest C# Validation #53 and Browser Review #1644 passed on the pre-CSH3 head `2ed36a3`: 12 lessons, 60 examples executed, 60 MCQs checked; 18 browser tests passed. The new CSH3 content requires a fresh validation run on the new head.
 - PR #266 remains Draft/Open. No merge or production deployment has been performed.
+
+
+## CSH3 integration and latest CI record — 2026-11-27
+
+- Current authored scope is twenty English draft lessons: CSH1.1–CSH1.6, CSH2.1–CSH2.6 and CSH3.1–CSH3.8.
+- C# Validation #53 passed on pre-CSH3 head `2ed36a3237e3e5d67c69e49f8e`: all 12 CSH1/CSH2 lessons, 60 examples executed, 60 MCQs checked.
+- Browser Review #1644 passed on that pre-CSH3 head: 18 browser tests passed, including all six CSH2 lessons.
+- Browser fixes included checking every visible brand link rather than a strict ambiguous locator, and aligning SQL Practice's accessible name with its visible text.
+- CSH3.1–CSH3.8 are now registered in the curriculum index and progress tracker; W3Schools Data Types and Type Casting entries map to the relevant new lessons.
+- Browser regression coverage has been expanded to all fourteen CSH2/CSH3 lessons. Latest-head validation is pending and must be inspected before marking the CSH3 batch validated.
+- PR #266 remains Draft/Open; no merge or production deployment has been performed.
