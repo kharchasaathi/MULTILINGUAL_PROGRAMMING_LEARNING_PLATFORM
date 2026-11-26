@@ -233,3 +233,13 @@ Lesson status remains `draft` until all required gates are evidenced. Authored, 
 - The C# lesson renderer replaces the generic practice link with a .NET 10 local-project instruction and preserves `playgroundMode: none`; browser contract assertions cover this.
 - PR #266 remains Draft/Open; no merge or production deployment is authorized.
 - Existing C, C++, Java, Python and SQL content remains outside the C# authoring scope.
+
+
+## CI troubleshooting and current verification — 2026-11-26
+
+- C# Validation #38 on an intermediate CSH2 commit failed after all six CSH1 lessons passed. The first CSH2 example did not import `System`; the isolated validator intentionally disables implicit usings, so `Console` was unresolved.
+- Corrected the CSH2.1–CSH2.6 example snippets by adding explicit `using System;` imports wherever required. The C# lesson validator was not weakened and implicit usings remain disabled, preserving a strict self-contained-example check.
+- Added a browser-review test that opens all six CSH2 lessons through the C# curriculum and checks lesson rendering, objectives, examples, MCQs and the absence of a browser playground.
+- Latest branch head at this audit: `8b94ed7bceefe84bf010e535c3cbaa544837a26a`.
+- C# Validation #51 and Browser Review #1642 are queued for that exact head; no PASS is claimed until their completed results and logs are inspected.
+- PR #266 remains Draft/Open. No merge or production deployment has been performed or authorized.
