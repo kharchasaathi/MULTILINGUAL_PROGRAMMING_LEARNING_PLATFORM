@@ -101,7 +101,7 @@ test("keyboard users can open and dismiss the curriculum dialog", async ({ page 
   await expect(page.locator("#lessonDialog")).not.toBeVisible();
 });
 
-test("all seven courses render representative lessons and starter programs execute in Chromium", async ({ page }) => {
+test("all ten courses render representative lessons and starter programs execute in Chromium", async ({ page }) => {
   test.setTimeout(180000);
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
@@ -110,7 +110,7 @@ test("all seven courses render representative lessons and starter programs execu
   await expect(page.locator("#courseGrid .course-card")).toHaveCount(await page.evaluate(async () => (await fetch("/content/curriculum-index.json")).json().then(data => data.courses.length)));
 
   // Exercise the shared lesson renderer and modal with one representative lesson per course.
-  for (const [course, topicId] of [["foundation","F0.1"],["html","H16.1"],["css","C22.1"],["javascript","J24.1"],["c","CL1.1"],["cpp","CPP1.1"],["python","PY1.1"],["sql","SQL1.1"],["java","JV1.1"]]) {
+  for (const [course, topicId] of [["foundation","F0.1"],["html","H16.1"],["css","C22.1"],["javascript","J24.1"],["c","CL1.1"],["cpp","CPP1.1"],["python","PY1.1"],["sql","SQL1.1"],["java","JV1.1"],["csharp","CSH1.6"]]) {
     await page.locator(`[data-course-nav="${course}"]`).click();
     const dialog = page.locator("#lessonDialog");
     await expect(dialog).toBeVisible();
@@ -127,7 +127,7 @@ test("all seven courses render representative lessons and starter programs execu
     expect(lessonResponse.ok(), topicId + " lesson file").toBeTruthy();
     const lessonData = await lessonResponse.json();
     const expectedExamples = lessonData.examples || lessonData.stages?.explain?.examples || [];
-    if (course === "java") expect(lessonData.practice?.playgroundMode, "Java lessons must not use the web-language playground").toBe("none");
+    if (course === "java" || course === "csharp") expect(lessonData.practice?.playgroundMode, `${course} lessons must not use the web-language playground`).toBe("none");
     const expectedQuestions = lessonData.assessment?.questions || [];
     await expect(dialog.locator(".lesson-objectives-list li")).toHaveCount(lessonData.learningObjectives.length);
     await expect(dialog.locator(".lesson-example")).toHaveCount(expectedExamples.length);
