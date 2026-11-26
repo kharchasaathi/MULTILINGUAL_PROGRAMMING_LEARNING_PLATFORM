@@ -99,6 +99,30 @@ test("lesson practice links close the dialog and navigate to the playground", as
   await expect(page.frameLocator("#previewFrame").locator("p")).toHaveText("Named and hexadecimal colours");
 });
 
+test("all six CSH2 lessons load through the C# curriculum and render without a browser playground", async ({ page }) => {
+  await page.goto(baseURL, { waitUntil: "domcontentloaded" });
+  await waitForCurriculum(page);
+  await page.locator('[data-course-nav="csharp"]').click();
+  const dialog = page.locator("#lessonDialog");
+  await expect(dialog).toBeVisible();
+  for (const topicId of ["CSH2.1", "CSH2.2", "CSH2.3", "CSH2.4", "CSH2.5", "CSH2.6"]) {
+    await dialog.locator(`[data-topic-id="${topicId}"]`).click();
+    await expect(dialog.locator(".lesson-template-title")).toContainText(topicId);
+    const response = await page.request.get(`${baseURL}/content/en/csharp/${topicId}.json`);
+    expect(response.ok(), topicId + " lesson file").toBeTruthy();
+    const lesson = await response.json();
+    expect(lesson.practice?.playgroundMode, topicId + " must not use a browser playground").toBe("none");
+    await expect(dialog.locator(".lesson-practice-link")).toHaveCount(0);
+    await expect(dialog.locator(".lesson-practice-note")).toContainText("compiled and executed with the .NET 10 SDK");
+    await expect(dialog.locator(".lesson-objectives-list li")).toHaveCount(lesson.learningObjectives.length);
+    await expect(dialog.locator(".lesson-example")).toHaveCount(lesson.stages.explain.examples.length);
+    await expect(dialog.locator(".lesson-question")).toHaveCount(lesson.assessment.questions.length);
+    await dialog.locator(".curriculum-back").click();
+    await expect(dialog.locator("[data-topic-id]").first()).toBeVisible();
+  }
+  await dialog.locator("#closeLesson").click();
+});
+
 test("keyboard users can open and dismiss the curriculum dialog", async ({ page }) => {
   await page.goto(baseURL, { waitUntil: "domcontentloaded" });
   await waitForCurriculum(page);
