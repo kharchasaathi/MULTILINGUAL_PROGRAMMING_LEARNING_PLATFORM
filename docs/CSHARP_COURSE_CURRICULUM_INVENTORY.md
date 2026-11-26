@@ -243,3 +243,14 @@ Lesson status remains `draft` until all required gates are evidenced. Authored, 
 - Latest branch head at this audit: `8b94ed7bceefe84bf010e535c3cbaa544837a26a`.
 - C# Validation #51 and Browser Review #1642 are queued for that exact head; no PASS is claimed until their completed results and logs are inspected.
 - PR #266 remains Draft/Open. No merge or production deployment has been performed or authorized.
+
+
+## CSH3 authoring batch — 2026-11-27
+
+- Authored CSH3.1–CSH3.8 in English and registered all eight lessons in the curriculum index and progress tracker.
+- Topics: Built-in Value Types; Reference Types; Numeric Types and Ranges; Boolean and Character Types; Strings as Reference Types; Implicit and Explicit Conversions; Parse, TryParse and Convert; Nullable Value Types and Nullability.
+- Each lesson contains five learning objectives, five original runnable examples with expected output and explanations, guided and independent practice, hints, a challenge, validation criteria, and five topic-specific MCQs.
+- Every C# example includes explicit imports where required; nullable analysis remains enabled; all examples use .NET 10 / C# 14 and `playgroundMode: none`.
+- W3Schools C# Data Types and Type Casting matrix entries now map to the new CSH3 lesson files. Exercise-level coverage remains subject to detailed audit.
+- Latest C# Validation #53 and Browser Review #1644 passed on the pre-CSH3 head `2ed36a3`: 12 lessons, 60 examples executed, 60 MCQs checked; 18 browser tests passed. The new CSH3 content requires a fresh validation run on the new head.
+- PR #266 remains Draft/Open. No merge or production deployment has been performed.
