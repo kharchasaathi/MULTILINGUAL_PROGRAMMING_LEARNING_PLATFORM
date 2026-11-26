@@ -120,10 +120,10 @@ The currently inspected `main` branch contains the E13 backup workflows and evid
 | Component | Current evidence-based status | What is known | What remains to verify |
 |---|---|---|---|
 | Firebase Authentication | CONSOLE CONFIGURATION PARTIALLY VERIFIED; ZERO USERS OBSERVED | Email/Password and Google enabled; zero users observed; authorized domains are localhost, multilingual-learning-52e24.firebaseapp.com and multilingual-learning-52e24.web.app; SMS MFA shows upgrade-to-enable | Verify SDK/runtime integration, user account linking/actions, password policy, SMS region policy and deployed app sign-in flow |
-| Cloud Firestore | NOT CREATED / NOT EVIDENCED AS ACTIVE | Console shows the initial “Create database” screen; Spark plan visible | No current database, region, collections, rules or indexes to inventory; creation requires a separate approved design decision |
+| Cloud Firestore | NOT CREATED / NOT EVIDENCED AS ACTIVE (2026-11-26 screenshot) | Latest owner screenshot still shows the introductory “Create database” screen; Spark plan visible | No current database, region, collections, rules or indexes are evidenced; creation requires a separate approved design decision |
 | Realtime Database | NOT CREATED / NOT EVIDENCED AS ACTIVE | Console shows the initial “Create Database” screen; Spark plan visible | No instance, region, rules or data flows to inventory; creation requires a separate approved architecture decision |
-| Cloud Storage for Firebase | NOT PROVISIONED; BLAZE UPGRADE REQUIRED BY CONSOLE | Storage page shows “Upgrade project” and states a billing account (Blaze) is required; project is Spark | No Firebase Storage bucket to inventory; no upgrade authorized. Backblaze B2 is a separate service and remains the E13 backup target |
-| Firebase Hosting | LINKAGE NOT SHOWN FOR THE REGISTERED WEB APP; PRODUCT STATUS UNKNOWN | General settings shows a “Link to a Firebase Hosting site” action for the web app | Inspect Hosting product directly for sites, domains and deployments; do not infer Hosting is disabled |
+| Cloud Storage for Firebase | INACCESSIBLE ON CURRENT SPARK PLAN; BUCKET EXISTENCE/USAGE UNKNOWN | Latest owner screenshot shows “Upgrade project” and says a billing account (Blaze) is required; project is Spark. Firebase documentation says Spark projects cannot view or access existing buckets; existing bucket data, if any, remains inaccessible until billing is enabled | Do not infer that no bucket/data exists from the landing page. Bucket name, location, contents, usage and rules remain unverified. No upgrade authorized. Backblaze B2 is a separate service and remains the E13 backup target |
+| Firebase Hosting | ACTIVE — OWNER SCREENSHOT VERIFIED 2026-11-26 | Hosting Overview shows a deployment on Nov 25, 2026 at 5:33 PM; Hosting Usage shows 998.57 MB current storage and 59.97 MB total downloads for the Nov 1–Dec 1 billing period. Project remains on Spark | Verify retained releases, per-site usage and exact current quota in Console; Hosting quota is project-level and independent of Cloud Storage and Firestore |
 | Firebase App Hosting | NOT EVIDENCED | No deployment evidence | Whether enabled; backend/region; connected repository and build identity |
 | Firebase Cloud Functions | NOT EVIDENCED | No function deployment evidence | Whether enabled; functions/regions/runtime/service accounts/secrets |
 | Firebase Cloud Messaging | NOT EVIDENCED | No push integration evidence | Whether enabled; sender/project configuration; token handling |
@@ -200,3 +200,70 @@ For each active external provider, capture only non-secret metadata:
 The next input needed is a Firebase Console project overview screenshot (Project settings / General) with sensitive identifiers and email addresses redacted. Then review Authentication, Firestore, Realtime Database, Storage, Hosting, Functions and IAM one at a time. If a product is not used, record it as DISABLED only after confirming that in the console.
 
 Do not send any secret values or user-level personal data.
+
+
+## 7. Latest owner Firebase usage screenshots and cost policy — 2026-11-26
+
+**Evidence source:** Owner-provided Firebase Console screenshots reviewed in ChatGPT on 2026-11-26. These screenshots supersede the older 2026-11-12 Hosting and Storage observations where the evidence conflicts. They are point-in-time observations, not a live billing export.
+
+### Project plan
+
+- Firebase project: `multilingual-learning-52e24` (display name: `Multilingual Learning`).
+- Billing plan shown in the Console: **Spark (no-cost)**.
+- The owner has not authorized a Blaze upgrade, Cloud Storage activation, database creation, or any paid-service change.
+- Continue on Spark unless the owner separately approves a reviewed cost and architecture proposal.
+
+### Firebase Hosting — observed usage
+
+- Hosting Overview screenshot shows a deployment marked **Deployed**, dated **Nov 25, 2026, 5:33 PM**.
+- Hosting Usage screenshot shows **998.57 MB current Hosting storage**.
+- The same Usage screen shows **59.97 MB total downloads** for the displayed **Nov 1–Dec 1 (PST)** billing period.
+- The project Overview separately displays **54.1 MB downloads (7d total)**. This is a different time window and must not be added to the 59.97 MB billing-period figure.
+- Firebase Hosting no-cost quota is **10 GB of storage per project** and **10 GB/month of data transfer**. At the screenshot snapshot, 998.57 MB is approximately 1 GB of the 10 GB Hosting storage allowance; roughly 9 GB remains, subject to retained releases and subsequent deploys. The 59.97 MB figure is the period's observed transfer usage; roughly 9.94 GB of the 10 GB monthly allowance remains at that snapshot.
+- Hosting storage is **not a monthly-reset allowance**. It counts files belonging to current and retained previous releases. Hosting data transfer is **monthly** and resets with the billing period.
+- Hosting usage is project-level across Hosting sites/channels. It is separate from Cloud Storage buckets and Firestore database storage.
+- If Spark Hosting storage reaches 10 GB, new deployments are blocked until old releases are deleted or the project is upgraded. If Spark data transfer reaches 10 GB/month, sites can be disabled after the documented grace period.
+- Review and limit retained releases to avoid unnecessary accumulated Hosting storage.
+
+### Cloud Firestore — current evidence and free quota
+
+- Latest owner screenshot shows the Firestore introductory screen with **Create database**. Therefore, no Firestore database is evidenced as created in the current screenshot; verify again before creating one.
+- Standard-edition free quota: **1 GiB stored data total**, **50,000 document reads/day**, **20,000 document writes/day**, **20,000 document deletes/day**, and **10 GiB outbound data transfer/month**.
+- Stored-data quota is a total storage allowance, not a fresh 1 GiB each month. Read/write/delete quotas reset daily around midnight Pacific time; outbound transfer is monthly.
+- Only **one Firestore database per project** qualifies for the free quota. Additional databases and certain features (including TTL deletes, PITR, backups, restores and clones) require billing.
+- Do not create Firestore solely because it is available. First approve the data model, region, security rules, indexes, access patterns, retention and expected reads/writes.
+- Potential future CodeSaathi use cases, if approved: learner profiles, course progress, quiz scores and bookmarks. The current static learning-site release records lesson progress in the learner's browser; cross-device server-side progress sync is not currently included.
+
+### Cloud Storage for Firebase — billing gate and unknown usage
+
+- Latest owner screenshot shows **Upgrade project** and says a billing account (Blaze) is required. The project is still Spark.
+- Firebase documentation states that since **February 3, 2026**, Cloud Storage for Firebase requires the Blaze pay-as-you-go plan. On Spark, the owner cannot view or access Cloud Storage buckets in Firebase or Google Cloud Console; API requests can return 402/403. Existing bucket data, if any, remains in the bucket but is inaccessible until billing is enabled.
+- Therefore the screenshot does **not** prove that no bucket exists or that stored data is zero. Bucket existence, name, location, size, rules and usage remain **UNKNOWN / OWNER VERIFICATION REQUIRED**.
+- No Blaze upgrade is authorized by this note.
+- Firebase documents legacy `*.appspot.com` default-bucket no-cost levels on Blaze of 5 GB stored, 1 GB downloaded/day, 20,000 uploads/day and 50,000 downloads/day. Do not assume these legacy-bucket allowances apply to every newer `*.firebasestorage.app` bucket; verify the exact bucket type, location and current pricing before enabling or uploading data.
+- If future uploads (course media, learner files or user-generated content) require Cloud Storage, first estimate capacity and egress, check applicable no-cost levels and regional rates, set budget notifications, and obtain the owner's explicit approval.
+
+### Google Cloud trial credits
+
+- The Firebase pricing page may offer eligible customers **up to $300 in Google Cloud trial credits** when starting on Blaze.
+- These credits are eligibility- and trial-term-dependent. They are not a recurring monthly Firebase storage allowance and must not be treated as guaranteed or permanent free capacity.
+- Confirm eligibility, expiry, payment method requirements and applicable terms in the billing account before relying on any trial credit.
+
+### CodeSaathi architecture and cost-control decisions
+
+1. **Stay on Spark for now.** Do not upgrade the project to Blaze or enable paid services without a separate explicit owner approval.
+2. Keep static course content (HTML, CSS, JavaScript, lesson JSON and small static assets) on Firebase Hosting while it remains within the project's 10 GB storage and 10 GB/month transfer no-cost levels.
+3. Before each major content batch or release, inspect Hosting Usage and retained releases; avoid storing large videos or duplicate binary assets in Hosting.
+4. Defer Firestore creation until learner accounts, cross-device progress, quiz results or bookmarks genuinely require server-side persistence. Design security rules and read/write-efficient data access before creation.
+5. Defer Cloud Storage for Firebase until uploaded files or large media genuinely require object storage. First verify the bucket type and exact pricing/no-cost eligibility.
+6. If Blaze is ever approved, create Google Cloud budget alerts and monitor service-level usage. **Budget alerts are notifications, not hard spending caps**, so they do not by themselves prevent charges.
+7. Keep secrets, billing identifiers, payment details and user-level personal data out of GitHub notes. Record only aggregate usage and non-secret configuration facts.
+
+### Official pricing and policy references
+
+- Firebase Hosting usage, quotas and release retention: https://firebase.google.com/docs/hosting/usage-quotas-pricing
+- Cloud Firestore pricing and free quota: https://firebase.google.com/docs/firestore/pricing
+- Cloud Storage for Firebase billing requirements and inaccessible Spark buckets: https://firebase.google.com/docs/storage/faqs-storage-changes-announced-sept-2024
+- Firebase pricing plans and conditional trial credits: https://firebase.google.com/pricing
+
+**Decision recorded:** remain on Spark; do not enable Cloud Storage, create Firestore, or activate Blaze as part of this documentation update. Reassess only when a concrete CodeSaathi feature requires the service and the owner approves the cost/architecture.
