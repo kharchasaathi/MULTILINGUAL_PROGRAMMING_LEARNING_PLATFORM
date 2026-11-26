@@ -150,3 +150,23 @@ The W3Schools C# Variables topic is mapped to CSH2.1–CSH2.5. The exercise cate
 Each new lesson has five original runnable examples, deterministic expected output, five learning objectives, guided and independent practice, and five unique MCQs with explanations. All six lesson files are registered in the working-branch curriculum index and progress tracker. Their status remains DRAFT / VALIDATION PENDING until the .NET 10 / C# 14 CI run confirms every example and MCQ.
 
 The W3Schools exercise mapping is a first mapping pass only; the final audit must still verify every exercise prompt and concept against original CodeSaathi practice content.
+
+
+## CSH3 authored coverage update — 2026-11-27
+
+The following W3Schools destinations now have original English CodeSaathi draft lessons authored and registered. This is authored-topic mapping, not yet final editorial or exercise-level approval:
+
+| W3Schools topic | Current CodeSaathi lesson mapping | Authored content |
+|---|---|---|
+| C# Data Types | CSH3.1–CSH3.5 | Built-in value types, reference types, numeric types/ranges, Boolean/character types, strings as reference types |
+| C# Type Casting | CSH3.6–CSH3.7 | Implicit/explicit conversions, Parse, TryParse and Convert |
+| C# Booleans | CSH3.4; CSH7.1 | CSH3.4 covers Boolean values and operators; conditional logic remains planned in CSH7.1 |
+
+CSH3.8 (Nullable Value Types and Nullability) is supplemental type-system coverage and is not represented as a separate W3Schools navigation topic.
+
+Each CSH3 lesson currently has five learning objectives, five original runnable examples with expected output, guided and independent practice, hints, a challenge, and five topic-specific MCQs. All examples target .NET 10 / C# 14 and use `playgroundMode: none`.
+
+- C# Validation #53 passed on the pre-CSH3 head: 12 lessons, 60 examples executed and 60 MCQs checked.
+- Browser Review #1644 passed on the pre-CSH3 head: 18 browser tests passed, including all six CSH2 lessons.
+- CSH3 browser coverage was expanded to include all eight new lessons. The latest-head CI results are pending and must be inspected before this batch is marked validated.
+- The 53 exercise-category counts above remain the observed 2026-11-25 source snapshot. Final one-to-one exercise reconciliation and rechecking current source counts are still release gates.
