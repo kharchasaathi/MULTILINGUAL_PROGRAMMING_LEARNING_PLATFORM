@@ -170,3 +170,10 @@ Each CSH3 lesson currently has five learning objectives, five original runnable 
 - Browser Review #1644 passed on the pre-CSH3 head: 18 browser tests passed, including all six CSH2 lessons.
 - CSH3 browser coverage was expanded to include all eight new lessons. The latest-head CI results are pending and must be inspected before this batch is marked validated.
 - The 53 exercise-category counts above remain the observed 2026-11-25 source snapshot. Final one-to-one exercise reconciliation and rechecking current source counts are still release gates.
+
+
+## CSH4 mapping update — 2026-11-27
+
+- CSH4.1–CSH4.6 map the W3Schools C# Operators syllabus entry to arithmetic, assignment, comparison, logical, bitwise/shift and conditional/null operator lessons.
+- CSH4.7 maps the W3Schools C# Math entry to Math class and numeric operations.
+- These are authored English draft lessons; compilation/execution, browser review, editorial review and release remain separate pending gates.
