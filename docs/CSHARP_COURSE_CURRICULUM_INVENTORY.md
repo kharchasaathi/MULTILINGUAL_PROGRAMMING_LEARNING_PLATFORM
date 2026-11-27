@@ -4,7 +4,7 @@
 - Working branch: `feature/csharp-course-foundation`
 - Release base: `release/v1-frontend`
 - Authoring language: English first; Telugu deferred until English review and technical validation are complete.
-- Status: IN_PROGRESS — twelve English draft lesson files (CSH1.1–CSH1.6 and CSH2.1–CSH2.6) are registered in the working-branch curriculum index and progress tracker; C# Validation #22 passed the six CSH1 lessons (30 examples executed, 30 MCQs checked); CSH2 validation is pending.
+- Status: IN_PROGRESS — twenty-seven English draft lesson files (CSH1.1–CSH1.6, CSH2.1–CSH2.6, CSH3.1–CSH3.8 and CSH4.1–CSH4.7) are registered in the working-branch curriculum index and progress tracker; CSH1–CSH3 have passed the latest C# validation and browser-review gates; CSH4 validation is pending.
 - Planned scope: 20 chapters, 148 lesson topics.
 - W3Schools primary coverage baseline: 36 syllabus navigation entries (including HOME) and 53 exercise categories, checked 2026-11-25.
 - Technical reference: Microsoft Learn C# documentation and language specification.
@@ -265,3 +265,14 @@ Lesson status remains `draft` until all required gates are evidenced. Authored, 
 - CSH3.1–CSH3.8 are now registered in the curriculum index and progress tracker; W3Schools Data Types and Type Casting entries map to the relevant new lessons.
 - Browser regression coverage has been expanded to all fourteen CSH2/CSH3 lessons. Latest-head validation is pending and must be inspected before marking the CSH3 batch validated.
 - PR #266 remains Draft/Open; no merge or production deployment has been performed.
+
+
+## CSH4 authoring batch — 2026-11-27
+
+- Authored CSH4.1–CSH4.7 in English and registered all seven lessons in the curriculum index and progress tracker.
+- Topics: Arithmetic Operators; Assignment Operators; Comparison Operators; Logical Operators; Bitwise and Shift Operators; Conditional and Null Operators; Math Class and Numeric Operations.
+- Each lesson contains five measurable objectives, five original runnable examples with expected output and explanations, guided and independent practice, hints, a challenge, validation criteria, and five topic-specific MCQs.
+- Examples target .NET 10 / C# 14 and preserve `practice.playgroundMode: \"none\"`.
+- W3Schools C# Operators and C# Math entries map to the new CSH4 lessons; full lesson validation and browser review are pending.
+- Latest confirmed C# Validation #79 and Browser Review #1657 passed on commit `3f022d17a2132cbe706d163576152392c3062350` for the prior 20-lesson head. CSH4 content is newer and must not be marked validated until new CI runs pass.
+- PR #266 remains Draft/Open; no merge or production deployment has been performed or authorized.
