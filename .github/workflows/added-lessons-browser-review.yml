@@ -30,6 +30,7 @@ on:
       - ".github/workflows/sql-course-validation.yml"
       - "scripts/validate-sql-course.mjs"
       - "public/content/en/cpp/**"
+      - "public/content/en/csharp/**"
       - "public/content/curriculum-index.json"
       - "public/index.html"
       - "public/app.js"
@@ -63,6 +64,7 @@ on:
       - "public/content/en/css/C22.*.json"
       - "public/content/en/javascript/J24.*.json"
       - "public/content/en/java/**"
+      - "public/content/en/csharp/**"
       - "public/content/curriculum-index.json"
       - "public/index.html"
       - "public/app.js"
@@ -71,6 +73,10 @@ on:
       - "scripts/validate-added-lessons.mjs"
       - "scripts/browser-review.spec.mjs"
       - ".github/workflows/added-lessons-browser-review.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -81,11 +87,12 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version: 24
+          package-manager-cache: false
       - name: Check application JavaScript syntax
         run: |
           node --check public/app.js

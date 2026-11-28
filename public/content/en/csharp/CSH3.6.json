@@ -1,0 +1,167 @@
+{
+  "id": "csharp.csh3.6.en",
+  "courseId": "csharp",
+  "moduleId": "CSH3",
+  "topicId": "CSH3.6",
+  "title": "Implicit and Explicit Conversions",
+  "language": "en",
+  "status": "draft",
+  "learningObjectives": [
+    "Explain the purpose and behavior of implicit and explicit conversions in C#.",
+    "Choose an appropriate type for a simple application scenario.",
+    "Read and explain original C# code that demonstrates the lesson concepts.",
+    "Predict deterministic program output and identify common mistakes.",
+    "Compile and execute a small .NET 10 console example to verify the result."
+  ],
+  "prerequisites": [
+    "CSH1.5",
+    "CSH1.6",
+    "CSH2.1",
+    "CSH2.6"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "A conversion changes a value from one type to another. C# permits certain implicit conversions when they are safe for the language's conversion rules, while explicit conversions require a cast or conversion operation and may lose information or fail.",
+      "whyItMatters": "Conversions connect data from different sources and prevent accidental data loss when values move between numeric types.",
+      "analogy": "A conversion is like transferring a measurement between units, where some directions preserve the value and others may round or lose detail.",
+      "analogyLimit": "C# conversions are governed by type rules, not a universal measurement system; some explicit conversions can overflow or throw in checked contexts."
+    },
+    "explain": {
+      "narrative": "## Implicit conversions\n\nAn implicit conversion is permitted by the compiler without a cast. For example, an int can be converted to long because every int value is representable by long. A numeric conversion may still change precision in some type combinations, so understand the language rules.\n\n## Explicit conversions\n\nA cast such as (int)someDouble makes a conversion explicit. Converting a floating-point value to an integral type truncates the fractional part toward zero. Narrowing integral conversions can lose high-order bits or throw in a checked context.\n\n## Checked conversions\n\nUse checked when an overflow should be reported rather than silently following unchecked conversion behavior. A cast does not mean that the original value is guaranteed to fit.\n\n## Baseline\n\nExamples target .NET 10 and C# 14.",
+      "examples": [
+        {
+          "id": "csh3.6-ex1",
+          "language": "csharp",
+          "title": "Implicit widening conversion",
+          "code": "using System;\n\nint itemCount = 125;\nlong totalCount = itemCount;\nConsole.WriteLine(totalCount);",
+          "expectedOutput": "125",
+          "explanation": "Every int value fits in long, so the compiler permits this implicit conversion.",
+          "runnable": true
+        },
+        {
+          "id": "csh3.6-ex2",
+          "language": "csharp",
+          "title": "Explicit numeric cast",
+          "code": "using System;\n\ndouble temperature = 23.9;\nint wholeDegrees = (int)temperature;\nConsole.WriteLine(wholeDegrees);",
+          "expectedOutput": "23",
+          "explanation": "The cast converts double to int by truncating the fractional part toward zero.",
+          "runnable": true
+        },
+        {
+          "id": "csh3.6-ex3",
+          "language": "csharp",
+          "title": "Convert an int to double",
+          "code": "using System;\n\nint score = 88;\ndouble preciseScore = score;\nConsole.WriteLine(preciseScore);",
+          "expectedOutput": "88",
+          "explanation": "The conversion from int to double is implicit because the target type can represent the integer value.",
+          "runnable": true
+        },
+        {
+          "id": "csh3.6-ex4",
+          "language": "csharp",
+          "title": "Use checked narrowing",
+          "code": "using System;\n\ntry\n{\n    int suppliedValue = 300;\n    byte small = checked((byte)suppliedValue);\n    Console.WriteLine(small);\n}\ncatch (OverflowException)\n{\n    Console.WriteLine(\"Out of range\");\n}",
+          "expectedOutput": "Out of range",
+          "explanation": "The value is stored in a variable before the checked conversion. The conversion therefore runs at runtime, detects that 300 is outside the byte range (0–255), and throws OverflowException, which the catch block handles.",
+          "runnable": true
+        },
+        {
+          "id": "csh3.6-ex5",
+          "language": "csharp",
+          "title": "Convert a character to its code unit",
+          "code": "using System;\n\nchar letter = 'A';\nint codeUnit = letter;\nConsole.WriteLine(codeUnit);",
+          "expectedOutput": "65",
+          "explanation": "A char-to-int conversion is implicit and yields the UTF-16 code unit value.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a .NET 10 console project and reproduce a small scenario that demonstrates implicit and explicit conversions. Build it, run it, compare the exact output and explain why each value has its resulting type or state.",
+      "independentTask": "Design an original C# console example using implicit and explicit conversions in a learner-registration, inventory or order-processing scenario. Include at least two meaningful cases, document expected output and explain one limitation or edge case.",
+      "hints": [
+        "Begin with the smallest compiling example and add one concept at a time.",
+        "Use explicit type names when they make the example easier to understand.",
+        "Check nullability, range and conversion behavior rather than assuming a value is valid.",
+        "Run the project with .NET 10 and compare the actual output with the documented output."
+      ],
+      "challenge": "Extend your scenario with a second input or state and explain how implicit and explicit conversions affects correctness and maintainability.",
+      "validationCriteria": [
+        "Contains at least five original runnable C# examples.",
+        "Every example compiles and executes using .NET SDK 10 and C# 14.",
+        "Actual output matches the documented deterministic expected output.",
+        "Includes guided and independent practice, a challenge and useful hints.",
+        "Preserves practice.playgroundMode as none; C# does not use the browser playground."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "csh3.6-q1",
+        "prompt": "Which conversion normally requires no cast from int to long?",
+        "answer": "Implicit conversion",
+        "options": [
+          "Implicit conversion",
+          "Explicit conversion",
+          "Parsing",
+          "Serialization"
+        ],
+        "explanation": "The compiler permits int-to-long as an implicit numeric conversion."
+      },
+      {
+        "id": "csh3.6-q2",
+        "prompt": "What does (int)23.9 produce?",
+        "answer": "23",
+        "options": [
+          "23",
+          "24",
+          "23.9",
+          "A compile-time error"
+        ],
+        "explanation": "Converting a floating-point value to an integral type truncates the fractional part toward zero."
+      },
+      {
+        "id": "csh3.6-q3",
+        "prompt": "Why use checked for a narrowing conversion?",
+        "answer": "To detect overflow",
+        "options": [
+          "To detect overflow",
+          "To convert the value to text",
+          "To make the conversion implicit",
+          "To allocate a new object"
+        ],
+        "explanation": "checked causes an overflow exception when the conversion result is outside the target integral type's range."
+      },
+      {
+        "id": "csh3.6-q4",
+        "prompt": "Which operator expresses an explicit cast?",
+        "answer": "(targetType)value",
+        "options": [
+          "(targetType)value",
+          "value ?? fallback",
+          "value is null",
+          "typeof(value)"
+        ],
+        "explanation": "A cast expression names the target type in parentheses before the value."
+      },
+      {
+        "id": "csh3.6-q5",
+        "prompt": "What is a risk of narrowing a numeric conversion?",
+        "answer": "Information can be lost or overflow can occur",
+        "options": [
+          "Information can be lost or overflow can occur",
+          "The value always becomes more precise",
+          "The variable becomes a reference type",
+          "The program automatically rounds to the nearest integer"
+        ],
+        "explanation": "Narrowing conversions can discard information or overflow depending on the types and context."
+      }
+    ]
+  }
+}

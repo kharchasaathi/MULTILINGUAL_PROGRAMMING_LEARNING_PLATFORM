@@ -1,0 +1,167 @@
+{
+  "id": "csharp.csh3.7.en",
+  "courseId": "csharp",
+  "moduleId": "CSH3",
+  "topicId": "CSH3.7",
+  "title": "Parse, TryParse and Convert",
+  "language": "en",
+  "status": "draft",
+  "learningObjectives": [
+    "Explain the purpose and behavior of parse, tryparse and convert in C#.",
+    "Choose an appropriate type for a simple application scenario.",
+    "Read and explain original C# code that demonstrates the lesson concepts.",
+    "Predict deterministic program output and identify common mistakes.",
+    "Compile and execute a small .NET 10 console example to verify the result."
+  ],
+  "prerequisites": [
+    "CSH1.5",
+    "CSH1.6",
+    "CSH2.1",
+    "CSH2.6"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Text from users or files often needs to become a typed value. Parse converts valid text or throws a format-related exception, TryParse reports success without using an exception for ordinary invalid input, and Convert provides conversion methods with defined null and rounding behavior.",
+      "whyItMatters": "Reliable input conversion prevents crashes and lets applications explain invalid data clearly.",
+      "analogy": "Parse is like asking a strict reader to interpret a value; TryParse is like asking whether the reader can interpret it and receiving a yes/no result.",
+      "analogyLimit": "These methods do not validate the business meaning of a value. A successfully parsed age can still be outside an application's acceptable range."
+    },
+    "explain": {
+      "narrative": "## Parse\n\nMethods such as int.Parse convert valid numeric text to a typed value. They throw exceptions when the input is null, malformed or outside the target type's range. Use Parse when invalid input is exceptional and should be handled accordingly.\n\n## TryParse\n\nTryParse returns a bool indicating whether conversion succeeded and writes the parsed result through an out parameter. It is usually the better choice for ordinary user input because invalid text is an expected possibility.\n\n## Convert\n\nSystem.Convert offers conversion methods such as ToInt32. Its behavior is not identical to a cast: for example, Convert.ToInt32(double) rounds to the nearest integer using midpoint-to-even behavior. Convert.ToInt32(null) returns zero.\n\n## Culture and validation\n\nNumeric text can use culture-specific decimal separators. When data is exchanged in a machine-readable format, choose an explicit culture such as CultureInfo.InvariantCulture. Parsing validates format and range, not application-specific rules.\n\n## Baseline\n\nExamples target .NET 10 and C# 14.",
+      "examples": [
+        {
+          "id": "csh3.7-ex1",
+          "language": "csharp",
+          "title": "Parse valid integer text",
+          "code": "using System;\n\nint quantity = int.Parse(\"42\");\nConsole.WriteLine(quantity + 8);",
+          "expectedOutput": "50",
+          "explanation": "int.Parse converts the valid text to an int, which can then participate in arithmetic.",
+          "runnable": true
+        },
+        {
+          "id": "csh3.7-ex2",
+          "language": "csharp",
+          "title": "Use TryParse for invalid input",
+          "code": "using System;\n\nbool success = int.TryParse(\"forty\", out int quantity);\nConsole.WriteLine(success);\nConsole.WriteLine(quantity);",
+          "expectedOutput": "False\n0",
+          "explanation": "TryParse reports failure without throwing for ordinary malformed input. The out value is zero when parsing fails for int.",
+          "runnable": true
+        },
+        {
+          "id": "csh3.7-ex3",
+          "language": "csharp",
+          "title": "Convert a numeric value",
+          "code": "using System;\n\nint rounded = Convert.ToInt32(12.6);\nConsole.WriteLine(rounded);",
+          "expectedOutput": "13",
+          "explanation": "Convert.ToInt32(double) rounds to the nearest integer rather than truncating like an explicit cast.",
+          "runnable": true
+        },
+        {
+          "id": "csh3.7-ex4",
+          "language": "csharp",
+          "title": "Parse with invariant culture",
+          "code": "using System;\n\nusing System.Globalization;\n\ndecimal amount = decimal.Parse(\"1234.50\", CultureInfo.InvariantCulture);\nConsole.WriteLine(amount.ToString(CultureInfo.InvariantCulture));",
+          "expectedOutput": "1234.50",
+          "explanation": "InvariantCulture makes the decimal separator explicit and avoids dependence on the machine's current culture.",
+          "runnable": true
+        },
+        {
+          "id": "csh3.7-ex5",
+          "language": "csharp",
+          "title": "Handle Parse failure",
+          "code": "using System;\n\ntry\n{\n    int code = int.Parse(\"12x\");\n    Console.WriteLine(code);\n}\ncatch (FormatException)\n{\n    Console.WriteLine(\"Enter digits only\");\n}",
+          "expectedOutput": "Enter digits only",
+          "explanation": "Malformed text causes FormatException. The example handles that specific failure and displays a useful message.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a .NET 10 console project and reproduce a small scenario that demonstrates parse, tryparse and convert. Build it, run it, compare the exact output and explain why each value has its resulting type or state.",
+      "independentTask": "Design an original C# console example using parse, tryparse and convert in a learner-registration, inventory or order-processing scenario. Include at least two meaningful cases, document expected output and explain one limitation or edge case.",
+      "hints": [
+        "Begin with the smallest compiling example and add one concept at a time.",
+        "Use explicit type names when they make the example easier to understand.",
+        "Check nullability, range and conversion behavior rather than assuming a value is valid.",
+        "Run the project with .NET 10 and compare the actual output with the documented output."
+      ],
+      "challenge": "Extend your scenario with a second input or state and explain how parse, tryparse and convert affects correctness and maintainability.",
+      "validationCriteria": [
+        "Contains at least five original runnable C# examples.",
+        "Every example compiles and executes using .NET SDK 10 and C# 14.",
+        "Actual output matches the documented deterministic expected output.",
+        "Includes guided and independent practice, a challenge and useful hints.",
+        "Preserves practice.playgroundMode as none; C# does not use the browser playground."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "csh3.7-q1",
+        "prompt": "Which method returns a Boolean success result when parsing text?",
+        "answer": "TryParse",
+        "options": [
+          "TryParse",
+          "Parse",
+          "ToString",
+          "GetType"
+        ],
+        "explanation": "TryParse reports whether conversion succeeded and supplies the value through an out parameter."
+      },
+      {
+        "id": "csh3.7-q2",
+        "prompt": "What happens when int.Parse receives malformed text?",
+        "answer": "It throws a FormatException",
+        "options": [
+          "It throws a FormatException",
+          "It returns false",
+          "It always returns zero",
+          "It silently removes letters"
+        ],
+        "explanation": "Parse throws FormatException when the text is not in a valid integer format."
+      },
+      {
+        "id": "csh3.7-q3",
+        "prompt": "What does Convert.ToInt32(12.6) return?",
+        "answer": "13",
+        "options": [
+          "13",
+          "12",
+          "12.6",
+          "An OverflowException"
+        ],
+        "explanation": "Convert.ToInt32(double) rounds to the nearest integer; 12.6 rounds to 13."
+      },
+      {
+        "id": "csh3.7-q4",
+        "prompt": "Why use CultureInfo.InvariantCulture for machine-readable numeric text?",
+        "answer": "To make formatting rules independent of the current user culture",
+        "options": [
+          "To make formatting rules independent of the current user culture",
+          "To accept every possible number format",
+          "To disable range checking",
+          "To convert all numbers to strings"
+        ],
+        "explanation": "InvariantCulture provides stable culture-independent parsing and formatting rules."
+      },
+      {
+        "id": "csh3.7-q5",
+        "prompt": "Does successful parsing guarantee a value is valid for the application?",
+        "answer": "No, business rules must still be checked",
+        "options": [
+          "No, business rules must still be checked",
+          "Yes, parsing checks all business rules",
+          "Yes, parsing checks user permissions",
+          "No, parsed values cannot be used"
+        ],
+        "explanation": "Parsing checks whether text can be represented by the target type, not whether it meets domain-specific rules."
+      }
+    ]
+  }
+}

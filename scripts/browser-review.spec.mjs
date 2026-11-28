@@ -22,6 +22,18 @@ const groups = {
   python: ["PY1.1"]
 };
 
+test("CodeSaathi brand links expose their visible text as the accessible name", async ({ page }) => {
+  for (const path of ["/", "/sql-reference.html", "/sql-playground.html", "/java-playground.html"]) {
+    await page.goto(baseURL + path, { waitUntil: "domcontentloaded" });
+    const brands = page.locator("a.brand:visible");
+    const count = await brands.count();
+    expect(count, `visible brand links on ${path}`).toBeGreaterThan(0);
+    for (let i = 0; i < count; i++) {
+      await expect(brands.nth(i)).toHaveAccessibleName(/CodeSaathi/);
+    }
+  }
+});
+
 test("homepage and lesson dialog have no serious or critical WCAG axe violations", async ({ page }) => {
   await page.goto(baseURL, { waitUntil: "domcontentloaded" });
   await waitForCurriculum(page);
@@ -90,6 +102,30 @@ test("lesson practice links close the dialog and navigate to the playground", as
   await expect(page.frameLocator("#previewFrame").locator("p")).toHaveText("Named and hexadecimal colours");
 });
 
+test("all CSH2 and CSH3 lessons load through the C# curriculum and render without a browser playground", async ({ page }) => {
+  await page.goto(baseURL, { waitUntil: "domcontentloaded" });
+  await waitForCurriculum(page);
+  await page.locator('[data-course-nav="csharp"]').click();
+  const dialog = page.locator("#lessonDialog");
+  await expect(dialog).toBeVisible();
+  for (const topicId of ["CSH2.1", "CSH2.2", "CSH2.3", "CSH2.4", "CSH2.5", "CSH2.6", "CSH3.1", "CSH3.2", "CSH3.3", "CSH3.4", "CSH3.5", "CSH3.6", "CSH3.7", "CSH3.8"]) {
+    await dialog.locator(`[data-topic-id="${topicId}"]`).click();
+    await expect(dialog.locator(".lesson-template-title")).toContainText(topicId);
+    const response = await page.request.get(`${baseURL}/content/en/csharp/${topicId}.json`);
+    expect(response.ok(), topicId + " lesson file").toBeTruthy();
+    const lesson = await response.json();
+    expect(lesson.practice?.playgroundMode, topicId + " must not use a browser playground").toBe("none");
+    await expect(dialog.locator(".lesson-practice-link")).toHaveCount(0);
+    await expect(dialog.locator(".lesson-practice-note")).toContainText("compiled and executed with the .NET 10 SDK");
+    await expect(dialog.locator(".lesson-objectives-list li")).toHaveCount(lesson.learningObjectives.length);
+    await expect(dialog.locator(".lesson-example")).toHaveCount(lesson.stages.explain.examples.length);
+    await expect(dialog.locator(".lesson-question")).toHaveCount(lesson.assessment.questions.length);
+    await dialog.locator(".curriculum-back").click();
+    await expect(dialog.locator("[data-topic-id]").first()).toBeVisible();
+  }
+  await dialog.locator("#closeLesson").click();
+});
+
 test("keyboard users can open and dismiss the curriculum dialog", async ({ page }) => {
   await page.goto(baseURL, { waitUntil: "domcontentloaded" });
   await waitForCurriculum(page);
@@ -101,7 +137,7 @@ test("keyboard users can open and dismiss the curriculum dialog", async ({ page 
   await expect(page.locator("#lessonDialog")).not.toBeVisible();
 });
 
-test("all seven courses render representative lessons and starter programs execute in Chromium", async ({ page }) => {
+test("all ten courses render representative lessons and starter programs execute in Chromium", async ({ page }) => {
   test.setTimeout(180000);
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
@@ -110,7 +146,7 @@ test("all seven courses render representative lessons and starter programs execu
   await expect(page.locator("#courseGrid .course-card")).toHaveCount(await page.evaluate(async () => (await fetch("/content/curriculum-index.json")).json().then(data => data.courses.length)));
 
   // Exercise the shared lesson renderer and modal with one representative lesson per course.
-  for (const [course, topicId] of [["foundation","F0.1"],["html","H16.1"],["css","C22.1"],["javascript","J24.1"],["c","CL1.1"],["cpp","CPP1.1"],["python","PY1.1"],["sql","SQL1.1"],["java","JV1.1"]]) {
+  for (const [course, topicId] of [["foundation","F0.1"],["html","H16.1"],["css","C22.1"],["javascript","J24.1"],["c","CL1.1"],["cpp","CPP1.1"],["python","PY1.1"],["sql","SQL1.1"],["java","JV1.1"],["csharp","CSH1.6"]]) {
     await page.locator(`[data-course-nav="${course}"]`).click();
     const dialog = page.locator("#lessonDialog");
     await expect(dialog).toBeVisible();
@@ -127,7 +163,11 @@ test("all seven courses render representative lessons and starter programs execu
     expect(lessonResponse.ok(), topicId + " lesson file").toBeTruthy();
     const lessonData = await lessonResponse.json();
     const expectedExamples = lessonData.examples || lessonData.stages?.explain?.examples || [];
-    if (course === "java") expect(lessonData.practice?.playgroundMode, "Java lessons must not use the web-language playground").toBe("none");
+    if (course === "java" || course === "csharp") expect(lessonData.practice?.playgroundMode, `${course} lessons must not use the web-language playground`).toBe("none");
+    if (course === "csharp") {
+      await expect(dialog.locator(".lesson-practice-link")).toHaveCount(0);
+      await expect(dialog.locator(".lesson-practice-note")).toContainText("compiled and executed with the .NET 10 SDK");
+    }
     const expectedQuestions = lessonData.assessment?.questions || [];
     await expect(dialog.locator(".lesson-objectives-list li")).toHaveCount(lessonData.learningObjectives.length);
     await expect(dialog.locator(".lesson-example")).toHaveCount(expectedExamples.length);

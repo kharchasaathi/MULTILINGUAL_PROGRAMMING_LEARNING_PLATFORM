@@ -1,0 +1,165 @@
+{
+  "id": "csharp.csh2.6.en",
+  "courseId": "csharp",
+  "moduleId": "CSH2",
+  "topicId": "CSH2.6",
+  "title": "Scope and Lifetime of Local Variables",
+  "language": "en",
+  "status": "draft",
+  "learningObjectives": [
+    "Define scope and distinguish it from lifetime.",
+    "Identify the block in which a local variable can be accessed.",
+    "Explain the scope of a for-loop iteration variable.",
+    "Recognize that separate method calls have separate local variables.",
+    "Use nested blocks and methods to organize temporary values safely."
+  ],
+  "prerequisites": [
+    "CSH1.5",
+    "CSH1.6"
+  ],
+  "stages": {
+    "understand": {
+      "concept": "Scope determines where a variable name can be used in source code. A local variable is generally scoped to the block in which it is declared, including the method or nested block. Lifetime describes how long the variable's storage is relevant during execution; it is not identical to lexical scope.",
+      "whyItMatters": "Understanding scope prevents accidental name conflicts and helps keep temporary data close to the code that uses it. It also makes methods easier to reason about and test.",
+      "analogy": "Scope is like the area of a building where a keycard grants access. Lifetime is how long the keycard remains active. The two ideas are related but not identical.",
+      "analogyLimit": "C# compiler rules determine lexical visibility, while runtime implementation details determine storage and lifetime. Captured locals in lambdas or local functions can outlive the method activation in which they were created."
+    },
+    "explain": {
+      "narrative": "## Block scope\n\nA local declared inside a block is visible only within that block and its nested blocks, subject to C# declaration-space rules. It cannot be referenced after the closing brace.\n\n## Method scope\n\nEach method invocation has its own local variables and parameters. A local in one method is not directly visible in another method; pass values as parameters or return results when data must cross method boundaries.\n\n## Loop variables\n\nA variable declared in a for initializer is scoped to the loop statement. It is not available after the loop. A foreach iteration variable is similarly scoped to its foreach statement.\n\n## Scope versus lifetime\n\nScope is a compile-time language concept describing where a name can be referenced. Lifetime is a runtime concept describing how long a variable's storage remains relevant. Captured locals in lambdas or local functions can outlive the method activation in which they were created.\n\n## Version baseline\n\nThese scope rules are long-standing C# behaviour and apply to C# 14 and .NET 10.",
+      "examples": [
+        {
+          "id": "csh2.6-ex1",
+          "language": "csharp",
+          "title": "A variable inside a block",
+          "code": "using System;\n\n{\n    int blockScore = 88;\n    Console.WriteLine(blockScore);\n}\nConsole.WriteLine(\"Block finished\");",
+          "expectedOutput": "88\nBlock finished",
+          "explanation": "blockScore is accessible inside its declaring block; the later statement does not try to access it.",
+          "runnable": true
+        },
+        {
+          "id": "csh2.6-ex2",
+          "language": "csharp",
+          "title": "Separate method-local variables",
+          "code": "using System;\n\nstatic int CalculateBonus(int score)\n{\n    int bonus = 5;\n    return score + bonus;\n}\n\nConsole.WriteLine(CalculateBonus(70));",
+          "expectedOutput": "75",
+          "explanation": "bonus belongs to this method invocation. The caller receives only the returned result.",
+          "runnable": true
+        },
+        {
+          "id": "csh2.6-ex3",
+          "language": "csharp",
+          "title": "A for-loop variable",
+          "code": "using System;\n\nfor (int index = 1; index <= 3; index++)\n{\n    Console.WriteLine(index);\n}\nConsole.WriteLine(\"Loop ended\");",
+          "expectedOutput": "1\n2\n3\nLoop ended",
+          "explanation": "index is declared in the for statement and is not used after the loop.",
+          "runnable": true
+        },
+        {
+          "id": "csh2.6-ex4",
+          "language": "csharp",
+          "title": "Nested block scope",
+          "code": "using System;\n\nint total = 10;\n{\n    int extra = 4;\n    Console.WriteLine(total + extra);\n}\nConsole.WriteLine(total);",
+          "expectedOutput": "14\n10",
+          "explanation": "The nested block can read total from its enclosing scope, but extra is local to the nested block.",
+          "runnable": true
+        },
+        {
+          "id": "csh2.6-ex5",
+          "language": "csharp",
+          "title": "Independent method calls",
+          "code": "using System;\n\nstatic int NextValue(int start)\n{\n    int value = start;\n    value++;\n    return value;\n}\n\nConsole.WriteLine(NextValue(4));\nConsole.WriteLine(NextValue(4));",
+          "expectedOutput": "5\n5",
+          "explanation": "Each call creates its own local value. Updating it in one invocation does not change the next invocation's local.",
+          "runnable": true
+        }
+      ]
+    },
+    "practise": {
+      "guidedTask": "Create a .NET 10 console program demonstrating scope and lifetime of local variables. Explain each statement, then build and run the project.",
+      "independentTask": "Design an original console example based on a learner-progress or shop-inventory scenario. Demonstrate scope and lifetime of local variables, record the expected output, and explain one edge case.",
+      "hints": [
+        "Start with the smallest compiling program.",
+        "Use descriptive names and one concept at a time.",
+        "Check the first compiler diagnostic before changing code.",
+        "Run the program and compare its exact output with the expected result."
+      ],
+      "challenge": "Extend your example with a second realistic scenario involving scope and lifetime of local variables. Explain the design choice and one limitation.",
+      "validationCriteria": [
+        "Contains at least five original runnable examples.",
+        "Each example compiles using .NET SDK 10.0.404 and C# 14.",
+        "Actual output matches the documented deterministic expected output.",
+        "Includes guided and independent practice with useful hints.",
+        "Uses practice.playgroundMode none; C# must not be routed into the browser playground."
+      ]
+    }
+  },
+  "practice": {
+    "playgroundMode": "none",
+    "starterCode": "",
+    "resetCode": ""
+  },
+  "assessment": {
+    "questions": [
+      {
+        "id": "csh2.6-q1",
+        "prompt": "What is the central focus of this lesson?",
+        "answer": "Scope and Lifetime of Local Variables",
+        "options": [
+          "Scope and Lifetime of Local Variables",
+          "Creating a web server",
+          "Managing CSS styles",
+          "Querying a database"
+        ],
+        "explanation": "The lesson is designed to teach scope and lifetime of local variables."
+      },
+      {
+        "id": "csh2.6-q2",
+        "prompt": "Which technical baseline do the C# course examples target?",
+        "answer": ".NET 10 with C# 14",
+        "options": [
+          ".NET 10 with C# 14",
+          ".NET 6 with C# 10",
+          "Java 21 with C# 14",
+          "An unpinned preview SDK"
+        ],
+        "explanation": "The course pins the initial examples to .NET 10 and C# 14."
+      },
+      {
+        "id": "csh2.6-q3",
+        "prompt": "How should runnable C# examples be verified?",
+        "answer": "Compile and execute them with the .NET SDK",
+        "options": [
+          "Compile and execute them with the .NET SDK",
+          "Only preview them as HTML",
+          "Run them in a CSS playground",
+          "Assume valid JSON means the code runs"
+        ],
+        "explanation": "C# examples require actual .NET compilation and runtime execution."
+      },
+      {
+        "id": "csh2.6-q4",
+        "prompt": "What is the safest response to a compiler diagnostic?",
+        "answer": "Read the diagnostic and fix the underlying code",
+        "options": [
+          "Read the diagnostic and fix the underlying code",
+          "Ignore all warnings and errors",
+          "Change unrelated files",
+          "Remove the expected output"
+        ],
+        "explanation": "Compiler diagnostics provide evidence about the code and should guide a minimal correction."
+      },
+      {
+        "id": "csh2.6-q5",
+        "prompt": "Which habit improves maintainability?",
+        "answer": "Use clear names and explain intent",
+        "options": [
+          "Use clear names and explain intent",
+          "Use cryptic names everywhere",
+          "Put all values in global state",
+          "Avoid checking actual output"
+        ],
+        "explanation": "Readable code and deliberate verification improve maintainability."
+      }
+    ]
+  }
+}
